@@ -49,11 +49,11 @@ impl ReceiptMilestoneOption {
     pub fn new(
         migrated_at: MilestoneIndex,
         last: bool,
-        funds: Vec<MigratedFundsEntry>,
+        funds: impl Into<Vec<MigratedFundsEntry>>,
         transaction: TreasuryTransactionPayload,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        let funds = VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds)
+        let funds = VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds.into())
             .map_err(Error::InvalidReceiptFundsCount)?;
 
         verify_funds::<true>(&funds, &token_supply)?;
@@ -188,17 +188,17 @@ pub mod dto {
     }
 
     impl ReceiptMilestoneOption {
-        pub fn try_from_dto(value: &ReceiptMilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
+        pub fn try_from_dto(value: ReceiptMilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
             Self::new(
                 MilestoneIndex(value.migrated_at),
                 value.last,
                 value
                     .funds
-                    .iter()
+                    .into_iter()
                     .map(|f| MigratedFundsEntry::try_from_dto(f, token_supply))
-                    .collect::<Result<_, _>>()?,
-                if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
-                    TreasuryTransactionPayload::try_from_dto(transaction.as_ref(), token_supply)?
+                    .collect::<Result<Vec<_>, _>>()?,
+                if let PayloadDto::TreasuryTransaction(transaction) = value.transaction {
+                    TreasuryTransactionPayload::try_from_dto(*transaction, token_supply)?
                 } else {
                     return Err(Error::InvalidField("transaction"));
                 },
@@ -206,10 +206,10 @@ pub mod dto {
             )
         }
 
-        pub fn try_from_dto_unverified(value: &ReceiptMilestoneOptionDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: ReceiptMilestoneOptionDto) -> Result<Self, Error> {
             let funds = value
                 .funds
-                .iter()
+                .into_iter()
                 .map(MigratedFundsEntry::try_from_dto_unverified)
                 .collect::<Result<Vec<_>, _>>()?;
 
@@ -218,8 +218,8 @@ pub mod dto {
                 last: value.last,
                 funds: VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds)
                     .map_err(Error::InvalidReceiptFundsCount)?,
-                transaction: if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
-                    TreasuryTransactionPayload::try_from_dto_unverified(transaction.as_ref())?.into()
+                transaction: if let PayloadDto::TreasuryTransaction(transaction) = value.transaction {
+                    TreasuryTransactionPayload::try_from_dto_unverified(*transaction)?.into()
                 } else {
                     return Err(Error::InvalidField("transaction"));
                 },

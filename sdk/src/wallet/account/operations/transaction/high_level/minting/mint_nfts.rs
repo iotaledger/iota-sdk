@@ -1,10 +1,11 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Bech32Address,
         output::{
@@ -12,7 +13,7 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        Error as BlockError,
+        ConvertTo,
     },
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
@@ -21,70 +22,97 @@ use crate::{
 };
 
 /// Address and NFT for `send_nft()`.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
-    pub address: Option<Bech32Address>,
+    #[getset(get = "pub")]
+    address: Option<Bech32Address>,
     /// NFT sender feature.
-    pub sender: Option<Bech32Address>,
+    #[getset(get = "pub")]
+    sender: Option<Bech32Address>,
     /// NFT metadata feature.
-    pub metadata: Option<Vec<u8>>,
+    #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    metadata: Option<Vec<u8>>,
     /// NFT tag feature.
-    pub tag: Option<Vec<u8>>,
+    #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    tag: Option<Vec<u8>>,
     /// NFT issuer feature.
-    pub issuer: Option<Bech32Address>,
+    #[getset(get = "pub")]
+    issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
-    pub immutable_metadata: Option<Vec<u8>>,
+    #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    immutable_metadata: Option<Vec<u8>>,
 }
 
-/// Dto for MintNftParams.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MintNftParamsDto {
-    /// Bech32 encoded address to which the NFT will be minted. Default will use the
-    /// first address of the account.
-    pub address: Option<Bech32Address>,
-    /// NFT sender feature, bech32 encoded address.
-    pub sender: Option<Bech32Address>,
-    /// NFT metadata feature, hex encoded bytes.
-    pub metadata: Option<String>,
-    /// NFT tag feature, hex encoded bytes.
-    pub tag: Option<String>,
-    /// NFT issuer feature, bech32 encoded address.
-    pub issuer: Option<Bech32Address>,
-    /// Immutable NFT metadata, hex encoded bytes.
-    pub immutable_metadata: Option<String>,
-}
+impl MintNftParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-impl TryFrom<&MintNftParamsDto> for MintNftParams {
-    type Error = crate::wallet::Error;
+    /// Set the address and try convert to [`Bech32Address`]
+    pub fn try_with_address(mut self, address: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.address = Some(address.convert()?);
+        Ok(self)
+    }
 
-    fn try_from(value: &MintNftParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address,
-            sender: value.sender,
-            metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
-                None => None,
-            },
-            tag: match &value.tag {
-                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
-                None => None,
-            },
-            issuer: value.issuer,
-            immutable_metadata: match &value.immutable_metadata {
-                Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
-                }
-                None => None,
-            },
-        })
+    /// Set the address
+    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.address = address.into();
+        self
+    }
+
+    /// Set the sender address and try convert to [`Bech32Address`]
+    pub fn try_with_sender(mut self, sender: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.sender = Some(sender.convert()?);
+        Ok(self)
+    }
+
+    /// Set the sender address
+    pub fn with_sender(mut self, sender: impl Into<Option<Bech32Address>>) -> Self {
+        self.sender = sender.into();
+        self
+    }
+
+    /// Set the metadata
+    pub fn with_metadata(mut self, metadata: impl Into<Option<Vec<u8>>>) -> Self {
+        self.metadata = metadata.into();
+        self
+    }
+
+    /// Set the tag
+    pub fn with_tag(mut self, tag: impl Into<Option<Vec<u8>>>) -> Self {
+        self.tag = tag.into();
+        self
+    }
+
+    /// Set the issuer address and try convert to [`Bech32Address`]
+    pub fn try_with_issuer(mut self, issuer: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.issuer = Some(issuer.convert()?);
+        Ok(self)
+    }
+
+    /// Set the issuer address
+    pub fn with_issuer(mut self, issuer: impl Into<Option<Bech32Address>>) -> Self {
+        self.issuer = issuer.into();
+        self
+    }
+
+    /// Set the immutable metadata
+    pub fn with_immutable_metadata(mut self, immutable_metadata: impl Into<Option<Vec<u8>>>) -> Self {
+        self.immutable_metadata = immutable_metadata.into();
+        self
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to mint nfts.
     /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
@@ -94,14 +122,11 @@ impl Account {
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
     ///         .try_into()
     ///         .unwrap();
-    /// let params = vec![MintNftParams {
-    ///     address: Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string()),
-    ///     sender: None,
-    ///     metadata: Some(b"some nft metadata".to_vec()),
-    ///     tag: None,
-    ///     issuer: None,
-    ///     immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-    /// }];
+    /// let params = [MintNftParams::new()
+    ///     try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
+    ///     with_metadata(b"some nft metadata".to_vec())
+    ///     with_immutable_metadata(b"some immutable nft metadata".to_vec())
+    /// ];
     ///
     /// let transaction = account.mint_nfts(params, None).await?;
     /// println!(
@@ -110,22 +135,30 @@ impl Account {
     ///     transaction.transaction_id,
     /// );
     /// ```
-    pub async fn mint_nfts(
+    pub async fn mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
-        params: Vec<MintNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_mint_nfts(params, options).await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
+        let options = options.into();
+        let prepared_transaction = self.prepare_mint_nfts(params, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
-    pub async fn prepare_mint_nfts(
+    pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
-        params: Vec<MintNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

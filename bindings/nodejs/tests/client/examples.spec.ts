@@ -1,5 +1,8 @@
-import type { IBlock, IOutputResponse, ITaggedDataPayload } from '@iota/types';
-import { Client, utf8ToHex, Utils } from '../../';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { describe, it } from '@jest/globals';
+import { Client, utf8ToHex, Utils, Block, OutputResponse, SecretManager, TaggedDataPayload, CommonOutput } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';
@@ -34,7 +37,7 @@ describe.skip('Main examples', () => {
     });
 
     it('generates addresses', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -82,7 +85,7 @@ describe.skip('Main examples', () => {
 
     it('gets the balance of an address', async () => {
         // Generate the first address
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -106,24 +109,25 @@ describe.skip('Main examples', () => {
     });
 
     it('calculates the balance of an address', () => {
-        const testOutputs = addressOutputs as IOutputResponse[];
+        const testOutputs = addressOutputs as unknown as OutputResponse[];
 
         // Calculate the total amount and native tokens
         let totalAmount = 0;
         const totalNativeTokens: { [id: string]: number } = {};
         for (const outputResponse of testOutputs) {
             const output = outputResponse['output'];
-
-            if ('nativeTokens' in output) {
-                output.nativeTokens?.forEach(
-                    (token) =>
-                    (totalNativeTokens[token.id] =
-                        (totalNativeTokens[token.id] || 0) +
-                        parseInt(token.amount)),
-                );
+            if (output instanceof CommonOutput) {
+                (output as CommonOutput)
+                    .getNativeTokens()
+                    ?.forEach(
+                        (token) =>
+                            (totalNativeTokens[token.id] =
+                                (totalNativeTokens[token.id] || 0) +
+                                parseInt(token.amount)),
+                    );
             }
 
-            totalAmount += parseInt(output.amount);
+            totalAmount += parseInt(output.getAmount());
         }
 
         expect(totalAmount).toBe(1960954000);
@@ -147,7 +151,7 @@ describe.skip('Main examples', () => {
         const blockData = await client.getBlock(blockIdAndBlock[0]);
         const blockMetadata = await client.getBlockMetadata(blockIdAndBlock[0]);
 
-        expect(blockData).toStrictEqual<IBlock>(blockIdAndBlock[1]);
+        expect(blockData).toStrictEqual<Block>(blockIdAndBlock[1]);
         expect(blockMetadata.blockId).toBeValidBlockId();
     });
 
@@ -159,15 +163,13 @@ describe.skip('Main examples', () => {
 
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
 
-        expect(fetchedBlock.payload).toStrictEqual<ITaggedDataPayload>({
-            type: 5,
-            tag: utf8ToHex('Hello'),
-            data: utf8ToHex('Tangle'),
-        });
+        expect(fetchedBlock.payload).toStrictEqual(
+            new TaggedDataPayload( utf8ToHex('Hello'), utf8ToHex('Tangle'))
+        );
     });
 
     it('sends a transaction', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 1,
                 end: 2,

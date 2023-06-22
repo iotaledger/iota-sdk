@@ -9,9 +9,12 @@ use std::sync::{
 use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use serde::Deserialize;
+use serde::Serialize;
 use tokio::sync::RwLock;
 
+use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
@@ -25,24 +28,36 @@ use crate::wallet::{
     },
 };
 use crate::{
-    client::secret::SecretManager,
+    client::secret::{SecretManage, SecretManager},
     wallet::{wallet::WalletInner, Account, ClientOptions, Wallet},
 };
 
-#[derive(Debug, Serialize, Deserialize, Default)]
 /// Builder for the wallet.
-pub struct WalletBuilder {
-    client_options: Option<ClientOptions>,
-    coin_type: Option<u32>,
+#[derive(Debug, Serialize)]
+pub struct WalletBuilder<S: SecretManage = SecretManager> {
+    pub(crate) client_options: Option<ClientOptions>,
+    pub(crate) coin_type: Option<u32>,
     #[cfg(feature = "storage")]
-    storage_options: Option<StorageOptions>,
-    #[serde(default, skip)]
-    pub(crate) secret_manager: Option<Arc<RwLock<SecretManager>>>,
+    pub(crate) storage_options: Option<StorageOptions>,
+    #[serde(skip)]
+    pub(crate) secret_manager: Option<Arc<RwLock<S>>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl<S: SecretManage> Default for WalletBuilder<S> {
+    fn default() -> Self {
+        Self {
+            client_options: Default::default(),
+            coin_type: Default::default(),
+            #[cfg(feature = "storage")]
+            storage_options: Default::default(),
+            secret_manager: Default::default(),
+        }
+    }
+}
+
 #[cfg(feature = "storage")]
 #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct StorageOptions {
     pub(crate) storage_path: PathBuf,
     pub(crate) storage_file_name: Option<String>,
@@ -62,7 +77,10 @@ impl Default for StorageOptions {
     }
 }
 
-impl WalletBuilder {
+impl<S: 'static + SecretManage> WalletBuilder<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Initialises a new instance of the wallet builder with the default storage adapter.
     pub fn new() -> Self {
         Self {
@@ -84,14 +102,14 @@ impl WalletBuilder {
     }
 
     /// Set the secret_manager to be used.
-    pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<SecretManager>>) -> Self {
+    pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<S>>) -> Self {
         self.secret_manager = secret_manager.into().map(|sm| Arc::new(RwLock::new(sm)));
         self
     }
 
     /// Set the secret_manager to be used wrapped in an Arc<RwLock<>> so it can be cloned and mutated also outside of
     /// the Wallet.
-    pub fn with_secret_manager_arc(mut self, secret_manager: impl Into<Option<Arc<RwLock<SecretManager>>>>) -> Self {
+    pub fn with_secret_manager_arc(mut self, secret_manager: impl Into<Option<Arc<RwLock<S>>>>) -> Self {
         self.secret_manager = secret_manager.into();
         self
     }
@@ -106,17 +124,22 @@ impl WalletBuilder {
         });
         self
     }
+}
 
+impl<S: 'static + SecretManage> WalletBuilder<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    Self: SaveLoadWallet,
+{
     /// Builds the wallet
-    #[allow(unreachable_code, unused_mut)]
-    pub async fn finish(mut self) -> crate::wallet::Result<Wallet> {
+    pub async fn finish(mut self) -> crate::wallet::Result<Wallet<S>> {
         log::debug!("[WalletBuilder]");
 
         #[cfg(feature = "storage")]
         let storage_options = self.storage_options.clone().unwrap_or_default();
-        #[cfg(feature = "storage")]
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
+        #[cfg(feature = "storage")]
         if !storage_options.storage_path.is_dir() {
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
@@ -138,9 +161,9 @@ impl WalletBuilder {
         let mut storage_manager = StorageManager::new(storage, None).await?;
 
         #[cfg(feature = "storage")]
-        let mut read_manager_builder = storage_manager.get_wallet_data().await?;
+        let read_manager_builder = Self::load(&storage_manager).await?;
         #[cfg(not(feature = "storage"))]
-        let mut read_manager_builder: Option<Self> = None;
+        let read_manager_builder: Option<Self> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
@@ -167,26 +190,31 @@ impl WalletBuilder {
         }
 
         if self.coin_type.is_none() {
-            let coin_type =
-                read_manager_builder
-                    .and_then(|data| data.coin_type)
-                    .ok_or(crate::wallet::Error::MissingParameter(
-                        "coin_type (IOTA: 4218, Shimmer: 4219)",
-                    ))?;
+            self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
+        }
+        let coin_type = self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
+            "coin_type (IOTA: 4218, Shimmer: 4219)",
+        ))?;
 
-            // Update self so it gets used and stored again
-            self.coin_type.replace(coin_type);
+        #[cfg(feature = "storage")]
+        let mut accounts = storage_manager.get_accounts().await?;
+        // Check against potential account coin type before saving the wallet data
+        #[cfg(feature = "storage")]
+        if let Some(account) = accounts.first() {
+            if *account.coin_type() != coin_type {
+                return Err(crate::wallet::Error::InvalidCoinType {
+                    new_coin_type: coin_type,
+                    existing_coin_type: *account.coin_type(),
+                });
+            }
         }
 
         // Store wallet data in storage
         #[cfg(feature = "storage")]
-        storage_manager.save_wallet_data(&self).await?;
+        self.save(&storage_manager).await?;
 
         #[cfg(feature = "events")]
         let event_emitter = tokio::sync::RwLock::new(EventEmitter::new());
-
-        #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.get_accounts().await?;
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
@@ -202,9 +230,7 @@ impl WalletBuilder {
                 .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
                 .finish()
                 .await?,
-            coin_type: AtomicU32::new(self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
-                "coin_type (IOTA: 4218, Shimmer: 4219)",
-            ))?),
+            coin_type: AtomicU32::new(coin_type),
             secret_manager: self
                 .secret_manager
                 .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
@@ -216,7 +242,7 @@ impl WalletBuilder {
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         });
 
-        let mut accounts: Vec<Account> = try_join_all(
+        let mut accounts: Vec<Account<S>> = try_join_all(
             accounts
                 .into_iter()
                 .map(|a| Account::new(a, wallet_inner.clone()).boxed()),
@@ -239,7 +265,7 @@ impl WalletBuilder {
     }
 
     #[cfg(feature = "storage")]
-    pub(crate) async fn from_wallet(wallet: &Wallet) -> Self {
+    pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
             client_options: Some(ClientOptions::from_client(wallet.client()).await),
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),

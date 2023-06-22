@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::input_selection::minimum_storage_deposit_basic_output,
+    client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -30,18 +30,18 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
-    pub async fn get_unlockable_outputs_with_additional_unlock_conditions(
-        &self,
-        outputs_to_claim: OutputsToClaim,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[OUTPUT_CLAIMING] get_unlockable_outputs_with_additional_unlock_conditions");
+    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
+        log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
         let account_details = self.details().await;
 
         let local_time = self.client().get_time_checked().await?;
@@ -124,7 +124,7 @@ impl Account {
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
     /// additional inputs
-    pub async fn get_basic_outputs_for_additional_inputs(&self) -> crate::wallet::Result<Vec<OutputData>> {
+    pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
@@ -158,8 +158,14 @@ impl Account {
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`Account::get_unlockable_outputs_with_additional_unlock_conditions()`].
-    pub async fn claim_outputs(&self, output_ids_to_claim: Vec<OutputId>) -> crate::wallet::Result<Transaction> {
+    /// from [`Account::claimable_outputs()`].
+    pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
+        &self,
+        output_ids_to_claim: I,
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
         let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;
         self.claim_outputs_internal(output_ids_to_claim, basic_outputs)
@@ -183,11 +189,14 @@ impl Account {
     }
 
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
-    pub(crate) async fn claim_outputs_internal(
+    pub(crate) async fn claim_outputs_internal<I: IntoIterator<Item = OutputId> + Send>(
         &self,
-        output_ids_to_claim: Vec<OutputId>,
+        output_ids_to_claim: I,
         mut possible_additional_inputs: Vec<OutputData>,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
         let current_time = self.client().get_time_checked().await?;
@@ -399,7 +408,7 @@ pub(crate) fn sdr_not_expired(output: &Output, current_time: u32) -> Option<&Sto
                 .map_or(false, |expiration| current_time >= expiration.timestamp());
 
             // We only have to send the storage deposit return back if the output is not expired
-            if !expired { Some(sdr) } else { None }
+            (!expired).then_some(sdr)
         })
     })
 }

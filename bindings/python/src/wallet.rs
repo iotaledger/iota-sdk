@@ -14,6 +14,7 @@ use tokio::sync::RwLock;
 use crate::{
     client::Client,
     error::{Error, Result},
+    SecretManager,
 };
 
 #[pyclass]
@@ -34,7 +35,7 @@ pub fn destroy_wallet(wallet: &Wallet) -> PyResult<()> {
 #[pyfunction]
 pub fn create_wallet(options: String) -> Result<Wallet> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
-    let wallet = crate::block_on(async { wallet_options.build_manager().await })?;
+    let wallet = crate::block_on(async { wallet_options.build().await })?;
 
     Ok(Wallet {
         wallet: Arc::new(RwLock::new(Some(wallet))),
@@ -58,7 +59,7 @@ pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
 /// Listen to wallet events.
 #[pyfunction]
 pub fn listen_wallet(wallet: &Wallet, events: Vec<String>, handler: PyObject) {
-    let mut rust_events = Vec::new();
+    let mut rust_events = Vec::with_capacity(events.len());
 
     for event in events {
         let event = match serde_json::from_str::<WalletEventType>(&event) {
@@ -106,4 +107,26 @@ pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
     })?;
 
     Ok(Client { client })
+}
+
+/// Get the secret manager from the wallet.
+#[pyfunction]
+pub fn get_secret_manager_from_wallet(wallet: &Wallet) -> Result<SecretManager> {
+    let secret_manager = crate::block_on(async {
+        wallet
+            .wallet
+            .read()
+            .await
+            .as_ref()
+            .map(|w| w.get_secret_manager().clone())
+            .ok_or_else(|| {
+                Error::from(
+                    serde_json::to_string(&Response::Panic("wallet got destroyed".into()))
+                        .expect("json to string error")
+                        .as_str(),
+                )
+            })
+    })?;
+
+    Ok(SecretManager { secret_manager })
 }

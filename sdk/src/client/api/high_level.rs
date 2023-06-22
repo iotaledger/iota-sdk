@@ -3,6 +3,8 @@
 
 use std::collections::HashSet;
 
+use futures::{StreamExt, TryStreamExt};
+
 use crate::{
     client::{
         api::{input_selection::Error as InputSelectionError, ClientBlockBuilder},
@@ -14,7 +16,7 @@ use crate::{
         Client,
     },
     types::{
-        api::core::dto::LedgerInclusionStateDto,
+        api::core::response::LedgerInclusionState,
         block::{
             address::Bech32Address,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
@@ -46,15 +48,13 @@ impl Client {
 
         let input_ids = inputs
             .iter()
-            .map(|i| match i {
-                Input::Utxo(input) => *input.output_id(),
-                Input::Treasury(_) => {
-                    unreachable!()
-                }
+            .filter_map(|i| match i {
+                Input::Utxo(input) => Some(*input.output_id()),
+                Input::Treasury(_) => None,
             })
-            .collect();
+            .collect::<Vec<_>>();
 
-        self.get_outputs(input_ids).await
+        self.get_outputs(&input_ids).await
     }
 
     /// A generic send function for easily sending transaction or tagged data blocks.
@@ -64,22 +64,9 @@ impl Client {
 
     /// Find all blocks by provided block IDs.
     pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<Block>> {
-        let mut blocks = Vec::new();
-
         // Use a `HashSet` to prevent duplicate block_ids.
-        let mut block_ids_to_query = HashSet::<BlockId>::new();
-
-        // Collect the `BlockId` in the HashSet.
-        for block_id in block_ids {
-            block_ids_to_query.insert(*block_id);
-        }
-
-        // Use `get_block()` API to get the `Block`.
-        for block_id in block_ids_to_query {
-            let block = self.get_block(&block_id).await?;
-            blocks.push(block);
-        }
-        Ok(blocks)
+        let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
+        futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
     }
 
     /// Retries (promotes or reattaches) a block for provided block id. Block should only be
@@ -128,13 +115,13 @@ impl Client {
             // Check inclusion state for each attachment
             let block_ids_len = block_ids.len();
             let mut conflicting = false;
-            for (index, block_id_) in block_ids.clone().iter().enumerate() {
-                let block_metadata = self.get_block_metadata(block_id_).await?;
+            for (index, id) in block_ids.clone().iter().enumerate() {
+                let block_metadata = self.get_block_metadata(id).await?;
                 if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
                     match inclusion_state {
-                        LedgerInclusionStateDto::Included | LedgerInclusionStateDto::NoTransaction => {
+                        LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
                             // if original block, request it so we can return it on first position
-                            if block_id == block_id_ {
+                            if id == block_id {
                                 let mut included_and_reattached_blocks =
                                     vec![(*block_id, self.get_block(block_id).await?)];
                                 included_and_reattached_blocks.extend(blocks_with_id);
@@ -147,7 +134,7 @@ impl Client {
                         }
                         // only set it as conflicting here and don't return, because another reattached block could
                         // have the included transaction
-                        LedgerInclusionStateDto::Conflicting => conflicting = true,
+                        LedgerInclusionState::Conflicting => conflicting = true,
                     };
                 }
                 // Only reattach or promote latest attachment of the block
@@ -182,32 +169,35 @@ impl Client {
     /// additional unlock conditions
     pub async fn find_inputs(&self, addresses: Vec<Bech32Address>, amount: u64) -> Result<Vec<UtxoInput>> {
         // Get outputs from node and select inputs
-        let mut available_outputs = Vec::new();
-
-        for address in addresses {
-            let output_ids_response = self
-                .basic_output_ids(vec![
+        let available_outputs = futures::stream::iter(addresses)
+            .then(|address| {
+                self.basic_output_ids([
                     QueryParameter::Address(address),
                     QueryParameter::HasExpiration(false),
                     QueryParameter::HasTimelock(false),
                     QueryParameter::HasStorageDepositReturn(false),
                 ])
-                .await?;
+            })
+            .and_then(|res| async {
+                let items = res.items;
+                self.get_outputs(&items).await
+            })
+            .try_collect::<Vec<_>>()
+            .await?;
 
-            available_outputs.extend(self.get_outputs(output_ids_response.items).await?);
-        }
-
-        let mut basic_outputs = Vec::new();
-
-        for output_with_meta in available_outputs {
-            basic_outputs.push((
-                UtxoInput::new(
-                    output_with_meta.metadata().transaction_id().to_owned(),
-                    output_with_meta.metadata().output_index(),
-                )?,
-                output_with_meta.output().amount(),
-            ));
-        }
+        let mut basic_outputs = available_outputs
+            .into_iter()
+            .flatten()
+            .map(|output_with_meta| {
+                Ok((
+                    UtxoInput::new(
+                        output_with_meta.metadata().transaction_id().to_owned(),
+                        output_with_meta.metadata().output_index(),
+                    )?,
+                    output_with_meta.output().amount(),
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
         basic_outputs.sort_by(|l, r| r.1.cmp(&l.1));
 
         let mut total_already_spent = 0;
@@ -243,14 +233,14 @@ impl Client {
         output_ids: &[OutputId],
         addresses: &[Bech32Address],
     ) -> Result<Vec<OutputWithMetadata>> {
-        let mut output_responses = self.get_outputs(output_ids.to_vec()).await?;
+        let mut output_responses = self.get_outputs(output_ids).await?;
 
         // Use `get_address()` API to get the address outputs first,
         // then collect the `UtxoInput` in the HashSet.
         for address in addresses {
             // Get output ids of outputs that can be controlled by this address without further unlock constraints
             let output_ids_response = self
-                .basic_output_ids(vec![
+                .basic_output_ids([
                     QueryParameter::Address(*address),
                     QueryParameter::HasExpiration(false),
                     QueryParameter::HasTimelock(false),
@@ -258,7 +248,7 @@ impl Client {
                 ])
                 .await?;
 
-            output_responses.extend(self.get_outputs(output_ids_response.items).await?);
+            output_responses.extend(self.get_outputs(&output_ids_response.items).await?);
         }
 
         Ok(output_responses.clone())

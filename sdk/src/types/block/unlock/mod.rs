@@ -6,7 +6,7 @@ mod nft;
 mod reference;
 mod signature;
 
-use alloc::vec::Vec;
+use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};
@@ -87,11 +87,9 @@ pub struct Unlocks(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Un
 
 impl Unlocks {
     /// Creates a new [`Unlocks`].
-    pub fn new(unlocks: Vec<Unlock>) -> Result<Self, Error> {
-        let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> = unlocks
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidUnlockCount)?;
+    pub fn new(unlocks: impl Into<Box<[Unlock]>>) -> Result<Self, Error> {
+        let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> =
+            unlocks.into().try_into().map_err(Error::InvalidUnlockCount)?;
 
         verify_unlocks::<true>(&unlocks, &())?;
 
@@ -203,12 +201,12 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&UnlockDto> for Unlock {
+    impl TryFrom<UnlockDto> for Unlock {
         type Error = Error;
 
-        fn try_from(value: &UnlockDto) -> Result<Self, Self::Error> {
+        fn try_from(value: UnlockDto) -> Result<Self, Self::Error> {
             match value {
-                UnlockDto::Signature(s) => match &s.signature {
+                UnlockDto::Signature(s) => match s.signature {
                     SignatureDto::Ed25519(ed) => {
                         let public_key =
                             prefix_hex::decode(&ed.public_key).map_err(|_| Error::InvalidField("publicKey"))?;

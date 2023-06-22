@@ -4,17 +4,15 @@
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        request_funds_from_faucet,
-        secret::SecretManager,
-        Client,
+        request_funds_from_faucet, Client,
     },
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
+                dto::{OutputBuilderAmountDto, OutputDto},
+                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
@@ -139,7 +137,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 },
                 native_tokens,
                 serial_number,
-                &token_scheme,
+                token_scheme,
                 unlock_conditions,
                 features,
                 immutable_features,
@@ -172,14 +170,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::Output(OutputDto::from(&output))
         }
-        ClientMethod::GenerateEd25519Addresses {
-            secret_manager,
-            options,
-        } => {
-            let secret_manager = SecretManager::try_from(&secret_manager)?;
-            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
-            Response::GeneratedEd25519Addresses(addresses)
-        }
         ClientMethod::BuildAndPostBlock {
             secret_manager,
             options,
@@ -188,7 +178,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let mut block_builder = client.block();
 
             let secret_manager = match secret_manager {
-                Some(secret_manager) => Some((&secret_manager).try_into()?),
+                Some(secret_manager) => Some(secret_manager.try_into()?),
                 None => None,
             };
 
@@ -224,11 +214,11 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 bech32_hrp: *params.bech32_hrp(),
                 min_pow_score: params.min_pow_score(),
                 below_max_depth: params.below_max_depth(),
-                rent_structure: RentStructureDto {
-                    v_byte_cost: params.rent_structure().byte_cost(),
-                    v_byte_factor_key: params.rent_structure().byte_factor_key(),
-                    v_byte_factor_data: params.rent_structure().byte_factor_data(),
-                },
+                rent_structure: RentStructure::new(
+                    params.rent_structure().byte_cost(),
+                    params.rent_structure().byte_factor_key(),
+                    params.rent_structure().byte_factor_data(),
+                ),
                 token_supply: params.token_supply().to_string(),
             };
             Response::ProtocolParameters(protocol_response)
@@ -242,7 +232,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let mut block_builder = client.block();
 
             let secret_manager = match secret_manager {
-                Some(secret_manager) => Some((&secret_manager).try_into()?),
+                Some(secret_manager) => Some(secret_manager.try_into()?),
                 None => None,
             };
 
@@ -264,14 +254,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let mut block_builder = client.block();
 
-            let secret_manager = (&secret_manager).try_into()?;
+            let secret_manager = secret_manager.try_into()?;
 
             block_builder = block_builder.with_secret_manager(&secret_manager);
 
             Response::SignedTransaction(PayloadDto::from(
                 &block_builder
                     .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-                        &prepared_transaction_data,
+                        prepared_transaction_data,
                     )?)
                     .await?,
             ))
@@ -281,7 +271,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             let block = block_builder
                 .finish_block(Some(Payload::try_from_dto(
-                    &payload,
+                    payload,
                     &client.get_protocol_parameters().await?,
                 )?))
                 .await?;
@@ -307,7 +297,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto(&block, &client.get_protocol_parameters().await?)?)
+                .post_block(&Block::try_from_dto(block, &client.get_protocol_parameters().await?)?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
@@ -370,7 +360,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
-                .get_outputs(output_ids)
+                .get_outputs(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -379,7 +369,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .get_outputs_ignore_errors(output_ids)
+                .get_outputs_ignore_errors(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -414,7 +404,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             generate_addresses_options,
         } => {
-            let secret_manager = (&secret_manager).try_into()?;
+            let secret_manager = secret_manager.try_into()?;
             Response::ConsolidatedFunds(
                 client
                     .consolidate_funds(&secret_manager, generate_addresses_options)

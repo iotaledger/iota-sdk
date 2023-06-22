@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -32,11 +32,9 @@ async fn main() -> Result<()> {
         .await?[0];
     request_funds_from_faucet(&faucet_url, &address).await?;
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

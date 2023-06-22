@@ -6,8 +6,8 @@ use core::borrow::Borrow;
 
 use packable::{prefix::StringPrefix, Packable};
 
-use super::address::{Hrp, HrpLike};
-use crate::types::block::{helper::network_name_to_id, output::RentStructure, Error, PROTOCOL_VERSION};
+use super::address::Hrp;
+use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
@@ -66,7 +66,7 @@ impl ProtocolParameters {
     pub fn new(
         protocol_version: u8,
         network_name: String,
-        bech32_hrp: impl HrpLike,
+        bech32_hrp: impl ConvertTo<Hrp>,
         min_pow_score: u32,
         below_max_depth: u8,
         rent_structure: RentStructure,
@@ -75,7 +75,7 @@ impl ProtocolParameters {
         Ok(Self {
             protocol_version,
             network_name: <StringPrefix<u8>>::try_from(network_name).map_err(Error::InvalidStringPrefix)?,
-            bech32_hrp: bech32_hrp.to_hrp()?,
+            bech32_hrp: bech32_hrp.convert()?,
             min_pow_score,
             below_max_depth,
             rent_structure,
@@ -144,7 +144,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
 pub mod dto {
 
     use super::*;
-    use crate::types::block::{output::dto::RentStructureDto, Error};
+    use crate::types::block::{output::RentStructure, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
@@ -159,7 +159,7 @@ pub mod dto {
         pub bech32_hrp: Hrp,
         pub min_pow_score: u32,
         pub below_max_depth: u8,
-        pub rent_structure: RentStructureDto,
+        pub rent_structure: RentStructure,
         pub token_supply: String,
     }
 
@@ -173,7 +173,7 @@ pub mod dto {
                 value.bech32_hrp,
                 value.min_pow_score,
                 value.below_max_depth,
-                value.rent_structure.into(),
+                value.rent_structure,
                 value
                     .token_supply
                     .parse()

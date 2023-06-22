@@ -10,7 +10,7 @@ use std::{collections::HashMap, ops::Range};
 use async_trait::async_trait;
 use crypto::{
     keys::slip10::{Chain, Segment},
-    signatures::secp256k1_ecdsa::EvmAddress,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
@@ -19,7 +19,7 @@ use iota_ledger_nano::{
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
 
-use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
+use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
         is_alias_transition,
@@ -29,7 +29,7 @@ use crate::{
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
         output::Output,
-        payload::transaction::TransactionEssence,
+        payload::{transaction::TransactionEssence, Payload},
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, Unlock, Unlocks},
     },
@@ -105,7 +105,7 @@ impl From<iota_ledger_nano::api::errors::APIError> for Error {
 }
 
 /// Secret manager that uses a Ledger hardware wallet.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct LedgerSecretManager {
     /// Specifies if a real Ledger hardware is used or only a simulator is used.
     pub is_simulator: bool,
@@ -128,7 +128,7 @@ impl TryFrom<u8> for LedgerDeviceType {
 
 #[async_trait]
 impl SecretManage for LedgerSecretManager {
-    type Error = Error;
+    type Error = crate::client::Error;
 
     async fn generate_ed25519_addresses(
         &self,
@@ -151,22 +151,15 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         // get ledger
-        let ledger = get_ledger(coin_type, bip32_account, self.is_simulator)?;
+        let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
 
-        let addresses = if options.ledger_nano_prompt {
-            // and generate a single address that is shown to the user
-            ledger.get_addresses(true, bip32, address_indexes.len())?
-        } else {
-            ledger.get_addresses(false, bip32, address_indexes.len())?
-        };
+        let addresses = ledger
+            .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
+            .map_err(Error::from)?;
 
         drop(lock);
 
-        let mut ed25519_addresses = Vec::new();
-        for address in addresses {
-            ed25519_addresses.push(Ed25519Address::new(address));
-        }
-        Ok(ed25519_addresses)
+        Ok(addresses.into_iter().map(Ed25519Address::new).collect())
     }
 
     async fn generate_evm_addresses(
@@ -176,45 +169,21 @@ impl SecretManage for LedgerSecretManager {
         _address_indexes: Range<u32>,
         _options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
-        Err(Error::UnsupportedOperation)
+        Err(Error::UnsupportedOperation.into())
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
-        Err(Error::UnsupportedOperation)
+        Err(Error::UnsupportedOperation.into())
     }
-}
 
-/// needs_blind_signing
-/// the Ledger Nano S(+)/X app can present the user a detailed view of the transaction before it
-/// is signed but only with BasicOutputs, without extra-features and if the Essence is not too large.
-/// If criteria are not met, blind signing is needed.
-/// This method finds out if we have to switch to blind signing mode.
-pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
-    match &prepared_transaction.essence {
-        TransactionEssence::Regular(essence) => {
-            for output in essence.outputs().iter() {
-                // only basic outputs allowed
-                if let Output::Basic(output) = output {
-                    if output.simple_deposit_address().is_some() {
-                        continue;
-                    }
-                }
-                // not fine, return
-                return true;
-            }
-        }
+    async fn sign_secp256k1_ecdsa(
+        &self,
+        _msg: &[u8],
+        _chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        Err(Error::UnsupportedOperation.into())
     }
-    // check if essence + bip32 indices fit into the buffer of the device
-    let essence_bytes = prepared_transaction.essence.pack_to_vec();
-    let total_size =
-        LedgerBIP32Index::default().packed_len() * prepared_transaction.inputs_data.len() + essence_bytes.len();
 
-    // return true if too large
-    total_size > buffer_size
-}
-
-#[async_trait]
-impl SignTransactionEssence for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,
@@ -243,7 +212,7 @@ impl SignTransactionEssence for LedgerSecretManager {
             if (coin_type.is_some() && coin_type != Some(bip32_indices[1]))
                 || (account_index.is_some() && account_index != Some(bip32_indices[2]))
             {
-                return Err(Error::Bip32ChainMismatch);
+                return Err(Error::Bip32ChainMismatch.into());
             }
 
             coin_type = Some(bip32_indices[1]);
@@ -268,7 +237,7 @@ impl SignTransactionEssence for LedgerSecretManager {
         // lock the mutex to prevent multiple simultaneous requests to a ledger
         let lock = self.mutex.lock().await;
 
-        let ledger = get_ledger(coin_type, bip32_account, self.is_simulator)?;
+        let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
         let blind_signing = needs_blind_signing(prepared_transaction, ledger.get_buffer_size());
 
         // if essence + bip32 input indices are larger than the buffer size or the essence contains
@@ -277,7 +246,9 @@ impl SignTransactionEssence for LedgerSecretManager {
             // prepare signing
             log::debug!("[LEDGER] prepare_blind_signing");
             log::debug!("[LEDGER] {:?} {:?}", input_bip32_indices, essence_hash);
-            ledger.prepare_blind_signing(input_bip32_indices, essence_hash)?;
+            ledger
+                .prepare_blind_signing(input_bip32_indices, essence_hash)
+                .map_err(Error::from)?;
         } else {
             // figure out the remainder address and bip32 index (if there is one)
             let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
@@ -292,7 +263,7 @@ impl SignTransactionEssence for LedgerSecretManager {
                                     .map(|seg| u32::from_be_bytes(seg.bs()))
                                     .collect()
                             }
-                            None => return Err(Error::MissingBip32Chain),
+                            None => return Err(Error::MissingBip32Chain.into()),
                         };
                         (
                             Some(&a.address),
@@ -325,7 +296,7 @@ impl SignTransactionEssence for LedgerSecretManager {
                                 }
                             } else {
                                 log::debug!("[LEDGER] unsupported output");
-                                return Err(Error::MiscError);
+                                return Err(Error::MiscError.into());
                             }
 
                             remainder_index += 1;
@@ -334,7 +305,7 @@ impl SignTransactionEssence for LedgerSecretManager {
                         // was index found?
                         if remainder_index as usize == essence.outputs().len() {
                             log::debug!("[LEDGER] remainder_index not found");
-                            return Err(Error::MiscError);
+                            return Err(Error::MiscError.into());
                         }
                     }
                 }
@@ -350,22 +321,24 @@ impl SignTransactionEssence for LedgerSecretManager {
                 remainder_index,
                 remainder_bip32
             );
-            ledger.prepare_signing(
-                input_bip32_indices,
-                essence_bytes,
-                remainder_address.is_some(),
-                remainder_index,
-                remainder_bip32,
-            )?;
+            ledger
+                .prepare_signing(
+                    input_bip32_indices,
+                    essence_bytes,
+                    remainder_address.is_some(),
+                    remainder_index,
+                    remainder_bip32,
+                )
+                .map_err(Error::from)?;
         }
 
         // show essence to user
         // if denied by user, it returns with `DeniedByUser` Error
         log::debug!("[LEDGER] await user confirmation");
-        ledger.user_confirm()?;
+        ledger.user_confirm().map_err(Error::from)?;
 
         // sign
-        let signature_bytes = ledger.sign(input_len as u16)?;
+        let signature_bytes = ledger.sign(input_len as u16).map_err(Error::from)?;
         drop(ledger);
         drop(lock);
         let mut unpacker = SliceUnpacker::new(&signature_bytes);
@@ -394,6 +367,48 @@ impl SignTransactionEssence for LedgerSecretManager {
 
         Ok(Unlocks::new(unlocks)?)
     }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        super::default_sign_transaction(self, prepared_transaction_data).await
+    }
+}
+
+impl SecretManagerConfig for LedgerSecretManager {
+    type Config = bool;
+
+    fn to_config(&self) -> Option<Self::Config> {
+        Some(self.is_simulator)
+    }
+
+    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+        Ok(Self::new(*config))
+    }
+}
+
+/// the Ledger Nano S(+)/X app can present the user a detailed view of the transaction before it
+/// is signed but only with BasicOutputs, without extra-features and if the Essence is not too large.
+/// If criteria are not met, blind signing is needed.
+/// This method finds out if we have to switch to blind signing mode.
+pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
+    let TransactionEssence::Regular(essence) = &prepared_transaction.essence;
+
+    if !essence
+        .outputs()
+        .iter()
+        .all(|output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()))
+    {
+        return true;
+    }
+
+    // check if essence + bip32 indices fit into the buffer of the device
+    let total_size = LedgerBIP32Index::default().packed_len() * prepared_transaction.inputs_data.len()
+        + prepared_transaction.essence.packed_len();
+
+    // return true if too large
+    total_size > buffer_size
 }
 
 impl LedgerSecretManager {
@@ -429,11 +444,11 @@ impl LedgerSecretManager {
         // device, debug-flag, version number, lock-state but here we only are interested in a
         // successful call and the locked-flag
         let (connected_, locked, blind_signing_enabled, device) =
-            get_app_config(&transport_type).map_or((false, false, false, None), |config| {
+            get_app_config(&transport_type).map_or((false, None, false, None), |config| {
                 (
                     true,
                     // locked flag
-                    config.flags & (1 << 0) != 0,
+                    Some(config.flags & (1 << 0) != 0),
                     // blind signing enabled flag
                     config.flags & (1 << 1) != 0,
                     LedgerDeviceType::try_from(config.device).ok(),
@@ -477,7 +492,7 @@ fn merge_unlocks(
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_alias_transition(input, regular.outputs()).map(|t| t.0);
+        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) =
             input
                 .output

@@ -29,10 +29,13 @@ impl ClientInner {
     /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
     /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter". Returns an empty Vec if no results
     /// are found. api/indexer/v1/outputs/basic
-    pub async fn basic_output_ids(&self, query_parameters: Vec<QueryParameter>) -> Result<OutputIdsResponse> {
+    pub async fn basic_output_ids(
+        &self,
+        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+    ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v1/outputs/basic";
 
-        let query_parameters = verify_query_parameters_basic_outputs(query_parameters)?;
+        let query_parameters = verify_query_parameters_basic_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
@@ -42,10 +45,13 @@ impl ClientInner {
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
     /// api/indexer/v1/outputs/alias
-    pub async fn alias_output_ids(&self, query_parameters: Vec<QueryParameter>) -> Result<OutputIdsResponse> {
+    pub async fn alias_output_ids(
+        &self,
+        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+    ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v1/outputs/alias";
 
-        let query_parameters = verify_query_parameters_alias_outputs(query_parameters)?;
+        let query_parameters = verify_query_parameters_alias_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
@@ -67,10 +73,13 @@ impl ClientInner {
     /// Query parameters: "address", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
     /// api/indexer/v1/outputs/foundry
-    pub async fn foundry_output_ids(&self, query_parameters: Vec<QueryParameter>) -> Result<OutputIdsResponse> {
+    pub async fn foundry_output_ids(
+        &self,
+        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+    ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v1/outputs/foundry";
 
-        let query_parameters = verify_query_parameters_foundry_outputs(query_parameters)?;
+        let query_parameters = verify_query_parameters_foundry_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
@@ -93,10 +102,13 @@ impl ClientInner {
     /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
     /// api/indexer/v1/outputs/nft
-    pub async fn nft_output_ids(&self, query_parameters: Vec<QueryParameter>) -> Result<OutputIdsResponse> {
+    pub async fn nft_output_ids(
+        &self,
+        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+    ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v1/outputs/nft";
 
-        let query_parameters = verify_query_parameters_nft_outputs(query_parameters)?;
+        let query_parameters = verify_query_parameters_nft_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }

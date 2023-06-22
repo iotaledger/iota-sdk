@@ -28,9 +28,9 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let micro_amount = 1;
     let tx = accounts[1]
         .send_amount(
-            vec![
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount),
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount),
+            [
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -49,11 +49,7 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::MicroTransactions)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -82,9 +78,9 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let amount = 10;
     let tx = accounts[1]
         .send_amount(
-            vec![
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), amount),
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), 0),
+            [
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), amount)?,
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), 0)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -103,11 +99,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::Amount)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Amount).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -163,11 +155,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::All).await?)
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -235,19 +223,15 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     let tx = accounts[1]
         .send_native_tokens(
-            vec![
-                SendNativeTokensParams {
-                    address: *accounts[0].addresses().await?[0].address(),
-                    native_tokens: vec![(mint_tx_0.token_id, native_token_amount)],
-                    expiration: None,
-                    return_address: None,
-                },
-                SendNativeTokensParams {
-                    address: *accounts[0].addresses().await?[0].address(),
-                    native_tokens: vec![(mint_tx_1.token_id, native_token_amount)],
-                    expiration: None,
-                    return_address: None,
-                },
+            [
+                SendNativeTokensParams::new(
+                    *accounts[0].addresses().await?[0].address(),
+                    [(mint_tx_0.token_id, native_token_amount)],
+                )?,
+                SendNativeTokensParams::new(
+                    *accounts[0].addresses().await?[0].address(),
+                    [(mint_tx_1.token_id, native_token_amount)],
+                )?,
             ],
             None,
         )
@@ -261,11 +245,7 @@ async fn claim_2_native_tokens() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::NativeTokens)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -346,7 +326,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     let tx = account_0
         .send(
-            vec![
+            [
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
@@ -380,11 +360,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::NativeTokens)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -420,10 +396,10 @@ async fn claim_2_nft_outputs() -> Result<()> {
     let accounts = create_accounts_with_funds(&wallet, 2).await?;
 
     let token_supply = accounts[1].client().get_token_supply().await?;
-    let outputs = vec![
+    let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *accounts[0].addresses().await?[0].address().as_ref(),
                 )),
@@ -434,7 +410,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *accounts[0].addresses().await?[0].address().as_ref(),
                 )),
@@ -456,11 +432,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::Nfts)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -485,10 +457,10 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     let account_1 = wallet.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
-    let outputs = vec![
+    let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *account_1.addresses().await?[0].address().as_ref(),
                 )),
@@ -499,7 +471,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *account_1.addresses().await?[0].address().as_ref(),
                 )),
@@ -521,11 +493,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::Nfts)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -552,10 +520,10 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     let micro_amount = 1;
     let tx = account_0
         .send_amount(
-            vec![SendAmountParams::new(
+            [SendAmountParams::new(
                 *account_1.addresses().await?[0].address(),
                 micro_amount,
-            )],
+            )?],
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()
@@ -572,11 +540,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
 
     let result = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::MicroTransactions)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await;
     assert!(matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds { .. })));
 

@@ -14,18 +14,24 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use zeroize::Zeroize;
+use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{constants::HD_WALLET_TYPE, Client, Error},
-    types::block::{address::Ed25519Address, signature::Ed25519Signature},
+    client::{api::PreparedTransactionData, constants::HD_WALLET_TYPE, Client, Error},
+    types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
 };
 
 /// Secret manager that uses only a mnemonic.
 ///
 /// Computation are done in-memory. A mnemonic needs to be supplied upon the creation of [`MnemonicSecretManager`].
 pub struct MnemonicSecretManager(Seed);
+
+impl std::fmt::Debug for MnemonicSecretManager {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_tuple("MnemonicSecretManager").finish()
+    }
+}
 
 #[async_trait]
 impl SecretManage for MnemonicSecretManager {
@@ -39,28 +45,32 @@ impl SecretManage for MnemonicSecretManager {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<Ed25519Address>, Self::Error> {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
-        let mut addresses = Vec::new();
 
-        for address_index in address_indexes {
-            let chain =
-                Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
+        Ok(address_indexes
+            .map(|address_index| {
+                let chain = Chain::from_u32_hardened([
+                    HD_WALLET_TYPE,
+                    coin_type,
+                    account_index,
+                    internal as u32,
+                    address_index,
+                ]);
 
-            let public_key = self
-                .0
-                .derive::<ed25519::SecretKey>(&chain)?
-                .secret_key()
-                .public_key()
-                .to_bytes();
+                let public_key = self
+                    .0
+                    .derive::<ed25519::SecretKey>(&chain)?
+                    .secret_key()
+                    .public_key()
+                    .to_bytes();
 
-            // Hash the public key to get the address
-            let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
-                crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
-            });
+                // Hash the public key to get the address
+                let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
+                    crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
+                })?;
 
-            addresses.push(Ed25519Address::new(result?));
-        }
-
-        Ok(addresses)
+                crate::client::Result::Ok(Ed25519Address::new(result))
+            })
+            .collect::<Result<_, _>>()?)
     }
 
     async fn generate_evm_addresses(
@@ -71,22 +81,21 @@ impl SecretManage for MnemonicSecretManager {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
-        let mut addresses = Vec::new();
 
-        for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
-                .join(Chain::from_u32([internal as u32, address_index]));
+        Ok(address_indexes
+            .map(|address_index| {
+                let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
+                    .join(Chain::from_u32([internal as u32, address_index]));
 
-            let public_key = self
-                .0
-                .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
-                .secret_key()
-                .public_key();
+                let public_key = self
+                    .0
+                    .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
+                    .secret_key()
+                    .public_key();
 
-            addresses.push(public_key.to_evm_address());
-        }
-
-        Ok(addresses)
+                crate::client::Result::Ok(public_key.to_evm_address())
+            })
+            .collect::<Result<_, _>>()?)
     }
 
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
@@ -97,22 +106,49 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
+
+    async fn sign_secp256k1_ecdsa(
+        &self,
+        msg: &[u8],
+        chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        // Get the private and public key for this secp256k1_ecdsa key
+        let private_key = self.0.derive::<secp256k1_ecdsa::SecretKey>(chain)?.secret_key();
+        let public_key = private_key.public_key();
+        let signature = private_key.sign(msg);
+
+        Ok((public_key, signature))
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+        time: Option<u32>,
+    ) -> Result<Unlocks, Self::Error> {
+        super::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        super::default_sign_transaction(self, prepared_transaction_data).await
+    }
 }
 
 impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: &str) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(mnemonic)?))
+    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+        Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
-    pub fn try_from_hex_seed(mut hex: String) -> Result<Self, Error> {
-        let mut bytes: Vec<u8> = prefix_hex::decode(hex.as_str())?;
-        let seed = Seed::from_bytes(&bytes);
-        hex.zeroize();
-        bytes.zeroize();
+    pub fn try_from_hex_seed(hex: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+        let hex = hex.into();
+        let bytes = Zeroizing::new(prefix_hex::decode::<Vec<u8>>(hex.as_str())?);
+        let seed = Seed::from_bytes(bytes.as_ref());
         Ok(Self(seed))
     }
 }
@@ -127,7 +163,7 @@ mod tests {
         use crate::client::constants::IOTA_COIN_TYPE;
 
         let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
-        let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
+        let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic.to_owned()).unwrap();
 
         let addresses = secret_manager
             .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)

@@ -3,21 +3,21 @@
 
 use std::collections::{HashMap, HashSet};
 
-#[cfg(feature = "storage")]
-use crate::wallet::WalletBuilder;
+use super::storage::SaveLoadWallet;
 use crate::{
     client::{
         node_manager::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
-        Client, ClientBuilder, NodeInfoWrapper,
+        secret::SecretManage,
+        Client, ClientBuilder,
     },
-    wallet::Wallet,
+    wallet::{Wallet, WalletBuilder},
     Url,
 };
 
-impl Wallet {
+impl<S: 'static + SecretManage> Wallet<S> {
     pub fn client(&self) -> &Client {
         &self.client
     }
@@ -25,7 +25,13 @@ impl Wallet {
     pub async fn client_options(&self) -> ClientBuilder {
         ClientBuilder::from_client(self.client()).await
     }
+}
 
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    WalletBuilder<S>: SaveLoadWallet,
+{
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,
@@ -53,20 +59,12 @@ impl Wallet {
         }
         #[cfg(feature = "storage")]
         {
-            self.storage_manager
-                .read()
+            WalletBuilder::from_wallet(self)
                 .await
-                .save_wallet_data(&WalletBuilder::from_wallet(self).await)
+                .save(&*self.storage_manager.read().await)
                 .await?;
         }
         Ok(())
-    }
-
-    /// Get the node info.
-    pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
-        let node_info_wrapper = self.client().get_info().await?;
-
-        Ok(node_info_wrapper)
     }
 
     /// Update the authentication for a node.
@@ -146,10 +144,9 @@ impl Wallet {
 
         #[cfg(feature = "storage")]
         {
-            self.storage_manager
-                .read()
+            WalletBuilder::from_wallet(self)
                 .await
-                .save_wallet_data(&WalletBuilder::from_wallet(self).await)
+                .save(&*self.storage_manager.read().await)
                 .await?;
         }
 

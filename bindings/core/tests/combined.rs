@@ -4,46 +4,10 @@
 use std::collections::BTreeMap;
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
+    client::{constants::SHIMMER_COIN_TYPE, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
-
-#[tokio::test]
-async fn generate_ed25519_addresses() -> Result<()> {
-    let client_config = r#"{
-            "nodes":[],
-            "localPow":true,
-            "fallbackToLocalPow": true
-    }"#
-    .to_string();
-
-    let client = ClientBuilder::new().from_json(&client_config)?.finish().await?;
-
-    let secret_manager = format!(
-        "{{\"mnemonic\":\"{}\"}}",
-        "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"
-    );
-    let options = GetAddressesOptions::default()
-        .with_range(0..10)
-        .try_with_bech32_hrp("atoi")
-        .unwrap();
-    let method = ClientMethod::GenerateEd25519Addresses {
-        secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
-        options,
-    };
-
-    let response = client.call_method(method).await;
-    match response {
-        Response::GeneratedEd25519Addresses(addresses) => assert_eq!(
-            addresses[0],
-            "atoi1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxxja54p"
-        ),
-        _ => panic!("Unexpected response type"),
-    };
-
-    Ok(())
-}
 
 #[tokio::test]
 async fn create_account() -> Result<()> {
@@ -68,7 +32,7 @@ async fn create_account() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet = options.build_manager().await?;
+    let wallet = options.build().await?;
 
     // create an account
     let response = wallet
@@ -126,7 +90,7 @@ async fn verify_accounts() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet = options.build_manager().await?;
+    let wallet = options.build().await?;
 
     let mut account_details = BTreeMap::new();
     let mut handle_response = |response| match response {
@@ -234,7 +198,7 @@ async fn client_from_wallet() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet = options.build_manager().await?;
+    let wallet = options.build().await?;
 
     // create an account
     let response = wallet

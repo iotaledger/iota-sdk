@@ -70,8 +70,8 @@ impl MilestonePayload {
     pub const SIGNATURE_LENGTH: usize = 64;
 
     /// Creates a new [`MilestonePayload`].
-    pub fn new(essence: MilestoneEssence, signatures: Vec<Signature>) -> Result<Self, Error> {
-        let signatures = VecPrefix::<Signature, SignatureCount>::try_from(signatures)
+    pub fn new(essence: MilestoneEssence, signatures: impl Into<Vec<Signature>>) -> Result<Self, Error> {
+        let signatures = VecPrefix::<Signature, SignatureCount>::try_from(signatures.into())
             .map_err(Error::MilestoneInvalidSignatureCount)?;
 
         Ok(Self { essence, signatures })
@@ -217,7 +217,7 @@ pub mod dto {
     impl MilestonePayload {
         // TODO: find a solution to factorize.
         pub fn try_from_dto(
-            value: &MilestonePayloadDto,
+            value: MilestonePayloadDto,
             protocol_parameters: &ProtocolParameters,
         ) -> Result<Self, Error> {
             let essence = {
@@ -225,15 +225,11 @@ pub mod dto {
                 let timestamp = value.timestamp;
                 let previous_milestone_id = MilestoneId::from_str(&value.previous_milestone_id)
                     .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
-                let mut parent_ids = Vec::new();
-
-                for block_id in &value.parents {
-                    parent_ids.push(
-                        block_id
-                            .parse::<BlockId>()
-                            .map_err(|_| Error::InvalidField("parents"))?,
-                    );
-                }
+                let parent_ids = value
+                    .parents
+                    .into_iter()
+                    .map(|block_id| block_id.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
+                    .collect::<Result<_, _>>()?;
 
                 let inclusion_merkle_root = MerkleRoot::from_str(&value.inclusion_merkle_root)
                     .map_err(|_| Error::InvalidField("inclusionMerkleRoot"))?;
@@ -242,7 +238,7 @@ pub mod dto {
                 let options = MilestoneOptions::try_from(
                     value
                         .options
-                        .iter()
+                        .into_iter()
                         .map(|o| MilestoneOption::try_from_dto(o, protocol_parameters.token_supply()))
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
@@ -265,30 +261,28 @@ pub mod dto {
                 )?
             };
 
-            let mut signatures = Vec::new();
-            for v in &value.signatures {
-                signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
-            }
+            let signatures = value
+                .signatures
+                .into_iter()
+                .map(|v| v.try_into().map_err(|_| Error::InvalidField("signatures")))
+                .collect::<Result<Vec<_>, _>>()?;
 
             Self::new(essence, signatures)
         }
 
-        pub fn try_from_dto_unverified(value: &MilestonePayloadDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: MilestonePayloadDto) -> Result<Self, Error> {
             let essence = {
                 let index = value.index;
                 let timestamp = value.timestamp;
                 let protocol_version = value.protocol_version;
                 let previous_milestone_id = MilestoneId::from_str(&value.previous_milestone_id)
                     .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
-                let mut parent_ids = Vec::new();
 
-                for block_id in &value.parents {
-                    parent_ids.push(
-                        block_id
-                            .parse::<BlockId>()
-                            .map_err(|_| Error::InvalidField("parents"))?,
-                    );
-                }
+                let parent_ids = value
+                    .parents
+                    .into_iter()
+                    .map(|block_id| block_id.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
+                    .collect::<Result<_, _>>()?;
 
                 let inclusion_merkle_root = MerkleRoot::from_str(&value.inclusion_merkle_root)
                     .map_err(|_| Error::InvalidField("inclusionMerkleRoot"))?;
@@ -297,7 +291,7 @@ pub mod dto {
                 let options = MilestoneOptions::try_from(
                     value
                         .options
-                        .iter()
+                        .into_iter()
                         .map(MilestoneOption::try_from_dto_unverified)
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
@@ -321,7 +315,7 @@ pub mod dto {
             };
 
             let mut signatures = Vec::new();
-            for v in &value.signatures {
+            for v in value.signatures {
                 signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 

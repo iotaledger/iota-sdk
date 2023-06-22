@@ -9,7 +9,7 @@ use iota_sdk::{
             PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
@@ -30,7 +30,7 @@ use crate::client::{build_inputs, build_outputs, Build::Basic};
 
 #[tokio::test]
 async fn single_ed25519_unlock() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -43,7 +43,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         &bech32_address_0.to_string(),
         None,
@@ -54,7 +54,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         &bech32_address_0.to_string(),
         None,
@@ -74,7 +74,7 @@ async fn single_ed25519_unlock() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,
@@ -110,7 +110,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
 #[tokio::test]
 async fn ed25519_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -123,7 +123,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             &bech32_address_0.to_string(),
@@ -156,7 +156,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         ),
     ]);
 
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         3_000_000,
         &bech32_address_0.to_string(),
         None,
@@ -176,7 +176,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,
@@ -224,7 +224,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
 #[tokio::test]
 async fn two_signature_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -245,7 +245,7 @@ async fn two_signature_unlocks() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             &bech32_address_0.to_string(),
@@ -268,7 +268,7 @@ async fn two_signature_unlocks() -> Result<()> {
         ),
     ]);
 
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         2_000_000,
         &bech32_address_0.to_string(),
         None,
@@ -288,7 +288,7 @@ async fn two_signature_unlocks() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,

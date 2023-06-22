@@ -144,69 +144,65 @@ impl BrokerOptions {
 #[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize)]
 pub struct Topic(String);
 
-impl TryFrom<String> for Topic {
-    type Error = Error;
-
-    fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
-        Self::try_new(value)
-    }
-}
-
 impl<'de> Deserialize<'de> for Topic {
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
         let s: String = Deserialize::deserialize(deserializer)?;
-        Self::try_from(s).map_err(|err| D::Error::custom(format!("{err}")))
+        Self::new(s).map_err(|err| D::Error::custom(format!("{err}")))
     }
 }
 
 impl Topic {
     /// Creates a new topic and checks if it's valid.
-    pub fn try_new(topic: impl Into<String>) -> Result<Self, Error> {
-        let valid_topics = lazy_static!(
-        RegexSet::new([
-            // Milestone topics.
-            r"^milestone-info/latest$",
-            r"^milestone-info/confirmed$",
-            r"^milestones$",
-            // Block topics.
-            r"^blocks$",
-            r"^blocks/transaction$",
-            r"^blocks/transaction/tagged-data$",
-            r"^blocks/transaction/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
-            r"^blocks/tagged-data$",
-            r"^blocks/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
-            r"^block-metadata/0x([a-f0-9]{64})$",
-            r"^block-metadata/referenced$",
-            // Transaction topics.
-            r"^transactions/0x([a-f0-9]{64})/included-block$",
-            // Output topics.
-            r"^outputs/0x([a-f0-9]{64})(\d{4})$",
-            r"^outputs/alias/0x([a-f0-9]{64})$",
-            r"^outputs/nft/0x([a-f0-9]{64})$",
-            r"^outputs/foundry/0x([a-f0-9]{76})$",
-            r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-alias)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",
-            // Receipt topics.
-            r"^receipts$",
-        ]).expect("cannot build regex set") => RegexSet);
-        let topic = topic.into();
+    pub fn new(topic: impl Into<String>) -> Result<Self, Error> {
+        let topic = Self::new_unchecked(topic);
 
-        if valid_topics.is_match(&topic) {
-            Ok(Self(topic))
+        if topic.is_valid() {
+            Ok(topic)
         } else {
-            Err(Error::InvalidTopic(topic))
+            Err(Error::InvalidTopic(topic.0))
         }
     }
 
     /// Creates a new topic without checking if the given string represents a valid topic.
-    pub fn new_unchecked(value: String) -> Self {
-        Self(value)
+    pub(crate) fn new_unchecked(value: impl Into<String>) -> Self {
+        Self(value.into())
     }
 
-    /// Returns the topic.
-    pub fn topic(&self) -> &str {
+    pub(crate) fn is_valid(&self) -> bool {
+        let valid_topics = lazy_static!(
+            RegexSet::new([
+                // Milestone topics.
+                r"^milestone-info/latest$",
+                r"^milestone-info/confirmed$",
+                r"^milestones$",
+                // Block topics.
+                r"^blocks$",
+                r"^blocks/transaction$",
+                r"^blocks/transaction/tagged-data$",
+                r"^blocks/transaction/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
+                r"^blocks/tagged-data$",
+                r"^blocks/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
+                r"^block-metadata/0x([a-f0-9]{64})$",
+                r"^block-metadata/referenced$",
+                // Transaction topics.
+                r"^transactions/0x([a-f0-9]{64})/included-block$",
+                // Output topics.
+                r"^outputs/0x([a-f0-9]{64})(\d{4})$",
+                r"^outputs/alias/0x([a-f0-9]{64})$",
+                r"^outputs/nft/0x([a-f0-9]{64})$",
+                r"^outputs/foundry/0x([a-f0-9]{76})$",
+                r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-alias)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",
+                // Receipt topics.
+                r"^receipts$",
+            ]).expect("cannot build regex set") => RegexSet);
+        valid_topics.is_match(&self.0)
+    }
+
+    /// Returns the topic as a str.
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 }

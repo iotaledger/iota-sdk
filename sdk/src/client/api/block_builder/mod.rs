@@ -17,14 +17,14 @@ use crate::{
         Result,
     },
     types::block::{
-        address::{Address, Bech32AddressLike, Ed25519Address},
+        address::{Address, Bech32Address, Ed25519Address},
         input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
         output::{
             dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
         },
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
-        Block, BlockId,
+        Block, BlockId, ConvertTo,
     },
 };
 
@@ -141,17 +141,12 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set a custom input(transaction output)
     pub fn with_input(mut self, input: UtxoInput) -> Result<Self> {
-        self.inputs = match self.inputs {
-            Some(mut inputs) => {
-                inputs.push(input);
-                // 128 is the maximum input amount
-                if inputs.len() > INPUT_COUNT_MAX.into() {
-                    return Err(Error::ConsolidationRequired(inputs.len()));
-                }
-                Some(inputs)
-            }
-            None => Some(vec![input]),
-        };
+        let inputs = self.inputs.get_or_insert_with(Vec::new);
+        // 128 is the maximum input amount
+        if inputs.len() >= INPUT_COUNT_MAX as _ {
+            return Err(Error::ConsolidationRequired(inputs.len()));
+        }
+        inputs.push(input);
         Ok(self)
     }
 
@@ -162,8 +157,12 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Set a transfer to the builder
-    pub async fn with_output(mut self, address: impl Bech32AddressLike, amount: u64) -> Result<ClientBlockBuilder<'a>> {
-        let address = address.to_bech32()?;
+    pub async fn with_output(
+        mut self,
+        address: impl ConvertTo<Bech32Address>,
+        amount: u64,
+    ) -> Result<ClientBlockBuilder<'a>> {
+        let address = address.convert()?;
         self.client.bech32_hrp_matches(address.hrp()).await?;
 
         let output = BasicOutputBuilder::new_with_amount(amount)
@@ -179,7 +178,7 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Set outputs to the builder
-    pub fn with_outputs(mut self, outputs: Vec<Output>) -> Result<Self> {
+    pub fn with_outputs(mut self, outputs: impl IntoIterator<Item = Output>) -> Result<Self> {
         self.outputs.extend(outputs);
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
             return Err(crate::client::Error::Block(
@@ -245,7 +244,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
         if let Some(inputs) = options.inputs {
             for input in inputs {
-                self = self.with_input(UtxoInput::try_from(&input)?)?;
+                self = self.with_input(UtxoInput::try_from(input)?)?;
             }
         }
 
@@ -282,7 +281,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
             self = self.with_outputs(
                 outputs
-                    .iter()
+                    .into_iter()
                     .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
                     .collect::<Result<Vec<Output>>>()?,
             )?;
@@ -337,15 +336,14 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Consume the builder and get the API result
-    pub async fn finish_tagged_data(self) -> Result<Block> {
+    pub async fn finish_tagged_data(mut self) -> Result<Block> {
         let payload: Payload;
         {
             let index = &self.tag.as_ref();
-            let empty_slice = &vec![];
-            let data = &self.data.as_ref().unwrap_or(empty_slice);
+            let data = self.data.take().unwrap_or_default();
 
             // build tagged_data
-            let index = TaggedDataPayload::new(index.expect("no tagged_data tag").to_vec(), (*data).clone())
+            let index = TaggedDataPayload::new(index.expect("no tagged_data tag").to_vec(), data)
                 .map_err(|e| Error::TaggedData(e.to_string()))?;
             payload = Payload::from(index);
         }

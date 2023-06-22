@@ -4,9 +4,9 @@
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
+        address::{dto::AddressDto, Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
-        payload::{transaction::TransactionEssence, TransactionPayload},
+        payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
         signature::Ed25519Signature,
         Block,
     },
@@ -36,11 +36,15 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             response
         }
         UtilsMethod::BlockId { block } => {
-            let block = Block::try_from_dto_unverified(&block)?;
+            let block = Block::try_from_dto_unverified(block)?;
             Response::BlockId(block.id())
         }
+        UtilsMethod::MilestoneId { payload } => {
+            let payload = MilestonePayload::try_from_dto_unverified(payload)?;
+            Response::MilestoneId(payload.id())
+        }
         UtilsMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto_unverified(&payload)?;
+            let payload = TransactionPayload::try_from_dto_unverified(payload)?;
             Response::TransactionId(payload.id())
         }
         UtilsMethod::ComputeAliasId { output_id } => Response::AliasId(AliasId::from(&output_id)),
@@ -51,22 +55,31 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             token_scheme_kind,
         } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
         UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
-            TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
+            TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),
-        UtilsMethod::VerifyEd25519Signature {
-            signature,
-            message,
-            address,
-        } => {
-            let signature = Ed25519Signature::try_from(&signature)?;
-            let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let address = Ed25519Address::try_from(&address)?;
-            Response::Bool(signature.is_valid(&msg, &address).is_ok())
-        }
         UtilsMethod::VerifyMnemonic { mut mnemonic } => {
             verify_mnemonic(&mnemonic)?;
             mnemonic.zeroize();
             Response::Ok
+        }
+        UtilsMethod::VerifyEd25519Signature { signature, message } => {
+            let signature = Ed25519Signature::try_from(signature)?;
+            let message: Vec<u8> = prefix_hex::decode(message)?;
+            Response::Bool(signature.verify(&message)?)
+        }
+        UtilsMethod::VerifySecp256k1EcdsaSignature {
+            public_key,
+            signature,
+            message,
+        } => {
+            use crypto::signatures::secp256k1_ecdsa;
+            use iota_sdk::types::block::Error;
+            let public_key = prefix_hex::decode(public_key)?;
+            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
+            let signature = prefix_hex::decode(signature)?;
+            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
+            let message: Vec<u8> = prefix_hex::decode(message)?;
+            Response::Bool(public_key.verify(&signature, &message))
         }
     };
     Ok(response)

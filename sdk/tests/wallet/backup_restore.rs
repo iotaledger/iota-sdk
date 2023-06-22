@@ -22,17 +22,19 @@ use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     let stronghold = StrongholdSecretManager::builder()
-        .password(stronghold_password)
+        .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
@@ -45,12 +47,12 @@ async fn backup_and_restore() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
@@ -71,7 +73,7 @@ async fn backup_and_restore() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-            "wrong password".to_string(),
+            "wrong password".to_owned(),
             None,
             None,
         )
@@ -82,7 +84,7 @@ async fn backup_and_restore() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             None,
             None,
         )
@@ -115,13 +117,15 @@ async fn backup_and_restore() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold and MnemonicSecretManager
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_mnemonic_secret_manager";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
+        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned(),
     )?;
 
     let wallet = Wallet::builder()
@@ -132,23 +136,23 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
     // restore from backup
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
+        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned(),
     )?;
 
     let restore_wallet = Wallet::builder()
@@ -163,7 +167,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             None,
             None,
         )
@@ -196,17 +200,19 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_different_coin_type";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     let stronghold = StrongholdSecretManager::builder()
-        .password(stronghold_password)
+        .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_different_coin_type/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
@@ -220,12 +226,12 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
@@ -247,7 +253,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             Some(true),
             None,
         )
@@ -279,17 +285,19 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_same_coin_type() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_same_coin_type";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     let stronghold = StrongholdSecretManager::builder()
-        .password(stronghold_password)
+        .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_same_coin_type/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
@@ -303,12 +311,12 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    let account_before_backup = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account_before_backup = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_same_coin_type/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
@@ -330,7 +338,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_same_coin_type/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             Some(true),
             None,
         )
@@ -360,17 +368,19 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_different_coin_type_dont_ignore";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_OTHER)?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     let stronghold = StrongholdSecretManager::builder()
-        .password(stronghold_password)
+        .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_different_coin_type_dont_ignore/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
@@ -384,12 +394,12 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .await?;
 
     // Create one account
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
@@ -411,7 +421,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             Some(false),
             None,
         )
@@ -446,17 +456,19 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 #[tokio::test]
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_bech32_hrp_mismatch";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     let stronghold = StrongholdSecretManager::builder()
-        .password(stronghold_password)
+        .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_bech32_hrp_mismatch/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
@@ -469,12 +481,12 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
@@ -495,7 +507,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             None,
             Some(iota_sdk::types::block::address::Hrp::from_str_unchecked("otherhrp")),
         )

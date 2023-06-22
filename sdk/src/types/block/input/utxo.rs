@@ -78,10 +78,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&UtxoInputDto> for UtxoInput {
+    impl TryFrom<UtxoInputDto> for UtxoInput {
         type Error = Error;
 
-        fn try_from(value: &UtxoInputDto) -> Result<Self, Self::Error> {
+        fn try_from(value: UtxoInputDto) -> Result<Self, Self::Error> {
             Self::new(
                 value
                     .transaction_id

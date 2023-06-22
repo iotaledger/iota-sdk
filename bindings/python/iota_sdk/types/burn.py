@@ -24,10 +24,10 @@ class Burn:
         The native tokens to burn
     """
 
-    aliases: Optional[List[HexStr]]
-    nfts: Optional[List[HexStr]]
-    foundries: Optional[List[HexStr]]
-    nativeTokens: Optional[List[NativeToken]]
+    aliases: Optional[List[HexStr]] = None
+    nfts: Optional[List[HexStr]] = None
+    foundries: Optional[List[HexStr]] = None
+    nativeTokens: Optional[List[NativeToken]] = None
 
     def add_alias(self, alias: HexStr) -> Burn:
         if self.aliases is None:
@@ -58,7 +58,5 @@ class Burn:
         config = {k: v for k, v in self.__dict__.items() if v != None}
 
         if "nativeTokens" in config:
-            config["nativeTokens"] = [
-                native_token.as_dict() for native_token in config["nativeTokens"]
-            ]
+            config["nativeTokens"] = {nativeToken.as_dict()["id"]: nativeToken.as_dict()["amount"] for nativeToken in config["nativeTokens"]}
         return config

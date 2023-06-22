@@ -9,10 +9,11 @@ use iota_sdk_bindings_core::{
     Response, SecretManagerMethod,
 };
 use neon::prelude::*;
+use tokio::sync::RwLock;
 
 pub struct SecretManagerMethodHandler {
     channel: Channel,
-    secret_manager: SecretManager,
+    secret_manager: Arc<RwLock<SecretManager>>,
 }
 
 impl Finalize for SecretManagerMethodHandler {}
@@ -21,8 +22,15 @@ impl SecretManagerMethodHandler {
     fn new(channel: Channel, options: String) -> Arc<Self> {
         let secret_manager_dto =
             serde_json::from_str::<SecretManagerDto>(&options).expect("error initializing secret manager");
-        let secret_manager = SecretManager::try_from(&secret_manager_dto).expect("error initializing secret manager");
+        let secret_manager = SecretManager::try_from(secret_manager_dto).expect("error initializing secret manager");
 
+        Arc::new(Self {
+            channel,
+            secret_manager: Arc::new(RwLock::new(secret_manager)),
+        })
+    }
+
+    pub fn new_with_secret_manager(channel: Channel, secret_manager: Arc<RwLock<SecretManager>>) -> Arc<Self> {
         Arc::new(Self {
             channel,
             secret_manager,

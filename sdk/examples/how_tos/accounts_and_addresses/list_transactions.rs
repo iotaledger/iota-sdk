@@ -3,16 +3,27 @@
 
 //! In this example we will list all transaction of an account.
 //!
-//! `cargo run --release --all-features --example list_transactions`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example list_transactions
+//! ```
 
-use iota_sdk::wallet::{account::SyncOptions, Result, Wallet};
+use std::env::var;
+
+use iota_sdk::{
+    wallet::{account::SyncOptions, Result},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Get the account
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     let account = wallet.get_account("Alice").await?;
 
     // Sync account

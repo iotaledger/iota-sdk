@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import fs from 'fs';
-import { Account, AccountBalance, Wallet, CoinType } from '../node/lib';
+import { Account, Balance, Wallet, CoinType } from '../node/lib';
 
 async function run() {
     try {
@@ -29,7 +29,7 @@ async function run() {
 
     expect(account.getMetadata().alias).toBe('Alice');
 
-    const balance: AccountBalance = await account.sync();
+    const balance: Balance = await account.sync();
     expect(balance.baseCoin.available).not.toBeNaN();
 
     await account.setAlias('new alias');

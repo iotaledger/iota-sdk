@@ -20,6 +20,7 @@ use crate::types::block::{output::TokenId, Error};
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
     // Identifier of the native token.
+    #[serde(rename = "id")]
     token_id: TokenId,
     // Amount of native tokens.
     #[packable(verify_with = verify_amount)]
@@ -240,45 +241,5 @@ fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken], _: &(
         Err(Error::NativeTokensNotUniqueSorted)
     } else {
         Ok(())
-    }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::Error;
-
-    /// Describes a native token.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct NativeTokenDto {
-        // Identifier of the native token.
-        #[serde(rename = "id")]
-        pub token_id: TokenId,
-        // Amount of native tokens hex encoded.
-        pub amount: U256,
-    }
-
-    impl From<&NativeToken> for NativeTokenDto {
-        fn from(value: &NativeToken) -> Self {
-            Self {
-                token_id: *value.token_id(),
-                amount: (&value.amount()).into(),
-            }
-        }
-    }
-
-    impl TryFrom<&NativeTokenDto> for NativeToken {
-        type Error = Error;
-
-        fn try_from(value: &NativeTokenDto) -> Result<Self, Self::Error> {
-            Self::new(
-                value.token_id,
-                U256::try_from(&value.amount).map_err(|_| Error::InvalidField("amount"))?,
-            )
-            .map_err(|_| Error::InvalidField("nativeTokens"))
-        }
     }
 }

@@ -4,11 +4,15 @@
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
+    client::secret::SecretManage,
     types::block::{payload::Payload, BlockId},
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
         &self,

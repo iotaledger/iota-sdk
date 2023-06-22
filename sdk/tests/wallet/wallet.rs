@@ -10,11 +10,11 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        constants::IOTA_COIN_TYPE,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Error, Result, Wallet},
 };
 
 use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
@@ -59,7 +59,7 @@ async fn different_seed() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let _account = wallet.create_account().with_alias("Alice").finish().await?;
 
     drop(_account);
     drop(wallet);
@@ -68,14 +68,7 @@ async fn different_seed() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
 
     // Generating a new account needs to return an error, because the seed from the secret_manager is different
-    assert!(
-        wallet
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    assert!(wallet.create_account().with_alias("Bob").finish().await.is_err());
 
     tear_down(storage_path)
 }
@@ -86,31 +79,43 @@ async fn changed_coin_type() -> Result<()> {
     let storage_path = "test-storage/changed_coin_type";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC), None).await?;
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let mnemonic = DEFAULT_MNEMONIC.to_owned();
+
+    let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None).await?;
+    let _account = wallet.create_account().with_alias("Alice").finish().await?;
 
     drop(_account);
     drop(wallet);
 
-    // Recreate Wallet with same mnemonic
-    let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
+    let err = Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            mnemonic.clone(),
+        )?))
         .with_coin_type(IOTA_COIN_TYPE)
         .with_storage_path(storage_path)
         .finish()
-        .await?;
+        .await;
 
-    // Generating a new account needs to return an error, because a different coin type was set and we require all
-    // accounts to have the same coin type
-    assert!(
-        wallet
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
+    // the existing account
+    assert!(matches!(
+        err,
+        Err(Error::InvalidCoinType {
+            new_coin_type: IOTA_COIN_TYPE,
+            existing_coin_type: SHIMMER_COIN_TYPE
+        })
+    ));
+
+    // Building the wallet with the same coin type still works
+    let wallet = Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            mnemonic,
+        )?))
+        .with_storage_path(storage_path)
+        .finish()
+        .await?;
+    // Also still possible to create a new account
+    assert!(wallet.create_account().with_alias("Bob").finish().await.is_ok());
 
     tear_down(storage_path)
 }
@@ -120,7 +125,7 @@ async fn shimmer_coin_type() -> Result<()> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC), None).await?;
+    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC.to_owned()), None).await?;
     let account = wallet.create_account().finish().await?;
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
@@ -139,7 +144,7 @@ async fn iota_coin_type() -> Result<()> {
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
-    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
@@ -171,7 +176,7 @@ async fn wallet_address_generation() -> Result<()> {
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
-    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
@@ -197,8 +202,10 @@ async fn wallet_address_generation() -> Result<()> {
 
     #[cfg(feature = "stronghold")]
     {
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
         let secret_manager = StrongholdSecretManager::builder()
-            .password("some_hopefully_secure_password")
+            .password("some_hopefully_secure_password".to_owned())
             .build("test-storage/wallet_address_generation/test.stronghold")?;
         secret_manager.store_mnemonic(DEFAULT_MNEMONIC.to_string()).await?;
 

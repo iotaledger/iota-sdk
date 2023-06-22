@@ -3,7 +3,7 @@
 
 //! Module describing the tagged data payload.
 
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::ops::RangeInclusive;
 
 use packable::{
@@ -41,13 +41,10 @@ impl TaggedDataPayload {
     pub const DATA_LENGTH_RANGE: RangeInclusive<u32> = 0..=(Block::LENGTH_MAX - Block::LENGTH_MIN - 9) as u32;
 
     /// Creates a new [`TaggedDataPayload`].
-    pub fn new(tag: Vec<u8>, data: Vec<u8>) -> Result<Self, Error> {
+    pub fn new(tag: impl Into<Box<[u8]>>, data: impl Into<Box<[u8]>>) -> Result<Self, Error> {
         Ok(Self {
-            tag: tag.into_boxed_slice().try_into().map_err(Error::InvalidTagLength)?,
-            data: data
-                .into_boxed_slice()
-                .try_into()
-                .map_err(Error::InvalidTaggedDataLength)?,
+            tag: tag.into().try_into().map_err(Error::InvalidTagLength)?,
+            data: data.into().try_into().map_err(Error::InvalidTaggedDataLength)?,
         })
     }
 
@@ -101,10 +98,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&TaggedDataPayloadDto> for TaggedDataPayload {
+    impl TryFrom<TaggedDataPayloadDto> for TaggedDataPayload {
         type Error = Error;
 
-        fn try_from(value: &TaggedDataPayloadDto) -> Result<Self, Self::Error> {
+        fn try_from(value: TaggedDataPayloadDto) -> Result<Self, Self::Error> {
             Self::new(
                 if !value.tag.is_empty() {
                     prefix_hex::decode(&value.tag).map_err(|_| Error::InvalidField("tag"))?

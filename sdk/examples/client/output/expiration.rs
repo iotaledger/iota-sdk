@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
         .try_into()
         .unwrap();
 
-    let outputs = vec![
+    let outputs = [
         // with storage deposit return
         BasicOutputBuilder::new_with_amount(255_100)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))

@@ -6,6 +6,7 @@
 #[macro_use]
 mod r#macro;
 mod block_id;
+mod convert;
 mod error;
 
 /// A module that provides types and syntactic validations of addresses.
@@ -42,6 +43,7 @@ pub(crate) use r#macro::{create_bitflags, impl_id};
 pub use self::{
     block::{dto::BlockDto, Block, BlockBuilder},
     block_id::BlockId,
+    convert::ConvertTo,
     error::Error,
 };
 

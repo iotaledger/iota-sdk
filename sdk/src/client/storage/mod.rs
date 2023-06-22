@@ -8,25 +8,41 @@
 mod stronghold;
 
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
-pub use self::stronghold::StrongholdStorageProvider;
+pub use self::stronghold::StrongholdStorageAdapter;
 
-/// The interface for database providers.
+/// The storage adapter.
 #[async_trait]
-pub trait StorageProvider {
+pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
     type Error;
 
-    /// Get a value out of the database.
-    async fn get(&self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error>;
+    /// Gets the record associated with the given key from the storage.
+    async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> Result<Option<T>, Self::Error>
+    where
+        Self::Error: From<serde_json::Error>,
+    {
+        Ok(self
+            .get_bytes(key)
+            .await?
+            .map(|b| serde_json::from_slice(&b))
+            .transpose()?)
+    }
 
-    /// Insert a value into the database.
-    ///
-    /// If there exists a record under the same key as `k`, it will be replaced by the new value (`v`) and returned.
-    async fn insert(&self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error>;
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error>;
 
-    /// Delete a value from the database.
-    ///
-    /// The deleted value is returned.
-    async fn delete(&self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error>;
+    /// Saves or updates a record on the storage.
+    async fn set<T: Serialize + Send + Sync + ?Sized>(&self, key: &str, record: &T) -> Result<(), Self::Error>
+    where
+        Self::Error: From<serde_json::Error>,
+    {
+        self.set_bytes(key, &serde_json::to_vec(record)?).await?;
+        Ok(())
+    }
+
+    async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), Self::Error>;
+
+    /// Removes a record from the storage.
+    async fn delete(&self, key: &str) -> Result<(), Self::Error>;
 }

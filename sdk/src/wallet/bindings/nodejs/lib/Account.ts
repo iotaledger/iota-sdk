@@ -3,7 +3,7 @@
 
 import type { MessageHandler } from './MessageHandler';
 import type {
-    AccountBalance,
+    Balance,
     AccountMetadata,
     SyncOptions,
     AccountMeta,
@@ -33,6 +33,8 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
+    Secp256k1EcdsaSignature,
+    Ed25519Signature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -43,6 +45,7 @@ import type {
 } from '../types/buildOutputData';
 import type {
     HexEncodedAmount,
+    HexEncodedString,
     IAliasOutput,
     IBasicOutput,
     IFoundryOutput,
@@ -393,10 +396,71 @@ export class Account {
     }
 
     /**
+     * Verifies an ed25519 signature against a message.
+     */
+    async verifyEd25519Signature(
+        signature: Ed25519Signature,
+        message: HexEncodedString,
+    ): Promise<boolean> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifyEd25519Signature',
+                data: {
+                    signature,
+                    message,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies a Secp256k1Ecdsa signature against a message.
+     */
+    async verifySecp256k1EcdsaSignature(
+        signature: Secp256k1EcdsaSignature,
+        message: HexEncodedString,
+    ): Promise<boolean> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifySecp256k1EcdsaSignature',
+                data: {
+                    publicKey: signature.publicKey,
+                    signature: signature.signature,
+                    message,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Signs a message with a Secp256k1Ecdsa private key.
+     */
+    async signSecp256k1Ecdsa(
+        message: HexEncodedString,
+        chain: number[],
+    ): Promise<Secp256k1EcdsaSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signSecp256k1Ecdsa',
+                data: {
+                    message,
+                    chain,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Get the account balance.
      * @returns The account balance.
      */
-    async getBalance(): Promise<AccountBalance> {
+    async getBalance(): Promise<Balance> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -506,13 +570,11 @@ export class Account {
      * @param outputs The type of outputs to claim.
      * @returns The output IDs of the unlockable outputs.
      */
-    async getOutputsWithAdditionalUnlockConditions(
-        outputs: OutputsToClaim,
-    ): Promise<string[]> {
+    async claimableOutputs(outputs: OutputsToClaim): Promise<string[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'getOutputsWithAdditionalUnlockConditions',
+                name: 'claimableOutputs',
                 data: {
                     outputsToClaim: outputs,
                 },
@@ -1082,7 +1144,7 @@ export class Account {
      * @param options Optional synchronization options.
      * @returns The account balance.
      */
-    async sync(options?: SyncOptions): Promise<AccountBalance> {
+    async sync(options?: SyncOptions): Promise<Balance> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {

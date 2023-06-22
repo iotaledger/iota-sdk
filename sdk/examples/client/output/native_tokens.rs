@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     let token_id: [u8; 38] =
         prefix_hex::decode("0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000")?;
 
-    let outputs = vec![
+    let outputs = [
         // Without StorageDepositReturnUnlockCondition, the receiver will get the amount of the output and the native
         // tokens
         BasicOutputBuilder::new_with_amount(1_000_000)

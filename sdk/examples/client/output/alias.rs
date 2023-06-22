@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
-    let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?];
+    let outputs = [alias_output_builder.clone().finish_output(token_supply)?];
 
     let block = client
         .block()
@@ -72,12 +72,10 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let alias_id = AliasId::from(&alias_output_id);
-    let outputs = vec![
-        alias_output_builder
-            .with_alias_id(alias_id)
-            .with_state_index(1)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [alias_output_builder
+        .with_alias_id(alias_id)
+        .with_state_index(1)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

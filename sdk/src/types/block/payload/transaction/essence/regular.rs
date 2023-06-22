@@ -38,8 +38,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Adds inputs to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_inputs(mut self, inputs: Vec<Input>) -> Self {
-        self.inputs = inputs;
+    pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
+        self.inputs = inputs.into();
         self
     }
 
@@ -50,8 +50,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Add outputs to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_outputs(mut self, outputs: Vec<Output>) -> Self {
-        self.outputs = outputs;
+    pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
+        self.outputs = outputs.into();
         self
     }
 
@@ -377,17 +377,23 @@ pub mod dto {
     }
 
     impl RegularTransactionEssence {
-        fn _try_from_dto(
-            value: &RegularTransactionEssenceDto,
-            outputs: Vec<Output>,
-        ) -> Result<RegularTransactionEssenceBuilder, Error> {
+        pub fn try_from_dto(
+            value: RegularTransactionEssenceDto,
+            protocol_parameters: &ProtocolParameters,
+        ) -> Result<Self, Error> {
+            let outputs = value
+                .outputs
+                .into_iter()
+                .map(|o| Output::try_from_dto(o, protocol_parameters.token_supply()))
+                .collect::<Result<Vec<Output>, Error>>()?;
+
             let network_id = value
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
             let inputs = value
                 .inputs
-                .iter()
+                .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<Vec<Input>, Error>>()?;
 
@@ -395,9 +401,9 @@ pub mod dto {
                 .with_inputs(inputs)
                 .with_outputs(outputs);
 
-            builder = if let Some(p) = &value.payload {
+            builder = if let Some(p) = value.payload {
                 if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(Payload::TaggedData(Box::new((i.as_ref()).try_into()?)))
+                    builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
                 } else {
                     return Err(Error::InvalidField("payload"));
                 }
@@ -405,32 +411,39 @@ pub mod dto {
                 builder
             };
 
-            Ok(builder)
-        }
-
-        pub fn try_from_dto(
-            value: &RegularTransactionEssenceDto,
-            protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, Error> {
-            let outputs = value
-                .outputs
-                .iter()
-                .map(|o| Output::try_from_dto(o, protocol_parameters.token_supply()))
-                .collect::<Result<Vec<Output>, Error>>()?;
-
-            let builder = Self::_try_from_dto(value, outputs)?;
-
             builder.finish(protocol_parameters).map_err(Into::into)
         }
 
-        pub fn try_from_dto_unverified(value: &RegularTransactionEssenceDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: RegularTransactionEssenceDto) -> Result<Self, Error> {
             let outputs = value
                 .outputs
-                .iter()
+                .into_iter()
                 .map(Output::try_from_dto_unverified)
                 .collect::<Result<Vec<Output>, Error>>()?;
 
-            let builder = Self::_try_from_dto(value, outputs)?;
+            let network_id = value
+                .network_id
+                .parse::<u64>()
+                .map_err(|_| Error::InvalidField("network_id"))?;
+            let inputs = value
+                .inputs
+                .into_iter()
+                .map(TryInto::try_into)
+                .collect::<Result<Vec<Input>, Error>>()?;
+
+            let mut builder = Self::builder(network_id, InputsCommitment::from_str(&value.inputs_commitment)?)
+                .with_inputs(inputs)
+                .with_outputs(outputs);
+
+            builder = if let Some(p) = value.payload {
+                if let PayloadDto::TaggedData(i) = p {
+                    builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
+                } else {
+                    return Err(Error::InvalidField("payload"));
+                }
+            } else {
+                builder
+            };
 
             builder.finish_unverified().map_err(Into::into)
         }

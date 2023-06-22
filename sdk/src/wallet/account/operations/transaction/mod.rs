@@ -14,7 +14,7 @@ pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionO
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
-        secret::types::InputSigningData,
+        secret::{types::InputSigningData, SecretManage},
         Error,
     },
     types::{
@@ -34,11 +34,14 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore
-    /// let outputs = vec![
+    /// let outputs = [
     ///    BasicOutputBuilder::new_with_amount(1_000_000)?
     ///    .add_unlock_condition(AddressUnlockCondition::new(
     ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
@@ -61,9 +64,10 @@ impl Account {
     /// ```
     pub async fn send(
         &self,
-        outputs: Vec<Output>,
+        outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
+        let outputs = outputs.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
         let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -83,20 +87,23 @@ impl Account {
     /// transactions
     pub async fn finish_transaction(
         &self,
-        outputs: Vec<Output>,
+        outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] finish_transaction");
+        let options = options.into();
 
-        let prepared_transaction_data = self.prepare_transaction(outputs, options).await?;
+        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction_data).await
+        self.sign_and_submit_transaction(prepared_transaction_data, options)
+            .await
     }
 
     /// Sign a transaction, submit it to a node and store it in the account
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
@@ -109,18 +116,21 @@ impl Account {
             }
         };
 
-        self.submit_and_store_transaction(signed_transaction_data).await
+        self.submit_and_store_transaction(signed_transaction_data, options)
+            .await
     }
 
     /// Validate the transaction, submit it to a node and store it in the account
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
             signed_transaction_data.transaction_payload.id()
         );
+        let options = options.into();
 
         // Validate transaction before sending and storing it
         let local_time = self.client().get_time_checked().await?;
@@ -175,7 +185,7 @@ impl Account {
             timestamp: crate::utils::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
-            note: None,
+            note: options.and_then(|o| o.note),
             inputs,
         };
 

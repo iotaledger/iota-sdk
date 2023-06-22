@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will get outputs with quorum, which will compare the responses from the nodes.
-//! 
+//!
 //! `cargo run --example quorum --release`
 
 use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client, Result};
@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
         .finish()?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generate the first address
     let addresses = client
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(addresses[0].clone()),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),

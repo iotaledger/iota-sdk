@@ -1,13 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager, SecretManagerDto},
     Response, SecretManagerMethod,
 };
+use tokio::sync::RwLock;
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::future_to_promise;
 
@@ -16,7 +17,7 @@ use crate::PromiseString;
 /// The SecretManager method handler.
 #[wasm_bindgen(js_name = SecretManagerMethodHandler)]
 pub struct SecretManagerMethodHandler {
-    pub(crate) secret_manager: Rc<SecretManager>,
+    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
 }
 
 /// Creates a method handler with the given secret_manager options.
@@ -24,10 +25,10 @@ pub struct SecretManagerMethodHandler {
 #[allow(non_snake_case)]
 pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandler, JsValue> {
     let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(|err| err.to_string())?;
-    let secret_manager = SecretManager::try_from(&secret_manager_dto).map_err(|err| err.to_string())?;
+    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| err.to_string())?;
 
     Ok(SecretManagerMethodHandler {
-        secret_manager: Rc::new(secret_manager),
+        secret_manager: Arc::new(RwLock::new(secret_manager)),
     })
 }
 
@@ -40,8 +41,7 @@ pub fn call_secret_manager_method_async(
     method: String,
     methodHandler: &SecretManagerMethodHandler,
 ) -> Result<PromiseString, JsValue> {
-    let secret_manager: Rc<SecretManager> = Rc::clone(&methodHandler.secret_manager);
-
+    let secret_manager = methodHandler.secret_manager.clone();
     let promise: js_sys::Promise = future_to_promise(async move {
         let method: SecretManagerMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 

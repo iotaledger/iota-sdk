@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::{
         api::plugins::participation::types::{Participations, PARTICIPATION_TAG},
         block::{
@@ -20,7 +20,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Returns an account's total voting power (voting or NOT voting).
     pub async fn get_voting_power(&self) -> Result<u64> {
         Ok(self
@@ -42,7 +45,8 @@ impl Account {
     /// increases voting power then increases again immediately after).
     pub async fn increase_voting_power(&self, amount: u64) -> Result<Transaction> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
-        self.sign_and_submit_transaction(prepared).await
+
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Function to prepare the transaction for
@@ -86,7 +90,7 @@ impl Account {
             ),
         };
 
-        self.prepare_transaction(vec![new_output], tx_options).await
+        self.prepare_transaction([new_output], tx_options).await
     }
 
     /// Reduces an account's "voting power" by a given amount.
@@ -100,7 +104,8 @@ impl Account {
     /// increases voting power then decreases immediately after).
     pub async fn decrease_voting_power(&self, amount: u64) -> Result<Transaction> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
-        self.sign_and_submit_transaction(prepared).await
+
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Function to prepare the transaction for
@@ -132,7 +137,7 @@ impl Account {
         };
 
         self.prepare_transaction(
-            vec![new_output],
+            [new_output],
             Some(TransactionOptions {
                 // Use the previous voting output and additionally others for possible additional required amount for
                 // the remainder to reach the minimum required storage deposit.
@@ -164,7 +169,7 @@ impl Account {
             participation_bytes
         } else {
             // TODO participation bytes are incorrect, should we really just ignore?
-            vec![]
+            Vec::new()
         };
 
         Ok((

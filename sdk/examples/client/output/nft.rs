@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     // create new nft output
     //////////////////////////////////
 
-    let outputs = vec![
+    let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(address))
@@ -84,7 +84,7 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(bech32_nft_address)])
+        .basic_output_ids([QueryParameter::Address(bech32_nft_address)])
         .await?;
     let output_with_meta = client.get_output(&output_ids_response.items[0]).await?;
 
@@ -93,7 +93,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(&secret_manager)
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
-        .with_outputs(vec![
+        .with_outputs([
             NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output().amount(), nft_id)
                 .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
                 .finish_output(token_supply)?,
@@ -114,11 +114,9 @@ async fn main() -> Result<()> {
 
     let nft_output_id = get_nft_output_id(block.payload().unwrap())?;
     let output_with_meta = client.get_output(&nft_output_id).await?;
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
-            .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
+        .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

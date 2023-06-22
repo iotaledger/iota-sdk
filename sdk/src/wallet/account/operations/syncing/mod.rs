@@ -11,6 +11,7 @@ use std::collections::{HashMap, HashSet};
 
 pub use self::options::SyncOptions;
 use crate::{
+    client::secret::SecretManage,
     types::block::{
         address::{Address, AliasAddress, NftAddress, ToBech32Ext},
         output::{dto::OutputMetadataDto, FoundryId, Output, OutputId},
@@ -18,11 +19,14 @@ use crate::{
     wallet::account::{
         constants::MIN_SYNC_INTERVAL,
         types::{AddressWithUnspentOutputs, OutputData},
-        Account, AccountBalance,
+        Account, Balance,
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
@@ -44,7 +48,7 @@ impl Account {
 
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
+    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
         let options = match options {
             Some(opt) => opt,
             None => self.default_sync_options().await,
@@ -80,12 +84,12 @@ impl Account {
             }
         };
 
-        let account_balance = self.balance().await?;
+        let balance = self.balance().await?;
         // Update last_synced mutex
         let time_now = crate::utils::unix_timestamp_now().as_millis();
         *last_synced = time_now;
         log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
-        Ok(account_balance)
+        Ok(balance)
     }
 
     async fn sync_internal(&self, options: &SyncOptions) -> crate::wallet::Result<()> {
@@ -104,7 +108,7 @@ impl Account {
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
         let spent_or_unsynced_output_metadata_responses = self
             .client()
-            .get_outputs_metadata_ignore_errors(spent_or_not_synced_output_ids.clone())
+            .get_outputs_metadata_ignore_errors(&spent_or_not_synced_output_ids)
             .await?;
 
         // Add the output response to the output ids, the output response is optional, because an output could be

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { HexEncodedAmount } from '@iota/types';
+import type { HexEncodedAmount } from '../utils';
 
 /** A DTO for [`Burn`] */
 export interface Burn {

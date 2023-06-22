@@ -110,12 +110,12 @@ fn dto_roundtrip() {
     let ed25519_address = Ed25519Address::from_str(ED25519_ADDRESS).unwrap();
     let ed25519_dto = Ed25519AddressDto::from(&ed25519_address);
 
-    assert_eq!(Ed25519Address::try_from(&ed25519_dto).unwrap(), ed25519_address);
+    assert_eq!(Ed25519Address::try_from(ed25519_dto).unwrap(), ed25519_address);
 
     let address = Address::from(ed25519_address);
     let dto = AddressDto::from(&address);
 
-    assert_eq!(Address::try_from(&dto).unwrap(), address);
+    assert_eq!(Address::try_from(dto).unwrap(), address);
 }
 
 #[test]
@@ -126,7 +126,7 @@ fn dto_invalid_pub_key_hash() {
     };
 
     assert!(matches!(
-        Ed25519Address::try_from(&dto),
+        Ed25519Address::try_from(dto),
         Err(Error::InvalidField("pubKeyHash"))
     ));
 }

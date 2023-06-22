@@ -1,4 +1,6 @@
-import type { HexEncodedAmount } from '@iota/types';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
@@ -11,24 +13,23 @@ import type {
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-} from '../buildOutputData';
-import type { INode, IPreparedTransactionData } from '../../client';
-import type { OutputParams } from '../outputParams';
+} from '../build-output-data';
+import type { Burn, INode, PreparedTransactionData } from '../../client';
+import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
-import type { SignedTransactionEssence } from '../signedTransactionEssence';
+import type { SignedTransactionEssence } from '../signed-transaction-essence';
 import type {
     AliasOutputParams,
     MintNativeTokenParams,
     TransactionOptions,
     MintNftParams,
-} from '../transactionOptions';
+} from '../transaction-options';
 import type {
     ParticipationEventId,
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Output } from '../../';
-import { Burn } from '../burn';
+import { HexEncodedAmount, Output } from '../../';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -130,8 +131,8 @@ export type __GetFoundryOutputMethod__ = {
     };
 };
 
-export type __GetOutputsWithAdditionalUnlockConditionsMethod__ = {
-    name: 'getOutputsWithAdditionalUnlockConditions';
+export type __ClaimableOutputsMethod__ = {
+    name: 'claimableOutputs';
     data: {
         outputsToClaim: OutputsToClaim;
     };
@@ -299,14 +300,14 @@ export type __SetDefaultSyncOptionsMethod__ = {
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 };
 
 export type __SignAndSubmitTransactionMethod__ = {
     name: 'signAndSubmitTransaction';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 };
 

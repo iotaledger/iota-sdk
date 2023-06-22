@@ -3,7 +3,10 @@
 
 //! In this example we will build outputs with all possible unlock conditions.
 //!
-//! `cargo run --release --example output_unlock_conditions`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example output_unlock_conditions
+//! ```
 
 use iota_sdk::{
     client::{Client, Result},
@@ -46,7 +49,7 @@ async fn main() -> Result<()> {
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
-    let outputs = vec![
+    let outputs = [
         //// most simple output
         basic_output_builder.clone().finish_output(token_supply)?,
         // with storage deposit return unlock condition

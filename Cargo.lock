@@ -81,24 +81,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e999941b234f3131b00bc13c22d06e8c5ff726d1b6318ac7eb276997bbb4fef0"
 
 [[package]]
-name = "android_log-sys"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27f0fc03f560e1aebde41c2398b691cb98b5ea5996a6184a7a67bbbb77448969"
-
-[[package]]
-name = "android_logger"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fa490e751f3878eb9accb9f18988eca52c2337ce000a8bf31ef50d4c723ca9e"
-dependencies = [
- "android_log-sys",
- "env_logger",
- "log",
- "once_cell",
-]
-
-[[package]]
 name = "anstream"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -152,6 +134,12 @@ name = "anyhow"
 version = "1.0.71"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c7d0618f0e0b7e8ff11427422b64564d5fb0be1940354bfe2e0529b18a9d9b8"
+
+[[package]]
+name = "anymap"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33954243bd79057c2de7338850b85983a44588021f8a5fee574a8888c6de4344"
 
 [[package]]
 name = "arrayref"
@@ -424,12 +412,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cesu8"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c"
-
-[[package]]
 name = "cexpr"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -588,16 +570,6 @@ dependencies = [
  "atty",
  "lazy_static",
  "winapi",
-]
-
-[[package]]
-name = "combine"
-version = "4.6.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35ed6e9d84f0b51a7f52daf1c7d71dd136fd7a3f41a8462b8cdb8c78d920fad4"
-dependencies = [
- "bytes",
- "memchr",
 ]
 
 [[package]]
@@ -989,15 +961,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
-dependencies = [
- "log",
 ]
 
 [[package]]
@@ -1631,8 +1594,9 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
+ "anymap",
  "async-trait",
  "backtrace",
  "bech32 0.9.1",
@@ -1647,6 +1611,7 @@ dependencies = [
  "gloo-storage",
  "gloo-timers",
  "hashbrown 0.13.2",
+ "heck",
  "hex",
  "instant",
  "iota-crypto",
@@ -1741,21 +1706,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iota-wallet-java"
-version = "0.1.0"
-dependencies = [
- "android_logger",
- "futures",
- "iota-sdk",
- "jni",
- "lazy_static",
- "log",
- "once_cell",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "iota-wallet-nodejs"
 version = "0.2.0"
 dependencies = [
@@ -1769,21 +1719,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "iota-wallet-swift"
-version = "0.1.0"
-dependencies = [
- "futures",
- "iota-sdk",
- "once_cell",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "iota_stronghold"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "bincode",
  "hkdf",
@@ -1826,28 +1764,6 @@ name = "itoa"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
-
-[[package]]
-name = "jni"
-version = "0.21.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a87aa2bb7d2af34197c04845522473242e1aa17c12f4935d5856491a7fb8c97"
-dependencies = [
- "cesu8",
- "cfg-if",
- "combine",
- "jni-sys",
- "log",
- "thiserror",
- "walkdir",
- "windows-sys 0.45.0",
-]
-
-[[package]]
-name = "jni-sys"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
 [[package]]
 name = "jobserver"
@@ -2378,12 +2294,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26072860ba924cbfa98ea39c8c19b4dd6a4a25423dbdf219c1eca91aa0cf6964"
 
 [[package]]
-name = "pollster"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5da3b0203fd7ee5720aa0b5e790b591aa5d3f41c3ed2c34a3a393382198af2f7"
-
-[[package]]
 name = "poly1305"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2710,9 +2620,9 @@ dependencies = [
 
 [[package]]
 name = "rumqttc"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b616bf8b706c2a6235604f5d93f9578c37d0c6161e13898b68a1da4af2d812c"
+checksum = "04483567c64bb8a9d64364a0a9437215a056a2b886140fd66e62a12394cf5998"
 dependencies = [
  "async-tungstenite",
  "bytes",
@@ -2720,7 +2630,6 @@ dependencies = [
  "futures",
  "http",
  "log",
- "pollster",
  "rustls-native-certs",
  "rustls-pemfile",
  "thiserror",
@@ -3158,7 +3067,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3168,7 +3077,7 @@ dependencies = [
 [[package]]
 name = "stronghold-runtime"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "dirs",
  "iota-crypto",
@@ -3186,7 +3095,7 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -3195,7 +3104,7 @@ dependencies = [
 [[package]]
 name = "stronghold_engine"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "anyhow",
  "dirs-next",

@@ -11,7 +11,7 @@ use iota_sdk::{
             PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
@@ -36,7 +36,7 @@ use crate::client::{
 
 #[tokio::test]
 async fn sign_alias_state_transition() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -58,7 +58,7 @@ async fn sign_alias_state_transition() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let alias_id = AliasId::from_str(ALIAS_ID_1)?;
 
-    let inputs = build_inputs(vec![Alias(
+    let inputs = build_inputs([Alias(
         1_000_000,
         alias_id,
         0,
@@ -70,7 +70,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
-    let outputs = build_outputs(vec![Alias(
+    let outputs = build_outputs([Alias(
         1_000_000,
         alias_id,
         1,
@@ -91,7 +91,7 @@ async fn sign_alias_state_transition() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,
@@ -127,7 +127,7 @@ async fn sign_alias_state_transition() -> Result<()> {
 
 #[tokio::test]
 async fn sign_alias_governance_transition() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -149,7 +149,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let alias_id = AliasId::from_str(ALIAS_ID_1)?;
 
-    let inputs = build_inputs(vec![Alias(
+    let inputs = build_inputs([Alias(
         1_000_000,
         alias_id,
         0,
@@ -161,7 +161,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
     )]);
 
-    let outputs = build_outputs(vec![Alias(
+    let outputs = build_outputs([Alias(
         1_000_000,
         alias_id,
         0,
@@ -182,7 +182,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,
@@ -218,7 +218,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
 
 #[tokio::test]
 async fn alias_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -241,7 +241,7 @@ async fn alias_reference_unlocks() -> Result<()> {
     let alias_id = AliasId::from_str(ALIAS_ID_1)?;
     let alias_bech32_address = &Address::Alias(AliasAddress::new(alias_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Alias(
             1_000_000,
             alias_id,
@@ -275,7 +275,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
     ]);
 
-    let outputs = build_outputs(vec![
+    let outputs = build_outputs([
         Alias(
             1_000_000,
             alias_id,
@@ -308,7 +308,7 @@ async fn alias_reference_unlocks() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,

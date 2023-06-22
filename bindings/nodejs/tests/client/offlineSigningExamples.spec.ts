@@ -1,16 +1,24 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { describe, it } from '@jest/globals';
+import 'reflect-metadata';
+import 'dotenv/config';
+
 import {
     Client,
-    IPreparedTransactionData,
+    Payload,
+    PreparedTransactionData,
+    RegularTransactionEssence,
     SecretManager,
     SHIMMER_TESTNET_BECH32_HRP,
+    TransactionPayload,
     Utils
 } from '../../';
 import '../customMatchers';
-import 'dotenv/config';
 import { addresses } from '../fixtures/addresses';
 import * as signedTransactionJson from '../fixtures/signedTransaction.json';
 import * as sigUnlockPreparedTx from '../fixtures/sigUnlockPreparedTx.json';
-import type { PayloadTypes } from '@iota/types';
 
 const onlineClient = new Client({
     nodes: [
@@ -30,7 +38,7 @@ const secretManager = {
 
 describe('Offline signing examples', () => {
     it('generates addresses offline', async () => {
-        const addresses = await offlineClient.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -60,7 +68,7 @@ describe('Offline signing examples', () => {
             },
         );
 
-        expect(preparedTransaction.essence.type).toBe(1);
+        expect(preparedTransaction.essence).toBeInstanceOf(RegularTransactionEssence);
 
         const signedTransaction = await offlineClient.signTransaction(
             secretManager,
@@ -68,7 +76,7 @@ describe('Offline signing examples', () => {
             preparedTransaction,
         );
 
-        expect(signedTransaction.type).toBe(6);
+        expect(signedTransaction).toBeInstanceOf(TransactionPayload);
     });
 
     // transaction tests disabled for workflows, because they fail if we don't have funds
@@ -76,7 +84,7 @@ describe('Offline signing examples', () => {
         // Send block with the signed transaction as a payload
         const blockIdAndBlock = await onlineClient.postBlockPayload(
             // Imported JSON is typed with literal types
-            signedTransactionJson as unknown as PayloadTypes,
+            signedTransactionJson as unknown as Payload,
         );
 
         expect(blockIdAndBlock[1].payload).toBeDefined();
@@ -92,7 +100,7 @@ describe('Offline signing examples', () => {
             mnemonic:
                 'good reason pipe keen price glory mystery illegal loud isolate wolf trash raise guilt inflict guide modify bachelor length galaxy lottery there mango comfort',
         };
-        const preparedTx = sigUnlockPreparedTx as IPreparedTransactionData;
+        const preparedTx = sigUnlockPreparedTx as any as PreparedTransactionData;
         const txEssenceHash = Utils.hashTransactionEssence(
             preparedTx.essence,
         );

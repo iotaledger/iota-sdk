@@ -15,10 +15,13 @@ import type {
     __DeregisterParticipationEventMethod__,
     __GenerateEd25519AddressesMethod__,
     __GenerateEvmAddressesMethod__,
+    __VerifyEd25519SignatureMethod__,
+    __VerifySecp256k1EcdsaSignatureMethod__,
+    __SignSecp256k1EcdsaMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
-    __GetOutputsWithAdditionalUnlockConditionsMethod__,
+    __ClaimableOutputsMethod__,
     __GetTransactionMethod__,
     __AddressesMethod__,
     __AddressesWithUnspentOutputsMethod__,
@@ -102,11 +105,14 @@ export type __AccountMethod__ =
     | __DestroyFoundryMethod__
     | __GenerateEd25519AddressesMethod__
     | __GenerateEvmAddressesMethod__
+    | __VerifyEd25519SignatureMethod__
+    | __VerifySecp256k1EcdsaSignatureMethod__
+    | __SignSecp256k1EcdsaMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
     | __GetFoundryOutputMethod__
-    | __GetOutputsWithAdditionalUnlockConditionsMethod__
+    | __ClaimableOutputsMethod__
     | __GetParticipationEventMethod__
     | __GetParticipationEventIdsMethod__
     | __GetParticipationEventsMethod__

@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     // address of the owner of the NFT
     let nft_output_builder = NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address));
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .clone()
             .with_state_index(0)
@@ -110,7 +110,7 @@ async fn main() -> Result<()> {
     let foundry_output_builder = FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .clone()
             .with_amount(1_000_000)
@@ -153,7 +153,7 @@ async fn main() -> Result<()> {
     let basic_output_builder =
         BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .with_amount(1_000_000)
             .with_alias_id(alias_id)
@@ -198,7 +198,7 @@ async fn main() -> Result<()> {
 
     // get additional input for the new basic output without extra unlock conditions
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(address.to_bech32(client.get_bech32_hrp().await?)),
             QueryParameter::HasStorageDepositReturn(false),
             QueryParameter::HasTimelock(false),

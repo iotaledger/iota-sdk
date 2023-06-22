@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
         .add_feature(SenderFeature::new(address))
-        .with_state_metadata(vec![1, 2, 3])
+        .with_state_metadata([1, 2, 3])
         .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
@@ -82,7 +82,7 @@ async fn main() -> Result<()> {
     let alias_0_address = Address::Alias(AliasAddress::new(alias_id_0));
     let alias_1_address = Address::Alias(AliasAddress::new(alias_id_1));
 
-    let outputs = vec![
+    let outputs = [
         // make second alias output be controlled by the first one
         alias_output_builder
             .clone()
@@ -118,16 +118,14 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create third transaction with the third alias output updated
     //////////////////////////////////
-    let outputs = vec![
-        alias_output_builder
-            .clone()
-            .with_alias_id(alias_id_2)
-            .with_state_index(1)
-            .with_state_metadata(vec![3, 2, 1])
-            .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
-            .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [alias_output_builder
+        .clone()
+        .with_alias_id(alias_id_2)
+        .with_state_index(1)
+        .with_state_metadata([3, 2, 1])
+        .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
+        .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
+        .finish_output(token_supply)?];
 
     let block_3 = client
         .block()
@@ -144,15 +142,13 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create fourth transaction with the third alias output updated again
     //////////////////////////////////
-    let outputs = vec![
-        alias_output_builder
-            .with_alias_id(alias_id_2)
-            .with_state_index(2)
-            .with_state_metadata(vec![2, 1, 3])
-            .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
-            .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [alias_output_builder
+        .with_alias_id(alias_id_2)
+        .with_state_index(2)
+        .with_state_metadata([2, 1, 3])
+        .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
+        .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
+        .finish_output(token_supply)?];
 
     let block_3 = client
         .block()

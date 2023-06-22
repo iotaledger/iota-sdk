@@ -15,12 +15,9 @@ use iota_sdk::{
     },
     types::{
         api::{
-            core::{
-                dto::{PeerDto, ReceiptDto},
-                response::{
-                    BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, TreasuryResponse,
-                    UtxoChangesResponse as MilestoneUTXOChanges,
-                },
+            core::response::{
+                BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
+                ReceiptResponse, TreasuryResponse, UtxoChangesResponse as MilestoneUTXOChanges,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -33,6 +30,7 @@ use iota_sdk::{
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
+                milestone::MilestoneId,
                 transaction::TransactionId,
             },
             protocol::dto::ProtocolParametersDto,
@@ -43,7 +41,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, OutputDataDto, TransactionDto},
+            types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
             PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -64,9 +62,8 @@ use crate::{error::Error, OmittedDebug};
 #[derivative(Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum Response {
-    // Client responses
     /// Response for:
-    /// - [`GenerateEd25519Addresses`](crate::method::ClientMethod::GenerateEd25519Addresses)
+    /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
     GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GenerateEvmAddresses`](crate::method::SecretManagerMethod::GenerateEvmAddresses)
@@ -105,6 +102,10 @@ pub enum Response {
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
+    /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
+    #[serde(rename_all = "camelCase")]
+    Secp256k1EcdsaSignature { public_key: String, signature: String },
+    /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),
@@ -116,7 +117,7 @@ pub enum Response {
     Info(NodeInfoWrapper),
     /// Response for:
     /// - [`GetPeers`](crate::method::ClientMethod::GetPeers)
-    Peers(Vec<PeerDto>),
+    Peers(Vec<PeerResponse>),
     /// Response for:
     /// - [`GetTips`](crate::method::ClientMethod::GetTips)
     Tips(Vec<BlockId>),
@@ -161,7 +162,7 @@ pub enum Response {
     /// Response for:
     /// - [`GetReceipts`](crate::method::ClientMethod::GetReceipts)
     /// - [`GetReceiptsMigratedAt`](crate::method::ClientMethod::GetReceiptsMigratedAt)
-    Receipts(Vec<ReceiptDto>),
+    Receipts(Vec<ReceiptResponse>),
     /// Response for:
     /// - [`GetTreasury`](crate::method::ClientMethod::GetTreasury)
     Treasury(TreasuryResponse),
@@ -205,6 +206,9 @@ pub enum Response {
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
+    /// Response for:
+    /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
+    MilestoneId(MilestoneId),
     /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
@@ -261,9 +265,10 @@ pub enum Response {
     /// Response for
     /// - [`GetLocalPow`](crate::method::ClientMethod::GetLocalPow)
     /// - [`GetFallbackToLocalPow`](crate::method::ClientMethod::GetFallbackToLocalPow)
-    /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
     /// - [`IsAddressValid`](crate::method::UtilsMethod::IsAddressValid)
+    /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
+    /// - [`VerifySecp256k1EcdsaSignature`](crate::method::UtilsMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// Response for
     /// - [`Backup`](crate::method::WalletMethod::Backup),
@@ -305,7 +310,7 @@ pub enum Response {
     /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for
-    /// - [`GetOutputsWithAdditionalUnlockConditions`](crate::method::AccountMethod::GetOutputsWithAdditionalUnlockConditions)
+    /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::method::AccountMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
@@ -350,7 +355,7 @@ pub enum Response {
     /// Response for
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
-    Balance(AccountBalanceDto),
+    Balance(Balance),
     /// Response for
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)

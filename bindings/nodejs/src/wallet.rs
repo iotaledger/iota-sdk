@@ -14,7 +14,7 @@ use iota_sdk_bindings_core::{
 use neon::prelude::*;
 use tokio::sync::RwLock;
 
-use crate::client::ClientMethodHandler;
+use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
 
 // Wrapper so we can destroy the WalletMethodHandler
 pub type WalletMethodHandlerWrapperInner = Arc<RwLock<Option<WalletMethodHandler>>>;
@@ -34,7 +34,7 @@ impl WalletMethodHandler {
         let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
 
         let wallet = crate::RUNTIME
-            .block_on(async move { wallet_options.build_manager().await })
+            .block_on(async move { wallet_options.build().await })
             .expect("error initializing wallet");
 
         Ok(Self { channel, wallet })
@@ -73,7 +73,7 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callba
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
         let this = cx.undefined();
-        let args = vec![
+        let args = [
             cx.undefined().upcast::<JsValue>(),
             cx.string(serde_json::to_string(&event_data).unwrap())
                 .upcast::<JsValue>(),
@@ -109,7 +109,7 @@ pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 let cb = callback.into_inner(&mut cx);
                 let this = cx.undefined();
 
-                let args = vec![
+                let args = [
                     if is_error {
                         cx.string(response.clone()).upcast::<JsValue>()
                     } else {
@@ -141,11 +141,11 @@ pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut event_types = vec![];
+    let mut event_types = Vec::with_capacity(vec.len());
     for event_string in vec {
-        let event_type = event_string.downcast_or_throw::<JsString, FunctionContext>(&mut cx)?;
+        let event_type = event_string.downcast_or_throw::<JsNumber, FunctionContext>(&mut cx)?;
         let wallet_event_type =
-            WalletEventType::try_from(event_type.value(&mut cx).as_str()).or_else(|e| cx.throw_error(e))?;
+            WalletEventType::try_from(event_type.value(&mut cx) as u8).or_else(|e| cx.throw_error(e))?;
         event_types.push(wallet_event_type);
     }
 
@@ -190,6 +190,31 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
             let client_method_handler =
                 ClientMethodHandler::new_with_client(channel.clone(), method_handler.wallet.client().clone());
             deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_method_handler)));
+        } else {
+            deferred.settle_with(&channel, move |mut cx| {
+                cx.error(
+                    serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            });
+        }
+    });
+
+    Ok(promise)
+}
+
+pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsPromise> {
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let channel = cx.channel();
+
+    let (deferred, promise) = cx.promise();
+    crate::RUNTIME.spawn(async move {
+        if let Some(method_handler) = &*method_handler.read().await {
+            let secret_manager_method_handler = SecretManagerMethodHandler::new_with_secret_manager(
+                channel.clone(),
+                method_handler.wallet.get_secret_manager().clone(),
+            );
+            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(secret_manager_method_handler)));
         } else {
             deferred.settle_with(&channel, move |mut cx| {
                 cx.error(

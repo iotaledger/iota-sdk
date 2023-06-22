@@ -3,7 +3,7 @@
 
 //! In this example we will get the outputs of the first address of the seed and send everything.
 //! Run the consolidation example first if there are more than 128 outputs.
-//! 
+//!
 //! `cargo run --example send_all --release`
 
 use iota_sdk::client::{
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
         .finish()?;
 
     let secret_manager_1 =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let secret_manager_2 =
         SecretManager::try_from_hex_seed(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_2").unwrap())?;
 
@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(
                 client
                     .get_addresses(&secret_manager_1)
@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
     let block = client
         .block()
         .with_secret_manager(&secret_manager_1)
-        .with_outputs(vec![new_output])?
+        .with_outputs([new_output])?
         .finish()
         .await?;
 

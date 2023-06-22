@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     let basic_output_builder =
         BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         // most simple output
         basic_output_builder.clone().finish_output(token_supply)?,
         // with metadata feature block

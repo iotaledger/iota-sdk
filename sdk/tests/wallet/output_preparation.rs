@@ -503,14 +503,13 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let addresses = accounts[0].addresses().await?;
     let address = addresses[0].address();
 
-    let nft_options = vec![MintNftParams {
-        address: Some(*address),
-        sender: Some(*address),
-        metadata: Some(b"some nft metadata".to_vec()),
-        tag: Some(b"some nft tag".to_vec()),
-        issuer: Some(*address),
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-    }];
+    let nft_options = [MintNftParams::new()
+        .with_address(*address)
+        .with_sender(*address)
+        .with_metadata(b"some nft metadata".to_vec())
+        .with_tag(b"some nft tag".to_vec())
+        .with_issuer(*address)
+        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
     let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
     accounts[0]

@@ -14,5 +14,7 @@ from .types.common import *
 from .types.feature import *
 from .types.native_token import *
 from .types.output_id import *
+from .types.payload import *
 from .types.token_scheme import *
+from .types.transaction_options import *
 from .types.unlock_condition import *

@@ -1,15 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashMap, path::Path, sync::Arc};
+use std::{path::Path, sync::Arc};
 
-use rocksdb::{DBCompressionType, Options, WriteBatch, DB};
+use rocksdb::{DBCompressionType, Options, DB};
 use tokio::sync::Mutex;
 
-use super::StorageAdapter;
-
-/// The storage id.
-pub const STORAGE_ID: &str = "RocksDB";
+use crate::client::storage::StorageAdapter;
 
 /// Key value storage adapter.
 #[derive(Debug)]
@@ -33,39 +30,19 @@ impl RocksdbStorageAdapter {
 
 #[async_trait::async_trait]
 impl StorageAdapter for RocksdbStorageAdapter {
-    fn id(&self) -> &'static str {
-        STORAGE_ID
+    type Error = crate::wallet::Error;
+
+    async fn get_bytes(&self, key: &str) -> crate::wallet::Result<Option<Vec<u8>>> {
+        Ok(self.db.lock().await.get(key)?)
     }
 
-    /// Gets the record associated with the given key from the storage.
-    async fn get(&self, key: &str) -> crate::wallet::Result<Option<String>> {
-        Ok(self
-            .db
-            .lock()
-            .await
-            .get(key.as_bytes())?
-            .map(|r| String::from_utf8_lossy(&r).to_string()))
-    }
-
-    /// Saves or updates a record on the storage.
-    async fn set(&self, key: &str, record: String) -> crate::wallet::Result<()> {
-        self.db.lock().await.put(key.as_bytes(), record.as_bytes())?;
+    async fn set_bytes(&self, key: &str, record: &[u8]) -> crate::wallet::Result<()> {
+        self.db.lock().await.put(key, record)?;
         Ok(())
     }
 
-    /// Batch writes records to the storage.
-    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
-        let mut batch = WriteBatch::default();
-        for (key, value) in records {
-            batch.put(key.as_bytes(), value.as_bytes());
-        }
-        self.db.lock().await.write(batch)?;
-        Ok(())
-    }
-
-    /// Removes a record from the storage.
-    async fn remove(&self, key: &str) -> crate::wallet::Result<()> {
-        self.db.lock().await.delete(key.as_bytes())?;
+    async fn delete(&self, key: &str) -> crate::wallet::Result<()> {
+        self.db.lock().await.delete(key)?;
         Ok(())
     }
 }

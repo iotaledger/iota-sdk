@@ -1,53 +1,61 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send a transaction.
-//! Rename `.env.example` to `.env` first.
+//! In this example we will issue a simple base coin transaction.
 //!
-//! `cargo run --release --all-features --example simple_transaction`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_account` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example simple_transaction
+//! ```
+
+use std::env::var;
 
 use iota_sdk::{
-    types::block::address::Bech32Address,
-    wallet::{Result, SendAmountParams, Wallet},
+    wallet::{Result, SendAmountParams},
+    Wallet,
 };
+
+// The base coin amount to send
+const SEND_AMOUNT: u64 = 1_000_000;
+// The address to send the coins to
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
-
-    // Get the account we generated with `01_create_wallet`
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     let account = wallet.get_account("Alice").await?;
+
     // May want to ensure the account is synced before sending a transaction.
-    let balance = wallet.sync(None).await?;
+    let _ = wallet.sync(None).await?;
 
-    if balance.base_coin().available() >= 1_000_000 {
-        // Set the stronghold password
-        wallet
-            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-            .await?;
+    // Set the stronghold password
+    wallet
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .await?;
 
-        // Send a transaction with 1 Mi
-        let outputs = vec![SendAmountParams::new(
-            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-            1_000_000,
-        )];
-        let transaction = account.send_amount(outputs, None).await?;
+    println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
+    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let transaction = account.send_amount(outputs, None).await?;
 
-        // Wait for transaction to get included
-        let block_id = account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
-            .await?;
+    // Wait for transaction to get included
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
 
-        println!(
-            "Block sent: {}/block/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
-            block_id
-        );
-    }
+    println!(
+        "Transaction included: {}/block/{}",
+        var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     Ok(())
 }

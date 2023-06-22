@@ -3,7 +3,10 @@
 
 //! In this example we will build NFT outputs with all possible features.
 //!
-//! `cargo run --release --example output_features`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example output_features
+//! ```
 
 use iota_sdk::{
     client::{Client, Result},
@@ -36,7 +39,7 @@ async fn main() -> Result<()> {
     let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         // with sender feature
         nft_output_builder
             .clone()

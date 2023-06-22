@@ -14,7 +14,7 @@ use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
-pub struct AccountBalance {
+pub struct Balance {
     /// Total and available amount of the base coin
     pub(crate) base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
@@ -34,7 +34,7 @@ pub struct AccountBalance {
     pub(crate) potentially_locked_outputs: HashMap<OutputId, bool>,
 }
 
-impl std::ops::AddAssign for AccountBalance {
+impl std::ops::AddAssign for Balance {
     fn add_assign(&mut self, rhs: Self) {
         self.base_coin += rhs.base_coin;
         self.required_storage_deposit += rhs.required_storage_deposit;
@@ -57,49 +57,7 @@ impl std::ops::AddAssign for AccountBalance {
     }
 }
 
-/// Dto for the balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
-/// [`crate::wallet::account::Account::balance()`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AccountBalanceDto {
-    /// Total and available amount of the base coin
-    pub base_coin: BaseCoinBalance,
-    /// Current required storage deposit amount
-    pub required_storage_deposit: RequiredStorageDeposit,
-    /// Native tokens
-    pub native_tokens: Vec<NativeTokensBalanceDto>,
-    /// Nfts
-    pub nfts: Vec<NftId>,
-    /// Aliases
-    pub aliases: Vec<AliasId>,
-    /// Foundries
-    pub foundries: Vec<FoundryId>,
-    /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
-    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
-    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
-    /// can change at any time
-    pub potentially_locked_outputs: HashMap<OutputId, bool>,
-}
-
-impl From<&AccountBalance> for AccountBalanceDto {
-    fn from(value: &AccountBalance) -> Self {
-        Self {
-            base_coin: value.base_coin.clone(),
-            required_storage_deposit: value.required_storage_deposit.clone(),
-            native_tokens: value
-                .native_tokens
-                .iter()
-                .map(NativeTokensBalanceDto::from)
-                .collect::<_>(),
-            nfts: value.nfts.clone(),
-            aliases: value.aliases.clone(),
-            foundries: value.foundries.clone(),
-            potentially_locked_outputs: value.potentially_locked_outputs.clone(),
-        }
-    }
-}
-
-/// Base coin fields for [`AccountBalance`]
+/// Base coin fields for [`Balance`]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
 #[serde(rename_all = "camelCase")]
 #[getset(get_copy = "pub")]
@@ -149,72 +107,48 @@ impl std::ops::AddAssign for RequiredStorageDeposit {
     }
 }
 
-/// Native tokens fields for [`AccountBalance`]
+/// Native tokens fields for [`Balance`]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters, CopyGetters)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeTokensBalance {
     /// Token id
     #[getset(get = "pub")]
     pub(crate) token_id: TokenId,
-    /// Token foundry immutable metadata
-    #[getset(get = "pub")]
-    pub(crate) metadata: Option<MetadataFeature>,
     /// Total amount
     #[getset(get_copy = "pub")]
     pub(crate) total: U256,
     /// Balance that can currently be spent
     #[getset(get_copy = "pub")]
     pub(crate) available: U256,
+    /// Token foundry immutable metadata
+    #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub(crate) metadata: Option<MetadataFeature>,
 }
 
 impl Default for NativeTokensBalance {
     fn default() -> Self {
         Self {
             token_id: TokenId::null(),
-            metadata: None,
             total: U256::from(0u8),
             available: U256::from(0u8),
+            metadata: None,
         }
     }
 }
 
 impl std::ops::AddAssign for NativeTokensBalance {
     fn add_assign(&mut self, rhs: Self) {
-        if self.metadata.is_none() {
-            self.metadata = rhs.metadata;
-        }
         self.total += rhs.total;
         self.available += rhs.available;
-    }
-}
-
-/// Base coin fields for [`AccountBalanceDto`]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NativeTokensBalanceDto {
-    /// Token id
-    pub token_id: TokenId,
-    /// Token foundry immutable metadata
-    pub metadata: Option<String>,
-    /// Total amount
-    pub total: U256,
-    /// Balance that can currently be spent
-    pub available: U256,
-}
-
-impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
-    fn from(value: &NativeTokensBalance) -> Self {
-        Self {
-            token_id: value.token_id,
-            metadata: value.metadata.as_ref().map(|m| prefix_hex::encode(m.data())),
-            total: value.total,
-            available: value.available,
+        if self.metadata.is_none() {
+            self.metadata = rhs.metadata;
         }
     }
 }
 
 #[cfg(feature = "rand")]
-impl AccountBalance {
+impl Balance {
     pub fn rand_mock() -> Self {
         use rand::Rng;
 

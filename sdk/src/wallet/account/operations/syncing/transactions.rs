@@ -4,8 +4,9 @@
 use std::str::FromStr;
 
 use crate::{
+    client::secret::SecretManage,
     types::{
-        api::core::dto::LedgerInclusionStateDto,
+        api::core::response::LedgerInclusionState,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
     },
     utils::unix_timestamp_now,
@@ -20,7 +21,10 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Sync transactions and reattach them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
@@ -102,7 +106,7 @@ impl Account {
                     Ok(metadata) => {
                         if let Some(inclusion_state) = metadata.ledger_inclusion_state {
                             match inclusion_state {
-                                LedgerInclusionStateDto::Included => {
+                                LedgerInclusionState::Included => {
                                     log::debug!(
                                         "[SYNC] confirmed transaction {transaction_id} in block {}",
                                         metadata.block_id
@@ -116,7 +120,7 @@ impl Account {
                                         &mut spent_output_ids,
                                     );
                                 }
-                                LedgerInclusionStateDto::Conflicting => {
+                                LedgerInclusionState::Conflicting => {
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
                                     if let Ok(included_block) =
@@ -142,7 +146,7 @@ impl Account {
                                         );
                                     }
                                 }
-                                LedgerInclusionStateDto::NoTransaction => {
+                                LedgerInclusionState::NoTransaction => {
                                     unreachable!(
                                         "We should only get the metadata for blocks with a transaction payload"
                                     )

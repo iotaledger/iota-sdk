@@ -3,57 +3,59 @@
 
 //! In this example we will get inputs and prepare a transaction.
 //!
-//! `cargo run --example 1_prepare_transaction --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example 1_prepare_transaction
+//! ```
 
-use std::{
-    fs::File,
-    io::{BufWriter, Read, Write},
-    path::Path,
-};
+use std::env::var;
 
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
         constants::SHIMMER_COIN_TYPE,
-        secret::{placeholder::PlaceholderSecretManager, SecretManager},
+        secret::SecretManager,
     },
-    types::block::address::Bech32Address,
     wallet::{account::types::AccountAddress, ClientOptions, Result, SendAmountParams, Wallet},
 };
+use tokio::{
+    fs::File,
+    io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
+};
 
-const ADDRESS_FILE_NAME: &str = "examples/wallet/offline_signing/addresses.json";
-const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/prepared_transaction.json";
+const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
+const ADDRESSES_FILE_PATH: &str = "./examples/wallet/offline_signing/example.addresses.json";
+const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
+// Address to which we want to send the amount.
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+// The amount to send.
+const SEND_AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = vec![SendAmountParams::new(
-        // Address to which we want to send the amount.
-        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-        // The amount to send.
-        1_000_000,
-    )];
+    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
 
     // Recovers addresses from example `0_address_generation`.
-    let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;
+    let addresses = read_addresses_from_file().await?;
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
 
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Placeholder(PlaceholderSecretManager))
+        .with_secret_manager(SecretManager::Placeholder)
+        .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path("examples/wallet/offline_signing/online_walletdb")
         .finish()
         .await?;
 
     // Create a new account
     let account = wallet
         .create_account()
-        .with_alias("Alice".to_string())
+        .with_alias("Alice")
         .with_addresses(addresses)
         .finish()
         .await?;
@@ -65,24 +67,24 @@ async fn main() -> Result<()> {
 
     println!("Prepared transaction sending {outputs:?}");
 
-    write_transaction_to_file(PREPARED_TRANSACTION_FILE_NAME, prepared_transaction)
+    write_transaction_to_file(prepared_transaction).await?;
+
+    Ok(())
 }
 
-fn read_addresses_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<AccountAddress>> {
-    let mut file = File::open(&path)?;
+async fn read_addresses_from_file() -> Result<Vec<AccountAddress>> {
+    let mut file = BufReader::new(File::open(ADDRESSES_FILE_PATH).await?);
     let mut json = String::new();
-    file.read_to_string(&mut json)?;
+    file.read_to_string(&mut json).await?;
 
     Ok(serde_json::from_str(&json)?)
 }
 
-fn write_transaction_to_file<P: AsRef<Path>>(path: P, prepared_transaction: PreparedTransactionData) -> Result<()> {
+async fn write_transaction_to_file(prepared_transaction: PreparedTransactionData) -> Result<()> {
     let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(&prepared_transaction))?;
-    let mut file = BufWriter::new(File::create(path)?);
-
-    println!("{json}");
-
-    file.write_all(json.as_bytes())?;
-
+    let mut file = BufWriter::new(File::create(PREPARED_TRANSACTION_FILE_PATH).await?);
+    println!("example.prepared_transaction.json:\n{json}");
+    file.write_all(json.as_bytes()).await?;
+    file.flush().await?;
     Ok(())
 }

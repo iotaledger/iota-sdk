@@ -78,7 +78,7 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callba
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
         let this = cx.undefined();
-        let args = vec![
+        let args = [
             cx.undefined().upcast::<JsValue>(),
             cx.string(serde_json::to_string(&event_data).unwrap())
                 .upcast::<JsValue>(),
@@ -122,7 +122,7 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 let cb = callback.into_inner(&mut cx);
                 let this = cx.undefined();
 
-                let args = vec![
+                let args = [
                     if is_error {
                         cx.string(response.clone()).upcast::<JsValue>()
                     } else {
@@ -146,11 +146,11 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut event_types = vec![];
+    let mut event_types = Vec::new();
     for event_string in vec {
-        let event_type = event_string.downcast_or_throw::<JsString, FunctionContext>(&mut cx)?;
+        let event_type = event_string.downcast_or_throw::<JsNumber, FunctionContext>(&mut cx)?;
         let wallet_event_type =
-            WalletEventType::try_from(event_type.value(&mut cx).as_str()).or_else(|e| cx.throw_error(e))?;
+            WalletEventType::try_from(event_type.value(&mut cx) as u8).or_else(|e| cx.throw_error(e))?;
         event_types.push(wallet_event_type);
     }
 
@@ -187,7 +187,7 @@ pub fn destroy(mut cx: FunctionContext) -> JsResult<JsPromise> {
 
 pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let current_path = cx.argument::<JsString>(0)?.value(&mut cx);
-    let current_password = cx.argument::<JsString>(1)?.value(&mut cx);
+    let current_password = cx.argument::<JsString>(1)?.value(&mut cx).into();
     let salt = cx.argument::<JsString>(2)?.value(&mut cx);
     let rounds = cx.argument::<JsNumber>(3)?.value(&mut cx);
     let new_path = cx
@@ -199,15 +199,16 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult
         .argument_opt(5)
         .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
         .transpose()?
-        .map(|opt| opt.value(&mut cx));
+        .map(|opt| opt.value(&mut cx))
+        .map(Into::into);
 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
-        &current_password,
-        &salt,
+        current_password,
+        salt,
         rounds as u32,
         new_path.as_ref(),
-        new_password.as_deref(),
+        new_password,
     )
     .or_else(|e| {
         cx.throw_error(

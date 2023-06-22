@@ -5,8 +5,6 @@
 
 use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "stronghold")]
-use zeroize::ZeroizeOnDrop;
 
 use crate::{
     client::Result,
@@ -20,18 +18,29 @@ use crate::{
 };
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StrongholdDto {
     /// The Stronghold password
-    pub password: Option<String>,
+    pub password: Option<crate::client::Password>,
     /// The timeout for auto key clearing, in seconds
     pub timeout: Option<u64>,
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
+
+#[cfg(feature = "stronghold")]
+impl core::fmt::Debug for StrongholdDto {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("StrongholdDto")
+            .field("timeout", &self.timeout)
+            .field("snapshot_path", &self.snapshot_path)
+            .finish()
+    }
+}
+
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -102,8 +111,8 @@ pub enum LedgerDeviceType {
 pub struct LedgerNanoStatus {
     /// Ledger is available and ready to be used.
     pub(crate) connected: bool,
-    /// Ledger is connected and locked.
-    pub(crate) locked: bool,
+    /// Ledger is connected and locked, Some(true/false) for IOTA/Shimmer, None for the rest.
+    pub(crate) locked: Option<bool>,
     /// Ledger blind signing enabled
     pub(crate) blind_signing_enabled: bool,
     /// Ledger opened app.
@@ -119,8 +128,8 @@ impl LedgerNanoStatus {
     pub fn connected(&self) -> bool {
         self.connected
     }
-    /// Ledger is connected and locked.
-    pub fn locked(&self) -> bool {
+    /// Ledger is connected and locked, Some(true/false) for IOTA/Shimmer, None for the rest.
+    pub fn locked(&self) -> Option<bool> {
         self.locked
     }
     /// Ledger blind signing enabled
@@ -174,19 +183,19 @@ pub struct InputSigningDataDto {
 
 #[allow(missing_docs)]
 impl InputSigningData {
-    pub fn try_from_dto(input: &InputSigningDataDto, token_supply: u64) -> Result<Self> {
+    pub fn try_from_dto(input: InputSigningDataDto, token_supply: u64) -> Result<Self> {
         Ok(Self {
-            output: Output::try_from_dto(&input.output, token_supply)?,
-            output_metadata: OutputMetadata::try_from(&input.output_metadata)?,
-            chain: input.chain.clone().map(Chain::from_u32_hardened),
+            output: Output::try_from_dto(input.output, token_supply)?,
+            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
+            chain: input.chain.map(Chain::from_u32_hardened),
         })
     }
 
-    pub fn try_from_dto_unverified(input: &InputSigningDataDto) -> Result<Self> {
+    pub fn try_from_dto_unverified(input: InputSigningDataDto) -> Result<Self> {
         Ok(Self {
-            output: Output::try_from_dto_unverified(&input.output)?,
-            output_metadata: OutputMetadata::try_from(&input.output_metadata)?,
-            chain: input.chain.clone().map(Chain::from_u32_hardened),
+            output: Output::try_from_dto_unverified(input.output)?,
+            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
+            chain: input.chain.map(Chain::from_u32_hardened),
         })
     }
 }

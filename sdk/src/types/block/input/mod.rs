@@ -112,10 +112,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&InputDto> for Input {
+    impl TryFrom<InputDto> for Input {
         type Error = Error;
 
-        fn try_from(value: &InputDto) -> Result<Self, Self::Error> {
+        fn try_from(value: InputDto) -> Result<Self, Self::Error> {
             match value {
                 InputDto::Utxo(u) => Ok(Self::Utxo(u.try_into()?)),
                 InputDto::Treasury(t) => Ok(Self::Treasury(t.try_into()?)),
