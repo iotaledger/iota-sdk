@@ -94,10 +94,14 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
+        #[cfg(feature = "std")]
         let creation_time = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("Time went backwards")
             .as_nanos() as u64;
+        // TODO no_std way to have a nanosecond timestamp
+        #[cfg(not(feature = "std"))]
+        let creation_time = 0;
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
@@ -129,10 +133,14 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
+        #[cfg(feature = "std")]
         let creation_time = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("Time went backwards")
             .as_nanos() as u64;
+        // TODO no_std way to have a nanosecond timestamp
+        #[cfg(not(feature = "std"))]
+        let creation_time = 0;
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
