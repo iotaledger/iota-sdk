@@ -219,7 +219,7 @@ impl ClientInner {
         Ok(BlockId::from_str(&resp.block_id)?)
     }
 
-    /// Finds a block by its BlockId. This method returns the given block object.
+    /// Finds a block by its ID and returns it as object.
     /// GET /api/core/v3/blocks/{BlockId}
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
@@ -237,7 +237,7 @@ impl ClientInner {
         }
     }
 
-    /// Finds a block by its BlockId. This method returns the given block raw data.
+    /// Finds a block by its ID and returns it as raw bytes.
     /// GET /api/core/v3/blocks/{BlockId}
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/blocks/{block_id}");
@@ -263,7 +263,7 @@ impl ClientInner {
 
     // UTXO routes.
 
-    /// Finds an output, as JSON, by its identifier.
+    /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
     pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
         let path = &format!("api/core/v3/outputs/{output_id}");
@@ -282,7 +282,7 @@ impl ClientInner {
         Ok(OutputWithMetadata::new(output, metadata))
     }
 
-    /// Finds an output, as raw bytes, by its identifier.
+    /// Finds an output by its ID and returns it as raw bytes.
     /// GET /api/core/v3/outputs/{outputId}
     pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/outputs/{output_id}");
@@ -294,7 +294,7 @@ impl ClientInner {
             .await
     }
 
-    /// Finds output metadata by output identifier.
+    /// Finds output metadata by output ID.
     /// GET /api/core/v3/outputs/{outputId}/metadata
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
         let path = &format!("api/core/v3/outputs/{output_id}/metadata");
@@ -306,7 +306,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the block, as object, that was included in the ledger for a given TransactionId.
+    /// Returns the block that was included in the ledger for a given transaction ID, as object.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -324,7 +324,7 @@ impl ClientInner {
         }
     }
 
-    /// Returns the block, as raw bytes, that was included in the ledger for a given TransactionId.
+    /// Returns the block that was included in the ledger for a given transaction ID, as object, as raw bytes.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -350,7 +350,7 @@ impl ClientInner {
 
     // Commitments routes.
 
-    /// Gets the slot commitment by the given slot commitment id.
+    /// Finds a slot commitment by its ID and returns it as object.
     /// GET /api/core/v3/commitments/{commitmentId}
     pub async fn get_slot_commitment_by_id(&self, slot_commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
@@ -362,7 +362,7 @@ impl ClientInner {
             .await
     }
 
-    /// Gets the slot commitment, as raw bytes, by the given slot commitment id.
+    /// Finds a slot commitment by its ID and returns it as raw bytes.
     /// GET /api/core/v3/commitments/{commitmentId}
     pub async fn get_slot_commitment_by_id_raw(&self, slot_commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
@@ -374,7 +374,7 @@ impl ClientInner {
             .await
     }
 
-    /// Gets the slot commitment by the given slot index.
+    /// Finds a slot commitment by slot index and returns it as object.
     /// GET /api/core/v3/commitments/by-index/{index}
     pub async fn get_slot_commitment_by_index(&self, slot_index: &SlotIndex) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
@@ -386,7 +386,7 @@ impl ClientInner {
             .await
     }
 
-    /// Gets the slot commitment, as raw bytes, by the given slot index.
+    /// Finds a slot commitment by slot index and returns it as raw bytes.
     /// GET /api/core/v3/commitments/by-index/{index}
     pub async fn get_slot_commitment_by_index_raw(&self, slot_index: &SlotIndex) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");

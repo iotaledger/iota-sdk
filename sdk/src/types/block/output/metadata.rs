@@ -11,9 +11,9 @@ use crate::types::block::{output::OutputId, payload::transaction::TransactionId,
     serde(rename_all = "camelCase")
 )]
 pub struct OutputMetadata {
-    /// The identifier of the block in which the output was included.
+    /// The ID of the block in which the output was included.
     block_id: BlockId,
-    /// The identifier of the output.
+    /// The ID of the output.
     output_id: OutputId,
     /// Whether the output is spent or not.
     is_spent: bool,
@@ -43,17 +43,17 @@ impl OutputMetadata {
         }
     }
 
-    /// Returns the block id of the [`OutputMetadata`].
+    /// Returns the block ID of the [`OutputMetadata`].
     pub fn block_id(&self) -> &BlockId {
         &self.block_id
     }
 
-    /// Returns the output id of the [`OutputMetadata`].
+    /// Returns the output ID of the [`OutputMetadata`].
     pub fn output_id(&self) -> &OutputId {
         &self.output_id
     }
 
-    /// Returns the transaction id of the [`OutputMetadata`].
+    /// Returns the transaction ID of the [`OutputMetadata`].
     pub fn transaction_id(&self) -> &TransactionId {
         self.output_id.transaction_id()
     }
