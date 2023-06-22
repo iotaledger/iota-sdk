@@ -3,8 +3,6 @@
 
 //! Node core API routes.
 
-use std::str::FromStr;
-
 use packable::PackableExt;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -102,17 +100,14 @@ impl ClientInner {
     pub async fn get_tips(&self) -> Result<Vec<BlockId>> {
         let path = "api/core/v2/tips";
 
-        let resp = self
+        let response = self
             .node_manager
             .read()
             .await
             .get_request::<TipsResponse>(path, None, self.get_timeout().await, false, false)
             .await?;
 
-        resp.tips
-            .iter()
-            .map(|tip| BlockId::from_str(tip).map_err(Error::Block))
-            .collect::<Result<Vec<_>>>()
+        Ok(response.tips)
     }
 
     // Blocks routes.
@@ -130,7 +125,7 @@ impl ClientInner {
         let block_dto = BlockDto::from(block);
 
         // fallback to local PoW if remote PoW fails
-        let resp = match self
+        let response = match self
             .node_manager
             .read()
             .await
@@ -169,7 +164,7 @@ impl ClientInner {
             Err(e) => return Err(e),
         };
 
-        Ok(BlockId::from_str(&resp.block_id)?)
+        Ok(response.block_id)
     }
 
     /// Returns the BlockId of the submitted block.
@@ -184,7 +179,7 @@ impl ClientInner {
         };
 
         // fallback to local Pow if remote Pow fails
-        let resp = match self
+        let response = match self
             .node_manager
             .read()
             .await
@@ -221,7 +216,7 @@ impl ClientInner {
             Err(e) => return Err(e),
         };
 
-        Ok(BlockId::from_str(&resp.block_id)?)
+        Ok(response.block_id)
     }
 
     /// Finds a block by its BlockId. This method returns the given block object.
@@ -229,14 +224,14 @@ impl ClientInner {
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
-        let resp = self
+        let response = self
             .node_manager
             .read()
             .await
             .get_request::<BlockResponse>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match resp {
+        match response {
             BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
             BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
         }

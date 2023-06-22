@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::str::FromStr;
-
 use crate::{
     client::secret::SecretManage,
     types::{
@@ -114,7 +112,7 @@ where
                                     confirmed_unknown_output = true;
                                     updated_transaction_and_outputs(
                                         transaction,
-                                        Some(BlockId::from_str(&metadata.block_id)?),
+                                        Some(metadata.block_id),
                                         InclusionState::Confirmed,
                                         &mut updated_transactions,
                                         &mut spent_output_ids,
