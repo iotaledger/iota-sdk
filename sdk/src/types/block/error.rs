@@ -5,6 +5,7 @@ use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
 use crypto::Error as CryptoError;
+// use packable::bounded::BoundedU8;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
@@ -14,7 +15,6 @@ use crate::types::block::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AliasId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
-    parent::ParentCount,
     payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
 };
@@ -59,7 +59,8 @@ pub enum Error {
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
     InvalidOutputKind(u8),
-    InvalidParentCount(<ParentCount as TryFrom<usize>>::Error),
+    // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
+    InvalidParentCount(u8),
     InvalidPayloadKind(u32),
     InvalidPayloadLength { expected: usize, actual: usize },
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),

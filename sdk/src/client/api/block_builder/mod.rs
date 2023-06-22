@@ -22,7 +22,7 @@ use crate::{
         output::{
             dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
         },
-        parent::Parents,
+        parent::StrongParents,
         payload::{Payload, TaggedDataPayload},
         Block, BlockId, ConvertTo,
     },
@@ -42,7 +42,7 @@ pub struct ClientBlockBuilder<'a> {
     custom_remainder_address: Option<Address>,
     tag: Option<Vec<u8>>,
     data: Option<Vec<u8>>,
-    parents: Option<Parents>,
+    strong_parents: Option<StrongParents>,
     burn: Option<Burn>,
 }
 
@@ -83,8 +83,8 @@ pub struct ClientBlockBuilderOptions {
     pub tag: Option<String>,
     /// Hex encoded data
     pub data: Option<String>,
-    /// Parents
-    pub parents: Option<Vec<BlockId>>,
+    /// Strong parents
+    pub strong_parents: Option<Vec<BlockId>>,
     /// Explicit burning of aliases, nfts, foundries and native tokens
     pub burn: Option<Burn>,
 }
@@ -104,7 +104,7 @@ impl<'a> ClientBlockBuilder<'a> {
             custom_remainder_address: None,
             tag: None,
             data: None,
-            parents: None,
+            strong_parents: None,
             burn: None,
         }
     }
@@ -221,9 +221,9 @@ impl<'a> ClientBlockBuilder<'a> {
         self
     }
 
-    /// Set 1-8 custom parent block ids
-    pub fn with_parents(mut self, parent_ids: impl Into<Option<Vec<BlockId>>>) -> Result<Self> {
-        self.parents = parent_ids.into().map(Parents::from_vec).transpose()?;
+    /// Set custom strong parent block ids
+    pub fn with_strong_parents(mut self, strong_parent_ids: impl Into<Option<Vec<BlockId>>>) -> Result<Self> {
+        self.strong_parents = strong_parent_ids.into().map(StrongParents::from_vec).transpose()?;
         Ok(self)
     }
 
@@ -299,8 +299,8 @@ impl<'a> ClientBlockBuilder<'a> {
             self = self.with_data(prefix_hex::decode::<Vec<_>>(data)?);
         }
 
-        if let Some(parents) = options.parents {
-            self = self.with_parents(parents)?;
+        if let Some(strong_parents) = options.strong_parents {
+            self = self.with_strong_parents(strong_parents)?;
         }
         if let Some(burn) = options.burn {
             self = self.with_burn(burn);
@@ -354,9 +354,9 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Builds the final block and posts it to the node
     pub async fn finish_block(self, payload: Option<Payload>) -> Result<Block> {
-        // Do not replace parents with the latest tips if they are set explicitly,
+        // Do not replace strong parents with the latest tips if they are set explicitly,
         // necessary for block promotion.
-        let final_block = self.client.finish_block_builder(self.parents, payload).await?;
+        let final_block = self.client.finish_block_builder(self.strong_parents, payload).await?;
 
         let block_id = self.client.post_block_raw(&final_block).await?;
         // Get block if we use remote PoW, because the node will change parents and nonce

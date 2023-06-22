@@ -9,41 +9,49 @@ use crate::pow::miner::{Miner, MinerBuilder, MinerCancel};
 use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
     client::{ClientInner, Error, Result},
-    types::block::{parent::Parents, payload::Payload, Block, BlockBuilder, Error as BlockError},
+    types::block::{parent::StrongParents, payload::Payload, Block, BlockBuilder, Error as BlockError},
 };
 
 impl ClientInner {
     /// Finishes the block with local PoW if needed.
     /// Without local PoW, it will finish the block with a 0 nonce.
-    pub async fn finish_block_builder(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    pub async fn finish_block_builder(
+        &self,
+        strong_parents: Option<StrongParents>,
+        payload: Option<Payload>,
+    ) -> Result<Block> {
         if self.get_local_pow().await {
-            self.finish_pow(parents, payload).await
+            self.finish_pow(strong_parents, payload).await
         } else {
             // Finish block without doing PoW.
-            let parents = match parents {
-                Some(parents) => parents,
-                None => Parents::from_vec(self.get_tips().await?)?,
+            let strong_parents = match strong_parents {
+                Some(strong_parents) => strong_parents,
+                None => StrongParents::from_vec(self.get_tips().await?)?,
             };
 
-            Ok(BlockBuilder::new(parents).with_payload(payload).finish()?)
+            Ok(BlockBuilder::new(strong_parents).with_payload(payload).finish()?)
         }
     }
 
     /// Calls the appropriate PoW function depending whether the compilation is for wasm or not.
-    pub async fn finish_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    pub async fn finish_pow(&self, strong_parents: Option<StrongParents>, payload: Option<Payload>) -> Result<Block> {
         #[cfg(not(target_family = "wasm"))]
-        let block = self.finish_multi_threaded_pow(parents, payload).await?;
+        let block = self.finish_multi_threaded_pow(strong_parents, payload).await?;
         #[cfg(target_family = "wasm")]
-        let block = self.finish_single_threaded_pow(parents, payload).await?;
+        let block = self.finish_single_threaded_pow(strong_parents, payload).await?;
 
         Ok(block)
     }
 
     /// Performs multi-threaded proof-of-work.
     ///
-    /// Always fetches new tips after each tips interval elapses if no parents are provided.
+    /// Always fetches new tips after each tips interval elapses if no strong parents are provided.
     #[cfg(not(target_family = "wasm"))]
-    async fn finish_multi_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    async fn finish_multi_threaded_pow(
+        &self,
+        strong_parents: Option<StrongParents>,
+        payload: Option<Payload>,
+    ) -> Result<Block> {
         let pow_worker_count = *self.pow_worker_count.read().await;
         let min_pow_score = self.get_min_pow_score().await?;
         let tips_interval = self.get_tips_interval().await;
@@ -52,9 +60,9 @@ impl ClientInner {
             let cancel = MinerCancel::new();
             let cancel_2 = cancel.clone();
             let payload_ = payload.clone();
-            let parents = match &parents {
-                Some(parents) => parents.clone(),
-                None => Parents::from_vec(self.get_tips().await?)?,
+            let strong_parents = match &strong_parents {
+                Some(strong_parents) => strong_parents.clone(),
+                None => StrongParents::from_vec(self.get_tips().await?)?,
             };
             let time_thread = std::thread::spawn(move || Ok(pow_timeout(tips_interval, cancel)));
             let pow_thread = std::thread::spawn(move || {
@@ -62,7 +70,7 @@ impl ClientInner {
                 if let Some(worker_count) = pow_worker_count {
                     client_miner = client_miner.with_num_workers(worker_count);
                 }
-                do_pow(client_miner.finish(), min_pow_score, payload_, parents).map(Some)
+                do_pow(client_miner.finish(), min_pow_score, payload_, strong_parents).map(Some)
             });
 
             for t in [pow_thread, time_thread] {
@@ -84,23 +92,27 @@ impl ClientInner {
     /// Single threaded proof-of-work for Wasm, which cannot generally spawn the native threads used
     /// by the `ClientMiner`.
     ///
-    /// Fetches new tips after each tips interval elapses if no parents are provided.
+    /// Fetches new tips after each tips interval elapses if no strong parents are provided.
     #[cfg(target_family = "wasm")]
-    async fn finish_single_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    async fn finish_single_threaded_pow(
+        &self,
+        strong_parents: Option<StrongParents>,
+        payload: Option<Payload>,
+    ) -> Result<Block> {
         let min_pow_score: u32 = self.get_min_pow_score().await?;
         let tips_interval: u64 = self.get_tips_interval().await;
 
         loop {
-            let parents = match &parents {
-                Some(parents) => parents.clone(),
-                None => Parents::from_vec(self.get_tips().await?)?,
+            let strong_parents = match &strong_parents {
+                Some(strong_parents) => strong_parents.clone(),
+                None => StrongParents::from_vec(self.get_tips().await?)?,
             };
 
             let single_threaded_miner = SingleThreadedMinerBuilder::new()
                 .with_timeout_in_seconds(tips_interval)
                 .finish();
 
-            match do_pow(single_threaded_miner, min_pow_score, payload.clone(), parents) {
+            match do_pow(single_threaded_miner, min_pow_score, payload.clone(), strong_parents) {
                 Ok(block) => {
                     return Ok(block);
                 }
@@ -119,9 +131,9 @@ fn do_pow(
     #[cfg(target_family = "wasm")] miner: SingleThreadedMiner,
     min_pow_score: u32,
     payload: Option<Payload>,
-    parents: Parents,
+    strong_parents: StrongParents,
 ) -> Result<Block> {
-    Ok(BlockBuilder::new(parents)
+    Ok(BlockBuilder::new(strong_parents)
         .with_payload(payload)
         .finish_nonce(|bytes| miner.nonce(bytes, min_pow_score))?)
 }
