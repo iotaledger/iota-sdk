@@ -239,6 +239,10 @@ required-features = [ "client" ]
 # Client Examples
 
 [[example]]
+name = "get_health"
+path = "examples/how_tos/client/get_health.rs"
+
+[[example]]
 name = "get_info"
 path = "examples/how_tos/client/get_info.rs"
 
@@ -285,11 +289,6 @@ path = "examples/client/block/transaction.rs"
 required-features = [ "client" ]
 
 # Node API core examples
-
-[[example]]
-name = "node_api_core_get_health"
-path = "examples/client/node_api_core/00_get_health.rs"
-required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_routes"

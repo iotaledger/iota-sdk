@@ -24,9 +24,9 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get node health.
-    let health = client.get_health(&node_url).await?;
+    let is_healthy = client.get_health(&node_url).await?;
 
-    println!("Health: {health}");
+    println!("Healthy: {is_healthy}");
 
     Ok(())
 }
