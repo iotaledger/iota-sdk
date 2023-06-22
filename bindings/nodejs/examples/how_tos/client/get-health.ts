@@ -21,7 +21,7 @@ async function run() {
     });
 
     try {
-        const isHealthy = await client.getHealth(process.env.NODE_URL)
+        const isHealthy = await client.getHealth(process.env.NODE_URL);
         console.log('Healthy: ', isHealthy);
     } catch (error) {
         console.error('Error: ', error);
