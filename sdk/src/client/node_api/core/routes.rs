@@ -391,7 +391,7 @@ impl ClientInner {
 
     /// Gets the slot commitment by the given slot index.
     /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index(&self, slot_index: &SlotIndex) -> Result<SlotCommitment> {
+    pub async fn get_slot_commitment_by_index(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
         self.node_manager
@@ -403,7 +403,7 @@ impl ClientInner {
 
     /// Gets the slot commitment, as raw bytes, by the given slot index.
     /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: &SlotIndex) -> Result<Vec<u8>> {
+    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
         self.node_manager
@@ -415,7 +415,7 @@ impl ClientInner {
 
     /// Get all UTXO changes of a given slot by its index.
     /// GET /api/core/v3/commitments/by-index/{index}/utxo-changes
-    pub async fn get_utxo_changes_by_slot_index(&self, slot_index: &SlotIndex) -> Result<UtxoChangesResponse> {
+    pub async fn get_utxo_changes_by_slot_index(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}/utxo-changes");
 
         self.node_manager
