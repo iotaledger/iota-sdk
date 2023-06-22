@@ -20,7 +20,7 @@ pub struct OutputMetadata {
     // Commitment ID that includes the spent output.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     commitment_id_spent: Option<SlotCommitmentId>,
-    // Transaction ID that spends the output.
+    // Transaction ID that spent the output.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     transaction_id_spent: Option<TransactionId>,
     /// Commitment ID that includes the output.
