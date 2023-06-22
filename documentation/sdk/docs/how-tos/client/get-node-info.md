@@ -1,14 +1,12 @@
 ---
 title: Get Node Information
-description: 'You can access all the features of the iota.rs library using an instance of the Client class. The Client class provides high-level abstraction to all interactions over IOTA network (Tangle).'
+description: Sometimes it's needed to get certain info from the Node to determine for example if the node is synced or which features it has enabled. You can get this info from a Client instance.
 image: /img/logo/iota_mark_light.png
 keywords:
 - how to
-- client class
-- iota node
-- ClientBuilder
+- client
 - load balancer
-- java
+- node info
 - nodejs
 - python
 - rust
