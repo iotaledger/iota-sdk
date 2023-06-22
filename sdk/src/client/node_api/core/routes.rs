@@ -301,14 +301,17 @@ impl ClientInner {
 
     /// Get the metadata for a given `OutputId` (TransactionId + output_index).
     /// GET /api/core/v2/outputs/{outputId}/metadata
-    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
+    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
-        self.node_manager
+        let metadata = self
+            .node_manager
             .read()
             .await
             .get_request::<OutputMetadataDto>(path, None, self.get_timeout().await, false, true)
-            .await
+            .await?;
+
+        Ok(OutputMetadata::try_from(metadata)?)
     }
 
     /// Gets all stored receipts.
