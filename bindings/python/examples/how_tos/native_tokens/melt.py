@@ -28,7 +28,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 melt_amount = 10
 
 # Send transaction.
-transaction = account.prepare_decrease_native_token_supply(token_id, melt_amount).send()
+transaction = account.prepare_melt_native_token(token_id, melt_amount).send()
 print(f'Transaction sent: {transaction["transactionId"]}')
 
 # Wait for transaction to get included

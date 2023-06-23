@@ -161,9 +161,9 @@ Returns all pending transactions of the account.
 ### prepare\_decrease\_native\_token\_supply
 
 ```python
-def prepare_decrease_native_token_supply(token_id: HexStr,
-                                         melt_amount: int,
-                                         options=None)
+def prepare_melt_native_token(token_id: HexStr,
+                              melt_amount: int,
+                              options=None)
 ```
 
 Melt native tokens. This happens with the foundry output which minted them, by increasing it&#x27;s

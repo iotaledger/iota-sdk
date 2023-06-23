@@ -16,7 +16,7 @@ The Account class.
 - [claimOutputs](Account.md#claimoutputs)
 - [prepareConsolidateOutputs](Account.md#prepareconsolidateoutputs)
 - [prepareCreateAliasOutput](Account.md#preparecreatealiasoutput)
-- [prepareDecreaseNativeTokenSupply](Account.md#preparedecreasenativetokensupply)
+- [prepareMeltNativeToken](Account.md#preparemeltnativetoken)
 - [prepareDestroyAlias](Account.md#preparedestroyalias)
 - [prepareDestroyFoundry](Account.md#preparedestroyfoundry)
 - [generateEd25519Addresses](Account.md#generateed25519addresses)
@@ -267,9 +267,9 @@ A transaction object.
 
 ___
 
-### prepareDecreaseNativeTokenSupply
+### prepareMeltNativeToken
 
-▸ **prepareDecreaseNativeTokenSupply**(`tokenId`, `meltAmount`, `transactionOptions?`): `Promise`<[`PreparedTransactionData`](PreparedTransactionData.md)\>
+▸ **prepareMeltNativeToken**(`tokenId`, `meltAmount`, `transactionOptions?`): `Promise`<[`PreparedTransactionData`](PreparedTransactionData.md)\>
 
 Melt native tokens. This happens with the foundry output which minted them, by increasing its
 `melted_tokens` field.
@@ -636,9 +636,9 @@ The minting transaction and the token ID.
 
 ___
 
-### prepareMintNativeToken
+### prepareCreateNativeToken
 
-▸ **prepareMintNativeToken**(`params`, `transactionOptions?`): `Promise`<`PreparedMintTokenTransactionData`\>
+▸ **prepareCreateNativeToken**(`params`, `transactionOptions?`): `Promise`<`PreparedMintTokenTransactionData`\>
 
 Mint native tokens.
 
@@ -646,7 +646,7 @@ Mint native tokens.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `params` | [`MintNativeTokenParams`](../interfaces/MintNativeTokenParams.md) | The options for minting tokens. |
+| `params` | [`CreateNativeTokenParams`](../interfaces/CreateNativeTokenParams.md) | The options for creating tokens. |
 | `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
 
 #### Returns

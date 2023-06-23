@@ -671,7 +671,7 @@ impl WalletMessageHandler {
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
-            AccountMethod::DecreaseNativeTokenSupply {
+            AccountMethod::MeltNativeToken {
                 token_id,
                 melt_amount,
                 options,

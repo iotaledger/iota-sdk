@@ -104,7 +104,7 @@
 - [SignedTransactionEssence](interfaces/SignedTransactionEssence.md)
 - [Transaction](interfaces/Transaction.md)
 - [TransactionOptions](interfaces/TransactionOptions.md)
-- [MintNativeTokenParams](interfaces/MintNativeTokenParams.md)
+- [CreateNativeTokenParams](interfaces/CreateNativeTokenParams.md)
 - [MintNftParams](interfaces/MintNftParams.md)
 - [AliasOutputParams](interfaces/AliasOutputParams.md)
 - [WalletOptions](interfaces/WalletOptions.md)

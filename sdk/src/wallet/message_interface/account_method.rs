@@ -238,11 +238,11 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     PendingTransactions,
-    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// Melt native tokens. This happens with the foundry output which minted them, by increasing its
     /// `melted_tokens` field.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    DecreaseNativeTokenSupply {
+    MeltNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
@@ -263,7 +263,7 @@ pub enum AccountMethod {
         mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
-    /// Mint native token.
+    /// Create a native token.
     /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     CreateNativeToken {

@@ -45,7 +45,7 @@ pub struct NativeTokenTransaction {
     pub transaction: Transaction,
 }
 
-/// Dto for MintTokenTransaction
+/// Dto for NativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeTokenTransactionDto {
@@ -70,7 +70,7 @@ pub struct PreparedNativeTokenTransaction {
     pub transaction: PreparedTransactionData,
 }
 
-/// Dto for CreateNativeTokenTransaction
+/// Dto for PreparedNativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PreparedNativeTokenTransactionDto {

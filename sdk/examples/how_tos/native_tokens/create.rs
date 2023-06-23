@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will mint a native token.
+//! In this example we will create a native token.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
         println!("Account synced");
     }
 
-    println!("Preparing minting transaction...");
+    println!("Preparing initial minting transaction...");
 
     let params = CreateNativeTokenParams {
         alias_id: None,
@@ -74,9 +74,9 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
     println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
-    println!("Minted token: {}", transaction.token_id);
+    println!("Created token: {}", transaction.token_id);
 
-    // Ensure the account is synced after minting.
+    // Ensure the account is synced after initial minting.
     account.sync(None).await?;
     println!("Account synced");
 
