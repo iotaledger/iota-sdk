@@ -7,6 +7,7 @@
 //! `cargo run --example mint_nft --release`
 
 use std::env::var;
+
 use iota_sdk::{
     types::block::output::{
         feature::{IssuerFeature, SenderFeature},
@@ -68,11 +69,7 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    println!(
-        "Block included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     println!("Minted NFT 1");
 
     // Build an NFT manually by using the `NftOutputBuilder`
@@ -93,11 +90,7 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    println!(
-        "Block included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     println!("Minted NFT 2");
 
     // Ensure the account is synced after minting.

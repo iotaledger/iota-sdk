@@ -9,7 +9,7 @@ import {
     SenderFeature,
     utf8ToHex,
     Utils,
-    Wallet
+    Wallet,
 } from '@iota/sdk';
 
 // The owner address of the first NFT we'll mint
@@ -81,7 +81,9 @@ async function run() {
             amount: NFT2_AMOUNT,
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
-                new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(NFT1_OWNER_ADDRESS))),
+                new AddressUnlockCondition(
+                    new Ed25519Address(Utils.bech32ToHex(NFT1_OWNER_ADDRESS)),
+                ),
             ],
             immutableFeatures: [
                 new IssuerFeature(new Ed25519Address(hexAddress)),
