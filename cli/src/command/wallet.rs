@@ -18,7 +18,7 @@ use log::LevelFilter;
 use crate::{
     error::Error,
     helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
-    println_log_info,
+    println_log_error, println_log_info,
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
