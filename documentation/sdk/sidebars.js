@@ -106,6 +106,18 @@ module.exports = {
         },
         {
           type: "category",
+          label: 'Native Tokens',
+          items: [
+            'how-tos/native-tokens/mint',
+            'how-tos/native-tokens/decrease-supply',
+            'how-tos/native-tokens/increase-supply',
+            'how-tos/native-tokens/send',
+            'how-tos/native-tokens/burn',
+            'how-tos/native-tokens/destroy-foundry',
+          ]
+        },
+        {
+          type: "category",
           label: 'Sign And Verify Ed25519',
           items: [
             {
