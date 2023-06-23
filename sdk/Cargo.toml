@@ -183,8 +183,8 @@ required-features = [ "rocksdb", "stronghold" ]
 # Native Tokens Examples
 
 [[example]]
-name = "mint_native_token"
-path = "examples/how_tos/native_tokens/mint.rs"
+name = "create_native_token"
+path = "examples/how_tos/native_tokens/create.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]

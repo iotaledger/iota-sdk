@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-# In this example we will mint native tokens
+# In this example we will create native tokens
 
 wallet = Wallet('./alice-database')
 
@@ -32,7 +32,7 @@ if len(account.aliases) == 0:
     account.sync()
     print("Account synced")
 
-print('Preparing minting transaction...')
+print('Preparing initial minting transaction...')
 
 params = {
     "circulatingSupply": hex(100),
@@ -40,7 +40,7 @@ params = {
     "foundryMetadata": utf8_to_hex('Hello, World!'),
 }
 
-prepared_transaction = account.prepare_mint_native_token(params, None)
+prepared_transaction = account.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
 print(f'Transaction sent: {transaction["transactionId"]}')
 
@@ -48,8 +48,8 @@ print(f'Transaction sent: {transaction["transactionId"]}')
 blockId = account.retry_transaction_until_included(transaction['transactionId'])
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
-print(f'Minted token: {prepared_transaction.token_id()}')
+print(f'Created token: {prepared_transaction.token_id()}')
 
-# Ensure the account is synced after minting.
+# Ensure the account is synced after initial minting.
 account.sync()
 print('Account synced')

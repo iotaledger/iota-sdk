@@ -1,11 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-<<<<<<<< HEAD:bindings/nodejs/examples/wallet/09-create-native-token.ts
-import { CreateNativeTokenParams } from '@iota/sdk';
-========
-import { MintNativeTokenParams, utf8ToHex } from '@iota/sdk';
->>>>>>>> upstream/develop:bindings/nodejs/examples/how_tos/native_tokens/mint.ts
+import { CreateNativeTokenParams, utf8ToHex } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
@@ -14,13 +10,13 @@ const CIRCULATING_SUPPLY = '0x64';
 // The maximum supply of the native token. `100` hex encoded
 const MAXIMUM_SUPPLY = '0x64';
 
-// In this example we will mint a native token.
+// In this example we will create a native token.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/09-mint-native-token.ts
+// yarn run-example ./how_tos/native_tokens/create.ts
 async function run() {
     try {
         // Create the wallet
@@ -52,7 +48,7 @@ async function run() {
             console.log('Account synced');
         }
 
-        console.log('Preparing minting transaction...');
+        console.log('Preparing initial minting transaction...');
 
         // If we omit the AccountAddress field the first address of the account is used by default
         const params: CreateNativeTokenParams = {
@@ -61,13 +57,8 @@ async function run() {
             foundryMetadata: utf8ToHex('Hello, World!'),
         };
 
-<<<<<<<< HEAD:bindings/nodejs/examples/wallet/09-create-native-token.ts
         const prepared = await account.prepareCreateNativeToken(params);
-        transaction = await prepared.send();
-========
-        const prepared = await account.prepareMintNativeToken(params);
         const transaction = await prepared.send();
->>>>>>>> upstream/develop:bindings/nodejs/examples/how_tos/native_tokens/mint.ts
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
@@ -80,9 +71,9 @@ async function run() {
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        console.log(`Minted token: ${prepared.tokenId()}`);
+        console.log(`Created token: ${prepared.tokenId()}`);
 
-        // Ensure the account is synced after minting.
+        // Ensure the account is synced after initial minting.
         await account.sync();
         console.log('Account synced');
     } catch (error) {
