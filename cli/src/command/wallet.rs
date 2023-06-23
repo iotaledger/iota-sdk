@@ -165,15 +165,12 @@ pub async fn init_command(
 }
 
 pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {
+    let snapshot_path = path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH);
+    check_file_exists(snapshot_path.as_ref()).await?;
+
     let password = get_password("Stronghold password", false)?;
-    StrongholdAdapter::migrate_snapshot_v2_to_v3(
-        path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
-        password,
-        "wallet.rs",
-        100,
-        None,
-        None,
-    )?;
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(snapshot_path, password, "wallet.rs", 100, None, None)?;
+
     println_log_info!("Stronghold snapshot successfully migrated from v2 to v3.");
 
     Ok(())

@@ -39,10 +39,6 @@ impl StrongholdAdapter {
         log::debug!("migrate_snapshot_v2_to_v3");
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
 
-        if !current_path.as_ref().exists() {
-            return Err(Error::PathNotFound(current_path.as_ref().to_path_buf()));
-        }
-
         let mut buffer = [0u8; 32];
         let mut tmp_path = current_path.as_ref().as_os_str().to_os_string();
         tmp_path.push(OsStr::new("-tmp"));
