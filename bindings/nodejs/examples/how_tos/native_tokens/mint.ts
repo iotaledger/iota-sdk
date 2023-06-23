@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNativeTokenParams } from '@iota/sdk';
+import { MintNativeTokenParams, utf8ToHex } from '@iota/sdk';
 
-import { getUnlockedWallet } from './common';
+import { getUnlockedWallet } from '../../wallet/common';
 
 // The circulating supply of the native token. `100` hex encoded
 const CIRCULATING_SUPPLY = '0x64';
@@ -25,46 +25,50 @@ async function run() {
         // Get the account we generated with `01-create-wallet`
         const account = await wallet.getAccount('Alice');
 
-        console.log('Sending alias output transaction...');
+        const balance = await account.sync();
 
-        // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
-        let transaction = await account
-            .prepareCreateAliasOutput()
-            .then((prepared) => prepared.send());
-        console.log(`Transaction sent: ${transaction.transactionId}`);
+        // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
+        if (balance.aliases.length > 0) {
+            // If we don't have an alias, we need to create one
+            const transaction = await account
+                .prepareCreateAliasOutput()
+                .then((prepared) => prepared.send());
+            console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
-            transaction.transactionId,
-        );
+            // Wait for transaction to get included
+            const blockId = await account.retryTransactionUntilIncluded(
+                transaction.transactionId,
+            );
 
-        console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
-        );
+            console.log(
+                `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            );
 
-        await account.sync();
-        console.log('Account synced');
+            await account.sync();
+            console.log('Account synced');
+        }
 
-        console.log('Sending the minting transaction...');
+        console.log('Preparing minting transaction...');
 
         // If we omit the AccountAddress field the first address of the account is used by default
         const params: MintNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
+            foundryMetadata: utf8ToHex('Hello, World!'),
         };
 
         const prepared = await account.prepareMintNativeToken(params);
-        transaction = await prepared.send();
+        const transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         console.log(`Minted token: ${prepared.tokenId()}`);

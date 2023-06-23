@@ -103,7 +103,7 @@ wallet = [ "client" ]
 [[example]]
 name = "sign_and_verify_ed25519"
 path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "verify_ed25519_signature"
@@ -114,6 +114,7 @@ path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 [[example]]
 name = "create_mnemonic"
 path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "create_account"
@@ -179,15 +180,61 @@ name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# Native Tokens Examples
+
+[[example]]
+name = "mint_native_token"
+path = "examples/how_tos/native_tokens/mint.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "destroy_foundry"
+path = "examples/how_tos/native_tokens/destroy_foundry.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "burn_native_token"
+path = "examples/how_tos/native_tokens/burn.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "decrease_native_token_supply"
+path = "examples/how_tos/native_tokens/decrease_supply.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "increase_native_token_supply"
+path = "examples/how_tos/native_tokens/increase_supply.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "send_native_tokens"
+path = "examples/how_tos/native_tokens/send.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+# Alias wallet example
+
+[[example]]
+name = "alias_wallet_request_funds"
+path = "examples/how_tos/alias_wallet/request_funds.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "alias_wallet_transaction"
+path = "examples/how_tos/alias_wallet/transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Outputs
 
 [[example]]
 name = "output_unlock_conditions"
 path = "examples/how_tos/outputs/unlock_conditions.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "output_features"
 path = "examples/how_tos/outputs/features.rs"
+required-features = [ "client" ]
 
 # Block examples
 
@@ -550,18 +597,8 @@ path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
-name = "send_native_tokens"
-path = "examples/wallet/07_send_native_tokens.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
 name = "send_nft"
 path = "examples/wallet/08_send_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "mint_native_token"
-path = "examples/wallet/09_mint_native_token.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
@@ -570,28 +607,8 @@ path = "examples/wallet/10_mint_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "decrease_native_token_supply"
-path = "examples/wallet/11_decrease_native_token_supply.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "increase_native_token_supply"
-path = "examples/wallet/12_increase_native_token_supply.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "burn_native_token"
-path = "examples/wallet/13_burn_native_token.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
 name = "burn_nft"
 path = "examples/wallet/14_burn_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "destroy_foundry"
-path = "examples/wallet/15_destroy_foundry.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
@@ -607,17 +624,17 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "check_unlock_conditions"
 path = "examples/wallet/17_check_unlock_conditions.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "accounts"
 path = "examples/wallet/accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "events"
@@ -647,7 +664,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "spammer"
@@ -657,7 +674,7 @@ required-features = [ "wallet" ]
 [[example]]
 name = "split_funds"
 path = "examples/wallet/split_funds.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "storage"
@@ -672,7 +689,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "migrate_stronghold_snapshot_v2_to_v3"

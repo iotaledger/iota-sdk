@@ -1,14 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    AddressUnlockCondition,
-    BasicOutputBuilderParams,
-    Ed25519Address,
-    SendNativeTokensParams,
-} from '@iota/sdk';
+import { SendNativeTokensParams } from '@iota/sdk';
 
-import { getUnlockedWallet } from './common';
+import { getUnlockedWallet } from '../../wallet/common';
 
 // The native token amount to send, `10` hex encoded
 const SEND_NATIVE_TOKEN_AMOUNT = '0xA';
@@ -32,7 +27,7 @@ async function run() {
         const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
-        const balance = await account.sync();
+        let balance = await account.sync();
 
         // Get a token with sufficient balance
         // TODO: use BigNumber library
@@ -48,62 +43,41 @@ async function run() {
                 },
             ];
 
-            console.log(
-                `Sending '${Number(
-                    SEND_NATIVE_TOKEN_AMOUNT,
-                )}' coin(s) to '${RECV_ADDRESS}'...`,
+            let token = balance.nativeTokens.find(
+                (nativeToken) => nativeToken.tokenId == tokenId,
             );
+            if (token == null) {
+                throw new Error(
+                    `Couldn't find native token '${tokenId}' in the account`,
+                );
+            }
+            console.log(`Balance before sending:`, parseInt(token.available));
 
-            let transaction = await account
+            const transaction = await account
                 .prepareSendNativeTokens(outputs)
                 .then((prepared) => prepared.send());
 
             console.log(`Transaction sent: ${transaction.transactionId}`);
 
             // Wait for transaction to get included
-            let blockId = await account.retryTransactionUntilIncluded(
+            const blockId = await account.retryTransactionUntilIncluded(
                 transaction.transactionId,
             );
 
             console.log(
-                `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+                `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
             );
 
-            await account.sync();
-            console.log('Account synced');
-
-            console.log('Sending basic output transaction...');
-
-            // Send native tokens together with the required storage deposit
-            const client = await wallet.getClient();
-
-            const basicOutput: BasicOutputBuilderParams = {
-                unlockConditions: [
-                    new AddressUnlockCondition(
-                        new Ed25519Address(RECV_ADDRESS),
-                    ),
-                ],
-                nativeTokens: [
-                    {
-                        id: tokenId,
-                        amount: SEND_NATIVE_TOKEN_AMOUNT,
-                    },
-                ],
-            };
-
-            const output = await client.buildBasicOutput(basicOutput);
-            transaction = await account.sendOutputs([output]);
-
-            console.log(`Transaction sent: ${transaction.transactionId}`);
-
-            // Wait for transaction to get included
-            blockId = await account.retryTransactionUntilIncluded(
-                transaction.transactionId,
+            balance = await account.sync();
+            token = balance.nativeTokens.find(
+                (nativeToken) => nativeToken.tokenId == tokenId,
             );
-
-            console.log(
-                `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
-            );
+            if (token == null) {
+                throw new Error(
+                    `Couldn't find native token '${tokenId}' in the account`,
+                );
+            }
+            console.log(`Balance after sending:`, parseInt(token.available));
         }
     } catch (error) {
         console.log('Error: ', error);

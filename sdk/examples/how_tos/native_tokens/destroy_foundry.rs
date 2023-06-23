@@ -33,15 +33,13 @@ async fn main() -> Result<()> {
 
     // We try to destroy the first foundry in the account
     if let Some(foundry_id) = balance.foundries().first() {
-        let foundries_before = balance.foundries();
-        println!("Foundries BEFORE destroying:\n{foundries_before:#?}",);
+        let foundry_count = balance.foundries().len();
+        println!("Foundries before destroying: {foundry_count}");
 
         // Set the stronghold password
         wallet
             .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
-
-        println!("Sending foundry burn transaction...");
 
         let transaction = account.burn(*foundry_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
@@ -49,17 +47,10 @@ async fn main() -> Result<()> {
         let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        println!(
-            "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
-            block_id
-        );
+        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
 
-        println!("Burned Foundry '{}'", foundry_id);
-
-        let balance = account.sync(None).await?;
-        let foundries_after = balance.foundries();
-        println!("Foundries AFTER destroying:\n{foundries_after:#?}",);
+        let foundry_count = balance.foundries().len();
+        println!("Foundries after destroying: {foundry_count}");
     } else {
         println!("No Foundry available in account '{alias}'");
     }
