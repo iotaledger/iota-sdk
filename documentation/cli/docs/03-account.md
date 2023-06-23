@@ -574,6 +574,7 @@ List all transactions.
 ```
 
 List all transactions with details.
+
 ```sh
 > Account "main": transactions --show-details
 ```
