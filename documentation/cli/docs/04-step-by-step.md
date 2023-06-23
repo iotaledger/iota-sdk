@@ -8,7 +8,7 @@ It is advised to do them all at least once in the given order to understand the 
 
 Initialize the wallet with a given node and a randomly generated mnemonic.
 ```sh title=Input
-./wallet init --node <NODE_API_URL>
+./wallet init --node-url <NODE_API_URL>
 ```
 ```sh title=Output
 > INFO  Mnemonic stored successfully

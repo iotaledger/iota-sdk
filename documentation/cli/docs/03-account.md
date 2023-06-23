@@ -23,9 +23,9 @@ Prints the account balance.
 
 #### Parameters
 
-| Name        | Optional  | Default | Example                                                         |
-| ----------- | --------- | ------- | --------------------------------------------------------------- |
-| `addresses` | ✓         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| Name        | Optional  | Default                                | Example                                                         |
+| ----------- | --------- | -------------------------------------- | --------------------------------------------------------------- |
+| `addresses` | ✓         | All addresses belonging to the account | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
 
 #### Examples
 
@@ -82,9 +82,9 @@ Tries to claim outputs with storage deposit return, expiration or timelock unloc
 
 #### Parameters
 
-| Name        | Optional  | Default | Example                                                                |
-| ----------- | --------- | ------- | ---------------------------------------------------------------------- |
-| `output_id` | ✓         | N/A     | 0xd5dff9ee869dfa7796d5132b220cb5c00146c36abba27d3562e2d726decb50850000 |
+| Name        | Optional  | Default               | Example                                                                |
+| ----------- | --------- | --------------------- | ---------------------------------------------------------------------- |
+| `output_id` | ✓         | All claimable outputs | 0xd5dff9ee869dfa7796d5132b220cb5c00146c36abba27d3562e2d726decb50850000 |
 
 #### Examples
 
@@ -230,7 +230,7 @@ Requests funds from a faucet.
 | Name      | Optional  | Default                                              | Example                                                           |
 | --------- | --------- | -----------------------------------------------------| ------------------------------------------------------------------|
 | `address` | ✓         | The latest address of the account                    | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3   |
-| `url`     | ✓         | <https://faucet.testnet.shimmer.network/api/enqueue> | <http://localhost:8091/api/enqueue>                               |
+| `url`     | ✓         | https://faucet.testnet.shimmer.network/api/enqueue   | http://localhost:8091/api/enqueue                                 |
 
 #### Examples
 
@@ -561,14 +561,21 @@ Lists all account transactions.
 
 #### Parameters
 
-| Name               | Optional  | Default | Example                                                                         |
-| -------------------| --------- | ------- | ------------------------------------------------------------------------------- |
-| `show_details`     | ✓         | false   | true                                                                            |
+| Name               | Optional  | Default | Example  |
+| -------------------| --------- | ------- | -------- |
+| `show_details`     | ✓         | false   | true     |
 
 #### Example
 
+List all transactions.
+
 ```sh
 > Account "main": transactions
+```
+
+List all transactions with details.
+```sh
+> Account "main": transactions --show-details
 ```
 
 ### `unspent-outputs`
