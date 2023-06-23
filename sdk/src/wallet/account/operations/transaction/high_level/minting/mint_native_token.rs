@@ -9,7 +9,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::high_level::minting::create_native_token::{
-                NativeTokenTransaction, PreparedNativeTokenTransaction,
+                MintNativeTokenTransaction, PreparedMintNativeTokenTransaction,
             },
             Account, TransactionOptions,
         },
@@ -39,14 +39,14 @@ where
         token_id: TokenId,
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<NativeTokenTransaction> {
+    ) -> crate::wallet::Result<MintNativeTokenTransaction> {
         let options = options.into();
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())
             .await?;
         let transaction = self.sign_and_submit_transaction(prepared.transaction, options).await?;
 
-        Ok(NativeTokenTransaction {
+        Ok(MintNativeTokenTransaction {
             token_id: prepared.token_id,
             transaction,
         })
@@ -59,7 +59,7 @@ where
         token_id: TokenId,
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedNativeTokenTransaction> {
+    ) -> crate::wallet::Result<PreparedMintNativeTokenTransaction> {
         log::debug!("[TRANSACTION] mint_native_token");
 
         let account_details = self.details().await;
@@ -139,6 +139,6 @@ where
 
         self.prepare_transaction(outputs, options)
             .await
-            .map(|transaction| PreparedNativeTokenTransaction { token_id, transaction })
+            .map(|transaction| PreparedMintNativeTokenTransaction { token_id, transaction })
     }
 }

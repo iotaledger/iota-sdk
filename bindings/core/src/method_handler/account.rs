@@ -14,7 +14,7 @@ use iota_sdk::{
         Error,
     },
     wallet::account::{
-        types::TransactionDto, Account, OutputDataDto, PreparedNativeTokenTransactionDto, TransactionOptions,
+        types::TransactionDto, Account, OutputDataDto, PreparedMintNativeTokenTransactionDto, TransactionOptions,
     },
 };
 use primitive_types::U256;
@@ -178,7 +178,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::PreparedNativeTokenTransaction(PreparedNativeTokenTransactionDto::from(&data))
+            Response::PreparedMintNativeTokenTransaction(PreparedMintNativeTokenTransactionDto::from(&data))
         }
         #[cfg(feature = "participation")]
         AccountMethod::PrepareIncreaseVotingPower { amount } => {
@@ -199,7 +199,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
-            Response::PreparedNativeTokenTransaction(PreparedNativeTokenTransactionDto::from(&data))
+            Response::PreparedMintNativeTokenTransaction(PreparedMintNativeTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareOutput {
             params,

@@ -40,7 +40,7 @@ pub struct CreateNativeTokenParams {
 /// The result of a minting native token transaction
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NativeTokenTransaction {
+pub struct MintNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: Transaction,
 }
@@ -48,13 +48,13 @@ pub struct NativeTokenTransaction {
 /// Dto for NativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NativeTokenTransactionDto {
+pub struct MintNativeTokenTransactionDto {
     pub token_id: TokenId,
     pub transaction: TransactionDto,
 }
 
-impl From<&NativeTokenTransaction> for NativeTokenTransactionDto {
-    fn from(value: &NativeTokenTransaction) -> Self {
+impl From<&MintNativeTokenTransaction> for MintNativeTokenTransactionDto {
+    fn from(value: &MintNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
             transaction: TransactionDto::from(&value.transaction),
@@ -65,7 +65,7 @@ impl From<&NativeTokenTransaction> for NativeTokenTransactionDto {
 /// The result of preparing a minting native token transaction
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedNativeTokenTransaction {
+pub struct PreparedMintNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,
 }
@@ -73,13 +73,13 @@ pub struct PreparedNativeTokenTransaction {
 /// Dto for PreparedNativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedNativeTokenTransactionDto {
+pub struct PreparedMintNativeTokenTransactionDto {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionDataDto,
 }
 
-impl From<&PreparedNativeTokenTransaction> for PreparedNativeTokenTransactionDto {
-    fn from(value: &PreparedNativeTokenTransaction) -> Self {
+impl From<&PreparedMintNativeTokenTransaction> for PreparedMintNativeTokenTransactionDto {
+    fn from(value: &PreparedMintNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
             transaction: PreparedTransactionDataDto::from(&value.transaction),
@@ -103,7 +103,7 @@ where
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account.mint_native_token(params, None,).await?;
+    /// let tx = account.create_native_token(params, None,).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
@@ -113,13 +113,13 @@ where
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<NativeTokenTransaction> {
+    ) -> crate::wallet::Result<MintNativeTokenTransaction> {
         let options = options.into();
         let prepared = self.prepare_create_native_token(params, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared.transaction, options)
             .await
-            .map(|transaction| NativeTokenTransaction {
+            .map(|transaction| MintNativeTokenTransaction {
                 token_id: prepared.token_id,
                 transaction,
             })
@@ -131,7 +131,7 @@ where
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedNativeTokenTransaction> {
+    ) -> crate::wallet::Result<PreparedMintNativeTokenTransaction> {
         log::debug!("[TRANSACTION] mint_native_token");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
@@ -180,7 +180,7 @@ where
 
             self.prepare_transaction(outputs, options)
                 .await
-                .map(|transaction| PreparedNativeTokenTransaction { token_id, transaction })
+                .map(|transaction| PreparedMintNativeTokenTransaction { token_id, transaction })
         } else {
             unreachable!("We checked if it's an alias output before")
         }

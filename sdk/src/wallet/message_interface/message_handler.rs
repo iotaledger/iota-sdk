@@ -37,7 +37,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::minting::create_native_token::NativeTokenTransactionDto, TransactionOptions,
+                high_level::minting::create_native_token::MintNativeTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
@@ -701,9 +701,9 @@ impl WalletMessageHandler {
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::NativeTokenTransaction(NativeTokenTransactionDto::from(
-                        &transaction,
-                    )))
+                    Ok(Response::MintNativeTokenTransaction(
+                        MintNativeTokenTransactionDto::from(&transaction),
+                    ))
                 })
                 .await
             }
@@ -712,9 +712,9 @@ impl WalletMessageHandler {
                     let transaction = account
                         .create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
-                    Ok(Response::NativeTokenTransaction(NativeTokenTransactionDto::from(
-                        &transaction,
-                    )))
+                    Ok(Response::MintNativeTokenTransaction(
+                        MintNativeTokenTransactionDto::from(&transaction),
+                    ))
                 })
                 .await
             }
