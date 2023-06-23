@@ -54,4 +54,7 @@ pub enum Error {
     /// Io error
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+    /// Path not found
+    #[error("path not found: {0}")]
+    PathNotFound(std::path::PathBuf),
 }
