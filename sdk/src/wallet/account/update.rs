@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{dto::OutputMetadataDto, OutputId, OutputMetadata},
+    types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
@@ -39,7 +39,7 @@ where
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         unspent_outputs: Vec<OutputData>,
-        spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadataDto>>,
+        spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update account with new synced transactions");
@@ -101,10 +101,10 @@ where
         for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it
             if let Some(output_metadata_response) = output_metadata_response_opt {
-                if output_metadata_response.is_spent {
+                if output_metadata_response.is_spent() {
                     account_details.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata = OutputMetadata::try_from(output_metadata_response)?;
+                        output_data.metadata = output_metadata_response;
                     }
                 } else {
                     // not spent, just not synced, skip

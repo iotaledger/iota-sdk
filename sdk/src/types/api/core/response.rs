@@ -6,11 +6,14 @@ use alloc::{boxed::Box, string::String, vec::Vec};
 use crate::types::block::{
     output::{
         dto::{OutputDto, OutputMetadataDto},
-        OutputWithMetadata,
+        OutputId, OutputWithMetadata,
     },
-    payload::{dto::MilestonePayloadDto, milestone::option::dto::ReceiptMilestoneOptionDto},
+    payload::{
+        dto::MilestonePayloadDto,
+        milestone::{option::dto::ReceiptMilestoneOptionDto, MilestoneId},
+    },
     protocol::dto::ProtocolParametersDto,
-    BlockDto,
+    BlockDto, BlockId,
 };
 
 /// Response of GET /api/core/v2/info.
@@ -61,7 +64,7 @@ pub struct LatestMilestoneResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timestamp: Option<u32>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_id: Option<String>,
+    pub milestone_id: Option<MilestoneId>,
 }
 
 /// Returned in [`StatusResponse`].
@@ -77,7 +80,7 @@ pub struct ConfirmedMilestoneResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timestamp: Option<u32>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_id: Option<String>,
+    pub milestone_id: Option<MilestoneId>,
 }
 
 /// Returned in [`InfoResponse`].
@@ -137,7 +140,7 @@ pub struct MetricsResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct TipsResponse {
-    pub tips: Vec<String>,
+    pub tips: Vec<BlockId>,
 }
 
 /// Response of POST /api/core/v2/blocks.
@@ -149,7 +152,7 @@ pub struct TipsResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct SubmitBlockResponse {
-    pub block_id: String,
+    pub block_id: BlockId,
 }
 
 /// Response of GET /api/core/v2/blocks/{block_id}.
@@ -188,8 +191,8 @@ pub enum LedgerInclusionState {
     serde(rename_all = "camelCase")
 )]
 pub struct BlockMetadataResponse {
-    pub block_id: String,
-    pub parents: Vec<String>,
+    pub block_id: BlockId,
+    pub parents: Vec<BlockId>,
     pub is_solid: bool,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub referenced_by_milestone_index: Option<u32>,
@@ -279,7 +282,7 @@ pub struct ReceiptsResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct TreasuryResponse {
-    pub milestone_id: String,
+    pub milestone_id: MilestoneId,
     pub amount: String,
 }
 
@@ -307,8 +310,8 @@ pub enum MilestoneResponse {
 )]
 pub struct UtxoChangesResponse {
     pub index: u32,
-    pub created_outputs: Vec<String>,
-    pub consumed_outputs: Vec<String>,
+    pub created_outputs: Vec<OutputId>,
+    pub consumed_outputs: Vec<OutputId>,
 }
 
 /// Describes the heartbeat of a node.
