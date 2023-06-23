@@ -429,9 +429,9 @@ Calculates the participation overview of the account.
 
 #### Parameters
 
-| Name        | Optional  | Default | Example                                                            |
-| ----------- | --------- | ------- | ------------------------------------------------------------------ |
-| `event_ids` | ✓         | N/A     | 0x8d6ffcd8d6c9f049b5732adb8900bb6f6a28e282b15a2297405a28181eebd515 |
+| Name        | Optional  | Default                                     | Example                                                            |
+| ----------- | --------- | ------------------------------------------- | ------------------------------------------------------------------ |
+| `event_ids` | ✓         | All participation event ids for the account | 0x8d6ffcd8d6c9f049b5732adb8900bb6f6a28e282b15a2297405a28181eebd515 |
 
 #### Example
 
