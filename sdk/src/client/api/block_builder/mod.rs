@@ -19,9 +19,7 @@ use crate::{
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
-        output::{
-            dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE},
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
         Block, BlockId, ConvertTo,
@@ -76,7 +74,7 @@ pub struct ClientBlockBuilderOptions {
     /// Hex encoded output address and amount
     pub output_hex: Option<ClientBlockBuilderOutputAddress>,
     /// Outputs
-    pub outputs: Option<Vec<OutputDto>>,
+    pub outputs: Option<Vec<Output>>,
     /// Custom remainder address
     pub custom_remainder_address: Option<String>,
     /// Hex encoded tag
@@ -277,14 +275,7 @@ impl<'a> ClientBlockBuilder<'a> {
         }
 
         if let Some(outputs) = options.outputs {
-            let token_supply = self.client.get_token_supply().await?;
-
-            self = self.with_outputs(
-                outputs
-                    .into_iter()
-                    .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
-                    .collect::<Result<Vec<Output>>>()?,
-            )?;
+            self = self.with_outputs(outputs)?;
         }
 
         if let Some(custom_remainder_address) = options.custom_remainder_address {

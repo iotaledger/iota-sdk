@@ -6,15 +6,12 @@ use instant::Instant;
 
 use crate::{
     client::{constants::HD_WALLET_TYPE, secret::SecretManage, Client},
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            input::Input,
-            output::{OutputId, OutputWithMetadata},
-            payload::{
-                transaction::{TransactionEssence, TransactionId},
-                Payload, TransactionPayload,
-            },
+    types::block::{
+        input::Input,
+        output::{OutputId, OutputWithMetadata},
+        payload::{
+            transaction::{TransactionEssence, TransactionId},
+            Payload, TransactionPayload,
         },
     },
     wallet::{
@@ -149,15 +146,11 @@ where
                                     if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
                                         let inputs_with_meta =
                                             get_inputs_for_transaction_payload(&client, transaction_payload).await?;
-                                        let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
-                                            .into_iter()
-                                            .map(OutputWithMetadataResponse::from)
-                                            .collect();
 
                                         let transaction = build_transaction_from_payload_and_inputs(
                                             transaction_id,
                                             *transaction_payload.clone(),
-                                            inputs_response,
+                                            inputs_with_meta,
                                         )?;
 
                                         Ok((transaction_id, Some(transaction)))

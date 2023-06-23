@@ -9,7 +9,7 @@ use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions, ClientBuilder},
     types::block::{
         address::{Address, Bech32Address, Hrp},
-        output::{dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::{
         message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
@@ -187,14 +187,14 @@ async fn message_interface_events() -> Result<()> {
     let _response = wallet_handle.send_message(sync_method).await;
 
     // send transaction
-    let outputs = vec![OutputDto::from(
-        &BasicOutputBuilder::new_with_amount(1_000_000)
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
             ))
             .finish_output(TOKEN_SUPPLY)
             .unwrap(),
-    )];
+    ];
 
     let transaction = Message::CallAccountMethod {
         account_id: "alias".into(),

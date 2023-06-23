@@ -6,14 +6,12 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
     client::api::PreparedTransactionDataDto,
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            address::Bech32Address,
-            payload::transaction::{dto::TransactionPayloadDto, TransactionId},
-        },
+    types::block::{
+        address::Bech32Address,
+        output::OutputWithMetadata,
+        payload::transaction::{dto::TransactionPayloadDto, TransactionId},
     },
-    wallet::account::types::{InclusionState, OutputDataDto},
+    wallet::account::types::{InclusionState, OutputData},
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -182,19 +180,19 @@ impl TryFrom<u8> for WalletEventType {
 #[serde(rename_all = "camelCase")]
 pub struct NewOutputEvent {
     /// The new output.
-    pub output: OutputDataDto,
+    pub output: OutputData,
     /// The transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction: Option<TransactionPayloadDto>,
     /// The inputs for the transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub transaction_inputs: Option<Vec<OutputWithMetadataResponse>>,
+    pub transaction_inputs: Option<Vec<OutputWithMetadata>>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SpentOutputEvent {
     /// The spent output.
-    pub output: OutputDataDto,
+    pub output: OutputData,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]

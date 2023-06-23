@@ -13,7 +13,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        output::{dto::OutputDto, OutputId, TokenId},
+        output::{Output, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
     wallet::{
@@ -123,7 +123,7 @@ pub enum AccountMethod {
     /// Calculate the minimum required storage deposit for an output.
     /// Expected response:
     /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
+    MinimumRequiredStorageDeposit { output: Output },
     /// Returns all outputs of the account
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
@@ -236,7 +236,7 @@ pub enum AccountMethod {
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
-        outputs: Vec<OutputDto>,
+        outputs: Vec<Output>,
         options: Option<TransactionOptionsDto>,
     },
     /// Vote for a participation event.
@@ -278,7 +278,7 @@ pub enum AccountMethod {
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {
-        outputs: Vec<OutputDto>,
+        outputs: Vec<Output>,
         options: Option<TransactionOptionsDto>,
     },
     /// Set the alias of the account.

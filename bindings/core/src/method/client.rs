@@ -16,10 +16,7 @@ use iota_sdk::{
     },
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{
-            dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AliasId,
-            FoundryId, NativeToken, NftId, OutputId,
-        },
+        output::{AliasId, Feature, FoundryId, NativeToken, NftId, OutputId, TokenScheme, UnlockCondition},
         payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
         BlockDto, BlockId,
     },
@@ -45,9 +42,9 @@ pub enum ClientMethod {
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -57,8 +54,8 @@ pub enum ClientMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -69,10 +66,10 @@ pub enum ClientMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
-        token_scheme: TokenSchemeDto,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        token_scheme: TokenScheme,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -83,9 +80,9 @@ pub enum ClientMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Removes all listeners for the provided topics.
     /// Expected response: [`Ok`](crate::Response::Ok)

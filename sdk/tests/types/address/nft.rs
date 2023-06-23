@@ -4,18 +4,13 @@
 use std::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{
-        dto::{AddressDto, NftAddressDto},
-        Address, Bech32Address, NftAddress, ToBech32Ext,
-    },
+    address::{Address, Bech32Address, NftAddress, ToBech32Ext},
     output::NftId,
-    Error,
 };
 use packable::PackableExt;
 
 const NFT_ID: &str = "0xa9ede98a7f0223fa7a49fbc586f7a88bb4f0d152f282b19bcebd05c9e8a02370";
 const NFT_BECH32: &str = "rms1zz57m6v20upz87n6f8autphh4z9mfux32teg9vvme67stj0g5q3hqd6l53z";
-const NFT_ID_INVALID: &str = "0xb0c800965d7511f5fb4406274d4e607f87d5c5970bc05e896f841a700e86e";
 
 #[test]
 fn kind() {
@@ -99,43 +94,6 @@ fn bech32_roundtrip() {
         Bech32Address::try_from_str(bech32),
         Bech32Address::try_new("rms", address)
     );
-}
-
-#[test]
-fn dto_fields() {
-    let nft_address = NftAddress::from_str(NFT_ID).unwrap();
-    let nft_dto = NftAddressDto::from(&nft_address);
-
-    assert_eq!(nft_dto.kind, NftAddress::KIND);
-    assert_eq!(nft_dto.nft_id, NFT_ID.to_string());
-
-    let address = Address::from(nft_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(dto, AddressDto::Nft(nft_dto));
-}
-
-#[test]
-fn dto_roundtrip() {
-    let nft_address = NftAddress::from_str(NFT_ID).unwrap();
-    let nft_dto = NftAddressDto::from(&nft_address);
-
-    assert_eq!(NftAddress::try_from(nft_dto).unwrap(), nft_address);
-
-    let address = Address::from(nft_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(Address::try_from(dto).unwrap(), address);
-}
-
-#[test]
-fn dto_invalid_nft_id() {
-    let dto = NftAddressDto {
-        kind: NftAddress::KIND,
-        nft_id: NFT_ID_INVALID.to_string(),
-    };
-
-    assert!(matches!(NftAddress::try_from(dto), Err(Error::InvalidField("nftId"))));
 }
 
 #[test]

@@ -13,7 +13,6 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            dto::OutputDto,
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
@@ -82,7 +81,7 @@ async fn main() -> Result<()> {
     ];
 
     // Convert ouput array to json array
-    let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
+    let json_outputs = serde_json::to_string_pretty(&outputs)?;
     println!("{json_outputs}");
 
     Ok(())

@@ -23,11 +23,20 @@ pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
     where
         Self::Error: From<serde_json::Error>,
     {
+        // println!(
+        //     "key: {key}, value: {:?}",
+        //     self.get_bytes(key)
+        //         .await?
+        //         .map(|b| serde_json::from_slice::<serde_json::Value>(&b))
+        //         .transpose()
+        //         .unwrap()
+        // );
         Ok(self
             .get_bytes(key)
             .await?
             .map(|b| serde_json::from_slice(&b))
-            .transpose()?)
+            .transpose()
+            .unwrap())
     }
 
     async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error>;

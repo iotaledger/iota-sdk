@@ -9,7 +9,7 @@ pub mod routes;
 use crate::client::constants::MAX_PARALLEL_API_REQUESTS;
 use crate::{
     client::{Client, Result},
-    types::block::output::{dto::OutputMetadataDto, OutputId, OutputWithMetadata},
+    types::block::output::{OutputId, OutputMetadata, OutputWithMetadata},
 };
 
 impl Client {
@@ -70,7 +70,7 @@ impl Client {
     }
 
     /// Requests metadata for outputs by their output ID in parallel, ignoring failed requests
-    pub async fn get_outputs_metadata_ignore_errors(&self, output_ids: &[OutputId]) -> Result<Vec<OutputMetadataDto>> {
+    pub async fn get_outputs_metadata_ignore_errors(&self, output_ids: &[OutputId]) -> Result<Vec<OutputMetadata>> {
         #[cfg(target_family = "wasm")]
         let metadata = futures::future::join_all(output_ids.iter().map(|id| self.get_output_metadata(id)))
             .await

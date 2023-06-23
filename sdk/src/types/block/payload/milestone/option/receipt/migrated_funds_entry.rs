@@ -81,13 +81,13 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::{address::Address, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct MigratedFundsEntryDto {
         pub tail_transaction_hash: String,
-        pub address: AddressDto,
+        pub address: Address,
         pub deposit: u64,
     }
 
@@ -95,7 +95,7 @@ pub mod dto {
         fn from(value: &MigratedFundsEntry) -> Self {
             Self {
                 tail_transaction_hash: prefix_hex::encode(value.tail_transaction_hash().as_ref()),
-                address: value.address().into(),
+                address: *value.address(),
                 deposit: value.amount(),
             }
         }
@@ -108,7 +108,7 @@ pub mod dto {
 
             Self::new(
                 TailTransactionHash::new(tail_transaction_hash)?,
-                value.address.try_into()?,
+                value.address,
                 value.deposit,
                 token_supply,
             )
@@ -121,7 +121,7 @@ pub mod dto {
             Ok(Self {
                 tail_transaction_hash: TailTransactionHash::new(tail_transaction_hash)?,
                 amount: value.deposit,
-                address: value.address.try_into()?,
+                address: value.address,
             })
         }
     }

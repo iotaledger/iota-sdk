@@ -8,7 +8,11 @@ use crate::types::block::{address::Address, Error};
 /// Defines a unix time until which only Address, defined in Address Unlock Condition, is allowed to unlock the output.
 /// After or at the unix time, only Return Address can unlock it.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
     return_address: Address,
@@ -62,46 +66,5 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
         Err(Error::ExpirationUnlockConditionZero)
     } else {
         Ok(())
-    }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct ExpirationUnlockConditionDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: AddressDto,
-        #[serde(rename = "unixTime")]
-        pub timestamp: u32,
-    }
-
-    impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {
-        fn from(value: &ExpirationUnlockCondition) -> Self {
-            Self {
-                kind: ExpirationUnlockCondition::KIND,
-                return_address: value.return_address().into(),
-                timestamp: value.timestamp(),
-            }
-        }
-    }
-
-    impl TryFrom<ExpirationUnlockConditionDto> for ExpirationUnlockCondition {
-        type Error = Error;
-
-        fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(
-                Address::try_from(value.return_address)
-                    .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
-                value.timestamp,
-            )
-            .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
-        }
     }
 }

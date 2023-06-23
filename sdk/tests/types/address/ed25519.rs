@@ -3,18 +3,11 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{
-    address::{
-        dto::{AddressDto, Ed25519AddressDto},
-        Address, Bech32Address, Ed25519Address, ToBech32Ext,
-    },
-    Error,
-};
+use iota_sdk::types::block::address::{Address, Bech32Address, Ed25519Address, ToBech32Ext};
 use packable::PackableExt;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";
 const ED25519_BECH32: &str = "rms1qr47gz3xxjqpjrwd0yu5glhqrth6w0t08npney8000ust2lcw2r92j5a8rt";
-const ED25519_ADDRESS_INVALID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64";
 
 #[test]
 fn kind() {
@@ -89,46 +82,6 @@ fn bech32_roundtrip() {
         Bech32Address::try_from_str(bech32),
         Bech32Address::try_new("rms", address)
     );
-}
-
-#[test]
-fn dto_fields() {
-    let ed25519_address = Ed25519Address::from_str(ED25519_ADDRESS).unwrap();
-    let ed25519_dto = Ed25519AddressDto::from(&ed25519_address);
-
-    assert_eq!(ed25519_dto.kind, Ed25519Address::KIND);
-    assert_eq!(ed25519_dto.pub_key_hash, ED25519_ADDRESS.to_string());
-
-    let address = Address::from(ed25519_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(dto, AddressDto::Ed25519(ed25519_dto));
-}
-
-#[test]
-fn dto_roundtrip() {
-    let ed25519_address = Ed25519Address::from_str(ED25519_ADDRESS).unwrap();
-    let ed25519_dto = Ed25519AddressDto::from(&ed25519_address);
-
-    assert_eq!(Ed25519Address::try_from(ed25519_dto).unwrap(), ed25519_address);
-
-    let address = Address::from(ed25519_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(Address::try_from(dto).unwrap(), address);
-}
-
-#[test]
-fn dto_invalid_pub_key_hash() {
-    let dto = Ed25519AddressDto {
-        kind: Ed25519Address::KIND,
-        pub_key_hash: ED25519_ADDRESS_INVALID.to_string(),
-    };
-
-    assert!(matches!(
-        Ed25519Address::try_from(dto),
-        Err(Error::InvalidField("pubKeyHash"))
-    ));
 }
 
 #[test]

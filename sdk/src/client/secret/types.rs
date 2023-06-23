@@ -3,18 +3,12 @@
 
 //! Miscellaneous types for secret managers.
 
-use crypto::keys::slip10::{Chain, Segment};
+use crypto::keys::slip10::Chain;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    client::Result,
-    types::block::{
-        address::Address,
-        output::{
-            dto::{OutputDto, OutputMetadataDto},
-            Output, OutputId, OutputMetadata,
-        },
-    },
+use crate::types::block::{
+    address::Address,
+    output::{Output, OutputId, OutputMetadata},
 };
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
@@ -166,53 +160,5 @@ impl InputSigningData {
     /// Return the [OutputId]
     pub fn output_id(&self) -> &OutputId {
         self.output_metadata.output_id()
-    }
-}
-
-/// Dto for data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InputSigningDataDto {
-    /// The output
-    pub output: OutputDto,
-    /// The output metadata
-    pub output_metadata: OutputMetadataDto,
-    /// The chain derived from seed, only for ed25519 addresses
-    pub chain: Option<Vec<u32>>,
-}
-
-#[allow(missing_docs)]
-impl InputSigningData {
-    pub fn try_from_dto(input: InputSigningDataDto, token_supply: u64) -> Result<Self> {
-        Ok(Self {
-            output: Output::try_from_dto(input.output, token_supply)?,
-            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
-            chain: input.chain.map(Chain::from_u32_hardened),
-        })
-    }
-
-    pub fn try_from_dto_unverified(input: InputSigningDataDto) -> Result<Self> {
-        Ok(Self {
-            output: Output::try_from_dto_unverified(input.output)?,
-            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
-            chain: input.chain.map(Chain::from_u32_hardened),
-        })
-    }
-}
-
-impl From<&InputSigningData> for InputSigningDataDto {
-    fn from(input: &InputSigningData) -> Self {
-        Self {
-            output: OutputDto::from(&input.output),
-            output_metadata: OutputMetadataDto::from(&input.output_metadata),
-            chain: input.chain.as_ref().map(|chain| {
-                chain
-                    .segments()
-                    .iter()
-                    // TODO: get the value direct when https://github.com/iotaledger/crypto.rs/issues/192 is done
-                    .map(|seg| u32::from_be_bytes(seg.bs()) & !Segment::HARDEN_MASK)
-                    .collect::<Vec<u32>>()
-            }),
-        }
     }
 }

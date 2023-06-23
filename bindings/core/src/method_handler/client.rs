@@ -6,21 +6,18 @@ use iota_sdk::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
         request_funds_from_faucet, Client,
     },
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            input::dto::UtxoInputDto,
-            output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
-            },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                Payload,
-            },
-            protocol::dto::ProtocolParametersDto,
-            Block, BlockDto,
+    types::block::{
+        input::dto::UtxoInputDto,
+        output::{
+            AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NftOutputBuilder, OutputBuilderAmount,
+            RentStructure,
         },
+        payload::{
+            dto::{MilestonePayloadDto, PayloadDto},
+            Payload,
+        },
+        protocol::dto::ProtocolParametersDto,
+        Block, BlockDto,
     },
 };
 #[cfg(feature = "mqtt")]
@@ -81,24 +78,36 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(AliasOutput::try_from_dtos(
+            let mut output = AliasOutputBuilder::new(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(
+                        amount
+                            .parse()
+                            .map_err(|_| iota_sdk::types::block::Error::InvalidField("amount"))?,
+                    )
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
-                native_tokens,
-                &alias_id,
-                state_index,
-                state_metadata.map(prefix_hex::decode).transpose()?,
-                foundry_counter,
-                unlock_conditions,
-                features,
-                immutable_features,
-                client.get_token_supply().await?,
-            )?);
+                alias_id,
+            )
+            .with_state_index(state_index)
+            .with_foundry_counter(foundry_counter)
+            .with_unlock_conditions(unlock_conditions);
+            if let Some(native_tokens) = native_tokens {
+                output = output.with_native_tokens(native_tokens);
+            }
+            if let Some(state_metadata) = state_metadata {
+                output = output.with_state_metadata(state_metadata);
+            }
+            if let Some(features) = features {
+                output = output.with_features(features);
+            }
+            if let Some(immutable_features) = immutable_features {
+                output = output.with_immutable_features(immutable_features);
+            }
+            let output = output.finish_output(client.get_token_supply().await?)?;
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildBasicOutput {
             amount,
@@ -106,19 +115,25 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             unlock_conditions,
             features,
         } => {
-            let output = Output::from(BasicOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
-                } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
-                },
-                native_tokens,
-                unlock_conditions,
-                features,
-                client.get_token_supply().await?,
-            )?);
+            let mut output = BasicOutputBuilder::new(if let Some(amount) = amount {
+                OutputBuilderAmount::Amount(
+                    amount
+                        .parse()
+                        .map_err(|_| iota_sdk::types::block::Error::InvalidField("amount"))?,
+                )
+            } else {
+                OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+            })
+            .with_unlock_conditions(unlock_conditions);
+            if let Some(native_tokens) = native_tokens {
+                output = output.with_native_tokens(native_tokens);
+            }
+            if let Some(features) = features {
+                output = output.with_features(features);
+            }
+            let output = output.finish_output(client.get_token_supply().await?)?;
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildFoundryOutput {
             amount,
@@ -129,22 +144,32 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(FoundryOutput::try_from_dtos(
+            let mut output = FoundryOutputBuilder::new(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(
+                        amount
+                            .parse()
+                            .map_err(|_| iota_sdk::types::block::Error::InvalidField("amount"))?,
+                    )
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
-                native_tokens,
                 serial_number,
                 token_scheme,
-                unlock_conditions,
-                features,
-                immutable_features,
-                client.get_token_supply().await?,
-            )?);
+            )
+            .with_unlock_conditions(unlock_conditions);
+            if let Some(native_tokens) = native_tokens {
+                output = output.with_native_tokens(native_tokens);
+            }
+            if let Some(features) = features {
+                output = output.with_features(features);
+            }
+            if let Some(immutable_features) = immutable_features {
+                output = output.with_immutable_features(immutable_features);
+            }
+            let output = output.finish_output(client.get_token_supply().await?)?;
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildNftOutput {
             amount,
@@ -154,21 +179,31 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(NftOutput::try_from_dtos(
+            let mut output = NftOutputBuilder::new(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(
+                        amount
+                            .parse()
+                            .map_err(|_| iota_sdk::types::block::Error::InvalidField("amount"))?,
+                    )
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
-                native_tokens,
-                &nft_id,
-                unlock_conditions,
-                features,
-                immutable_features,
-                client.get_token_supply().await?,
-            )?);
+                nft_id,
+            )
+            .with_unlock_conditions(unlock_conditions);
+            if let Some(native_tokens) = native_tokens {
+                output = output.with_native_tokens(native_tokens);
+            }
+            if let Some(features) = features {
+                output = output.with_features(features);
+            }
+            if let Some(immutable_features) = immutable_features {
+                output = output.with_immutable_features(immutable_features);
+            }
+            let output = output.finish_output(client.get_token_supply().await?)?;
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildAndPostBlock {
             secret_manager,
@@ -305,12 +340,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockRaw { block_id } => Response::BlockRaw(client.get_block_raw(&block_id).await?),
-        ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
-            client
-                .get_output(&output_id)
-                .await
-                .map(OutputWithMetadataResponse::from)?,
-        ),
+        ClientMethod::GetOutput { output_id } => {
+            Response::OutputWithMetadataResponse(client.get_output(&output_id).await?)
+        }
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
@@ -358,23 +390,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.foundry_output_ids(query_parameters).await?)
         }
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
-        ClientMethod::GetOutputs { output_ids } => {
-            let outputs_response = client
-                .get_outputs(&output_ids)
-                .await?
-                .iter()
-                .map(OutputWithMetadataResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
-        }
+        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(&output_ids).await?),
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
-            let outputs_response = client
-                .get_outputs_ignore_errors(&output_ids)
-                .await?
-                .iter()
-                .map(OutputWithMetadataResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
+            Response::Outputs(client.get_outputs_ignore_errors(&output_ids).await?)
         }
         ClientMethod::FindBlocks { block_ids } => Response::Blocks(
             client
@@ -420,13 +438,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .collect(),
         ),
         ClientMethod::FindOutputs { output_ids, addresses } => {
-            let outputs_response = client
-                .find_outputs(&output_ids, &addresses)
-                .await?
-                .iter()
-                .map(OutputWithMetadataResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
+            Response::Outputs(client.find_outputs(&output_ids, &addresses).await?)
         }
         ClientMethod::Reattach { block_id } => {
             let (block_id, block) = client.reattach(&block_id).await?;

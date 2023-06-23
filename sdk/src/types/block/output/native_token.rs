@@ -12,7 +12,10 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::TokenId, Error};
+use crate::{
+    types::block::{output::TokenId, Error},
+    utils::serde::boxed_slice_prefix,
+};
 
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
@@ -150,11 +153,13 @@ impl From<NativeTokens> for NativeTokensBuilder {
 pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidNativeTokenCount(p.into())))]
 pub struct NativeTokens(
-    #[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<NativeToken, NativeTokenCount>,
+    #[packable(verify_with = verify_unique_sorted)]
+    #[serde(with = "boxed_slice_prefix")]
+    BoxedSlicePrefix<NativeToken, NativeTokenCount>,
 );
 
 impl TryFrom<Vec<NativeToken>> for NativeTokens {
@@ -232,6 +237,10 @@ impl NativeTokens {
         self.0
             .binary_search_by_key(token_id, |native_token| native_token.token_id)
             .map_or(None, |index| Some(&self.0[index]))
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 

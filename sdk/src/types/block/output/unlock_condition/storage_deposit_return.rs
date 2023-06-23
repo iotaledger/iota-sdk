@@ -5,7 +5,11 @@ use crate::types::block::{address::Address, output::verify_output_amount, protoc
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct StorageDepositReturnUnlockCondition {
     // The [`Address`] to return the amount to.
@@ -58,50 +62,4 @@ fn verify_amount_packable<const VERIFY: bool>(
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::{String, ToString};
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct StorageDepositReturnUnlockConditionDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: AddressDto,
-        pub amount: String,
-    }
-
-    impl From<&StorageDepositReturnUnlockCondition> for StorageDepositReturnUnlockConditionDto {
-        fn from(value: &StorageDepositReturnUnlockCondition) -> Self {
-            Self {
-                kind: StorageDepositReturnUnlockCondition::KIND,
-                return_address: AddressDto::from(value.return_address()),
-                amount: value.amount().to_string(),
-            }
-        }
-    }
-
-    impl StorageDepositReturnUnlockCondition {
-        pub fn try_from_dto(value: StorageDepositReturnUnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
-            Self::new(
-                Address::try_from(value.return_address)?,
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                token_supply,
-            )
-        }
-
-        pub fn try_from_dto_unverified(value: StorageDepositReturnUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self {
-                return_address: Address::try_from(value.return_address)?,
-                amount: value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-            })
-        }
-    }
 }

@@ -281,10 +281,7 @@ pub mod dto {
             Ok(match value {
                 PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto(*p, protocol_parameters)?),
                 PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto(*p, protocol_parameters)?),
-                PayloadDto::TreasuryTransaction(p) => Self::from(TreasuryTransactionPayload::try_from_dto(
-                    *p,
-                    protocol_parameters.token_supply(),
-                )?),
+                PayloadDto::TreasuryTransaction(p) => Self::from(TreasuryTransactionPayload::try_from_dto(*p)?),
                 PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })
         }
@@ -293,9 +290,7 @@ pub mod dto {
             Ok(match value {
                 PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(*p)?),
                 PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(*p)?),
-                PayloadDto::TreasuryTransaction(p) => {
-                    Self::from(TreasuryTransactionPayload::try_from_dto_unverified(*p)?)
-                }
+                PayloadDto::TreasuryTransaction(p) => Self::from(TreasuryTransactionPayload::try_from_dto(*p)?),
                 PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })
         }

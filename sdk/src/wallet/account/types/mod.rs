@@ -18,17 +18,11 @@ pub use self::{
 };
 use crate::{
     client::{constants::HD_WALLET_TYPE, secret::types::InputSigningData},
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            address::{dto::AddressDto, Address},
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                AliasTransition, Output, OutputId, OutputMetadata,
-            },
-            payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
-            BlockId,
-        },
+    types::block::{
+        address::Address,
+        output::{AliasTransition, Output, OutputId, OutputMetadata, OutputWithMetadata},
+        payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+        BlockId,
     },
     wallet::account::AccountDetails,
 };
@@ -95,43 +89,6 @@ impl OutputData {
     }
 }
 
-/// Dto for an output with metadata
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputDataDto {
-    /// The output id
-    pub output_id: OutputId,
-    /// The metadata of the output
-    pub metadata: OutputMetadataDto,
-    /// The actual Output
-    pub output: OutputDto,
-    /// If an output is spent
-    pub is_spent: bool,
-    /// Associated account address.
-    pub address: AddressDto,
-    /// Network ID
-    pub network_id: String,
-    /// Remainder
-    pub remainder: bool,
-    /// Bip32 path
-    pub chain: Option<Chain>,
-}
-
-impl From<&OutputData> for OutputDataDto {
-    fn from(value: &OutputData) -> Self {
-        Self {
-            output_id: value.output_id,
-            metadata: OutputMetadataDto::from(&value.metadata),
-            output: OutputDto::from(&value.output),
-            is_spent: value.is_spent,
-            address: AddressDto::from(&value.address),
-            network_id: value.network_id.to_string(),
-            remainder: value.remainder,
-            chain: value.chain.clone(),
-        }
-    }
-}
-
 /// A transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -151,7 +108,7 @@ pub struct Transaction {
     /// from the node.
     // serde(default) is needed so it doesn't break with old dbs
     #[serde(default)]
-    pub inputs: Vec<OutputWithMetadataResponse>,
+    pub inputs: Vec<OutputWithMetadata>,
 }
 
 /// Dto for a transaction with metadata
@@ -172,7 +129,7 @@ pub struct TransactionDto {
     /// If the transaction was created by the wallet or if it was sent by someone else and is incoming
     pub incoming: bool,
     pub note: Option<String>,
-    pub inputs: Vec<OutputWithMetadataResponse>,
+    pub inputs: Vec<OutputWithMetadata>,
 }
 
 impl From<&Transaction> for TransactionDto {

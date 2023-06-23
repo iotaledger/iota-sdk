@@ -4,10 +4,7 @@
 use alloc::{boxed::Box, string::String, vec::Vec};
 
 use crate::types::block::{
-    output::{
-        dto::{OutputDto, OutputMetadataDto},
-        OutputWithMetadata,
-    },
+    output::OutputWithMetadata,
     payload::{dto::MilestonePayloadDto, milestone::option::dto::ReceiptMilestoneOptionDto},
     protocol::dto::ProtocolParametersDto,
     BlockDto,
@@ -208,34 +205,6 @@ pub struct BlockMetadataResponse {
 }
 
 /// Response of GET /api/core/v2/outputs/{output_id}.
-/// Returns an output and its metadata.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct OutputWithMetadataResponse {
-    pub metadata: OutputMetadataDto,
-    pub output: OutputDto,
-}
-
-impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
-    fn from(value: &OutputWithMetadata) -> Self {
-        Self {
-            metadata: OutputMetadataDto::from(value.metadata()),
-            output: OutputDto::from(value.output()),
-        }
-    }
-}
-
-impl From<OutputWithMetadata> for OutputWithMetadataResponse {
-    fn from(value: OutputWithMetadata) -> Self {
-        Self::from(&value)
-    }
-}
-
-/// Response of GET /api/core/v2/outputs/{output_id}.
 /// Returns an output and its metadata as JSON or raw bytes.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -245,7 +214,7 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     serde(untagged)
 )]
 pub enum OutputResponse {
-    Json(Box<OutputWithMetadataResponse>),
+    Json(Box<OutputWithMetadata>),
     Raw(Vec<u8>),
 }
 

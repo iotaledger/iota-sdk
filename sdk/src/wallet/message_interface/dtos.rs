@@ -9,12 +9,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
-        output::{dto::FoundryOutputDto, FoundryId, OutputId},
+        output::{FoundryId, FoundryOutput, OutputId},
         payload::transaction::TransactionId,
     },
     wallet::account::{
-        types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
-        AccountDetails, OutputDataDto,
+        types::{AccountAddress, AddressWithUnspentOutputs, OutputData, TransactionDto},
+        AccountDetails,
     },
 };
 
@@ -35,11 +35,11 @@ pub struct AccountDetailsDto {
     /// Addresses with unspent outputs
     pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
     /// Outputs
-    pub outputs: HashMap<OutputId, OutputDataDto>,
+    pub outputs: HashMap<OutputId, OutputData>,
     /// Unspent outputs that are currently used as input for transactions
     pub locked_outputs: HashSet<OutputId>,
     /// Unspent outputs
-    pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
+    pub unspent_outputs: HashMap<OutputId, OutputData>,
     /// Sent transactions
     pub transactions: HashMap<TransactionId, TransactionDto>,
     /// Pending transactions
@@ -48,7 +48,7 @@ pub struct AccountDetailsDto {
     pub incoming_transactions: HashMap<TransactionId, TransactionDto>,
     /// Foundries for native tokens in outputs
     #[serde(default)]
-    pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
+    pub native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
 impl From<&AccountDetails> for AccountDetailsDto {
@@ -63,13 +63,13 @@ impl From<&AccountDetails> for AccountDetailsDto {
             outputs: value
                 .outputs()
                 .iter()
-                .map(|(id, output)| (*id, OutputDataDto::from(output)))
+                .map(|(id, output)| (*id, output.clone()))
                 .collect(),
             locked_outputs: value.locked_outputs().clone(),
             unspent_outputs: value
                 .unspent_outputs()
                 .iter()
-                .map(|(id, output)| (*id, OutputDataDto::from(output)))
+                .map(|(id, output)| (*id, output.clone()))
                 .collect(),
             transactions: value
                 .transactions()
@@ -85,7 +85,7 @@ impl From<&AccountDetails> for AccountDetailsDto {
             native_token_foundries: value
                 .native_token_foundries()
                 .iter()
-                .map(|(id, foundry)| (*id, FoundryOutputDto::from(foundry)))
+                .map(|(id, foundry)| (*id, foundry.clone()))
                 .collect(),
         }
     }
