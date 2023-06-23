@@ -100,6 +100,7 @@ impl RegularTransactionEssenceBuilder {
             .expect("Time went backwards")
             .as_nanos() as u64;
         // TODO no_std way to have a nanosecond timestamp
+        // https://github.com/iotaledger/iota-sdk/issues/647
         #[cfg(not(feature = "std"))]
         let creation_time = 0;
 
@@ -139,6 +140,7 @@ impl RegularTransactionEssenceBuilder {
             .expect("Time went backwards")
             .as_nanos() as u64;
         // TODO no_std way to have a nanosecond timestamp
+        // https://github.com/iotaledger/iota-sdk/issues/647
         #[cfg(not(feature = "std"))]
         let creation_time = 0;
 

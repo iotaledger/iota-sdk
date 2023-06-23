@@ -95,6 +95,7 @@ describe('Offline signing examples', () => {
         expect(blockId).toBeValidBlockId;
     });
     // TODO temporarily disabled
+    // https://github.com/iotaledger/iota-sdk/issues/647
     // it('create a signature unlock', async () => {
     //     // Verifies that an unlock created in Rust matches that created by the binding when the mnemonic is identical.
     //     const secretManager = {
