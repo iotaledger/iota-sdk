@@ -21,8 +21,8 @@ use crate::types::block::{BlockId, Error};
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[deref(forward)]
-#[packable(unpack_error = Error, with = |e| Error::InvalidParentCount(e.into_prefix_err().into()))]
-pub(crate) struct Parents<const MIN: u8, const MAX: u8>(
+#[packable(unpack_error = Error, with = |_| Error::InvalidParentCount)]
+pub struct Parents<const MIN: u8, const MAX: u8>(
     #[packable(verify_with = verify_parents)] BoxedSlicePrefix<BlockId, BoundedU8<MIN, MAX>>,
 );
 
@@ -37,7 +37,10 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
         inner.dedup();
 
         Ok(Self(
-            inner.into_boxed_slice().try_into().map_err(Error::InvalidParentCount)?,
+            inner
+                .into_boxed_slice()
+                .try_into()
+                .map_err(|_| Error::InvalidParentCount)?,
         ))
     }
 
@@ -48,7 +51,7 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(Error::InvalidParentCount)?,
+                .map_err(|_| Error::InvalidParentCount)?,
         ))
     }
 

@@ -22,8 +22,8 @@ async fn main() -> Result<()> {
     // Use tips as custom parents.
     let parents = client.get_tips().await?;
 
-    // Create and send the block with custom parents.
-    let block = client.block().with_parents(parents)?.finish().await?;
+    // Create and send the block with custom strong parents.
+    let block = client.block().with_strong_parents(parents)?.finish().await?;
 
     println!("{block:#?}");
 
