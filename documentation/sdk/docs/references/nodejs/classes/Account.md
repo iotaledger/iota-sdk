@@ -35,8 +35,8 @@ The Account class.
 - [unspentOutputs](Account.md#unspentoutputs)
 - [getMetadata](Account.md#getmetadata)
 - [minimumRequiredStorageDeposit](Account.md#minimumrequiredstoragedeposit)
-- [prepareIncreaseNativeTokenSupply](Account.md#prepareincreasenativetokensupply)
 - [prepareMintNativeToken](Account.md#preparemintnativetoken)
+- [prepareCreateNativeToken](Account.md#preparecreatenativetoken)
 - [prepareMintNfts](Account.md#preparemintnfts)
 - [prepareOutput](Account.md#prepareoutput)
 - [prepareSendAmount](Account.md#preparesendamount)
@@ -614,9 +614,9 @@ The amount.
 
 ___
 
-### prepareIncreaseNativeTokenSupply
+### prepareMintNativeToken
 
-▸ **prepareIncreaseNativeTokenSupply**(`tokenId`, `mintAmount`, `transactionOptions?`): `Promise`<`PreparedMintTokenTransactionData`\>
+▸ **prepareMintNativeToken**(`tokenId`, `mintAmount`, `transactionOptions?`): `Promise`<`PreparedMintTokenTransactionData`\>
 
 Mint more native tokens.
 

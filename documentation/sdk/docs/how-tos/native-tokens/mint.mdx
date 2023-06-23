@@ -1,11 +1,12 @@
 ---
-title: Increase Native Token Circulating Supply 
+title: Mint Native Tokens
 sidebar_label: Increase Circulating Supply
-description: 'How to increase the circulating supply of native tokens'
+description: 'How to mint native tokens'
 image: /img/logo/iota_mark_light.png
 keywords:
 - how to
 - increase native token circulating supply
+- mint
 - foundry
 - nodejs
 - python
@@ -15,12 +16,12 @@ keywords:
 import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/native_tokens/increase-supply.ts';
-import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/native_tokens/increase_supply.py';
-import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/native_tokens/increase_supply.rs';
+import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/native_tokens/mint.ts';
+import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/native_tokens/mint.py';
+import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/native_tokens/mint.rs';
 
 You may want to increase the circulating native token supply. To do so, you will need to call the
-`Account.increase_native_token_supply(token_id, mint_amount, options)` function.
+`Account.mint_native_token(token_id, mint_amount, options)` function.
 
 ## Code Example
 

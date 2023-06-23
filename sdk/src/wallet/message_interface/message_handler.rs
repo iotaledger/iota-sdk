@@ -688,7 +688,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::IncreaseNativeTokenSupply {
+            AccountMethod::MintNativeToken {
                 token_id,
                 mint_amount,
                 options,
@@ -701,7 +701,7 @@ impl WalletMessageHandler {
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::CreateNativeTokenTransaction(NativeTokenTransactionDto::from(
+                    Ok(Response::NativeTokenTransaction(NativeTokenTransactionDto::from(
                         &transaction,
                     )))
                 })
@@ -712,7 +712,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
-                    Ok(Response::CreateNativeTokenTransaction(NativeTokenTransactionDto::from(
+                    Ok(Response::NativeTokenTransaction(NativeTokenTransactionDto::from(
                         &transaction,
                     )))
                 })

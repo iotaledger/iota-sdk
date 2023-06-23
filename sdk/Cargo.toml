@@ -203,8 +203,8 @@ path = "examples/how_tos/native_tokens/melt.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
-name = "increase_native_token_supply"
-path = "examples/how_tos/native_tokens/increase_supply.rs"
+name = "mint_native_token"
+path = "examples/how_tos/native_tokens/mint.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]

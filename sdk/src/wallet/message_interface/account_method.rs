@@ -254,9 +254,9 @@ pub enum AccountMethod {
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit { output: OutputDto },
     /// Mint more native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Expected response: [`NativeTokenTransaction`](crate::wallet::message_interface::Response::NativeTokenTransaction)
     #[serde(rename_all = "camelCase")]
-    IncreaseNativeTokenSupply {
+    MintNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
@@ -264,7 +264,7 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Create a native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Expected response: [`NativeTokenTransaction`](crate::wallet::message_interface::Response::NativeTokenTransaction)
     #[serde(rename_all = "camelCase")]
     CreateNativeToken {
         params: CreateNativeTokenParams,

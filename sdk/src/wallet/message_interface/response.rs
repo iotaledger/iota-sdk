@@ -130,7 +130,7 @@ pub enum Response {
     SentTransaction(TransactionDto),
     /// Response for
     /// [`CreateNativeToken`](crate::wallet::message_interface::AccountMethod::CreateNativeToken),
-    CreateNativeTokenTransaction(NativeTokenTransactionDto),
+    NativeTokenTransaction(NativeTokenTransactionDto),
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
     /// [`VerifyEd25519Signature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEd25519Signature)
@@ -229,8 +229,8 @@ impl Debug for Response {
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::CreateNativeTokenTransaction(create_transaction) => {
-                write!(f, "NativeTokenTransaction({create_transaction:?})")
+            Self::NativeTokenTransaction(native_token_transaction) => {
+                write!(f, "NativeTokenTransaction({native_token_transaction:?})")
             }
             Self::Bool(b) => {
                 write!(f, "Bool({b})")

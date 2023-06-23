@@ -181,7 +181,7 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     PrepareIncreaseVotingPower { amount: String },
     /// Mint more native token.
-    /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
+    /// Expected response: [`PreparedNativeTokenTransaction`](crate::Response::PreparedNativeTokenTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareMintNativeToken {
         /// Native token id
@@ -197,7 +197,7 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Create native token.
-    /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
+    /// Expected response: [`PreparedNativeTokenTransaction`](crate::Response::PreparedNativeTokenTransaction)
     PrepareCreateNativeToken {
         params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
