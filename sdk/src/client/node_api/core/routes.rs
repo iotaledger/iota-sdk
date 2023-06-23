@@ -15,11 +15,13 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, RoutesResponse,
-            SubmitBlockResponse, TipsResponse,
+            BlockMetadataResponse, InfoResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
         },
         block::{
-            output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{
+                dto::{OutputDto, OutputMetadataDto},
+                Output, OutputId, OutputMetadata, OutputWithMetadata,
+            },
             payload::transaction::TransactionId,
             slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -257,21 +259,18 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        let response: OutputWithMetadataResponse = self
+        let output = self
             .node_manager
             .read()
             .await
-            .get_request(path, None, self.get_timeout().await, false, true)
+            .get_request::<OutputDto>(path, None, self.get_timeout().await, false, true)
             .await?;
-
         let token_supply = self.get_token_supply().await?;
-        let output = Output::try_from_dto(response.output, token_supply)?;
-        let metadata = OutputMetadata::try_from(response.metadata)?;
 
-        Ok(OutputWithMetadata::new(output, metadata))
+        Ok(Output::try_from_dto(output, token_supply)?)
     }
 
     /// Finds an output by its ID and returns it as raw bytes.
@@ -299,6 +298,16 @@ impl ClientInner {
             .await?;
 
         Ok(OutputMetadata::try_from(metadata)?)
+    }
+
+    // Finds output and its metadata by output ID.
+    /// GET /api/core/v3/outputs/{outputId}
+    /// + GET /api/core/v3/outputs/{outputId}/metadata
+    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+        Ok(OutputWithMetadata::new(
+            self.get_output(output_id).await?,
+            self.get_output_metadata(output_id).await?,
+        ))
     }
 
     /// Returns the block that was included in the ledger for a given transaction ID, as object.
