@@ -1,7 +1,9 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import { Block, Client, initLogger, MilestonePayload, parsePayload } from '@iota/sdk';
+import { plainToInstance } from 'class-transformer';
+
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -24,14 +26,29 @@ async function run() {
     const topics = ['blocks'];
 
     const callback = function (error: Error, data: string) {
-        console.log(JSON.parse(data));
+        if (error != null) {
+            console.log(error);
+            return;
+        }
+
+        let parsed = JSON.parse(data);
+        if (parsed.topic == 'milestone') {
+            let payload = parsePayload(JSON.parse(parsed.payload)) as MilestonePayload;
+            let index = payload.index;
+            let previousMilestone = payload.previousMilestoneId;
+            console.log("New milestone index" + index + ", previous ID: " + previousMilestone);
+        } else if (parsed.topic == 'blocks') {
+            let block = plainToInstance(Block, JSON.parse(parsed.payload));
+            console.log("payload:", block.payload);
+        }
+        
     };
 
     await client.listen(topics, callback);
 
     // Clear listener after 10 seconds
     setTimeout(async () => {
-        await client.clearListeners(['blocks']);
+        await client.clearListeners(topics);
         console.log('Listener cleared');
         // Exit the process
         setTimeout(async () => process.exit(0), 2000);

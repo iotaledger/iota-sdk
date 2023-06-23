@@ -108,7 +108,7 @@ class Utils():
     def compute_inputs_commitment(inputs) -> HexStr:
         """Calculate the input commitment from the output objects that are used as inputs to fund the transaction.
         """
-        return _call_method('computeInputsCommitment ', {
+        return _call_method('computeInputsCommitment', {
             'inputs': inputs
         })
 
@@ -116,7 +116,7 @@ class Utils():
     def compute_storage_deposit(output, rent) -> HexStr:
         """Calculates the required storage deposit of an output.
         """
-        return _call_method('computeStorageDeposit  ', {
+        return _call_method('computeStorageDeposit', {
             'inputs': inputs
         })
 
