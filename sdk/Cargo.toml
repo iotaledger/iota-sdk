@@ -151,6 +151,11 @@ name = "list_outputs"
 path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+[[example]]
+name = "consolidate_outputs"
+path = "examples/how_tos/accounts_and_addresses/consolidate_outputs.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Simple Transaction Examples
 
 [[example]]
@@ -655,11 +660,6 @@ required-features = [ "wallet", "participation" ]
 name = "logger"
 path = "examples/wallet/logger.rs"
 required-features = [ "wallet" ]
-
-[[example]]
-name = "output_consolidation"
-path = "examples/wallet/output_consolidation.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "recover_accounts"

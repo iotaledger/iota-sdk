@@ -9,7 +9,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example output_consolidation
+//! cargo run --release --all-features --example consolidate_outputs
 //! ```
 
 use std::env::var;
