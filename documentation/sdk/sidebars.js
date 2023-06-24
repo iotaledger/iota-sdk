@@ -72,6 +72,7 @@ module.exports = {
             'how-tos/accounts-and-addresses/create-address',
             'how-tos/accounts-and-addresses/list-transactions',
             'how-tos/accounts-and-addresses/list-outputs',
+            'how-tos/accounts-and-addresses/consolidate-outputs',
           ]
         },
         {

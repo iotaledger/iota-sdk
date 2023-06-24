@@ -1,0 +1,88 @@
+---
+title: Consolidate Outputs
+description: 'How to consolidate outputs'
+image: /img/logo/iota_mark_light.png
+keywords:
+- how to
+- consolidate outputs
+- nodejs
+- python
+- rust
+---
+
+import CodeBlock from '@theme/CodeBlock';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import RustCode from "!!raw-loader!../../../../../sdk/examples/how_tos/accounts_and_addresses/consolidate_outputs.rs";
+import NodejsCode from "!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/accounts_and_addresses/consolidate-outputs.ts";
+import PythonCode from "!!raw-loader!../../../../../bindings/python/examples/how_tos/accounts_and_addresses/consolidate_outputs.py";
+
+This How-To will show you how to consolidate all outputs of an account.
+
+## Code Example
+
+<Tabs groupId="language">
+    <TabItem value="rust" label="Rust">
+        <CodeBlock className="language-rust">
+            {RustCode}
+        </CodeBlock>
+    </TabItem>
+    <TabItem value="nodejs" label="Nodejs">
+        <CodeBlock className="language-typescript">
+            {NodejsCode}
+        </CodeBlock>
+    </TabItem>
+    <TabItem value="python" label="Python">
+        <CodeBlock className="language-python">
+            {PythonCode}
+        </CodeBlock>
+    </TabItem>
+</Tabs>
+
+## Expected Output
+
+```plaintext
+Account synced
+Outputs BEFORE consolidation:
+OUTPUT #0
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 998947200
+- native tokens: Some(NativeTokens([NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0200000000), amount: 100 }]))
+OUTPUT #1
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 50300
+- native tokens: Some(NativeTokens([]))
+OUTPUT #2
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 999895300
+- native tokens: Some(NativeTokens([NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0100000000), amount: 100 }]))
+OUTPUT #3
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 54400
+- native tokens: Some(NativeTokens([]))
+OUTPUT #4
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 52800
+- native tokens: Some(NativeTokens([]))
+Sending consolidation transaction...
+Transaction sent: 0xff3498d1bfc22997a333d9ff57c007f342bc709d3e8d2978bcc7e339fe1f2f60
+Transaction included: https://explorer.shimmer.network/testnet/block/0x11d15f4cfb995352fd5e59dd35481743d9290b64f05da8558df2873b60314105
+Account synced
+Outputs AFTER consolidation:
+OUTPUT #0
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 50300
+- native tokens: Some(NativeTokens([]))
+OUTPUT #1
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 1998842500
+- native tokens: Some(NativeTokens([NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0100000000), amount: 100 }, NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0200000000), amount: 100 }]))
+OUTPUT #2
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 54400
+- native tokens: Some(NativeTokens([]))
+OUTPUT #3
+- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
+- amount: 52800
+- native tokens: Some(NativeTokens([]))
+```
