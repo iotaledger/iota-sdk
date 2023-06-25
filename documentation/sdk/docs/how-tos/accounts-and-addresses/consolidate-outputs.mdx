@@ -41,48 +41,70 @@ This How-To will show you how to consolidate all outputs of an account.
 
 ## Expected Output
 
+<Tabs groupId="language">
+<TabItem value="rust" label="Rust">
+
 ```plaintext
 Account synced
 Outputs BEFORE consolidation:
 OUTPUT #0
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 998947200
-- native tokens: Some(NativeTokens([NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0200000000), amount: 100 }]))
+- address: Bech32Address(rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq)
+- amount: 1000000
+- native tokens: Some(NativeTokens([]))
 OUTPUT #1
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 50300
+- address: Bech32Address(rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq)
+- amount: 998000000
 - native tokens: Some(NativeTokens([]))
 OUTPUT #2
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 999895300
-- native tokens: Some(NativeTokens([NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0100000000), amount: 100 }]))
-OUTPUT #3
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 54400
-- native tokens: Some(NativeTokens([]))
-OUTPUT #4
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 52800
+- address: Bech32Address(rms1qz7652a7c7s9pcur04x7jlmmnyfq8mpxgahmz50tzqutmv6p72vus60pqsd)
+- amount: 1000000
 - native tokens: Some(NativeTokens([]))
 Sending consolidation transaction...
-Transaction sent: 0xff3498d1bfc22997a333d9ff57c007f342bc709d3e8d2978bcc7e339fe1f2f60
-Transaction included: https://explorer.shimmer.network/testnet/block/0x11d15f4cfb995352fd5e59dd35481743d9290b64f05da8558df2873b60314105
+Transaction sent: 0x245f75cb1b985304ceb022687e5c70ed6a936d667258015303e3f7f9ec285bbf
+Transaction included: https://explorer.shimmer.network/testnet/block/0x5c06b0d2a16e22a54ca2f976a12d56515b58f8310c77de724b8d03dc4f862180
 Account synced
 Outputs AFTER consolidation:
 OUTPUT #0
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 50300
-- native tokens: Some(NativeTokens([]))
-OUTPUT #1
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 1998842500
-- native tokens: Some(NativeTokens([NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0100000000), amount: 100 }, NativeToken { token_id: TokenId(0x08bb8fe924f520a17acc1f55ae1b387e3d48e088423e136d7584aafcddb6c9f4de0200000000), amount: 100 }]))
-OUTPUT #2
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 54400
-- native tokens: Some(NativeTokens([]))
-OUTPUT #3
-- address: Bech32Address(rms1qzqn6l47kcascxg2rpzwz6ahdv9qkjnpjulw5x05t34zfq3ngd0fwt6at3h)
-- amount: 52800
+- address: Bech32Address(rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq)
+- amount: 1000000000
 - native tokens: Some(NativeTokens([]))
 ```
+
+</TabItem>
+<TabItem value="nodejs" label="Nodejs">
+
+```plaintext
+Funds consolidated to:  rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```plaintext
+Account synced
+Outputs BEFORE consolidation:
+OUTPUT #0
+- address: rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq
+- amount: 1000000
+- native tokens: None
+OUTPUT #1
+- address: rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq
+- amount: 998000000
+- native tokens: None
+OUTPUT #2
+- address: rms1qz7652a7c7s9pcur04x7jlmmnyfq8mpxgahmz50tzqutmv6p72vus60pqsd
+- amount: 1000000
+- native tokens: None
+Sending consolidation transaction...
+Transaction sent: 0x245f75cb1b985304ceb022687e5c70ed6a936d667258015303e3f7f9ec285bbf
+Transaction included: https://explorer.shimmer.network/testnet/block/0x5c06b0d2a16e22a54ca2f976a12d56515b58f8310c77de724b8d03dc4f862180
+Account synced
+Outputs AFTER consolidation:
+OUTPUT #0
+- address: rms1qr58umklvtqa4yxxwmskgzyhx2axfe5tfvunu5gauqu9sns7ava3u3kehwq
+- amount: 1000000000
+- native tokens: None
+```
+
+</TabItem>
+</Tabs>
