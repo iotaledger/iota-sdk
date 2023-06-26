@@ -4,7 +4,7 @@
 //! TODO: <insert example description> by calling
 //! `GET api/indexer/v1/outputs/basic`.
 //!
-//! `cargo run --example get_outputs --release -- [NODE_URL]`.
+//! `cargo run --release --example get_outputs -- [NODE_URL]`.
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},

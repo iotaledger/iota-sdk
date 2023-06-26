@@ -30,7 +30,7 @@ async function run() {
             { hasTimelock: false },
             { hasStorageDepositReturn: false },
         ]);
-        console.log!('First output of query:');
+        console.log('First output of query:');
         console.log('ID: ', outputIdsResponse.items[0]);
 
         const outputs = await client.getOutputs(outputIdsResponse.items);
