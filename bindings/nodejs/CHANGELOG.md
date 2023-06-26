@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Client::destroy` to close an open handle;
+
 ### Changed
 
 ### Deprecated
@@ -18,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security -->
+
+## Unreleased - YYYY-MM-DD
+
+### Added
+
+- `Client::destroy` to close an open handle;
 
 ## 1.0.0-rc.1 - 2023-06-19
 
