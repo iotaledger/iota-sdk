@@ -51,14 +51,12 @@ async fn main() -> Result<()> {
     if let Some(native_token_balance) = balance.native_tokens().iter().find(|native_token| {
         native_token.token_id() == &token_id && native_token.available() >= U256::from(MIN_AVAILABLE_AMOUNT)
     }) {
-        println!("Balance before burning:\n{native_token_balance:#?}",);
+        println!("Balance before burning: {native_token_balance:#?}");
 
         // Set the stronghold password
         wallet
             .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
-
-        println!("Sending the burning transaction...");
 
         // Burn a native token
         let burn_amount = U256::from(BURN_AMOUNT);
