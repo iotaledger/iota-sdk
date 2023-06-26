@@ -14,8 +14,6 @@
 //! cargo run --release --all-features --example mint_collection_nft <ISSUER NFT ID>
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     types::block::{
         address::{Bech32Address, NftAddress},
@@ -36,13 +34,13 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let issuer_nft_id = env::args()
+    let issuer_nft_id = std::env::args()
         .nth(1)
         .expect("missing example argument: ISSUER NFT ID")
         .parse::<NftId>()?;
 
     let wallet = Wallet::builder()
-        .with_storage_path(&env::var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -52,7 +50,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
@@ -104,7 +102,7 @@ fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -113,7 +111,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())
