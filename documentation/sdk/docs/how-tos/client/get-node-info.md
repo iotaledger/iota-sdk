@@ -56,151 +56,54 @@ The following code example will:
 <TabItem value="rust" label="Rust">
 
 ```bash
-InfoResponse {
-    name: "HORNET",
-    version: "2.0.0-rc.6",
-    status: StatusResponse {
-        is_healthy: true,
-        latest_milestone: LatestMilestoneResponse {
-            index: 5792633,
-            timestamp: Some(
-                1687456380,
-            ),
-            milestone_id: Some(
-                "0x5d554e0c20779dae25288efefb33c385b11c2dc6088f9418d3a1fececa1385fc",
-            ),
-        },
-        confirmed_milestone: ConfirmedMilestoneResponse {
-            index: 5792633,
-            timestamp: Some(
-                1687456380,
-            ),
-            milestone_id: Some(
-                "0x5d554e0c20779dae25288efefb33c385b11c2dc6088f9418d3a1fececa1385fc",
-            ),
-        },
-        pruning_index: 4750998,
+{
+  "name": "HORNET",
+  "version": "2.0.0-rc.6",
+  "status": {
+    "isHealthy": true,
+    "latestMilestone": {
+      "index": 5857259,
+      "timestamp": 1687786864,
+      "milestoneId": "0x4acfdc55bf4d7eab9e947cda3f6c4c88578c3fd59e44d3b461b706ef73186622"
     },
-    supported_protocol_versions: [
-        2,
-    ],
-    protocol: ProtocolParametersDto {
-        protocol_version: 2,
-        network_name: "testnet-1",
-        bech32_hrp: Hrp {
-            inner: [
-                114,
-                109,
-                115,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ],
-            len: 3,
-        },
-        min_pow_score: 1500,
-        below_max_depth: 15,
-        rent_structure: RentStructure {
-            v_byte_cost: 100,
-            v_byte_factor_key: 10,
-            v_byte_factor_data: 1,
-        },
-        token_supply: "1450896407249092",
+    "confirmedMilestone": {
+      "index": 5857259,
+      "timestamp": 1687786864,
+      "milestoneId": "0x4acfdc55bf4d7eab9e947cda3f6c4c88578c3fd59e44d3b461b706ef73186622"
     },
-    pending_protocol_parameters: [],
-    base_token: BaseTokenResponse {
-        name: "Shimmer",
-        ticker_symbol: "SMR",
-        unit: "SMR",
-        subunit: Some(
-            "glow",
-        ),
-        decimals: 6,
-        use_metric_prefix: false,
+    "pruningIndex": 4749782
+  },
+  "supportedProtocolVersions": [
+    2
+  ],
+  "protocol": {
+    "version": 2,
+    "networkName": "testnet-1",
+    "bech32Hrp": "rms",
+    "minPowScore": 1500,
+    "belowMaxDepth": 15,
+    "rentStructure": {
+      "vByteCost": 100,
+      "vByteFactorKey": 10,
+      "vByteFactorData": 1
     },
-    metrics: MetricsResponse {
-        blocks_per_second: 1.4,
-        referenced_blocks_per_second: 0.2,
-        referenced_rate: 14.285714285714285,
-    },
-    features: [],
+    "tokenSupply": "1450896407249092"
+  },
+  "pendingProtocolParameters": [],
+  "baseToken": {
+    "name": "Shimmer",
+    "tickerSymbol": "SMR",
+    "unit": "SMR",
+    "subunit": "glow",
+    "decimals": 6,
+    "useMetricPrefix": false
+  },
+  "metrics": {
+    "blocksPerSecond": 1.2,
+    "referencedBlocksPerSecond": 0.6,
+    "referencedRate": 50.0
+  },
+  "features": []
 }
 ```
 
