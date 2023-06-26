@@ -4,6 +4,7 @@
 mod addresses;
 mod client_builder;
 mod common;
+mod consolidation;
 mod error;
 mod input_selection;
 mod input_signing_data;

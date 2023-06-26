@@ -245,16 +245,7 @@ async fn test_get_milestone_by_id() {
     let node_info = client.get_info().await.unwrap();
 
     let r = client
-        .get_milestone_by_id(
-            &node_info
-                .node_info
-                .status
-                .latest_milestone
-                .milestone_id
-                .unwrap()
-                .parse()
-                .unwrap(),
-        )
+        .get_milestone_by_id(&node_info.node_info.status.latest_milestone.milestone_id.unwrap())
         .await
         .unwrap();
 
@@ -284,16 +275,7 @@ async fn test_get_utxo_changes_by_id() {
     let node_info = client.get_info().await.unwrap();
 
     let r = client
-        .get_utxo_changes_by_id(
-            &node_info
-                .node_info
-                .status
-                .latest_milestone
-                .milestone_id
-                .unwrap()
-                .parse()
-                .unwrap(),
-        )
+        .get_utxo_changes_by_id(&node_info.node_info.status.latest_milestone.milestone_id.unwrap())
         .await
         .unwrap();
 

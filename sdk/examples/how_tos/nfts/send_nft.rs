@@ -1,15 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send an NFT (Non-fungible token).
+//! In this example we will send an nft.
+//! Rename `.env.example` to `.env` first.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
-//!
-//! Rename `.env.example` to `.env` first, then run the command:
-//! ```sh
-//! cargo run --release --all-features --example send_nft
-//! ```
+//! `cargo run --release --example send_nft`
 
 use std::env::var;
 
@@ -26,6 +21,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Create the wallet
     let wallet = Wallet::builder()
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -54,11 +50,7 @@ async fn main() -> Result<()> {
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
 
-        println!(
-            "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
-            block_id
-        );
+        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     } else {
         println!("No available NFTs");
     }
