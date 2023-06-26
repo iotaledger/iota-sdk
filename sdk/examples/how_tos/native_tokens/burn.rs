@@ -69,19 +69,14 @@ async fn main() -> Result<()> {
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Transaction included: {}/block/{}",
+            "Block included: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
-        );
-        println!(
-            "Burned {} native token(s) ({})",
-            burn_amount,
-            native_token_balance.token_id()
         );
 
         let balance = account.sync(None).await?;
 
-        println!("Balance after burning:");
+        print!("Balance after burning: ");
         if let Some(native_token_balance) = balance
             .native_tokens()
             .iter()
