@@ -30,9 +30,9 @@ async fn main() -> Result<()> {
     // Take the address from command line argument or use a default one.
     let address = Bech32Address::try_from_str(
         std::env::args()
-        .nth(2)
-        .as_deref()
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
+            .nth(2)
+            .as_deref()
+            .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
     )?;
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
