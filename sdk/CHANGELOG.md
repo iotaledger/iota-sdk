@@ -105,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use concrete ID types instead of String in HTTP responses;
 - `Client::get_outputs_metadata_ignore_errors` returns `OutputMetadata` instead of DTO;
 - `ClientInner::get_output_metadata` returns `OutputMetadata` instead of DTO;
+- Rename `MintNativeToken` to `CreateNativeToken`, `IncreaseNativeTokenSupply` to `MintNativeToken`, `DecreaseNativeTokenSupply` to `MeltNativeToken`;
 
 ### Removed
 
