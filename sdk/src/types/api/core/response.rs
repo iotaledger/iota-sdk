@@ -33,6 +33,13 @@ pub struct InfoResponse {
     pub features: Vec<String>,
 }
 
+#[cfg(feature = "serde")]
+impl core::fmt::Display for InfoResponse {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", serde_json::to_string_pretty(self).unwrap())
+    }
+}
+
 /// Returned in [`InfoResponse`].
 /// Status information about the node.
 #[derive(Clone, Debug, Eq, PartialEq)]

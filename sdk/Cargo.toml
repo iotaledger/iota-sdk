@@ -245,6 +245,7 @@ path = "examples/how_tos/client/get_health.rs"
 [[example]]
 name = "get_info"
 path = "examples/how_tos/client/get_info.rs"
+required-features = [ "serde" ]
 
 [[example]]
 name = "get_outputs"
