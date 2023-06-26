@@ -12,7 +12,7 @@ const MELT_AMOUNT = '0xA';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/11-decrease-native-token-supply.ts
+// yarn run-example ./how_tos/native_tokens/melt.ts
 async function run() {
     try {
         // Create the wallet

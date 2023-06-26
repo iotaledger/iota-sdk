@@ -16,7 +16,7 @@ const BURN_AMOUNT = '0x1';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/13-burn-native-token.ts
+// yarn run-example ./how_tos/native_tokens/burn.ts
 async function run() {
     try {
         // Create the wallet

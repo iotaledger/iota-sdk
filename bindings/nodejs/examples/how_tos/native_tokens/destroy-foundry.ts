@@ -10,7 +10,7 @@ import { getUnlockedWallet } from '../../wallet/common';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/15-destroy-foundry.ts
+// yarn run-example ./how_tos/native_tokens/destroy-foundry.ts
 async function run() {
     try {
         // Create the wallet

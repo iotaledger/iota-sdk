@@ -12,7 +12,7 @@ const MINT_AMOUNT = '0xA';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/12-increase-native-token-supply.ts
+// yarn run-example ./how_tos/native_tokens/mint.ts
 async function run() {
     try {
         // Create the wallet
