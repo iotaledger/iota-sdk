@@ -72,7 +72,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .retry_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

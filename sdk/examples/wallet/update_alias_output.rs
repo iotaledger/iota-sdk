@@ -94,7 +94,7 @@ async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<Output>) ->
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

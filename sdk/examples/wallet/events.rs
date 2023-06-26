@@ -75,7 +75,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
