@@ -4,12 +4,14 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example and  that you have created an Issuer NFT ID
-//! by running the `mint_issuer_nft` example!
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example.
+//!
+//! You have to provide the ISSUER_NFT_ID that was created by first running the
+//! `mint_issuer_nft` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_collection_nft
+//! cargo run --release --all-features --example mint_collection_nft <ISSUER_NFT_ID>
 //! ```
 
 use iota_sdk::{
@@ -22,8 +24,6 @@ use iota_sdk::{
     Wallet,
 };
 
-// !!! Replace with the NFT address from the NFT we minted in `mint_issuer_nft` example !!!
-const ISSUER_NFT_ID: &str = "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a";
 // The NFT collection size
 const NFT_COLLECTION_SIZE: usize = 150;
 // Mint NFTs in chunks since the transaction size is limited
@@ -31,14 +31,13 @@ const NUM_NFTS_MINTED_PER_TRANSACTION: usize = 50;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let issuer_nft_id = if ISSUER_NFT_ID == "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a" {
-        panic!("You need to change the ISSUER_NFT_ID constant before you can run this example successfully!");
-    } else {
-        ISSUER_NFT_ID.parse()?
-    };
-
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
+
+    let issuer_nft_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: ISSUER_NFT_ID")
+        .parse::<NftId>()?;
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())

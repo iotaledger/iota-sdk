@@ -6,9 +6,14 @@
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
+//! You may provide a TOKEN_ID that is available in the account. The foundry
+//! output which minted it needs to be available as well. You can check this by
+//! running the `get_balance` example. You can mint a new native token by running
+//! the `mint_native_token` example.
+//!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example decrease_native_token_supply
+//! cargo run --release --all-features --example decrease_native_token_supply [TOKEN_ID]
 //! ```
 
 use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
@@ -33,7 +38,10 @@ async fn main() -> Result<()> {
     let balance = account.balance().await?;
 
     // Find first foundry and corresponding token id
-    let token_id = TokenId::from(*balance.foundries().first().unwrap());
+    let token_id = std::env::args()
+        .nth(1)
+        .map(|s| s.parse::<TokenId>().expect("invalid token id"))
+        .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
 
     if let Some(native_token_balance) = balance
         .native_tokens()
@@ -68,7 +76,6 @@ async fn main() -> Result<()> {
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
-    println!("Melted {} native tokens ({})", melt_amount, token_id);
 
     let balance = account.sync(None).await?;
     let available_balance = balance
