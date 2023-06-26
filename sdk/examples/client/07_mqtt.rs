@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --features=mqtt --example 07_mqtt [NUM_EVENTS] [ADDRESS]
+//! cargo run --release --all-features --example 07_mqtt [NUM_EVENTS] [ADDRESS]
 //! ```
 
 use iota_sdk::{

@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --features=stronghold --example client_stronghold
+//! cargo run --release --all-features --example client_stronghold
 //! ```
 
 use iota_sdk::client::{

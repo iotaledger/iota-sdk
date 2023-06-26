@@ -14,7 +14,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --features=ledger_nano --example ledger_nano_transaction
+//! cargo run --release --all-features --example ledger_nano_transaction
 //! ```
 
 use iota_sdk::client::{
