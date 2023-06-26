@@ -12,7 +12,7 @@ use crate::{
     types::block::address::Bech32Address,
 };
 
-// https://github.com/gohornet/hornet/blob/bb1271be9f3a638f6acdeb6de74eab64515f27f1/plugins/indexer/v1/routes.go#L54
+// https://github.com/iotaledger/inx-indexer/tree/develop/pkg/indexer
 
 /// Query parameters for output_id requests.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -283,6 +283,7 @@ pub(crate) fn verify_query_parameters_nft_outputs(query_parameters: Vec<QueryPar
         QueryParameter::ExpiresBefore,
         QueryParameter::ExpiresAfter,
         QueryParameter::ExpirationReturnAddress,
+        QueryParameter::Issuer,
         QueryParameter::Sender,
         QueryParameter::Tag,
         QueryParameter::CreatedBefore,

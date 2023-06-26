@@ -8,10 +8,10 @@ from typing import List
 
 class NodeCoreAPI():
 
-    def get_node_health(self, url: str):
+    def get_health(self, url: str):
         """ Get node health.
         """
-        return self._call_method('getNodeHealth', {
+        return self._call_method('getHealth', {
             'url': url
         })
 

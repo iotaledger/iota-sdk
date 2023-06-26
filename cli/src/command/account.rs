@@ -195,13 +195,13 @@ pub enum AccountCommand {
     /// Synchronize the account.
     Sync,
     /// Show the details of the transaction.
-    #[clap(alias = "tx")]
+    #[clap(visible_alias = "tx")]
     Transaction {
         /// Transaction ID to be displayed e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
         transaction_id: String,
     },
     /// List the account transactions.
-    #[clap(alias = "txs")]
+    #[clap(visible_alias = "txs")]
     Transactions {
         /// List account transactions with all details.
         #[arg(long, default_value_t = false)]
@@ -576,7 +576,6 @@ pub async fn mint_nft_command(
         .with_tag(tag)
         .with_sender(sender)
         .with_issuer(issuer);
-
     let transaction = account.mint_nfts([nft_options], None).await?;
 
     println_log_info!(
