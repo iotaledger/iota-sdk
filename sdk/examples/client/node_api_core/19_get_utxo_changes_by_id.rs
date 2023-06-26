@@ -6,12 +6,7 @@
 //!
 //! `cargo run --example node_api_core_get_utxo_changes_by_id --release -- [NODE URL]`
 
-use std::str::FromStr;
-
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::payload::milestone::MilestoneId,
-};
+use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -27,7 +22,7 @@ async fn main() -> Result<()> {
 
     // Fetch the latest milestone ID from the node.
     let info = client.get_info().await?;
-    let milestone_id = MilestoneId::from_str(&info.node_info.status.latest_milestone.milestone_id.unwrap())?;
+    let milestone_id = info.node_info.status.latest_milestone.milestone_id.unwrap();
     // Send the request.
     let utxo_changes = client.get_utxo_changes_by_id(&milestone_id).await?;
 

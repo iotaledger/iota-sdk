@@ -18,14 +18,20 @@ use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{constants::HD_WALLET_TYPE, Client, Error},
-    types::block::{address::Ed25519Address, signature::Ed25519Signature},
+    client::{api::PreparedTransactionData, constants::HD_WALLET_TYPE, Client, Error},
+    types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
 };
 
 /// Secret manager that uses only a mnemonic.
 ///
 /// Computation are done in-memory. A mnemonic needs to be supplied upon the creation of [`MnemonicSecretManager`].
 pub struct MnemonicSecretManager(Seed);
+
+impl std::fmt::Debug for MnemonicSecretManager {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_tuple("MnemonicSecretManager").finish()
+    }
+}
 
 #[async_trait]
 impl SecretManage for MnemonicSecretManager {
@@ -101,17 +107,32 @@ impl SecretManage for MnemonicSecretManager {
         Ok(Ed25519Signature::new(public_key, signature))
     }
 
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
-        // Get the private and public key for this Evm address
+        // Get the private and public key for this secp256k1_ecdsa key
         let private_key = self.0.derive::<secp256k1_ecdsa::SecretKey>(chain)?.secret_key();
         let public_key = private_key.public_key();
         let signature = private_key.sign(msg);
 
         Ok((public_key, signature))
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+        time: Option<u32>,
+    ) -> Result<Unlocks, Self::Error> {
+        super::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        super::default_sign_transaction(self, prepared_transaction_data).await
     }
 }
 

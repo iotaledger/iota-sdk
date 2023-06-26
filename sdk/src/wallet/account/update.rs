@@ -4,7 +4,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    types::block::output::{dto::OutputMetadataDto, OutputId},
+    client::secret::SecretManage,
+    types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
@@ -20,7 +21,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Set the alias for the account
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut account_details = self.details_mut().await;
@@ -35,7 +39,7 @@ impl Account {
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         unspent_outputs: Vec<OutputData>,
-        spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadataDto>>,
+        spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update account with new synced transactions");
@@ -97,10 +101,10 @@ impl Account {
         for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it
             if let Some(output_metadata_response) = output_metadata_response_opt {
-                if output_metadata_response.is_spent {
+                if output_metadata_response.is_spent() {
                     account_details.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata = output_metadata_response.try_into()?;
+                        output_data.metadata = output_metadata_response;
                     }
                 } else {
                     // not spent, just not synced, skip

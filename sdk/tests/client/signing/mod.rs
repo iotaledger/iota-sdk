@@ -15,7 +15,7 @@ use iota_sdk::{
             GetAddressesOptions, PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Result,
     },
     types::block::{

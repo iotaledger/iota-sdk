@@ -4,6 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
+    client::secret::SecretManage,
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
         account::{
@@ -16,7 +17,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to mint more native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
     /// this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore
@@ -36,10 +40,11 @@ impl Account {
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
+        let options = options.into();
         let prepared = self
-            .prepare_increase_native_token_supply(token_id, mint_amount, options)
+            .prepare_increase_native_token_supply(token_id, mint_amount, options.clone())
             .await?;
-        let transaction = self.sign_and_submit_transaction(prepared.transaction).await?;
+        let transaction = self.sign_and_submit_transaction(prepared.transaction, options).await?;
 
         Ok(MintTokenTransaction {
             token_id: prepared.token_id,

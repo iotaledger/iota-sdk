@@ -42,7 +42,6 @@ async fn main() -> Result<()> {
         MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -54,7 +53,7 @@ async fn main() -> Result<()> {
         account
     } else {
         println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias.to_string()).finish().await?
+        wallet.create_account().with_alias(alias).finish().await?
     };
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");

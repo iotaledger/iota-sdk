@@ -13,7 +13,7 @@
 
 use std::env::var;
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{wallet::Result, Wallet};
 
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 5;

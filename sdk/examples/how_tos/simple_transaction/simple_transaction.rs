@@ -13,7 +13,10 @@
 
 use std::env::var;
 
-use iota_sdk::wallet::{Result, SendAmountParams, Wallet};
+use iota_sdk::{
+    wallet::{Result, SendAmountParams},
+    Wallet,
+};
 
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;

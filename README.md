@@ -13,11 +13,10 @@ modules: `client` and `wallet`.
     - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
     - [Install the IOTA SDK](#install-the-iota-sdk)
-    - [Usage](#usage)
-        - [Client](#client)
-        - [Wallet](#wallet)
-        - [Examples](#examples)
-    - [API Reference](#api-reference)
+- [Client](#client-usage)
+- [Wallet](#wallet-usage)
+- [Examples](#examples)
+- [API Reference](#api-reference)
 - [Contribute](#contribute)
 - [License](#license)
 
@@ -25,17 +24,16 @@ modules: `client` and `wallet`.
 
 - **Client module**: The `client` module in the IOTA SDK offers low-level functions that allow you to have
   fine-grained control over your interactions with Shimmer nodes. The module is stateless. It provides access to the
-  underlying API endpoints and enables advanced operations such as custom message construction and direct communication
-- with the network.
+  underlying API endpoints and enables advanced operations such as custom message construction and direct communication 
+  with the network.
 
 - **Wallet module**: The `wallet` module in the IOTA SDK provides high-level functions for managing accounts, generating
   addresses, creating transactions, and interacting with the Shimmer network. It offers a user-friendly interface for
   developers to build applications on the Shimmer network. It is stateful, and it can optionally interact
   with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling, storage, and state backup.
 
-- **Python, Node.js, and WASM Bindings**: The IOTA SDK includes bindings for Python, Node.js, and WASM, which allow you
-  to use the SDK in your preferred programming language. These bindings provide seamless integration with existing Python and
-  Node.js projects, enabling cross-platform compatibility and flexibility.
+- **Bindings**: The IOTA SDK includes bindings for `Python`, `Node.js`, and `WASM`, which allow you
+  to use the SDK in your preferred programming language. These bindings provide seamless integration with existing projects, enabling cross-platform compatibility and flexibility.
 
 ## Branching Structure for Development
 
@@ -43,14 +41,14 @@ This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
 |--------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on releases.           |
+| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on release.           |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
 | other        | Other branches that may reflect current projects. Like `develop`, they will find their way into `staging` once they are ready. |
 
 ## Before You Start
 
-This file is focused on Rust. Please refer to
+This file is focused on the Rust core SDK. Please refer to
 the [Python](bindings/python/README.md), [Node.js](bindings/nodejs/README.md) and [Wasm](bindings/wasm/README.md)
 instructions if you want information on installing and using them.
 
@@ -94,7 +92,7 @@ set OPENSSL_DIR="C:\Program Files\OpenSSL-Win64"
 
 #### macOS
 
-You can install `cmake` and `openssl` with `Homebrew`:
+You can install `cmake` and `openssl` with [`Homebrew`](https://brew.sh/):
 
 ```
 brew install cmake openssl@1.1
@@ -116,11 +114,7 @@ To start using the IOTA SDK in your Rust project, you can include the following 
 iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
 ```
 
-### Usage
-
-#### Client
-
-To use the Client module, you simply need to create a `Client`.
+## Client Usage
 
 ```rust
 use iota_sdk::client::{
@@ -141,9 +135,7 @@ async fn main() -> Result<()> {
 }
 ```
 
-#### Wallet
-
-To use the Wallet module, you need to create a `Wallet`:
+## Wallet Usage
 
 ```rust
 use iota_sdk::{
@@ -158,11 +150,12 @@ use std::path::PathBuf;
 #[tokio::main]
 async fn main() -> Result<()> {
     // Setup Stronghold secret manager.
+    // WARNING: Never hardcode passwords in production code.
     let secret_manager = StrongholdSecretManager::builder()
-        .password("vault.stronghold") // A password to encrypt the stored data.WARNING: Never hardcode passwords in production code.
+        .password("password") // A password to encrypt the stored data. 
         .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
 
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;// The node to connect to.
+    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
 
     // Set up and store the wallet.
     let wallet = Wallet::builder()
@@ -180,7 +173,7 @@ async fn main() -> Result<()> {
     // Create an account.
     let account = wallet
         .create_account()
-        .with_alias("Alice".to_string()) // A name to associate with the created account.
+        .with_alias("Alice") // A name to associate with the created account.
         .finish()
         .await?;
 
@@ -189,7 +182,7 @@ async fn main() -> Result<()> {
 }
 ```
 
-#### Examples
+## Examples
 
 You can use the provided code [examples](sdk/examples) to get acquainted with the IOTA SDK. You can use the following
 command to run any example:
@@ -198,7 +191,7 @@ command to run any example:
 cargo run --example example_name --release
 ```
 
-* Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
+Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
 
 ```bash
 cargo run --example node_api_core_get_info --release 
@@ -210,9 +203,7 @@ You can get a list of the available code examples with the following command:
 cargo run --example
 ```
 
-### API Reference
-
-#### Rust
+## API Reference
 
 The IOTA SDK Rust API Reference is in the [crate documentation](https://docs.rs/iota-sdk/latest/iota_sdk/).
 
@@ -231,4 +222,3 @@ Before contributing, please read and adhere to the [code of conduct](/.github/CO
 
 The IOTA SDK is open-source software licensed under Apache License 2.0. For more information, please read
 the [LICENSE](/LICENSE).
-

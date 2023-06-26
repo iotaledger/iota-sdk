@@ -1,5 +1,8 @@
-import { printExpected, printReceived, matcherHint } from 'jest-matcher-utils';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 
+import { printExpected, printReceived, matcherHint } from 'jest-matcher-utils';
+import { expect } from '@jest/globals';
 interface CustomMatchers<R = unknown> {
     toBeValidAddress(): R;
     toBeValidBlockId(): R;
@@ -48,3 +51,5 @@ expect.extend({
         return idMatcher(received, 70, '0x');
     },
 });
+
+export { expect } ;

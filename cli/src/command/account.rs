@@ -143,6 +143,8 @@ pub enum AccountCommand {
     },
     /// Generate a new address.
     NewAddress,
+    /// Get information about currently set node.
+    NodeInfo,
     /// Display an output.
     Output {
         /// Output ID to be displayed.
@@ -193,13 +195,13 @@ pub enum AccountCommand {
     /// Synchronize the account.
     Sync,
     /// Show the details of the transaction.
-    #[clap(alias = "tx")]
+    #[clap(visible_alias = "tx")]
     Transaction {
         /// Transaction ID to be displayed e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
         transaction_id: String,
     },
     /// List the account transactions.
-    #[clap(alias = "txs")]
+    #[clap(visible_alias = "txs")]
     Transactions {
         /// List account transactions with all details.
         #[arg(long, default_value_t = false)]
@@ -323,9 +325,7 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
     } else {
         println_log_info!("Claiming outputs.");
 
-        let output_ids = account
-            .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-            .await?;
+        let output_ids = account.claimable_outputs(OutputsToClaim::All).await?;
 
         if output_ids.is_empty() {
             println_log_info!("No outputs available to claim.");
@@ -576,7 +576,6 @@ pub async fn mint_nft_command(
         .with_tag(tag)
         .with_sender(sender)
         .with_issuer(issuer);
-
     let transaction = account.mint_nfts([nft_options], None).await?;
 
     println_log_info!(
@@ -593,6 +592,15 @@ pub async fn new_address_command(account: &Account) -> Result<(), Error> {
     let address = account.generate_ed25519_addresses(1, None).await?;
 
     print_address(account, &address[0]).await?;
+
+    Ok(())
+}
+
+// `node-info` command
+pub async fn node_info_command(account: &Account) -> Result<(), Error> {
+    let node_info = account.client().get_info().await?;
+
+    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
 
     Ok(())
 }

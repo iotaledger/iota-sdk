@@ -1,11 +1,11 @@
-import type {
-    IOutputResponse,
-    ITransactionPayload,
-    ITransactionEssence,
-} from '@iota/types';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { OutputData } from './output';
-import type { InclusionState } from './transaction';
-import { IInputSigningData, IRemainder } from '../client';
+import { InclusionState } from './transaction';
+import { InputSigningData, Remainder } from '../client';
+import { TransactionEssence, TransactionPayload } from '../block';
+import { OutputResponse } from '../models';
 
 export type TransactionId = string;
 
@@ -84,13 +84,13 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
 
 class NewOutputWalletEvent extends WalletEvent {
     output: OutputData;
-    transaction?: ITransactionPayload;
-    transactionInputs?: [IOutputResponse];
+    transaction?: TransactionPayload;
+    transactionInputs?: [OutputResponse];
 
     constructor(
         output: OutputData,
-        transaction?: ITransactionPayload,
-        transactionInputs?: [IOutputResponse],
+        transaction?: TransactionPayload,
+        transactionInputs?: [OutputResponse],
     ) {
         super(WalletEventType.NewOutput);
         this.output = output;
@@ -108,14 +108,14 @@ class NewOutputWalletEvent extends WalletEvent {
     /**
      * The transaction.
      */
-    getTransaction(): ITransactionPayload | undefined {
+    getTransaction(): TransactionPayload | undefined {
         return this.transaction;
     }
 
     /**
      * The transaction inputs.
      */
-    getTransactionInputs(): [IOutputResponse] | undefined {
+    getTransactionInputs(): [OutputResponse] | undefined {
         return this.transactionInputs;
     }
 }
@@ -221,14 +221,14 @@ class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
 }
 
 class PreparedTransactionProgress extends TransactionProgress {
-    essence: ITransactionEssence;
-    inputsData: IInputSigningData[];
-    remainder?: IRemainder;
+    essence: TransactionEssence;
+    inputsData: InputSigningData[];
+    remainder?: Remainder;
 
     constructor(
-        essence: ITransactionEssence,
-        inputsData: IInputSigningData[],
-        remainder?: IRemainder,
+        essence: TransactionEssence,
+        inputsData: InputSigningData[],
+        remainder?: Remainder,
     ) {
         super(TransactionProgressType.PreparedTransaction);
         this.essence = essence;

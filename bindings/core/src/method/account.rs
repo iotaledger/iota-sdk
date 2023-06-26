@@ -18,8 +18,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParamsDto, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
-            OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            CreateAliasParams, FilterOptions, MintNativeTokenParams, MintNftParams, OutputParams, OutputsToClaim,
+            SyncOptions, TransactionOptionsDto,
         },
         SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
@@ -38,6 +38,10 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`AddressesWithUnspentOutputs`](crate::Response::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs,
+    /// Get outputs with additional unlock conditions
+    /// Expected response: [`OutputIds`](crate::Response::OutputIds)
+    #[serde(rename_all = "camelCase")]
+    ClaimableOutputs { outputs_to_claim: OutputsToClaim },
     /// Claim outputs.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -70,10 +74,6 @@ pub enum AccountMethod {
     /// Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
-    /// Get outputs with additional unlock conditions
-    /// Expected response: [`OutputIds`](crate::Response::OutputIds)
-    #[serde(rename_all = "camelCase")]
-    GetOutputsWithAdditionalUnlockConditions { outputs_to_claim: OutputsToClaim },
     /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
@@ -152,7 +152,7 @@ pub enum AccountMethod {
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
+        params: Option<CreateAliasParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
@@ -193,20 +193,20 @@ pub enum AccountMethod {
     /// Prepare to Mint nft.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareMintNfts {
-        params: Vec<MintNftParamsDto>,
+        params: Vec<MintNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Mint native token.
     /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
     PrepareMintNativeToken {
-        params: MintNativeTokenParamsDto,
+        params: MintNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: Box<OutputParamsDto>,
+        params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare send amount.

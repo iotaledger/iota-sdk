@@ -14,10 +14,10 @@ use crate::{
         claimable_outputs_command, consolidate_command, create_alias_outputs_command, decrease_native_token_command,
         decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
         increase_native_token_command, increase_voting_power_command, mint_native_token_command, mint_nft_command,
-        new_address_command, output_command, outputs_command, participation_overview_command, send_command,
-        send_native_token_command, send_nft_command, stop_participating_command, sync_command, transaction_command,
-        transactions_command, unspent_outputs_command, vote_command, voting_output_command, voting_power_command,
-        AccountCli, AccountCommand,
+        new_address_command, node_info_command, output_command, outputs_command, participation_overview_command,
+        send_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
+        transaction_command, transactions_command, unspent_outputs_command, vote_command, voting_output_command,
+        voting_power_command, AccountCli, AccountCommand,
     },
     error::Error,
     helper::{bytes_from_hex_or_file, print_account_help},
@@ -60,7 +60,7 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
         _ => {
             // Prepend `Account: ` so the parsing will be correct
             let command = format!("Account: {}", command.trim());
-            let account_cli = match AccountCli::try_parse_from(command.split(' ')) {
+            let account_cli = match AccountCli::try_parse_from(command.split_whitespace()) {
                 Ok(account_cli) => account_cli,
                 Err(err) => {
                     println!("{err}");
@@ -126,6 +126,7 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                     .await
                 }
                 AccountCommand::NewAddress => new_address_command(&account).await,
+                AccountCommand::NodeInfo => node_info_command(&account).await,
                 AccountCommand::Output { output_id } => output_command(&account, output_id).await,
                 AccountCommand::Outputs => outputs_command(&account).await,
                 AccountCommand::Send {

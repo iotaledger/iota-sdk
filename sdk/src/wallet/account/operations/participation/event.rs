@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    client::{node_manager::node::Node, Client},
+    client::{node_manager::node::Node, secret::SecretManage, Client},
     types::api::plugins::participation::types::{
         ParticipationEventId, ParticipationEventStatus, ParticipationEventType,
     },
@@ -14,7 +14,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Stores participation information for the given events locally and returns them all.
     ///
     /// This will NOT store the node url and auth inside the client options.

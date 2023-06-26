@@ -1,14 +1,17 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 export * from './account';
 export * from './wallet';
 export * from './address';
 export * from './bridge';
-export * from './buildOutputData';
+export * from './build-output-data';
 export * from './event';
 export * from './output';
-export * from './outputParams';
+export * from './output-params';
 export * from './participation';
-export * from './preparedMintTokenTransactionData';
-export * from './preparedTransactionData';
-export * from './signedTransactionEssence';
+export * from './prepared-mint-token-transaction';
+export * from './prepared-transaction';
+export * from './signed-transaction-essence';
 export * from './transaction';
-export * from './transactionOptions';
+export * from './transaction-options';

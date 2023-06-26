@@ -11,9 +11,10 @@ use std::collections::{HashMap, HashSet};
 
 pub use self::options::SyncOptions;
 use crate::{
+    client::secret::SecretManage,
     types::block::{
         address::{Address, AliasAddress, NftAddress, ToBech32Ext},
-        output::{dto::OutputMetadataDto, FoundryId, Output, OutputId},
+        output::{FoundryId, Output, OutputId, OutputMetadata},
     },
     wallet::account::{
         constants::MIN_SYNC_INTERVAL,
@@ -22,7 +23,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
@@ -109,11 +113,11 @@ impl Account {
 
         // Add the output response to the output ids, the output response is optional, because an output could be
         // pruned and then we can't get the metadata
-        let mut spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadataDto>> =
+        let mut spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>> =
             spent_or_not_synced_output_ids.into_iter().map(|o| (o, None)).collect();
         for output_metadata_response in spent_or_unsynced_output_metadata_responses {
-            let output_id = output_metadata_response.output_id()?;
-            spent_or_unsynced_output_metadata_map.insert(output_id, Some(output_metadata_response));
+            let output_id = output_metadata_response.output_id();
+            spent_or_unsynced_output_metadata_map.insert(*output_id, Some(output_metadata_response));
         }
 
         if options.sync_incoming_transactions {

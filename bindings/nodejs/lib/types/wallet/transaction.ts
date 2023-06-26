@@ -1,4 +1,9 @@
-import type { IOutputResponse, ITransactionPayload } from '@iota/types';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { Type } from 'class-transformer';
+import { TransactionPayload } from '../block/payload/transaction';
+import { OutputResponse } from '../models/api';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {
@@ -13,22 +18,24 @@ export enum InclusionState {
 }
 
 /** A Transaction with metadata */
-export interface Transaction {
+export class Transaction {
     /** The transaction payload */
-    payload: ITransactionPayload;
+    @Type(() => TransactionPayload)
+    payload!: TransactionPayload;
     /** The block id in which the transaction payload was included */
     blockId?: string;
     /** The inclusion state of the transaction */
-    inclusionState: InclusionState;
+    inclusionState!: InclusionState;
     /** The creation time */
-    timestamp: string;
+    timestamp!: string;
     /** The transaction id */
-    transactionId: string;
+    transactionId!: string;
     /** The network id in which the transaction was sent */
-    networkId: string;
+    networkId!: string;
     /** If the transaction was created by the wallet or someone else */
-    incoming: boolean;
+    incoming!: boolean;
     /** Note that can be set when sending a transaction and is only stored locally */
     note?: string;
-    inputs: IOutputResponse[];
+    @Type(() => OutputResponse)
+    inputs!: OutputResponse[];
 }

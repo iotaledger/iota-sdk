@@ -65,7 +65,7 @@ async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> 
         account
     } else {
         println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias.to_string()).finish().await?
+        wallet.create_account().with_alias(alias).finish().await?
     })
 }
 

@@ -16,7 +16,8 @@ use iota_sdk::{
             BasicOutputBuilder,
         },
     },
-    wallet::{Result, Wallet},
+    wallet::Result,
+    Wallet,
 };
 
 #[tokio::main]

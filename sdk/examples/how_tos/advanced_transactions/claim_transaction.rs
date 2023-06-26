@@ -6,7 +6,10 @@
 //!
 //! `cargo run --release --all-features --example claim_transaction`
 
-use iota_sdk::wallet::{account::OutputsToClaim, Result, Wallet};
+use iota_sdk::{
+    wallet::{account::OutputsToClaim, Result},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -27,9 +30,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let output_ids = account
-        .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-        .await?;
+    let output_ids = account.claimable_outputs(OutputsToClaim::All).await?;
     println!("Available outputs to claim:");
     for output_id in &output_ids {
         println!("{}", output_id);

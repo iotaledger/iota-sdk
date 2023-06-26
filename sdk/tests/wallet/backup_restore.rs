@@ -1,25 +1,21 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 use std::path::PathBuf;
 
-#[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_sdk::wallet::{ClientOptions, Result, Wallet};
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 use iota_sdk::{
     client::{
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         node_manager::node::{Node, NodeDto},
         secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
     },
+    wallet::{ClientOptions, Result, Wallet},
     Url,
 };
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
 #[tokio::test]
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -47,7 +43,7 @@ async fn backup_and_restore() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -114,7 +110,6 @@ async fn backup_and_restore() -> Result<()> {
 }
 
 #[tokio::test]
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold and MnemonicSecretManager
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -136,7 +131,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     let stronghold_password = "some_hopefully_secure_password".to_owned();
 
@@ -197,7 +192,6 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 }
 
 #[tokio::test]
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -226,7 +220,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -282,7 +276,6 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 }
 
 #[tokio::test]
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_same_coin_type() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -311,7 +304,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    let account_before_backup = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account_before_backup = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -365,7 +358,6 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 }
 
 #[tokio::test]
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -394,7 +386,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .await?;
 
     // Create one account
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -454,7 +446,6 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 }
 
 #[tokio::test]
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -481,7 +472,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
