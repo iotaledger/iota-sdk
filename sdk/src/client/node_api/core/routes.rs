@@ -304,10 +304,13 @@ impl ClientInner {
     /// GET /api/core/v3/outputs/{outputId}
     /// + GET /api/core/v3/outputs/{outputId}/metadata
     pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
-        Ok(OutputWithMetadata::new(
-            self.get_output(output_id).await?,
-            self.get_output_metadata(output_id).await?,
-        ))
+        let output = Output::unpack_verified(
+            self.get_output_raw(output_id).await?,
+            &self.get_protocol_parameters().await?,
+        )?;
+        let metadata = self.get_output_metadata(output_id).await?;
+
+        Ok(OutputWithMetadata::new(output, metadata))
     }
 
     /// Returns the block that was included in the ledger for a given transaction ID, as object.
