@@ -241,6 +241,21 @@ name = "output_features"
 path = "examples/how_tos/outputs/features.rs"
 required-features = [ "client" ]
 
+# Client Examples
+
+[[example]]
+name = "get_health"
+path = "examples/how_tos/client/get_health.rs"
+
+[[example]]
+name = "get_info"
+path = "examples/how_tos/client/get_info.rs"
+required-features = [ "serde" ]
+
+[[example]]
+name = "get_outputs"
+path = "examples/how_tos/client/get_outputs.rs"
+
 # Block examples
 
 [[example]]
@@ -286,18 +301,8 @@ required-features = [ "client" ]
 # Node API core examples
 
 [[example]]
-name = "node_api_core_get_health"
-path = "examples/client/node_api_core/00_get_health.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "node_api_core_get_routes"
 path = "examples/client/node_api_core/01_get_routes.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "node_api_core_get_info"
-path = "examples/client/node_api_core/02_get_info.rs"
 required-features = [ "client" ]
 
 [[example]]
@@ -401,11 +406,6 @@ path = "examples/client/node_api_core/22_get_utxo_changes_by_index.rs"
 required-features = [ "client" ]
 
 # Node API indexer examples
-
-[[example]]
-name = "node_api_indexer_get_basic_outputs"
-path = "examples/client/node_api_indexer/00_get_basic_outputs.rs"
-required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_alias_output"

@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! This example returns the health of the node by calling `GET /health`.
+//! Returns general information about the node by calling `GET /api/core/v2/info`.
 //!
-//! `cargo run --example node_api_core_get_health --release -- [NODE URL]`
+//! `cargo run --release --example get_info -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 
@@ -23,10 +23,10 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Get node health.
-    let health = client.get_health(&node_url).await?;
+    // Get node info.
+    let info = client.get_info().await?.node_info;
 
-    println!("Health: {health}");
+    println!("{info}");
 
     Ok(())
 }
