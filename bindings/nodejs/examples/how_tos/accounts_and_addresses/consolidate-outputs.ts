@@ -1,47 +1,94 @@
-// Copyright 2021-2023 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, CoinType, initLogger } from '@iota/sdk';
+import { CommonOutput, Utils, Wallet, initLogger } from '@iota/sdk';
+
+// This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./client/consolidation.ts
+// yarn run-example ./how_tos/accounts_and_addresses/consolidate-outputs.ts
 
-// In this example we will consolidate all funds in a range of addresses
+// In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
+// them to the same address again.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
-    }
-
-    const client = new Client({
-        // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
-        localPow: true,
-    });
-
     try {
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
+        if (!process.env.STRONGHOLD_PASSWORD) {
+            throw new Error(
+                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+            );
         }
 
-        // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
-        // balance
-        const secretManager = {
-            mnemonic: process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
-        };
-
-        // Here all funds will be sent to the address with the lowest index in the range
-        const address = await client.consolidateFunds(secretManager, {
-            coinType: CoinType.Shimmer,
-            accountIndex: 0,
-            range: {
-                start: 0,
-                end: 10,
-            },
-            internal: false,
+        const wallet = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,
         });
-        console.log('Funds consolidated to: ', address);
+
+        const account = await wallet.getAccount('Alice');
+
+        // To create an address we need to unlock stronghold.
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+
+        // Sync account to make sure account is updated with outputs from previous examples
+        account.sync();
+        console.log('Account synced');
+
+        // List unspent outputs before consolidation.
+        // The output we created with example `request_funds` and the basic output from `mint` have only one
+        // unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
+        // same `AddressUnlockCondition`(the first address of the account), so they will be consolidated into one
+        // output.
+        const outputs = await account.unspentOutputs();
+        console.log('Outputs BEFORE consolidation:');
+
+        outputs.forEach(({ output, address }, i) => {
+            console.log(`OUTPUT #${i}`);
+            console.log(
+                '- address: %s\n- amount: %d\n- native tokens: %s',
+                Utils.hexToBech32(address.toString(), 'rms'),
+                output.getAmount(),
+                output instanceof CommonOutput ? output.getNativeTokens() : [],
+            );
+        });
+
+        console.log('Sending consolidation transaction...');
+
+        // Consolidate unspent outputs and print the consolidation transaction ID
+        // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
+        const preparedTransaction = await account.prepareConsolidateOutputs(
+            true,
+        );
+        const transaction = await preparedTransaction.send();
+        console.log('Transaction sent: %s', transaction.transactionId);
+
+        // Wait for the consolidation transaction to get confirmed
+        const blockId = account.retryTransactionUntilIncluded(
+            transaction.transactionId,
+        );
+
+        console.log(
+            'Transaction included: %s/block/$s',
+            process.env.EXPLORER_URL,
+            blockId,
+        );
+
+        // Sync account
+        account.sync();
+        console.log('Account synced');
+
+        // Outputs after consolidation
+        console.log('Outputs AFTER consolidation:');
+        outputs.forEach(({ output, address }, i) => {
+            console.log(`OUTPUT #${i}`);
+            console.log(
+                '- address: %s\n- amount: %d\n- native tokens: %s',
+                Utils.hexToBech32(address.toString(), 'rms'),
+                output.getAmount(),
+                output instanceof CommonOutput
+                    ? output.getNativeTokens()
+                    : undefined,
+            );
+        });
     } catch (error) {
         console.error('Error: ', error);
     }
