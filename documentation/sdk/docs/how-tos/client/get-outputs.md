@@ -107,7 +107,7 @@ OutputResponse {
   output: BasicOutput {
     type: 3,
     amount: '12310426',
-    unlockConditions: [ [Object] ]
+    unlockConditions: [ [AddressUnlockCondition] ]
   }
 }
 ```
