@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     // Take the milestone id from the command line, or use a default.
     let milestone_id = if let Some(s) = std::env::args().nth(1) {
-        s
+        s.parse::<MilestoneId>().expect("invalid milestone id")
     } else {
         client
             .get_info()
@@ -39,9 +39,7 @@ async fn main() -> Result<()> {
             .latest_milestone
             .milestone_id
             .unwrap()
-    }
-    .parse::<MilestoneId>()
-    .expect("invalid milestone id");
+    };
 
     // Send the request.
     let milestone = client.get_milestone_by_id_raw(&milestone_id).await?;

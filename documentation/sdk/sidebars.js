@@ -108,12 +108,12 @@ module.exports = {
           type: "category",
           label: 'Native Tokens',
           items: [
-            'how_tos/native_tokens/mint',
-            'how_tos/native_tokens/decrease_supply',
-            'how_tos/native_tokens/increase_supply',
-            'how_tos/native_tokens/send',
-            'how_tos/native_tokens/burn',
-            'how_tos/native_tokens/destroy_foundry',
+            'how-tos/native-tokens/mint',
+            'how-tos/native-tokens/decrease-supply',
+            'how-tos/native-tokens/increase-supply',
+            'how-tos/native-tokens/send',
+            'how-tos/native-tokens/burn',
+            'how-tos/native-tokens/destroy-foundry',
           ]
         },
         {

@@ -3,6 +3,7 @@
 
 mod account_recovery;
 mod accounts;
+#[cfg(all(feature = "stronghold", feature = "storage"))]
 mod backup_restore;
 mod balance;
 mod bech32_hrp_validation;
@@ -15,6 +16,7 @@ mod error;
 mod events;
 #[cfg(feature = "message_interface")]
 mod message_interface;
+#[cfg(feature = "stronghold")]
 mod migrate_stronghold_snapshot_v2_to_v3;
 mod native_tokens;
 mod output_preparation;
@@ -23,4 +25,5 @@ mod transactions;
 #[allow(clippy::module_inception)]
 mod wallet;
 #[cfg(not(target_os = "windows"))]
+#[cfg(feature = "rocksdb")]
 mod wallet_storage;

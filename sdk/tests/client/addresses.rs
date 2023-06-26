@@ -7,8 +7,9 @@ use iota_sdk::{
     client::{
         api::GetAddressesOptions,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
+        generate_mnemonic,
         secret::{GenerateAddressOptions, SecretManager},
-        Client,
+        Client, Result,
     },
     types::block::address::{Address, Hrp},
 };
@@ -226,4 +227,36 @@ async fn address_generation() {
             std::fs::remove_file(stronghold_filename).unwrap();
         }
     }
+}
+
+#[tokio::test]
+async fn search_address() -> Result<()> {
+    let client = Client::builder().finish().await.unwrap();
+
+    let secret_manager = SecretManager::try_from_mnemonic(generate_mnemonic()?)?;
+
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(9..10)
+                .with_bech32_hrp(IOTA_BECH32_HRP),
+        )
+        .await?;
+
+    let res = iota_sdk::client::api::search_address(
+        &secret_manager,
+        IOTA_BECH32_HRP,
+        IOTA_COIN_TYPE,
+        0,
+        0..10,
+        &addresses[0],
+    )
+    .await?;
+
+    assert_eq!(res, (9, false));
+
+    Ok(())
 }

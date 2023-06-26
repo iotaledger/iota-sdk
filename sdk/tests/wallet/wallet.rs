@@ -5,19 +5,23 @@
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 #[cfg(feature = "storage")]
 use iota_sdk::{
+    client::constants::SHIMMER_COIN_TYPE,
     client::node_manager::node::{Node, NodeDto},
+    wallet::Error,
     Url,
 };
 use iota_sdk::{
     client::{
-        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{ClientOptions, Error, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
-use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
+#[cfg(feature = "storage")]
+use crate::wallet::common::NODE_OTHER;
+use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
 
 #[cfg(feature = "storage")]
 #[tokio::test]

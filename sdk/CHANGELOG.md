@@ -102,6 +102,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
 - Made `Account::get_basic_outputs_for_additional_inputs` private;
 - `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
+- Use concrete ID types instead of String in HTTP responses;
+- `Client::get_outputs_metadata_ignore_errors` returns `OutputMetadata` instead of DTO;
+- `ClientInner::get_output_metadata` returns `OutputMetadata` instead of DTO;
 
 ### Removed
 
@@ -134,6 +137,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validation for transitions in the input selection;
 - Automatically increase foundry counter of alias outputs;
 - Validate that foundry outputs can't have serial number `0`;
+- Allow QueryParameter::Issuer for NFTs;
 
 ## 0.3.0 - 2023-05-02
 

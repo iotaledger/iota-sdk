@@ -8,7 +8,7 @@ It is advised to do them all at least once in the given order to understand the 
 
 Initialize the wallet with a given node and a randomly generated mnemonic.
 ```sh title=Input
-./wallet init --node <NODE_API_URL>
+./wallet init --node-url <NODE_API_URL>
 ```
 ```sh title=Output
 > INFO  Mnemonic stored successfully
@@ -69,7 +69,7 @@ Enter the "main" account and send some amount to the "savings" address.
 ```
 ```sh title=Output
 > INFO  Transaction sent:
-> transaction id: 0x...
+> TransactionId(0x...)
 > Some(BlockId(0x...))
 ```
 
@@ -96,7 +96,7 @@ Enter the "main" account and mint native tokens with foundry metadata.
 
 ```sh title=Output
 > INFO  Native token minting transaction sent:
-> transaction id: 0x...
+> TransactionId(0x...)
 > Some(BlockId(0x...))
 ```
 
@@ -128,7 +128,7 @@ Send native tokens from the "main" account to the new "savings" address.
 ```
 ```sh title=Output
 > INFO  Native token transaction sent:
-> transaction id: 0x...
+> TransactionId(0x...)
 > Some(BlockId(0x...))
 ```
 
@@ -144,7 +144,7 @@ Enter the "main" account and mint an NFT.
 ```
 ```sh title=Output
 > INFO  NFT minting transaction sent:
-> transaction id: 0x...
+> TransactionId(0x...)
 > Some(BlockId(0x...))
 ```
 
@@ -177,7 +177,7 @@ Send the NFT to the new "savings" address.
 ```
 ```sh title=Output
 > INFO  Nft transaction sent:
-> transaction id: 0x...
+> TransactionId(0x...)
 > Some(BlockId(0x...))
 ```
 
