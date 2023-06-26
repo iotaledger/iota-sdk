@@ -783,8 +783,8 @@ export class Account {
     }
 
     /**
-     * Mint native tokens.
-     * @param params The options for minting tokens.
+     * Create a native token.
+     * @param params The options for creating a native token.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The minting transaction and the token ID.
