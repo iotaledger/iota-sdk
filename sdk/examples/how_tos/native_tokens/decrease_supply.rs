@@ -76,7 +76,6 @@ async fn main() -> Result<()> {
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
-    println!("Melted {} native tokens ({})", melt_amount, token_id);
 
     let balance = account.sync(None).await?;
     let available_balance = balance
