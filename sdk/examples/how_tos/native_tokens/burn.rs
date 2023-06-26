@@ -8,12 +8,12 @@
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
 //!
-//! You may provide a TOKEN ID that is available in the account. You can check this by running the
+//! You may provide a TOKEN_ID that is available in the account. You can check this by running the
 //! `get_balance` example. You can mint a new native token by running the `mint_native_token` example.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example burn_native_token [TOKEN ID]
+//! cargo run --release --all-features --example burn_native_token [TOKEN_ID]
 //! ```
 
 use iota_sdk::{

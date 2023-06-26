@@ -6,12 +6,12 @@
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example.
 //!
-//! You have to provide the ISSUER NFT ID that you created by running the
+//! You have to provide the ISSUER_NFT_ID that you created by running the
 //! `mint_issuer_nft` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_collection_nft <ISSUER NFT ID>
+//! cargo run --release --all-features --example mint_collection_nft <ISSUER_NFT_ID>
 //! ```
 
 use iota_sdk::{
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 
     let issuer_nft_id = std::env::args()
         .nth(1)
-        .expect("missing example argument: ISSUER NFT ID")
+        .expect("missing example argument: ISSUER_NFT_ID")
         .parse::<NftId>()?;
 
     let wallet = Wallet::builder()
