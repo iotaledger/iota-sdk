@@ -1,10 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will mint an NFT in two different ways.
+//! In this example we will mint some NFTs.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `create_account` example!
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -37,15 +37,17 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Create the wallet
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
+
+    // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
-    let nfts_before = balance.nfts();
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
 
     // We send from the first address in the account.
     let sender_address = *account.addresses().await?[0].address();
@@ -62,8 +64,6 @@ async fn main() -> Result<()> {
         .with_tag(NFT1_TAG.as_bytes().to_vec())
         .try_with_issuer(sender_address)?
         .with_immutable_metadata(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec())];
-
-    println!("Sending minting transaction for NFT 1...");
 
     let transaction = account.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
@@ -90,8 +90,6 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    println!("Sending minting transaction for NFT 2...");
-
     let transaction = account.send(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
@@ -107,14 +105,7 @@ async fn main() -> Result<()> {
     println!("Minted NFT 2");
 
     // Ensure the account is synced after minting.
-    let balance = account.sync(None).await?;
-    let nfts_after = balance.nfts();
-    println!("New owned NFTs:");
-    nfts_after.iter().for_each(|nft_id| {
-        if !nfts_before.contains(nft_id) {
-            println!("- {nft_id}");
-        }
-    });
+    account.sync(None).await?;
 
     Ok(())
 }

@@ -8,7 +8,7 @@
 //! * if a voting occurred, stops the voting and destroys the voting output
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `create_account` example and there are funds on the first address
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example and there are funds on the first address
 //! by running the `get_funds` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:

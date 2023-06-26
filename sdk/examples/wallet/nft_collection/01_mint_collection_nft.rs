@@ -4,7 +4,7 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `create_account` example and  that you have created an Issuer NFT ID
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example and  that you have created an Issuer NFT ID
 //! by running the `mint_issuer_nft` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
