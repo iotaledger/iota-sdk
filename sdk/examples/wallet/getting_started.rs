@@ -4,7 +4,7 @@
 //! In this example we will create a new wallet, a mnemonic, and an initial account. Then, we'll print the first address
 //! of that account.
 //!
-//! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//! Make sure there's no `STRONGHOLD_SNAPSHOT_PATH` file and no `WALLET_DB_PATH` folder yet!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

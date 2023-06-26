@@ -3,7 +3,7 @@
 
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `create_account` example and  that you have created an Issuer NFT ID
 //! by running the `mint_issuer_nft` example!
 //!

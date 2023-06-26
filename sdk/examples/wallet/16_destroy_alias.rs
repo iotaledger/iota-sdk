@@ -4,7 +4,7 @@
 //! In this example we will try to destroy the first alias there is in the account. This is only possible if possible
 //! foundry outputs have circulating supply of 0.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `create_account` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:

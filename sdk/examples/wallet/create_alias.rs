@@ -3,7 +3,7 @@
 
 //! In this example we will create an alias output.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `create_account` example and that funds are available by running
 //! the `get_funds` example!
 //!

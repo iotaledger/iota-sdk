@@ -4,7 +4,7 @@
 //! In this example we will print the details of two accounts in the wallet. If an account doesn't exist yet it will be
 //! created. For the second account it will generate as many addresses as defined in the constant.
 //!
-//! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//! Make sure there's no `STRONGHOLD_SNAPSHOT_PATH` file and no `WALLET_DB_PATH` folder yet!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
