@@ -104,7 +104,7 @@ OutputResponse {
     milestoneTimestampBooked: 1684939216,
     ledgerIndex: 5794505
   },
-  output: Output {
+  output: BasicOutput {
     type: 3,
     amount: '12310426',
     unlockConditions: [ [Object] ]
