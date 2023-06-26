@@ -4,7 +4,7 @@
 //! TODO: <insert example description> by calling
 //! `GET api/indexer/v1/outputs/basic`.
 //!
-//! `cargo run --release --example get_outputs -- [NODE_URL]`.
+//! `cargo run --release --example get_outputs -- [NODE_URL] [ADDRESS]`.
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
@@ -28,7 +28,12 @@ async fn main() -> Result<()> {
         .await?;
 
     // Take the address from command line argument or use a default one.
-    let address = Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
+    let address = Bech32Address::try_from_str(
+        std::env::args()
+        .nth(2)
+        .as_deref()
+        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
+    )?;
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
