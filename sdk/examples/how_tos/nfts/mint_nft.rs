@@ -4,7 +4,7 @@
 //! In this example we will mint an NFT.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example mint_nft --release`
+//! `cargo run --release --example mint_nft`
 
 use std::env::var;
 

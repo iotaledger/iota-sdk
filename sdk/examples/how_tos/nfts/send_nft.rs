@@ -4,7 +4,7 @@
 //! In this example we will send an nft.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example send_nft --release`
+//! `cargo run --release --example send_nft`
 
 use std::env::var;
 

@@ -4,7 +4,7 @@
 //! In this example we will burn an existing nft output.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example burn_nft --release`
+//! `cargo run --release --example burn_nft`
 
 use std::env::var;
 
