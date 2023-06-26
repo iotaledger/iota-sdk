@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Account::getOutputsWithAdditionalUnlockConditions` renamed to `claimableOutputs`;
 - Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
+- Rename `Account::mintNativeToken` to `createNativeToken`, `Account::increaseNativeTokenSupply` to `mintNativeToken`, `Account::decreaseNativeTokenSupply` to `meltNativeToken`;
+
 
 ### Removed
 
