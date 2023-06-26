@@ -1,15 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will mint an NFT in two different ways.
+//! In this example we will mint an NFT.
+//! Rename `.env.example` to `.env` first.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
-//!
-//! Rename `.env.example` to `.env` first, then run the command:
-//! ```sh
-//! cargo run --release --all-features --example mint_nft
-//! ```
+//! `cargo run --release --example mint_nft`
 
 use std::env::var;
 
@@ -39,15 +34,17 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Create the wallet
     let wallet = Wallet::builder()
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
+
+    // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
-    let nfts_before = balance.nfts();
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
 
     // We send from the first address in the account.
     let sender_address = *account.addresses().await?[0].address();
@@ -65,8 +62,6 @@ async fn main() -> Result<()> {
         .try_with_issuer(sender_address)?
         .with_immutable_metadata(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec())];
 
-    println!("Sending minting transaction for NFT 1...");
-
     let transaction = account.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
@@ -74,11 +69,7 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     println!("Minted NFT 1");
 
     // Build an NFT manually by using the `NftOutputBuilder`
@@ -92,8 +83,6 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    println!("Sending minting transaction for NFT 2...");
-
     let transaction = account.send(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
@@ -101,22 +90,11 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     println!("Minted NFT 2");
 
     // Ensure the account is synced after minting.
-    let balance = account.sync(None).await?;
-    let nfts_after = balance.nfts();
-    println!("New owned NFTs:");
-    nfts_after.iter().for_each(|nft_id| {
-        if !nfts_before.contains(nft_id) {
-            println!("- {nft_id}");
-        }
-    });
+    account.sync(None).await?;
 
     Ok(())
 }
