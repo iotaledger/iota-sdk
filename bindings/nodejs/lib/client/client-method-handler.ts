@@ -11,7 +11,7 @@ import type { IClientOptions, __ClientMethods__ } from '../types/client';
 
 /** The MethodHandler which sends the commands to the Rust side. */
 export class ClientMethodHandler {
-    methodHandler: ClientMethodHandler | undefined;
+    methodHandler: ClientMethodHandler;
 
     constructor(options: IClientOptions | ClientMethodHandler) {
         // The rust client object is not extensible
@@ -23,14 +23,13 @@ export class ClientMethodHandler {
     }
 
     async destroy() {
-        await destroyClient(this.methodHandler);
-        this.methodHandler = undefined;
+        return destroyClient(this.methodHandler);
     }
 
     async callMethod(method: __ClientMethods__): Promise<string> {
         return callClientMethodAsync(
             JSON.stringify(method),
-            this.methodHandler!,
+            this.methodHandler,
         );
     }
 
