@@ -20,7 +20,7 @@ use crate::{
         block::{
             output::{
                 dto::{OutputDto, OutputMetadataDto},
-                Output, OutputId, OutputMetadata, OutputWithMetadata,
+                Output, OutputId, OutputMetadata,
             },
             payload::transaction::TransactionId,
             slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -300,19 +300,6 @@ impl ClientInner {
         Ok(OutputMetadata::try_from(metadata)?)
     }
 
-    // Finds output and its metadata by output ID.
-    /// GET /api/core/v3/outputs/{outputId}
-    /// + GET /api/core/v3/outputs/{outputId}/metadata
-    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
-        let output = Output::unpack_verified(
-            self.get_output_raw(output_id).await?,
-            &self.get_protocol_parameters().await?,
-        )?;
-        let metadata = self.get_output_metadata(output_id).await?;
-
-        Ok(OutputWithMetadata::new(output, metadata))
-    }
-
     /// Returns the block that was included in the ledger for a given transaction ID, as object.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
@@ -451,8 +438,7 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        let path = "api/core/v3/info";
-        url.set_path(path);
+        url.set_path(INFO_PATH);
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())

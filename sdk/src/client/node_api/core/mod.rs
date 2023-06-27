@@ -5,6 +5,8 @@
 
 pub mod routes;
 
+use packable::PackableExt;
+
 #[cfg(not(target_family = "wasm"))]
 use crate::client::constants::MAX_PARALLEL_API_REQUESTS;
 use crate::{
@@ -13,6 +15,19 @@ use crate::{
 };
 
 impl Client {
+    // Finds output and its metadata by output ID.
+    /// GET /api/core/v3/outputs/{outputId}
+    /// + GET /api/core/v3/outputs/{outputId}/metadata
+    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+        let output = Output::unpack_verified(
+            self.get_output_raw(output_id).await?,
+            &self.get_protocol_parameters().await?,
+        )?;
+        let metadata = self.get_output_metadata(output_id).await?;
+
+        Ok(OutputWithMetadata::new(output, metadata))
+    }
+
     /// Request outputs by their output ID in parallel
     pub async fn get_outputs(&self, output_ids: &[OutputId]) -> Result<Vec<Output>> {
         #[cfg(target_family = "wasm")]
