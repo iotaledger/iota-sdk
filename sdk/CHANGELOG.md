@@ -107,6 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientInner::get_output_metadata` returns `OutputMetadata` instead of DTO;
 - Rename `Account::mint_native_token` to `create_native_token`, `Account::increase_native_token_supply` to `mint_native_token`, `Account::decrease_native_token_supply` to `melt_native_token`;
 - Rename `Account::prepare_mint_native_token` to `prepare_create_native_token`, `Account::prepare_increase_native_token_supply` to `prepare_mint_native_token`, `Account::prepare_decrease_native_token_supply` to `prepare_melt_native_token`;
+- Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 
 ### Removed
 
