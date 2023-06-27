@@ -3,12 +3,8 @@
 
 //! Input selection for transactions
 
-mod automatic;
 mod core;
 mod helpers;
-mod manual;
-mod sender_issuer;
-mod utxo_chains;
 
 pub(crate) use self::core::is_alias_transition;
 pub use self::{

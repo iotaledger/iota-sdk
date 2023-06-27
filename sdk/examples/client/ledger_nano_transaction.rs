@@ -38,24 +38,25 @@ async fn main() -> Result<()> {
 
     println!("List of generated public addresses:\n{addresses:?}\n");
 
-    let block = client
-        .block()
-        .with_secret_manager(&secret_manager)
-        // Insert the output address and amount to spent. The amount cannot be zero.
-        .with_output(
-            // We generate an address from our seed so that we send the funds to ourselves
-            addresses[1],
-            1_000_000,
-        )
-        .await?
-        .finish()
-        .await?;
+    todo!("build a transaction that gets signed with the ledger nano");
+    // let block = client
+    //     .block()
+    //     .with_secret_manager(&secret_manager)
+    //     // Insert the output address and amount to spent. The amount cannot be zero.
+    //     .with_output(
+    //         // We generate an address from our seed so that we send the funds to ourselves
+    //         addresses[1],
+    //         1_000_000,
+    //     )
+    //     .await?
+    //     .finish()
+    //     .await?;
 
-    println!(
-        "Block using ledger nano sent: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
-    );
+    // println!(
+    //     "Block using ledger nano sent: {}/block/{}",
+    //     std::env::var("EXPLORER_URL").unwrap(),
+    //     block.id()
+    // );
 
-    Ok(())
+    // Ok(())
 }

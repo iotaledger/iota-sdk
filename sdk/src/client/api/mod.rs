@@ -5,7 +5,6 @@
 
 mod address;
 mod block_builder;
-mod consolidation;
 mod high_level;
 mod types;
 

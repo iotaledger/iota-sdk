@@ -4,7 +4,6 @@
 mod addresses;
 mod client_builder;
 mod common;
-mod consolidation;
 mod error;
 mod input_selection;
 mod input_signing_data;
@@ -14,7 +13,6 @@ mod mqtt;
 mod node_api;
 mod secret_manager;
 mod signing;
-mod transactions;
 
 use std::{
     collections::{BTreeSet, HashMap},

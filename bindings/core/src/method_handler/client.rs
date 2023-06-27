@@ -4,10 +4,7 @@
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
-        request_funds_from_faucet, Client,
-    },
+    client::{request_funds_from_faucet, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -16,7 +13,7 @@ use iota_sdk::{
                 dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
             },
-            payload::{dto::PayloadDto, Payload},
+            payload::Payload,
             protocol::dto::ProtocolParametersDto,
             Block, BlockDto,
         },
@@ -160,31 +157,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::Output(OutputDto::from(&output))
         }
-        ClientMethod::BuildAndPostBlock {
-            secret_manager,
-            options,
-        } => {
-            // Prepare transaction
-            let mut block_builder = client.block();
-
-            let secret_manager = match secret_manager {
-                Some(secret_manager) => Some(secret_manager.try_into()?),
-                None => None,
-            };
-
-            if let Some(secret_manager) = &secret_manager {
-                block_builder = block_builder.with_secret_manager(secret_manager);
-            }
-
-            if let Some(options) = options {
-                block_builder = block_builder.set_options(options).await?;
-            }
-
-            let block = block_builder.finish().await?;
-            let block_id = block.id();
-
-            Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
-        }
         #[cfg(feature = "mqtt")]
         ClientMethod::ClearListeners { topics } => {
             client.unsubscribe(topics).await?;
@@ -217,55 +189,15 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetLocalPow => Response::Bool(client.get_local_pow().await),
         ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow().await),
-        ClientMethod::PrepareTransaction {
-            secret_manager,
-            options,
-        } => {
-            let mut block_builder = client.block();
-
-            let secret_manager = match secret_manager {
-                Some(secret_manager) => Some(secret_manager.try_into()?),
-                None => None,
-            };
-
-            if let Some(secret_manager) = &secret_manager {
-                block_builder = block_builder.with_secret_manager(secret_manager);
-            }
-
-            if let Some(options) = options {
-                block_builder = block_builder.set_options(options).await?;
-            }
-
-            Response::PreparedTransactionData(PreparedTransactionDataDto::from(
-                &block_builder.prepare_transaction().await?,
-            ))
-        }
-        ClientMethod::SignTransaction {
-            secret_manager,
-            prepared_transaction_data,
-        } => {
-            let mut block_builder = client.block();
-
-            let secret_manager = secret_manager.try_into()?;
-
-            block_builder = block_builder.with_secret_manager(&secret_manager);
-
-            Response::SignedTransaction(PayloadDto::from(
-                &block_builder
-                    .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-                        prepared_transaction_data,
-                    )?)
-                    .await?,
-            ))
-        }
         ClientMethod::PostBlockPayload { payload } => {
-            let block_builder = client.block();
-
-            let block = block_builder
-                .finish_block(Some(Payload::try_from_dto(
-                    payload,
-                    &client.get_protocol_parameters().await?,
-                )?))
+            let block = client
+                .finish_block_builder(
+                    None,
+                    Some(Payload::try_from_dto(
+                        payload,
+                        &client.get_protocol_parameters().await?,
+                    )?),
+                )
                 .await?;
 
             let block_id = block.id();
@@ -368,17 +300,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(|(block_id, block)| (block_id, BlockDto::from(&block)))
                 .collect();
             Response::RetryUntilIncludedSuccessful(res)
-        }
-        ClientMethod::ConsolidateFunds {
-            secret_manager,
-            generate_addresses_options,
-        } => {
-            let secret_manager = secret_manager.try_into()?;
-            Response::ConsolidatedFunds(
-                client
-                    .consolidate_funds(&secret_manager, generate_addresses_options)
-                    .await?,
-            )
         }
         ClientMethod::FindInputs { addresses, amount } => Response::Inputs(
             client

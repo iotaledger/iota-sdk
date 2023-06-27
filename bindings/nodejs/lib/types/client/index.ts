@@ -1,7 +1,6 @@
 export * from './output_builder_params';
 
 export * from './bridge';
-export * from './build-block-options';
 export * from './burn';
 export * from './client-options';
 export * from './constants';

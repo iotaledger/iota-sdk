@@ -22,7 +22,10 @@ async function run() {
 
     try {
         // Create block with no payload
-        const blockIdAndBlock = await client.buildAndPostBlock();
+        // TODO: have a way in the bindings to send an empty block
+        const blockIdAndBlock = await client.postBlockPayload(
+            new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
+        );
         console.log('Block:', blockIdAndBlock, '\n');
 
         console.log(

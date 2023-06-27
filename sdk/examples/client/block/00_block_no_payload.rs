@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create and send the block.
-    let block = client.block().finish().await?;
+    let block = client.finish_block_builder(None, None).await?;
 
     println!("{block:#?}");
 

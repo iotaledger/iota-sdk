@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { describe, it } from '@jest/globals';
-import { Client, utf8ToHex, Utils, Block, OutputResponse, SecretManager, TaggedDataPayload, CommonOutput } from '../../';
+import { Client, utf8ToHex, Utils,  OutputResponse, SecretManager, TaggedDataPayload, CommonOutput } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';
@@ -139,50 +139,31 @@ describe.skip('Main examples', () => {
         ).toBe(200);
     });
 
-    it('sends a block', async () => {
-        const blockIdAndBlock = await client.buildAndPostBlock();
+    // TODO: have a way in the bindings to send an empty block
+    // it('sends a block', async () => {
+    //     const blockIdAndBlock = await client.buildAndPostBlock();
 
-        expect(blockIdAndBlock[0]).toBeValidBlockId();
-    });
+    //     expect(blockIdAndBlock[0]).toBeValidBlockId();
+    // });
 
     it('gets block data', async () => {
-        const blockIdAndBlock = await client.buildAndPostBlock();
+        const tips = await client.getTips();
 
-        const blockData = await client.getBlock(blockIdAndBlock[0]);
-        const blockMetadata = await client.getBlockMetadata(blockIdAndBlock[0]);
+        const blockData = await client.getBlock(tips[0]);
+        const blockId = Utils.blockId(blockData)
+        expect(tips[0]).toStrictEqual(blockId);
 
-        expect(blockData).toStrictEqual<Block>(blockIdAndBlock[1]);
+        const blockMetadata = await client.getBlockMetadata(tips[0]);
         expect(blockMetadata.blockId).toBeValidBlockId();
     });
 
     it('sends a block with a tagged data payload', async () => {
-        const blockIdAndBlock = await client.buildAndPostBlock(secretManager, {
-            tag: utf8ToHex('Hello'),
-            data: utf8ToHex('Tangle'),
-        });
+        const blockIdAndBlock = await client.postBlockPayload(new TaggedDataPayload( utf8ToHex('Hello'), utf8ToHex('Tangle')));
 
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
 
         expect(fetchedBlock.payload).toStrictEqual(
             new TaggedDataPayload( utf8ToHex('Hello'), utf8ToHex('Tangle'))
         );
-    });
-
-    it('sends a transaction', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
-            range: {
-                start: 1,
-                end: 2,
-            },
-        });
-
-        const blockIdAndBlock = await client.buildAndPostBlock(secretManager, {
-            output: {
-                address: addresses[0],
-                amount: '1000000',
-            },
-        });
-
-        expect(blockIdAndBlock[0]).toBeValidBlockId();
     });
 });
