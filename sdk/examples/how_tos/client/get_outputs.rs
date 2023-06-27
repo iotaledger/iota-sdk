@@ -9,7 +9,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example node_api_indexer_get_basic_outputs <ADDRESS> [NODE_URL]
+//! cargo run --release --all-features --example get_outputs [ADDRESS] [NODE_URL]
 //! ```
 
 use iota_sdk::{
@@ -30,11 +30,13 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the address from the command line, or panic.
-    let address = std::env::args()
-        .nth(1)
-        .expect("missing example argument: ADDRESS")
-        .parse::<Bech32Address>()?;
+    // Take the address from command line argument or use a default one.
+    let address = Bech32Address::try_from_str(
+        std::env::args()
+            .nth(1)
+            .as_deref()
+            .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
+    )?;
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
@@ -46,12 +48,13 @@ async fn main() -> Result<()> {
         ])
         .await?;
 
-    println!("Basic output IDs: {output_ids_response:#?}");
+    println!("First output of query:");
+    println!("ID: {:#?}", output_ids_response.first().expect("No outputs found"));
 
     // Get the outputs by their IDs.
-    let outputs_responses = client.get_outputs(&output_ids_response.items).await?;
+    let outputs_response = client.get_outputs(&output_ids_response.items).await?;
 
-    println!("{outputs_responses:#?}");
+    println!("{:#?}", outputs_response.first().unwrap());
 
     Ok(())
 }
