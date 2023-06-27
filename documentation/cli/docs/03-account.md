@@ -142,7 +142,7 @@ Create a new alias output.
 > Account "main": create-alias-output
 ```
 
-### `decrease-native-token-supply`
+### `melt-native-token`
 
 Melts a native token.
 
@@ -158,7 +158,7 @@ Melts a native token.
 Melt the provided amount of a native token.
 
 ```sh
-> Account "main": decrease-native-token-supply 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 100
+> Account "main": melt-native-token 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 100
 ```
 
 ### `decrease-voting-power`
@@ -262,7 +262,7 @@ Displays the account interface usage.
 > Account "main": help
 ```
 
-### `increase-native-token-supply`
+### `mint-native-token`
 
 Mints more of a native token.
 
@@ -278,7 +278,7 @@ Mints more of a native token.
 Mint 10 additional native tokens.
 
 ```sh
-> Account "main": increase-native-token-supply 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 10
+> Account "main": mint-native-token 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 10
 ```
 
 ### `increase-voting-power`
@@ -299,9 +299,9 @@ Increase the voting power of the account by 100000.
 > Account "main": increase-voting-power 100000
 ```
 
-### `mint-native-token`
+### `create-native-token`
 
-Mints a native token.
+Creates a native token.
 
 #### Parameters
 
@@ -314,22 +314,22 @@ Mints a native token.
 
 #### Examples
 
-Mint a native token with a maximum supply.
+Create a native token with a maximum supply.
 
 ```sh
-> Account "main": mint-native-token 1000 1000
+> Account "main": create-native-token 1000 1000
 ```
 
-Mint a native token with a maximum supply and hexadecimal foundry metadata.
+Create a native token with a maximum supply and hexadecimal foundry metadata.
 
 ```sh
-> Account "main": mint-native-token 1000 1000 --foundry-metadata-hex 0xabcdef
+> Account "main": create-native-token 1000 1000 --foundry-metadata-hex 0xabcdef
 ```
 
-Mint a native token with a maximum supply and foundry metadata from a file.
+Create a native token with a maximum supply and foundry metadata from a file.
 
 ```sh
-> Account "main": mint-native-token 1000 1000 --foundry-metadata-file metadata.json
+> Account "main": create-native-token 1000 1000 --foundry-metadata-file metadata.json
 ```
 
 ### `mint-nft`
