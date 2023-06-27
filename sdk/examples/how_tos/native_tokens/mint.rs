@@ -56,9 +56,7 @@ async fn main() -> Result<()> {
 
     // Mint some more native tokens
     let mint_amount = U256::from(MINT_AMOUNT);
-    let transaction = account
-        .mint_native_token(token_id, mint_amount, None)
-        .await?;
+    let transaction = account.mint_native_token(token_id, mint_amount, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     let block_id = account
