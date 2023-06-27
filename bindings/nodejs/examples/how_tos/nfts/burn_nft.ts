@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedWallet } from './common';
+import { Wallet } from '@iota/sdk';
 
 // In this example we will burn an existing nft output.
 //
@@ -9,27 +9,39 @@ import { getUnlockedWallet } from './common';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/14-burn-nft.ts
+// yarn run-example ./how_tos/nfts/burn_nft.ts
 async function run() {
     try {
+        if (!process.env.STRONGHOLD_PASSWORD) {
+            throw new Error(
+                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+            );
+        }
+
         // Create the wallet
-        const wallet = await getUnlockedWallet();
+        const wallet = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,
+        });
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount('Alice');
+        const account = await wallet.getAccount(
+            `${process.env.ACCOUNT_ALIAS_1}`,
+        );
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
         if (balance.nfts.length == 0) {
-            throw new Error(`No NFT available in account 'Alice'`);
+            throw new Error(
+                `No NFT available in account '${process.env.ACCOUNT_ALIAS_1}'`,
+            );
         }
         // Get the first nft
         const nftId = balance.nfts[0];
 
         console.log(`Balance BEFORE burning:\n`, balance);
 
-        // Burn a native token
+        // Burn an NFT
         const transaction = await account
             .prepareBurnNft(nftId)
             .then((prepared) => prepared.send());
@@ -41,7 +53,7 @@ async function run() {
             transaction.transactionId,
         );
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
         console.log(`Burned NFT ${nftId}`);
 

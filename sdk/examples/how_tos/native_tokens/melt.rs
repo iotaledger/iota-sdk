@@ -6,12 +6,15 @@
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
 //!
+//! You may provide a TOKEN_ID that is available in the account. The foundry
+//! output which minted it needs to be available as well. You can check this by
+//! running the `get_balance` example. You can mint a new native token by running
+//! the `mint_native_token` example.
+//!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example melt_native_token
+//! cargo run --release --all-features --example melt_native_token [TOKEN_ID]
 //! ```
-
-use std::env::var;
 
 use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
 
@@ -24,7 +27,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -35,7 +38,10 @@ async fn main() -> Result<()> {
     let balance = account.balance().await?;
 
     // Find first foundry and corresponding token id
-    let token_id = TokenId::from(*balance.foundries().first().unwrap());
+    let token_id = std::env::args()
+        .nth(1)
+        .map(|s| s.parse::<TokenId>().expect("invalid token id"))
+        .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
 
     if let Some(native_token_balance) = balance
         .native_tokens()
@@ -51,7 +57,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Melt some of the circulating supply
@@ -63,7 +69,11 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     let balance = account.sync(None).await?;
     let available_balance = balance

@@ -50,7 +50,8 @@
     },
     "resolutions": {
         "tar": "^4.4.19",
-        "simple-get": "^2.8.2"
+        "simple-get": "^2.8.2",
+        "semver": "^7.5.2"
     },
     "repository": {
         "type": "git",

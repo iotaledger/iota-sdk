@@ -1,11 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SendNftParams } from '@iota/sdk';
+import { SendNftParams, Wallet } from '@iota/sdk';
 
-import { getUnlockedWallet } from './common';
-
-// The address to send the tokens to
+// The address to send the NFT to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
 
@@ -15,14 +13,23 @@ const RECV_ADDRESS =
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/08-send-nft.ts
+// yarn run-example ./how_tos/nfts/send_nft.ts
 async function run() {
     try {
-        // Create the wallet
-        const wallet = await getUnlockedWallet();
+        if (!process.env.STRONGHOLD_PASSWORD) {
+            throw new Error(
+                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+            );
+        }
+
+        const wallet = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,
+        });
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount('Alice');
+        const account = await wallet.getAccount(
+            `${process.env.ACCOUNT_ALIAS_1}`,
+        );
 
         // May want to ensure the account is synced before sending a transaction.
         const balance = await account.sync();
@@ -40,8 +47,6 @@ async function run() {
             },
         ];
 
-        console.log(`Sending NFT '${nftId}' to '${RECV_ADDRESS}'...`);
-
         // Send the full NFT output to the specified address
         const transaction = await account
             .prepareSendNft(outputs)
@@ -55,7 +60,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         // To send an NFT with expiration unlock condition prepareOutput() can be used like this:

@@ -4,7 +4,7 @@
 //! TODO: <insert example description> by calling
 //! `GET api/indexer/v1/outputs/basic`.
 //!
-//! `cargo run --example node_api_indexer_get_basic_outputs --release -- [NODE_URL] [ADDRESS]`.
+//! `cargo run --release --example get_outputs -- [NODE_URL] [ADDRESS]`.
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
         std::env::args()
             .nth(2)
             .as_deref()
-            .unwrap_or("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"),
+            .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
     )?;
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
@@ -45,12 +45,13 @@ async fn main() -> Result<()> {
         ])
         .await?;
 
-    println!("Basic output IDs: {output_ids_response:#?}");
+    println!("First output of query:");
+    println!("ID: {:#?}", output_ids_response.first().expect("No outputs found"));
 
     // Get the outputs by their IDs.
-    let outputs_responses = client.get_outputs(&output_ids_response.items).await?;
+    let outputs_response = client.get_outputs(&output_ids_response.items).await?;
 
-    println!("{outputs_responses:#?}");
+    println!("{:#?}", outputs_response.first().unwrap());
 
     Ok(())
 }

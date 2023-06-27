@@ -9,7 +9,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example output_consolidation
+//! cargo run --release --all-features --example consolidate_outputs
 //! ```
 
 use std::env::var;
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
 
     println!("Sending consolidation transaction...");
 
-    // Consolidate unspent outputs and print the consolidation transaction IDs
+    // Consolidate unspent outputs and print the consolidation transaction ID
     // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
     let transaction = account.consolidate_outputs(true, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
