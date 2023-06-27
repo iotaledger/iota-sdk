@@ -3,8 +3,7 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     testMatch: ['<rootDir>/tests/**/*.(test|spec).ts'],
-    testTimeout: 120000,
-    verbose: true,
+    verbose: false,
     detectOpenHandles: true,
     forceExit: true,
     moduleNameMapper: {
