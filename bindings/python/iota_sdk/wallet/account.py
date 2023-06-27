@@ -258,7 +258,7 @@ class Account:
         """Create native token.
         """
         prepared = self._call_account_method(
-            'prepareMintNativeToken', {
+            'prepareCreateNativeToken', {
                 'tokenId': token_id,
                 'mintAmount': hex(mint_amount),
                 'options': options
