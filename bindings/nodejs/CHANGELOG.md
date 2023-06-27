@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Rename `Account::mintNativeToken` to `createNativeToken`, `Account::increaseNativeTokenSupply` to `mintNativeToken`, `Account::decreaseNativeTokenSupply` to `meltNativeToken`;
+- Rename `Account::prepareMintNativeToken` to `prepareCreateNativeToken`, `Account::prepareIncreaseNativeTokenSupply` to `prepareMintNativeToken`, `Account::prepareDecreaseNativeTokenSupply` to `prepareMeltNativeToken`;
 
 ## 1.0.0-rc.1 - 2023-06-19
 
