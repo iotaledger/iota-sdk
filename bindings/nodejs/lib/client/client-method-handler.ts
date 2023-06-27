@@ -11,7 +11,7 @@ import type { IClientOptions, __ClientMethods__ } from '../types/client';
 
 /** The MethodHandler which sends the commands to the Rust side. */
 export class ClientMethodHandler {
-    methodHandler: ClientMethodHandler | undefined ;
+    methodHandler: ClientMethodHandler | undefined;
 
     constructor(options: IClientOptions | ClientMethodHandler) {
         // The rust client object is not extensible
