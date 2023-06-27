@@ -129,6 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlaceholderSecretManager`;
 - `block::Error::{InvalidControllerKind, MigratedFundsNotSorted, MissingPayload, MissingRequiredSenderBlock}` variants;
 - `client::Error::InvalidBIP32ChainData`;
+- `BlockResponse`, `OutputResponse` and `MilestoneResponse`;
+- `ClientError::UnexpectedApiResponse`;
 
 ### Fixed
 
