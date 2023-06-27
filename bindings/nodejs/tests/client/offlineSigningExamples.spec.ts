@@ -41,9 +41,9 @@ describe('Offline signing examples', () => {
         offlineClient = new Client({})
     });
 
-    afterAll(() => {
-        onlineClient.destroy();
-        offlineClient.destroy();
+    afterAll(async () => {
+        await onlineClient.destroy();
+        await offlineClient.destroy();
     });
 
     it('generates addresses offline', async () => {

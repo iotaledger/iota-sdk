@@ -57,14 +57,15 @@ import { plainToInstance } from 'class-transformer';
 
 /** The Client to interact with nodes. */
 export class Client {
-    private methodHandler: ClientMethodHandler;
+    private methodHandler: ClientMethodHandler | undefined;
 
     constructor(options: IClientOptions | ClientMethodHandler) {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
-    async destroy(): Promise<void> {
-        await this.methodHandler.destroy();
+    async destroy() {
+        await this.methodHandler?.destroy();
+        this.methodHandler = undefined;
     }
 
     /**
@@ -72,7 +73,7 @@ export class Client {
      * @returns { Promise<INodeInfoWrapper> }.
      */
     async getInfo(): Promise<INodeInfoWrapper> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getInfo',
         });
 
@@ -83,7 +84,7 @@ export class Client {
      * Gets the network related information such as network_id and min_pow_score
      */
     async getNetworkInfo(): Promise<INetworkInfo> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getNetworkInfo',
         });
 
@@ -94,7 +95,7 @@ export class Client {
     async basicOutputIds(
         queryParameters: QueryParameter[],
     ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'basicOutputIds',
             data: {
                 queryParameters,
@@ -106,7 +107,7 @@ export class Client {
 
     /** Get output from a known outputID */
     async getOutput(outputId: OutputId): Promise<OutputResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getOutput',
             data: {
                 outputId,
@@ -119,7 +120,7 @@ export class Client {
 
     /** Fetch OutputResponse from provided OutputIds (requests are sent in parallel) */
     async getOutputs(outputIds: OutputId[]): Promise<OutputResponse[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getOutputs',
             data: {
                 outputIds,
@@ -135,7 +136,7 @@ export class Client {
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
     ): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'buildAndPostBlock',
             data: {
                 secretManager,
@@ -150,7 +151,7 @@ export class Client {
      * The tips can be considered as non-lazy and are therefore ideal for attaching a block.
      */
     async getTips(): Promise<BlockId[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getTips',
         });
 
@@ -161,7 +162,7 @@ export class Client {
      * Post block in JSON format, returns the block ID.
      */
     async postBlock(block: Block): Promise<BlockId> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'postBlock',
             data: {
                 block,
@@ -175,7 +176,7 @@ export class Client {
      * Get block as JSON.
      */
     async getBlock(blockId: BlockId): Promise<Block> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getBlock',
             data: {
                 blockId,
@@ -190,7 +191,7 @@ export class Client {
      * Get block metadata.
      */
     async getBlockMetadata(blockId: BlockId): Promise<IBlockMetadata> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getBlockMetadata',
             data: {
                 blockId,
@@ -207,7 +208,7 @@ export class Client {
         addresses: string[],
         amount: number,
     ): Promise<UTXOInput[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'findInputs',
             data: {
                 addresses,
@@ -227,7 +228,7 @@ export class Client {
         outputIds: string[],
         addresses: string[],
     ): Promise<OutputResponse[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'findOutputs',
             data: {
                 outputIds,
@@ -246,7 +247,7 @@ export class Client {
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
     ): Promise<PreparedTransactionData> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'prepareTransaction',
             data: {
                 secretManager,
@@ -267,7 +268,7 @@ export class Client {
         secretManager: SecretManagerType,
         preparedTransactionData: PreparedTransactionData,
     ): Promise<Payload> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'signTransaction',
             data: {
                 secretManager,
@@ -286,7 +287,7 @@ export class Client {
         transactionEssenceHash: HexEncodedString,
         chain: IBip32Chain,
     ): Promise<UnlockCondition> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'signatureUnlock',
             data: {
                 secretManager,
@@ -302,7 +303,7 @@ export class Client {
      * Submit a payload in a block
      */
     async postBlockPayload(payload: Payload): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'postBlockPayload',
             data: {
                 payload,
@@ -316,7 +317,7 @@ export class Client {
      * Get a node candidate from the healthy node pool.
      */
     async getNode(): Promise<INode> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getNode',
         });
 
@@ -327,7 +328,7 @@ export class Client {
      * Get the network id of the node we're connecting to.
      */
     async getNetworkId(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getNetworkId',
         });
 
@@ -338,7 +339,7 @@ export class Client {
      * Returns the bech32_hrp.
      */
     async getBech32Hrp(): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getBech32Hrp',
         });
 
@@ -349,7 +350,7 @@ export class Client {
      * Returns the min PoW score.
      */
     async getMinPowScore(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getMinPowScore',
         });
 
@@ -360,7 +361,7 @@ export class Client {
      * Returns the tips interval.
      */
     async getTipsInterval(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getTipsInterval',
         });
 
@@ -378,7 +379,7 @@ export class Client {
      * Returns the protocol parameters.
      */
     async getProtocolParameters(): Promise<INodeInfoProtocol> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getProtocolParameters',
         });
 
@@ -389,7 +390,7 @@ export class Client {
      * Returns if local pow should be used or not.
      */
     async getLocalPow(): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getLocalPow',
         });
 
@@ -400,7 +401,7 @@ export class Client {
      * Get fallback to local proof of work timeout.
      */
     async getFallbackToLocalPow(): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getFallbackToLocalPow',
         });
 
@@ -411,7 +412,7 @@ export class Client {
      * Get health of node by input url.
      */
     async getHealth(url: string): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getHealth',
             data: {
                 url,
@@ -425,7 +426,7 @@ export class Client {
      * Get info of node with input url.
      */
     async getNodeInfo(url: string, auth?: IAuth): Promise<INodeInfo> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getNodeInfo',
             data: {
                 url,
@@ -440,7 +441,7 @@ export class Client {
      * Get peers.
      */
     async getPeers(): Promise<IPeer[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getPeers',
         });
 
@@ -451,7 +452,7 @@ export class Client {
      * Post block as raw bytes, returns the block ID.
      */
     async postBlockRaw(block: Block): Promise<BlockId> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'postBlockRaw',
             data: {
                 block,
@@ -465,7 +466,7 @@ export class Client {
      * Get block as raw bytes.
      */
     async getBlockRaw(blockId: BlockId): Promise<Uint8Array> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getBlockRaw',
             data: {
                 blockId,
@@ -479,7 +480,7 @@ export class Client {
      * Look up a milestone by a given milestone index.
      */
     async getMilestoneById(milestoneId: string): Promise<MilestonePayload> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getMilestoneById',
             data: {
                 milestoneId,
@@ -495,7 +496,7 @@ export class Client {
     async getUtxoChangesById(
         milestoneId: string,
     ): Promise<IMilestoneUtxoChangesResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getUtxoChangesById',
             data: {
                 milestoneId,
@@ -508,7 +509,7 @@ export class Client {
      * Look up a milestone by a given milestone index.
      */
     async getMilestoneByIndex(index: number): Promise<MilestonePayload> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getMilestoneByIndex',
             data: {
                 index,
@@ -524,7 +525,7 @@ export class Client {
     async getUtxoChangesByIndex(
         index: number,
     ): Promise<IMilestoneUtxoChangesResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getUtxoChangesByIndex',
             data: {
                 index,
@@ -538,7 +539,7 @@ export class Client {
      * Get receipts.
      */
     async getReceipts(): Promise<ReceiptsResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getReceipts',
         });
         const parsed = JSON.parse(response) as Response<ReceiptsResponse>;
@@ -551,7 +552,7 @@ export class Client {
     async getReceiptsMigratedAt(
         milestoneIndex: number,
     ): Promise<ReceiptsResponse[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getReceiptsMigratedAt',
             data: {
                 milestoneIndex,
@@ -565,7 +566,7 @@ export class Client {
      * Get the treasury output.
      */
     async getTreasury(): Promise<TreasuryOutput> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getTreasury',
         });
 
@@ -576,7 +577,7 @@ export class Client {
      * Returns the included block of the transaction.
      */
     async getIncludedBlock(transactionId: string): Promise<Block> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getIncludedBlock',
             data: {
                 transactionId,
@@ -590,7 +591,7 @@ export class Client {
      * Returns the metadata of the included block of the transaction.
      */
     async getIncludedBlockMetadata(transactionId: string): Promise<Block> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
                 transactionId,
@@ -604,7 +605,7 @@ export class Client {
      * Transforms a hex encoded address to a bech32 encoded address.
      */
     async hexToBech32(hex: string, bech32Hrp?: string): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'hexToBech32',
             data: {
                 hex,
@@ -622,7 +623,7 @@ export class Client {
         aliasId: string,
         bech32Hrp?: string,
     ): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'aliasIdToBech32',
             data: {
                 aliasId,
@@ -637,7 +638,7 @@ export class Client {
      * Transforms an nft id to a bech32 encoded address.
      */
     async nftIdToBech32(nftId: string, bech32Hrp?: string): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'nftIdToBech32',
             data: {
                 nftId,
@@ -655,7 +656,7 @@ export class Client {
         hex: string,
         bech32Hrp?: string,
     ): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {
                 hex,
@@ -672,7 +673,7 @@ export class Client {
     async aliasOutputIds(
         queryParameters: AliasQueryParameter[],
     ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'aliasOutputIds',
             data: {
                 queryParameters,
@@ -686,7 +687,7 @@ export class Client {
      * Fetch alias output ID
      */
     async aliasOutputId(aliasId: string): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'aliasOutputId',
             data: {
                 aliasId,
@@ -702,7 +703,7 @@ export class Client {
     async nftOutputIds(
         queryParameters: NftQueryParameter[],
     ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'nftOutputIds',
             data: {
                 queryParameters,
@@ -716,7 +717,7 @@ export class Client {
      * Fetch NFT output ID
      */
     async nftOutputId(nftId: string): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'nftOutputId',
             data: {
                 nftId,
@@ -732,7 +733,7 @@ export class Client {
     async foundryOutputIds(
         queryParameters: FoundryQueryParameter[],
     ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'foundryOutputIds',
             data: {
                 queryParameters,
@@ -746,7 +747,7 @@ export class Client {
      * Fetch Foundry Output ID
      */
     async foundryOutputId(foundryId: string): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'foundryOutputId',
             data: {
                 foundryId,
@@ -763,7 +764,7 @@ export class Client {
     async getOutputsIgnoreErrors(
         outputIds: string[],
     ): Promise<OutputResponse[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'getOutputsIgnoreErrors',
             data: {
                 outputIds,
@@ -777,7 +778,7 @@ export class Client {
      * Find all blocks by provided block IDs.
      */
     async findBlocks(blockIds: BlockId[]): Promise<Block[]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'findBlocks',
             data: {
                 blockIds,
@@ -792,7 +793,7 @@ export class Client {
      * retried only if they are valid and haven't been confirmed for a while.
      */
     async retry(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'retry',
             data: {
                 blockId,
@@ -812,7 +813,7 @@ export class Client {
         interval?: number,
         maxAttempts?: number,
     ): Promise<[BlockId, Block][]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'retryUntilIncluded',
             data: {
                 blockId,
@@ -832,7 +833,7 @@ export class Client {
         secretManager: SecretManagerType,
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'consolidateFunds',
             data: {
                 secretManager,
@@ -848,7 +849,7 @@ export class Client {
      * confirmed for a while.
      */
     async reattach(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'reattach',
             data: {
                 blockId,
@@ -862,7 +863,7 @@ export class Client {
      * Reattach a block without checking if it should be reattached
      */
     async reattachUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'reattachUnchecked',
             data: {
                 blockId,
@@ -877,7 +878,7 @@ export class Client {
      * method should error out and should not allow unnecessary promotions.
      */
     async promote(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'promote',
             data: {
                 blockId,
@@ -890,7 +891,7 @@ export class Client {
      * Promote a block without checking if it should be promoted
      */
     async promoteUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'promoteUnchecked',
             data: {
                 blockId,
@@ -904,7 +905,7 @@ export class Client {
      * Returns the unhealthy nodes.
      */
     async unhealthyNodes(): Promise<Set<INode>> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'unhealthyNodes',
         });
 
@@ -917,7 +918,7 @@ export class Client {
     async buildBasicOutput(
         params: BasicOutputBuilderParams,
     ): Promise<BasicOutput> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'buildBasicOutput',
             data: params,
         });
@@ -932,7 +933,7 @@ export class Client {
     async buildAliasOutput(
         params: AliasOutputBuilderParams,
     ): Promise<AliasOutput> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'buildAliasOutput',
             data: params,
         });
@@ -947,7 +948,7 @@ export class Client {
     async buildFoundryOutput(
         params: FoundryOutputBuilderParams,
     ): Promise<FoundryOutput> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'buildFoundryOutput',
             data: params,
         });
@@ -960,7 +961,7 @@ export class Client {
      * Build an Nft Output.
      */
     async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'buildNftOutput',
             data: params,
         });
@@ -976,14 +977,14 @@ export class Client {
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return this.methodHandler.listen(topics, callback);
+        return this.methodHandler!.listen(topics, callback);
     }
 
     /**
      * Stop listening for provided MQTT topics.
      */
     async clearListeners(topics: string[]): Promise<void> {
-        await this.methodHandler.callMethod({
+        await this.methodHandler!.callMethod({
             name: 'clearListeners',
             data: {
                 topics,
@@ -998,7 +999,7 @@ export class Client {
         url: string,
         address: string,
     ): Promise<string> {
-        const response = await this.methodHandler.callMethod({
+        const response = await this.methodHandler!.callMethod({
             name: 'requestFundsFromFaucet',
             data: { url, address },
         });

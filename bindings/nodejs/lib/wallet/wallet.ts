@@ -79,7 +79,8 @@ export class Wallet {
      * Destroy the Wallet and drop its database connection.
      */
     async destroy(): Promise<void> {
-        await this.methodHandler.destroy();
+        await (await this.getClient()).destroy();
+        return this.methodHandler.destroy();
     }
 
     /**
