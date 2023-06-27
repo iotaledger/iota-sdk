@@ -618,12 +618,12 @@ required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "create_alias"
-path = "examples/wallet/create_alias.rs"
+path = "examples/how_tos/alias/create.rs"
 required-features = [ "stronghold" ]
 
 [[example]]
 name = "destroy_alias"
-path = "examples/wallet/16_destroy_alias.rs"
+path = "examples/how_tos/alias/destroy.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
