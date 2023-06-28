@@ -7,7 +7,6 @@ import {
     initLogger,
     TaggedDataPayload,
     utf8ToHex,
-    Utils,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
