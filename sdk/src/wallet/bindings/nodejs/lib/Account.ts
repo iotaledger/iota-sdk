@@ -787,11 +787,11 @@ export class Account {
     }
 
     /**
-     * Mint native tokens.
-     * @param params The options for minting tokens.
+     * Create a native token.
+     * @param params The options for creating the token.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction and the token ID.
+     * @returns The creating transaction and the token ID.
      */
     async createNativeToken(
         params: CreateNativeTokenParams,

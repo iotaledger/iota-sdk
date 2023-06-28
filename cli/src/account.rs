@@ -78,18 +78,6 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                 AccountCommand::ClaimableOutputs => claimable_outputs_command(&account).await,
                 AccountCommand::Consolidate => consolidate_command(&account).await,
                 AccountCommand::CreateAliasOutput => create_alias_outputs_command(&account).await,
-                AccountCommand::MeltNativeToken { token_id, amount } => {
-                    melt_native_token_command(&account, token_id, amount).await
-                }
-                AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(&account, alias_id).await,
-                AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(&account, foundry_id).await,
-                AccountCommand::Exit => {
-                    return Ok(true);
-                }
-                AccountCommand::Faucet { address, url } => faucet_command(&account, address, url).await,
-                AccountCommand::MintNativeToken { token_id, amount } => {
-                    mint_native_token(&account, token_id, amount).await
-                }
                 AccountCommand::CreateNativeToken {
                     circulating_supply,
                     maximum_supply,
@@ -103,6 +91,18 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                         bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
                     )
                     .await
+                }
+                AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(&account, alias_id).await,
+                AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(&account, foundry_id).await,
+                AccountCommand::Exit => {
+                    return Ok(true);
+                }
+                AccountCommand::Faucet { address, url } => faucet_command(&account, address, url).await,
+                AccountCommand::MeltNativeToken { token_id, amount } => {
+                    melt_native_token_command(&account, token_id, amount).await
+                }
+                AccountCommand::MintNativeToken { token_id, amount } => {
+                    mint_native_token(&account, token_id, amount).await
                 }
                 AccountCommand::MintNft {
                     address,

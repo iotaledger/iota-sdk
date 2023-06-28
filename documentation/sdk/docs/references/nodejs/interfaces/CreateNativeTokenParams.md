@@ -1,6 +1,6 @@
 # Interface: CreateNativeTokenParams
 
-Native token options for initial minting
+Native token options for creating
 
 ## Table of contents
 

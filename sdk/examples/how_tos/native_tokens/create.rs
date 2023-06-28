@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will create a native token.
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
         println!("Account synced");
     }
 
-    println!("Preparing initial minting transaction...");
+    println!("Preparing transaction to create native token...");
 
     let params = CreateNativeTokenParams {
         alias_id: None,
@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
     println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     println!("Created token: {}", transaction.token_id);
 
-    // Ensure the account is synced after initial minting.
+    // Ensure the account is synced after creating the native token.
     account.sync(None).await?;
     println!("Account synced");
 

@@ -27,8 +27,9 @@ async function run() {
 
         const balance = await account.sync();
 
-        // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
-        if (balance.aliases.length > 0) {
+        // We can first check if we already have an alias in our account, because an alias can have
+        // many foundry outputs and therefore we can reuse an existing one
+        if (balance.aliases.length == 0) {
             // If we don't have an alias, we need to create one
             const transaction = await account
                 .prepareCreateAliasOutput()
@@ -48,7 +49,7 @@ async function run() {
             console.log('Account synced');
         }
 
-        console.log('Preparing initial minting transaction...');
+        console.log('Preparing transaction to create native token...');
 
         // If we omit the AccountAddress field the first address of the account is used by default
         const params: CreateNativeTokenParams = {
@@ -73,7 +74,7 @@ async function run() {
 
         console.log(`Created token: ${prepared.tokenId()}`);
 
-        // Ensure the account is synced after initial minting.
+        // Ensure the account is synced after creating the native token.
         await account.sync();
         console.log('Account synced');
     } catch (error) {

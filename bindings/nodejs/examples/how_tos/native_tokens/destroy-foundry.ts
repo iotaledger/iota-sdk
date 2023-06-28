@@ -25,6 +25,7 @@ async function run() {
         if (balance.foundries.length == 0) {
             throw new Error(`No Foundry available in account 'Alice'`);
         }
+
         // We try to destroy the first foundry in the account
         const foundry = balance.foundries[0];
 

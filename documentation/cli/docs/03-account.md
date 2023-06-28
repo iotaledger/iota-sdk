@@ -142,23 +142,37 @@ Create a new alias output.
 > Account "main": create-alias-output
 ```
 
-### `melt-native-token`
+### `create-native-token`
 
-Melts a native token.
+Creates a native token.
 
 #### Parameters
 
-| Name       | Optional  | Default | Example                                                                        |
-| ---------- | --------- | ------- | ------------------------------------------------------------------------------ |
-| `token_id` | ✘         | N/A     | 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 |
-| `amount`   | ✘         | N/A     | 100                                                                            |
+| Name                      | Optional  | Default | Example       |
+| ------------------------- | --------- | ------- | ------------- |
+| `circulating_supply`      | ✘         | N/A     | 1000          |
+| `maximum_supply`          | ✘         | N/A     | 1000          |
+| `foundry_metadata_hex`    | ✓         | None    | 0xabcdef      |
+| `foundry_metadata_file`   | ✓         | None    | metadata.json |
 
-#### Example
+#### Examples
 
-Melt the provided amount of a native token.
+Create a native token with a maximum supply.
 
 ```sh
-> Account "main": melt-native-token 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 100
+> Account "main": create-native-token 1000 1000
+```
+
+Create a native token with a maximum supply and hexadecimal foundry metadata.
+
+```sh
+> Account "main": create-native-token 1000 1000 --foundry-metadata-hex 0xabcdef
+```
+
+Create a native token with a maximum supply and foundry metadata from a file.
+
+```sh
+> Account "main": create-native-token 1000 1000 --foundry-metadata-file metadata.json
 ```
 
 ### `decrease-voting-power`
@@ -262,6 +276,25 @@ Displays the account interface usage.
 > Account "main": help
 ```
 
+### `melt-native-token`
+
+Melts a native token.
+
+#### Parameters
+
+| Name       | Optional  | Default | Example                                                                        |
+| ---------- | --------- | ------- | ------------------------------------------------------------------------------ |
+| `token_id` | ✘         | N/A     | 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 |
+| `amount`   | ✘         | N/A     | 100                                                                            |
+
+#### Example
+
+Melt the provided amount of a native token.
+
+```sh
+> Account "main": melt-native-token 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 100
+```
+
 ### `mint-native-token`
 
 Mints more of a native token.
@@ -297,39 +330,6 @@ Increase the voting power of the account by 100000.
 
 ```sh
 > Account "main": increase-voting-power 100000
-```
-
-### `create-native-token`
-
-Creates a native token.
-
-#### Parameters
-
-| Name                      | Optional  | Default | Example       |
-| ------------------------- | --------- | ------- | ------------- |
-| `circulating_supply`      | ✘         | N/A     | 1000          |
-| `maximum_supply`          | ✘         | N/A     | 1000          |
-| `foundry_metadata_hex`    | ✓         | None    | 0xabcdef      |
-| `foundry_metadata_file`   | ✓         | None    | metadata.json |
-
-#### Examples
-
-Create a native token with a maximum supply.
-
-```sh
-> Account "main": create-native-token 1000 1000
-```
-
-Create a native token with a maximum supply and hexadecimal foundry metadata.
-
-```sh
-> Account "main": create-native-token 1000 1000 --foundry-metadata-hex 0xabcdef
-```
-
-Create a native token with a maximum supply and foundry metadata from a file.
-
-```sh
-> Account "main": create-native-token 1000 1000 --foundry-metadata-file metadata.json
 ```
 
 ### `mint-nft`

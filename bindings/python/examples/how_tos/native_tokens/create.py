@@ -32,7 +32,7 @@ if len(account.aliases) == 0:
     account.sync()
     print("Account synced")
 
-print('Preparing initial minting transaction...')
+print('Preparing transaction to create native token...')
 
 params = {
     "circulatingSupply": hex(100),
@@ -50,6 +50,6 @@ print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 print(f'Created token: {prepared_transaction.token_id()}')
 
-# Ensure the account is synced after initial minting.
+# Ensure the account is synced after creating the native token.
 account.sync()
 print('Account synced')

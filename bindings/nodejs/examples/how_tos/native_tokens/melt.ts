@@ -24,6 +24,10 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
+        if (balance.foundries.length == 0) {
+            throw new Error(`No Foundry available in account 'Alice'`);
+        }
+
         // Find first foundry and corresponding token id
         const tokenId = balance.foundries[0];
 
