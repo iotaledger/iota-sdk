@@ -53,7 +53,7 @@ impl Client {
             })
             .collect::<Vec<_>>();
 
-        self.get_outputs(&input_ids).await
+        self.get_outputs_with_metadata(&input_ids).await
     }
 
     /// Get a builder that can be used to construct a block in parts.
@@ -179,7 +179,7 @@ impl Client {
             })
             .and_then(|res| async {
                 let items = res.items;
-                self.get_outputs(&items).await
+                self.get_outputs_with_metadata(&items).await
             })
             .try_collect::<Vec<_>>()
             .await?;
@@ -232,7 +232,7 @@ impl Client {
         output_ids: &[OutputId],
         addresses: &[Bech32Address],
     ) -> Result<Vec<OutputWithMetadata>> {
-        let mut output_responses = self.get_outputs(output_ids).await?;
+        let mut output_responses = self.get_outputs_with_metadata(output_ids).await?;
 
         // Use `get_address()` API to get the address outputs first,
         // then collect the `UtxoInput` in the HashSet.
@@ -247,7 +247,7 @@ impl Client {
                 ])
                 .await?;
 
-            output_responses.extend(self.get_outputs(&output_ids_response.items).await?);
+            output_responses.extend(self.get_outputs_with_metadata(&output_ids_response.items).await?);
         }
 
         Ok(output_responses.clone())

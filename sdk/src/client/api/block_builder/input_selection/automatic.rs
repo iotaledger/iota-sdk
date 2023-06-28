@@ -57,7 +57,7 @@ impl<'a> ClientBlockBuilder<'a> {
                 .items,
         );
 
-        self.client.get_outputs(&output_ids).await
+        self.client.get_outputs_with_metadata(&output_ids).await
     }
 
     /// Searches inputs for provided outputs, by requesting the outputs from the account addresses or for
