@@ -808,7 +808,10 @@ export class Account {
             response,
         ) as Response<PreparedCreateNativeTokenTransactionData>;
         return new PreparedCreateNativeTokenTransaction(
-            plainToInstance(PreparedCreateNativeTokenTransactionData, parsed.payload),
+            plainToInstance(
+                PreparedCreateNativeTokenTransactionData,
+                parsed.payload,
+            ),
             this,
         );
     }
