@@ -60,7 +60,7 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
         _ => {
             // Prepend `Account: ` so the parsing will be correct
             let command = format!("Account: {}", command.trim());
-            let account_cli = match AccountCli::try_parse_from(command.split(' ')) {
+            let account_cli = match AccountCli::try_parse_from(command.split_whitespace()) {
                 Ok(account_cli) => account_cli,
                 Err(err) => {
                     println!("{err}");

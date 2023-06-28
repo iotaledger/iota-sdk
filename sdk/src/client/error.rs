@@ -144,9 +144,6 @@ pub enum Error {
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
     TransactionSemantic(ConflictReason),
-    /// Unexpected API response error
-    #[error("unexpected API response")]
-    UnexpectedApiResponse,
     /// An indexer API request contains a query parameter not supported by the endpoint.
     #[error("an indexer API request contains a query parameter not supported by the endpoint: {0}.")]
     UnsupportedQueryParameter(QueryParameter),

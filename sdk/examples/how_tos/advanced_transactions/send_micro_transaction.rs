@@ -63,11 +63,7 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
 
     Ok(())
 }
