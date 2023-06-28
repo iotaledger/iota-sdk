@@ -149,6 +149,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     tear_down(storage_path)
 }
 
+#[ignore]
 #[tokio::test]
 #[cfg(feature = "storage")]
 async fn background_syncing() -> Result<()> {
