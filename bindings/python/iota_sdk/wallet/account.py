@@ -243,7 +243,7 @@ class Account:
         return PreparedTransactionData(self, prepared)
 
     def prepare_mint_native_token(self, token_id: HexStr, mint_amount: int, options: Optional[TransactionOptions] = None):
-        """Mint more native token.
+        """Mint additional native tokens.
         """
         prepared = self._call_account_method(
             'prepareMintNativeToken', {

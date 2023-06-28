@@ -21,7 +21,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to mint more native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
+    /// Function to mint additional native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
     /// this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore
     /// let tx = account.mint_native_token(

@@ -749,7 +749,7 @@ export class Account {
     }
 
     /**
-     * Mint more native tokens.
+     * Mint additional native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`

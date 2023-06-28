@@ -618,7 +618,7 @@ ___
 
 ▸ **prepareMintNativeToken**(`tokenId`, `mintAmount`, `transactionOptions?`): `Promise`<`PreparedMintTokenTransactionData`\>
 
-Mint more native tokens.
+Mint additional native tokens.
 
 #### Parameters
 

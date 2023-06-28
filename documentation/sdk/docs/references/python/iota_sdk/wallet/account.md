@@ -158,7 +158,15 @@ def pending_transactions()
 
 Returns all pending transactions of the account.
 
-### prepare\_decrease\_native\_token\_supply
+### prepare\_create\_native\_token
+
+```python
+def prepare_create_native_token(params, options=None)
+```
+
+Create a native token.
+
+### prepare\_melt\_native\_token
 
 ```python
 def prepare_melt_native_token(token_id: HexStr,
@@ -169,23 +177,15 @@ def prepare_melt_native_token(token_id: HexStr,
 Melt native tokens. This happens with the foundry output which minted them, by increasing it&#x27;s
 `melted_tokens` field.
 
-### prepare\_increase\_native\_token\_supply
-
-```python
-def prepare_increase_native_token_supply(token_id: HexStr,
-                                         mint_amount: int,
-                                         options=None)
-```
-
-Mint more native token.
-
 ### prepare\_mint\_native\_token
 
 ```python
-def prepare_mint_native_token(params, options=None)
+def prepare_mint_native_token(token_id: HexStr,
+                              mint_amount: int,
+                              options=None)
 ```
 
-Mint native token.
+Mint additional native tokens.
 
 ### minimum\_required\_storage\_deposit
 

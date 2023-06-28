@@ -253,7 +253,7 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit { output: OutputDto },
-    /// Mint more native token.
+    /// Mint additional native tokens.
     /// Expected response:
     /// [`MintNativeTokenTransaction`](crate::wallet::message_interface::Response::MintNativeTokenTransaction)
     #[serde(rename_all = "camelCase")]
