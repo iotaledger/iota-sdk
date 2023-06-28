@@ -15,11 +15,10 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, RoutesResponse,
-            SubmitBlockResponse, TipsResponse,
+            BlockMetadataResponse, InfoResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
         },
         block::{
-            output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -261,20 +260,18 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        let response: OutputWithMetadataResponse = self
+        let output = self
             .node_manager
             .read()
             .await
-            .get_request(path, None, self.get_timeout().await, false, true)
+            .get_request::<OutputDto>(path, None, self.get_timeout().await, false, true)
             .await?;
-
         let token_supply = self.get_token_supply().await?;
-        let output = Output::try_from_dto_with_params(response.output, token_supply)?;
 
-        Ok(OutputWithMetadata::new(output, response.metadata))
+        Ok(Output::try_from_dto_with_params(output, token_supply)?)
     }
 
     /// Finds an output by its ID and returns it as raw bytes.
@@ -442,8 +439,7 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        let path = "api/core/v3/info";
-        url.set_path(path);
+        url.set_path(INFO_PATH);
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())

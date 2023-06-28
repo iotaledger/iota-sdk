@@ -39,9 +39,9 @@ where
             .await?;
 
         // Update account with new foundries.
-        for foundry_output_with_metadata in results.into_iter().flatten() {
-            if let Output::Foundry(foundry) = foundry_output_with_metadata.output() {
-                foundries.insert(foundry.id(), foundry.to_owned());
+        for foundry in results.into_iter().flatten() {
+            if let Output::Foundry(foundry) = foundry {
+                foundries.insert(foundry.id(), foundry);
             }
         }
 

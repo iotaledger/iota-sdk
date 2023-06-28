@@ -144,7 +144,7 @@ async fn test_get_output_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
     let output_id = OutputId::new(transaction_id, 0).unwrap();
 
-    let output = client.get_output(&output_id).await.unwrap().into_output();
+    let output = client.get_output(&output_id).await.unwrap();
     let output_raw = Output::unpack_verified(
         client.get_output_raw(&output_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),

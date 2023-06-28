@@ -46,7 +46,7 @@ impl Client {
                     ])
                     .await?;
 
-                let basic_outputs_responses = self.get_outputs(&output_ids_response.items).await?;
+                let basic_outputs_responses = self.get_outputs_with_metadata(&output_ids_response.items).await?;
 
                 if !basic_outputs_responses.is_empty() {
                     // If we reach the same index again

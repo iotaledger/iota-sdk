@@ -107,7 +107,7 @@ async fn custom_input() -> Result<()> {
     // The first output would be picked when using automatic input selection, so use the second one instead
     let input_id = output_ids_response.items[1];
 
-    let input_amount = client.get_output(&input_id).await?.output().amount();
+    let input_amount = client.get_output(&input_id).await?.amount();
 
     let output = BasicOutputBuilder::new_with_amount(input_amount)
         .add_unlock_condition(AddressUnlockCondition::new(address))

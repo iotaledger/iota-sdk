@@ -53,7 +53,7 @@ impl Client {
             })
             .collect::<Vec<_>>();
 
-        self.get_outputs(&input_ids).await
+        self.get_outputs_with_metadata(&input_ids).await
     }
 
     /// Get a builder that can be used to construct a block in parts.
@@ -179,7 +179,7 @@ impl Client {
             })
             .and_then(|res| async {
                 let items = res.items;
-                self.get_outputs(&items).await
+                self.get_outputs_with_metadata(&items).await
             })
             .try_collect::<Vec<_>>()
             .await?;

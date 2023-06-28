@@ -38,7 +38,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
         if let Some(inputs) = &self.inputs {
             for input in inputs {
-                let output_with_meta = self.client.get_output(input.output_id()).await?;
+                let output_with_meta = self.client.get_output_with_metadata(input.output_id()).await?;
 
                 if !output_with_meta.metadata().is_spent() {
                     let alias_transition = is_alias_transition(
