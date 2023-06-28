@@ -764,7 +764,7 @@ export class Account {
      * @param mintAmount To be minted amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction and the token ID.
+     * @returns The minting transaction.
      */
     async mintNativeToken(
         tokenId: string,
