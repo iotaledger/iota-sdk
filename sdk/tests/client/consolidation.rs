@@ -34,7 +34,7 @@ async fn consolidate_outputs() -> Result<()> {
     assert_eq!(output_ids_response.items.len(), 1);
 
     let initial_output = client.get_output(&output_ids_response.items[0]).await?;
-    let initial_base_coin_amount = initial_output.output().amount();
+    let initial_base_coin_amount = initial_output.amount();
 
     // First split funds to multiple addresses
     let token_supply = client.get_token_supply().await?;
@@ -77,7 +77,7 @@ async fn consolidate_outputs() -> Result<()> {
     assert_eq!(output_ids_response.items.len(), 1);
 
     let final_output = client.get_output(&output_ids_response.items[0]).await?;
-    let final_base_coin_amount = final_output.output().amount();
+    let final_base_coin_amount = final_output.amount();
     // The output has the full amount again
     assert_eq!(final_base_coin_amount, initial_base_coin_amount);
 
