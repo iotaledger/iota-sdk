@@ -101,7 +101,7 @@ impl<'a> ClientBlockBuilder<'a> {
                         }
                     }) {
                         let output_id = self.client.alias_output_id(*alias_id).await?;
-                        let output_with_meta = self.client.get_output(&output_id).await?;
+                        let output_with_meta = self.client.get_output_with_metadata(&output_id).await?;
                         if let Output::Alias(alias_output) = output_with_meta.output() {
                             // State transition if we add them to inputs
                             let unlock_address = alias_output.state_controller_address();
@@ -156,7 +156,7 @@ impl<'a> ClientBlockBuilder<'a> {
                         }
                     }) {
                         let output_id = self.client.nft_output_id(*nft_id).await?;
-                        let output_with_meta = self.client.get_output(&output_id).await?;
+                        let output_with_meta = self.client.get_output_with_metadata(&output_id).await?;
                         if let Output::Nft(nft_output) = output_with_meta.output() {
                             let unlock_address = nft_output
                                 .unlock_conditions()

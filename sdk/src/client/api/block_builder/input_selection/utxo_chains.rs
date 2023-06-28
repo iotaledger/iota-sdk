@@ -58,7 +58,7 @@ pub(crate) async fn get_alias_and_nft_outputs_recursively(
             match unlock_address {
                 Address::Alias(address) => {
                     let input_id = client.alias_output_id(*address.alias_id()).await?;
-                    let input = client.get_output(&input_id).await?;
+                    let input = client.get_output_with_metadata(&input_id).await?;
                     if let Output::Alias(alias_input) = input.output() {
                         // State transition if we add them to inputs
                         let alias_unlock_address = alias_input.state_controller_address();
@@ -72,7 +72,7 @@ pub(crate) async fn get_alias_and_nft_outputs_recursively(
                 }
                 Address::Nft(address) => {
                     let input_id = client.nft_output_id(*address.nft_id()).await?;
-                    let input = client.get_output(&input_id).await?;
+                    let input = client.get_output_with_metadata(&input_id).await?;
                     if let Output::Nft(nft_input) = input.output() {
                         let unlock_address = nft_input
                             .unlock_conditions()
@@ -120,7 +120,7 @@ impl<'a> ClientBlockBuilder<'a> {
                         // Check if the transaction is a governance_transition, by checking if the new index is the same
                         // as the previous index
                         let output_id = client.alias_output_id(*alias_output.alias_id()).await?;
-                        let input = client.get_output(&output_id).await?;
+                        let input = client.get_output_with_metadata(&output_id).await?;
                         if let Output::Alias(alias_input) = input.output() {
                             // A governance transition is identified by an unchanged State Index in next
                             // state.
@@ -136,7 +136,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     // If the id is null then this output creates it and we can't have a previous output
                     if !nft_output.nft_id().is_null() {
                         let output_id = client.nft_output_id(*nft_output.nft_id()).await?;
-                        let input = client.get_output(&output_id).await?;
+                        let input = client.get_output_with_metadata(&output_id).await?;
                         if let Output::Nft(nft_input) = input.output() {
                             let unlock_address = nft_input
                                 .unlock_conditions()
@@ -149,7 +149,7 @@ impl<'a> ClientBlockBuilder<'a> {
                 Output::Foundry(foundry_output) => {
                     // if it's the first foundry output, then we can't have it as input
                     if let Ok(output_id) = client.foundry_output_id(foundry_output.id()).await {
-                        let input = client.get_output(&output_id).await?;
+                        let input = client.get_output_with_metadata(&output_id).await?;
                         if let Output::Foundry(foundry_input_output) = input.output() {
                             utxo_chains.push((Address::Alias(*foundry_input_output.alias_address()), input));
                         }

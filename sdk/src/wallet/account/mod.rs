@@ -222,9 +222,9 @@ where
 
         // Foundry was not found in the account, try to get it from the node
         let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
-        let output_response = self.client().get_output(&foundry_output_id).await?;
+        let output = self.client().get_output(&foundry_output_id).await?;
 
-        Ok(output_response.output().to_owned())
+        Ok(output)
     }
 
     /// Save the account to the database, accepts the updated_account as option so we don't need to drop it before
