@@ -15,14 +15,13 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-            PeerResponse, ReceiptResponse, ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
-            TreasuryResponse, UtxoChangesResponse,
+            BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, ReceiptResponse,
+            ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
-                milestone::{MilestoneId, MilestonePayload},
+                milestone::{dto::MilestonePayloadDto, MilestoneId, MilestonePayload},
                 transaction::TransactionId,
             },
             Block, BlockDto, BlockId,
@@ -224,17 +223,14 @@ impl ClientInner {
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
-        let response = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<BlockResponse>(path, None, self.get_timeout().await, false, true)
+            .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match response {
-            BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
-            BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?)
     }
 
     /// Finds a block by its BlockId. This method returns the given block raw data.
@@ -357,17 +353,14 @@ impl ClientInner {
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<BlockResponse>(path, None, self.get_timeout().await, true, true)
+            .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
             .await?;
 
-        match resp {
-            BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
-            BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?)
     }
 
     /// Returns the block, as raw bytes, that was included in the ledger for a given TransactionId.
@@ -401,20 +394,17 @@ impl ClientInner {
     pub async fn get_milestone_by_id(&self, milestone_id: &MilestoneId) -> Result<MilestonePayload> {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<MilestoneResponse>(path, None, self.get_timeout().await, false, true)
+            .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match resp {
-            MilestoneResponse::Json(dto) => Ok(MilestonePayload::try_from_dto(
-                dto,
-                &self.get_protocol_parameters().await?,
-            )?),
-            MilestoneResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(MilestonePayload::try_from_dto(
+            dto,
+            &self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Gets the milestone by the given milestone id.
@@ -446,20 +436,17 @@ impl ClientInner {
     pub async fn get_milestone_by_index(&self, index: u32) -> Result<MilestonePayload> {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<MilestoneResponse>(path, None, self.get_timeout().await, false, true)
+            .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match resp {
-            MilestoneResponse::Json(dto) => Ok(MilestonePayload::try_from_dto(
-                dto,
-                &self.get_protocol_parameters().await?,
-            )?),
-            MilestoneResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(MilestonePayload::try_from_dto(
+            dto,
+            &self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Gets the milestone by the given milestone index.

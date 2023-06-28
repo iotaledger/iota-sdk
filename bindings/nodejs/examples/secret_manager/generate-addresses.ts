@@ -48,7 +48,7 @@ async function run() {
                 start: 0,
                 end: 4,
             },
-            internal: true,
+            options: { internal: true },
         });
         console.log(
             'List of generated internal addresses:',
