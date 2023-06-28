@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.wallet.common import _call_method_routine
-from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedMintTokenTransaction
+from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedCreateTokenTransaction
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
@@ -226,6 +226,17 @@ class Account:
             'pendingTransactions'
         )
 
+    def prepare_create_native_token(self, params, options: Optional[TransactionOptions] = None):
+        """Create native token.
+        """
+        prepared = self._call_account_method(
+            'prepareCreateNativeToken', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedCreateTokenTransaction(account=self, prepared_transaction_data=prepared)
+
     def prepare_melt_native_token(self,
                                   token_id: HexStr,
                                   melt_amount: int,
@@ -252,18 +263,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedMintTokenTransaction(account=self, prepared_transaction_data=prepared)
-
-    def prepare_create_native_token(self, params, options: Optional[TransactionOptions] = None):
-        """Create native token.
-        """
-        prepared = self._call_account_method(
-            'prepareCreateNativeToken', {
-                'params': params,
-                'options': options
-            }
-        )
-        return PreparedMintTokenTransaction(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def minimum_required_storage_deposit(self, output):
         """Minimum required storage deposit.

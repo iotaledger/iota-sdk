@@ -4,15 +4,10 @@
 use primitive_types::U256;
 
 use crate::{
-    client::secret::SecretManage,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
-        account::{
-            operations::transaction::high_level::minting::create_native_token::{
-                MintNativeTokenTransaction, PreparedMintNativeTokenTransaction,
-            },
-            Account, TransactionOptions,
-        },
+        account::{types::Transaction, Account, TransactionOptions},
         Error,
     },
 };
@@ -21,8 +16,8 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to mint additional native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
-    /// this account. Address needs to be Bech32 encoded. This will not change the max supply.
+    /// Function to mint additional native tokens when the max supply isn't reached yet. The foundry needs to be
+    /// controlled by this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore
     /// let tx = account.mint_native_token(
     ///             TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
@@ -39,17 +34,14 @@ where
         token_id: TokenId,
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<MintNativeTokenTransaction> {
+    ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())
             .await?;
-        let transaction = self.sign_and_submit_transaction(prepared.transaction, options).await?;
+        let transaction = self.sign_and_submit_transaction(prepared, options).await?;
 
-        Ok(MintNativeTokenTransaction {
-            token_id: prepared.token_id,
-            transaction,
-        })
+        Ok(transaction)
     }
 
     /// Function to prepare the transaction for
@@ -59,7 +51,7 @@ where
         token_id: TokenId,
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedMintNativeTokenTransaction> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] mint_native_token");
 
         let account_details = self.details().await;
@@ -137,8 +129,6 @@ where
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
 
-        self.prepare_transaction(outputs, options)
-            .await
-            .map(|transaction| PreparedMintNativeTokenTransaction { token_id, transaction })
+        self.prepare_transaction(outputs, options).await
     }
 }

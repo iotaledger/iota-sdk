@@ -99,7 +99,7 @@
 - [Features](interfaces/Features.md)
 - [Unlocks](interfaces/Unlocks.md)
 - [StorageDeposit](interfaces/StorageDeposit.md)
-- [PreparedMintTokenTransaction](interfaces/PreparedMintTokenTransaction.md)
+- [PreparedCreateNativeTokenTransaction](interfaces/PreparedCreateNativeTokenTransaction.md)
 - [MintTokenTransaction](interfaces/MintTokenTransaction.md)
 - [SignedTransactionEssence](interfaces/SignedTransactionEssence.md)
 - [Transaction](interfaces/Transaction.md)

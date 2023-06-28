@@ -6,7 +6,7 @@ import { Transaction } from '../wallet';
 import { PreparedTransactionData } from './prepared-transaction-data';
 
 /** The result of preparing a minting operation */
-export class PreparedMintTokenTransactionData {
+export class PreparedCreateNativeTokenTransactionData {
     /** The token id of the minted token */
     tokenId!: string;
     /** The prepared transaction which will mint the token */
@@ -15,7 +15,7 @@ export class PreparedMintTokenTransactionData {
 }
 
 /** The result of a minting operation */
-export class MintTokenTransaction {
+export class CreateNativeTokenTransaction {
     /** The token id of the minted token */
     tokenId!: string;
     /** The transaction which minted the token */

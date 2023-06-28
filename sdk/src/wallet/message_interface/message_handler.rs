@@ -37,7 +37,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::minting::create_native_token::MintNativeTokenTransactionDto, TransactionOptions,
+                high_level::minting::create_native_token::CreateNativeTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
@@ -671,6 +671,17 @@ impl WalletMessageHandler {
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
+            AccountMethod::CreateNativeToken { params, options } => {
+                convert_async_panics(|| async {
+                    let transaction = account
+                        .create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .await?;
+                    Ok(Response::CreateNativeTokenTransaction(
+                        CreateNativeTokenTransactionDto::from(&transaction),
+                    ))
+                })
+                .await
+            }
             AccountMethod::MeltNativeToken {
                 token_id,
                 melt_amount,
@@ -701,20 +712,7 @@ impl WalletMessageHandler {
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::MintNativeTokenTransaction(
-                        MintNativeTokenTransactionDto::from(&transaction),
-                    ))
-                })
-                .await
-            }
-            AccountMethod::CreateNativeToken { params, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                        .await?;
-                    Ok(Response::MintNativeTokenTransaction(
-                        MintNativeTokenTransactionDto::from(&transaction),
-                    ))
+                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }

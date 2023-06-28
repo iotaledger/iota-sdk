@@ -24,7 +24,7 @@ async fn create_and_mint_native_token() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let mint_tx = account
+    let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
                 alias_id: None,
@@ -36,7 +36,7 @@ async fn create_and_mint_native_token() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.native_tokens().len(), 1);
@@ -44,17 +44,17 @@ async fn create_and_mint_native_token() -> Result<()> {
         balance
             .native_tokens()
             .iter()
-            .find(|t| t.token_id() == &mint_tx.token_id)
+            .find(|t| t.token_id() == &create_tx.token_id)
             .unwrap()
             .available(),
         U256::from(50)
     );
 
-    let mint_tx = account
-        .mint_native_token(mint_tx.token_id, U256::from(50), None)
+    let tx = account
+        .mint_native_token(create_tx.token_id, U256::from(50), None)
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.native_tokens().len(), 1);
@@ -62,7 +62,7 @@ async fn create_and_mint_native_token() -> Result<()> {
         balance
             .native_tokens()
             .iter()
-            .find(|t| t.token_id() == &mint_tx.token_id)
+            .find(|t| t.token_id() == &create_tx.token_id)
             .unwrap()
             .available(),
         U256::from(100)
@@ -89,7 +89,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
 
     let foundry_metadata = [1, 3, 3, 7];
 
-    let mint_tx = account
+    let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
                 alias_id: None,
@@ -101,7 +101,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     // Sync native_token_foundries to get the metadata
     let balance = account
@@ -116,7 +116,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         balance
             .native_tokens()
             .iter()
-            .find(|t| t.token_id() == &mint_tx.token_id)
+            .find(|t| t.token_id() == &create_tx.token_id)
             .unwrap()
             .metadata()
             .as_ref()

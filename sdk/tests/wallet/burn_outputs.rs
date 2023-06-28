@@ -246,7 +246,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let mint_tx = account
+    let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
                 alias_id: None,
@@ -258,12 +258,12 @@ async fn create_and_burn_native_tokens() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
     let tx = account
-        .burn(NativeToken::new(mint_tx.token_id, native_token_amount)?, None)
+        .burn(NativeToken::new(create_tx.token_id, native_token_amount)?, None)
         .await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)

@@ -25,7 +25,7 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::create_native_token::MintNativeTokenTransactionDto,
+            operations::transaction::high_level::minting::create_native_token::CreateNativeTokenTransactionDto,
             types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
             OutputDataDto,
         },
@@ -130,7 +130,7 @@ pub enum Response {
     SentTransaction(TransactionDto),
     /// Response for
     /// [`CreateNativeToken`](crate::wallet::message_interface::AccountMethod::CreateNativeToken),
-    MintNativeTokenTransaction(MintNativeTokenTransactionDto),
+    CreateNativeTokenTransaction(CreateNativeTokenTransactionDto),
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
     /// [`VerifyEd25519Signature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEd25519Signature)
@@ -229,7 +229,7 @@ impl Debug for Response {
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::MintNativeTokenTransaction(mint_transaction) => {
+            Self::CreateNativeTokenTransaction(mint_transaction) => {
                 write!(f, "MintNativeTokenTransaction({mint_transaction:?})")
             }
             Self::Bool(b) => {

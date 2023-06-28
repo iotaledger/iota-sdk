@@ -42,7 +42,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
-            PreparedMintNativeTokenTransactionDto,
+            PreparedCreateNativeTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
     },
@@ -318,25 +318,25 @@ pub enum Response {
     /// - [`Outputs`](crate::method::AccountMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::AccountMethod::UnspentOutputs)
     OutputsData(Vec<OutputDataDto>),
-    /// Response for    
-    /// [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
-    /// [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
-    /// [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
-    /// [`PrepareMeltNativeToken`](crate::method::AccountMethod::PrepareMeltNativeToken)
-    /// [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
-    /// [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
-    /// [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
-    /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
-    /// [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
-    /// [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
-    /// [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
-    /// [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
-    /// [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
+    /// Response for
+    /// - [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
+    /// - [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
+    /// - [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
+    /// - [`PrepareMeltNativeToken`](crate::method::AccountMethod::PrepareMeltNativeToken)
+    /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
+    /// - [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
+    /// - [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
+    /// - [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
+    /// - [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
+    /// - [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
+    /// - [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
+    /// - [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
+    /// - [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
+    /// - [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// - [`PrepareCreateNativeToken`](crate::method::AccountMethod::PrepareCreateNativeToken),
-    /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
-    PreparedMintNativeTokenTransaction(PreparedMintNativeTokenTransactionDto),
+    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
     /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)

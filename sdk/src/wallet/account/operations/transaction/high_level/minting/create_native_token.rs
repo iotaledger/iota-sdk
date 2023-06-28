@@ -40,7 +40,7 @@ pub struct CreateNativeTokenParams {
 /// The result of a minting native token transaction
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct MintNativeTokenTransaction {
+pub struct CreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: Transaction,
 }
@@ -48,13 +48,13 @@ pub struct MintNativeTokenTransaction {
 /// Dto for NativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct MintNativeTokenTransactionDto {
+pub struct CreateNativeTokenTransactionDto {
     pub token_id: TokenId,
     pub transaction: TransactionDto,
 }
 
-impl From<&MintNativeTokenTransaction> for MintNativeTokenTransactionDto {
-    fn from(value: &MintNativeTokenTransaction) -> Self {
+impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
+    fn from(value: &CreateNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
             transaction: TransactionDto::from(&value.transaction),
@@ -65,7 +65,7 @@ impl From<&MintNativeTokenTransaction> for MintNativeTokenTransactionDto {
 /// The result of preparing a minting native token transaction
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedMintNativeTokenTransaction {
+pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,
 }
@@ -73,13 +73,13 @@ pub struct PreparedMintNativeTokenTransaction {
 /// Dto for PreparedNativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedMintNativeTokenTransactionDto {
+pub struct PreparedCreateNativeTokenTransactionDto {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionDataDto,
 }
 
-impl From<&PreparedMintNativeTokenTransaction> for PreparedMintNativeTokenTransactionDto {
-    fn from(value: &PreparedMintNativeTokenTransaction) -> Self {
+impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTransactionDto {
+    fn from(value: &PreparedCreateNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
             transaction: PreparedTransactionDataDto::from(&value.transaction),
@@ -113,13 +113,13 @@ where
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<MintNativeTokenTransaction> {
+    ) -> crate::wallet::Result<CreateNativeTokenTransaction> {
         let options = options.into();
         let prepared = self.prepare_create_native_token(params, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared.transaction, options)
             .await
-            .map(|transaction| MintNativeTokenTransaction {
+            .map(|transaction| CreateNativeTokenTransaction {
                 token_id: prepared.token_id,
                 transaction,
             })
@@ -131,7 +131,7 @@ where
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedMintNativeTokenTransaction> {
+    ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] mint_native_token");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
@@ -180,7 +180,7 @@ where
 
             self.prepare_transaction(outputs, options)
                 .await
-                .map(|transaction| PreparedMintNativeTokenTransaction { token_id, transaction })
+                .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {
             unreachable!("We checked if it's an alias output before")
         }

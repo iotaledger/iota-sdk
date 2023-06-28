@@ -545,9 +545,9 @@ pub async fn mint_native_token(account: &Account, token_id: String, amount: Stri
         .await?;
 
     println_log_info!(
-        "Minting more native token transaction sent:\n{:?}\n{:?}",
-        mint_transaction.transaction.transaction_id,
-        mint_transaction.transaction.block_id
+        "Transaction minting additional native tokens sent:\n{:?}\n{:?}",
+        mint_transaction.transaction_id,
+        mint_transaction.block_id
     );
 
     Ok(())

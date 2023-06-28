@@ -196,7 +196,7 @@ pub enum AccountMethod {
         mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
-    /// Prepare to mint an NFT.
+    /// Prepare to mint NFTs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareMintNfts {
         params: Vec<MintNftParams>,

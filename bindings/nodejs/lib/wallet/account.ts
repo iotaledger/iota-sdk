@@ -40,7 +40,7 @@ import {
     INode,
     Burn,
     PreparedTransactionData,
-    PreparedMintTokenTransactionData,
+    PreparedCreateNativeTokenTransactionData,
 } from '../client';
 import {
     AliasOutput,
@@ -50,7 +50,7 @@ import {
     BasicOutput,
     FoundryOutput,
     Response,
-    PreparedMintTokenTransaction,
+    PreparedCreateNativeTokenTransaction,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 
@@ -760,7 +760,7 @@ export class Account {
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransaction> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -775,9 +775,9 @@ export class Account {
 
         const parsed = JSON.parse(
             response,
-        ) as Response<PreparedMintTokenTransactionData>;
-        return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -792,7 +792,7 @@ export class Account {
     async prepareCreateNativeToken(
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransaction> {
+    ): Promise<PreparedCreateNativeTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -806,9 +806,9 @@ export class Account {
 
         const parsed = JSON.parse(
             response,
-        ) as Response<PreparedMintTokenTransactionData>;
-        return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
+        ) as Response<PreparedCreateNativeTokenTransactionData>;
+        return new PreparedCreateNativeTokenTransaction(
+            plainToInstance(PreparedCreateNativeTokenTransactionData, parsed.payload),
             this,
         );
     }
