@@ -15,7 +15,7 @@ import type {
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintTokenTransaction,
+    CreateNativeTokenTransaction,
     CreateNativeTokenParams,
     MintNftParams,
     Node,
@@ -70,14 +70,14 @@ export class Account {
      * @returns The built `AliasOutput`.
      */
     async buildAliasOutput(data: BuildAliasOutputData): Promise<IAliasOutput> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildAliasOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -86,14 +86,14 @@ export class Account {
      * @returns The built `BasicOutput`.
      */
     async buildBasicOutput(data: BuildBasicOutputData): Promise<IBasicOutput> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildBasicOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -104,14 +104,14 @@ export class Account {
     async buildFoundryOutput(
         data: BuildFoundryOutputData,
     ): Promise<IFoundryOutput> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildFoundryOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -120,14 +120,14 @@ export class Account {
      * @returns The built `NftOutput`.
      */
     async buildNftOutput(data: BuildNftOutputData): Promise<INftOutput> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildNftOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -145,7 +145,7 @@ export class Account {
         burnAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'burnNativeToken',
@@ -156,7 +156,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -170,7 +170,7 @@ export class Account {
         nftId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'burnNft',
@@ -180,7 +180,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -190,7 +190,7 @@ export class Account {
      * @returns The resulting transaction.
      */
     async claimOutputs(outputIds: string[]): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'claimOutputs',
@@ -199,7 +199,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -214,7 +214,7 @@ export class Account {
         force: boolean,
         outputConsolidationThreshold?: number,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'consolidateOutputs',
@@ -224,7 +224,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -238,7 +238,7 @@ export class Account {
         params?: AliasOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'createAliasOutput',
@@ -248,7 +248,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -265,7 +265,7 @@ export class Account {
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'meltNativeToken',
@@ -276,13 +276,13 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     async deregisterParticipationEvent(
         eventId: ParticipationEventId,
     ): Promise<void> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'deregisterParticipationEvent',
@@ -291,7 +291,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -305,7 +305,7 @@ export class Account {
         aliasId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'destroyAlias',
@@ -315,7 +315,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -330,7 +330,7 @@ export class Account {
         foundryId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'destroyFoundry',
@@ -340,7 +340,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -770,7 +770,7 @@ export class Account {
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -796,7 +796,7 @@ export class Account {
     async createNativeToken(
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<CreateNativeTokenTransaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1145,7 +1145,7 @@ export class Account {
      * @returns The account balance.
      */
     async sync(options?: SyncOptions): Promise<Balance> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'syncAccount',
@@ -1154,14 +1154,14 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     async vote(
         eventId?: ParticipationEventId,
         answers?: number[],
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'vote',
@@ -1171,13 +1171,13 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     async stopParticipating(
         eventId: ParticipationEventId,
     ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'stopParticipating',
@@ -1186,7 +1186,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -1197,7 +1197,7 @@ export class Account {
     async getParticipationOverview(
         eventIds?: ParticipationEventId[],
     ): Promise<ParticipationOverview> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'getParticipationOverview',
@@ -1206,11 +1206,11 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     async increaseVotingPower(amount: string): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'increaseVotingPower',
@@ -1219,11 +1219,11 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     async decreaseVotingPower(amount: string): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'decreaseVotingPower',
@@ -1232,6 +1232,6 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 }

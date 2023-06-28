@@ -34,7 +34,7 @@ export interface Transaction {
 }
 
 /** The result of a minting operation */
-export interface MintTokenTransaction {
+export interface CreateNativeTokenTransaction {
     /** The token id of the created token */
     tokenId: string;
     /** The transaction which created the token */

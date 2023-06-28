@@ -187,7 +187,7 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to mint additional native tokens.
-    /// Expected response: [`PreparedNativeTokenTransaction`](crate::Response::PreparedNativeTokenTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareMintNativeToken {
         /// Native token id
