@@ -451,12 +451,12 @@ pub async fn create_native_token_command(
         foundry_metadata,
     };
 
-    let mint_transaction = account.create_native_token(params, None).await?;
+    let create_transaction = account.create_native_token(params, None).await?;
 
     println_log_info!(
         "Transaction to create native token sent:\n{:?}\n{:?}",
-        mint_transaction.transaction.transaction_id,
-        mint_transaction.transaction.block_id
+        create_transaction.transaction.transaction_id,
+        create_transaction.transaction.block_id
     );
 
     Ok(())

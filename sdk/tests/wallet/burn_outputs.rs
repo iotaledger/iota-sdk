@@ -125,24 +125,24 @@ async fn create_and_melt_native_token() -> Result<()> {
         foundry_metadata: None,
     };
 
-    let mint_transaction = account.create_native_token(params, None).await.unwrap();
+    let create_transaction = account.create_native_token(params, None).await.unwrap();
 
     account
-        .retry_transaction_until_included(&mint_transaction.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_transaction.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
 
     let search = balance
         .native_tokens()
         .iter()
-        .find(|token| token.token_id() == &mint_transaction.token_id && token.available() == circulating_supply);
+        .find(|token| token.token_id() == &create_transaction.token_id && token.available() == circulating_supply);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
     // Melt some of the circulating supply
     let melt_amount = U256::from(40i32);
     let transaction = account
-        .melt_native_token(mint_transaction.token_id, melt_amount, None)
+        .melt_native_token(create_transaction.token_id, melt_amount, None)
         .await
         .unwrap();
 
@@ -153,14 +153,14 @@ async fn create_and_melt_native_token() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
     let search = balance.native_tokens().iter().find(|token| {
-        (token.token_id() == &mint_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
+        (token.token_id() == &create_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
     });
     assert!(search.is_some());
 
     // Then melt the rest of the supply
     let melt_amount = circulating_supply - melt_amount;
     let transaction = account
-        .melt_native_token(mint_transaction.token_id, melt_amount, None)
+        .melt_native_token(create_transaction.token_id, melt_amount, None)
         .await
         .unwrap();
 
@@ -173,7 +173,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     let search = balance
         .native_tokens()
         .iter()
-        .find(|token| token.token_id() == &mint_transaction.token_id);
+        .find(|token| token.token_id() == &create_transaction.token_id);
     assert!(search.is_none());
 
     // Call to run tests in sequence
