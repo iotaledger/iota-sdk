@@ -95,18 +95,16 @@ async fn main() -> Result<()> {
     let output_ids_response = client
         .basic_output_ids([QueryParameter::Address(bech32_nft_address)])
         .await?;
-    let output_with_meta = client.get_output(&output_ids_response.items[0]).await?;
+    let output = client.get_output(&output_ids_response.items[0]).await?;
 
     let block = client
         .block()
         .with_secret_manager(&secret_manager)
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
-        .with_outputs([
-            NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output().amount(), nft_id)
-                .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
-                .finish_output(token_supply)?,
-        ])?
+        .with_outputs([NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)
+            .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
+            .finish_output(token_supply)?])?
         .finish()
         .await?;
 
@@ -123,8 +121,8 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let nft_output_id = get_nft_output_id(block.payload().unwrap())?;
-    let output_with_meta = client.get_output(&nft_output_id).await?;
-    let outputs = [BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
+    let output = client.get_output(&nft_output_id).await?;
+    let outputs = [BasicOutputBuilder::new_with_amount(output.amount())
         .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
         .finish_output(token_supply)?];
 

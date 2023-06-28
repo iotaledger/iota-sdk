@@ -107,7 +107,7 @@ where
         drop(account_details);
 
         if !unknown_outputs.is_empty() {
-            outputs.extend(self.client().get_outputs(&unknown_outputs).await?);
+            outputs.extend(self.client().get_outputs_with_metadata(&unknown_outputs).await?);
         }
 
         log::debug!(
@@ -217,7 +217,7 @@ pub(crate) async fn get_inputs_for_transaction_payload(
         .collect::<Vec<_>>();
 
     client
-        .get_outputs_ignore_errors(&output_ids)
+        .get_outputs_with_metadata_ignore_errors(&output_ids)
         .await
         .map_err(|e| e.into())
 }
