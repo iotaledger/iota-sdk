@@ -188,8 +188,8 @@ required-features = [ "rocksdb", "stronghold" ]
 # Native Tokens Examples
 
 [[example]]
-name = "mint_native_token"
-path = "examples/how_tos/native_tokens/mint.rs"
+name = "create_native_token"
+path = "examples/how_tos/native_tokens/create.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
@@ -203,13 +203,13 @@ path = "examples/how_tos/native_tokens/burn.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
-name = "decrease_native_token_supply"
-path = "examples/how_tos/native_tokens/decrease_supply.rs"
+name = "melt_native_token"
+path = "examples/how_tos/native_tokens/melt.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
-name = "increase_native_token_supply"
-path = "examples/how_tos/native_tokens/increase_supply.rs"
+name = "mint_native_token"
+path = "examples/how_tos/native_tokens/mint.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]

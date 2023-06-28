@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, MintNativeTokenParams, Result},
+    wallet::{account::SyncOptions, CreateNativeTokenParams, Result},
     U256,
 };
 
@@ -10,8 +10,8 @@ use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_increase_native_token_supply() -> Result<()> {
-    let storage_path = "test-storage/mint_and_increase_native_token_supply";
+async fn create_and_mint_native_token() -> Result<()> {
+    let storage_path = "test-storage/create_and_mint_native_token";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
@@ -24,9 +24,9 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let mint_tx = account
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx = account
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
@@ -36,7 +36,7 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.native_tokens().len(), 1);
@@ -44,17 +44,17 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         balance
             .native_tokens()
             .iter()
-            .find(|t| t.token_id() == &mint_tx.token_id)
+            .find(|t| t.token_id() == &create_tx.token_id)
             .unwrap()
             .available(),
         U256::from(50)
     );
 
-    let mint_tx = account
-        .increase_native_token_supply(mint_tx.token_id, U256::from(50), None)
+    let tx = account
+        .mint_native_token(create_tx.token_id, U256::from(50), None)
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.native_tokens().len(), 1);
@@ -62,7 +62,7 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         balance
             .native_tokens()
             .iter()
-            .find(|t| t.token_id() == &mint_tx.token_id)
+            .find(|t| t.token_id() == &create_tx.token_id)
             .unwrap()
             .available(),
         U256::from(100)
@@ -89,9 +89,9 @@ async fn native_token_foundry_metadata() -> Result<()> {
 
     let foundry_metadata = [1, 3, 3, 7];
 
-    let mint_tx = account
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx = account
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
@@ -101,7 +101,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     // Sync native_token_foundries to get the metadata
     let balance = account
@@ -116,7 +116,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         balance
             .native_tokens()
             .iter()
-            .find(|t| t.token_id() == &mint_tx.token_id)
+            .find(|t| t.token_id() == &create_tx.token_id)
             .unwrap()
             .metadata()
             .as_ref()

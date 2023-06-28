@@ -18,7 +18,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParams, FilterOptions, MintNativeTokenParams, MintNftParams, OutputParams, OutputsToClaim,
+            CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
             SyncOptions, TransactionOptionsDto,
         },
         SendAmountParams, SendNativeTokensParams, SendNftParams,
@@ -155,15 +155,10 @@ pub enum AccountMethod {
         params: Option<CreateAliasParams>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
-    /// `melted_tokens` field.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareDecreaseNativeTokenSupply {
-        /// Native token id
-        token_id: TokenId,
-        /// To be melted amount
-        melt_amount: U256,
+    /// Prepare to create a native token.
+    /// Expected response: [`PreparedNativeTokenTransaction`](crate::Response::PreparedNativeTokenTransaction)
+    PrepareCreateNativeToken {
+        params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Reduces an account's "voting power" by a given amount.
@@ -180,26 +175,31 @@ pub enum AccountMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     PrepareIncreaseVotingPower { amount: String },
-    /// Mint more native token.
-    /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
+    /// Prepare to melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// `melted_tokens` field.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareIncreaseNativeTokenSupply {
+    PrepareMeltNativeToken {
+        /// Native token id
+        token_id: TokenId,
+        /// To be melted amount
+        melt_amount: U256,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Prepare to mint additional native tokens.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareMintNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
-    /// Prepare to Mint nft.
+    /// Prepare to mint NFTs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareMintNfts {
         params: Vec<MintNftParams>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Prepare to Mint native token.
-    /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
-    PrepareMintNativeToken {
-        params: MintNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare an output.
@@ -215,7 +215,7 @@ pub enum AccountMethod {
         params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Prepare to Send native tokens.
+    /// Prepare to send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNativeTokens {
         params: Vec<SendNativeTokensParams>,
