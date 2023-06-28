@@ -1,38 +1,49 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedWallet } from '../../wallet/common';
+import { Wallet } from '@iota/sdk';
 
-// In this example we will try to destroy the first foundry there is in the account. This is only possible if its
-// circulating supply is 0 and no native tokens were burned.
+// In this example we will burn an existing nft output.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/15-destroy-foundry.ts
+// yarn run-example ./how_tos/nfts/burn_nft.ts
 async function run() {
     try {
+        if (!process.env.STRONGHOLD_PASSWORD) {
+            throw new Error(
+                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+            );
+        }
+
         // Create the wallet
-        const wallet = await getUnlockedWallet();
+        const wallet = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,
+        });
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount('Alice');
+        const account = await wallet.getAccount(
+            `${process.env.ACCOUNT_ALIAS_1}`,
+        );
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
-        if (balance.foundries.length == 0) {
-            throw new Error(`No Foundry available in account 'Alice'`);
+        if (balance.nfts.length == 0) {
+            throw new Error(
+                `No NFT available in account '${process.env.ACCOUNT_ALIAS_1}'`,
+            );
         }
-        // We try to destroy the first foundry in the account
-        const foundry = balance.foundries[0];
+        // Get the first nft
+        const nftId = balance.nfts[0];
 
-        console.log(`Foundries before destroying: ${balance.foundries.length}`);
+        console.log(`Balance BEFORE burning:\n`, balance);
 
-        // Burn a foundry
+        // Burn an NFT
         const transaction = await account
-            .prepareDestroyFoundry(foundry)
+            .prepareBurnNft(nftId)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -44,9 +55,10 @@ async function run() {
         console.log(
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
+        console.log(`Burned NFT ${nftId}`);
 
         balance = await account.sync();
-        console.log(`Foundries after destroying: ${balance.foundries.length}`);
+        console.log(`Balance AFTER burning:\n`, balance);
     } catch (error) {
         console.log('Error: ', error);
     }

@@ -8,14 +8,19 @@
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
 //!
+//! You may provide a TOKEN_ID that is available in the account. You can check this by running the
+//! `get_balance` example. You can mint a new native token by running the `mint_native_token` example.
+//!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example burn_native_token
+//! cargo run --release --all-features --example burn_native_token [TOKEN_ID]
 //! ```
 
-use std::env::var;
-
-use iota_sdk::{types::block::output::NativeToken, wallet::Result, Wallet, U256};
+use iota_sdk::{
+    types::block::output::{NativeToken, TokenId},
+    wallet::Result,
+    Wallet, U256,
+};
 
 // The minimum available native token amount to search for in the account
 const MIN_AVAILABLE_AMOUNT: u64 = 11;
@@ -28,7 +33,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let alias = "Alice";
@@ -37,35 +42,35 @@ async fn main() -> Result<()> {
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
-    // Get a token with sufficient balance
-    if let Some(token_id) = balance
-        .native_tokens()
-        .iter()
-        .find(|t| t.available() >= U256::from(MIN_AVAILABLE_AMOUNT))
-        .map(|t| t.token_id())
-    {
-        let available_balance = balance
-            .native_tokens()
-            .iter()
-            .find(|t| t.token_id() == token_id)
-            .unwrap()
-            .available();
-        println!("Balance before burning: {available_balance:?}");
+    // Take the given token id, or use a default.
+    let token_id = std::env::args()
+        .nth(1)
+        .map(|s| s.parse::<TokenId>().expect("invalid token id"))
+        .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
+
+    if let Some(native_token_balance) = balance.native_tokens().iter().find(|native_token| {
+        native_token.token_id() == &token_id && native_token.available() >= U256::from(MIN_AVAILABLE_AMOUNT)
+    }) {
+        println!("Balance before burning: {native_token_balance:#?}");
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         // Burn a native token
         let burn_amount = U256::from(BURN_AMOUNT);
-        let transaction = account.burn(NativeToken::new(*token_id, burn_amount)?, None).await?;
+        let transaction = account.burn(NativeToken::new(token_id, burn_amount)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
 
         let balance = account.sync(None).await?;
 
@@ -73,16 +78,15 @@ async fn main() -> Result<()> {
         if let Some(native_token_balance) = balance
             .native_tokens()
             .iter()
-            .find(|native_token| native_token.token_id() == token_id)
+            .find(|native_token| native_token.token_id() == native_token_balance.token_id())
         {
-            let available_balance = native_token_balance.available();
-            println!("{available_balance}");
+            println!("{native_token_balance:#?}");
         } else {
             println!("No remaining tokens");
         }
     } else {
         println!(
-            "No native token exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
+            "Native token '{token_id}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
         );
     }
 

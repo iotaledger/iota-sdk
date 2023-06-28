@@ -11,10 +11,6 @@ export interface IGenerateAddressesOptions {
     accountIndex?: number;
     range?: IRange;
     /**
-     * Internal addresses
-     */
-    internal?: boolean;
-    /**
      * Bech32 human readable part
      */
     bech32Hrp?: string;
@@ -26,7 +22,11 @@ export interface IGenerateAddressesOptions {
  */
 export interface IGenerateAddressOptions {
     /**
+     * Internal addresses
+     */
+    internal?: boolean;
+    /**
      * Display the address on ledger devices.
      */
-    ledgerNanoPrompt: boolean;
+    ledgerNanoPrompt?: boolean;
 }

@@ -88,6 +88,12 @@ jobs:
         working-directory: bindings/nodejs/
         run: yarn test
 
+      - name: Yarn Build Examples
+        working-directory: bindings/nodejs/examples/
+        run: |
+          yarn
+          yarn build
+
   lint:
     name: Lint
     if: ${{ ! github.event.schedule }}

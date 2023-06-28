@@ -151,6 +151,11 @@ name = "list_outputs"
 path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+[[example]]
+name = "consolidate_outputs"
+path = "examples/how_tos/accounts_and_addresses/consolidate_outputs.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Simple Transaction Examples
 
 [[example]]
@@ -236,6 +241,21 @@ name = "output_features"
 path = "examples/how_tos/outputs/features.rs"
 required-features = [ "client" ]
 
+# Client Examples
+
+[[example]]
+name = "get_health"
+path = "examples/how_tos/client/get_health.rs"
+
+[[example]]
+name = "get_info"
+path = "examples/how_tos/client/get_info.rs"
+required-features = [ "serde" ]
+
+[[example]]
+name = "get_outputs"
+path = "examples/how_tos/client/get_outputs.rs"
+
 # Block examples
 
 [[example]]
@@ -281,18 +301,8 @@ required-features = [ "client" ]
 # Node API core examples
 
 [[example]]
-name = "node_api_core_get_health"
-path = "examples/client/node_api_core/00_get_health.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "node_api_core_get_routes"
 path = "examples/client/node_api_core/01_get_routes.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "node_api_core_get_info"
-path = "examples/client/node_api_core/02_get_info.rs"
 required-features = [ "client" ]
 
 [[example]]
@@ -396,11 +406,6 @@ path = "examples/client/node_api_core/22_get_utxo_changes_by_index.rs"
 required-features = [ "client" ]
 
 # Node API indexer examples
-
-[[example]]
-name = "node_api_indexer_get_basic_outputs"
-path = "examples/client/node_api_indexer/00_get_basic_outputs.rs"
-required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_alias_output"
@@ -597,18 +602,18 @@ path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
-name = "send_nft"
-path = "examples/wallet/08_send_nft.rs"
+name = "mint_nft"
+path = "examples/how_tos/nfts/mint_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "mint_nft"
-path = "examples/wallet/10_mint_nft.rs"
+name = "send_nft"
+path = "examples/how_tos/nfts/send_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "burn_nft"
-path = "examples/wallet/14_burn_nft.rs"
+path = "examples/how_tos/nfts/burn_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
@@ -655,11 +660,6 @@ required-features = [ "wallet", "participation" ]
 name = "logger"
 path = "examples/wallet/logger.rs"
 required-features = [ "wallet" ]
-
-[[example]]
-name = "output_consolidation"
-path = "examples/wallet/output_consolidation.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "recover_accounts"
