@@ -10,7 +10,7 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 # Create and post a block without payload
-block_id = block = client.submit_payload(TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data")))[0]
+block_id = client.submit_payload(TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data")))[0]
 blockBytes = client.get_block_raw(block_id)
 
 # Post raw block
