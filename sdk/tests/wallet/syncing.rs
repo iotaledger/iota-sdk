@@ -168,7 +168,7 @@ async fn background_syncing() -> Result<()> {
     )
     .await?;
 
-    for i in 0..30 {
+    for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         let balance = account.balance().await?;
         if balance.base_coin().available() > 0 {
