@@ -8,8 +8,8 @@
 //!
 //! You may provide a TOKEN_ID that is available in the account. The foundry
 //! output which minted it needs to be available as well. You can check this by
-//! running the `get_balance` example. You can mint a new native token by running
-//! the `mint_native_token` example.
+//! running the `get_balance` example. You can create a new native token by running
+//! the `create_native_token` example.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

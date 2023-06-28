@@ -132,7 +132,7 @@ where
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
-        log::debug!("[TRANSACTION] mint_native_token");
+        log::debug!("[TRANSACTION] create_native_token");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
