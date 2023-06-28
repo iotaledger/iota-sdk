@@ -6,7 +6,7 @@ import { Account, PreparedCreateNativeTokenTransactionData } from '../..';
 import { PreparedTransaction } from './prepared-transaction';
 
 /*
- * The class PreparedCreateNativeTokenTransaction represents prepared data for minting a token transaction.
+ * The class PreparedCreateNativeTokenTransaction represents prepared data for issuing a transaction to create a native token.
  */
 export class PreparedCreateNativeTokenTransaction extends PreparedTransaction {
     private _tokenId: string;
@@ -24,7 +24,7 @@ export class PreparedCreateNativeTokenTransaction extends PreparedTransaction {
      *
      * Returns:
      *
-     * The token id of the MintTokenTransaction.
+     * The token id of the CreateNativeTokenTransaction.
      */
     public tokenId(): string {
         return this._tokenId;

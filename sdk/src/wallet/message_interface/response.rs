@@ -229,8 +229,8 @@ impl Debug for Response {
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::CreateNativeTokenTransaction(mint_transaction) => {
-                write!(f, "MintNativeTokenTransaction({mint_transaction:?})")
+            Self::CreateNativeTokenTransaction(create_transaction) => {
+                write!(f, "CreateNativeTokenTransaction({create_transaction:?})")
             }
             Self::Bool(b) => {
                 write!(f, "Bool({b})")

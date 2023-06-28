@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import { Transaction } from '../wallet';
 import { PreparedTransactionData } from './prepared-transaction-data';
 
-/** The result of preparing a minting operation */
+/** The result of preparing an operation to create a native token */
 export class PreparedCreateNativeTokenTransactionData {
     /** The token id of the minted token */
     tokenId!: string;
@@ -14,7 +14,7 @@ export class PreparedCreateNativeTokenTransactionData {
     transaction!: PreparedTransactionData;
 }
 
-/** The result of a minting operation */
+/** The result of an operation to create a native token */
 export class CreateNativeTokenTransaction {
     /** The token id of the minted token */
     tokenId!: string;

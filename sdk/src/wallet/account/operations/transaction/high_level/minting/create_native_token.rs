@@ -37,7 +37,7 @@ pub struct CreateNativeTokenParams {
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
-/// The result of a minting native token transaction
+/// The result of a transaction to create a native token
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenTransaction {
@@ -62,7 +62,7 @@ impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
     }
 }
 
-/// The result of preparing a minting native token transaction
+/// The result of preparing a transaction to create a native token
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PreparedCreateNativeTokenTransaction {
