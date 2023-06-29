@@ -5,6 +5,7 @@ use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
 use crypto::Error as CryptoError;
+// use packable::bounded::BoundedU8;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
@@ -14,7 +15,6 @@ use crate::types::block::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AliasId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
-    parent::ParentCount,
     payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
 };
@@ -59,7 +59,10 @@ pub enum Error {
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
     InvalidOutputKind(u8),
-    InvalidParentCount(<ParentCount as TryFrom<usize>>::Error),
+    // TODO this would now need to be generic, not sure if possible.
+    // https://github.com/iotaledger/iota-sdk/issues/647
+    // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
+    InvalidParentCount,
     InvalidPayloadKind(u32),
     InvalidPayloadLength { expected: usize, actual: usize },
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
@@ -182,8 +185,8 @@ impl fmt::Display for Error {
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
             Self::InvalidOutputKind(k) => write!(f, "invalid output kind: {k}"),
-            Self::InvalidParentCount(count) => {
-                write!(f, "invalid parents count: {count}")
+            Self::InvalidParentCount => {
+                write!(f, "invalid parents count")
             }
             Self::InvalidPayloadKind(k) => write!(f, "invalid payload kind: {k}"),
             Self::InvalidPayloadLength { expected, actual } => {
