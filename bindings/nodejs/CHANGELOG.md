@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Moved `internal` field from `IGenerateAddressesOptions` to `IGenerateAddressOptions`;
+- Error handling in `Client`, `SecretManager` and `Wallet` constructors;
 
 ## 1.0.0-rc.1 - 2023-06-19
 
