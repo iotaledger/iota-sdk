@@ -173,7 +173,10 @@ impl SecretManage for LedgerSecretManager {
     }
 
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
-        // TODO check msg length
+        if msg.len() != 32 {
+            return Err(Error::UnsupportedOperation.into());
+        }
+
         let msg = msg.to_vec();
         let mut input_bip32_indices: Vec<LedgerBIP32Index> = Vec::new();
 
