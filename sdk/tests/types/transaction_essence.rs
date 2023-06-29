@@ -44,7 +44,7 @@ fn essence_kind() {
 #[test]
 fn essence_unpack_invalid_kind() {
     assert!(matches!(
-        TransactionEssence::unpack_verified([2u8; 32], &protocol_parameters()),
-        Err(UnpackError::Packable(Error::InvalidEssenceKind(2)))
+        TransactionEssence::unpack_verified([3u8; 32], &protocol_parameters()),
+        Err(UnpackError::Packable(Error::InvalidEssenceKind(3)))
     ));
 }

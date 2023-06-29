@@ -105,8 +105,19 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
+        #[cfg(feature = "std")]
+        let creation_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_nanos() as u64;
+        // TODO no_std way to have a nanosecond timestamp
+        // https://github.com/iotaledger/iota-sdk/issues/647
+        #[cfg(not(feature = "std"))]
+        let creation_time = 0;
+
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
+            creation_time,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
@@ -114,7 +125,8 @@ impl RegularTransactionEssenceBuilder {
         })
     }
 
-    ///
+    /// Finishes a [`RegularTransactionEssenceBuilder`] into a [`RegularTransactionEssence`] without protocol
+    /// validation.
     pub fn finish(self) -> Result<RegularTransactionEssence, Error> {
         self.finish_with_params(ValidationParams::default())
     }
@@ -131,6 +143,8 @@ pub struct RegularTransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
+    /// The time at which this transaction was created by the client. It's a Unix-like timestamp in nanosecond.
+    creation_time: u64,
     #[packable(verify_with = verify_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
     inputs: BoxedSlicePrefix<Input, InputCount>,
@@ -145,7 +159,7 @@ pub struct RegularTransactionEssence {
 
 impl RegularTransactionEssence {
     /// The essence kind of a [`RegularTransactionEssence`].
-    pub const KIND: u8 = 1;
+    pub const KIND: u8 = 2;
 
     /// Creates a new [`RegularTransactionEssenceBuilder`] to build a [`RegularTransactionEssence`].
     pub fn builder(network_id: u64, inputs_commitment: InputsCommitment) -> RegularTransactionEssenceBuilder {
@@ -155,6 +169,11 @@ impl RegularTransactionEssence {
     /// Returns the network ID of a [`RegularTransactionEssence`].
     pub fn network_id(&self) -> u64 {
         self.network_id
+    }
+
+    /// Returns the creation time of a [`RegularTransactionEssence`].
+    pub fn creation_time(&self) -> u64 {
+        self.creation_time
     }
 
     /// Returns the inputs of a [`RegularTransactionEssence`].
@@ -296,6 +315,7 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub network_id: String,
+        pub creation_time: u64,
         pub inputs: Vec<InputDto>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
@@ -308,6 +328,7 @@ pub(crate) mod dto {
             Self {
                 kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
+                creation_time: value.creation_time(),
                 inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
