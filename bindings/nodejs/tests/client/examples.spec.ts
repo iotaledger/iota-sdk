@@ -139,7 +139,7 @@ describe.skip('Main examples', () => {
         ).toBe(200);
     });
 
-    // TODO: have a way in the bindings to send an empty block
+    // TODO: have a way in the bindings to send an empty block https://github.com/iotaledger/iota-sdk/issues/647
     // it('sends a block', async () => {
     //     const blockIdAndBlock = await client.buildAndPostBlock();
 

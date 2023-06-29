@@ -22,7 +22,7 @@ async function run() {
 
     try {
         // Create block with no payload
-        // TODO: have a way in the bindings to send an empty block
+        // TODO: have a way in the bindings to send an empty block https://github.com/iotaledger/iota-sdk/issues/647
         const blockIdAndBlock = await client.postBlockPayload(
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
