@@ -7,8 +7,9 @@ use iota_sdk::{
     client::{
         api::GetAddressesOptions,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
+        generate_mnemonic,
         secret::{GenerateAddressOptions, SecretManager},
-        Client,
+        Client, Result,
     },
     types::block::address::{Address, Hrp},
 };
@@ -188,39 +189,74 @@ async fn address_generation() {
     }
 
     #[cfg(feature = "stronghold")]
-    for address in &addresses_data {
-        let stronghold_filename = format!("{}.stronghold", address.bech32_address);
-        let stronghold_secret_manager = StrongholdSecretManager::builder()
-            .password("some_hopefully_secure_password")
-            .build(&stronghold_filename)
-            .unwrap();
+    {
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+        for address in &addresses_data {
+            let stronghold_filename = format!("{}.stronghold", address.bech32_address);
+            let stronghold_secret_manager = StrongholdSecretManager::builder()
+                .password("some_hopefully_secure_password".to_owned())
+                .build(&stronghold_filename)
+                .unwrap();
 
-        stronghold_secret_manager
-            .store_mnemonic(address.mnemonic.clone())
-            .await
-            .unwrap();
+            stronghold_secret_manager
+                .store_mnemonic(address.mnemonic.clone())
+                .await
+                .unwrap();
 
-        let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-            .generate_ed25519_addresses(
-                GetAddressesOptions::default()
-                    .with_bech32_hrp(address.bech32_hrp)
-                    .with_coin_type(address.coin_type)
-                    .with_range(address.address_index..address.address_index + 1)
-                    .with_account_index(address.account_index)
-                    .with_options(GenerateAddressOptions {
-                        internal: address.internal,
-                        ..Default::default()
-                    }),
-            )
-            .await
-            .unwrap();
+            let addresses = SecretManager::Stronghold(stronghold_secret_manager)
+                .generate_ed25519_addresses(
+                    GetAddressesOptions::default()
+                        .with_bech32_hrp(address.bech32_hrp)
+                        .with_coin_type(address.coin_type)
+                        .with_range(address.address_index..address.address_index + 1)
+                        .with_account_index(address.account_index)
+                        .with_options(GenerateAddressOptions {
+                            internal: address.internal,
+                            ..Default::default()
+                        }),
+                )
+                .await
+                .unwrap();
 
-        assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
-            assert_eq!(ed25519_address.to_string(), address.ed25519_address);
-        } else {
-            panic!("Invalid address type")
+            assert_eq!(addresses[0], address.bech32_address);
+            if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
+                assert_eq!(ed25519_address.to_string(), address.ed25519_address);
+            } else {
+                panic!("Invalid address type")
+            }
+            std::fs::remove_file(stronghold_filename).unwrap();
         }
-        std::fs::remove_file(stronghold_filename).unwrap();
     }
+}
+
+#[tokio::test]
+async fn search_address() -> Result<()> {
+    let client = Client::builder().finish().await.unwrap();
+
+    let secret_manager = SecretManager::from(generate_mnemonic()?);
+
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(9..10)
+                .with_bech32_hrp(IOTA_BECH32_HRP),
+        )
+        .await?;
+
+    let res = iota_sdk::client::api::search_address(
+        &secret_manager,
+        IOTA_BECH32_HRP,
+        IOTA_COIN_TYPE,
+        0,
+        0..10,
+        &addresses[0],
+    )
+    .await?;
+
+    assert_eq!(res, (9, false));
+
+    Ok(())
 }

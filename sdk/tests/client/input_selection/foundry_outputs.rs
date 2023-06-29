@@ -826,7 +826,7 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
 }
 
 #[test]
-fn mint_native_tokens_but_burn_alias() {
+fn create_native_token_but_burn_alias() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);

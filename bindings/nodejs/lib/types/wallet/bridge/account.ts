@@ -1,4 +1,6 @@
-import type { HexEncodedAmount } from '@iota/types';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
@@ -11,24 +13,23 @@ import type {
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-} from '../buildOutputData';
-import type { INode, IPreparedTransactionData } from '../../client';
-import type { OutputParams } from '../outputParams';
+} from '../build-output-data';
+import type { Burn, INode, PreparedTransactionData } from '../../client';
+import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
-import type { SignedTransactionEssence } from '../signedTransactionEssence';
+import type { SignedTransactionEssence } from '../signed-transaction-essence';
 import type {
     AliasOutputParams,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     TransactionOptions,
     MintNftParams,
-} from '../transactionOptions';
+} from '../transaction-options';
 import type {
     ParticipationEventId,
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Output } from '../../';
-import { Burn } from '../burn';
+import { HexEncodedAmount, Output } from '../../';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -81,8 +82,8 @@ export type __PrepareCreateAliasOutputMethod__ = {
     };
 };
 
-export type __PrepareDecreaseNativeTokenSupplyMethod__ = {
-    name: 'prepareDecreaseNativeTokenSupply';
+export type __PrepareMeltNativeTokenMethod__ = {
+    name: 'prepareMeltNativeToken';
     data: {
         tokenId: string;
         meltAmount: HexEncodedAmount;
@@ -130,8 +131,8 @@ export type __GetFoundryOutputMethod__ = {
     };
 };
 
-export type __GetOutputsWithAdditionalUnlockConditionsMethod__ = {
-    name: 'getOutputsWithAdditionalUnlockConditions';
+export type __ClaimableOutputsMethod__ = {
+    name: 'claimableOutputs';
     data: {
         outputsToClaim: OutputsToClaim;
     };
@@ -185,8 +186,8 @@ export type __MinimumRequiredStorageDepositMethod__ = {
     };
 };
 
-export type __PrepareIncreaseNativeTokenSupplyMethod__ = {
-    name: 'prepareIncreaseNativeTokenSupply';
+export type __PrepareMintNativeTokenMethod__ = {
+    name: 'prepareMintNativeToken';
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
@@ -194,10 +195,10 @@ export type __PrepareIncreaseNativeTokenSupplyMethod__ = {
     };
 };
 
-export type __PrepareMintNativeTokenMethod__ = {
-    name: 'prepareMintNativeToken';
+export type __PrepareCreateNativeTokenMethod__ = {
+    name: 'prepareCreateNativeToken';
     data: {
-        params: MintNativeTokenParams;
+        params: CreateNativeTokenParams;
         options?: TransactionOptions;
     };
 };
@@ -299,14 +300,14 @@ export type __SetDefaultSyncOptionsMethod__ = {
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 };
 
 export type __SignAndSubmitTransactionMethod__ = {
     name: 'signAndSubmitTransaction';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 };
 

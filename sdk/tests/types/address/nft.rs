@@ -120,12 +120,12 @@ fn dto_roundtrip() {
     let nft_address = NftAddress::from_str(NFT_ID).unwrap();
     let nft_dto = NftAddressDto::from(&nft_address);
 
-    assert_eq!(NftAddress::try_from(&nft_dto).unwrap(), nft_address);
+    assert_eq!(NftAddress::try_from(nft_dto).unwrap(), nft_address);
 
     let address = Address::from(nft_address);
     let dto = AddressDto::from(&address);
 
-    assert_eq!(Address::try_from(&dto).unwrap(), address);
+    assert_eq!(Address::try_from(dto).unwrap(), address);
 }
 
 #[test]
@@ -135,7 +135,7 @@ fn dto_invalid_nft_id() {
         nft_id: NFT_ID_INVALID.to_string(),
     };
 
-    assert!(matches!(NftAddress::try_from(&dto), Err(Error::InvalidField("nftId"))));
+    assert!(matches!(NftAddress::try_from(dto), Err(Error::InvalidField("nftId"))));
 }
 
 #[test]

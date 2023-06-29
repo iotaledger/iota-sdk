@@ -69,7 +69,7 @@ use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
-use super::storage::StorageAdapter;
+use super::{storage::StorageAdapter, utils::Password};
 
 /// A wrapper on [Stronghold].
 ///
@@ -149,7 +149,9 @@ fn check_or_create_snapshot(
 /// Extra / custom builder method implementations.
 impl StrongholdAdapterBuilder {
     /// Use an user-input password string to derive a key to use Stronghold.
-    pub fn password(mut self, password: &str) -> Self {
+    pub fn password(mut self, password: impl Into<Password>) -> Self {
+        let password = password.into();
+
         // Note that derive_builder always adds another layer of Option<T>.
         self.key_provider = Some(self::common::key_provider_from_password(password));
 
@@ -173,6 +175,9 @@ impl StrongholdAdapterBuilder {
     pub fn build<P: AsRef<Path>>(mut self, snapshot_path: P) -> Result<StrongholdAdapter, Error> {
         // In any case, Stronghold - as a necessary component - needs to be present at this point.
         let stronghold = self.stronghold.unwrap_or_default();
+
+        #[cfg(test)]
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
         if let Some(key_provider) = &self.key_provider {
             check_or_create_snapshot(&stronghold, key_provider, &SnapshotPath::from_path(&snapshot_path))?;
@@ -236,7 +241,9 @@ impl StrongholdAdapter {
     /// `password` after `timeout` (if set).
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
-    pub async fn set_password(&self, password: &str) -> Result<(), Error> {
+    pub async fn set_password(&self, password: impl Into<Password> + Send) -> Result<(), Error> {
+        let password = password.into();
+
         let mut key_provider_guard = self.key_provider.lock().await;
 
         let key_provider = self::common::key_provider_from_password(password);
@@ -286,7 +293,9 @@ impl StrongholdAdapter {
     /// data, provide a list of keys in `keys_to_re_encrypt`, as we have no way to list and iterate over every
     /// key-value in the Stronghold store - we'll attempt on the ones provided instead. Set it to `None` to skip
     /// re-encryption.
-    pub async fn change_password(&self, new_password: &str) -> Result<(), Error> {
+    pub async fn change_password(&self, new_password: impl Into<Password> + Send) -> Result<(), Error> {
+        let new_password = new_password.into();
+
         // Stop the key clearing task to prevent the key from being abruptly cleared (largely).
         if let Some(timeout_task) = self.timeout_task.lock().await.take() {
             timeout_task.abort();
@@ -564,7 +573,7 @@ mod tests {
 
         let stronghold_path = "test_clear_key.stronghold";
         let mut adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .timeout(timeout)
             .build(stronghold_path)
             .unwrap();
@@ -587,7 +596,7 @@ mod tests {
         let timeout = None;
         adapter.set_timeout(timeout).await;
 
-        assert!(adapter.set_password("password").await.is_err());
+        assert!(adapter.set_password("password".to_owned()).await.is_err());
 
         adapter.clear_key().await;
         assert!(matches!(*adapter.key_provider.lock().await, None));
@@ -607,17 +616,17 @@ mod tests {
     async fn stronghold_password_already_set() {
         let stronghold_path = "stronghold_password_already_set.stronghold";
         let adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
         adapter.clear_key().await;
         // After the key got cleared it should work again to set it
-        assert!(adapter.set_password("drowssap").await.is_ok());
+        assert!(adapter.set_password("drowssap".to_owned()).await.is_ok());
         // When the password already exists, it should still work
-        assert!(adapter.set_password("drowssap").await.is_ok());
+        assert!(adapter.set_password("drowssap".to_owned()).await.is_ok());
         // When the password already exists, but a wrong one is provided, it should return an error
-        assert!(adapter.set_password("other_password").await.is_err());
+        assert!(adapter.set_password("other_password".to_owned()).await.is_err());
 
         fs::remove_file(stronghold_path).unwrap();
     }

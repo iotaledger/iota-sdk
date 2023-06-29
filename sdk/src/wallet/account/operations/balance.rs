@@ -4,6 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
+    client::secret::SecretManage,
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
@@ -19,9 +20,12 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    Error: From<S::Error>,
+{
     /// Get the balance of the account.
-    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
+    pub async fn balance(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
 
         let account_details = self.details().await;
@@ -161,16 +165,14 @@ impl Account {
 
                                 let account_addresses = self.addresses().await?;
                                 let local_time = self.client().get_time_checked().await?;
-                                let output_can_be_unlocked_now = self
-                                    .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-                                    .await?
-                                    .contains(output_id);
+                                let is_claimable =
+                                    self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
 
                                 // For outputs that are expired or have a timelock unlock condition, but no expiration
                                 // unlock condition and we then can unlock them, then
                                 // they can never be not available for us anymore
                                 // and should be added to the balance
-                                if output_can_be_unlocked_now {
+                                if is_claimable {
                                     // check if output can be unlocked always from now on, in that case it should be
                                     // added to the total amount
                                     let output_can_be_unlocked_now_and_in_future =
@@ -332,9 +334,9 @@ impl Account {
 
             balance.native_tokens.push(NativeTokensBalance {
                 token_id: *native_token.token_id(),
-                metadata,
                 total: native_token.amount(),
                 available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+                metadata,
             })
         }
 

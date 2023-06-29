@@ -69,5 +69,5 @@ fn read_signed_transaction_from_file<P: AsRef<Path>>(path: P) -> Result<SignedTr
 
     let dto = serde_json::from_str::<SignedTransactionDataDto>(&json)?;
 
-    Ok(SignedTransactionData::try_from_dto_unverified(&dto)?)
+    Ok(SignedTransactionData::try_from_dto_unverified(dto)?)
 }

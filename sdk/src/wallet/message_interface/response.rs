@@ -25,8 +25,8 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AddressWithUnspentOutputs, BalanceDto, TransactionDto},
+            operations::transaction::high_level::minting::create_native_token::CreateNativeTokenTransactionDto,
+            types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
             OutputDataDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -66,7 +66,7 @@ pub enum Response {
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for
-    /// [`GetOutputsWithAdditionalUnlockConditions`](crate::wallet::message_interface::AccountMethod::GetOutputsWithAdditionalUnlockConditions)
+    /// [`ClaimableOutputs`](crate::wallet::message_interface::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::wallet::message_interface::AccountMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
@@ -100,13 +100,13 @@ pub enum Response {
     /// [`GenerateEvmAddresses`](crate::wallet::message_interface::AccountMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
     /// Response for:
-    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
-    EvmSignature { public_key: String, signature: String },
+    Secp256k1EcdsaSignature { public_key: String, signature: String },
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
-    Balance(BalanceDto),
+    Balance(Balance),
     /// Response for
     /// [`GetLedgerNanoStatus`](crate::wallet::message_interface::Message::GetLedgerNanoStatus),
     #[cfg(feature = "ledger_nano")]
@@ -129,11 +129,13 @@ pub enum Response {
     /// [`DecreaseVotingPower`](crate::wallet::message_interface::AccountMethod::DecreaseVotingPower)
     SentTransaction(TransactionDto),
     /// Response for
-    /// [`MintNativeToken`](crate::wallet::message_interface::AccountMethod::MintNativeToken),
-    MintTokenTransaction(MintTokenTransactionDto),
+    /// [`CreateNativeToken`](crate::wallet::message_interface::AccountMethod::CreateNativeToken),
+    CreateNativeTokenTransaction(CreateNativeTokenTransactionDto),
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
-    StrongholdPasswordIsAvailable(bool),
+    /// [`VerifyEd25519Signature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEd25519Signature)
+    /// [`VerifySecp256k1EcdsaSignature`](crate::wallet::message_interface::account_method::AccountMethod::VerifySecp256k1EcdsaSignature)
+    Bool(bool),
     /// An error occurred.
     Error(Error),
     /// A panic occurred.
@@ -219,19 +221,19 @@ impl Debug for Response {
             }
             Self::GeneratedEd25519Addresses(addresses) => write!(f, "GeneratedEd25519Addresses({addresses:?})"),
             Self::GeneratedEvmAddresses(addresses) => write!(f, "GeneratedEvmAddresses({addresses:?})"),
-            Self::EvmSignature { public_key, signature } => {
+            Self::Secp256k1EcdsaSignature { public_key, signature } => {
                 write!(
                     f,
-                    "EvmSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
+                    "Secp256k1EcdsaSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
                 )
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::MintTokenTransaction(mint_transaction) => {
-                write!(f, "MintTokenTransaction({mint_transaction:?})")
+            Self::CreateNativeTokenTransaction(create_transaction) => {
+                write!(f, "CreateNativeTokenTransaction({create_transaction:?})")
             }
-            Self::StrongholdPasswordIsAvailable(is_available) => {
-                write!(f, "StrongholdPasswordIsAvailable({is_available:?})")
+            Self::Bool(b) => {
+                write!(f, "Bool({b})")
             }
             Self::Error(error) => write!(f, "Error({error:?})"),
             Self::Panic(panic_msg) => write!(f, "Panic({panic_msg:?})"),

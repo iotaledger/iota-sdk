@@ -1,5 +1,8 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { INode } from '../client';
-import type { OutputId } from './output';
+import type { OutputId } from '../block/output';
 
 export interface ParticipationOverview {
     participations: Participations;

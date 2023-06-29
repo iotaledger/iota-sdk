@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
+    client::secret::SecretManage,
     types::{
-        api::core::dto::LedgerInclusionStateDto,
+        api::core::response::LedgerInclusionState,
         block::{
             payload::{transaction::TransactionId, Payload},
             Block, BlockId,
@@ -15,7 +16,10 @@ use crate::{
 const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). This function is re-exported from the client library and default interval is as defined there.
     /// Returns the included block at first position and additional reattached blocks
@@ -89,12 +93,12 @@ impl Account {
                     let block_metadata = self.client().get_block_metadata(block_id_).await?;
                     if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
                         match inclusion_state {
-                            LedgerInclusionStateDto::Included | LedgerInclusionStateDto::NoTransaction => {
+                            LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
                                 return Ok(*block_id_);
                             }
                             // only set it as conflicting here and don't return, because another reattached block could
                             // have the included transaction
-                            LedgerInclusionStateDto::Conflicting => conflicting = true,
+                            LedgerInclusionState::Conflicting => conflicting = true,
                         };
                     }
                     // Only reattach or promote latest attachment of the block

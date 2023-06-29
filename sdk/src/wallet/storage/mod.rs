@@ -15,17 +15,17 @@ mod participation;
 use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
-use self::adapter::StorageAdapter;
-use crate::client::storage::StorageAdapter as ClientStorageAdapter;
+use self::adapter::DynStorageAdapter;
+use crate::client::storage::StorageAdapter;
 
 #[derive(Debug)]
 pub struct Storage {
-    inner: Box<dyn StorageAdapter>,
+    inner: Box<dyn DynStorageAdapter>,
     encryption_key: Option<[u8; 32]>,
 }
 
 #[async_trait]
-impl ClientStorageAdapter for Storage {
+impl StorageAdapter for Storage {
     type Error = crate::wallet::Error;
 
     async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error> {
@@ -56,12 +56,6 @@ impl ClientStorageAdapter for Storage {
     }
 }
 
-impl Storage {
-    fn id(&self) -> &'static str {
-        self.inner.id()
-    }
-}
-
 impl Drop for Storage {
     fn drop(&mut self) {
         log::debug!("drop Storage");
@@ -73,16 +67,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{client::storage::StorageAdapterId, wallet::storage::adapter::memory::Memory};
-
-    #[test]
-    fn id() {
-        let storage = Storage {
-            inner: Box::<Memory>::default(),
-            encryption_key: None,
-        };
-        assert_eq!(storage.id(), Memory::ID);
-    }
+    use crate::wallet::storage::adapter::memory::Memory;
 
     #[tokio::test]
     async fn get_set_remove() {

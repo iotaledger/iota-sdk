@@ -52,11 +52,11 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&StateControllerAddressUnlockConditionDto> for StateControllerAddressUnlockCondition {
+    impl TryFrom<StateControllerAddressUnlockConditionDto> for StateControllerAddressUnlockCondition {
         type Error = Error;
 
-        fn try_from(value: &StateControllerAddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(Address::try_from(&value.address).map_err(|_e| {
+        fn try_from(value: StateControllerAddressUnlockConditionDto) -> Result<Self, Error> {
+            Ok(Self::new(Address::try_from(value.address).map_err(|_e| {
                 Error::InvalidField("stateControllerAddressUnlockCondition")
             })?))
         }

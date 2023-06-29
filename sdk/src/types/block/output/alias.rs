@@ -707,10 +707,7 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
-            unlock_condition::dto::UnlockConditionDto,
-        },
+        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
         Error,
     };
 
@@ -724,7 +721,7 @@ pub mod dto {
         pub amount: String,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeTokenDto>,
+        pub native_tokens: Vec<NativeToken>,
         // Unique identifier of the alias.
         pub alias_id: AliasId,
         // A counter that must increase by 1 every time the alias is state transitioned.
@@ -749,7 +746,7 @@ pub mod dto {
             Self {
                 kind: AliasOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
+                native_tokens: value.native_tokens().to_vec(),
                 alias_id: *value.alias_id(),
                 state_index: value.state_index(),
                 state_metadata: prefix_hex::encode(value.state_metadata()),
@@ -762,7 +759,7 @@ pub mod dto {
     }
 
     impl AliasOutput {
-        fn _try_from_dto(value: &AliasOutputDto) -> Result<AliasOutputBuilder, Error> {
+        pub fn try_from_dto(value: AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = AliasOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 value.alias_id,
@@ -779,35 +776,55 @@ pub mod dto {
 
             builder = builder.with_foundry_counter(value.foundry_counter);
 
-            for t in &value.native_tokens {
-                builder = builder.add_native_token(t.try_into()?);
+            for t in value.native_tokens {
+                builder = builder.add_native_token(t);
             }
 
-            for b in &value.features {
+            for b in value.features {
                 builder = builder.add_feature(Feature::try_from(b)?);
             }
 
-            for b in &value.immutable_features {
+            for b in value.immutable_features {
                 builder = builder.add_immutable_feature(Feature::try_from(b)?);
             }
 
-            Ok(builder)
-        }
-
-        pub fn try_from_dto(value: &AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
-
-            for u in &value.unlock_conditions {
+            for u in value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
             builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: &AliasOutputDto) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
+        pub fn try_from_dto_unverified(value: AliasOutputDto) -> Result<Self, Error> {
+            let mut builder = AliasOutputBuilder::new_with_amount(
+                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                value.alias_id,
+            );
 
-            for u in &value.unlock_conditions {
+            builder = builder.with_state_index(value.state_index);
+
+            if !value.state_metadata.is_empty() {
+                builder = builder.with_state_metadata(
+                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
+                        .map_err(|_| Error::InvalidField("state_metadata"))?,
+                );
+            }
+
+            builder = builder.with_foundry_counter(value.foundry_counter);
+
+            for t in value.native_tokens {
+                builder = builder.add_native_token(t);
+            }
+
+            for b in value.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for b in value.immutable_features {
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+            }
+
+            for u in value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
@@ -817,7 +834,7 @@ pub mod dto {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeTokenDto>>,
+            native_tokens: Option<Vec<NativeToken>>,
             alias_id: &AliasId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
@@ -838,10 +855,6 @@ pub mod dto {
             };
 
             if let Some(native_tokens) = native_tokens {
-                let native_tokens = native_tokens
-                    .iter()
-                    .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
@@ -858,14 +871,14 @@ pub mod dto {
             }
 
             let unlock_conditions = unlock_conditions
-                .iter()
+                .into_iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
-                    .iter()
+                    .into_iter()
                     .map(Feature::try_from)
                     .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
@@ -873,7 +886,7 @@ pub mod dto {
 
             if let Some(immutable_features) = immutable_features {
                 let immutable_features = immutable_features
-                    .iter()
+                    .into_iter()
                     .map(Feature::try_from)
                     .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
@@ -991,14 +1004,14 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_alias_output(protocol_parameters.token_supply());
         let dto = OutputDto::Alias((&output).into());
-        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_alias());
-        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_alias());
 
         let output_split = AliasOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().iter().map(Into::into).collect()),
+            Some(output.native_tokens().to_vec()),
             output.alias_id(),
             output.state_index().into(),
             output.state_metadata().to_owned().into(),
@@ -1019,7 +1032,7 @@ mod tests {
         let test_split_dto = |builder: AliasOutputBuilder| {
             let output_split = AliasOutput::try_from_dtos(
                 (&builder.amount).into(),
-                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.alias_id,
                 builder.state_index,
                 builder.state_metadata.to_owned().into(),

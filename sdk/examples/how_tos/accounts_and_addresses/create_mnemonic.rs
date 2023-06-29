@@ -3,7 +3,9 @@
 
 //! In this example we will create a random mnemonic.
 //!
+//! ```sh
 //! `cargo run --release --all-features --example create_mnemonic`
+//! ```
 
 use iota_sdk::client::{Client, Result};
 
@@ -11,7 +13,7 @@ use iota_sdk::client::{Client, Result};
 async fn main() -> Result<()> {
     let mnemonic = Client::generate_mnemonic()?;
 
-    println!("Mnemonic: {}", mnemonic.as_str());
+    println!("Generated mnemonic: {}", mnemonic.as_str());
 
     Ok(())
 }

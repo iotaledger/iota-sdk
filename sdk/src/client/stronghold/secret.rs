@@ -10,6 +10,7 @@ use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
+use instant::Duration;
 use iota_stronghold::{
     procedures::{self, Chain, Curve, KeyType, Slip10DeriveInput},
     Location,
@@ -21,19 +22,21 @@ use super::{
 };
 use crate::{
     client::{
+        api::PreparedTransactionData,
         constants::HD_WALLET_TYPE,
         secret::{
             mnemonic::{Mnemonic, MnemonicLike},
-            GenerateAddressOptions, SecretManage,
+            types::StrongholdDto,
+            GenerateAddressOptions, SecretManage, SecretManagerConfig,
         },
         stronghold::Error,
     },
-    types::block::{address::Ed25519Address, signature::Ed25519Signature},
+    types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
 };
 
 #[async_trait]
 impl SecretManage for StrongholdAdapter {
-    type Error = Error;
+    type Error = crate::client::Error;
 
     async fn generate_ed25519_addresses(
         &self,
@@ -48,7 +51,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::KeyCleared);
+            return Err(Error::KeyCleared.into());
         }
 
         // Stronghold arguments.
@@ -82,9 +85,11 @@ impl SecretManage for StrongholdAdapter {
             self.stronghold
                 .lock()
                 .await
-                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .get_client(PRIVATE_DATA_CLIENT_PATH)
+                .map_err(Error::from)?
                 .vault(SECRET_VAULT_PATH)
-                .delete_secret(derive_location.record_path())?;
+                .delete_secret(derive_location.record_path())
+                .map_err(Error::from)?;
 
             // Hash the public key to get the address.
             let hash = Blake2b256::digest(public_key);
@@ -112,7 +117,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::KeyCleared);
+            return Err(Error::KeyCleared.into());
         }
 
         // Stronghold arguments.
@@ -146,9 +151,11 @@ impl SecretManage for StrongholdAdapter {
             self.stronghold
                 .lock()
                 .await
-                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .get_client(PRIVATE_DATA_CLIENT_PATH)
+                .map_err(Error::from)?
                 .vault(SECRET_VAULT_PATH)
-                .delete_secret(derive_location.record_path())?;
+                .delete_secret(derive_location.record_path())
+                .map_err(Error::from)?;
 
             // Collect it.
             addresses.push(public_key.to_evm_address());
@@ -164,7 +171,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::KeyCleared);
+            return Err(Error::KeyCleared.into());
         }
 
         // Stronghold arguments.
@@ -191,14 +198,16 @@ impl SecretManage for StrongholdAdapter {
         self.stronghold
             .lock()
             .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .get_client(PRIVATE_DATA_CLIENT_PATH)
+            .map_err(Error::from)?
             .vault(SECRET_VAULT_PATH)
-            .delete_secret(derive_location.record_path())?;
+            .delete_secret(derive_location.record_path())
+            .map_err(Error::from)?;
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
 
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
@@ -209,7 +218,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::KeyCleared);
+            return Err(Error::KeyCleared.into());
         }
 
         // Stronghold arguments.
@@ -236,11 +245,54 @@ impl SecretManage for StrongholdAdapter {
         self.stronghold
             .lock()
             .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .get_client(PRIVATE_DATA_CLIENT_PATH)
+            .map_err(Error::from)?
             .vault(SECRET_VAULT_PATH)
-            .delete_secret(derive_location.record_path())?;
+            .delete_secret(derive_location.record_path())
+            .map_err(Error::from)?;
 
         Ok((public_key, signature))
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+        time: Option<u32>,
+    ) -> Result<Unlocks, Self::Error> {
+        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        crate::client::secret::default_sign_transaction(self, prepared_transaction_data).await
+    }
+}
+
+impl SecretManagerConfig for StrongholdAdapter {
+    type Config = StrongholdDto;
+
+    fn to_config(&self) -> Option<Self::Config> {
+        Some(Self::Config {
+            password: None,
+            timeout: self.get_timeout().map(|duration| duration.as_secs()),
+            snapshot_path: self.snapshot_path.clone().into_os_string().to_string_lossy().into(),
+        })
+    }
+
+    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+        let mut builder = Self::builder();
+
+        if let Some(password) = &config.password {
+            builder = builder.password(password.clone());
+        }
+
+        if let Some(timeout) = &config.timeout {
+            builder = builder.timeout(Duration::from_secs(*timeout));
+        }
+
+        Ok(builder.build(&config.snapshot_path)?)
     }
 }
 
@@ -431,7 +483,7 @@ mod tests {
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -463,7 +515,7 @@ mod tests {
             "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -495,7 +547,7 @@ mod tests {
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -514,7 +566,7 @@ mod tests {
                 .is_err()
         );
 
-        stronghold_adapter.set_password("drowssap").await.unwrap();
+        stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 
         // After setting the correct password it works again.
         let addresses = stronghold_adapter

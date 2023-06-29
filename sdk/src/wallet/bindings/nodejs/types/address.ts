@@ -48,18 +48,17 @@ export interface SendNftParams {
 
 /** Options for address generation, useful with a Ledger Nano SecretManager */
 export interface GenerateAddressOptions {
-    internal: boolean;
-    ledgerNanoPrompt: boolean;
+    /**
+     * Internal addresses
+     */
+    internal?: boolean;
+    ledgerNanoPrompt?: boolean;
 }
 
 export interface GenerateAddressesOptions {
     coinType?: CoinType;
     accountIndex?: number;
     range?: IRange;
-    /**
-     * Internal addresses
-     */
-    internal?: boolean;
     /**
      * Bech32 human readable part
      */

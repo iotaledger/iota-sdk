@@ -4,11 +4,12 @@ processors:
   - type: filter
     skip_empty_modules: true
   - type: smart
+  - type: pydoc_markdown_iota.IotaProcessor
   - type: crossref
 renderer:
   type: docusaurus
-  docs_base_path: ../../documentation/sdk/docs/references/
-  relative_output_path: python
+  docs_base_path: ./docs/
+  relative_output_path: references/python
 
   markdown:
     use_fixed_header_levels: true

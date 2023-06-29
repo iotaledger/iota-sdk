@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::{
         api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
         block::{
@@ -19,7 +19,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Casts a given number of votes for a given (voting) event.
     ///
     /// If voting for other events, continues voting for them.
@@ -39,7 +42,8 @@ impl Account {
         answers: impl Into<Option<Vec<u8>>> + Send,
     ) -> Result<Transaction> {
         let prepared = self.prepare_vote(event_id, answers).await?;
-        self.sign_and_submit_transaction(prepared).await
+
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Function to prepare the transaction for
@@ -133,7 +137,8 @@ impl Account {
     /// If NOT already voting for this event, throws an error (e.g. output with this event ID not found).
     pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<Transaction> {
         let prepared = self.prepare_stop_participating(event_id).await?;
-        self.sign_and_submit_transaction(prepared).await
+
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Function to prepare the transaction for

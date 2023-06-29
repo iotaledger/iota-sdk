@@ -60,7 +60,7 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager=None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
         if secret_manager_handle is None:
             self.handle = create_secret_manager(dumps(secret_manager))
         else:
@@ -220,6 +220,14 @@ class SecretManager():
         """Signs a message with an Ed25519 private key.
         """
         return self._call_method('signEd25519', {
+            'message': message,
+            'chain': chain,
+        })
+
+    def sign_secp256k1_ecdsa(self, message: HexStr, chain: List[int]):
+        """Signs a message with an Secp256k1Ecdsa private key.
+        """
+        return self._call_method('signSecp256k1Ecdsa', {
             'message': message,
             'chain': chain,
         })

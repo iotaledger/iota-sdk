@@ -15,14 +15,7 @@ use super::{
     common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
     StrongholdAdapter,
 };
-use crate::client::{
-    storage::{StorageAdapter, StorageAdapterId},
-    stronghold::Error,
-};
-
-impl StorageAdapterId for StrongholdAdapter {
-    const ID: &'static str = "Stronghold";
-}
+use crate::client::{storage::StorageAdapter, stronghold::Error};
 
 #[async_trait]
 impl StorageAdapter for StrongholdAdapter {
@@ -93,6 +86,8 @@ impl StorageAdapter for StrongholdAdapter {
         Ok(())
     }
 }
+
+#[cfg(test)]
 mod tests {
 
     #[tokio::test]
@@ -107,7 +102,7 @@ mod tests {
         fs::remove_file(snapshot_path).unwrap_or(());
 
         let stronghold = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(snapshot_path)
             .unwrap();
 

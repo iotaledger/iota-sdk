@@ -98,10 +98,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&TaggedDataPayloadDto> for TaggedDataPayload {
+    impl TryFrom<TaggedDataPayloadDto> for TaggedDataPayload {
         type Error = Error;
 
-        fn try_from(value: &TaggedDataPayloadDto) -> Result<Self, Self::Error> {
+        fn try_from(value: TaggedDataPayloadDto) -> Result<Self, Self::Error> {
             Self::new(
                 if !value.tag.is_empty() {
                     prefix_hex::decode(&value.tag).map_err(|_| Error::InvalidField("tag"))?

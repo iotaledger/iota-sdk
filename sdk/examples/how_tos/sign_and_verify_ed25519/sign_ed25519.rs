@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will sign with Ed25519.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example sign_ed25519 --release --features=stronghold`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example sign_ed25519
+//! ```
 
 use iota_sdk::{
     client::{
@@ -28,7 +30,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let stronghold = StrongholdSecretManager::builder()
-        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("sign_ed25519.stronghold")?;
 
     stronghold

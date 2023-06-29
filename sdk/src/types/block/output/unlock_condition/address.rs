@@ -50,12 +50,12 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&AddressUnlockConditionDto> for AddressUnlockCondition {
+    impl TryFrom<AddressUnlockConditionDto> for AddressUnlockCondition {
         type Error = Error;
 
-        fn try_from(value: &AddressUnlockConditionDto) -> Result<Self, Error> {
+        fn try_from(value: AddressUnlockConditionDto) -> Result<Self, Error> {
             Ok(Self::new(
-                Address::try_from(&value.address).map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
+                Address::try_from(value.address).map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
             ))
         }
     }

@@ -92,12 +92,12 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&ExpirationUnlockConditionDto> for ExpirationUnlockCondition {
+    impl TryFrom<ExpirationUnlockConditionDto> for ExpirationUnlockCondition {
         type Error = Error;
 
-        fn try_from(value: &ExpirationUnlockConditionDto) -> Result<Self, Error> {
+        fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
             Self::new(
-                Address::try_from(&value.return_address)
+                Address::try_from(value.return_address)
                     .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
                 value.timestamp,
             )

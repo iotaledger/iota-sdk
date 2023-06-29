@@ -277,30 +277,26 @@ pub mod dto {
     }
 
     impl Payload {
-        pub fn try_from_dto(value: &PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
+        pub fn try_from_dto(value: PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             Ok(match value {
-                PayloadDto::Transaction(p) => {
-                    Self::from(TransactionPayload::try_from_dto(p.as_ref(), protocol_parameters)?)
-                }
-                PayloadDto::Milestone(p) => {
-                    Self::from(MilestonePayload::try_from_dto(p.as_ref(), protocol_parameters)?)
-                }
+                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto(*p, protocol_parameters)?),
+                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto(*p, protocol_parameters)?),
                 PayloadDto::TreasuryTransaction(p) => Self::from(TreasuryTransactionPayload::try_from_dto(
-                    p.as_ref(),
+                    *p,
                     protocol_parameters.token_supply(),
                 )?),
-                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(p.as_ref())?),
+                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })
         }
 
-        pub fn try_from_dto_unverified(value: &PayloadDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: PayloadDto) -> Result<Self, Error> {
             Ok(match value {
-                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(p.as_ref())?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(p.as_ref())?),
+                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(*p)?),
+                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(*p)?),
                 PayloadDto::TreasuryTransaction(p) => {
-                    Self::from(TreasuryTransactionPayload::try_from_dto_unverified(p.as_ref())?)
+                    Self::from(TreasuryTransactionPayload::try_from_dto_unverified(*p)?)
                 }
-                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(p.as_ref())?),
+                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })
         }
     }

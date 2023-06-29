@@ -1,15 +1,23 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(all(feature = "events", any(feature = "ledger_nano", feature = "ledger_nano")))]
-use crate::wallet::events::types::{AddressData, WalletEvent};
+#[cfg(feature = "ledger_nano")]
+use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
     wallet::account::{types::address::AccountAddress, Account},
 };
+#[cfg(all(feature = "events", feature = "ledger_nano"))]
+use crate::{
+    types::block::address::ToBech32Ext,
+    wallet::events::types::{AddressData, WalletEvent},
+};
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Generate addresses and stores them in the account
     /// ```ignore
     /// let public_addresses = account.generate_ed25519_addresses(2, None).await?;
@@ -57,90 +65,95 @@ impl Account {
 
         let address_range = highest_current_index_plus_one..highest_current_index_plus_one + amount;
 
-        let addresses = match &*self.wallet.secret_manager.read().await {
-            #[cfg(feature = "ledger_nano")]
-            SecretManager::LedgerNano(ledger_nano) => {
-                // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
-                // needs to have it visible on the computer first, so we need to generate it without the
-                // prompt first
-                if options.ledger_nano_prompt {
-                    #[cfg(feature = "events")]
-                    let changed_options = {
-                        // Change options so ledger will not show the prompt the first time
-                        let mut changed_options = options;
-                        changed_options.ledger_nano_prompt = false;
-                        changed_options
-                    };
-                    let mut addresses = Vec::new();
+        // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
+        // needs to have it visible on the computer first, so we need to generate it without the
+        // prompt first
+        #[cfg(feature = "ledger_nano")]
+        let addresses = if options.ledger_nano_prompt
+            && self
+                .wallet
+                .secret_manager
+                .read()
+                .await
+                .downcast::<LedgerSecretManager>()
+                .is_some()
+        {
+            #[cfg(feature = "events")]
+            let changed_options = {
+                // Change options so ledger will not show the prompt the first time
+                let mut changed_options = options;
+                changed_options.ledger_nano_prompt = false;
+                changed_options
+            };
+            let mut addresses = Vec::new();
 
-                    for address_index in address_range {
-                        #[cfg(feature = "events")]
-                        {
-                            // Generate without prompt to be able to display it
-                            let address = ledger_nano
-                                .generate_ed25519_addresses(
-                                    account_details.coin_type,
-                                    account_details.index,
-                                    address_index..address_index + 1,
-                                    Some(changed_options),
-                                )
-                                .await?;
-                            self.emit(
-                                account_details.index,
-                                WalletEvent::LedgerAddressGeneration(AddressData {
-                                    address: crate::types::block::address::ToBech32Ext::to_bech32(
-                                        address[0], bech32_hrp,
-                                    ),
-                                }),
-                            )
-                            .await;
-                        }
-                        // Generate with prompt so the user can verify
-                        let address = ledger_nano
-                            .generate_ed25519_addresses(
-                                account_details.coin_type,
-                                account_details.index,
-                                address_index..address_index + 1,
-                                Some(options),
-                            )
-                            .await?;
-                        addresses.push(address[0]);
-                    }
-                    addresses
-                } else {
-                    ledger_nano
+            for address_index in address_range {
+                #[cfg(feature = "events")]
+                {
+                    // Generate without prompt to be able to display it
+                    let address = self
+                        .wallet
+                        .secret_manager
+                        .read()
+                        .await
                         .generate_ed25519_addresses(
                             account_details.coin_type,
                             account_details.index,
-                            address_range.clone(),
-                            Some(options),
+                            address_index..address_index + 1,
+                            Some(changed_options),
                         )
-                        .await?
+                        .await?;
+                    self.emit(
+                        account_details.index,
+                        WalletEvent::LedgerAddressGeneration(AddressData {
+                            address: address[0].to_bech32(bech32_hrp),
+                        }),
+                    )
+                    .await;
                 }
-            }
-            #[cfg(feature = "stronghold")]
-            SecretManager::Stronghold(stronghold) => {
-                stronghold
+                // Generate with prompt so the user can verify
+                let address = self
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
                     .generate_ed25519_addresses(
                         account_details.coin_type,
                         account_details.index,
-                        address_range,
+                        address_index..address_index + 1,
                         Some(options),
                     )
-                    .await?
+                    .await?;
+                addresses.push(address[0]);
             }
-            SecretManager::Mnemonic(mnemonic) => {
-                mnemonic
-                    .generate_ed25519_addresses(
-                        account_details.coin_type,
-                        account_details.index,
-                        address_range,
-                        Some(options),
-                    )
-                    .await?
-            }
-            SecretManager::Placeholder(_) => Vec::new(),
+            addresses
+        } else {
+            self.wallet
+                .secret_manager
+                .read()
+                .await
+                .generate_ed25519_addresses(
+                    account_details.coin_type,
+                    account_details.index,
+                    address_range,
+                    Some(options),
+                )
+                .await?
         };
+
+        #[cfg(not(feature = "ledger_nano"))]
+        let addresses = self
+            .wallet
+            .secret_manager
+            .read()
+            .await
+            .generate_ed25519_addresses(
+                account_details.coin_type,
+                account_details.index,
+                address_range,
+                Some(options),
+            )
+            .await?;
 
         drop(account_details);
 

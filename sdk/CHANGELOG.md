@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.4.0 - 2023-MM-DD
+## 0.4.0 - 2023-xx-xx
 
 ### Added
 
@@ -36,12 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
 - Stronghold snapshot migration from v2 to v3;
 - `SecretManage::sign_evm`;
-<<<<<<< HEAD
-- `Mnemonic` type which derives `Zeroize` and `ZeroizeOnDrop`;
-=======
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
->>>>>>> upstream/develop
+- `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
+- `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
+- `Mnemonic` wrapper which is `Zeroize` and `ZeroizeOnDrop`;
 
 ### Changed
 
@@ -85,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
 - `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
+- `Wallet`, `WalletBuilder`, `Account`, `AccountBuilder` now specify generic secret manager type;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 - Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
 - Rename `AccountBalance` to `Balance` and `AccountBalanceDto` to `BalanceDto`:
@@ -95,6 +95,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More functions accept generic types for ergonomics: `Wallet::listen`, `clear_listeners`, `EventEmitter` fns, `RegularTransactionEssenceBuilder` fns, `AliasOutputBuilder` fns, `Account::claim_outputs`, `prepare_transaction`, `send`, `finish_transaction`, `send_nft`, `prepare_send_nft`, `send_native_tokens`, `prepare_send_native_tokens`, `send_amount`, `prepare_send_amount`, `mint_nfts`, `prepare_mint_nfts`, `vote`, `prepare_vote`, `Unlocks::new`, `TaggedDataPayload::new`, `MilestonePayload::new`, `ReceiptMilestoneOption::new`, `Client::subscribe`, `unsubscribe`, `basic_output_ids`, `alias_output_ids`, `foundry_output_ids`, `nft_output_ids`, `MqttManager::with_topics`, `MqttTopicManager::new`, `with_topics`, `QueryParameters::new`;
 - `Topic::try_new` renamed to `new`, `topic` renamed to `as_str`;
 - `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API;
+- `StorageManager` and wallet dynamic `StorageAdapter` are now private;
+- All public password-related methods now claim ownership over provided passwords and take care of zeroing the memory on drop;
+- Dto type conversion to represented type now always takes owned data;
+- Rename `WalletOptions::build_manager` to `build`;
+- `PeerDto` renamed to `PeerResponse`, `ReceiptDto` to `ReceiptResponse`, `LedgerInclusionStateDto` to `LedgerInclusionState`, `HeartbeatDto` to `Heartbeat`, `MetricsDto` tp `Metrics`, `GossipDto` to `Gossip`, `RelationDto` to `Relation`;
+- Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
+- Made `Account::get_basic_outputs_for_additional_inputs` private;
+- `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
+- Use concrete ID types instead of String in HTTP responses;
+- `Client::get_outputs_metadata_ignore_errors` returns `OutputMetadata` instead of DTO;
+- `ClientInner::get_output_metadata` returns `OutputMetadata` instead of DTO;
+- Rename `Account::mint_native_token` to `create_native_token`, `Account::increase_native_token_supply` to `mint_native_token`, `Account::decrease_native_token_supply` to `melt_native_token`;
+- Rename `Account::prepare_mint_native_token` to `prepare_create_native_token`, `Account::prepare_increase_native_token_supply` to `prepare_mint_native_token`, `Account::prepare_decrease_native_token_supply` to `prepare_melt_native_token`;
+- Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
+- Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
 - `WalletInner::generate_mnemonic` returns a `Mnemonic` instead of a `String`;
 
 ### Removed
@@ -109,7 +124,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excess `SecretManager` address generation methods;
 - `Bech32Addresses` and `RawAddresses`;
 - `Client::get_addresses`;
+- `StorageAdapterId`;
 - `Topic` `TryFrom<String>` impl;
+- `Client::generate_ed25519_addresses`
+- `Wallet::get_node_info`
+- `NativeTokenDto`, which required a migration;
+- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto`, `MintNativeTokenParamsDto` and `MintNftParamsDto`;
+- `NativeTokensBalanceDto` and `BalanceDto`;
+- `RentStructureBuilder`;
+- `PlaceholderSecretManager`;
+- `block::Error::{InvalidControllerKind, MigratedFundsNotSorted, MissingPayload, MissingRequiredSenderBlock}` variants;
+- `client::Error::InvalidBIP32ChainData`;
+- `BlockResponse`, `OutputResponse` and `MilestoneResponse`;
+- `ClientError::UnexpectedApiResponse`;
 - `WalletInner::verify_mnemonic` (because verification is done now when trying to create a `Mnemonic`);
 
 ### Fixed
@@ -119,6 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validation for transitions in the input selection;
 - Automatically increase foundry counter of alias outputs;
 - Validate that foundry outputs can't have serial number `0`;
+- Allow QueryParameter::Issuer for NFTs;
 
 ## 0.3.0 - 2023-05-02
 

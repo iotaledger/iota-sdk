@@ -10,7 +10,8 @@ use crypto::{
     keys::{bip39::wordlist, slip10::Seed},
     utils,
 };
-use zeroize::Zeroize;
+use serde::{Deserialize, Serialize};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 use super::{secret::mnemonic::Mnemonic, Client, ClientInner};
 use crate::{
@@ -51,11 +52,10 @@ pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hr
 
 /// Generates a new mnemonic.
 pub fn generate_mnemonic() -> Result<Mnemonic> {
-    let mut entropy = [0u8; 32];
-    utils::rand::fill(&mut entropy)?;
-    let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
+    let mut entropy = Zeroizing::new([0u8; 32]);
+    utils::rand::fill(entropy.as_mut())?;
+    let mnemonic = wordlist::encode(entropy.as_ref(), &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
-    entropy.zeroize();
     mnemonic.try_into()
 }
 
@@ -68,9 +68,9 @@ pub fn mnemonic_to_hex_seed(mnemonic: &Mnemonic) -> String {
 
 /// Returns a seed for a mnemonic.
 pub fn mnemonic_to_seed(mnemonic: &Mnemonic) -> Seed {
-    let mut mnemonic_seed = [0u8; 64];
+    let mut mnemonic_seed = Zeroizing::new([0u8; 64]);
     crypto::keys::bip39::mnemonic_to_seed(mnemonic.as_str(), "", &mut mnemonic_seed);
-    Seed::from_bytes(&mnemonic_seed)
+    Seed::from_bytes(mnemonic_seed.as_ref())
 }
 
 /// Requests funds from a faucet
@@ -175,5 +175,15 @@ impl Client {
     /// UTF-8 encodes both the `tag` and `data` of a given TaggedDataPayload.
     pub fn tagged_data_to_utf8(payload: &TaggedDataPayload) -> Result<(String, String)> {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
+    }
+}
+
+/// A password wrapper that takes care of zeroing the memory when being dropped.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, derive_more::From)]
+pub struct Password(String);
+
+impl Password {
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
     }
 }

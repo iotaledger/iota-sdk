@@ -144,7 +144,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
 pub mod dto {
 
     use super::*;
-    use crate::types::block::{output::dto::RentStructureDto, Error};
+    use crate::types::block::{output::RentStructure, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
@@ -159,7 +159,7 @@ pub mod dto {
         pub bech32_hrp: Hrp,
         pub min_pow_score: u32,
         pub below_max_depth: u8,
-        pub rent_structure: RentStructureDto,
+        pub rent_structure: RentStructure,
         pub token_supply: String,
     }
 
@@ -173,7 +173,7 @@ pub mod dto {
                 value.bech32_hrp,
                 value.min_pow_score,
                 value.below_max_depth,
-                value.rent_structure.into(),
+                value.rent_structure,
                 value
                     .token_supply
                     .parse()

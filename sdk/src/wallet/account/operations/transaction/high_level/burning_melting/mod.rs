@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-pub(crate) mod decrease_native_token_supply;
+pub(crate) mod melt_native_token;
 
 impl Account {
     /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
@@ -22,8 +22,10 @@ impl Account {
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared = self.prepare_burn(burn, options).await?;
-        self.sign_and_submit_transaction(prepared).await
+        let options = options.into();
+        let prepared = self.prepare_burn(burn, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared, options).await
     }
 
     /// A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and

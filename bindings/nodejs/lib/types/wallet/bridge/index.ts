@@ -8,13 +8,12 @@ import type {
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAliasOutputMethod__,
-    __PrepareDecreaseNativeTokenSupplyMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateEd25519AddressesMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
-    __GetOutputsWithAdditionalUnlockConditionsMethod__,
+    __ClaimableOutputsMethod__,
     __GetTransactionMethod__,
     __AddressesMethod__,
     __AddressesWithUnspentOutputsMethod__,
@@ -24,7 +23,8 @@ import type {
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
     __MinimumRequiredStorageDepositMethod__,
-    __PrepareIncreaseNativeTokenSupplyMethod__,
+    __PrepareCreateNativeTokenMethod__,
+    __PrepareMeltNativeTokenMethod__,
     __PrepareMintNativeTokenMethod__,
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
@@ -94,7 +94,7 @@ export type __AccountMethod__ =
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
     | __GetFoundryOutputMethod__
-    | __GetOutputsWithAdditionalUnlockConditionsMethod__
+    | __ClaimableOutputsMethod__
     | __GetParticipationEventMethod__
     | __GetParticipationEventIdsMethod__
     | __GetParticipationEventsMethod__
@@ -107,9 +107,9 @@ export type __AccountMethod__ =
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__
-    | __PrepareDecreaseNativeTokenSupplyMethod__
     | __MinimumRequiredStorageDepositMethod__
-    | __PrepareIncreaseNativeTokenSupplyMethod__
+    | __PrepareCreateNativeTokenMethod__
+    | __PrepareMeltNativeTokenMethod__
     | __PrepareMintNativeTokenMethod__
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__

@@ -23,7 +23,7 @@ use crate::wallet::events::{
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{
-        secret::{mnemonic::Mnemonic, SecretManager},
+        secret::{mnemonic::Mnemonic, SecretManage, SecretManager},
         Client,
     },
     wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance, Account},
@@ -31,41 +31,53 @@ use crate::{
 
 /// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should
 /// all share the same secret_manager type with the same seed/mnemonic.
-#[derive(Debug, Clone)]
-pub struct Wallet {
-    pub(crate) inner: Arc<WalletInner>,
+#[derive(Debug)]
+pub struct Wallet<S: SecretManage = SecretManager> {
+    pub(crate) inner: Arc<WalletInner<S>>,
     // TODO should we use a hashmap instead of a vec?
-    pub(crate) accounts: Arc<RwLock<Vec<Account>>>,
+    pub(crate) accounts: Arc<RwLock<Vec<Account<S>>>>,
 }
 
-impl core::ops::Deref for Wallet {
-    type Target = WalletInner;
+impl<S: SecretManage> Clone for Wallet<S> {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            accounts: self.accounts.clone(),
+        }
+    }
+}
+
+impl<S: SecretManage> core::ops::Deref for Wallet<S> {
+    type Target = WalletInner<S>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
     }
 }
 
-impl Wallet {
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Initialises the wallet builder.
-    pub fn builder() -> WalletBuilder {
-        WalletBuilder::new()
+    pub fn builder() -> WalletBuilder<S> {
+        WalletBuilder::<S>::new()
     }
 
     /// Create a new account
-    pub fn create_account(&self) -> AccountBuilder {
+    pub fn create_account(&self) -> AccountBuilder<S> {
         log::debug!("creating account");
-        AccountBuilder::new(self.clone())
+        AccountBuilder::<S>::new(self.clone())
     }
 }
 
 #[derive(Debug)]
-pub struct WalletInner {
+pub struct WalletInner<S: SecretManage = SecretManager> {
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client: Client,
     pub(crate) coin_type: AtomicU32,
-    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
+    pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
     #[cfg(feature = "storage")]
@@ -74,9 +86,12 @@ pub struct WalletInner {
     pub(crate) storage_manager: tokio::sync::RwLock<StorageManager>,
 }
 
-impl Wallet {
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Get all accounts
-    pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account>> {
+    pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account<S>>> {
         Ok(self.accounts.read().await.clone())
     }
 
@@ -152,9 +167,9 @@ impl Wallet {
     }
 }
 
-impl WalletInner {
+impl<S: SecretManage> WalletInner<S> {
     /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &Arc<RwLock<SecretManager>> {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
         &self.secret_manager
     }
 
@@ -199,7 +214,7 @@ impl WalletInner {
     }
 }
 
-impl Drop for Wallet {
+impl<S: SecretManage> Drop for Wallet<S> {
     fn drop(&mut self) {
         log::debug!("drop Wallet");
     }

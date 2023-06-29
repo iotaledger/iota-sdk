@@ -12,7 +12,7 @@ async function run() {
         const account = await manager.getAccount('0');
 
         // Get a tokenId from your account balance after running example
-        // 22-mint-native-tokens.js
+        // 22-create-native-token.js
         let tokenId =
             '0x08a08898630b0a76a455c85c5e8d13ec56fa905c3bf1b619625c5dab45ddf02f620100000000';
 
