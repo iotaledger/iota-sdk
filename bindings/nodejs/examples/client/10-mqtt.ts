@@ -37,13 +37,13 @@ async function run() {
             return;
         }
 
-        let parsed = JSON.parse(data);
+        const parsed = JSON.parse(data);
         if (parsed.topic == 'milestone') {
-            let payload = parsePayload(
+            const payload = parsePayload(
                 JSON.parse(parsed.payload),
             ) as MilestonePayload;
-            let index = payload.index;
-            let previousMilestone = payload.previousMilestoneId;
+            const index = payload.index;
+            const previousMilestone = payload.previousMilestoneId;
             console.log(
                 'New milestone index' +
                     index +
@@ -51,7 +51,7 @@ async function run() {
                     previousMilestone,
             );
         } else if (parsed.topic == 'blocks') {
-            let block = plainToInstance(Block, JSON.parse(parsed.payload));
+            const block = plainToInstance(Block, JSON.parse(parsed.payload));
             console.log('payload:', block.payload);
         }
     };
