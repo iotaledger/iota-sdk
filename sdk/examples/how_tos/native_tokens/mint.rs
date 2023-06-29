@@ -1,27 +1,25 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will mint a native token.
+//! In this example we will mint an existing native token with its foundry.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
 //!
+//! You may provide a TOKEN_ID that is available in the account. The foundry
+//! output which minted it needs to be available as well. You can check this by
+//! running the `get_balance` example. You can create a new native token by running
+//! the `create_native_token` example.
+//!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_native_token
+//! cargo run --release --all-features --example mint_native_token [TOKEN_ID]
 //! ```
 
-use std::env::var;
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
 
-use iota_sdk::{
-    wallet::{MintNativeTokenParams, Result},
-    Wallet, U256,
-};
-
-// The circulating supply of the native token
-const CIRCULATING_SUPPLY: u64 = 100;
-// The maximum supply of the native token
-const MAXIMUM_SUPPLY: u64 = 100;
+// The amount of native tokens to mint
+const MINT_AMOUNT: u64 = 10;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -29,56 +27,55 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
+
+    // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
-    // therefore we can reuse an existing one
-    if balance.aliases().is_empty() {
-        // If we don't have an alias, we need to create one
-        let transaction = account.create_alias_output(None, None).await?;
-        println!("Transaction sent: {}", transaction.transaction_id);
+    // Find first foundry and corresponding token id
+    let token_id = std::env::args()
+        .nth(1)
+        .map(|s| s.parse::<TokenId>().expect("invalid token id"))
+        .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
 
-        // Wait for transaction to get included
-        let block_id = account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
-            .await?;
-        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+    let available_balance = balance
+        .native_tokens()
+        .iter()
+        .find(|t| t.token_id() == &token_id)
+        .unwrap()
+        .available();
+    println!("Balance before minting: {available_balance}",);
 
-        account.sync(None).await?;
-        println!("Account synced");
-    }
+    // Mint some more native tokens
+    let mint_amount = U256::from(MINT_AMOUNT);
+    let transaction = account.mint_native_token(token_id, mint_amount, None).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Preparing minting transaction...");
-
-    let params = MintNativeTokenParams {
-        alias_id: None,
-        circulating_supply: U256::from(CIRCULATING_SUPPLY),
-        maximum_supply: U256::from(MAXIMUM_SUPPLY),
-        foundry_metadata: None,
-    };
-
-    let transaction = account.mint_native_token(params, None).await?;
-    println!("Transaction sent: {}", transaction.transaction.transaction_id);
-
-    // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
-    println!("Minted token: {}", transaction.token_id);
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
-    // Ensure the account is synced after minting.
-    account.sync(None).await?;
-    println!("Account synced");
+    let balance = account.sync(None).await?;
+    let available_balance = balance
+        .native_tokens()
+        .iter()
+        .find(|t| t.token_id() == &token_id)
+        .unwrap()
+        .available();
+    println!("Balance after minting: {available_balance:?}",);
 
     Ok(())
 }

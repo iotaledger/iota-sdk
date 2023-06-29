@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.wallet.common import _call_method_routine
-from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedMintTokenTransaction
+from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedCreateTokenTransaction
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
@@ -226,15 +226,26 @@ class Account:
             'pendingTransactions'
         )
 
-    def prepare_decrease_native_token_supply(self,
-                                             token_id: HexStr,
-                                             melt_amount: int,
-                                             options: Optional[TransactionOptions] = None):
+    def prepare_create_native_token(self, params, options: Optional[TransactionOptions] = None):
+        """Create native token.
+        """
+        prepared = self._call_account_method(
+            'prepareCreateNativeToken', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedCreateTokenTransaction(account=self, prepared_transaction_data=prepared)
+
+    def prepare_melt_native_token(self,
+                                  token_id: HexStr,
+                                  melt_amount: int,
+                                  options: Optional[TransactionOptions] = None):
         """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
         `melted_tokens` field.
         """
         prepared = self._call_account_method(
-            'prepareDecreaseNativeTokenSupply', {
+            'prepareMeltNativeToken', {
                 'tokenId': token_id,
                 'meltAmount': hex(melt_amount),
                 'options': options
@@ -242,28 +253,17 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def prepare_increase_native_token_supply(self, token_id: HexStr, mint_amount: int, options: Optional[TransactionOptions] = None):
-        """Mint more native token.
+    def prepare_mint_native_token(self, token_id: HexStr, mint_amount: int, options: Optional[TransactionOptions] = None):
+        """Mint additional native tokens.
         """
         prepared = self._call_account_method(
-            'prepareIncreaseNativeTokenSupply', {
+            'prepareMintNativeToken', {
                 'tokenId': token_id,
                 'mintAmount': hex(mint_amount),
                 'options': options
             }
         )
-        return PreparedMintTokenTransaction(account=self, prepared_transaction_data=prepared)
-
-    def prepare_mint_native_token(self, params, options: Optional[TransactionOptions] = None):
-        """Mint native token.
-        """
-        prepared = self._call_account_method(
-            'prepareMintNativeToken', {
-                'params': params,
-                'options': options
-            }
-        )
-        return PreparedMintTokenTransaction(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def minimum_required_storage_deposit(self, output):
         """Minimum required storage deposit.

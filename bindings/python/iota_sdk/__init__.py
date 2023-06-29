@@ -3,6 +3,7 @@
 
 from .iota_sdk import *
 from .client.client import Client, NodeIndexerAPI, ClientError
+from .client._high_level_api import GenerateAddressesOptions, GenerateAddressOptions
 from .utils import Utils
 from .wallet.wallet import Wallet, Account
 from .wallet.common import WalletError

@@ -12,7 +12,7 @@ async function run() {
         await account.sync();
 
         // Get a tokenId from your account balance after running example
-        // 22-mint-native-tokens.js
+        // 22-create-native-token.js
         let tokenId =
             '0x087ec7c0a543e60cfc92850ed053d3b323c0d7181e63b24c6ef24dd591814006950100000000';
         // `100` hex encoded

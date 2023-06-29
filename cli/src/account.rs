@@ -11,9 +11,9 @@ use crate::{
     account_history::AccountHistory,
     command::account::{
         addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
-        claimable_outputs_command, consolidate_command, create_alias_outputs_command, decrease_native_token_command,
+        claimable_outputs_command, consolidate_command, create_alias_outputs_command, create_native_token_command,
         decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
-        increase_native_token_command, increase_voting_power_command, mint_native_token_command, mint_nft_command,
+        increase_voting_power_command, melt_native_token_command, mint_native_token, mint_nft_command,
         new_address_command, node_info_command, output_command, outputs_command, participation_overview_command,
         send_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
         transaction_command, transactions_command, unspent_outputs_command, vote_command, voting_output_command,
@@ -78,8 +78,19 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                 AccountCommand::ClaimableOutputs => claimable_outputs_command(&account).await,
                 AccountCommand::Consolidate => consolidate_command(&account).await,
                 AccountCommand::CreateAliasOutput => create_alias_outputs_command(&account).await,
-                AccountCommand::DecreaseNativeTokenSupply { token_id, amount } => {
-                    decrease_native_token_command(&account, token_id, amount).await
+                AccountCommand::CreateNativeToken {
+                    circulating_supply,
+                    maximum_supply,
+                    foundry_metadata_hex,
+                    foundry_metadata_file,
+                } => {
+                    create_native_token_command(
+                        &account,
+                        circulating_supply,
+                        maximum_supply,
+                        bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
+                    )
+                    .await
                 }
                 AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(&account, alias_id).await,
                 AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(&account, foundry_id).await,
@@ -87,22 +98,11 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                     return Ok(true);
                 }
                 AccountCommand::Faucet { address, url } => faucet_command(&account, address, url).await,
-                AccountCommand::IncreaseNativeTokenSupply { token_id, amount } => {
-                    increase_native_token_command(&account, token_id, amount).await
+                AccountCommand::MeltNativeToken { token_id, amount } => {
+                    melt_native_token_command(&account, token_id, amount).await
                 }
-                AccountCommand::MintNativeToken {
-                    circulating_supply,
-                    maximum_supply,
-                    foundry_metadata_hex,
-                    foundry_metadata_file,
-                } => {
-                    mint_native_token_command(
-                        &account,
-                        circulating_supply,
-                        maximum_supply,
-                        bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
-                    )
-                    .await
+                AccountCommand::MintNativeToken { token_id, amount } => {
+                    mint_native_token(&account, token_id, amount).await
                 }
                 AccountCommand::MintNft {
                     address,

@@ -12,7 +12,7 @@ const MELT_AMOUNT = '0xA';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/11-decrease-native-token-supply.ts
+// yarn run-example ./how_tos/native_tokens/melt.ts
 async function run() {
     try {
         // Create the wallet
@@ -23,6 +23,10 @@ async function run() {
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
+
+        if (balance.foundries.length == 0) {
+            throw new Error(`No Foundry available in account 'Alice'`);
+        }
 
         // Find first foundry and corresponding token id
         const tokenId = balance.foundries[0];
@@ -40,7 +44,7 @@ async function run() {
 
         // Melt some of the circulating supply
         const transaction = await account
-            .prepareDecreaseNativeTokenSupply(token.tokenId, MELT_AMOUNT)
+            .prepareMeltNativeToken(token.tokenId, MELT_AMOUNT)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);

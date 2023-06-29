@@ -1,6 +1,5 @@
-from iota_sdk import Wallet, utf8_to_hex
+from iota_sdk import Wallet
 from dotenv import load_dotenv
-import time
 import os
 
 load_dotenv()
@@ -11,45 +10,30 @@ wallet = Wallet('./alice-database')
 
 account = wallet.get_account('Alice')
 
+# Sync account with the node
+balance = account.sync()
+
+# Find first foundry and corresponding token id
+token_id = balance['foundries'][0]
+
+available_balance = int([native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token_id][0]['available'], 0)
+print(f'Balance before minting: {available_balance}')
+
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# Sync account with the node
-response = account.sync()
+mint_amount = 10
 
-# We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
-if len(account.aliases) == 0:
-    # If we don't have an alias, we need to create one
-    transaction = account.prepare_create_alias_output(None, None).send()
-    print(f'Transaction sent: {transaction["transactionId"]}')
-
-    # Wait for transaction to get included
-    blockId = account.retry_transaction_until_included(transaction['transactionId'])
-    print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
-
-    account.sync()
-    print("Account synced")
-
-print('Preparing minting transaction...')
-
-params = {
-    "circulatingSupply": hex(100),
-    "maximumSupply": hex(100),
-    "foundryMetadata": utf8_to_hex('Hello, World!'),
-}
-
-prepared_transaction = account.prepare_mint_native_token(params, None)
-transaction = prepared_transaction.send()
+# Prepare and send transaction.
+transaction = account.prepare_mint_native_token(token_id, mint_amount).send()
 print(f'Transaction sent: {transaction["transactionId"]}')
 
 # Wait for transaction to get included
 blockId = account.retry_transaction_until_included(transaction['transactionId'])
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
-print(f'Minted token: {prepared_transaction.token_id()}')
-
-# Ensure the account is synced after minting.
-account.sync()
-print('Account synced')
+balance = account.sync()
+available_balance = int([native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token_id][0]['available'], 0)
+print(f'Balance after minting: {available_balance}')
