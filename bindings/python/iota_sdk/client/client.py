@@ -373,82 +373,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'immutableFeatures': immutable_features
         }))
 
-    def build_and_post_block(self,
-                             secret_manager=None,
-                             account_index: Optional[int] = None,
-                             coin_type: Optional[int] = None,
-                             custom_remainder_address: Optional[str] = None,
-                             data: Optional[HexStr] = None,
-                             initial_address_index: Optional[int] = None,
-                             input_range_start: Optional[int] = None,
-                             input_range_end: Optional[int] = None,
-                             inputs: Optional[List[Dict[str, Any]]] = None,
-                             output: Optional[AddressAndAmount] = None,
-                             outputs: Optional[List[Any]] = None,
-                             tag: Optional[HexStr] = None) -> List[HexStr | Block]:
-        """Build and post a block.
-
-        Parameters
-        ----------
-        account_index : int
-            Account Index
-        coin_type : int
-            Coin type. The CoinType enum can be used
-        custom_remainder_address : string
-            Address to send the remainder funds to
-        data : str
-            Hex encoded data
-        initial_address_index : int
-            Initial address index
-        input_range_start : int
-            Start of the input range
-        input_range_end : int
-            End of the input range
-        inputs : Array of Inputs
-            Inputs to use
-        output : AddressAndAmount
-            Address and amount to send to
-        outputs : Array of Outputs
-            Outputs to use
-        tag : string
-            Hex encoded tag
-
-        Returns
-        -------
-        Block as dict
-
-        """
-        options = dict(locals())
-
-        del options['self']
-        del options['secret_manager']
-
-        options = {k: v for k, v in options.items() if v != None}
-
-        if 'output' in options:
-            options['output'] = options.pop('output').as_dict()
-
-        if 'coin_type' in options:
-            options['coin_type'] = int(options.pop('coin_type'))
-
-        is_start_set = 'input_range_start' in options
-        is_end_set = 'input_range_end' in options
-        if is_start_set or is_end_set:
-            options['range'] = {}
-            if is_start_set:
-                options['range']['start'] = options.pop('start')
-            if is_end_set:
-                options['range']['end'] = options.pop('end')
-
-        options = humps.camelize(options)
-
-        result = self._call_method('buildAndPostBlock', {
-            'secretManager': secret_manager,
-            'options': options
-        })
-        result[1] = Block.from_dict(result[1])
-        return result
-
     def get_node(self) -> Dict[str, Any]:
         """Get a node candidate from the healthy node pool.
         """
@@ -493,14 +417,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Returns the unhealthy nodes.
         """
         return self._call_method('unhealthyNodes')
-
-    def prepare_transaction(self, secret_manager=None, options=None):
-        """Prepare a transaction for signing.
-        """
-        return self._call_method('prepareTransaction', {
-            'secretManager': secret_manager,
-            'options': options
-        })
 
     def sign_transaction(self, secret_manager, prepared_transaction_data):
         """Sign a transaction.

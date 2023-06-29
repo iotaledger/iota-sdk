@@ -144,7 +144,7 @@ async fn test_get_output_raw() {
 
     let client = setup_client_with_node_health_ignored().await;
 
-    let output = client.get_output(&output_id).await.unwrap().into_output();
+    let output = client.get_output(&output_id).await.unwrap();
     let output_raw = Output::unpack_verified(
         client.get_output_raw(&output_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),

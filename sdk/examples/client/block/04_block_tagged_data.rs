@@ -10,7 +10,7 @@
 
 use iota_sdk::{
     client::{Client, Result},
-    types::block::payload::Payload,
+    types::block::payload::{Payload, TaggedDataPayload},
 };
 
 #[tokio::main]
@@ -20,18 +20,17 @@ async fn main() -> Result<()> {
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
-    let tag = std::env::args().nth(1).unwrap_or_else(|| "Hello".to_string());
-    let data = std::env::args().nth(2).unwrap_or_else(|| "Tangle".to_string());
-
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create and send the block with tag and data.
     let block = client
-        .build_block()
-        .with_tag(tag.as_bytes().to_vec())
-        .with_data(data.as_bytes().to_vec())
-        .finish()
+        .finish_block_builder(
+            None,
+            Some(Payload::TaggedData(Box::new(
+                TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
+            ))),
+        )
         .await?;
 
     println!("{block:#?}\n");

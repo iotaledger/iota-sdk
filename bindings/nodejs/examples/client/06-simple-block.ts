@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import { Client, initLogger, TaggedDataPayload, utf8ToHex } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -22,7 +22,10 @@ async function run() {
 
     try {
         // Create block with no payload
-        const blockIdAndBlock = await client.buildAndPostBlock();
+        // TODO: have a way in the bindings to send an empty block https://github.com/iotaledger/iota-sdk/issues/647
+        const blockIdAndBlock = await client.postBlockPayload(
+            new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
+        );
         console.log('Block:', blockIdAndBlock, '\n');
 
         console.log(
