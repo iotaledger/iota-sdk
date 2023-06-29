@@ -9,7 +9,6 @@ import type {
     __ClaimOutputsMethod__,
     __ConsolidateOutputsMethod__,
     __CreateAliasOutputMethod__,
-    __DecreaseNativeTokenSupplyMethod__,
     __DestroyAliasMethod__,
     __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
@@ -31,7 +30,8 @@ import type {
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
     __MinimumRequiredStorageDepositMethod__,
-    __IncreaseNativeTokenSupplyMethod__,
+    __CreateNativeTokenMethod__,
+    __MeltNativeTokenMethod__,
     __MintNativeTokenMethod__,
     __MintNftsMethod__,
     __PrepareOutputMethod__,
@@ -125,9 +125,9 @@ export type __AccountMethod__ =
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__
-    | __DecreaseNativeTokenSupplyMethod__
     | __MinimumRequiredStorageDepositMethod__
-    | __IncreaseNativeTokenSupplyMethod__
+    | __CreateNativeTokenMethod__
+    | __MeltNativeTokenMethod__
     | __MintNativeTokenMethod__
     | __MintNftsMethod__
     | __PrepareOutputMethod__

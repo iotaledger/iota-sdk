@@ -4,15 +4,15 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example and  that you have created an Issuer NFT ID
-//! by running the `mint_issuer_nft` example!
+//! running the `create_account` example.
+//!
+//! You have to provide the ISSUER_NFT_ID that you created by running the
+//! `mint_issuer_nft` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_collection_nft
+//! cargo run --release --all-features --example mint_collection_nft <ISSUER_NFT_ID>
 //! ```
-
-use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     types::block::{
@@ -24,8 +24,6 @@ use iota_sdk::{
     Wallet,
 };
 
-// !!! Replace with the NFT address from the NFT we minted in `mint_issuer_nft` example !!!
-const ISSUER_NFT_ID: &str = "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a";
 // The NFT collection size
 const NFT_COLLECTION_SIZE: usize = 150;
 // Mint NFTs in chunks since the transaction size is limited
@@ -33,17 +31,16 @@ const NUM_NFTS_MINTED_PER_TRANSACTION: usize = 50;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let issuer_nft_id = if ISSUER_NFT_ID == "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a" {
-        panic!("You need to change the ISSUER_NFT_ID constant before you can run this example successfully!");
-    } else {
-        NftId::from_str(ISSUER_NFT_ID)?
-    };
-
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    let issuer_nft_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: ISSUER_NFT_ID")
+        .parse::<NftId>()?;
+
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -53,7 +50,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
@@ -105,7 +102,7 @@ fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -114,7 +111,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

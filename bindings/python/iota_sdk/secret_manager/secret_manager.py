@@ -60,7 +60,7 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager=None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
         if secret_manager_handle is None:
             self.handle = create_secret_manager(dumps(secret_manager))
         else:

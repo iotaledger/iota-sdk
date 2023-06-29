@@ -6,7 +6,7 @@ use std::sync::Arc;
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,
     iota_sdk::client::{mqtt::Topic, Client, ClientBuilder},
-    listen_mqtt as rust_listen_mqtt, ClientMethod, Response,
+    listen_mqtt as rust_listen_mqtt, ClientMethod, Response, Result,
 };
 use neon::prelude::*;
 
@@ -20,18 +20,11 @@ pub struct ClientMethodHandler {
 impl Finalize for ClientMethodHandler {}
 
 impl ClientMethodHandler {
-    pub fn new(channel: Channel, options: String) -> Arc<Self> {
+    pub fn new(channel: Channel, options: String) -> Result<Arc<Self>> {
         let runtime = tokio::runtime::Runtime::new().expect("error initializing client");
-        let client = runtime
-            .block_on(
-                ClientBuilder::new()
-                    .from_json(&options)
-                    .expect("error initializing client")
-                    .finish(),
-            )
-            .expect("error initializing client");
+        let client = runtime.block_on(ClientBuilder::new().from_json(&options)?.finish())?;
 
-        Arc::new(Self { channel, client })
+        Ok(Arc::new(Self { channel, client }))
     }
 
     pub(crate) fn new_with_client(channel: Channel, client: Client) -> Arc<Self> {
@@ -66,7 +59,8 @@ pub fn create_client(mut cx: FunctionContext) -> JsResult<JsBox<Arc<ClientMethod
     let options = cx.argument::<JsString>(0)?;
     let options = options.value(&mut cx);
     let channel = cx.channel();
-    let method_handler = ClientMethodHandler::new(channel, options);
+    let method_handler = ClientMethodHandler::new(channel, options)
+        .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
 
     Ok(cx.boxed(method_handler))
 }

@@ -2,108 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
-use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
-        secret::SecretManage,
-    },
-    types::block::{
-        address::AliasAddress,
-        output::{
-            feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
-            AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
-        },
-    },
-    wallet::account::{
-        types::{Transaction, TransactionDto},
-        Account, TransactionOptions,
+    client::{api::PreparedTransactionData, secret::SecretManage},
+    types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
+    wallet::{
+        account::{types::Transaction, Account, TransactionOptions},
+        Error,
     },
 };
-
-/// Address and foundry data for `mint_native_token()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MintNativeTokenParams {
-    /// The alias id which should be used to create the foundry.
-    pub alias_id: Option<AliasId>,
-    /// Circulating supply
-    pub circulating_supply: U256,
-    /// Maximum supply
-    pub maximum_supply: U256,
-    /// Foundry metadata
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
-    pub foundry_metadata: Option<Vec<u8>>,
-}
-
-/// The result of a minting native token transaction
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MintTokenTransaction {
-    pub token_id: TokenId,
-    pub transaction: Transaction,
-}
-
-/// Dto for MintTokenTransaction
-#[derive(Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MintTokenTransactionDto {
-    pub token_id: TokenId,
-    pub transaction: TransactionDto,
-}
-
-impl From<&MintTokenTransaction> for MintTokenTransactionDto {
-    fn from(value: &MintTokenTransaction) -> Self {
-        Self {
-            token_id: value.token_id,
-            transaction: TransactionDto::from(&value.transaction),
-        }
-    }
-}
-
-/// The result of preparing a minting native token transaction
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PreparedMintTokenTransaction {
-    pub token_id: TokenId,
-    pub transaction: PreparedTransactionData,
-}
-
-/// Dto for MintTokenTransaction
-#[derive(Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PreparedMintTokenTransactionDto {
-    pub token_id: TokenId,
-    pub transaction: PreparedTransactionDataDto,
-}
-
-impl From<&PreparedMintTokenTransaction> for PreparedMintTokenTransactionDto {
-    fn from(value: &PreparedMintTokenTransaction) -> Self {
-        Self {
-            token_id: value.token_id,
-            transaction: PreparedTransactionDataDto::from(&value.transaction),
-        }
-    }
-}
 
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to create a new foundry output with minted native tokens.
-    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
-    /// RemainderValueStrategy or custom inputs.
-    /// Address needs to be Bech32 encoded
+    /// Function to mint additional native tokens when the max supply isn't reached yet. The foundry needs to be
+    /// controlled by this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore
-    /// let params = MintNativeTokenParams {
-    ///     alias_id: None,
-    ///     circulating_supply: U256::from(100),
-    ///     maximum_supply: U256::from(100),
-    ///     foundry_metadata: None
-    /// };
-    ///
-    /// let tx = account.mint_native_token(params, None,).await?;
+    /// let tx = account.mint_native_token(
+    ///             TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
+    ///             U256::from(100),
+    ///             None
+    ///         ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
@@ -111,78 +31,104 @@ where
     /// ```
     pub async fn mint_native_token(
         &self,
-        params: MintNativeTokenParams,
+        token_id: TokenId,
+        mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<MintTokenTransaction> {
+    ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
-        let prepared = self.prepare_mint_native_token(params, options.clone()).await?;
+        let prepared = self
+            .prepare_mint_native_token(token_id, mint_amount, options.clone())
+            .await?;
+        let transaction = self.sign_and_submit_transaction(prepared, options).await?;
 
-        self.sign_and_submit_transaction(prepared.transaction, options)
-            .await
-            .map(|transaction| MintTokenTransaction {
-                token_id: prepared.token_id,
-                transaction,
-            })
+        Ok(transaction)
     }
 
     /// Function to prepare the transaction for
     /// [Account.mint_native_token()](crate::account::Account.mint_native_token)
     pub async fn prepare_mint_native_token(
         &self,
-        params: MintNativeTokenParams,
+        token_id: TokenId,
+        mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedMintTokenTransaction> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] mint_native_token");
-        let rent_structure = self.client().get_rent_structure().await?;
+
+        let account_details = self.details().await;
         let token_supply = self.client().get_token_supply().await?;
+        let existing_foundry_output = account_details.unspent_outputs().values().find(|output_data| {
+            if let Output::Foundry(output) = &output_data.output {
+                TokenId::new(*output.id()) == token_id
+            } else {
+                false
+            }
+        });
 
-        let (alias_id, alias_output) = self
-            .get_alias_output(params.alias_id)
-            .await
-            .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
+        let existing_foundry_output = existing_foundry_output
+            .ok_or_else(|| Error::MintingFailed(format!("foundry output {token_id} is not available")))?
+            .clone();
 
-        if let Output::Alias(alias_output) = &alias_output.output {
-            // Create the new alias output with the same feature blocks, just updated state_index and foundry_counter
-            let new_alias_output_builder = AliasOutputBuilder::from(alias_output)
-                .with_alias_id(alias_id)
-                .with_state_index(alias_output.state_index() + 1)
-                .with_foundry_counter(alias_output.foundry_counter() + 1);
+        let existing_alias_output = if let Output::Foundry(foundry_output) = &existing_foundry_output.output {
+            let TokenScheme::Simple(token_scheme) = foundry_output.token_scheme();
+            // Check if we can mint the provided amount without exceeding the maximum_supply
+            if token_scheme.maximum_supply() - token_scheme.circulating_supply() < mint_amount {
+                return Err(Error::MintingFailed(format!(
+                    "minting additional {mint_amount} tokens would exceed the maximum supply: {}",
+                    token_scheme.maximum_supply()
+                )));
+            }
 
-            // create foundry output with minted native tokens
-            let foundry_id = FoundryId::build(
-                &AliasAddress::new(alias_id),
-                alias_output.foundry_counter() + 1,
-                SimpleTokenScheme::KIND,
-            );
-            let token_id = TokenId::from(foundry_id);
+            // Get the alias output that controls the foundry output
+            let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
+                if let Output::Alias(output) = &output_data.output {
+                    output.alias_id_non_null(&output_data.output_id) == **foundry_output.alias_address()
+                } else {
+                    false
+                }
+            });
+            existing_alias_output
+                .ok_or_else(|| Error::MintingFailed("alias output is not available".to_string()))?
+                .clone()
+        } else {
+            return Err(Error::MintingFailed("alias output is not available".to_string()));
+        };
 
-            let outputs = [
-                new_alias_output_builder.finish_output(token_supply)?,
-                {
-                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
-                        alias_output.foundry_counter() + 1,
-                        TokenScheme::Simple(SimpleTokenScheme::new(
-                            params.circulating_supply,
-                            U256::from(0u8),
-                            params.maximum_supply,
-                        )?),
-                    )
-                    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
+        drop(account_details);
 
-                    if let Some(foundry_metadata) = params.foundry_metadata {
-                        foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
-                    }
-
-                    foundry_builder.finish_output(token_supply)?
-                }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
-            ];
-
-            self.prepare_transaction(outputs, options)
-                .await
-                .map(|transaction| PreparedMintTokenTransaction { token_id, transaction })
+        let alias_output = if let Output::Alias(alias_output) = existing_alias_output.output {
+            alias_output
         } else {
             unreachable!("We checked if it's an alias output before")
-        }
+        };
+        let foundry_output = if let Output::Foundry(foundry_output) = existing_foundry_output.output {
+            foundry_output
+        } else {
+            unreachable!("We checked if it's an foundry output before")
+        };
+
+        // Create the next alias output with the same data, just updated state_index
+        let new_alias_output_builder =
+            AliasOutputBuilder::from(&alias_output).with_state_index(alias_output.state_index() + 1);
+
+        // Create next foundry output with minted native tokens
+
+        let TokenScheme::Simple(token_scheme) = foundry_output.token_scheme();
+
+        let updated_token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(
+            token_scheme.minted_tokens() + mint_amount,
+            token_scheme.melted_tokens(),
+            token_scheme.maximum_supply(),
+        )?);
+
+        let new_foundry_output_builder =
+            FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
+
+        let outputs = [
+            new_alias_output_builder.finish_output(token_supply)?,
+            new_foundry_output_builder.finish_output(token_supply)?,
+            // Native Tokens will be added automatically in the remainder output in try_select_inputs()
+        ];
+
+        self.prepare_transaction(outputs, options).await
     }
 }

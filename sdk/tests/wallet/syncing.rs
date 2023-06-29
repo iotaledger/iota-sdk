@@ -148,3 +148,41 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
 
     tear_down(storage_path)
 }
+
+#[ignore]
+#[tokio::test]
+#[cfg(feature = "storage")]
+async fn background_syncing() -> Result<()> {
+    let storage_path = "test-storage/background_syncing";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+
+    wallet.start_background_syncing(None, None).await?;
+
+    let account = wallet.create_account().finish().await?;
+
+    iota_sdk::client::request_funds_from_faucet(
+        crate::wallet::common::FAUCET_URL,
+        account.addresses().await?[0].address(),
+    )
+    .await?;
+
+    for _ in 0..30 {
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        let balance = account.balance().await?;
+        if balance.base_coin().available() > 0 {
+            break;
+        }
+    }
+
+    // Balance should be != 0 without calling account.sync()
+    let balance = account.balance().await?;
+    if balance.base_coin().available() == 0 {
+        panic!("Faucet no longer wants to hand over coins or background syncing failed");
+    }
+
+    wallet.stop_background_syncing().await?;
+
+    tear_down(storage_path)
+}

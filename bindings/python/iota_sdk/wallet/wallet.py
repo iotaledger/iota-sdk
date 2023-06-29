@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
-from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SecretManager
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 from iota_sdk.wallet.account import Account, _call_method_routine
 from json import dumps
 from typing import Any, Dict, List, Optional
 
 
 class Wallet():
-    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | StrongholdSecretManager] = None):
+    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
         """Initialize the IOTA Wallet.
         """
 

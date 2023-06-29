@@ -42,8 +42,8 @@ export type CustomAddress = {
     value: string;
 };
 
-/** Native token options for minting */
-export interface MintNativeTokenParams {
+/** Native token options for creating */
+export interface CreateNativeTokenParams {
     aliasId?: string;
     /** Hex encoded number */
     circulatingSupply: HexEncodedAmount;

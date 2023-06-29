@@ -7,7 +7,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{Account, MintNativeTokenParams, MintNftParams, Result},
+    wallet::{Account, CreateNativeTokenParams, MintNftParams, Result},
     U256,
 };
 
@@ -101,8 +101,8 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_decrease_native_token_supply() -> Result<()> {
-    let storage_path = "test-storage/mint_and_decrease_native_token_supply";
+async fn create_and_melt_native_token() -> Result<()> {
+    let storage_path = "test-storage/create_and_melt_native_token";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
@@ -118,31 +118,31 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     account.sync(None).await?;
 
     let circulating_supply = U256::from(60i32);
-    let params = MintNativeTokenParams {
+    let params = CreateNativeTokenParams {
         alias_id: None,
         circulating_supply,
         maximum_supply: U256::from(100i32),
         foundry_metadata: None,
     };
 
-    let mint_transaction = account.mint_native_token(params, None).await.unwrap();
+    let create_transaction = account.create_native_token(params, None).await.unwrap();
 
     account
-        .retry_transaction_until_included(&mint_transaction.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_transaction.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
 
     let search = balance
         .native_tokens()
         .iter()
-        .find(|token| token.token_id() == &mint_transaction.token_id && token.available() == circulating_supply);
+        .find(|token| token.token_id() == &create_transaction.token_id && token.available() == circulating_supply);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
     // Melt some of the circulating supply
     let melt_amount = U256::from(40i32);
     let transaction = account
-        .decrease_native_token_supply(mint_transaction.token_id, melt_amount, None)
+        .melt_native_token(create_transaction.token_id, melt_amount, None)
         .await
         .unwrap();
 
@@ -153,14 +153,14 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
     let search = balance.native_tokens().iter().find(|token| {
-        (token.token_id() == &mint_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
+        (token.token_id() == &create_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
     });
     assert!(search.is_some());
 
     // Then melt the rest of the supply
     let melt_amount = circulating_supply - melt_amount;
     let transaction = account
-        .decrease_native_token_supply(mint_transaction.token_id, melt_amount, None)
+        .melt_native_token(create_transaction.token_id, melt_amount, None)
         .await
         .unwrap();
 
@@ -173,7 +173,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let search = balance
         .native_tokens()
         .iter()
-        .find(|token| token.token_id() == &mint_transaction.token_id);
+        .find(|token| token.token_id() == &create_transaction.token_id);
     assert!(search.is_none());
 
     // Call to run tests in sequence
@@ -230,8 +230,8 @@ async fn destroy_alias(account: &Account) -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_native_tokens() -> Result<()> {
-    let storage_path = "test-storage/mint_and_burn_native_tokens";
+async fn create_and_burn_native_tokens() -> Result<()> {
+    let storage_path = "test-storage/create_and_burn_native_tokens";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
@@ -246,9 +246,9 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let mint_tx = account
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx = account
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -258,12 +258,12 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
     let tx = account
-        .burn(NativeToken::new(mint_tx.token_id, native_token_amount)?, None)
+        .burn(NativeToken::new(create_tx.token_id, native_token_amount)?, None)
         .await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)
