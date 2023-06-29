@@ -8,13 +8,11 @@ mod mqtt;
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client, Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client,
     },
     types::block::{
-        address::ToBech32Ext,
-        output::{Output, OutputId},
-        payload::{transaction::TransactionId, Payload},
+        payload::{tagged_data::TaggedDataPayload, transaction::TransactionId, Payload},
         BlockId,
     },
 };
@@ -29,10 +27,12 @@ async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     client
-        .build_block()
-        .with_tag(b"Hello".to_vec())
-        .with_data(b"Tangle".to_vec())
-        .finish()
+        .finish_block_builder(
+            None,
+            Some(Payload::TaggedData(Box::new(
+                TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
+            ))),
+        )
         .await
         .unwrap()
         .id()
@@ -56,7 +56,12 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
     );
 
     // Continue only after funds are received
-    for _ in 0..30 {
+    let mut round = 0;
+    let output_id = loop {
+        round += 1;
+        if round > 30 {
+            panic!("got no funds from faucet")
+        }
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids([
@@ -69,25 +74,11 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
             .unwrap();
 
         if !output_ids_response.items.is_empty() {
-            break;
+            break output_ids_response.items[0];
         }
-    }
+    };
 
-    let block_id = client
-        .build_block()
-        .with_secret_manager(&secret_manager)
-        .with_output_hex(
-            // Send funds back to the sender.
-            &bech32_to_hex(addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
-            // The amount to spend, cannot be zero.
-            1_000_000,
-        )
-        .await
-        .unwrap()
-        .finish()
-        .await
-        .unwrap()
-        .id();
+    let block_id = *client.get_output_metadata(&output_id).await.unwrap().block_id();
 
     let block = client.get_block(&block_id).await.unwrap();
 
@@ -101,47 +92,49 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
     (block_id, transaction_id)
 }
 
-// helper function to get the output id for the first alias output
-fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
-    match payload {
-        Payload::Transaction(tx_payload) => {
-            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
-                if let Output::Alias(_alias_output) = output {
-                    return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
-                }
-            }
-            panic!("No alias output in transaction essence")
-        }
-        _ => panic!("No tx payload"),
-    }
-}
+// TODO uncomment
 
-// helper function to get the output id for the first foundry output
-fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
-    match payload {
-        Payload::Transaction(tx_payload) => {
-            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
-                if let Output::Foundry(_foundry_output) = output {
-                    return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
-                }
-            }
-            panic!("No foundry output in transaction essence")
-        }
-        _ => panic!("No tx payload"),
-    }
-}
+// // helper function to get the output id for the first alias output
+// fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
+//     match payload {
+//         Payload::Transaction(tx_payload) => {
+//             for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
+//                 if let Output::Alias(_alias_output) = output {
+//                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+//                 }
+//             }
+//             panic!("No alias output in transaction essence")
+//         }
+//         _ => panic!("No tx payload"),
+//     }
+// }
 
-// helper function to get the output id for the first NFT output
-fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
-    match payload {
-        Payload::Transaction(tx_payload) => {
-            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
-                if let Output::Nft(_nft_output) = output {
-                    return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
-                }
-            }
-            panic!("No nft output in transaction essence")
-        }
-        _ => panic!("No tx payload"),
-    }
-}
+// // helper function to get the output id for the first foundry output
+// fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
+//     match payload {
+//         Payload::Transaction(tx_payload) => {
+//             for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
+//                 if let Output::Foundry(_foundry_output) = output {
+//                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+//                 }
+//             }
+//             panic!("No foundry output in transaction essence")
+//         }
+//         _ => panic!("No tx payload"),
+//     }
+// }
+
+// // helper function to get the output id for the first NFT output
+// fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
+//     match payload {
+//         Payload::Transaction(tx_payload) => {
+//             for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
+//                 if let Output::Nft(_nft_output) = output {
+//                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+//                 }
+//             }
+//             panic!("No nft output in transaction essence")
+//         }
+//         _ => panic!("No tx payload"),
+//     }
+// }

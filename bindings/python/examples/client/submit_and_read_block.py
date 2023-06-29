@@ -8,7 +8,7 @@
 
 # Import the python iota client
 # Make sure you have first installed it with `pip install iota_sdk`
-from iota_sdk import Client, hex_to_utf8, utf8_to_hex
+from iota_sdk import Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
 from dotenv import load_dotenv
 import os
 
@@ -51,12 +51,11 @@ print(f'  message converted to hex: {message_hex}')
 # Step 2: Submit your block to the Shimmer test network
 ########################################################
 # A block must be built, to which the payload is attached.
-# The build_and_post_block function handles this task.
+# The submit_payload function handles this task.
 
 # Create and post a block with a tagged data payload
 # The client returns your block data (blockIdAndBlock)
-blockIdAndBlock = client.build_and_post_block(
-    secret_manager=None, tag=tag_hex, data=message_hex)
+blockIdAndBlock = client.submit_payload(TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data")))
 
 block_id = blockIdAndBlock[0]
 block = blockIdAndBlock[1]

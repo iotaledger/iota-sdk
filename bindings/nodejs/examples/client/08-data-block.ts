@@ -7,7 +7,6 @@ import {
     initLogger,
     TaggedDataPayload,
     utf8ToHex,
-    Utils,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -26,18 +25,10 @@ async function run() {
         nodes: [process.env.NODE_URL],
     });
 
-    const options = {
-        tag: utf8ToHex('Hello'),
-        data: utf8ToHex('Tangle'),
-    };
     try {
-        const mnemonic = Utils.generateMnemonic();
-        const secretManager = { mnemonic: mnemonic };
-
         // Create block with tagged payload
-        const blockIdAndBlock = await client.buildAndPostBlock(
-            secretManager,
-            options,
+        const blockIdAndBlock = await client.postBlockPayload(
+            new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
 
         console.log(

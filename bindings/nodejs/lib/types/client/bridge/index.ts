@@ -7,13 +7,11 @@ import type {
     __GetOutputMethod__,
     __GetOutputsMethod__,
     __PostBlockMethod__,
-    __BuildAndPostBlockMethod__,
     __GetTipsMethod__,
     __GetNetworkInfoMethod__,
     __GetBlockMethod__,
     __GetBlockMetadataMethod__,
     __FindInputsMethod__,
-    __PrepareTransactionMethod__,
     __SignTransactionMethod__,
     __PostBlockPayloadMethod__,
     __GetNodeMethod__,
@@ -45,7 +43,6 @@ import type {
     __FindBlocksMethod__,
     __RetryMethod__,
     __RetryUntilIncludedMethod__,
-    __ConsolidateFundsMethod__,
     __ReattachMethod__,
     __ReattachUncheckedMethod__,
     __PromoteMethod__,
@@ -68,13 +65,11 @@ export type __ClientMethods__ =
     | __GetBasicOutputIdsMethod__
     | __GetOutputsMethod__
     | __PostBlockMethod__
-    | __BuildAndPostBlockMethod__
     | __GetTipsMethod__
     | __GetNetworkInfoMethod__
     | __GetBlockMethod__
     | __GetBlockMetadataMethod__
     | __FindInputsMethod__
-    | __PrepareTransactionMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__
     | __PostBlockPayloadMethod__
@@ -107,7 +102,6 @@ export type __ClientMethods__ =
     | __FindBlocksMethod__
     | __RetryMethod__
     | __RetryUntilIncludedMethod__
-    | __ConsolidateFundsMethod__
     | __ReattachMethod__
     | __ReattachUncheckedMethod__
     | __PromoteMethod__

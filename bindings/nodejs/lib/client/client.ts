@@ -4,8 +4,6 @@
 import { ClientMethodHandler } from './client-method-handler';
 import {
     IClientOptions,
-    IGenerateAddressesOptions,
-    IBuildBlockOptions,
     QueryParameter,
     PreparedTransactionData,
     INetworkInfo,
@@ -29,6 +27,7 @@ import {
     BasicOutput,
     FoundryOutput,
     NftOutput,
+    Output,
     Block,
     BlockId,
     UnlockCondition,
@@ -125,37 +124,6 @@ export class Client {
         return plainToInstance(OutputResponse, parsed.payload);
     }
 
-    /** Build and post a block */
-    async buildAndPostBlock(
-        secretManager?: SecretManagerType,
-        options?: IBuildBlockOptions,
-    ): Promise<[BlockId, Block]> {
-        if (
-            options &&
-            options.output &&
-            typeof options.output.amount === 'bigint'
-        ) {
-            options.output.amount = options.output.amount.toString(10);
-        }
-        if (
-            options &&
-            options.outputHex &&
-            typeof options.outputHex.amount === 'bigint'
-        ) {
-            options.outputHex.amount = options.outputHex.amount.toString(10);
-        }
-        const response = await this.methodHandler.callMethod({
-            name: 'buildAndPostBlock',
-            data: {
-                secretManager,
-                options,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-
     /**
      * Returns tips that are ideal for attaching a block.
      * The tips can be considered as non-lazy and are therefore ideal for attaching a block.
@@ -228,27 +196,6 @@ export class Client {
 
         const parsed = JSON.parse(response) as Response<UTXOInput[]>;
         return plainToInstance(UTXOInput, parsed.payload);
-    }
-
-    /**
-     * Prepare a transaction for signing
-     */
-    async prepareTransaction(
-        secretManager?: SecretManagerType,
-        options?: IBuildBlockOptions,
-    ): Promise<PreparedTransactionData> {
-        const response = await this.methodHandler.callMethod({
-            name: 'prepareTransaction',
-            data: {
-                secretManager,
-                options,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<PreparedTransactionData>;
-        return plainToInstance(PreparedTransactionData, parsed.payload);
     }
 
     /**
@@ -724,25 +671,6 @@ export class Client {
         });
 
         return arr;
-    }
-
-    /**
-     * Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
-     * Returns the address to which the funds got consolidated, if any were available
-     */
-    async consolidateFunds(
-        secretManager: SecretManagerType,
-        generateAddressesOptions: IGenerateAddressesOptions,
-    ): Promise<string> {
-        const response = await this.methodHandler.callMethod({
-            name: 'consolidateFunds',
-            data: {
-                secretManager,
-                generateAddressesOptions,
-            },
-        });
-
-        return JSON.parse(response).payload;
     }
 
     /**

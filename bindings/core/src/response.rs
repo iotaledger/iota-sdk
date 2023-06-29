@@ -80,10 +80,7 @@ pub enum Response {
     /// - [`GetProtocolParameters`](crate::method::ClientMethod::GetProtocolParameters)
     ProtocolParameters(ProtocolParameters),
     /// Response for:
-    /// - [`PrepareTransaction`](crate::method::ClientMethod::PrepareTransaction)
-    PreparedTransactionData(PreparedTransactionDataDto),
-    /// Response for:
-    /// - [`SignTransaction`](crate::method::ClientMethod::SignTransaction)
+    /// - [`SignTransaction`](crate::method::SecretManagerMethod::SignTransaction)
     SignedTransaction(TransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
@@ -116,7 +113,6 @@ pub enum Response {
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
     Block(BlockDto),
     /// Response for:
-    /// - [`BuildAndPostBlock`](crate::method::ClientMethod::BuildAndPostBlock)
     /// - [`PostBlockPayload`](crate::method::ClientMethod::PostBlockPayload)
     /// - [`Retry`](crate::method::ClientMethod::Retry)
     BlockIdWithBlock(BlockId, BlockDto),
@@ -155,9 +151,6 @@ pub enum Response {
     /// Response for:
     /// - [`RetryUntilIncluded`](crate::method::ClientMethod::RetryUntilIncluded)
     RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
-    /// Response for:
-    /// - [`ConsolidateFunds`](crate::method::ClientMethod::ConsolidateFunds)
-    ConsolidatedFunds(Bech32Address),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInputDto>),

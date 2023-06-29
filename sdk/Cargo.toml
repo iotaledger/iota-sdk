@@ -301,38 +301,6 @@ name = "block_tagged_data"
 path = "examples/client/block/04_block_tagged_data.rs"
 required-features = [ "client" ]
 
-[[example]]
-name = "custom_inputs"
-path = "examples/client/block/custom_inputs.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "output"
-path = "examples/client/block/output.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "transaction"
-path = "examples/client/block/transaction.rs"
-required-features = [ "client" ]
-
-# High Level examples
-
-[[example]]
-name = "address_consolidation"
-path = "examples/client/high_level/consolidation.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "inputs_from_transaction_id"
-path = "examples/client/high_level/inputs_from_transaction_id.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "search_address"
-path = "examples/client/high_level/search_address.rs"
-required-features = [ "client" ]
-
 # Node API core examples
 
 [[example]]
@@ -455,11 +423,6 @@ path = "examples/client/client_config.rs"
 required-features = [ "client" ]
 
 [[example]]
-name = "custom_remainder_address"
-path = "examples/client/custom_remainder_address.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "get_block"
 path = "examples/client/get_block.rs"
 required-features = [ "client" ]
@@ -485,41 +448,6 @@ path = "examples/client/stronghold.rs"
 required-features = [ "client", "stronghold" ]
 
 [[example]]
-name = "0_address_generation"
-path = "examples/client/offline_signing/0_address_generation.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "1_transaction_preparation"
-path = "examples/client/offline_signing/1_transaction_preparation.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "2_transaction_signing"
-path = "examples/client/offline_signing/2_transaction_signing.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "3_send_block"
-path = "examples/client/offline_signing/3_send_block.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "all"
-path = "examples/client/output/all.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "all_automatic_input_selection"
-path = "examples/client/output/all_automatic_input_selection.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "alias"
-path = "examples/client/output/alias.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "build_alias_output"
 path = "examples/client/output/build_alias_output.rs"
 required-features = [ "client" ]
@@ -530,68 +458,8 @@ path = "examples/client/output/build_nft_output.rs"
 required-features = [ "client" ]
 
 [[example]]
-name = "recursive_alias"
-path = "examples/client/output/recursive_alias.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "basic"
-path = "examples/client/output/basic.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "build_basic_output"
 path = "examples/client/output/build_basic_output.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "expiration"
-path = "examples/client/output/expiration.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "foundry"
-path = "examples/client/output/foundry.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "micro_transaction"
-path = "examples/client/output/micro_transaction.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "native_tokens"
-path = "examples/client/output/native_tokens.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "nft"
-path = "examples/client/output/nft.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "participation"
-path = "examples/client/participation.rs"
-required-features = [ "client", "participation" ]
-
-[[example]]
-name = "quorum"
-path = "examples/client/quorum.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "send_all"
-path = "examples/client/send_all.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "client_split_funds"
-path = "examples/client/split_funds.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "tagged_data_to_utf8"
-path = "examples/client/tagged_data_to_utf8.rs"
 required-features = [ "client" ]
 
 ### Wallet

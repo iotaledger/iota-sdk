@@ -5,15 +5,7 @@ use derivative::Derivative;
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::Topic;
 use iota_sdk::{
-    client::{
-        api::{
-            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesOptions as GenerateAddressesOptions,
-            PreparedTransactionDataDto,
-        },
-        node_api::indexer::query_parameters::QueryParameter,
-        node_manager::node::NodeAuth,
-        secret::SecretManagerDto,
-    },
+    client::{node_api::indexer::query_parameters::QueryParameter, node_manager::node::NodeAuth},
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
@@ -27,8 +19,6 @@ use iota_sdk::{
     },
 };
 use serde::{Deserialize, Serialize};
-
-use crate::OmittedDebug;
 
 /// Each public client method.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
@@ -98,15 +88,6 @@ pub enum ClientMethod {
         /// Topics for which listeners should be removed.
         topics: Vec<Topic>,
     },
-    /// Build and post a block
-    #[serde(rename_all = "camelCase")]
-    BuildAndPostBlock {
-        /// Secret manager
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: Option<SecretManagerDto>,
-        /// Options
-        options: Option<BuildBlockOptions>,
-    },
     /// Get a node candidate from the healthy node pool.
     GetNode,
     /// Gets the network related information such as network_id and min_pow_score
@@ -136,24 +117,6 @@ pub enum ClientMethod {
         endpoint: String,
         query_params: Vec<String>,
         request_object: Option<String>,
-    },
-    /// Prepare a transaction for signing
-    #[serde(rename_all = "camelCase")]
-    PrepareTransaction {
-        /// Secret manager
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: Option<SecretManagerDto>,
-        /// Options
-        options: Option<BuildBlockOptions>,
-    },
-    /// Sign a transaction
-    #[serde(rename_all = "camelCase")]
-    SignTransaction {
-        /// Secret manager
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Prepared transaction data
-        prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Build a block containing the specified payload and post it to the network.
     PostBlockPayload {
@@ -321,16 +284,6 @@ pub enum ClientMethod {
         interval: Option<u64>,
         /// Maximum attempts
         max_attempts: Option<u64>,
-    },
-    /// Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
-    /// Returns the address to which the funds got consolidated, if any were available
-    #[serde(rename_all = "camelCase")]
-    ConsolidateFunds {
-        /// Secret manager
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Addresses generation options
-        generate_addresses_options: GenerateAddressesOptions,
     },
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
