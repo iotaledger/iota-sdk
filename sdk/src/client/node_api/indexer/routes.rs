@@ -27,8 +27,9 @@ impl ClientInner {
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
     /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter". Returns Err(Node(NotFound) if not
-    /// results are found.
+    /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter".
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v1/outputs/basic
     pub async fn basic_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
@@ -43,7 +44,7 @@ impl ClientInner {
     /// Get alias outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
-    /// Returns Err(Node(NotFound) if not results are found.
+    /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v1/outputs/alias
     pub async fn alias_output_ids(
         &self,

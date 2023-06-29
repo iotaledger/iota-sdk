@@ -19,8 +19,9 @@ import {
     Output,
     IRent,
     HexEncodedAmount,
+    OutputId,
 } from '../types';
-import { AliasId, BlockId, TokenId } from '../types/block/id';
+import { AliasId, BlockId, FoundryId, TokenId } from '../types/block/id';
 
 /** Utils class for utils. */
 export class Utils {
@@ -64,7 +65,7 @@ export class Utils {
         aliasId: AliasId,
         serialNumber: number,
         tokenSchemeKind: number,
-    ): string {
+    ): FoundryId {
         return callUtilsMethod({
             name: 'computeFoundryId',
             data: {
@@ -107,7 +108,7 @@ export class Utils {
      * @param outputIndex The index of the output.
      * @returns The output id.
      */
-    static computeOutputId(id: TransactionId, index: number): TransactionId {
+    static computeOutputId(id: TransactionId, index: number): OutputId {
         return callUtilsMethod({
             name: 'computeOutputId',
             data: {

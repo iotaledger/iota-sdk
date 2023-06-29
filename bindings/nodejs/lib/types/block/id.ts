@@ -11,3 +11,5 @@ export type AliasId = HexEncodedString;
 export type BlockId = HexEncodedString;
 
 export type TokenId = HexEncodedString;
+
+export type FoundryId = HexEncodedString;

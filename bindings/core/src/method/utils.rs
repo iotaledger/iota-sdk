@@ -103,7 +103,7 @@ pub enum UtilsMethod {
     /// Computes the Foundry ID
     #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
-        /// Alias address
+        /// Alias id
         alias_id: AliasId,
         /// Serial number
         serial_number: u32,
