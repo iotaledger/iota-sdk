@@ -217,11 +217,10 @@ impl SecretManage for LedgerSecretManager {
         let mut unpacker = SliceUnpacker::new(&signature_bytes);
 
         // unpack signature to unlocks
-        match Unlock::unpack::<_, true>(&mut unpacker, &())? {
-            Unlock::Signature(SignatureUnlock(Signature::Ed25519(signature))) => return Ok(signature),
-            // TODO
-            _ => panic!(),
-        }
+        return match Unlock::unpack::<_, true>(&mut unpacker, &())? {
+            Unlock::Signature(SignatureUnlock(Signature::Ed25519(signature))) => Ok(signature),
+            _ => Err(Error::UnsupportedOperation.into()),
+        };
     }
 
     async fn sign_secp256k1_ecdsa(
