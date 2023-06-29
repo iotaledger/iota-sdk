@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SecretManagerType } from '../../secret_manager/secret-manager';
-import type { IGenerateAddressesOptions } from '../generate-addresses-options';
-import type { IBuildBlockOptions } from '../build-block-options';
 import type { Block, BlockId, Payload } from '../../block';
 import type {
     PreparedTransactionData,
@@ -54,14 +52,6 @@ export interface __PostBlockMethod__ {
     };
 }
 
-export interface __BuildAndPostBlockMethod__ {
-    name: 'buildAndPostBlock';
-    data: {
-        secretManager?: SecretManagerType;
-        options?: IBuildBlockOptions;
-    };
-}
-
 export interface __GetTipsMethod__ {
     name: 'getTips';
 }
@@ -97,14 +87,6 @@ export interface __FindOutputsMethod__ {
     data: {
         outputIds: string[];
         addresses: string[];
-    };
-}
-
-export interface __PrepareTransactionMethod__ {
-    name: 'prepareTransaction';
-    data: {
-        secretManager?: SecretManagerType;
-        options?: IBuildBlockOptions;
     };
 }
 
@@ -312,14 +294,6 @@ export interface __RetryUntilIncludedMethod__ {
         blockId: string;
         interval?: number;
         maxAttempts?: number;
-    };
-}
-
-export interface __ConsolidateFundsMethod__ {
-    name: 'consolidateFunds';
-    data: {
-        secretManager: SecretManagerType;
-        generateAddressesOptions: IGenerateAddressesOptions;
     };
 }
 

@@ -27,8 +27,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with the custom payload.
     let block = client
-        .block()
-        .finish_block(Some(Payload::from(tagged_data_payload)))
+        .finish_block_builder(None, Some(Payload::from(tagged_data_payload)))
         .await?;
 
     println!("{block:#?}");

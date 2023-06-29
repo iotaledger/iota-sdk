@@ -1,7 +1,6 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.common import CoinType
@@ -80,15 +79,6 @@ class HighLevelAPI():
             'blockId': block_id,
             'interval': interval,
             'maxAttempts': max_attempts
-        })
-
-    def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions):
-        """Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
-           Returns the address to which the funds got consolidated, if any were available.
-        """
-        return self._call_method('consolidateFunds', {
-            'secretManager': secret_manager,
-            'generateAddressesOptions': generate_addresses_options.as_dict(),
         })
 
     def find_inputs(self, addresses: List[str], amount: int):
