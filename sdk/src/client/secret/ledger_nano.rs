@@ -178,14 +178,14 @@ impl SecretManage for LedgerSecretManager {
         }
 
         let msg = msg.to_vec();
-        let mut input_bip32_indices: Vec<LedgerBIP32Index> = Vec::new();
+        let mut input_bip32_indices = Vec::new();
 
-        let bip32_indices: Vec<u32> = chain
+        let bip32_indices = chain
             .segments()
             .iter()
             // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
             .map(|seg| u32::from_be_bytes(seg.bs()))
-            .collect();
+            .collect::<Vec<_>>();
 
         let coin_type = bip32_indices[1] & !Segment::HARDEN_MASK;
         let account_index = bip32_indices[2] | Segment::HARDEN_MASK;
@@ -237,21 +237,21 @@ impl SecretManage for LedgerSecretManager {
         prepared_transaction: &PreparedTransactionData,
         time: Option<u32>,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
-        let mut input_bip32_indices: Vec<LedgerBIP32Index> = Vec::new();
-        let mut coin_type: Option<u32> = None;
-        let mut account_index: Option<u32> = None;
+        let mut input_bip32_indices = Vec::new();
+        let mut coin_type = None;
+        let mut account_index = None;
 
         let input_len = prepared_transaction.inputs_data.len();
 
         for input in &prepared_transaction.inputs_data {
-            let bip32_indices: Vec<u32> = match &input.chain {
+            let bip32_indices = match &input.chain {
                 Some(chain) => {
                     chain
                         .segments()
                         .iter()
                         // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
                         .map(|seg| u32::from_be_bytes(seg.bs()))
-                        .collect()
+                        .collect::<Vec<_>>()
                 }
                 None => return Err(Error::MissingBip32Chain)?,
             };
@@ -302,14 +302,14 @@ impl SecretManage for LedgerSecretManager {
             let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
                 match &prepared_transaction.remainder {
                     Some(a) => {
-                        let remainder_bip32_indices: Vec<u32> = match &a.chain {
+                        let remainder_bip32_indices = match &a.chain {
                             Some(chain) => {
                                 chain
                                     .segments()
                                     .iter()
                                     // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
                                     .map(|seg| u32::from_be_bytes(seg.bs()))
-                                    .collect()
+                                    .collect::<Vec<_>>()
                             }
                             None => return Err(Error::MissingBip32Chain.into()),
                         };
