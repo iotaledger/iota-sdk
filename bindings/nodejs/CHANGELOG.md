@@ -21,17 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0-rc.2 - 2023-0x-xx
 
-<<<<<<< HEAD
 ### Added
 
 - `Client::destroy` to close an open handle;
-=======
+
 ### Changed
 
 - Rename `Account::prepareMintNativeToken` to `prepareCreateNativeToken`, `Account::prepareIncreaseNativeTokenSupply` to `prepareMintNativeToken`, `Account::prepareDecreaseNativeTokenSupply` to `prepareMeltNativeToken`;
 - Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 - Rename `MintTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding `Data` types);
->>>>>>> develop
 
 ### Fixed
 
