@@ -7,7 +7,9 @@ use iota_sdk::{
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
         protocol::protocol_parameters,
-        rand::{block::rand_block_ids, number::rand_number, parents::rand_parents, payload::rand_tagged_data_payload},
+        rand::{
+            block::rand_block_ids, number::rand_number, parents::rand_strong_parents, payload::rand_tagged_data_payload,
+        },
         Block, BlockBuilder, Error,
     },
 };
@@ -15,7 +17,7 @@ use packable::{error::UnpackError, PackableExt};
 
 #[test]
 fn default_finish_zero_nonce() {
-    let block = BlockBuilder::new(rand_parents()).finish().unwrap();
+    let block = BlockBuilder::new(rand_strong_parents()).finish().unwrap();
 
     assert!(block.nonce() == 0);
 }
@@ -23,7 +25,7 @@ fn default_finish_zero_nonce() {
 #[test]
 fn pow_provider() {
     let min_pow_score = protocol_parameters().min_pow_score();
-    let block = BlockBuilder::new(rand_parents())
+    let block = BlockBuilder::new(rand_strong_parents())
         .finish_nonce(get_miner(min_pow_score))
         .unwrap();
 
@@ -81,7 +83,7 @@ fn unpack_invalid_remaining_bytes() {
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = BlockBuilder::new(rand_parents()).finish().unwrap();
+    let block = BlockBuilder::new(rand_strong_parents()).finish().unwrap();
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -94,7 +96,7 @@ fn pack_unpack_valid() {
 #[test]
 fn getters() {
     let protocol_parameters = protocol_parameters();
-    let parents = rand_parents();
+    let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
     let nonce: u64 = rand_number();
 
@@ -105,15 +107,15 @@ fn getters() {
         .unwrap();
 
     assert_eq!(block.protocol_version(), protocol_parameters.protocol_version());
-    assert_eq!(*block.parents(), parents);
+    assert_eq!(*block.strong_parents(), parents);
     assert_eq!(*block.payload().as_ref().unwrap(), &payload);
     assert_eq!(block.nonce(), nonce);
 }
 
 #[test]
 fn build_into_parents() {
-    let parents = rand_parents();
+    let parents = rand_strong_parents();
     let block = Block::build(parents.clone()).finish().unwrap();
 
-    assert_eq!(block.into_parents(), parents);
+    assert_eq!(block.into_strong_parents(), parents);
 }

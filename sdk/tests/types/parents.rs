@@ -5,23 +5,23 @@ use core::ops::Deref;
 use std::collections::BTreeSet;
 
 use iota_sdk::types::block::{
-    parent::Parents,
+    parent::StrongParents,
     rand::block::{rand_block_id, rand_block_ids},
     BlockId, Error,
 };
-use packable::{bounded::TryIntoBoundedU8Error, error::UnpackError, prefix::VecPrefix, PackableExt};
+use packable::{error::UnpackError, prefix::VecPrefix, PackableExt};
 
 #[test]
 fn len() {
     for i in 1..=8 {
-        assert_eq!(Parents::from_vec(rand_block_ids(i)).unwrap().len(), i);
+        assert_eq!(StrongParents::from_vec(rand_block_ids(i)).unwrap().len(), i);
     }
 }
 
 #[test]
 fn new_valid_iter() {
     let inner = rand_block_ids(8);
-    let parents = Parents::from_vec(inner.clone()).unwrap();
+    let parents = StrongParents::from_vec(inner.clone()).unwrap();
 
     let parents_vec = parents.iter().copied().collect::<Vec<BlockId>>();
 
@@ -31,7 +31,7 @@ fn new_valid_iter() {
 #[test]
 fn new_from_set() {
     let inner = rand_block_ids(8);
-    let parents = Parents::from_set(BTreeSet::from_iter(inner.clone())).unwrap();
+    let parents = StrongParents::from_set(BTreeSet::from_iter(inner.clone())).unwrap();
 
     assert_eq!(*parents.to_vec(), inner);
 }
@@ -39,7 +39,7 @@ fn new_from_set() {
 #[test]
 fn new_valid_deref() {
     let inner = rand_block_ids(8);
-    let parents = Parents::from_vec(inner.clone()).unwrap();
+    let parents = StrongParents::from_vec(inner.clone()).unwrap();
 
     assert_eq!(parents.deref(), &inner.into_boxed_slice());
 }
@@ -49,15 +49,17 @@ fn new_invalid_more_than_max() {
     let mut inner = vec![rand_block_id()];
 
     for _ in 0..8 {
-        Parents::from_vec(inner.clone()).unwrap();
+        StrongParents::from_vec(inner.clone()).unwrap();
         inner.push(rand_block_id());
         inner.sort();
     }
 
-    assert!(matches!(
-        Parents::from_vec(inner),
-        Err(Error::InvalidParentCount(TryIntoBoundedU8Error::Invalid(9)))
-    ));
+    // TODO https://github.com/iotaledger/iota-sdk/issues/647
+    // assert!(matches!(
+    //     Parents::from_vec(inner),
+    //     Err(Error::InvalidParentCount(TryIntoBoundedU8Error::Invalid(9)))
+    // ));
+    assert!(matches!(StrongParents::from_vec(inner), Err(Error::InvalidParentCount)));
 }
 
 #[test]
@@ -66,7 +68,7 @@ fn new_not_sorted() {
     let inner_2 = inner_1.clone();
     inner_1.reverse();
 
-    let parents = Parents::from_vec(inner_1).unwrap();
+    let parents = StrongParents::from_vec(inner_1).unwrap();
 
     assert_eq!(*parents.to_vec(), inner_2);
 }
@@ -77,14 +79,14 @@ fn new_not_unique() {
     let inner_2 = inner_1.clone();
     inner_1.push(*inner_1.last().unwrap());
 
-    let parents = Parents::from_vec(inner_1).unwrap();
+    let parents = StrongParents::from_vec(inner_1).unwrap();
 
     assert_eq!(*parents.to_vec(), inner_2);
 }
 
 #[test]
 fn packed_len() {
-    let parents = Parents::from_vec(rand_block_ids(5)).unwrap();
+    let parents = StrongParents::from_vec(rand_block_ids(5)).unwrap();
 
     assert_eq!(parents.packed_len(), 1 + 5 * 32);
     assert_eq!(parents.pack_to_vec().len(), 1 + 5 * 32);
@@ -92,8 +94,8 @@ fn packed_len() {
 
 #[test]
 fn pack_unpack_valid() {
-    let parents_1 = Parents::from_vec(rand_block_ids(8)).unwrap();
-    let parents_2 = Parents::unpack_verified(parents_1.pack_to_vec().as_slice(), &()).unwrap();
+    let parents_1 = StrongParents::from_vec(rand_block_ids(8)).unwrap();
+    let parents_2 = StrongParents::unpack_verified(parents_1.pack_to_vec().as_slice(), &()).unwrap();
 
     assert_eq!(parents_1, parents_2);
 }
@@ -106,11 +108,16 @@ fn pack_unpack_invalid_less_than_min() {
         145, 50, 168, 233, 176, 12, 164, 138, 207, 22, 96, 82, 189, 64, 188, 130,
     ];
 
+    // TODO https://github.com/iotaledger/iota-sdk/issues/647
+    // assert!(matches!(
+    //     Parents::unpack_verified(bytes.as_slice(), &()),
+    //     Err(UnpackError::Packable(Error::InvalidParentCount(
+    //         TryIntoBoundedU8Error::Invalid(0)
+    //     )))
+    // ));
     assert!(matches!(
-        Parents::unpack_verified(bytes.as_slice(), &()),
-        Err(UnpackError::Packable(Error::InvalidParentCount(
-            TryIntoBoundedU8Error::Invalid(0)
-        )))
+        StrongParents::unpack_verified(bytes.as_slice(), &()),
+        Err(UnpackError::Packable(Error::InvalidParentCount))
     ));
 }
 
@@ -122,11 +129,16 @@ fn pack_unpack_invalid_more_than_max() {
         145, 50, 168, 233, 176, 12, 164, 138, 207, 22, 96, 82, 189, 64, 188, 130,
     ];
 
+    // TODO https://github.com/iotaledger/iota-sdk/issues/647
+    // assert!(matches!(
+    //     Parents::unpack_verified(bytes.as_slice(), &()),
+    //     Err(UnpackError::Packable(Error::InvalidParentCount(
+    //         TryIntoBoundedU8Error::Invalid(9)
+    //     )))
+    // ));
     assert!(matches!(
-        Parents::unpack_verified(bytes.as_slice(), &()),
-        Err(UnpackError::Packable(Error::InvalidParentCount(
-            TryIntoBoundedU8Error::Invalid(9)
-        )))
+        StrongParents::unpack_verified(bytes.as_slice(), &()),
+        Err(UnpackError::Packable(Error::InvalidParentCount))
     ));
 }
 
@@ -137,7 +149,7 @@ fn unpack_invalid_not_sorted() {
     let inner = VecPrefix::<_, u8>::try_from(inner).unwrap();
 
     let packed = inner.pack_to_vec();
-    let parents = Parents::unpack_verified(packed.as_slice(), &());
+    let parents = StrongParents::unpack_verified(packed.as_slice(), &());
 
     assert!(matches!(
         parents,
@@ -152,7 +164,7 @@ fn unpack_invalid_not_unique() {
     let inner = VecPrefix::<_, u8>::try_from(inner).unwrap();
 
     let packed = inner.pack_to_vec();
-    let parents = Parents::unpack_verified(packed.as_slice(), &());
+    let parents = StrongParents::unpack_verified(packed.as_slice(), &());
 
     assert!(matches!(
         parents,
