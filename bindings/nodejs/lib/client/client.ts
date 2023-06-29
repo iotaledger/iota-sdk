@@ -4,8 +4,6 @@
 import { ClientMethodHandler } from './client-method-handler';
 import {
     IClientOptions,
-    IGenerateAddressesOptions,
-    IBuildBlockOptions,
     QueryParameter,
     PreparedTransactionData,
     INetworkInfo,
@@ -122,21 +120,6 @@ export class Client {
         return plainToInstance(OutputResponse, parsed.payload);
     }
 
-    /** Build and post a block */
-    async buildAndPostBlock(
-        secretManager?: SecretManagerType,
-        options?: IBuildBlockOptions,
-    ): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'buildAndPostBlock',
-            data: {
-                secretManager,
-                options,
-            },
-        });
-        return JSON.parse(response).payload;
-    }
-
     /**
      * Returns tips that are ideal for attaching a block.
      * The tips can be considered as non-lazy and are therefore ideal for attaching a block.
@@ -229,27 +212,6 @@ export class Client {
 
         const parsed = JSON.parse(response) as Response<OutputResponse[]>;
         return plainToInstance(OutputResponse, parsed.payload);
-    }
-
-    /**
-     * Prepare a transaction for signing
-     */
-    async prepareTransaction(
-        secretManager?: SecretManagerType,
-        options?: IBuildBlockOptions,
-    ): Promise<PreparedTransactionData> {
-        const response = await this.methodHandler.callMethod({
-            name: 'prepareTransaction',
-            data: {
-                secretManager,
-                options,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<PreparedTransactionData>;
-        return plainToInstance(PreparedTransactionData, parsed.payload);
     }
 
     /**
@@ -713,25 +675,6 @@ export class Client {
                 blockId,
                 interval,
                 maxAttempts,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
-     * Returns the address to which the funds got consolidated, if any were available
-     */
-    async consolidateFunds(
-        secretManager: SecretManagerType,
-        generateAddressesOptions: IGenerateAddressesOptions,
-    ): Promise<string> {
-        const response = await this.methodHandler.callMethod({
-            name: 'consolidateFunds',
-            data: {
-                secretManager,
-                generateAddressesOptions,
             },
         });
 

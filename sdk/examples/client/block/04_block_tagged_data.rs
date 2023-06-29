@@ -10,7 +10,7 @@
 
 use iota_sdk::{
     client::{Client, Result},
-    types::block::payload::Payload,
+    types::block::payload::{Payload, TaggedDataPayload},
 };
 
 #[tokio::main]
@@ -28,10 +28,12 @@ async fn main() -> Result<()> {
 
     // Create and send the block with tag and data.
     let block = client
-        .block()
-        .with_tag(tag.as_bytes().to_vec())
-        .with_data(data.as_bytes().to_vec())
-        .finish()
+        .finish_block_builder(
+            None,
+            Some(Payload::TaggedData(Box::new(
+                TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
+            ))),
+        )
         .await?;
 
     println!("{block:#?}\n");

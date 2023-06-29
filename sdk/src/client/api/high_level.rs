@@ -7,7 +7,7 @@ use futures::{StreamExt, TryStreamExt};
 
 use crate::{
     client::{
-        api::{input_selection::Error as InputSelectionError, ClientBlockBuilder},
+        api::input_selection::Error as InputSelectionError,
         constants::{
             DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL, DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT, FIVE_MINUTES_IN_SECONDS,
         },
@@ -54,11 +54,6 @@ impl Client {
             .collect::<Vec<_>>();
 
         self.get_outputs_with_metadata(&input_ids).await
-    }
-
-    /// A generic send function for easily sending transaction or tagged data blocks.
-    pub fn block(&self) -> ClientBlockBuilder<'_> {
-        ClientBlockBuilder::new(self)
     }
 
     /// Find all blocks by provided block IDs.

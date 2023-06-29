@@ -5,13 +5,12 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client,
     },
     types::block::{
-        address::ToBech32Ext,
         output::OutputId,
-        payload::{transaction::TransactionId, Payload},
+        payload::{transaction::TransactionId, Payload, TaggedDataPayload},
         BlockId,
     },
 };
@@ -26,10 +25,12 @@ async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     client
-        .block()
-        .with_tag(b"Hello".to_vec())
-        .with_data(b"Tangle".to_vec())
-        .finish()
+        .finish_block_builder(
+            None,
+            Some(Payload::TaggedData(Box::new(
+                TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
+            ))),
+        )
         .await
         .unwrap()
         .id()
@@ -59,7 +60,12 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     );
 
     // Continue only after funds are received
-    for _ in 0..30 {
+    let mut round = 0;
+    let output_id = loop {
+        round += 1;
+        if round > 30 {
+            panic!("got no funds from faucet")
+        }
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids([
@@ -72,25 +78,11 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
             .unwrap();
 
         if !output_ids_response.items.is_empty() {
-            break;
+            break output_ids_response.items[0];
         }
-    }
+    };
 
-    let block_id = client
-        .block()
-        .with_secret_manager(&secret_manager)
-        .with_output_hex(
-            // Send funds back to the sender.
-            &bech32_to_hex(addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
-            // The amount to spend, cannot be zero.
-            1_000_000,
-        )
-        .await
-        .unwrap()
-        .finish()
-        .await
-        .unwrap()
-        .id();
+    let block_id = *client.get_output_metadata(&output_id).await.unwrap().block_id();
 
     let block = setup_client_with_node_health_ignored()
         .await

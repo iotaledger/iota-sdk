@@ -8,7 +8,10 @@
 //! cargo run --release --example block_custom_parents
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::parent::Parents,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,7 +28,9 @@ async fn main() -> Result<()> {
     println!("Custom tips:\n{tips:#?}");
 
     // Create and send the block with custom parents.
-    let block = client.block().with_parents(tips)?.finish().await?;
+    let block = client
+        .finish_block_builder(Some(Parents::from_vec(parents)?), None)
+        .await?;
 
     println!("{block:#?}");
 
