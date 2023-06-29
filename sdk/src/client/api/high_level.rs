@@ -16,16 +16,16 @@ use crate::{
         Client,
     },
     types::{
-        api::core::response::LedgerInclusionState,
+        api::core::response::BlockTransactionState,
         block::{
             address::Bech32Address,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
-            output::OutputWithMetadata,
-            parent::Parents,
+            output::{OutputId, OutputWithMetadata},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload,
             },
+            semantic::ConflictReason,
             Block, BlockId,
         },
     },
@@ -63,23 +63,39 @@ impl Client {
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
     }
 
-    /// Retries (promotes or reattaches) a block for provided block id. Block should only be
-    /// retried only if they are valid and haven't been confirmed for a while.
-    pub async fn retry(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
-        // Get the metadata to check if it needs to promote or reattach
-        let block_metadata = self.get_block_metadata(block_id).await?;
-        if block_metadata.should_promote.unwrap_or(false) {
-            self.promote_unchecked(block_id).await
-        } else if block_metadata.should_reattach.unwrap_or(false) {
-            self.reattach_unchecked(block_id).await
+    /// Tries to reissue a block's payload.
+    pub async fn reissue(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
+        let metadata = self.get_block_metadata(block_id).await?;
+
+        if metadata.reissue_payload.unwrap_or(false) {
+            self.reissue_unchecked(block_id).await
         } else {
-            Err(Error::NoNeedPromoteOrReattach(block_id.to_string()))
+            Err(Error::NoNeedToReissue(block_id.to_string()))
         }
+    }
+
+    /// Tries to reissue a block's payload without checking if it should be reissued.
+    pub async fn reissue_unchecked(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
+        // Get the block by the ID.
+        let block = self.get_block(block_id).await?;
+        let reissue_block = self.finish_block_builder(None, block.payload().cloned()).await?;
+
+        // Post the modified
+        let block_id = self.post_block_raw(&reissue_block).await?;
+        // Get block if we use remote Pow, because the node will change parents and nonce
+        let block = if self.get_local_pow().await {
+            reissue_block
+        } else {
+            self.get_block(&block_id).await?
+        };
+
+        Ok((block_id, block))
     }
 
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first position
     /// and additional reattached blocks
+    /// TODO may want to rename this reissue_until_included
     pub async fn retry_until_included(
         &self,
         block_id: &BlockId,
@@ -91,6 +107,7 @@ impl Client {
         let mut block_ids = vec![*block_id];
         // Reattached Blocks that get returned
         let mut blocks_with_id = Vec::new();
+
         for _ in 0..max_attempts.unwrap_or(DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT) {
             #[cfg(target_family = "wasm")]
             gloo_timers::future::TimeoutFuture::new(
@@ -109,41 +126,38 @@ impl Client {
             // Check inclusion state for each attachment
             let block_ids_len = block_ids.len();
             let mut conflicting = false;
+
             for (index, id) in block_ids.clone().iter().enumerate() {
                 let block_metadata = self.get_block_metadata(id).await?;
-                if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
-                    match inclusion_state {
-                        LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
-                            // if original block, request it so we can return it on first position
-                            if id == block_id {
-                                let mut included_and_reattached_blocks =
-                                    vec![(*block_id, self.get_block(block_id).await?)];
-                                included_and_reattached_blocks.extend(blocks_with_id);
-                                return Ok(included_and_reattached_blocks);
-                            } else {
-                                // Move included block to first position
-                                blocks_with_id.rotate_left(index);
-                                return Ok(blocks_with_id);
-                            }
+                if let Some(block_state) = block_metadata.block_state {
+                    if let BlockTransactionState::Finalized = block_state {
+                        // if original block, request it so we can return it on first position
+                        if id == block_id {
+                            let mut included_and_reattached_blocks = vec![(*block_id, self.get_block(block_id).await?)];
+                            included_and_reattached_blocks.extend(blocks_with_id);
+                            return Ok(included_and_reattached_blocks);
+                        } else {
+                            // Move included block to first position
+                            blocks_with_id.rotate_left(index);
+                            return Ok(blocks_with_id);
                         }
-                        // only set it as conflicting here and don't return, because another reattached block could
-                        // have the included transaction
-                        LedgerInclusionState::Conflicting => conflicting = true,
                     };
                 }
+
                 // Only reattach or promote latest attachment of the block
-                if index == block_ids_len - 1 {
-                    if block_metadata.should_promote.unwrap_or(false) {
-                        // Safe to unwrap since we iterate over it
-                        self.promote_unchecked(block_ids.last().unwrap()).await?;
-                    } else if block_metadata.should_reattach.unwrap_or(false) {
-                        // Safe to unwrap since we iterate over it
-                        let reattached = self.reattach_unchecked(block_ids.last().unwrap()).await?;
-                        block_ids.push(reattached.0);
-                        blocks_with_id.push(reattached);
-                    }
+                if index == block_ids_len - 1 && block_metadata.reissue_payload.unwrap_or(false) {
+                    // Safe to unwrap since we iterate over it
+                    let reissued = self.reissue_unchecked(block_ids.last().unwrap()).await?;
+                    block_ids.push(reissued.0);
+                    blocks_with_id.push(reissued);
                 }
+
+                conflicting = block_metadata
+                    .tx_state_reason
+                    .map(|reason| reason != ConflictReason::None)
+                    .unwrap_or(false);
             }
+
             // After we checked all our reattached blocks, check if the transaction got reattached in another block
             // and confirmed
             if conflicting {
@@ -156,6 +170,7 @@ impl Client {
                 }
             }
         }
+
         Err(Error::TangleInclusion(block_id.to_string()))
     }
 
@@ -220,53 +235,32 @@ impl Client {
         Ok(selected_inputs)
     }
 
-    /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
-    /// confirmed for a while.
-    pub async fn reattach(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
-        let metadata = self.get_block_metadata(block_id).await?;
-        if metadata.should_reattach.unwrap_or(false) {
-            self.reattach_unchecked(block_id).await
-        } else {
-            Err(Error::NoNeedPromoteOrReattach(block_id.to_string()))
-        }
-    }
+    /// Find all outputs based on the requests criteria. This method will try to query multiple nodes if
+    /// the request amount exceeds individual node limit.
+    pub async fn find_outputs(
+        &self,
+        output_ids: &[OutputId],
+        addresses: &[Bech32Address],
+    ) -> Result<Vec<OutputWithMetadata>> {
+        let mut output_responses = self.get_outputs_with_metadata(output_ids).await?;
 
-    /// Reattach a block without checking if it should be reattached
-    pub async fn reattach_unchecked(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
-        // Get the Block object by the BlockID.
-        let block = self.get_block(block_id).await?;
-        let reattach_block = self.finish_block_builder(None, block.payload().cloned()).await?;
+        // Use `get_address()` API to get the address outputs first,
+        // then collect the `UtxoInput` in the HashSet.
+        for address in addresses {
+            // Get output ids of outputs that can be controlled by this address without further unlock constraints
+            let output_ids_response = self
+                .basic_output_ids([
+                    QueryParameter::Address(*address),
+                    QueryParameter::HasExpiration(false),
+                    QueryParameter::HasTimelock(false),
+                    QueryParameter::HasStorageDepositReturn(false),
+                ])
+                .await?;
 
-        // Post the modified
-        let block_id = self.post_block_raw(&reattach_block).await?;
-
-        Ok((block_id, reattach_block))
-    }
-
-    /// Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
-    /// method should error out and should not allow unnecessary promotions.
-    pub async fn promote(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
-        let metadata = self.get_block_metadata(block_id).await?;
-        if metadata.should_promote.unwrap_or(false) {
-            self.promote_unchecked(block_id).await
-        } else {
-            Err(Error::NoNeedPromoteOrReattach(block_id.to_string()))
-        }
-    }
-
-    /// Promote a block without checking if it should be promoted
-    pub async fn promote_unchecked(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
-        // Create a new block (zero value block) for which one tip would be the actual block.
-        let mut tips = self.get_tips().await?;
-        if let Some(tip) = tips.first_mut() {
-            *tip = *block_id;
+            output_responses.extend(self.get_outputs_with_metadata(&output_ids_response.items).await?);
         }
 
-        let promote_block = self.finish_block_builder(Some(Parents::from_vec(tips)?), None).await?;
-
-        let block_id = self.post_block_raw(&promote_block).await?;
-
-        Ok((block_id, promote_block))
+        Ok(output_responses.clone())
     }
 
     /// Returns the local time checked with the timestamp of the latest milestone, if the difference is larger than 5
