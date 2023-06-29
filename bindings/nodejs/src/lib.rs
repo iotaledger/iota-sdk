@@ -50,6 +50,7 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     // Client
     cx.export_function("callClientMethod", client::call_client_method)?;
     cx.export_function("createClient", client::create_client)?;
+    cx.export_function("destroyClient", client::destroy_client)?;
     // MQTT
     cx.export_function("listenMqtt", client::listen_mqtt)?;
 

@@ -18,6 +18,7 @@ const {
     initLogger,
     callClientMethod,
     createClient,
+    destroyClient,
     listenMqtt,
     callWalletMethod,
     createWallet,
@@ -101,6 +102,7 @@ const callWalletMethodAsync = (
 export {
     initLogger,
     createClient,
+    destroyClient,
     createSecretManager,
     createWallet,
     callClientMethodAsync,
