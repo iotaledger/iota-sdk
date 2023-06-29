@@ -7,7 +7,7 @@
 
 use iota_sdk::{
     client::{Client, Result},
-    types::block::parent::Parents,
+    types::block::parent::StrongParents,
 };
 
 #[tokio::main]
@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with custom parents.
     let block = client
-        .finish_block_builder(Some(Parents::from_vec(parents)?), None)
+        .finish_block_builder(Some(StrongParents::from_vec(parents)?), None)
         .await?;
 
     println!("{block:#?}");
