@@ -172,6 +172,7 @@ impl SecretManage for LedgerSecretManager {
         Err(Error::UnsupportedOperation.into())
     }
 
+    /// Ledger only allows signing messages of 32 bytes, anything else is unsupported and will result in an error.
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         if msg.len() != 32 {
             return Err(Error::UnsupportedOperation.into());
