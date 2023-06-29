@@ -178,45 +178,45 @@ impl SecretManage for LedgerSecretManager {
         }
 
         let msg = msg.to_vec();
-        let mut input_bip32_indices = Vec::new();
 
-        let bip32_indices = chain
+        let bip32_chain = chain
             .segments()
             .iter()
             // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
             .map(|seg| u32::from_be_bytes(seg.bs()))
             .collect::<Vec<_>>();
 
-        let coin_type = bip32_indices[1] & !Segment::HARDEN_MASK;
-        let account_index = bip32_indices[2] | Segment::HARDEN_MASK;
-        input_bip32_indices.push(LedgerBIP32Index {
-            bip32_change: bip32_indices[3] | Segment::HARDEN_MASK,
-            bip32_index: bip32_indices[4] | Segment::HARDEN_MASK,
-        });
+        let coin_type = bip32_chain[1] & !Segment::HARDEN_MASK;
+        let account_index = bip32_chain[2] | Segment::HARDEN_MASK;
+        let bip32_index = LedgerBIP32Index {
+            bip32_change: bip32_chain[3] | Segment::HARDEN_MASK,
+            bip32_index: bip32_chain[4] | Segment::HARDEN_MASK,
+        };
 
-        // lock the mutex to prevent multiple simultaneous requests to a ledger
+        // Lock the mutex to prevent multiple simultaneous requests to a ledger.
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, account_index, self.is_simulator).map_err(Error::from)?;
 
         log::debug!("[LEDGER] prepare_blind_signing");
-        log::debug!("[LEDGER] {:?} {:?}", input_bip32_indices, msg);
+        log::debug!("[LEDGER] {:?} {:?}", bip32_index, msg);
         ledger
-            .prepare_blind_signing(input_bip32_indices, msg)
+            .prepare_blind_signing(vec![bip32_index], msg)
             .map_err(Error::from)?;
 
-        // show essence to user
-        // if denied by user, it returns with `DeniedByUser` Error
+        // Show essence to user, if denied by user, it returns with `DeniedByUser` Error.
         log::debug!("[LEDGER] await user confirmation");
         ledger.user_confirm().map_err(Error::from)?;
 
-        // sign
+        // Sign.
         let signature_bytes = ledger.sign(1).map_err(Error::from)?;
+
         drop(ledger);
         drop(lock);
+
         let mut unpacker = SliceUnpacker::new(&signature_bytes);
 
-        // unpack signature to unlocks
+        // Unpack and return signature.
         return match Unlock::unpack::<_, true>(&mut unpacker, &())? {
             Unlock::Signature(SignatureUnlock(Signature::Ed25519(signature))) => Ok(signature),
             _ => Err(Error::UnsupportedOperation.into()),
