@@ -142,7 +142,7 @@ impl ClientInner {
     }
 
     /// Finds a block by its ID and returns it as object.
-    /// GET /api/core/v3/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{blockId}
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
@@ -160,7 +160,7 @@ impl ClientInner {
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
-    /// GET /api/core/v3/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{blockId}
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
@@ -225,7 +225,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the block that was included in the ledger for a given transaction ID, as object.
+    /// Returns the earliest block containing the transaction that get confirmed, as object.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -243,7 +243,7 @@ impl ClientInner {
         )?)
     }
 
-    /// Returns the block that was included in the ledger for a given transaction ID, as object, as raw bytes.
+    /// Returns the earliest block containing the transaction that get confirmed, as raw bytes.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
