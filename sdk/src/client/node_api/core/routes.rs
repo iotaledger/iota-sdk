@@ -16,6 +16,7 @@ use crate::{
     types::{
         api::core::response::{
             BlockMetadataResponse, InfoResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
+            UtxoChangesResponse,
         },
         block::{
             output::{
@@ -365,9 +366,24 @@ impl ClientInner {
             .await
     }
 
+    /// Get all UTXO changes of a given slot by slot commitment ID.
+    /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes
+    pub async fn get_utxo_changes_by_slot_commitment_id(
+        &self,
+        slot_commitment_id: &SlotCommitmentId,
+    ) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
     /// Finds a slot commitment by slot index and returns it as object.
     /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index(&self, slot_index: &SlotIndex) -> Result<SlotCommitment> {
+    pub async fn get_slot_commitment_by_index(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
         self.node_manager
@@ -379,13 +395,25 @@ impl ClientInner {
 
     /// Finds a slot commitment by slot index and returns it as raw bytes.
     /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: &SlotIndex) -> Result<Vec<u8>> {
+    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
         self.node_manager
             .read()
             .await
             .get_request_bytes(path, None, self.get_timeout().await)
+            .await
+    }
+
+    /// Get all UTXO changes of a given slot by its index.
+    /// GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+    pub async fn get_utxo_changes_by_slot_index(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/by-index/{slot_index}/utxo-changes");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
