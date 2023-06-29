@@ -10,7 +10,7 @@
 
 use iota_sdk::client::{
     api::{search_address, GetAddressesOptions},
-    constants::IOTA_COIN_TYPE,
+    constants::SHIMMER_COIN_TYPE,
     secret::SecretManager,
     Client, Result,
 };
@@ -42,17 +42,16 @@ async fn main() -> Result<()> {
     let address_range_len = args.next().map(|s| s.parse::<u32>().unwrap()).unwrap_or(10);
     let address_range = address_range_start..address_range_start + address_range_len;
 
-    // FIXME: doesn't work?
-    let res = search_address(
+    let (address_index, is_internal) = search_address(
         &secret_manager,
         client.get_bech32_hrp().await?,
-        IOTA_COIN_TYPE,
+        SHIMMER_COIN_TYPE,
         0,
         address_range,
         &address.into(),
     )
     .await?;
-    println!("Address index: {}\nIs internal address: {}", res.0, res.1);
+    println!("Address index: {address_index}\nIs internal address: {is_internal}");
 
     Ok(())
 }
