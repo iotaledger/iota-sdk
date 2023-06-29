@@ -14,7 +14,7 @@ use iota_sdk::{
         Error,
     },
     wallet::account::{
-        types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
+        types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions,
     },
 };
 use primitive_types::U256;
@@ -143,13 +143,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareDecreaseNativeTokenSupply {
+        AccountMethod::PrepareMeltNativeToken {
             token_id,
             melt_amount,
             options,
         } => {
             let data = account
-                .prepare_decrease_native_token_supply(
+                .prepare_melt_native_token(
                     token_id,
                     U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
@@ -166,19 +166,19 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareIncreaseNativeTokenSupply {
+        AccountMethod::PrepareMintNativeToken {
             token_id,
             mint_amount,
             options,
         } => {
             let data = account
-                .prepare_increase_native_token_supply(
+                .prepare_mint_native_token(
                     token_id,
                     U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
         AccountMethod::PrepareIncreaseVotingPower { amount } => {
@@ -195,11 +195,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareMintNativeToken { params, options } => {
+        AccountMethod::PrepareCreateNativeToken { params, options } => {
             let data = account
-                .prepare_mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .prepare_create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
-            Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
+            Response::PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareOutput {
             params,

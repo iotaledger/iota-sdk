@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-pub(crate) mod decrease_native_token_supply;
+pub(crate) mod melt_native_token;
 
 impl Account {
     /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.

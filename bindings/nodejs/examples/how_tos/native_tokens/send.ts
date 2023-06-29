@@ -17,7 +17,7 @@ const RECV_ADDRESS =
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/07-send-native-tokens.ts
+// yarn run-example ./how_tos/native_tokens/send.ts
 async function run() {
     try {
         // Create the wallet

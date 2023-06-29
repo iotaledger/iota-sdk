@@ -10,7 +10,7 @@ import { getUnlockedWallet } from '../../wallet/common';
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/15-destroy-foundry.ts
+// yarn run-example ./how_tos/native_tokens/destroy-foundry.ts
 async function run() {
     try {
         // Create the wallet
@@ -25,6 +25,7 @@ async function run() {
         if (balance.foundries.length == 0) {
             throw new Error(`No Foundry available in account 'Alice'`);
         }
+
         // We try to destroy the first foundry in the account
         const foundry = balance.foundries[0];
 

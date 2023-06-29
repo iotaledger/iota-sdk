@@ -3,16 +3,16 @@
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The amount of native tokens to mint, 10 hex encoded.
-const MINT_AMOUNT = '0xA';
+// The amount of native tokens to melt, 10 hex encoded. TODO Convert to int
+const MELT_AMOUNT = '0xA';
 
-// In this example we will mint an existing native token with its foundry.
+// In this example we will melt an existing native token with its foundry.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./how_tos/native_tokens/mint.ts
+// yarn run-example ./how_tos/native_tokens/melt.ts
 async function run() {
     try {
         // Create the wallet
@@ -40,11 +40,11 @@ async function run() {
             );
         }
 
-        console.log(`Balance before minting:`, parseInt(token.available));
+        console.log(`Balance before melting:`, parseInt(token.available));
 
-        // Mint some more native tokens
+        // Melt some of the circulating supply
         const transaction = await account
-            .prepareMintNativeToken(token.tokenId, MINT_AMOUNT)
+            .prepareMeltNativeToken(token.tokenId, MELT_AMOUNT)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -67,7 +67,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-        console.log(`Balance after minting:`, parseInt(token.available));
+        console.log(`Balance after melting:`, parseInt(token.available));
     } catch (error) {
         console.log('Error: ', error);
     }

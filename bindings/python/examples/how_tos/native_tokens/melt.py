@@ -1,10 +1,11 @@
-from iota_sdk import Wallet
+from iota_sdk import Wallet, HexStr
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
-# In this example we will mint native tokens
+# In this example we will decrease the native token supply
 
 wallet = Wallet('./alice-database')
 
@@ -17,17 +18,17 @@ balance = account.sync()
 token_id = balance['foundries'][0]
 
 available_balance = int([native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token_id][0]['available'], 0)
-print(f'Balance before minting: {available_balance}')
+print(f'Balance before melting: {available_balance}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-mint_amount = 10
+melt_amount = 10
 
-# Prepare and send transaction.
-transaction = account.prepare_mint_native_token(token_id, mint_amount).send()
+# Send transaction.
+transaction = account.prepare_melt_native_token(token_id, melt_amount).send()
 print(f'Transaction sent: {transaction["transactionId"]}')
 
 # Wait for transaction to get included
@@ -36,4 +37,4 @@ print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 balance = account.sync()
 available_balance = int([native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token_id][0]['available'], 0)
-print(f'Balance after minting: {available_balance}')
+print(f'Balance after melting: {available_balance}')

@@ -1,5 +1,5 @@
 /**
- * This example will burn native tokens
+ * This example will melt native tokens
  */
 const getUnlockedManager = require('./account-manager');
 
@@ -14,11 +14,11 @@ async function run() {
         // Get a tokenId from your account balance after running example
         // 22-create-native-token.js
         let tokenId =
-            '0x08e81324605a946192ad414cf10da992ba5b97001ed4242de084e72cf19a924f7b0100000000';
+            '0x08e6210d29881310db2afde095e594f6f006fcdbd06e7a83b74bd2bdf3b5190d0e0200000000';
         // `100` hex encoded
-        let burnAmount = "0x64"
+        let meltAmount = "0xc8"
 
-        const response = await account.burnNativeToken(tokenId, burnAmount);
+        const response = await account.meltNativeToken(tokenId, meltAmount);
 
         console.log(response);
 

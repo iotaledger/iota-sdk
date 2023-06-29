@@ -10,7 +10,7 @@ export * from './event';
 export * from './output';
 export * from './output-params';
 export * from './participation';
-export * from './prepared-mint-token-transaction';
+export * from './prepared-create-token-transaction';
 export * from './prepared-transaction';
 export * from './signed-transaction-essence';
 export * from './transaction';

@@ -15,7 +15,7 @@ import {
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     MintNftParams,
     OutputData,
     OutputParams,
@@ -40,7 +40,7 @@ import {
     INode,
     Burn,
     PreparedTransactionData,
-    PreparedMintTokenTransactionData,
+    PreparedCreateNativeTokenTransactionData,
 } from '../client';
 import {
     AliasOutput,
@@ -50,7 +50,7 @@ import {
     BasicOutput,
     FoundryOutput,
     Response,
-    PreparedMintTokenTransaction,
+    PreparedCreateNativeTokenTransaction,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 
@@ -313,7 +313,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async prepareDecreaseNativeTokenSupply(
+    async prepareMeltNativeToken(
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -321,7 +321,7 @@ export class Account {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareDecreaseNativeTokenSupply',
+                name: 'prepareMeltNativeToken',
                 data: {
                     tokenId,
                     meltAmount,
@@ -749,22 +749,22 @@ export class Account {
     }
 
     /**
-     * Mint more native tokens.
+     * Mint additional native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction and the token ID.
+     * @returns The minting transaction.
      */
-    async prepareIncreaseNativeTokenSupply(
+    async prepareMintNativeToken(
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransaction> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareIncreaseNativeTokenSupply',
+                name: 'prepareMintNativeToken',
                 data: {
                     tokenId,
                     mintAmount,
@@ -775,28 +775,28 @@ export class Account {
 
         const parsed = JSON.parse(
             response,
-        ) as Response<PreparedMintTokenTransactionData>;
-        return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
 
     /**
-     * Mint native tokens.
-     * @param params The options for minting tokens.
+     * Create a native token.
+     * @param params The options for creating a native token.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction and the token ID.
+     * @returns The creating transaction and the token ID.
      */
-    async prepareMintNativeToken(
-        params: MintNativeTokenParams,
+    async prepareCreateNativeToken(
+        params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransaction> {
+    ): Promise<PreparedCreateNativeTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareMintNativeToken',
+                name: 'prepareCreateNativeToken',
                 data: {
                     params: params,
                     options: transactionOptions,
@@ -806,9 +806,12 @@ export class Account {
 
         const parsed = JSON.parse(
             response,
-        ) as Response<PreparedMintTokenTransactionData>;
-        return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
+        ) as Response<PreparedCreateNativeTokenTransactionData>;
+        return new PreparedCreateNativeTokenTransaction(
+            plainToInstance(
+                PreparedCreateNativeTokenTransactionData,
+                parsed.payload,
+            ),
             this,
         );
     }

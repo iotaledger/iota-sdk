@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will mint an existing native token with its foundry.
+//! In this example we will melt an existing native token with its foundry.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
@@ -13,13 +13,13 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_native_token [TOKEN_ID]
+//! cargo run --release --all-features --example melt_native_token [TOKEN_ID]
 //! ```
 
 use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
 
-// The amount of native tokens to mint
-const MINT_AMOUNT: u64 = 10;
+// The amount of native tokens to melt
+const MELT_AMOUNT: u64 = 10;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .find(|native_token| native_token.token_id() == &token_id)
     {
         let available_balance = native_token_balance.available();
-        println!("Balance before minting: {available_balance}");
+        println!("Balance before melting: {available_balance}");
     } else {
         println!("Couldn't find native token '{token_id}' in the account");
         return Ok(());
@@ -58,9 +58,9 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Mint some more native tokens
-    let mint_amount = U256::from(MINT_AMOUNT);
-    let transaction = account.mint_native_token(token_id, mint_amount, None).await?;
+    // Melt some of the circulating supply
+    let melt_amount = U256::from(MELT_AMOUNT);
+    let transaction = account.melt_native_token(token_id, melt_amount, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
         .find(|t| t.token_id() == &token_id)
         .unwrap()
         .available();
-    println!("Balance after minting: {available_balance:?}",);
+    println!("Balance after melting: {available_balance}",);
 
     Ok(())
 }
