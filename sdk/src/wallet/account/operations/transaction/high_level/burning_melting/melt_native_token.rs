@@ -47,7 +47,7 @@ where
         log::debug!("[TRANSACTION] prepare_melt_native_token");
 
         let foundry_id = FoundryId::from(token_id);
-        let account_id = *foundry_id.alias_address().account_id();
+        let account_id = *foundry_id.account_address().account_id();
         let token_supply = self.client().get_token_supply().await?;
 
         let (existing_alias_output_data, existing_foundry_output) = self

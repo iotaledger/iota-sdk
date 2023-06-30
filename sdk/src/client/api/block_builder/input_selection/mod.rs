@@ -82,8 +82,8 @@ impl InputSelection {
                     Ok(None)
                 }
             }
-            Address::Account(alias_address) => Ok(Some(Requirement::Account(
-                *alias_address.account_id(),
+            Address::Account(account_address) => Ok(Some(Requirement::Account(
+                *account_address.account_id(),
                 AccountTransition::State,
             ))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),

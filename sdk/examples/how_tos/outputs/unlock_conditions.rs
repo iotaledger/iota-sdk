@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     let rent_structure = client.get_rent_structure().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
-    let alias_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
+    let account_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
 
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(U256::from(50), U256::from(0), U256::from(100))?);
 
@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with immutable alias unlock condition
         foundry_output_builder
-            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(*alias_address.as_alias()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(*account_address.as_alias()))
             .finish_output(token_supply)?,
     ];
 

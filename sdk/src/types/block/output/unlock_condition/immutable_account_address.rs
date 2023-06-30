@@ -11,7 +11,7 @@ use crate::types::block::{
 /// Defines the permanent [`AccountAddress`] that owns this output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ImmutableAccountAddressUnlockCondition(#[packable(verify_with = verify_alias_address)] Address);
+pub struct ImmutableAccountAddressUnlockCondition(#[packable(verify_with = verify_account_address)] Address);
 
 impl ImmutableAccountAddressUnlockCondition {
     /// The [`UnlockCondition`](crate::types::block::output::UnlockCondition) kind of an
@@ -34,13 +34,13 @@ impl ImmutableAccountAddressUnlockCondition {
     }
 
     /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
-    pub fn alias_address(&self) -> &AccountAddress {
+    pub fn account_address(&self) -> &AccountAddress {
         // It has already been validated at construction that the address is an `AccountAddress`.
         self.0.as_alias()
     }
 }
 
-fn verify_alias_address<const VERIFY: bool>(address: &Address, _: &()) -> Result<(), Error> {
+fn verify_account_address<const VERIFY: bool>(address: &Address, _: &()) -> Result<(), Error> {
     if VERIFY && !address.is_alias() {
         Err(Error::InvalidAddressKind(address.kind()))
     } else {
@@ -81,8 +81,8 @@ pub mod dto {
                 .map_err(|_e| Error::InvalidField("immutableAccountAddressUnlockCondition"))?;
 
             // An ImmutableAccountAddressUnlockCondition must have an AccountAddress.
-            if let Address::Account(alias_address) = address {
-                Ok(Self::new(alias_address))
+            if let Address::Account(account_address) = address {
+                Ok(Self::new(account_address))
             } else {
                 Err(Error::InvalidField("immutableAccountAddressUnlockCondition"))
             }

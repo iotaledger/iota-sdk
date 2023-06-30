@@ -116,7 +116,7 @@ impl InputSelection {
                     }
 
                     let requirement =
-                        Requirement::Account(*foundry_output.alias_address().account_id(), AccountTransition::State);
+                        Requirement::Account(*foundry_output.account_address().account_id(), AccountTransition::State);
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
 

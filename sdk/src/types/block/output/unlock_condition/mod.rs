@@ -104,7 +104,7 @@ impl UnlockCondition {
             Self::Expiration(_) => UnlockConditionFlags::EXPIRATION,
             Self::StateControllerAddress(_) => UnlockConditionFlags::STATE_CONTROLLER_ADDRESS,
             Self::GovernorAddress(_) => UnlockConditionFlags::GOVERNOR_ADDRESS,
-            Self::ImmutableAccountAddress(_) => UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS,
+            Self::ImmutableAccountAddress(_) => UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS,
         }
     }
 }
@@ -120,7 +120,7 @@ create_bitflags!(
         (EXPIRATION, ExpirationUnlockCondition),
         (STATE_CONTROLLER_ADDRESS, StateControllerAddressUnlockCondition),
         (GOVERNOR_ADDRESS, GovernorAddressUnlockCondition),
-        (IMMUTABLE_ALIAS_ADDRESS, ImmutableAccountAddressUnlockCondition),
+        (IMMUTABLE_ACCOUNT_ADDRESS, ImmutableAccountAddressUnlockCondition),
     ]
 );
 
@@ -418,7 +418,7 @@ mod test {
                 UnlockConditionFlags::EXPIRATION,
                 UnlockConditionFlags::STATE_CONTROLLER_ADDRESS,
                 UnlockConditionFlags::GOVERNOR_ADDRESS,
-                UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS
+                UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS
             ]
         );
     }

@@ -21,12 +21,12 @@ impl From<TokenId> for FoundryId {
 
 impl FoundryId {
     /// Builds a new [`FoundryId`] from its components.
-    pub fn build(alias_address: &AccountAddress, serial_number: u32, token_scheme_kind: u8) -> Self {
+    pub fn build(account_address: &AccountAddress, serial_number: u32, token_scheme_kind: u8) -> Self {
         let mut bytes = [0u8; Self::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
 
         // PANIC: packing to an array of the correct length can't fail.
-        Address::Account(*alias_address).pack(&mut packer).unwrap();
+        Address::Account(*account_address).pack(&mut packer).unwrap();
         serial_number.pack(&mut packer).unwrap();
         token_scheme_kind.pack(&mut packer).unwrap();
 
@@ -34,7 +34,7 @@ impl FoundryId {
     }
 
     /// Returns the [`AccountAddress`] of the [`FoundryId`].
-    pub fn alias_address(&self) -> AccountAddress {
+    pub fn account_address(&self) -> AccountAddress {
         // PANIC: the lengths are known.
         AccountAddress::from(AccountId::new(self.0[1..AccountId::LENGTH + 1].try_into().unwrap()))
     }

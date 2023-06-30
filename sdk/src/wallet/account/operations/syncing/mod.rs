@@ -215,10 +215,10 @@ where
             for output_data in new_outputs_data.iter() {
                 match &output_data.output {
                     Output::Account(alias_output) => {
-                        let alias_address =
+                        let account_address =
                             AccountAddress::from(alias_output.account_id_non_null(&output_data.output_id));
 
-                        new_alias_and_nft_addresses.insert(Address::Account(alias_address), output_data.address);
+                        new_alias_and_nft_addresses.insert(Address::Account(account_address), output_data.address);
                     }
                     Output::Nft(nft_output) => {
                         let nft_address = NftAddress::from(nft_output.nft_id_non_null(&output_data.output_id));

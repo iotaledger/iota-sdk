@@ -42,43 +42,43 @@ fn is_methods() {
 
 #[test]
 fn as_methods() {
-    let alias_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let address = Address::from(alias_address);
+    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
+    let address = Address::from(account_address);
 
     assert!(std::panic::catch_unwind(|| address.as_ed25519()).is_err());
-    assert_eq!(address.as_alias(), &alias_address);
+    assert_eq!(address.as_alias(), &account_address);
     assert!(std::panic::catch_unwind(|| address.as_nft()).is_err());
 }
 
 #[test]
 fn new_account_id() {
     let account_id = AccountId::from_str(ACCOUNT_ID).unwrap();
-    let alias_address = AccountAddress::new(account_id);
+    let account_address = AccountAddress::new(account_id);
 
-    assert_eq!(alias_address.account_id(), &account_id);
+    assert_eq!(account_address.account_id(), &account_id);
 }
 
 #[test]
 fn new_into_account_id() {
     let account_id = AccountId::from_str(ACCOUNT_ID).unwrap();
-    let alias_address = AccountAddress::new(account_id);
+    let account_address = AccountAddress::new(account_id);
 
-    assert_eq!(alias_address.into_account_id(), account_id);
+    assert_eq!(account_address.into_account_id(), account_id);
 }
 
 #[test]
 fn from_str_to_str() {
-    let alias_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
+    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
 
-    assert_eq!(alias_address.to_string(), ACCOUNT_ID);
+    assert_eq!(account_address.to_string(), ACCOUNT_ID);
 }
 
 #[test]
 fn debug() {
-    let alias_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
+    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
 
     assert_eq!(
-        format!("{alias_address:?}"),
+        format!("{account_address:?}"),
         "AccountAddress(0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee)"
     );
 }
@@ -103,13 +103,13 @@ fn bech32_roundtrip() {
 
 #[test]
 fn dto_fields() {
-    let alias_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let alias_dto = AccountAddressDto::from(&alias_address);
+    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
+    let alias_dto = AccountAddressDto::from(&account_address);
 
     assert_eq!(alias_dto.kind, AccountAddress::KIND);
     assert_eq!(alias_dto.account_id, ACCOUNT_ID.to_string());
 
-    let address = Address::from(alias_address);
+    let address = Address::from(account_address);
     let dto = AddressDto::from(&address);
 
     assert_eq!(dto, AddressDto::Account(alias_dto));
@@ -117,12 +117,12 @@ fn dto_fields() {
 
 #[test]
 fn dto_roundtrip() {
-    let alias_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let alias_dto = AccountAddressDto::from(&alias_address);
+    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
+    let alias_dto = AccountAddressDto::from(&account_address);
 
-    assert_eq!(AccountAddress::try_from(alias_dto).unwrap(), alias_address);
+    assert_eq!(AccountAddress::try_from(alias_dto).unwrap(), account_address);
 
-    let address = Address::from(alias_address);
+    let address = Address::from(account_address);
     let dto = AddressDto::from(&address);
 
     assert_eq!(Address::try_from(dto).unwrap(), address);

@@ -1170,7 +1170,7 @@ fn alias_burn_should_not_validate_alias_sender() {
 }
 
 #[test]
-fn alias_burn_should_not_validate_alias_address() {
+fn alias_burn_should_not_validate_account_address() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1260,7 +1260,7 @@ fn alias_governance_transition_should_not_validate_alias_sender() {
 }
 
 #[test]
-fn alias_governance_transition_should_not_validate_alias_address() {
+fn alias_governance_transition_should_not_validate_account_address() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 

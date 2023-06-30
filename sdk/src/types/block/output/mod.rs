@@ -295,7 +295,7 @@ impl Output {
                     // Account address is only unlocked if it's a state transition
                     Ok((
                         *output.state_controller_address(),
-                        Some(Address::Account(output.alias_address(output_id))),
+                        Some(Address::Account(output.account_address(output_id))),
                     ))
                 } else {
                     Ok((*output.governor_address(), None))
@@ -313,7 +313,7 @@ impl Output {
                     .locked_address(output.address(), current_time),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
-            Self::Foundry(output) => Ok((Address::Account(*output.alias_address()), None)),
+            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
         }
     }
 

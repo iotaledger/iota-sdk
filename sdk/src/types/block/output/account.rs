@@ -458,7 +458,7 @@ impl AccountOutput {
     }
 
     /// Returns the account address for this output.
-    pub fn alias_address(&self, output_id: &OutputId) -> AccountAddress {
+    pub fn account_address(&self, output_id: &OutputId) -> AccountAddress {
         AccountAddress::new(self.account_id_non_null(output_id))
     }
 
@@ -520,7 +520,7 @@ impl AccountOutput {
 
             let created_foundries = outputs.iter().filter_map(|output| {
                 if let Output::Foundry(foundry) = output {
-                    if foundry.alias_address().account_id() == &next_state.account_id
+                    if foundry.account_address().account_id() == &next_state.account_id
                         && !input_chains.contains_key(&foundry.chain_id())
                     {
                         Some(foundry)
@@ -680,8 +680,8 @@ fn verify_index_counter(account_id: &AccountId, state_index: u32, foundry_counte
 
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
-        if let Address::Account(alias_address) = unlock_condition.address() {
-            if alias_address.account_id() == account_id {
+        if let Address::Account(account_address) = unlock_condition.address() {
+            if account_address.account_id() == account_id {
                 return Err(Error::SelfControlledAccountOutput(*account_id));
             }
         }
@@ -690,8 +690,8 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     }
 
     if let Some(unlock_condition) = unlock_conditions.governor_address() {
-        if let Address::Account(alias_address) = unlock_condition.address() {
-            if alias_address.account_id() == account_id {
+        if let Address::Account(account_address) = unlock_condition.address() {
+            if account_address.account_id() == account_id {
                 return Err(Error::SelfControlledAccountOutput(*account_id));
             }
         }

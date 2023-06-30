@@ -99,7 +99,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
         /// Account address
-        alias_address: AccountAddress,
+        account_address: AccountAddress,
         /// Serial number
         serial_number: u32,
         /// Token scheme kind

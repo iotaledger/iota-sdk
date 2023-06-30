@@ -478,7 +478,7 @@ where
         // that have the corresponding alias or nft address in their unlock condition
         match &input.output {
             Output::Account(alias_output) => block_indexes.insert(
-                Address::Account(alias_output.alias_address(input.output_id())),
+                Address::Account(alias_output.account_address(input.output_id())),
                 current_block_index,
             ),
             Output::Nft(nft_output) => block_indexes.insert(

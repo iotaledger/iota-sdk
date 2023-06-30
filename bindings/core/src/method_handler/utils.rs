@@ -46,10 +46,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
         UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
-            alias_address,
+            account_address,
             serial_number,
             token_scheme_kind,
-        } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
+        } => Response::FoundryId(FoundryId::build(&account_address, serial_number, token_scheme_kind)),
         UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),

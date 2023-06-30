@@ -287,7 +287,7 @@ impl FoundryOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`FoundryOutput`].
     pub const KIND: u8 = 5;
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
-    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS;
+    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS;
     /// The set of allowed [`Feature`]s for a [`FoundryOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA;
     /// The set of allowed immutable [`Feature`]s for a [`FoundryOutput`].
@@ -354,17 +354,17 @@ impl FoundryOutput {
 
     ///
     #[inline(always)]
-    pub fn alias_address(&self) -> &AccountAddress {
+    pub fn account_address(&self) -> &AccountAddress {
         // A FoundryOutput must have an ImmutableAccountAddressUnlockCondition.
         self.unlock_conditions
             .immutable_account_address()
-            .map(|unlock_condition| unlock_condition.alias_address())
+            .map(|unlock_condition| unlock_condition.account_address())
             .unwrap()
     }
 
     /// Returns the [`FoundryId`] of the [`FoundryOutput`].
     pub fn id(&self) -> FoundryId {
-        FoundryId::build(self.alias_address(), self.serial_number, self.token_scheme.kind())
+        FoundryId::build(self.account_address(), self.serial_number, self.token_scheme.kind())
     }
 
     /// Returns the [`TokenId`] of the [`FoundryOutput`].
@@ -386,7 +386,7 @@ impl FoundryOutput {
         inputs: &[(OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
-        Address::from(*self.alias_address()).unlock(unlock, inputs, context)
+        Address::from(*self.account_address()).unlock(unlock, inputs, context)
     }
 
     // Transition, just without full ValidationContext
@@ -396,7 +396,7 @@ impl FoundryOutput {
         input_native_tokens: &BTreeMap<TokenId, U256>,
         output_native_tokens: &BTreeMap<TokenId, U256>,
     ) -> Result<(), StateTransitionError> {
-        if current_state.alias_address() != next_state.alias_address()
+        if current_state.account_address() != next_state.account_address()
             || current_state.serial_number != next_state.serial_number
             || current_state.immutable_features != next_state.immutable_features
         {
@@ -471,7 +471,7 @@ impl FoundryOutput {
 
 impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let alias_chain_id = ChainId::from(*next_state.alias_address().account_id());
+        let alias_chain_id = ChainId::from(*next_state.account_address().account_id());
 
         if let (Some(Output::Account(input_alias)), Some(Output::Account(output_alias))) = (
             context.input_chains.get(&alias_chain_id),

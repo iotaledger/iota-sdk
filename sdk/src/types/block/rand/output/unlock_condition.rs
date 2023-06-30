@@ -23,9 +23,9 @@ pub fn rand_state_controller_address_unlock_condition_different_from(
 ) -> StateControllerAddressUnlockCondition {
     let mut address = rand_address();
 
-    if let Address::Account(mut alias_address) = &mut address {
-        while alias_address.account_id() == account_id {
-            alias_address = rand_account_address();
+    if let Address::Account(mut account_address) = &mut address {
+        while account_address.account_id() == account_id {
+            account_address = rand_account_address();
         }
     }
 
@@ -36,9 +36,9 @@ pub fn rand_state_controller_address_unlock_condition_different_from(
 pub fn rand_governor_address_unlock_condition_different_from(account_id: &AccountId) -> GovernorAddressUnlockCondition {
     let mut address = rand_address();
 
-    if let Address::Account(mut alias_address) = &mut address {
-        while alias_address.account_id() == account_id {
-            alias_address = rand_account_address();
+    if let Address::Account(mut account_address) = &mut address {
+        while account_address.account_id() == account_id {
+            account_address = rand_account_address();
         }
     }
 

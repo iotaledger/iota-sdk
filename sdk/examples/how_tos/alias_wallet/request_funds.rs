@@ -42,8 +42,8 @@ async fn main() -> Result<()> {
     println!("Account Id: {account_id}");
 
     // Get account address
-    let alias_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
-    let faucet_response = request_funds_from_faucet(&faucet_url, &alias_address).await?;
+    let account_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let faucet_response = request_funds_from_faucet(&faucet_url, &account_address).await?;
 
     println!("{faucet_response}");
 

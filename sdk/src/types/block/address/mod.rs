@@ -146,10 +146,10 @@ impl Address {
                     return Err(ConflictReason::InvalidUnlock);
                 }
             }
-            (Self::Account(alias_address), Unlock::Account(unlock)) => {
+            (Self::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Account(alias_output)) = inputs[unlock.index() as usize] {
-                    if &alias_output.account_id_non_null(&output_id) != alias_address.account_id() {
+                    if &alias_output.account_id_non_null(&output_id) != account_address.account_id() {
                         return Err(ConflictReason::InvalidUnlock);
                     }
                     if !context.unlocked_addresses.contains(self) {

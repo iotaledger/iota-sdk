@@ -51,12 +51,12 @@ async fn main() -> Result<()> {
     println!("Account Id: {account_id}");
 
     // Get account address
-    let alias_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let account_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
     // Find first output unlockable by the account address
     let input = *account
         .client()
-        .basic_output_ids([QueryParameter::Address(alias_address)])
+        .basic_output_ids([QueryParameter::Address(account_address)])
         .await?
         .items
         .first()

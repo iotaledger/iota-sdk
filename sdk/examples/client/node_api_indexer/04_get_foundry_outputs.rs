@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Take the address from command line argument or use a default one.
-    let alias_address = Bech32Address::try_from_str(
+    let account_address = Bech32Address::try_from_str(
         std::env::args()
             .nth(2)
             .as_deref()
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of foundry outputs that can be controlled by this address.
     let output_ids_response = client
-        .foundry_output_ids([QueryParameter::AccountAddress(alias_address)])
+        .foundry_output_ids([QueryParameter::AccountAddress(account_address)])
         .await?;
 
     println!("Foundry output IDs: {output_ids_response:#?}");

@@ -664,7 +664,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 }
 
 #[test]
-fn expiration_expired_only_alias_addresses() {
+fn expiration_expired_only_account_addresses() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
