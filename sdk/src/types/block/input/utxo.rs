@@ -12,7 +12,7 @@ use crate::types::block::{output::OutputId, payload::transaction::TransactionId,
 pub struct UtxoInput(OutputId);
 
 impl UtxoInput {
-    /// The input kind of a [`UtxoInput`].
+    /// The input kind of a [`UtxoInput`]
     pub const KIND: u8 = 0;
 
     /// Creates a new [`UtxoInput`].
