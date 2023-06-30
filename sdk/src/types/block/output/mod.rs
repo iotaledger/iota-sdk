@@ -241,12 +241,12 @@ impl Output {
     }
 
     /// Gets the output as an actual [`AccountOutput`].
-    /// PANIC: do not call on a non-alias output.
+    /// PANIC: do not call on a non-account output.
     pub fn as_alias(&self) -> &AccountOutput {
         if let Self::Account(output) = self {
             output
         } else {
-            panic!("as_alias called on a non-alias output");
+            panic!("as_alias called on a non-account output");
         }
     }
 
@@ -556,7 +556,7 @@ pub mod dto {
                     ),
                     AccountOutput::KIND => Self::Account(
                         AccountOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias output: {e}")))?,
+                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize account output: {e}")))?,
                     ),
                     FoundryOutput::KIND => Self::Foundry(
                         FoundryOutputDto::deserialize(value)

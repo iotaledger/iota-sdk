@@ -195,13 +195,13 @@ pub enum ClientMethod {
         /// Query parameters for output requests
         query_parameters: Vec<QueryParameter>,
     },
-    /// Fetch alias output IDs
+    /// Fetch account output IDs
     #[serde(rename_all = "camelCase")]
     AccountOutputIds {
         /// Query parameters for output requests
         query_parameters: Vec<QueryParameter>,
     },
-    /// Fetch alias output ID
+    /// Fetch account output ID
     #[serde(rename_all = "camelCase")]
     AccountOutputId {
         /// Account id

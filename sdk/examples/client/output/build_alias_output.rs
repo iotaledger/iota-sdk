@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will build an alias output.
+//! In this example we will build an account output.
 //!
 //! `cargo run --example build_alias_output --release`
 

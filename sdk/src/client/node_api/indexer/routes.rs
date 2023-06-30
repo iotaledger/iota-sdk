@@ -40,7 +40,7 @@ impl ClientInner {
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
-    /// Get alias outputs filtered by the given parameters.
+    /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
@@ -56,7 +56,7 @@ impl ClientInner {
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
-    /// Get alias output by its accountID.
+    /// Get account output by its accountID.
     /// api/indexer/v2/outputs/alias/:{AccountId}
     pub async fn alias_output_id(&self, account_id: AccountId) -> Result<OutputId> {
         let route = format!("api/indexer/v2/outputs/alias/{account_id}");

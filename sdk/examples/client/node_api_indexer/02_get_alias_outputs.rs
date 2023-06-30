@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
             .unwrap_or("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"),
     )?;
 
-    // Get output IDs of alias outputs that can be controlled by this address.
+    // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
         .alias_output_ids([
             QueryParameter::Governor(address),
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         ])
         .await?;
 
-    println!("Alias output IDs: {output_ids_response:#?}");
+    println!("Account output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(&output_ids_response.items).await?;

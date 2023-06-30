@@ -139,10 +139,10 @@ where
         let (account_id, alias_output) = self
             .get_alias_output(params.account_id)
             .await
-            .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
+            .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
         if let Output::Account(alias_output) = &alias_output.output {
-            // Create the new alias output with the same feature blocks, just updated state_index and foundry_counter
+            // Create the new account output with the same feature blocks, just updated state_index and foundry_counter
             let new_alias_output_builder = AccountOutputBuilder::from(alias_output)
                 .with_account_id(account_id)
                 .with_state_index(alias_output.state_index() + 1)
@@ -184,7 +184,7 @@ where
                 .await
                 .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {
-            unreachable!("We checked if it's an alias output before")
+            unreachable!("We checked if it's an account output before")
         }
     }
 }

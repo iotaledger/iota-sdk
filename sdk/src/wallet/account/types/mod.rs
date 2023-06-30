@@ -203,7 +203,7 @@ pub enum InclusionState {
 /// The output kind enum.
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OutputKind {
-    /// Alias output.
+    /// Account output.
     Alias,
     /// Basic output.
     Basic,

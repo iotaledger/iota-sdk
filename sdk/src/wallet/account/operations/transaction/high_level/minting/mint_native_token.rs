@@ -80,7 +80,7 @@ where
                 )));
             }
 
-            // Get the alias output that controls the foundry output
+            // Get the account output that controls the foundry output
             let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
                 if let Output::Account(output) = &output_data.output {
                     output.account_id_non_null(&output_data.output_id) == **foundry_output.account_address()
@@ -89,10 +89,10 @@ where
                 }
             });
             existing_alias_output
-                .ok_or_else(|| Error::MintingFailed("alias output is not available".to_string()))?
+                .ok_or_else(|| Error::MintingFailed("account output is not available".to_string()))?
                 .clone()
         } else {
-            return Err(Error::MintingFailed("alias output is not available".to_string()));
+            return Err(Error::MintingFailed("account output is not available".to_string()));
         };
 
         drop(account_details);
@@ -100,7 +100,7 @@ where
         let alias_output = if let Output::Account(alias_output) = existing_alias_output.output {
             alias_output
         } else {
-            unreachable!("We checked if it's an alias output before")
+            unreachable!("We checked if it's an account output before")
         };
         let foundry_output = if let Output::Foundry(foundry_output) = existing_foundry_output.output {
             foundry_output
@@ -108,7 +108,7 @@ where
             unreachable!("We checked if it's an foundry output before")
         };
 
-        // Create the next alias output with the same data, just updated state_index
+        // Create the next account output with the same data, just updated state_index
         let new_alias_output_builder =
             AccountOutputBuilder::from(&alias_output).with_state_index(alias_output.state_index() + 1);
 

@@ -230,7 +230,7 @@ impl InputSelection {
 
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
-            // Keep alias outputs because at this point we do not know if a state or governor address will be required.
+            // Keep account outputs because at this point we do not know if a state or governor address will be required.
             if input.output.is_alias() {
                 return true;
             }
@@ -239,7 +239,7 @@ impl InputSelection {
                 return false;
             }
 
-            // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
             if unlock_conditions.is_time_locked(self.timestamp) {
@@ -250,7 +250,7 @@ impl InputSelection {
                 .output
                 // Alias transition is irrelevant here as we keep aliases anyway.
                 .required_and_unlocked_address(self.timestamp, input.output_id(), None)
-                // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+                // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
 

@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     // Get the output ID by the account ID.
     let output_id = client.alias_output_id(account_id).await?;
 
-    println!("Alias output ID: {output_id}");
+    println!("Account output ID: {output_id}");
 
     // Get the output by its ID.
     let output_response = client.get_output(&output_id).await?;

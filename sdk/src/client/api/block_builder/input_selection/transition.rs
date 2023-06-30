@@ -14,7 +14,7 @@ use crate::{
 };
 
 impl InputSelection {
-    /// Transitions an alias input by creating a new alias output if required.
+    /// Transitions an alias input by creating a new account output if required.
     fn transition_account_input(
         &mut self,
         input: &AccountOutput,
@@ -23,7 +23,7 @@ impl InputSelection {
     ) -> Result<Option<Output>, Error> {
         let account_id = input.account_id_non_null(output_id);
 
-        // Do not create an alias output if the alias input is to be burned.
+        // Do not create an account output if the alias input is to be burned.
         if self
             .burn
             .as_ref()
@@ -34,7 +34,7 @@ impl InputSelection {
             return Ok(None);
         }
 
-        // Do not create an alias output if it already exists.
+        // Do not create an account output if it already exists.
         if self
             .outputs
             .iter()

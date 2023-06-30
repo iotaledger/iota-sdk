@@ -3,7 +3,7 @@
 
 use crate::types::block::{unlock::UnlockIndex, Error};
 
-/// Points to the unlock of a consumed alias output.
+/// Points to the unlock of a consumed account output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = Error::InvalidAliasIndex)]
@@ -41,7 +41,7 @@ impl AccountUnlock {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    /// Points to the unlock of a consumed alias output.
+    /// Points to the unlock of a consumed account output.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct AccountUnlockDto {
         #[serde(rename = "type")]

@@ -43,7 +43,7 @@ pub struct SyncOptions {
     /// Specifies what outputs should be synced for the ed25519 addresses from the account.
     #[serde(default)]
     pub account: AccountSyncOptions,
-    /// Specifies what outputs should be synced for the address of an alias output.
+    /// Specifies what outputs should be synced for the address of an account output.
     #[serde(default)]
     pub alias: AliasSyncOptions,
     /// Specifies what outputs should be synced for the address of an nft output.
@@ -119,7 +119,7 @@ impl Default for AccountSyncOptions {
     }
 }
 
-/// Sync options for addresses from alias outputs
+/// Sync options for addresses from account outputs
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct AliasSyncOptions {

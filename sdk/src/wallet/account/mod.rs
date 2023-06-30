@@ -83,7 +83,7 @@ pub struct FilterOptions {
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
-    /// Return all alias outputs matching these IDs.
+    /// Return all account outputs matching these IDs.
     pub account_ids: Option<HashSet<AccountId>>,
     /// Return all foundry outputs matching these IDs.
     pub foundry_ids: Option<HashSet<FoundryId>>,
@@ -385,7 +385,7 @@ impl AccountInner {
         self.filter_outputs(self.details().await.unspent_outputs.values(), filter)
     }
 
-    /// Gets the unspent alias output matching the given ID.
+    /// Gets the unspent account output matching the given ID.
     pub async fn unspent_alias_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),

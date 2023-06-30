@@ -491,7 +491,7 @@ impl AccountOutput {
                 }
             }
             None => self.governor_address().unlock(unlock, inputs, context)?,
-            // The next state can only be an alias output since it is identified by an alias chain identifier.
+            // The next state can only be an account output since it is identified by an alias chain identifier.
             Some(_) => unreachable!(),
         };
 

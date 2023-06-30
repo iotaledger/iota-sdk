@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will update the state metadata of an alias output.
+//! In this example we will update the state metadata of an account output.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Get the alias output by its account id
+    // Get the account output by its account id
     let account_id = AccountId::from_str(ACCOUNT_ID)?;
     if let Some(alias_output_data) = account.unspent_alias_output(&account_id).await? {
         println!(

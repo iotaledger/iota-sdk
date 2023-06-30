@@ -119,7 +119,7 @@ impl InputSelection {
             return Ok(vec![(input, None)]);
         }
 
-        // At this point, a state transition is required so we need to verify that an alias output describing a
+        // At this point, a state transition is required so we need to verify that an account output describing a
         // governance transition was not provided.
 
         // PANIC: safe to unwrap as it's been checked that both can't be None at the same time.

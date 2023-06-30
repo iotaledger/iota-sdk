@@ -154,7 +154,7 @@ where
         .await
     }
 
-    // First request all outputs directly related to the ed25519 addresses, then for each nft and alias output we got,
+    // First request all outputs directly related to the ed25519 addresses, then for each nft and account output we got,
     // request all outputs that are related to their alias/nft addresses in a loop until no new alias or nft outputs is
     // found
     async fn request_outputs_recursively(

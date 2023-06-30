@@ -72,7 +72,7 @@ impl InputSelection {
 
         for output in outputs {
             let is_created = match output {
-                // Add an alias requirement if the alias output is transitioning and then required in the inputs.
+                // Add an alias requirement if the account output is transitioning and then required in the inputs.
                 Output::Account(alias_output) => {
                     let is_created = alias_output.account_id().is_null();
 
@@ -98,7 +98,7 @@ impl InputSelection {
                     is_created
                 }
                 // Add a foundry requirement if the foundry output is transitioning and then required in the inputs.
-                // Also add an alias requirement since the associated alias output needs to be transitioned.
+                // Also add an alias requirement since the associated account output needs to be transitioned.
                 Output::Foundry(foundry_output) => {
                     // TODO add some tests
                     let is_created = !inputs.clone().any(|input| {

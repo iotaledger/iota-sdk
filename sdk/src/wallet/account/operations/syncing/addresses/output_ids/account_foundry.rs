@@ -26,7 +26,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Returns output ids of alias outputs
+    /// Returns output ids of account outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
@@ -106,7 +106,7 @@ where
         alias_output_ids: &HashSet<OutputId>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_foundry_output_ids");
-        // Get alias outputs, so we can then get the foundry outputs with the account addresses
+        // Get account outputs, so we can then get the foundry outputs with the account addresses
         let alias_outputs_with_meta = self.get_outputs(alias_output_ids.iter().copied().collect()).await?;
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;

@@ -59,7 +59,7 @@ where
             })?;
 
         if let Output::Account(alias_output) = &existing_alias_output_data.output {
-            // Create the new alias output with updated amount and state_index
+            // Create the new account output with updated amount and state_index
             let alias_output = AccountOutputBuilder::from(alias_output)
                 .with_account_id(account_id)
                 .with_state_index(alias_output.state_index() + 1)
@@ -79,7 +79,7 @@ where
             // Input selection will detect that we're melting native tokens and add the required inputs if available
             self.prepare_transaction(outputs, options).await
         } else {
-            unreachable!("We checked if it's an alias output before")
+            unreachable!("We checked if it's an account output before")
         }
     }
 
@@ -113,8 +113,9 @@ where
             }
         }
 
-        let existing_alias_output_data = existing_alias_output_data
-            .ok_or_else(|| Error::BurningOrMeltingFailed("required alias output for foundry not found".to_string()))?;
+        let existing_alias_output_data = existing_alias_output_data.ok_or_else(|| {
+            Error::BurningOrMeltingFailed("required account output for foundry not found".to_string())
+        })?;
 
         let existing_foundry_output_data = existing_foundry_output
             .ok_or_else(|| Error::BurningOrMeltingFailed("required foundry output not found".to_string()))?;

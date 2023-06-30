@@ -314,7 +314,7 @@ fn destroy_foundry_with_alias_state_transition() {
         .with_state_index(inputs[0].output.as_alias().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
-    // Alias output gets the amount from the foundry output added
+    // Account output gets the amount from the foundry output added
     let outputs = [alias_output];
 
     let selected = InputSelection::new(

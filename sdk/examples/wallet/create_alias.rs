@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will create an alias output.
+//! In this example we will create an account output.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example and that funds are available by running
@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
 
     println!("Sending the create-alias transaction...");
 
-    // Create an alias output
+    // Create an account output
     let transaction = account.create_alias_output(None, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

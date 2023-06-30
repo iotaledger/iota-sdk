@@ -409,12 +409,12 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
 
 // `create-account-output` command
 pub async fn create_account_outputs_command(account: &Account) -> Result<(), Error> {
-    println_log_info!("Creating alias output.");
+    println_log_info!("Creating account output.");
 
     let transaction = account.create_alias_output(None, None).await?;
 
     println_log_info!(
-        "Alias output creation transaction sent:\n{:?}\n{:?}",
+        "Account output creation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
@@ -429,18 +429,18 @@ pub async fn create_native_token_command(
     maximum_supply: String,
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
-    // If no alias output exists, create one first
+    // If no account output exists, create one first
     if account.balance().await?.aliases().is_empty() {
         let transaction = account.create_alias_output(None, None).await?;
         println_log_info!(
-            "Alias output minting transaction sent:\n{:?}\n{:?}",
+            "Account output minting transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,
             transaction.block_id
         );
         account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        // Sync account after the transaction got confirmed, so the alias output is available
+        // Sync account after the transaction got confirmed, so the account output is available
         account.sync(None).await?;
     }
 

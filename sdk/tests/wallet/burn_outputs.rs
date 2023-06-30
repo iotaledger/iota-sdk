@@ -108,7 +108,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
+    // First create an account output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
 
     // Wait for transaction to get included
@@ -187,7 +187,7 @@ async fn destroy_foundry(account: &Account) -> Result<()> {
     let balance = account.sync(None).await?;
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    // Let's burn the first foundry we can find, although we may not find the required alias output so maybe not a good
+    // Let's burn the first foundry we can find, although we may not find the required account output so maybe not a good
     // idea
     let foundry_id = *balance.foundries().first().unwrap();
 

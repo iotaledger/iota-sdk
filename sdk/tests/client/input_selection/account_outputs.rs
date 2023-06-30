@@ -1417,26 +1417,22 @@ fn two_aliases_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1478,16 +1474,14 @@ fn state_controller_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index() + 1
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.state_index() == inputs[0].output.as_alias().state_index() + 1
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1641,16 +1635,14 @@ fn governor_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index()
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.state_index() == inputs[0].output.as_alias().state_index()
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -2330,7 +2322,7 @@ fn new_state_metadata() {
         chain: None,
     }];
 
-    // New alias output, with updated state index
+    // New account output, with updated state index
     let updated_alias_output = AccountOutputBuilder::from(alias_output.as_alias())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
@@ -2376,7 +2368,7 @@ fn new_state_metadata_but_same_state_index() {
         chain: None,
     }];
 
-    // New alias output, without updated state index
+    // New account output, without updated state index
     let updated_alias_output = AccountOutputBuilder::from(alias_output.as_alias())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
