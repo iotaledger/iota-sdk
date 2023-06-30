@@ -90,14 +90,14 @@ where
                     let output = &data.output;
                     let rent = output.rent_cost(&rent_structure);
 
-                    // Add alias and foundry outputs here because they can't have a
+                    // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
                     match output {
                         Output::Account(output) => {
                             // Add amount
                             balance.base_coin.total += output.amount();
                             // Add storage deposit
-                            balance.required_storage_deposit.alias += rent;
+                            balance.required_storage_deposit.account += rent;
                             if !account_details.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }

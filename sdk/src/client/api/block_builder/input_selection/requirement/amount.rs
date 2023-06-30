@@ -218,7 +218,7 @@ impl InputSelection {
     }
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
-        // Only consider automatically transitioned outputs, except for alias governance transitions.
+        // Only consider automatically transitioned outputs, except for account governance transitions.
         let outputs = self.outputs.iter_mut().filter(|output| {
             output
                 .chain_id()
@@ -259,7 +259,7 @@ impl InputSelection {
                 Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
                     .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
-                _ => panic!("only alias, nft and foundry can be automatically created"),
+                _ => panic!("only account, nft and foundry can be automatically created"),
             };
 
             amount_selection.outputs_sum -= amount - new_amount;
@@ -387,8 +387,8 @@ impl InputSelection {
             .iter()
             .filter(|input| match &input.output {
                 Output::Basic(_) => false,
-                // If alias, we are only interested in state transitions as governance can't move funds.
-                Output::Account(alias) => self.addresses.contains(alias.state_controller_address()),
+                // If account, we are only interested in state transitions as governance can't move funds.
+                Output::Account(account) => self.addresses.contains(account.state_controller_address()),
                 _ => true,
             })
             .peekable();

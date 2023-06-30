@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         println!("Sending transaction...",);
         send_and_wait_for_inclusion(&account, vec![updated_account_output]).await?;
     } else {
-        panic!("alias doesn't exist or is not unspent");
+        panic!("account doesn't exist or is not unspent");
     }
 
     println!("Example finished successfully");

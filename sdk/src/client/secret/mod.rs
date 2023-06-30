@@ -455,7 +455,7 @@ where
                 Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
             },
             None => {
-                // We can only sign ed25519 addresses and block_indexes needs to contain the alias or nft
+                // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
                 if !input_address.is_ed25519() {
@@ -473,9 +473,9 @@ where
             }
         }
 
-        // When we have an alias or Nft output, we will add their alias or nft address to block_indexes,
+        // When we have an account or Nft output, we will add their account or nft address to block_indexes,
         // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
-        // that have the corresponding alias or nft address in their unlock condition
+        // that have the corresponding account or nft address in their unlock condition
         match &input.output {
             Output::Account(account_output) => block_indexes.insert(
                 Address::Account(account_output.account_address(input.output_id())),

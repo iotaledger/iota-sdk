@@ -15,7 +15,7 @@ pub fn is_account_transition<'a>(
 ) -> Option<AccountTransition> {
     if let Output::Account(account_input) = &input {
         let account_id = account_input.account_id_non_null(&input_id);
-        // Checks if the alias exists in the outputs and gets the transition type.
+        // Checks if the account exists in the outputs and gets the transition type.
         for output in outputs.iter() {
             if let Output::Account(account_output) = output {
                 if *account_output.account_id() == account_id {
@@ -41,30 +41,30 @@ pub fn is_account_transition<'a>(
 /// Checks if an output is an account with a given non null account ID.
 /// Calling it with a null account ID may lead to undefined behavior.
 pub(crate) fn is_account_with_id_non_null(output: &Output, account_id: &AccountId) -> bool {
-    if let Output::Account(alias) = output {
-        alias.account_id() == account_id
+    if let Output::Account(account) = output {
+        account.account_id() == account_id
     } else {
         false
     }
 }
 
-/// Checks if an output is an alias with output ID that matches the given account ID.
+/// Checks if an output is an account with output ID that matches the given account ID.
 pub(crate) fn is_account_with_id(output: &Output, output_id: &OutputId, account_id: &AccountId) -> bool {
-    if let Output::Account(alias) = output {
-        &alias.account_id_non_null(output_id) == account_id
+    if let Output::Account(account) = output {
+        &account.account_id_non_null(output_id) == account_id
     } else {
         false
     }
 }
 
 impl InputSelection {
-    /// Fulfills an alias requirement by selecting the appropriate alias from the available inputs.
+    /// Fulfills an account requirement by selecting the appropriate account from the available inputs.
     pub(crate) fn fulfill_account_requirement(
         &mut self,
         account_id: AccountId,
         account_transition: AccountTransition,
     ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
-        // Check that the alias is not burned when a state transition is required.
+        // Check that the account is not burned when a state transition is required.
         if account_transition.is_state()
             && self
                 .burn
@@ -82,8 +82,8 @@ impl InputSelection {
             .iter()
             .find(|input| is_account_with_id(&input.output, input.output_id(), &account_id));
 
-        // If a state transition is not required and the alias has already been selected, no additional check has to be
-        // performed.
+        // If a state transition is not required and the account has already been selected, no additional check has to
+        // be performed.
         if !account_transition.is_state() && selected_input.is_some() {
             log::debug!(
                 "{account_id:?}/{account_transition:?} requirement already fulfilled by {:?}",
@@ -97,7 +97,7 @@ impl InputSelection {
             .iter()
             .position(|input| is_account_with_id(&input.output, input.output_id(), &account_id));
 
-        // If the alias was not already selected and it not available, the requirement can't be fulfilled.
+        // If the account was not already selected and it not available, the requirement can't be fulfilled.
         if selected_input.is_none() && available_index.is_none() {
             return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 account_id,
@@ -105,7 +105,7 @@ impl InputSelection {
             )));
         }
 
-        // If a state transition is not required, we can simply select the alias.
+        // If a state transition is not required, we can simply select the account.
         if !account_transition.is_state() {
             // Remove the output from the available inputs, swap to make it O(1).
             let input = self.available_inputs.swap_remove(available_index.unwrap());

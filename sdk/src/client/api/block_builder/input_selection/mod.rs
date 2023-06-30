@@ -75,7 +75,7 @@ impl InputSelection {
         match required_address {
             Address::Ed25519(_) => {
                 if account_transition.is_some() {
-                    // Only add the requirement if the output is an alias because other types of output have been
+                    // Only add the requirement if the output is an account because other types of output have been
                     // filtered by address already.
                     Ok(Some(Requirement::Ed25519(required_address)))
                 } else {
@@ -102,7 +102,7 @@ impl InputSelection {
             // - the sender feature doesn't need to be verified as it has been removed
             // - the issuer feature doesn't need to be verified as the chain is not new
             // - input doesn't need to be checked for as we just transitioned it
-            // - foundry alias requirement should have been met already by a prior `required_account_nft_addresses`
+            // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
             self.outputs.push(output);
         }
 
@@ -470,7 +470,7 @@ impl InputSelection {
                                 false
                             }
                         })
-                        .expect("ISA is broken because there is no alias input");
+                        .expect("ISA is broken because there is no account input");
 
                     if let Err(err) = AccountOutput::transition_inner(
                         account_input.output.as_account(),

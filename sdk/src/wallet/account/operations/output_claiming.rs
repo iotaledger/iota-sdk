@@ -64,7 +64,7 @@ where
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
                             &account_details.addresses_with_unspent_outputs,
-                            // outputs controlled by an alias or nft are currently not considered
+                            // outputs controlled by an account or nft are currently not considered
                             &[],
                             output_data,
                             local_time,

@@ -40,10 +40,10 @@ async fn main() -> Result<()> {
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
-    // therefore we can reuse an existing one
+    // We can first check if we already have an account output in our account, because an account can have many foundry
+    // outputs and therefore we can reuse an existing one
     if balance.accounts().is_empty() {
-        // If we don't have an alias, we need to create one
+        // If we don't have an account, we need to create one
         let transaction = account.create_account_output(None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 

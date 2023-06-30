@@ -20,10 +20,10 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAccountParams {
-    /// Bech32 encoded address which will control the alias. Default will use the first
+    /// Bech32 encoded address which will control the account. Default will use the first
     /// address of the account
     pub address: Option<Bech32Address>,
-    /// Immutable alias metadata
+    /// Immutable account metadata
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
@@ -42,9 +42,9 @@ where
     /// ```ignore
     /// let params = CreateAccountParams {
     ///     address: None,
-    ///     immutable_metadata: Some(b"some immutable alias metadata".to_vec()),
-    ///     metadata: Some(b"some alias metadata".to_vec()),
-    ///     state_metadata: Some(b"some alias state metadata".to_vec()),
+    ///     immutable_metadata: Some(b"some immutable account metadata".to_vec()),
+    ///     metadata: Some(b"some account metadata".to_vec()),
+    ///     state_metadata: Some(b"some account state metadata".to_vec()),
     /// };
     ///
     /// let transaction = account.create_account_output(params, None).await?;

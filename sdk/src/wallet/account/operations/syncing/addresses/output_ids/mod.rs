@@ -28,8 +28,8 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
-    /// (alias/nft address in AddressUnlockCondition and the alias/nft output is controlled with the Ed25519 address)
-    /// connected to
+    /// (account/nft address in AddressUnlockCondition and the account/nft output is controlled with the Ed25519
+    /// address) connected to
     pub(crate) async fn get_output_ids_for_address(
         &self,
         address: Address,
@@ -162,7 +162,7 @@ where
         let address_output_ids_start_time = Instant::now();
 
         let mut addresses_with_outputs = Vec::new();
-        // spent outputs or alias/nft/foundries that don't get synced anymore, because of other sync options
+        // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
         let mut spent_or_not_anymore_synced_outputs = Vec::new();
         // We split the addresses into chunks so we don't get timeouts if we have thousands
         for addresses_chunk in &mut addresses_with_unspent_outputs
@@ -204,7 +204,7 @@ where
                 let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
                 // only return addresses with outputs
                 if !output_ids.is_empty() {
-                    // outputs we had before, but now not anymore, got spent or are alias/nft/foundries that don't get
+                    // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
                     // synced anymore because of other sync options
                     for output_id in address.output_ids {
                         if !output_ids.contains(&output_id) {
@@ -214,7 +214,7 @@ where
                     address.output_ids = output_ids;
                     addresses_with_outputs.push(address);
                 } else {
-                    // outputs we had before, but now not anymore, got spent or are alias/nft/foundries that don't get
+                    // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
                     // synced anymore because of other sync options
                     spent_or_not_anymore_synced_outputs.extend(address.output_ids.into_iter());
                 }
@@ -222,7 +222,7 @@ where
         }
 
         log::debug!(
-            "[SYNC] spent or not anymore synced alias/nft/foundries outputs: {:?}",
+            "[SYNC] spent or not anymore synced account/nft/foundries outputs: {:?}",
             spent_or_not_anymore_synced_outputs
         );
         log::debug!(

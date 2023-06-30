@@ -155,14 +155,14 @@ where
     }
 
     // First request all outputs directly related to the ed25519 addresses, then for each nft and account output we got,
-    // request all outputs that are related to their alias/nft addresses in a loop until no new alias or nft outputs is
-    // found
+    // request all outputs that are related to their account/nft addresses in a loop until no new account or nft outputs
+    // is found
     async fn request_outputs_recursively(
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<AddressWithUnspentOutputs>, Vec<OutputData>)> {
-        // Cache the alias and nft address with the related ed2559 address, so we can update the account address with
+        // Cache the account and nft address with the related ed2559 address, so we can update the account address with
         // the new output ids
         let mut new_account_and_nft_addresses = HashMap::new();
         let (mut spent_or_not_synced_output_ids, mut addresses_with_unspent_outputs, mut outputs_data) =
@@ -211,7 +211,7 @@ where
 
             // Clear, so we only get new addresses
             new_account_and_nft_addresses = HashMap::new();
-            // Add new alias and nft addresses
+            // Add new account and nft addresses
             for output_data in new_outputs_data.iter() {
                 match &output_data.output {
                     Output::Account(account_output) => {

@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Sending the create-alias transaction...");
+    println!("Sending the create-account transaction...");
 
     // Create an account output
     let transaction = account.create_account_output(None, None).await?;

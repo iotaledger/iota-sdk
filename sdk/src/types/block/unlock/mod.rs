@@ -126,8 +126,8 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
                         return Err(Error::InvalidUnlockReference(index));
                     }
                 }
-                Unlock::Account(alias) => {
-                    if index == 0 || alias.index() >= index {
+                Unlock::Account(account) => {
+                    if index == 0 || account.index() >= index {
                         return Err(Error::InvalidUnlockAccount(index));
                     }
                 }
@@ -245,7 +245,7 @@ pub mod dto {
                     }
                     AccountUnlock::KIND => Self::Account(
                         AccountUnlockDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias unlock: {e}")))?,
+                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize account unlock: {e}")))?,
                     ),
                     NftUnlock::KIND => Self::Nft(
                         NftUnlockDto::deserialize(value)

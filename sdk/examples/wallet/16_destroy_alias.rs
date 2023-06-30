@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will try to destroy the first alias there is in the account. This is only possible if possible
-//! foundry outputs have circulating supply of 0.
+//! In this example we will try to destroy the first account output there is in the account. This is only possible if
+//! possible foundry outputs have circulating supply of 0.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
-    // Get the first alias
+    // Get the first account
     if let Some(account_id) = balance.accounts().first() {
         let accounts_before = balance.accounts();
         println!("Aliases BEFORE destroying:\n{accounts_before:#?}",);
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        println!("Sending alias burn transaction...");
+        println!("Sending account burn transaction...");
 
         let transaction = account.burn(*account_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

@@ -154,7 +154,7 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
+    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyFoundry {

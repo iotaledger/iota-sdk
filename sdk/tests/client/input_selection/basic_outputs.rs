@@ -593,7 +593,7 @@ fn account_sender() {
             .iter()
             .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
     );
-    // Provided output + alias
+    // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
 }

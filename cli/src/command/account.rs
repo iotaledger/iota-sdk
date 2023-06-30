@@ -464,12 +464,12 @@ pub async fn create_native_token_command(
 
 // `destroy-account` command
 pub async fn destroy_account_command(account: &Account, account_id: String) -> Result<(), Error> {
-    println_log_info!("Destroying alias {account_id}.");
+    println_log_info!("Destroying account {account_id}.");
 
     let transaction = account.burn(AccountId::from_str(&account_id)?, None).await?;
 
     println_log_info!(
-        "Destroying alias transaction sent:\n{:?}\n{:?}",
+        "Destroying account transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );

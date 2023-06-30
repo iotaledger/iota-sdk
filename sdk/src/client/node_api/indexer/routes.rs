@@ -44,12 +44,12 @@ impl ClientInner {
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
-    /// api/indexer/v2/outputs/alias
+    /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v2/outputs/alias";
+        let route = "api/indexer/v2/outputs/account";
 
         let query_parameters = verify_query_parameters_account_outputs(query_parameters.into())?;
 
@@ -57,9 +57,9 @@ impl ClientInner {
     }
 
     /// Get account output by its accountID.
-    /// api/indexer/v2/outputs/alias/:{AccountId}
+    /// api/indexer/v2/outputs/account/:{AccountId}
     pub async fn account_output_id(&self, account_id: AccountId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/alias/{account_id}");
+        let route = format!("api/indexer/v2/outputs/account/{account_id}");
 
         Ok(*(self
             .get_output_ids(&route, QueryParameters::empty(), true, false)

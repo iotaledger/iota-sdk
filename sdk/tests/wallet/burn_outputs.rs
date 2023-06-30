@@ -108,7 +108,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    // First create an account output, this needs to be done only once, because an alias can have many foundry outputs
+    // First create an account output, this needs to be done only once, because an account can have many foundry outputs
     let transaction = account.create_account_output(None, None).await?;
 
     // Wait for transaction to get included

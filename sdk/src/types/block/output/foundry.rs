@@ -267,7 +267,7 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
     }
 }
 
-/// Describes a foundry output that is controlled by an alias.
+/// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FoundryOutput {
@@ -275,7 +275,7 @@ pub struct FoundryOutput {
     amount: u64,
     // Native tokens held by the output.
     native_tokens: NativeTokens,
-    // The serial number of the foundry with respect to the controlling alias.
+    // The serial number of the foundry with respect to the controlling account.
     serial_number: u32,
     token_scheme: TokenScheme,
     unlock_conditions: UnlockConditions,
@@ -618,7 +618,7 @@ pub mod dto {
         Error,
     };
 
-    /// Describes a foundry output that is controlled by an alias.
+    /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct FoundryOutputDto {
@@ -629,7 +629,7 @@ pub mod dto {
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // The serial number of the foundry with respect to the controlling alias.
+        // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
         pub token_scheme: TokenSchemeDto,
         pub unlock_conditions: Vec<UnlockConditionDto>,

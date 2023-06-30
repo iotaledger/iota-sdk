@@ -22,7 +22,7 @@ fn balance_add_assign() {
     #[cfg(feature = "participation")]
     let voting_power1 = balance1.base_coin().voting_power();
 
-    let sdr_account_1 = balance1.required_storage_deposit().alias();
+    let sdr_account_1 = balance1.required_storage_deposit().account();
     let sdr_basic1 = balance1.required_storage_deposit().basic();
     let sdr_foundry1 = balance1.required_storage_deposit().foundry();
     let sdr_nft1 = balance1.required_storage_deposit().nft();
@@ -38,7 +38,7 @@ fn balance_add_assign() {
     #[cfg(feature = "participation")]
     let voting_power2 = balance2.base_coin().voting_power();
 
-    let sdr_account_2 = balance2.required_storage_deposit().alias();
+    let sdr_account_2 = balance2.required_storage_deposit().account();
     let sdr_basic2 = balance2.required_storage_deposit().basic();
     let sdr_foundry2 = balance2.required_storage_deposit().foundry();
     let sdr_nft2 = balance2.required_storage_deposit().nft();
@@ -56,7 +56,7 @@ fn balance_add_assign() {
     assert_eq!(balance1.base_coin().voting_power(), voting_power1 + voting_power2);
 
     assert_eq!(
-        balance1.required_storage_deposit().alias(),
+        balance1.required_storage_deposit().account(),
         sdr_account_1 + sdr_account_2
     );
     assert_eq!(balance1.required_storage_deposit().basic(), sdr_basic1 + sdr_basic2);

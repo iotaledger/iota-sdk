@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we use an alias as wallet.
+//! In this example we use an account as wallet.
 //! Rename `.env.example` to `.env` first.
 //!
 //! `cargo run --release --all-features --example account_wallet_transaction`
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(Some(sync_options.clone())).await?;
 
     let total_base_token_balance = balance.base_coin().total();
-    println!("Balance before sending funds from alias: {total_base_token_balance:#?}");
+    println!("Balance before sending funds from account: {total_base_token_balance:#?}");
 
     let account_id = balance.accounts().first().unwrap();
     println!("Account Id: {account_id}");
@@ -83,7 +83,7 @@ async fn main() -> Result<()> {
     );
 
     let total_base_token_balance = account.sync(Some(sync_options)).await?.base_coin().total();
-    println!("Balance after sending funds from alias: {total_base_token_balance:#?}");
+    println!("Balance after sending funds from account: {total_base_token_balance:#?}");
 
     Ok(())
 }

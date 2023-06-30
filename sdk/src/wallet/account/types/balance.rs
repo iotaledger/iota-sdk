@@ -89,7 +89,7 @@ impl std::ops::AddAssign for BaseCoinBalance {
 #[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
     #[serde(with = "crate::utils::serde::string")]
-    pub(crate) alias: u64,
+    pub(crate) account: u64,
     #[serde(with = "crate::utils::serde::string")]
     pub(crate) basic: u64,
     #[serde(with = "crate::utils::serde::string")]
@@ -100,7 +100,7 @@ pub struct RequiredStorageDeposit {
 
 impl std::ops::AddAssign for RequiredStorageDeposit {
     fn add_assign(&mut self, rhs: Self) {
-        self.alias += rhs.alias;
+        self.account += rhs.account;
         self.basic += rhs.basic;
         self.foundry += rhs.foundry;
         self.nft += rhs.nft;
@@ -205,7 +205,7 @@ impl Balance {
                 voting_power: total / 4,
             },
             required_storage_deposit: RequiredStorageDeposit {
-                alias: total / 16,
+                account: total / 16,
                 basic: total / 8,
                 foundry: total / 4,
                 nft: total / 2,

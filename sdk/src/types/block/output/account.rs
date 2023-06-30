@@ -38,12 +38,12 @@ pub enum AccountTransition {
 }
 
 impl AccountTransition {
-    /// Checks whether the alias transition is a state one.
+    /// Checks whether the account transition is a state one.
     pub fn is_state(&self) -> bool {
         matches!(self, Self::State)
     }
 
-    /// Checks whether the alias transition is a governance one.
+    /// Checks whether the account transition is a governance one.
     pub fn is_governance(&self) -> bool {
         matches!(self, Self::Governance)
     }
@@ -319,7 +319,7 @@ impl From<&AccountOutput> for AccountOutputBuilder {
 
 pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METADATA_LENGTH_MAX }>;
 
-/// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
+/// Describes an account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AccountOutput {
@@ -327,13 +327,13 @@ pub struct AccountOutput {
     amount: u64,
     // Native tokens held by the output.
     native_tokens: NativeTokens,
-    // Unique identifier of the alias.
+    // Unique identifier of the account.
     account_id: AccountId,
-    // A counter that must increase by 1 every time the alias is state transitioned.
+    // A counter that must increase by 1 every time the account is state transitioned.
     state_index: u32,
     // Metadata that can only be changed by the state controller.
     state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
-    // A counter that denotes the number of foundries created by this alias account.
+    // A counter that denotes the number of foundries created by this account.
     foundry_counter: u32,
     unlock_conditions: UnlockConditions,
     //
@@ -491,7 +491,7 @@ impl AccountOutput {
                 }
             }
             None => self.governor_address().unlock(unlock, inputs, context)?,
-            // The next state can only be an account output since it is identified by an alias chain identifier.
+            // The next state can only be an account output since it is identified by an account chain identifier.
             Some(_) => unreachable!(),
         };
 
@@ -714,7 +714,7 @@ pub mod dto {
         Error,
     };
 
-    /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
+    /// Describes an account in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct AccountOutputDto {
@@ -725,14 +725,14 @@ pub mod dto {
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // Unique identifier of the alias.
+        // Unique identifier of the account.
         pub account_id: AccountId,
-        // A counter that must increase by 1 every time the alias is state transitioned.
+        // A counter that must increase by 1 every time the account is state transitioned.
         pub state_index: u32,
         // Metadata that can only be changed by the state controller.
         #[serde(skip_serializing_if = "String::is_empty", default)]
         pub state_metadata: String,
-        // A counter that denotes the number of foundries created by this alias account.
+        // A counter that denotes the number of foundries created by this account.
         pub foundry_counter: u32,
         //
         pub unlock_conditions: Vec<UnlockConditionDto>,

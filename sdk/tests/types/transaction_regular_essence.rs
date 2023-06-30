@@ -399,7 +399,7 @@ fn duplicate_output_account() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let account_id = AccountId::from(bytes);
-    let alias = AccountOutput::build_with_amount(1_000_000, account_id)
+    let account = AccountOutput::build_with_amount(1_000_000, account_id)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
@@ -407,7 +407,7 @@ fn duplicate_output_account() {
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
-        .with_outputs([basic, alias.clone(), alias])
+        .with_outputs([basic, account.clone(), account])
         .finish(&protocol_parameters);
 
     assert!(matches!(

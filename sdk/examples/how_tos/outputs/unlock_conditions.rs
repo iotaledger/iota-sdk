@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
-        // with immutable alias unlock condition
+        // with immutable account unlock condition
         foundry_output_builder
             .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(
                 *account_address.as_account(),

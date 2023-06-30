@@ -25,7 +25,7 @@ impl InputSelection {
             .0;
 
         if account_transition.is_some() {
-            // Only check if we own the required address if the input is an alias because other types of output have
+            // Only check if we own the required address if the input is an account because other types of output have
             // been filtered by address already.
             &required_address == address && self.addresses.contains(address)
         } else {
@@ -34,7 +34,7 @@ impl InputSelection {
     }
 
     // Checks if an available input can unlock a given ED25519 address.
-    // In case an alias input is selected, also tells if it needs to be state or governance transitioned.
+    // In case an account input is selected, also tells if it needs to be state or governance transitioned.
     fn available_has_ed25519_address(
         &self,
         input: &InputSigningData,
@@ -112,7 +112,7 @@ impl InputSelection {
                 let input = self.available_inputs.swap_remove(index);
 
                 log::debug!(
-                    "{address:?} sender requirement fulfilled by {:?} (alias transition {:?})",
+                    "{address:?} sender requirement fulfilled by {:?} (account transition {:?})",
                     input.output_id(),
                     account_transition
                 );

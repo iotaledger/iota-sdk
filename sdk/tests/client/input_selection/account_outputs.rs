@@ -148,7 +148,7 @@ fn input_amount_lt_output_amount() {
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_000,
-            // Amount we want to send + storage deposit for alias remainder
+            // Amount we want to send + storage deposit for account remainder
             required: 2_251_500,
         })
     ));
@@ -196,7 +196,7 @@ fn input_amount_lt_output_amount_2() {
         selected,
         Err(Error::InsufficientAmount {
             found: 3_000_000,
-            // Amount we want to send + storage deposit for alias remainder
+            // Amount we want to send + storage deposit for account remainder
             required: 3_251_501
         })
     ));
@@ -239,7 +239,7 @@ fn basic_output_with_account_input() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
-    // basic output + alias remainder
+    // basic output + account remainder
     assert_eq!(selected.outputs.len(), 2);
 }
 

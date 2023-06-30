@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we use an alias as wallet.
+//! In this example we use an account as wallet.
 //! Rename `.env.example` to `.env` first.
 //!
 //! `cargo run --release --all-features --example account_wallet_request_funds`

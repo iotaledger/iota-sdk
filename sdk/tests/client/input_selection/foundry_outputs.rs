@@ -102,7 +102,7 @@ fn existing_input_account_for_foundry_account() {
     // Alias state index is increased
     selected.outputs.iter().for_each(|output| {
         if let Output::Account(account_output) = &output {
-            // Input alias has index 0, output should have index 1
+            // Input account has index 0, output should have index 1
             assert_eq!(account_output.state_index(), 1);
         }
     });
@@ -150,7 +150,7 @@ fn minted_native_tokens_in_new_remainder() {
     // Alias state index is increased
     selected.outputs.iter().for_each(|output| {
         if let Output::Account(account_output) = &output {
-            // Input alias has index 0, output should have index 1
+            // Input account has index 0, output should have index 1
             assert_eq!(account_output.state_index(), 1);
         }
         if let Output::Basic(basic_output) = &output {
@@ -274,7 +274,7 @@ fn melt_native_tokens() {
     // Alias state index is increased
     selected.outputs.iter().for_each(|output| {
         if let Output::Account(account_output) = &output {
-            // Input alias has index 0, output should have index 1
+            // Input account has index 0, output should have index 1
             assert_eq!(account_output.state_index(), 1);
         }
         if let Output::Basic(basic_output) = &output {
