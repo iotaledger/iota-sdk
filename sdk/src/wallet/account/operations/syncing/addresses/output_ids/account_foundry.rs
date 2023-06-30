@@ -27,12 +27,12 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Returns output ids of account outputs
-    pub(crate) async fn get_alias_and_foundry_output_ids(
+    pub(crate) async fn get_account_and_foundry_output_ids(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[SYNC] get_alias_and_foundry_output_ids");
+        log::debug!("[SYNC] get_account_and_foundry_output_ids");
         let client = self.client();
         let bech32_address = bech32_address.convert()?;
 
@@ -118,11 +118,11 @@ where
                 let account_address = AccountAddress::from(
                     account_output.account_id_non_null(account_output_with_meta.metadata().output_id()),
                 );
-                let alias_bech32_address = account_address.to_bech32(bech32_hrp);
+                let account_bech32_address = account_address.to_bech32(bech32_hrp);
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
-                        .foundry_output_ids([QueryParameter::AccountAddress(alias_bech32_address)])
+                        .foundry_output_ids([QueryParameter::AccountAddress(account_bech32_address)])
                         .await
                         .map_err(From::from)
                 })));

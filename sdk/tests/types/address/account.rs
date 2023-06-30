@@ -104,23 +104,23 @@ fn bech32_roundtrip() {
 #[test]
 fn dto_fields() {
     let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let alias_dto = AccountAddressDto::from(&account_address);
+    let account_dto = AccountAddressDto::from(&account_address);
 
-    assert_eq!(alias_dto.kind, AccountAddress::KIND);
-    assert_eq!(alias_dto.account_id, ACCOUNT_ID.to_string());
+    assert_eq!(account_dto.kind, AccountAddress::KIND);
+    assert_eq!(account_dto.account_id, ACCOUNT_ID.to_string());
 
     let address = Address::from(account_address);
     let dto = AddressDto::from(&address);
 
-    assert_eq!(dto, AddressDto::Account(alias_dto));
+    assert_eq!(dto, AddressDto::Account(account_dto));
 }
 
 #[test]
 fn dto_roundtrip() {
     let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let alias_dto = AccountAddressDto::from(&account_address);
+    let account_dto = AccountAddressDto::from(&account_address);
 
-    assert_eq!(AccountAddress::try_from(alias_dto).unwrap(), account_address);
+    assert_eq!(AccountAddress::try_from(account_dto).unwrap(), account_address);
 
     let address = Address::from(account_address);
     let dto = AddressDto::from(&address);

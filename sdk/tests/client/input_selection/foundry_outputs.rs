@@ -27,7 +27,7 @@ use crate::client::{
 };
 
 #[test]
-fn missing_input_alias_for_foundry() {
+fn missing_input_account_for_foundry() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -64,7 +64,7 @@ fn missing_input_alias_for_foundry() {
 }
 
 #[test]
-fn existing_input_alias_for_foundry_alias() {
+fn existing_input_account_for_foundry_alias() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -285,7 +285,7 @@ fn melt_native_tokens() {
 }
 
 #[test]
-fn destroy_foundry_with_alias_state_transition() {
+fn destroy_foundry_with_account_state_transition() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -333,7 +333,7 @@ fn destroy_foundry_with_alias_state_transition() {
 }
 
 #[test]
-fn destroy_foundry_with_alias_governance_transition() {
+fn destroy_foundry_with_account_governance_transition() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -375,7 +375,7 @@ fn destroy_foundry_with_alias_governance_transition() {
 }
 
 #[test]
-fn destroy_foundry_with_alias_burn() {
+fn destroy_foundry_with_account_burn() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -641,7 +641,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 
 // TODO
 // #[test]
-// fn alias_required_through_sender_and_sufficient() {
+// fn account_required_through_sender_and_sufficient() {
 //     let protocol_parameters = protocol_parameters();
 //     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -761,7 +761,7 @@ fn mint_and_burn_at_the_same_time() {
 }
 
 #[test]
-fn take_amount_from_alias_and_foundry_to_fund_basic() {
+fn take_amount_from_account_and_foundry_to_fund_basic() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);

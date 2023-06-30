@@ -471,11 +471,11 @@ impl FoundryOutput {
 
 impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let alias_chain_id = ChainId::from(*next_state.account_address().account_id());
+        let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
         if let (Some(Output::Account(input_alias)), Some(Output::Account(output_alias))) = (
-            context.input_chains.get(&alias_chain_id),
-            context.output_chains.get(&alias_chain_id),
+            context.input_chains.get(&account_chain_id),
+            context.output_chains.get(&account_chain_id),
         ) {
             if input_alias.foundry_counter() >= next_state.serial_number()
                 || next_state.serial_number() > output_alias.foundry_counter()
@@ -786,15 +786,15 @@ mod tests {
     fn builder() {
         let protocol_parameters = protocol_parameters();
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let alias_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
-        let alias_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
+        let account_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
+        let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
         let metadata_1 = rand_metadata_feature();
         let metadata_2 = rand_metadata_feature();
 
         let mut builder = FoundryOutput::build_with_amount(0, 234, rand_token_scheme())
             .with_serial_number(85)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .with_unlock_conditions([alias_1])
+            .with_unlock_conditions([account_1])
             .add_feature(metadata_1.clone())
             .replace_feature(metadata_2.clone())
             .with_immutable_features([metadata_2.clone()])
@@ -802,7 +802,7 @@ mod tests {
 
         let output = builder.clone().finish_unverified().unwrap();
         assert_eq!(output.serial_number(), 85);
-        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&alias_1));
+        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_1));
         assert_eq!(output.features().metadata(), Some(&metadata_2));
         assert_eq!(output.immutable_features().metadata(), Some(&metadata_1));
 
@@ -810,9 +810,9 @@ mod tests {
             .clear_unlock_conditions()
             .clear_features()
             .clear_immutable_features()
-            .replace_unlock_condition(alias_2);
+            .replace_unlock_condition(account_2);
         let output = builder.clone().finish_unverified().unwrap();
-        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&alias_2));
+        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_2));
         assert!(output.features().is_empty());
         assert!(output.immutable_features().is_empty());
 

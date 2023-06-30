@@ -593,7 +593,7 @@ fn missing_ed25519_issuer_transition() {
 }
 
 #[test]
-fn missing_alias_sender() {
+fn missing_account_sender() {
     let protocol_parameters = protocol_parameters();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
@@ -635,7 +635,7 @@ fn missing_alias_sender() {
 }
 
 #[test]
-fn missing_alias_issuer_created() {
+fn missing_account_issuer_created() {
     let protocol_parameters = protocol_parameters();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
@@ -676,7 +676,7 @@ fn missing_alias_issuer_created() {
 }
 
 #[test]
-fn missing_alias_issuer_transition() {
+fn missing_account_issuer_transition() {
     let protocol_parameters = protocol_parameters();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 

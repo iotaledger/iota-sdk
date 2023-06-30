@@ -4,7 +4,7 @@
 //! In this example we use an alias as wallet.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example alias_wallet_request_funds`
+//! `cargo run --release --all-features --example account_wallet_request_funds`
 
 use std::env::var;
 

@@ -256,9 +256,11 @@ fn filter_inputs(
         }
 
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
-        let alias_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
+        let account_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
 
-        if let Some(available_input) = output_data.input_signing_data(account, current_time, alias_state_transition)? {
+        if let Some(available_input) =
+            output_data.input_signing_data(account, current_time, account_state_transition)?
+        {
             available_outputs_signing_data.push(available_input);
         }
     }

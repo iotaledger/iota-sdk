@@ -74,13 +74,13 @@ pub fn validate_regular_transaction_essence_length(
     let regular_transaction_essence_bytes = regular_transaction_essence.pack_to_vec();
 
     // Assuming there is only 1 signature unlock and the rest is reference/alias/nft unlocks
-    let reference_alias_nft_unlocks_amount = regular_transaction_essence.inputs().len() - 1;
+    let reference_account_nft_unlocks_amount = regular_transaction_essence.inputs().len() - 1;
 
     // Max tx payload length - length for one signature unlock (there might be more unlocks, we check with them
     // later again, when we built the transaction payload)
     let max_length = MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS
         - SINGLE_UNLOCK_LENGTH
-        - (reference_alias_nft_unlocks_amount * REFERENCE_ALIAS_NFT_UNLOCK_LENGTH);
+        - (reference_account_nft_unlocks_amount * REFERENCE_ALIAS_NFT_UNLOCK_LENGTH);
 
     if regular_transaction_essence_bytes.len() > max_length {
         return Err(Error::InvalidRegularTransactionEssenceLength {

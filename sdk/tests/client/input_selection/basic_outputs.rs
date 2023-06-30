@@ -543,7 +543,7 @@ fn missing_ed25519_sender() {
 }
 
 #[test]
-fn alias_sender() {
+fn account_sender() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -599,7 +599,7 @@ fn alias_sender() {
 }
 
 #[test]
-fn alias_sender_zero_id() {
+fn account_sender_zero_id() {
     let protocol_parameters = protocol_parameters();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
@@ -653,7 +653,7 @@ fn alias_sender_zero_id() {
 }
 
 #[test]
-fn missing_alias_sender() {
+fn missing_account_sender() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([Basic(

@@ -35,7 +35,7 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn sign_alias_state_transition() -> Result<()> {
+async fn sign_account_state_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
@@ -126,7 +126,7 @@ async fn sign_alias_state_transition() -> Result<()> {
 }
 
 #[tokio::test]
-async fn sign_alias_governance_transition() -> Result<()> {
+async fn sign_account_governance_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
@@ -217,7 +217,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
 }
 
 #[tokio::test]
-async fn alias_reference_unlocks() -> Result<()> {
+async fn account_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
@@ -239,7 +239,8 @@ async fn alias_reference_unlocks() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
-    let alias_bech32_address = &Address::Account(AccountAddress::new(account_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let account_bech32_address =
+        &Address::Account(AccountAddress::new(account_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let inputs = build_inputs([
         Account(
@@ -255,7 +256,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_bech32_address.to_string(),
+            &account_bech32_address.to_string(),
             None,
             None,
             None,
@@ -265,7 +266,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_bech32_address.to_string(),
+            &account_bech32_address.to_string(),
             None,
             None,
             None,
@@ -289,7 +290,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
         Basic(
             2_000_000,
-            &alias_bech32_address.to_string(),
+            &account_bech32_address.to_string(),
             None,
             None,
             None,

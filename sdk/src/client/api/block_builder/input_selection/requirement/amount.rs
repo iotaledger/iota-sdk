@@ -226,8 +226,8 @@ impl InputSelection {
                 .map(|chain_id| {
                     self.automatically_transitioned
                         .get(chain_id)
-                        .map_or(false, |alias_transition| {
-                            alias_transition.map_or(true, |alias_transition| alias_transition.is_state())
+                        .map_or(false, |account_transition| {
+                            account_transition.map_or(true, |account_transition| account_transition.is_state())
                         })
                 })
                 .unwrap_or(false)

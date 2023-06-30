@@ -60,9 +60,9 @@ async fn all_combined() -> Result<()> {
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2)?;
-    let alias_1_bech32_address =
+    let account_1_bech32_address =
         &Address::Account(AccountAddress::new(account_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let alias_2_bech32_address =
+    let account_2_bech32_address =
         &Address::Account(AccountAddress::new(account_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let nft_id_1 = NftId::from_str(NFT_ID_1)?;
@@ -99,7 +99,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_1_bech32_address.to_string(),
+            &account_1_bech32_address.to_string(),
             None,
             None,
             None,
@@ -109,7 +109,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_2_bech32_address.to_string(),
+            &account_2_bech32_address.to_string(),
             None,
             None,
             None,
@@ -119,7 +119,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_2_bech32_address.to_string(),
+            &account_2_bech32_address.to_string(),
             None,
             None,
             None,
@@ -211,7 +211,7 @@ async fn all_combined() -> Result<()> {
         Nft(
             1_000_000,
             nft_id_2,
-            &alias_1_bech32_address.to_string(),
+            &account_1_bech32_address.to_string(),
             None,
             None,
             None,
@@ -227,7 +227,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some((&alias_1_bech32_address.to_string(), 50)),
+            Some((&account_1_bech32_address.to_string(), 50)),
             None,
         ),
         Basic(
@@ -253,7 +253,7 @@ async fn all_combined() -> Result<()> {
         Nft(
             1_000_000,
             nft_id_3,
-            &alias_1_bech32_address.to_string(),
+            &account_1_bech32_address.to_string(),
             None,
             None,
             None,
@@ -264,7 +264,7 @@ async fn all_combined() -> Result<()> {
         Nft(
             1_000_000,
             nft_id_4,
-            &alias_1_bech32_address.to_string(),
+            &account_1_bech32_address.to_string(),
             None,
             None,
             None,

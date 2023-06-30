@@ -10,7 +10,7 @@ use crate::{
 impl InputSelection {
     // Checks if a selected input unlocks a given ED25519 address.
     fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        let alias_transition = is_account_transition(
+        let account_transition = is_account_transition(
             &input.output,
             *input.output_id(),
             self.outputs.as_slice(),
@@ -20,11 +20,11 @@ impl InputSelection {
         // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input
             .output
-            .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)
+            .required_and_unlocked_address(self.timestamp, input.output_id(), account_transition)
             .unwrap()
             .0;
 
-        if alias_transition.is_some() {
+        if account_transition.is_some() {
             // Only check if we own the required address if the input is an alias because other types of output have
             // been filtered by address already.
             &required_address == address && self.addresses.contains(address)
@@ -95,8 +95,8 @@ impl InputSelection {
             // Otherwise, checks if the requirement can be fulfilled by a non-basic output.
             self.available_inputs.iter().enumerate().find_map(|(index, input)| {
                 if !input.output.is_basic() {
-                    if let (true, alias_transition) = self.available_has_ed25519_address(input, &address) {
-                        Some((index, alias_transition))
+                    if let (true, account_transition) = self.available_has_ed25519_address(input, &address) {
+                        Some((index, account_transition))
                     } else {
                         None
                     }
@@ -107,17 +107,17 @@ impl InputSelection {
         };
 
         match found {
-            Some((index, alias_transition)) => {
+            Some((index, account_transition)) => {
                 // Remove the input from the available inputs, swap to make it O(1).
                 let input = self.available_inputs.swap_remove(index);
 
                 log::debug!(
                     "{address:?} sender requirement fulfilled by {:?} (alias transition {:?})",
                     input.output_id(),
-                    alias_transition
+                    account_transition
                 );
 
-                Ok(vec![(input, alias_transition)])
+                Ok(vec![(input, account_transition)])
             }
             None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address))),
         }

@@ -58,11 +58,11 @@ impl OutputData {
         &self,
         account: &AccountDetails,
         current_time: u32,
-        alias_transition: Option<AccountTransition>,
+        account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let (unlock_address, _unlocked_alias_or_nft_address) =
+        let (unlock_address, _unlocked_account_or_nft_address) =
             self.output
-                .required_and_unlocked_address(current_time, &self.output_id, alias_transition)?;
+                .required_and_unlocked_address(current_time, &self.output_id, account_transition)?;
 
         let chain = if unlock_address == self.address {
             self.chain.clone()

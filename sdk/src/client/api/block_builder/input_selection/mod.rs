@@ -64,17 +64,17 @@ pub struct Selected {
 }
 
 impl InputSelection {
-    fn required_alias_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let alias_transition =
+    fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
+        let account_transition =
             is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
-            .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?
+            .required_and_unlocked_address(self.timestamp, input.output_id(), account_transition)?
             .0;
 
         match required_address {
             Address::Ed25519(_) => {
-                if alias_transition.is_some() {
+                if account_transition.is_some() {
                     // Only add the requirement if the output is an alias because other types of output have been
                     // filtered by address already.
                     Ok(Some(Requirement::Ed25519(required_address)))
@@ -93,20 +93,20 @@ impl InputSelection {
     fn select_input(
         &mut self,
         input: InputSigningData,
-        alias_transition: Option<AccountTransition>,
+        account_transition: Option<AccountTransition>,
     ) -> Result<(), Error> {
         log::debug!("Selecting input {:?}", input.output_id());
 
-        if let Some(output) = self.transition_input(&input, alias_transition)? {
+        if let Some(output) = self.transition_input(&input, account_transition)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
             // - the issuer feature doesn't need to be verified as the chain is not new
             // - input doesn't need to be checked for as we just transitioned it
-            // - foundry alias requirement should have been met already by a prior `required_alias_nft_addresses`
+            // - foundry alias requirement should have been met already by a prior `required_account_nft_addresses`
             self.outputs.push(output);
         }
 
-        if let Some(requirement) = self.required_alias_nft_addresses(&input)? {
+        if let Some(requirement) = self.required_account_nft_addresses(&input)? {
             log::debug!("Adding {requirement:?} from input {:?}", input.output_id());
             self.requirements.push(requirement);
         }
@@ -271,9 +271,9 @@ impl InputSelection {
         // might be a more efficient way to do this
         inputs.sort_by_key(|i| i.output.pack_to_vec());
         // filter for ed25519 address first
-        let (mut sorted_inputs, alias_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
+        let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let alias_transition = is_account_transition(
+                let account_transition = is_account_transition(
                     &input_signing_data.output,
                     *input_signing_data.output_id(),
                     outputs,
@@ -281,19 +281,19 @@ impl InputSelection {
                 );
                 let (input_address, _) = input_signing_data
                     .output
-                    .required_and_unlocked_address(time, input_signing_data.output_id(), alias_transition)
+                    .required_and_unlocked_address(time, input_signing_data.output_id(), account_transition)
                     // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
                 input_address.is_ed25519()
             });
 
-        for input in alias_nft_address_inputs {
-            let alias_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
+        for input in account_nft_address_inputs {
+            let account_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
             let (input_address, _) =
                 input
                     .output
-                    .required_and_unlocked_address(time, input.output_id(), alias_transition)?;
+                    .required_and_unlocked_address(time, input.output_id(), account_transition)?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Account(unlock_address) => {
@@ -319,7 +319,7 @@ impl InputSelection {
                 }
                 None => {
                     // insert before address
-                    let alias_or_nft_address = match &input.output {
+                    let account_or_nft_address = match &input.output {
                         Output::Account(account_output) => Some(Address::Account(AccountAddress::new(
                             account_output.account_id_non_null(input.output_id()),
                         ))),
@@ -329,10 +329,10 @@ impl InputSelection {
                         _ => None,
                     };
 
-                    if let Some(alias_or_nft_address) = alias_or_nft_address {
+                    if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let alias_transition = is_account_transition(
+                            let account_transition = is_account_transition(
                                 &input_signing_data.output,
                                 *input_signing_data.output_id(),
                                 outputs,
@@ -340,11 +340,11 @@ impl InputSelection {
                             );
                             let (input_address, _) = input_signing_data
                                 .output
-                                .required_and_unlocked_address(time, input.output_id(), alias_transition)
+                                .required_and_unlocked_address(time, input.output_id(), account_transition)
                                 // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 
-                            input_address == alias_or_nft_address
+                            input_address == account_or_nft_address
                         }) {
                             Some(position) => {
                                 // Insert before the output with this address required for unlocking
@@ -389,8 +389,8 @@ impl InputSelection {
             let inputs = self.fulfill_requirement(requirement)?;
 
             // Select suggested inputs.
-            for (input, alias_transition) in inputs {
-                self.select_input(input, alias_transition)?;
+            for (input, account_transition) in inputs {
+                self.select_input(input, account_transition)?;
             }
         }
 
@@ -461,11 +461,11 @@ impl InputSelection {
                         continue;
                     }
 
-                    let alias_input = input_aliases
+                    let account_input = input_aliases
                         .iter()
                         .find(|i| {
-                            if let Output::Account(alias_input) = &i.output {
-                                *account_output.account_id() == alias_input.account_id_non_null(i.output_id())
+                            if let Output::Account(account_input) = &i.output {
+                                *account_output.account_id() == account_input.account_id_non_null(i.output_id())
                             } else {
                                 false
                             }
@@ -473,21 +473,21 @@ impl InputSelection {
                         .expect("ISA is broken because there is no alias input");
 
                     if let Err(err) = AccountOutput::transition_inner(
-                        alias_input.output.as_alias(),
+                        account_input.output.as_alias(),
                         account_output,
                         &input_chains_foundries,
                         &self.outputs,
                     ) {
                         log::debug!("validate_transitions error {err:?}");
-                        let alias_transition =
-                            if alias_input.output.as_alias().state_index() == account_output.state_index() {
+                        let account_transition =
+                            if account_input.output.as_alias().state_index() == account_output.state_index() {
                                 AccountTransition::Governance
                             } else {
                                 AccountTransition::State
                             };
                         return Err(Error::UnfulfillableRequirement(Requirement::Account(
                             *account_output.account_id(),
-                            alias_transition,
+                            account_transition,
                         )));
                     }
                 }

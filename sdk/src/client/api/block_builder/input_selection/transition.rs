@@ -19,7 +19,7 @@ impl InputSelection {
         &mut self,
         input: &AccountOutput,
         output_id: &OutputId,
-        alias_transition: AccountTransition,
+        account_transition: AccountTransition,
     ) -> Result<Option<Output>, Error> {
         let account_id = input.account_id_non_null(output_id);
 
@@ -61,16 +61,16 @@ impl InputSelection {
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
-        if alias_transition.is_state() {
+        if account_transition.is_state() {
             builder = builder.with_state_index(input.state_index() + 1)
         };
 
         let output = builder.finish_output(self.protocol_parameters.token_supply())?;
 
         self.automatically_transitioned
-            .insert(ChainId::from(account_id), Some(alias_transition));
+            .insert(ChainId::from(account_id), Some(account_transition));
 
-        log::debug!("Automatic {alias_transition} transition of {output_id:?}/{account_id:?}");
+        log::debug!("Automatic {account_transition} transition of {output_id:?}/{account_id:?}");
 
         Ok(Some(output))
     }
@@ -154,17 +154,17 @@ impl InputSelection {
     }
 
     /// Transitions an input by creating a new output if required.
-    /// If no `alias_transition` is provided, assumes a state transition.
+    /// If no `account_transition` is provided, assumes a state transition.
     pub(crate) fn transition_input(
         &mut self,
         input: &InputSigningData,
-        alias_transition: Option<AccountTransition>,
+        account_transition: Option<AccountTransition>,
     ) -> Result<Option<Output>, Error> {
         match &input.output {
-            Output::Account(alias_input) => self.transition_account_input(
-                alias_input,
+            Output::Account(account_input) => self.transition_account_input(
+                account_input,
                 input.output_id(),
-                alias_transition.unwrap_or(AccountTransition::State),
+                account_transition.unwrap_or(AccountTransition::State),
             ),
             Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),

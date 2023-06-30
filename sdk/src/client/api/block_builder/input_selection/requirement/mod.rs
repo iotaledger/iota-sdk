@@ -56,8 +56,8 @@ impl InputSelection {
             Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
             Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
             Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
-            Requirement::Account(account_id, alias_transition) => {
-                self.fulfill_account_requirement(account_id, alias_transition)
+            Requirement::Account(account_id, account_transition) => {
+                self.fulfill_account_requirement(account_id, account_transition)
             }
             Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),

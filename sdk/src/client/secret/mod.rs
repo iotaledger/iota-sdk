@@ -437,11 +437,11 @@ where
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) = input.output.required_and_unlocked_address(
             time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
             input.output_metadata.output_id(),
-            alias_transition,
+            account_transition,
         )?;
 
         // Check if we already added an [Unlock] for this address

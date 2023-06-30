@@ -24,7 +24,7 @@ use crate::client::{
 };
 
 #[test]
-fn burn_alias_present() {
+fn burn_account_present() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -69,7 +69,7 @@ fn burn_alias_present() {
 }
 
 #[test]
-fn burn_alias_present_and_required() {
+fn burn_account_present_and_required() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -161,7 +161,7 @@ fn burn_account_id_zero() {
 }
 
 #[test]
-fn burn_alias_absent() {
+fn burn_account_absent() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -258,7 +258,7 @@ fn burn_aliases_present() {
 }
 
 #[test]
-fn burn_alias_in_outputs() {
+fn burn_account_in_outputs() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 

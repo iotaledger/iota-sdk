@@ -27,7 +27,7 @@ use crate::client::{
 };
 
 #[test]
-fn input_alias_eq_output_alias() {
+fn input_account_eq_output_alias() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -203,7 +203,7 @@ fn input_amount_lt_output_amount_2() {
 }
 
 #[test]
-fn basic_output_with_alias_input() {
+fn basic_output_with_account_input() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -504,7 +504,7 @@ fn missing_input_for_account_output_but_created() {
 }
 
 #[test]
-fn alias_in_output_and_sender() {
+fn account_in_output_and_sender() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -674,7 +674,7 @@ fn missing_ed25519_issuer_transition() {
 }
 
 #[test]
-fn missing_alias_sender() {
+fn missing_account_sender() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -716,7 +716,7 @@ fn missing_alias_sender() {
 }
 
 #[test]
-fn missing_alias_issuer_created() {
+fn missing_account_issuer_created() {
     let protocol_parameters = protocol_parameters();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
@@ -757,7 +757,7 @@ fn missing_alias_issuer_created() {
 }
 
 #[test]
-fn missing_alias_issuer_transition() {
+fn missing_account_issuer_transition() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -918,7 +918,7 @@ fn missing_nft_issuer_transition() {
 }
 
 #[test]
-fn increase_alias_amount() {
+fn increase_account_amount() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -962,7 +962,7 @@ fn increase_alias_amount() {
 }
 
 #[test]
-fn decrease_alias_amount() {
+fn decrease_account_amount() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1062,7 +1062,7 @@ fn prefer_basic_to_alias() {
 }
 
 #[test]
-fn take_amount_from_alias_to_fund_basic() {
+fn take_amount_from_account_to_fund_basic() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1125,7 +1125,7 @@ fn take_amount_from_alias_to_fund_basic() {
 }
 
 #[test]
-fn alias_burn_should_not_validate_alias_sender() {
+fn account_burn_should_not_validate_account_sender() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1170,7 +1170,7 @@ fn alias_burn_should_not_validate_alias_sender() {
 }
 
 #[test]
-fn alias_burn_should_not_validate_account_address() {
+fn account_burn_should_not_validate_account_address() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1215,7 +1215,7 @@ fn alias_burn_should_not_validate_account_address() {
 }
 
 #[test]
-fn alias_governance_transition_should_not_validate_alias_sender() {
+fn account_governance_transition_should_not_validate_account_sender() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1260,7 +1260,7 @@ fn alias_governance_transition_should_not_validate_alias_sender() {
 }
 
 #[test]
-fn alias_governance_transition_should_not_validate_account_address() {
+fn account_governance_transition_should_not_validate_account_address() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -2184,7 +2184,7 @@ fn governance_transition_but_governor_not_owned() {
 }
 
 #[test]
-fn burn_alias_but_governor_not_owned() {
+fn burn_account_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -2397,7 +2397,7 @@ fn new_state_metadata_but_same_state_index() {
         selected,
         Err(Error::UnfulfillableRequirement(Requirement::Account(
             account_id,
-            _alias_transition,
+            _account_transition,
         ))) if account_id == account_id_1
     ));
 }

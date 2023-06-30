@@ -282,16 +282,16 @@ impl Output {
 
     /// Returns the address that is required to unlock this [`Output`] and the alias or nft address that gets
     /// unlocked by it, if it's an alias or nft.
-    /// If no `alias_transition` has been provided, assumes a state transition.
+    /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_and_unlocked_address(
         &self,
         current_time: u32,
         output_id: &OutputId,
-        alias_transition: Option<AccountTransition>,
+        account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Account(output) => {
-                if alias_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
+                if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
                     // Account address is only unlocked if it's a state transition
                     Ok((
                         *output.state_controller_address(),

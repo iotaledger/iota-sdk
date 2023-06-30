@@ -153,7 +153,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn create_alias_params_serde() {
+    fn create_account_params_serde() {
         let params_none_1 = CreateAccountParams {
             address: None,
             immutable_metadata: None,

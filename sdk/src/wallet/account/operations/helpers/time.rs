@@ -14,10 +14,10 @@ pub(crate) fn can_output_be_unlocked_now(
     // We use the addresses with unspent outputs, because other addresses of the account without unspent outputs can't
     // be related to this output
     account_addresses: &[AddressWithUnspentOutputs],
-    alias_and_nft_addresses: &[Address],
+    account_and_nft_addresses: &[Address],
     output_data: &OutputData,
     current_time: u32,
-    alias_transition: Option<AccountTransition>,
+    account_transition: Option<AccountTransition>,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
         if unlock_conditions.is_time_locked(current_time) {
@@ -25,15 +25,14 @@ pub(crate) fn can_output_be_unlocked_now(
         }
     }
 
-    let (required_unlock_address, _unlocked_alias_or_nft_address) =
-        output_data
-            .output
-            .required_and_unlocked_address(current_time, &output_data.output_id, alias_transition)?;
+    let (required_unlock_address, _unlocked_account_or_nft_address) = output_data
+        .output
+        .required_and_unlocked_address(current_time, &output_data.output_id, account_transition)?;
 
     Ok(account_addresses
         .iter()
         .any(|a| a.address.inner == required_unlock_address)
-        || alias_and_nft_addresses.iter().any(|a| *a == required_unlock_address))
+        || account_and_nft_addresses.iter().any(|a| *a == required_unlock_address))
 }
 
 // Check if an output can be unlocked by one of the account addresses at the current time and at any

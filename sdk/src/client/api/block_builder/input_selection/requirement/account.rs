@@ -13,13 +13,13 @@ pub fn is_account_transition<'a>(
     outputs: &[Output],
     burn: impl Into<Option<&'a Burn>>,
 ) -> Option<AccountTransition> {
-    if let Output::Account(alias_input) = &input {
-        let account_id = alias_input.account_id_non_null(&input_id);
+    if let Output::Account(account_input) = &input {
+        let account_id = account_input.account_id_non_null(&input_id);
         // Checks if the alias exists in the outputs and gets the transition type.
         for output in outputs.iter() {
             if let Output::Account(account_output) = output {
                 if *account_output.account_id() == account_id {
-                    if account_output.state_index() == alias_input.state_index() {
+                    if account_output.state_index() == account_input.state_index() {
                         // Governance transition.
                         return Some(AccountTransition::Governance);
                     } else {
@@ -62,10 +62,10 @@ impl InputSelection {
     pub(crate) fn fulfill_account_requirement(
         &mut self,
         account_id: AccountId,
-        alias_transition: AccountTransition,
+        account_transition: AccountTransition,
     ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         // Check that the alias is not burned when a state transition is required.
-        if alias_transition.is_state()
+        if account_transition.is_state()
             && self
                 .burn
                 .as_ref()
@@ -73,7 +73,7 @@ impl InputSelection {
         {
             return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 account_id,
-                alias_transition,
+                account_transition,
             )));
         }
 
@@ -84,9 +84,9 @@ impl InputSelection {
 
         // If a state transition is not required and the alias has already been selected, no additional check has to be
         // performed.
-        if !alias_transition.is_state() && selected_input.is_some() {
+        if !account_transition.is_state() && selected_input.is_some() {
             log::debug!(
-                "{account_id:?}/{alias_transition:?} requirement already fulfilled by {:?}",
+                "{account_id:?}/{account_transition:?} requirement already fulfilled by {:?}",
                 selected_input.unwrap().output_id()
             );
             return Ok(Vec::new());
@@ -101,17 +101,17 @@ impl InputSelection {
         if selected_input.is_none() && available_index.is_none() {
             return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 account_id,
-                alias_transition,
+                account_transition,
             )));
         }
 
         // If a state transition is not required, we can simply select the alias.
-        if !alias_transition.is_state() {
+        if !account_transition.is_state() {
             // Remove the output from the available inputs, swap to make it O(1).
             let input = self.available_inputs.swap_remove(available_index.unwrap());
 
             log::debug!(
-                "{account_id:?}/{alias_transition:?} requirement fulfilled by {:?}",
+                "{account_id:?}/{account_transition:?} requirement fulfilled by {:?}",
                 input.output_id()
             );
 
@@ -130,7 +130,7 @@ impl InputSelection {
         {
             return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 account_id,
-                alias_transition,
+                account_transition,
             )));
         }
 
@@ -139,7 +139,7 @@ impl InputSelection {
             let input = self.available_inputs.swap_remove(available_index);
 
             log::debug!(
-                "{account_id:?}/{alias_transition:?} requirement fulfilled by {:?}",
+                "{account_id:?}/{account_transition:?} requirement fulfilled by {:?}",
                 input.output_id()
             );
 
@@ -147,7 +147,7 @@ impl InputSelection {
         }
 
         log::debug!(
-            "{account_id:?}/{alias_transition:?} requirement already fulfilled by {:?}",
+            "{account_id:?}/{account_transition:?} requirement already fulfilled by {:?}",
             selected_input.unwrap().output_id()
         );
 

@@ -51,10 +51,10 @@ where
         let token_supply = self.client().get_token_supply().await?;
 
         let (existing_account_output_data, existing_foundry_output) = self
-            .find_alias_and_foundry_output_data(account_id, foundry_id)
+            .find_account_and_foundry_output_data(account_id, foundry_id)
             .await
-            .map(|(alias_data, foundry_data)| match foundry_data.output {
-                Output::Foundry(foundry_output) => (alias_data, foundry_output),
+            .map(|(account_data, foundry_data)| match foundry_data.output {
+                Output::Foundry(foundry_output) => (account_data, foundry_output),
                 _ => unreachable!("We already checked it's a foundry output"),
             })?;
 
@@ -84,7 +84,7 @@ where
     }
 
     /// Find and return unspent `OutputData` for given `account_id` and `foundry_id`
-    async fn find_alias_and_foundry_output_data(
+    async fn find_account_and_foundry_output_data(
         &self,
         account_id: AccountId,
         foundry_id: FoundryId,
