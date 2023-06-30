@@ -9,7 +9,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example destroy_account
+//! cargo run --release --all-features --example destroy_account_output
 //! ```
 
 use std::env::var;
