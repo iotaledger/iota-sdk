@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will destroy an alias output
 
-# TODO: replace with your own values.
+# Replace with your own values.
 ALIAS_ID = "0x982667c59ade8ab8a99188f4de38c68b97fc2ca7ba28a1e9d8d683996247e152"
 
 wallet = Wallet('./alice-database')

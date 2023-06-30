@@ -17,7 +17,7 @@ account = wallet.get_account('Alice')
 # Sync account with the node
 response = account.sync()
 
-# TODO: replace with your own values.
+# Replace with your own values.
 nftId = "0xf95f4d5344217a2ba19a6c19a47f97d267edf8c4d76a7b8c08072ad35acbebbe"
 
 # Send transaction.
