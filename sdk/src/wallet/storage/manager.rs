@@ -16,6 +16,9 @@ use crate::{
 /// The storage used by the manager.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) enum ManagerStorage {
+    /// PickleDB storage.
+    #[cfg(feature = "pickledb")]
+    Pickledb,
     /// RocksDB storage.
     #[cfg(feature = "rocksdb")]
     Rocksdb,
@@ -28,11 +31,13 @@ pub(crate) enum ManagerStorage {
 
 impl Default for ManagerStorage {
     fn default() -> Self {
+        #[cfg(feature = "pickledb")]
+        return Self::Pickledb;
         #[cfg(feature = "rocksdb")]
         return Self::Rocksdb;
         #[cfg(target_family = "wasm")]
         return Self::Wasm;
-        #[cfg(not(any(feature = "rocksdb", target_family = "wasm")))]
+        #[cfg(not(any(feature = "pickledb", feature = "rocksdb", target_family = "wasm")))]
         Self::Memory
     }
 }

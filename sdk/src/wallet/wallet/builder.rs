@@ -17,7 +17,7 @@ use tokio::sync::RwLock;
 use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
-#[cfg(all(feature = "storage", not(feature = "rocksdb")))]
+#[cfg(all(feature = "storage", not(feature = "rocksdb"), not(feature = "pickledb")))]
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
@@ -140,7 +140,7 @@ where
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
-        if !storage_options.storage_path.is_dir() {
+        if !storage_options.storage_path.is_dir() && !storage_options.storage_path.is_file() {
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
             }
@@ -151,10 +151,14 @@ where
                 return Err(crate::wallet::Error::MissingParameter("secret_manager"));
             }
         }
+        #[cfg(all(feature = "pickledb", feature = "storage"))]
+        let storage = crate::wallet::storage::adapter::pickledb::PickledbStorageAdapter::new(
+            storage_options.storage_path.clone(),
+        )?;
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
         let storage =
             crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.storage_path.clone())?;
-        #[cfg(all(not(feature = "rocksdb"), feature = "storage"))]
+        #[cfg(all(not(feature = "rocksdb"), not(feature = "pickledb"), feature = "storage"))]
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]

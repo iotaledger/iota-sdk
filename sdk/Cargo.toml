@@ -47,10 +47,12 @@ iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", branch 
 log = { version = "0.4.18", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
 once_cell = { version = "1.17.2", default-features = false, optional = true }
+pickledb = { version = "0.5.1", default-features = false, features = ["json"], optional = true }
 rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen" ], optional = true }
 regex = { version = "1.8.3", default-features = false, features = [ "unicode-perl" ], optional = true }
 reqwest = { version = "0.11.18", default-features = false, features = [ "json" ], optional = true }
-rocksdb = { version = "0.21.0", default-features = false, features = [ "lz4" ], optional = true }
+# Temporarily disabled, so it's not included in --all-features 
+# rocksdb = { version = "0.21.0", default-features = false, features = [ "lz4" ], optional = true }
 rumqttc = { version = "0.21.0", default-features = false, features = [ "websocket" ], optional = true }
 serde-big-array = { version = "0.5.1", default-features = false, optional = true }
 serde_repr = { version = "0.1.12", default-features = false, optional = true }
@@ -85,9 +87,11 @@ ledger_nano = [ "iota-ledger-nano" ]
 message_interface = [ "backtrace", "fern-logger" ]
 mqtt = [ "std", "regex", "rumqttc", "dep:once_cell" ]
 participation = [ "storage" ]
+pickledb = [ "dep:pickledb", "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
-rocksdb = [ "dep:rocksdb", "storage" ]
+# Temporarily disabled, so it's not included in --all-features 
+# rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
@@ -118,37 +122,37 @@ required-features = [ "client" ]
 [[example]]
 name = "create_account"
 path = "examples/how_tos/accounts_and_addresses/create_account.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "list_accounts"
 path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "check_balance"
 path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "list_addresses"
 path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "create_address"
 path = "examples/how_tos/accounts_and_addresses/create_address.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "list_transactions"
 path = "examples/how_tos/accounts_and_addresses/list_transactions.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "list_outputs"
 path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "consolidate_outputs"
@@ -160,73 +164,73 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "request_funds"
 path = "examples/how_tos/simple_transaction/request_funds.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 # Advanced Transactions Examples
 
 [[example]]
 name = "send_micro_transaction"
 path = "examples/how_tos/advanced_transactions/send_micro_transaction.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "advanced_transaction"
 path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 # Native Tokens Examples
 
 [[example]]
 name = "create_native_token"
 path = "examples/how_tos/native_tokens/create.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "destroy_foundry"
 path = "examples/how_tos/native_tokens/destroy_foundry.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "burn_native_token"
 path = "examples/how_tos/native_tokens/burn.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "melt_native_token"
 path = "examples/how_tos/native_tokens/melt.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "mint_native_token"
 path = "examples/how_tos/native_tokens/mint.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "send_native_tokens"
 path = "examples/how_tos/native_tokens/send.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 # Alias wallet example
 
 [[example]]
 name = "alias_wallet_request_funds"
 path = "examples/how_tos/alias_wallet/request_funds.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 [[example]]
 name = "alias_wallet_transaction"
 path = "examples/how_tos/alias_wallet/transaction.rs"
-required-features = [ "rocksdb", "stronghold" ]
+required-features = [ "pickledb", "stronghold" ]
 
 # Outputs
 

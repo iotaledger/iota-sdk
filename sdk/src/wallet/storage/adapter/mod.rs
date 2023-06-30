@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod memory;
+/// PickleDB storage adapter.
+#[cfg(feature = "pickledb")]
+#[cfg_attr(docsrs, doc(cfg(feature = "pickledb")))]
+pub mod pickledb;
 /// RocksDB storage adapter.
 #[cfg(feature = "rocksdb")]
 #[cfg_attr(docsrs, doc(cfg(feature = "rocksdb")))]

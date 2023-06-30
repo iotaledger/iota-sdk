@@ -18,7 +18,7 @@ crate-type = [ "cdylib" ]
 doc = false
 
 [dependencies]
-iota-sdk = { path = "../../../..", default-features = false, features = [ "wallet", "events", "ledger_nano", "storage", "stronghold", "tls", "message_interface", "participation", "rocksdb" ] }
+iota-sdk = { path = "../../../..", default-features = false, features = [ "wallet", "events", "ledger_nano", "storage", "stronghold", "tls", "message_interface", "participation", "pickledb" ] }
 
 log = { version = "0.4.18", default-features = false }
 neon = { version = "0.10.1", default-features = false, features = [ "napi-6", "event-queue-api", "promise-api" ] }

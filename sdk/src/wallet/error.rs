@@ -179,6 +179,13 @@ impl From<crate::client::secret::ledger_nano::Error> for Error {
     }
 }
 
+#[cfg(feature = "pickledb")]
+impl From<pickledb::error::Error> for Error {
+    fn from(error: pickledb::error::Error) -> Self {
+        Self::Storage(error.to_string())
+    }
+}
+
 #[cfg(feature = "rocksdb")]
 impl From<rocksdb::Error> for Error {
     fn from(error: rocksdb::Error) -> Self {

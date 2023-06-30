@@ -20,7 +20,7 @@ online_walletdb
 /pingdb
 /pongdb
 backup
-example-walletdb
+*example-walletdb
 
 # JSON files
 address.json
