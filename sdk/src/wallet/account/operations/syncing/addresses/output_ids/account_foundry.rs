@@ -42,13 +42,13 @@ where
         {
             output_ids.extend(
                 client
-                    .alias_output_ids([QueryParameter::Governor(bech32_address)])
+                    .account_output_ids([QueryParameter::Governor(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 client
-                    .alias_output_ids([QueryParameter::StateController(bech32_address)])
+                    .account_output_ids([QueryParameter::StateController(bech32_address)])
                     .await?
                     .items,
             );
@@ -62,7 +62,7 @@ where
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids([QueryParameter::Governor(bech32_address)])
+                            .account_output_ids([QueryParameter::Governor(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -74,7 +74,7 @@ where
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids([QueryParameter::StateController(bech32_address)])
+                            .account_output_ids([QueryParameter::StateController(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -103,20 +103,20 @@ where
     /// Returns output ids of foundries controlled by the provided aliases
     pub(crate) async fn get_foundry_output_ids(
         &self,
-        alias_output_ids: &HashSet<OutputId>,
+        account_output_ids: &HashSet<OutputId>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_foundry_output_ids");
         // Get account outputs, so we can then get the foundry outputs with the account addresses
-        let alias_outputs_with_meta = self.get_outputs(alias_output_ids.iter().copied().collect()).await?;
+        let account_outputs_with_meta = self.get_outputs(account_output_ids.iter().copied().collect()).await?;
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 
         let mut tasks = Vec::new();
 
-        for alias_output_with_meta in alias_outputs_with_meta {
-            if let Output::Account(alias_output) = alias_output_with_meta.output() {
+        for account_output_with_meta in account_outputs_with_meta {
+            if let Output::Account(account_output) = account_output_with_meta.output() {
                 let account_address = AccountAddress::from(
-                    alias_output.account_id_non_null(alias_output_with_meta.metadata().output_id()),
+                    account_output.account_id_non_null(account_output_with_meta.metadata().output_id()),
                 );
                 let alias_bech32_address = account_address.to_bech32(bech32_hrp);
                 let client = self.client().clone();

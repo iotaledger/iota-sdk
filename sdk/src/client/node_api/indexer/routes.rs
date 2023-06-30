@@ -7,7 +7,7 @@ use crate::{
     client::{
         node_api::indexer::{
             query_parameters::{
-                verify_query_parameters_alias_outputs, verify_query_parameters_basic_outputs,
+                verify_query_parameters_account_outputs, verify_query_parameters_basic_outputs,
                 verify_query_parameters_foundry_outputs, verify_query_parameters_nft_outputs, QueryParameter,
             },
             QueryParameters,
@@ -45,20 +45,20 @@ impl ClientInner {
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
     /// api/indexer/v2/outputs/alias
-    pub async fn alias_output_ids(
+    pub async fn account_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/alias";
 
-        let query_parameters = verify_query_parameters_alias_outputs(query_parameters.into())?;
+        let query_parameters = verify_query_parameters_account_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
     /// Get account output by its accountID.
     /// api/indexer/v2/outputs/alias/:{AccountId}
-    pub async fn alias_output_id(&self, account_id: AccountId) -> Result<OutputId> {
+    pub async fn account_output_id(&self, account_id: AccountId) -> Result<OutputId> {
         let route = format!("api/indexer/v2/outputs/alias/{account_id}");
 
         Ok(*(self

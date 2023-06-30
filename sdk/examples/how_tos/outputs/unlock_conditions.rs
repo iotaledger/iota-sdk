@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(address));
-    let alias_output_builder =
+    let account_output_builder =
         AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
             .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output(token_supply)?,
         // with governor and state controller unlock condition
-        alias_output_builder
+        account_output_builder
             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .finish_output(token_supply)?,

@@ -183,7 +183,7 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     let native_token_amount = U256::from(100);
 
-    let tx = accounts[1].create_alias_output(None, None).await?;
+    let tx = accounts[1].create_account_output(None, None).await?;
     accounts[1]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
@@ -283,7 +283,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     let native_token_amount = U256::from(100);
 
-    let tx = account_0.create_alias_output(None, None).await?;
+    let tx = account_0.create_account_output(None, None).await?;
     account_0
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;

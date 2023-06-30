@@ -4,7 +4,7 @@
 //! TODO: <insert example description> by calling
 //! `GET api/indexer/v2/outputs/alias`.
 //!
-//! `cargo run --example node_api_indexer_get_alias_outputs --release -- [NODE URL] [ADDRESS]`
+//! `cargo run --example node_api_indexer_get_account_outputs --release -- [NODE URL] [ADDRESS]`
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
-        .alias_output_ids([
+        .account_output_ids([
             QueryParameter::Governor(address),
             QueryParameter::StateController(address),
         ])

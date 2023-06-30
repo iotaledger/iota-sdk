@@ -180,7 +180,7 @@ fn build_nft_output(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn build_alias_output(
+fn build_account_output(
     amount: u64,
     account_id: AccountId,
     state_index: u32,
@@ -285,7 +285,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
             bech32_issuer,
             chain,
         ) => (
-            build_alias_output(
+            build_account_output(
                 amount,
                 account_id,
                 state_index,

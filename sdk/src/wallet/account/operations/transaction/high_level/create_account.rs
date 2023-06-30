@@ -16,7 +16,7 @@ use crate::{
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
-/// Params `create_alias_output()`
+/// Params `create_account_output()`
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAccountParams {
@@ -47,32 +47,32 @@ where
     ///     state_metadata: Some(b"some alias state metadata".to_vec()),
     /// };
     ///
-    /// let transaction = account.create_alias_output(params, None).await?;
+    /// let transaction = account.create_account_output(params, None).await?;
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
     ///     std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id
     /// );
     /// ```
-    pub async fn create_alias_output(
+    pub async fn create_account_output(
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
-        let prepared_transaction = self.prepare_create_alias_output(params, options.clone()).await?;
+        let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for
-    /// [Account.create_alias_output()](crate::account::Account.create_alias_output)
-    pub async fn prepare_create_alias_output(
+    /// [Account.create_account_output()](crate::account::Account.create_account_output)
+    pub async fn prepare_create_account_output(
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
-        log::debug!("[TRANSACTION] prepare_create_alias_output");
+        log::debug!("[TRANSACTION] prepare_create_account_output");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
@@ -91,7 +91,7 @@ where
             }
         };
 
-        let mut alias_output_builder =
+        let mut account_output_builder =
             AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
@@ -105,32 +105,32 @@ where
         }) = params
         {
             if let Some(immutable_metadata) = immutable_metadata {
-                alias_output_builder =
-                    alias_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
+                account_output_builder =
+                    account_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
             if let Some(metadata) = metadata {
-                alias_output_builder = alias_output_builder.add_feature(MetadataFeature::new(metadata)?);
+                account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
             }
             if let Some(state_metadata) = state_metadata {
-                alias_output_builder = alias_output_builder.with_state_metadata(state_metadata);
+                account_output_builder = account_output_builder.with_state_metadata(state_metadata);
             }
         }
 
-        let outputs = [alias_output_builder.finish_output(token_supply)?];
+        let outputs = [account_output_builder.finish_output(token_supply)?];
 
         self.prepare_transaction(outputs, options).await
     }
 
     /// Get an existing account output
-    pub(crate) async fn get_alias_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
-        log::debug!("[get_alias_output]");
+    pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
+        log::debug!("[get_account_output]");
         self.details()
             .await
             .unspent_outputs()
             .values()
             .find_map(|output_data| match &output_data.output {
-                Output::Account(alias_output) => {
-                    let output_account_id = alias_output.account_id_non_null(&output_data.output_id);
+                Output::Account(account_output) => {
+                    let output_account_id = account_output.account_id_non_null(&output_data.output_id);
 
                     account_id.map_or_else(
                         || Some((output_account_id, output_data.clone())),

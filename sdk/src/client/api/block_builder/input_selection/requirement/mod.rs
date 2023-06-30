@@ -73,12 +73,12 @@ impl InputSelection {
         for output in outputs {
             let is_created = match output {
                 // Add an alias requirement if the account output is transitioning and then required in the inputs.
-                Output::Account(alias_output) => {
-                    let is_created = alias_output.account_id().is_null();
+                Output::Account(account_output) => {
+                    let is_created = account_output.account_id().is_null();
 
                     if !is_created {
                         let requirement =
-                            Requirement::Account(*alias_output.account_id(), AccountTransition::Governance);
+                            Requirement::Account(*account_output.account_id(), AccountTransition::Governance);
                         log::debug!("Adding {requirement:?} from output");
                         self.requirements.push(requirement);
                     }

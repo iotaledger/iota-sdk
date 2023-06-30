@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example update_alias_output
+//! cargo run --release --all-features --example update_account_output
 //! ```
 
 use std::{env::var, str::FromStr, time::Instant};
@@ -44,28 +44,28 @@ async fn main() -> Result<()> {
 
     // Get the account output by its account id
     let account_id = AccountId::from_str(ACCOUNT_ID)?;
-    if let Some(alias_output_data) = account.unspent_alias_output(&account_id).await? {
+    if let Some(account_output_data) = account.unspent_account_output(&account_id).await? {
         println!(
             "Alias '{ACCOUNT_ID}' found in unspent output: '{}'",
-            alias_output_data.output_id
+            account_output_data.output_id
         );
 
         let token_supply = account.client().get_token_supply().await?;
         let rent_structure = account.client().get_rent_structure().await?;
 
-        let alias_output = alias_output_data.output.as_alias();
-        let updated_alias_output = AccountOutputBuilder::from(alias_output)
+        let account_output = account_output_data.output.as_alias();
+        let updated_account_output = AccountOutputBuilder::from(account_output)
             // Update the account id, as it might still be null
-            .with_account_id(alias_output.account_id_non_null(&alias_output_data.output_id))
+            .with_account_id(account_output.account_id_non_null(&account_output_data.output_id))
             // Minimum required storage deposit will change if the new metadata has a different size, so we will update
             // the amount
             .with_minimum_storage_deposit(rent_structure)
             .with_state_metadata(NEW_STATE_METADATA.as_bytes().to_vec())
-            .with_state_index(alias_output.state_index() + 1)
+            .with_state_index(account_output.state_index() + 1)
             .finish_output(token_supply)?;
 
         println!("Sending transaction...",);
-        send_and_wait_for_inclusion(&account, vec![updated_alias_output]).await?;
+        send_and_wait_for_inclusion(&account, vec![updated_account_output]).await?;
     } else {
         panic!("alias doesn't exist or is not unspent");
     }

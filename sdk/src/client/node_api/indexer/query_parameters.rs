@@ -230,7 +230,9 @@ pub(crate) fn verify_query_parameters_basic_outputs(query_parameters: Vec<QueryP
     Ok(QueryParameters::new(query_parameters))
 }
 
-pub(crate) fn verify_query_parameters_alias_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {
+pub(crate) fn verify_query_parameters_account_outputs(
+    query_parameters: Vec<QueryParameter>,
+) -> Result<QueryParameters> {
     verify_query_parameters!(
         query_parameters,
         QueryParameter::StateController,

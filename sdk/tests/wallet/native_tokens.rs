@@ -18,7 +18,7 @@ async fn create_and_mint_native_token() -> Result<()> {
 
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let tx = account.create_alias_output(None, None).await?;
+    let tx = account.create_account_output(None, None).await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
@@ -81,7 +81,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
 
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let tx = account.create_alias_output(None, None).await?;
+    let tx = account.create_account_output(None, None).await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;

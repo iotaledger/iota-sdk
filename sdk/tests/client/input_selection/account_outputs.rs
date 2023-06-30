@@ -284,8 +284,8 @@ fn create_alias() {
     assert_eq!(selected.outputs.len(), 2);
     // Output contains the new minted account id
     assert!(selected.outputs.iter().any(|output| {
-        if let Output::Account(alias_output) = output {
-            *alias_output.account_id() == account_id_0
+        if let Output::Account(account_output) = output {
+            *account_output.account_id() == account_id_0
         } else {
             false
         }
@@ -379,7 +379,7 @@ fn not_enough_storage_deposit_for_remainder() {
 }
 
 #[test]
-fn missing_input_for_alias_output() {
+fn missing_input_for_account_output() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -420,7 +420,7 @@ fn missing_input_for_alias_output() {
 }
 
 #[test]
-fn missing_input_for_alias_output_2() {
+fn missing_input_for_account_output_2() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
@@ -466,7 +466,7 @@ fn missing_input_for_alias_output_2() {
 }
 
 #[test]
-fn missing_input_for_alias_output_but_created() {
+fn missing_input_for_account_output_but_created() {
     let protocol_parameters = protocol_parameters();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
@@ -522,7 +522,7 @@ fn alias_in_output_and_sender() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let alias_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
         .with_state_index(inputs[0].output.as_alias().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
@@ -536,7 +536,7 @@ fn alias_in_output_and_sender() {
         None,
         None,
     )]);
-    outputs.push(alias_output);
+    outputs.push(account_output);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -1417,22 +1417,26 @@ fn two_aliases_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.account_id() == &account_id_1
-        } else {
-            false
-        }));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.account_id() == &account_id_2
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.account_id() == &account_id_1
+            } else {
+                false
+            })
+    );
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.account_id() == &account_id_2
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1474,14 +1478,16 @@ fn state_controller_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.state_index() == inputs[0].output.as_alias().state_index() + 1
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.state_index() == inputs[0].output.as_alias().state_index() + 1
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1635,14 +1641,16 @@ fn governor_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.state_index() == inputs[0].output.as_alias().state_index()
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.state_index() == inputs[0].output.as_alias().state_index()
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -2304,7 +2312,7 @@ fn new_state_metadata() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let alias_output =
+    let account_output =
         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
@@ -2317,20 +2325,20 @@ fn new_state_metadata() {
             .unwrap();
 
     let inputs = [InputSigningData {
-        output: alias_output.clone(),
+        output: account_output.clone(),
         output_metadata: rand_output_metadata(),
         chain: None,
     }];
 
     // New account output, with updated state index
-    let updated_alias_output = AccountOutputBuilder::from(alias_output.as_alias())
+    let updated_account_output = AccountOutputBuilder::from(account_output.as_alias())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
-        .with_state_index(alias_output.as_alias().state_index() + 1)
+        .with_state_index(account_output.as_alias().state_index() + 1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_alias_output];
+    let outputs = [updated_account_output];
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -2350,7 +2358,7 @@ fn new_state_metadata_but_same_state_index() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let alias_output =
+    let account_output =
         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
@@ -2363,19 +2371,19 @@ fn new_state_metadata_but_same_state_index() {
             .unwrap();
 
     let inputs = [InputSigningData {
-        output: alias_output.clone(),
+        output: account_output.clone(),
         output_metadata: rand_output_metadata(),
         chain: None,
     }];
 
     // New account output, without updated state index
-    let updated_alias_output = AccountOutputBuilder::from(alias_output.as_alias())
+    let updated_account_output = AccountOutputBuilder::from(account_output.as_alias())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_alias_output];
+    let outputs = [updated_account_output];
 
     let selected = InputSelection::new(
         inputs,

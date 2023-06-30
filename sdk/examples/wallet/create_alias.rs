@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     println!("Sending the create-alias transaction...");
 
     // Create an account output
-    let transaction = account.create_alias_output(None, None).await?;
+    let transaction = account.create_account_output(None, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

@@ -107,9 +107,9 @@ where
             }
         }
 
-        if (address.is_ed25519() && sync_options.account.alias_outputs)
-            || (address.is_nft() && sync_options.nft.alias_outputs)
-            || (address.is_alias() && sync_options.alias.alias_outputs)
+        if (address.is_ed25519() && sync_options.account.account_outputs)
+            || (address.is_nft() && sync_options.nft.account_outputs)
+            || (address.is_alias() && sync_options.alias.account_outputs)
         {
             // aliases and foundries
             #[cfg(target_family = "wasm")]

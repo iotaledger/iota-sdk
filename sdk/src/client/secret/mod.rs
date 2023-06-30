@@ -477,8 +477,8 @@ where
         // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
         // that have the corresponding alias or nft address in their unlock condition
         match &input.output {
-            Output::Account(alias_output) => block_indexes.insert(
-                Address::Account(alias_output.account_address(input.output_id())),
+            Output::Account(account_output) => block_indexes.insert(
+                Address::Account(account_output.account_address(input.output_id())),
                 current_block_index,
             ),
             Output::Nft(nft_output) => block_indexes.insert(

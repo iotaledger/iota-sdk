@@ -541,8 +541,10 @@ fn merge_unlocks(
         // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
         // that have the corresponding alias or nft address in their unlock condition
         match &input.output {
-            Output::Account(alias_output) => block_indexes.insert(
-                Address::Account(AccountAddress::new(alias_output.account_id_non_null(input.output_id()))),
+            Output::Account(account_output) => block_indexes.insert(
+                Address::Account(AccountAddress::new(
+                    account_output.account_id_non_null(input.output_id()),
+                )),
                 current_block_index,
             ),
             Output::Nft(nft_output) => block_indexes.insert(

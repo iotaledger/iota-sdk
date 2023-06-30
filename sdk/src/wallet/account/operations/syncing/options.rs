@@ -106,7 +106,7 @@ impl Default for SyncOptions {
 pub struct AccountSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
-    pub alias_outputs: bool,
+    pub account_outputs: bool,
 }
 
 impl Default for AccountSyncOptions {
@@ -114,7 +114,7 @@ impl Default for AccountSyncOptions {
         Self {
             basic_outputs: true,
             nft_outputs: true,
-            alias_outputs: true,
+            account_outputs: true,
         }
     }
 }
@@ -125,7 +125,7 @@ impl Default for AccountSyncOptions {
 pub struct AliasSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
-    pub alias_outputs: bool,
+    pub account_outputs: bool,
     pub foundry_outputs: bool,
 }
 
@@ -135,7 +135,7 @@ impl Default for AliasSyncOptions {
         Self {
             basic_outputs: false,
             nft_outputs: false,
-            alias_outputs: false,
+            account_outputs: false,
             foundry_outputs: true,
         }
     }
@@ -147,5 +147,5 @@ impl Default for AliasSyncOptions {
 pub struct NftSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
-    pub alias_outputs: bool,
+    pub account_outputs: bool,
 }

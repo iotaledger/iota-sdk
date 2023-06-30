@@ -248,9 +248,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.basic_output_ids(query_parameters).await?)
         }
         ClientMethod::AccountOutputIds { query_parameters } => {
-            Response::OutputIdsResponse(client.alias_output_ids(query_parameters).await?)
+            Response::OutputIdsResponse(client.account_output_ids(query_parameters).await?)
         }
-        ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.alias_output_id(account_id).await?),
+        ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.account_output_id(account_id).await?),
         ClientMethod::NftOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
         }

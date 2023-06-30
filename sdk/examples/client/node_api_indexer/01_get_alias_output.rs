@@ -4,7 +4,7 @@
 //! TODO: <insert example description> by calling
 //! `GET api/indexer/v2/outputs/alias/{accountId}`.
 //!
-//! `cargo run --example node_api_indexer_get_alias_output --release -- [NODE URL] [ACCOUNT ID]`
+//! `cargo run --example node_api_indexer_get_account_output --release -- [NODE URL] [ACCOUNT ID]`
 
 use std::str::FromStr;
 
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     )?;
 
     // Get the output ID by the account ID.
-    let output_id = client.alias_output_id(account_id).await?;
+    let output_id = client.account_output_id(account_id).await?;
 
     println!("Account output ID: {output_id}");
 

@@ -411,7 +411,7 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
 pub async fn create_account_outputs_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Creating account output.");
 
-    let transaction = account.create_alias_output(None, None).await?;
+    let transaction = account.create_account_output(None, None).await?;
 
     println_log_info!(
         "Account output creation transaction sent:\n{:?}\n{:?}",
@@ -431,7 +431,7 @@ pub async fn create_native_token_command(
 ) -> Result<(), Error> {
     // If no account output exists, create one first
     if account.balance().await?.aliases().is_empty() {
-        let transaction = account.create_alias_output(None, None).await?;
+        let transaction = account.create_account_output(None, None).await?;
         println_log_info!(
             "Account output minting transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,

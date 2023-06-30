@@ -101,9 +101,9 @@ fn existing_input_alias_for_foundry_alias() {
     assert_eq!(selected.outputs.len(), 2);
     // Alias state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Account(alias_output) = &output {
+        if let Output::Account(account_output) = &output {
             // Input alias has index 0, output should have index 1
-            assert_eq!(alias_output.state_index(), 1);
+            assert_eq!(account_output.state_index(), 1);
         }
     });
 }
@@ -149,9 +149,9 @@ fn minted_native_tokens_in_new_remainder() {
     assert_eq!(selected.outputs.len(), 3);
     // Alias state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Account(alias_output) = &output {
+        if let Output::Account(account_output) = &output {
             // Input alias has index 0, output should have index 1
-            assert_eq!(alias_output.state_index(), 1);
+            assert_eq!(account_output.state_index(), 1);
         }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the minted native tokens
@@ -235,7 +235,7 @@ fn melt_native_tokens() {
             )]),
         ),
     ]);
-    let alias_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
+    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -246,7 +246,7 @@ fn melt_native_tokens() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output,
+        output: account_output,
         output_metadata: rand_output_metadata(),
         chain: None,
     });
@@ -273,9 +273,9 @@ fn melt_native_tokens() {
     assert_eq!(selected.outputs.len(), 3);
     // Alias state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Account(alias_output) = &output {
+        if let Output::Account(account_output) = &output {
             // Input alias has index 0, output should have index 1
-            assert_eq!(alias_output.state_index(), 1);
+            assert_eq!(account_output.state_index(), 1);
         }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
@@ -309,13 +309,13 @@ fn destroy_foundry_with_alias_state_transition() {
             None,
         ),
     ]);
-    let alias_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
         .with_amount(103_100)
         .with_state_index(inputs[0].output.as_alias().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
     // Account output gets the amount from the foundry output added
-    let outputs = [alias_output];
+    let outputs = [account_output];
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -495,7 +495,7 @@ fn simple_foundry_transition_basic_not_needed() {
             None,
         ),
     ]);
-    let alias_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -507,7 +507,7 @@ fn simple_foundry_transition_basic_not_needed() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output,
+        output: account_output,
         output_metadata: rand_output_metadata(),
         chain: None,
     });
@@ -570,7 +570,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
             None,
         ),
     ]);
-    let alias_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -582,7 +582,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output,
+        output: account_output,
         output_metadata: rand_output_metadata(),
         chain: None,
     });
@@ -720,7 +720,7 @@ fn mint_and_burn_at_the_same_time() {
         SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(200)).unwrap(),
         Some(vec![(&token_id.to_string(), 100)]),
     )]);
-    let alias_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -732,7 +732,7 @@ fn mint_and_burn_at_the_same_time() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output,
+        output: account_output,
         output_metadata: rand_output_metadata(),
         chain: None,
     });
@@ -777,7 +777,7 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
             Some(vec![(&token_id.to_string(), 100)]),
         ),
     ]);
-    let alias_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -789,7 +789,7 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output,
+        output: account_output,
         output_metadata: rand_output_metadata(),
         chain: None,
     });
@@ -991,7 +991,7 @@ fn foundry_in_outputs_and_required() {
         SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
         None,
     )]);
-    let alias_output = AccountOutputBuilder::new_with_amount(1_251_500, account_id_2)
+    let account_output = AccountOutputBuilder::new_with_amount(1_251_500, account_id_2)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -1003,7 +1003,7 @@ fn foundry_in_outputs_and_required() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output,
+        output: account_output,
         output_metadata: rand_output_metadata(),
         chain: None,
     });

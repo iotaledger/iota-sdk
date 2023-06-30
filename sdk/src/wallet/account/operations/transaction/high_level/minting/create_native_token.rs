@@ -136,32 +136,32 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let (account_id, alias_output) = self
-            .get_alias_output(params.account_id)
+        let (account_id, account_output) = self
+            .get_account_output(params.account_id)
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
-        if let Output::Account(alias_output) = &alias_output.output {
+        if let Output::Account(account_output) = &account_output.output {
             // Create the new account output with the same feature blocks, just updated state_index and foundry_counter
-            let new_alias_output_builder = AccountOutputBuilder::from(alias_output)
+            let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_state_index(alias_output.state_index() + 1)
-                .with_foundry_counter(alias_output.foundry_counter() + 1);
+                .with_state_index(account_output.state_index() + 1)
+                .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens
             let foundry_id = FoundryId::build(
                 &AccountAddress::new(account_id),
-                alias_output.foundry_counter() + 1,
+                account_output.foundry_counter() + 1,
                 SimpleTokenScheme::KIND,
             );
             let token_id = TokenId::from(foundry_id);
 
             let outputs = [
-                new_alias_output_builder.finish_output(token_supply)?,
+                new_account_output_builder.finish_output(token_supply)?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
                         rent_structure,
-                        alias_output.foundry_counter() + 1,
+                        account_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
                             U256::from(0u8),

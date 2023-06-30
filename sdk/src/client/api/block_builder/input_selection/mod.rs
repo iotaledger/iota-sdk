@@ -230,7 +230,8 @@ impl InputSelection {
 
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
-            // Keep account outputs because at this point we do not know if a state or governor address will be required.
+            // Keep account outputs because at this point we do not know if a state or governor address will be
+            // required.
             if input.output.is_alias() {
                 return true;
             }
@@ -296,8 +297,9 @@ impl InputSelection {
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Account(unlock_address) => {
-                    if let Output::Account(alias_output) = &input_signing_data.output {
-                        *unlock_address.account_id() == alias_output.account_id_non_null(input_signing_data.output_id())
+                    if let Output::Account(account_output) = &input_signing_data.output {
+                        *unlock_address.account_id()
+                            == account_output.account_id_non_null(input_signing_data.output_id())
                     } else {
                         false
                     }
@@ -318,8 +320,8 @@ impl InputSelection {
                 None => {
                     // insert before address
                     let alias_or_nft_address = match &input.output {
-                        Output::Account(alias_output) => Some(Address::Account(AccountAddress::new(
-                            alias_output.account_id_non_null(input.output_id()),
+                        Output::Account(account_output) => Some(Address::Account(AccountAddress::new(
+                            account_output.account_id_non_null(input.output_id()),
                         ))),
                         Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
                             nft_output.nft_id_non_null(input.output_id()),
@@ -453,9 +455,9 @@ impl InputSelection {
         // Validate utxo chain transitions
         for output in self.outputs.iter() {
             match output {
-                Output::Account(alias_output) => {
+                Output::Account(account_output) => {
                     // Null id outputs are just minted and can't be a transition
-                    if alias_output.account_id().is_null() {
+                    if account_output.account_id().is_null() {
                         continue;
                     }
 
@@ -463,7 +465,7 @@ impl InputSelection {
                         .iter()
                         .find(|i| {
                             if let Output::Account(alias_input) = &i.output {
-                                *alias_output.account_id() == alias_input.account_id_non_null(i.output_id())
+                                *account_output.account_id() == alias_input.account_id_non_null(i.output_id())
                             } else {
                                 false
                             }
@@ -472,19 +474,19 @@ impl InputSelection {
 
                     if let Err(err) = AccountOutput::transition_inner(
                         alias_input.output.as_alias(),
-                        alias_output,
+                        account_output,
                         &input_chains_foundries,
                         &self.outputs,
                     ) {
                         log::debug!("validate_transitions error {err:?}");
                         let alias_transition =
-                            if alias_input.output.as_alias().state_index() == alias_output.state_index() {
+                            if alias_input.output.as_alias().state_index() == account_output.state_index() {
                                 AccountTransition::Governance
                             } else {
                                 AccountTransition::State
                             };
                         return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                            *alias_output.account_id(),
+                            *account_output.account_id(),
                             alias_transition,
                         )));
                     }

@@ -1201,13 +1201,13 @@ fn changed_immutable_metadata() {
     }];
 
     // New nft output with changed immutable metadata feature
-    let updated_alias_output = NftOutputBuilder::from(nft_output.as_nft())
+    let updated_account_output = NftOutputBuilder::from(nft_output.as_nft())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_immutable_features(MetadataFeature::new([4, 5, 6]))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_alias_output];
+    let outputs = [updated_account_output];
 
     let selected = InputSelection::new(
         inputs,

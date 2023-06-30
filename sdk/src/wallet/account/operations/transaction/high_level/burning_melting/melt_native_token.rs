@@ -50,7 +50,7 @@ where
         let account_id = *foundry_id.account_address().account_id();
         let token_supply = self.client().get_token_supply().await?;
 
-        let (existing_alias_output_data, existing_foundry_output) = self
+        let (existing_account_output_data, existing_foundry_output) = self
             .find_alias_and_foundry_output_data(account_id, foundry_id)
             .await
             .map(|(alias_data, foundry_data)| match foundry_data.output {
@@ -58,16 +58,16 @@ where
                 _ => unreachable!("We already checked it's a foundry output"),
             })?;
 
-        if let Output::Account(alias_output) = &existing_alias_output_data.output {
+        if let Output::Account(account_output) = &existing_account_output_data.output {
             // Create the new account output with updated amount and state_index
-            let alias_output = AccountOutputBuilder::from(alias_output)
+            let account_output = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_state_index(alias_output.state_index() + 1)
+                .with_state_index(account_output.state_index() + 1)
                 .finish_output(token_supply)?;
 
             let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
             let outputs = [
-                alias_output,
+                account_output,
                 FoundryOutputBuilder::from(&existing_foundry_output)
                     .with_token_scheme(TokenScheme::Simple(SimpleTokenScheme::new(
                         token_scheme.minted_tokens(),
@@ -89,14 +89,14 @@ where
         account_id: AccountId,
         foundry_id: FoundryId,
     ) -> crate::wallet::Result<(OutputData, OutputData)> {
-        let mut existing_alias_output_data = None;
+        let mut existing_account_output_data = None;
         let mut existing_foundry_output = None;
 
         for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Account(output) => {
                     if output.account_id_non_null(output_id) == account_id {
-                        existing_alias_output_data = Some(output_data.clone());
+                        existing_account_output_data = Some(output_data.clone());
                     }
                 }
                 Output::Foundry(output) => {
@@ -108,18 +108,18 @@ where
                 Output::Basic(_) | Output::Nft(_) => {}
             }
 
-            if existing_alias_output_data.is_some() && existing_foundry_output.is_some() {
+            if existing_account_output_data.is_some() && existing_foundry_output.is_some() {
                 break;
             }
         }
 
-        let existing_alias_output_data = existing_alias_output_data.ok_or_else(|| {
+        let existing_account_output_data = existing_account_output_data.ok_or_else(|| {
             Error::BurningOrMeltingFailed("required account output for foundry not found".to_string())
         })?;
 
         let existing_foundry_output_data = existing_foundry_output
             .ok_or_else(|| Error::BurningOrMeltingFailed("required foundry output not found".to_string()))?;
 
-        Ok((existing_alias_output_data, existing_foundry_output_data))
+        Ok((existing_account_output_data, existing_foundry_output_data))
     }
 }

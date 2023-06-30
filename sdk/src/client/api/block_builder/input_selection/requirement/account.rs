@@ -17,9 +17,9 @@ pub fn is_account_transition<'a>(
         let account_id = alias_input.account_id_non_null(&input_id);
         // Checks if the alias exists in the outputs and gets the transition type.
         for output in outputs.iter() {
-            if let Output::Account(alias_output) = output {
-                if *alias_output.account_id() == account_id {
-                    if alias_output.state_index() == alias_input.state_index() {
+            if let Output::Account(account_output) = output {
+                if *account_output.account_id() == account_id {
+                    if account_output.state_index() == alias_input.state_index() {
                         // Governance transition.
                         return Some(AccountTransition::Governance);
                     } else {

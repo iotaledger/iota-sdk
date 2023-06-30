@@ -386,7 +386,7 @@ impl AccountInner {
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub async fn unspent_alias_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
+    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()

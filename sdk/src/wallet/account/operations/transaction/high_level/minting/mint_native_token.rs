@@ -70,7 +70,7 @@ where
             .ok_or_else(|| Error::MintingFailed(format!("foundry output {token_id} is not available")))?
             .clone();
 
-        let existing_alias_output = if let Output::Foundry(foundry_output) = &existing_foundry_output.output {
+        let existing_account_output = if let Output::Foundry(foundry_output) = &existing_foundry_output.output {
             let TokenScheme::Simple(token_scheme) = foundry_output.token_scheme();
             // Check if we can mint the provided amount without exceeding the maximum_supply
             if token_scheme.maximum_supply() - token_scheme.circulating_supply() < mint_amount {
@@ -81,14 +81,14 @@ where
             }
 
             // Get the account output that controls the foundry output
-            let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
+            let existing_account_output = account_details.unspent_outputs().values().find(|output_data| {
                 if let Output::Account(output) = &output_data.output {
                     output.account_id_non_null(&output_data.output_id) == **foundry_output.account_address()
                 } else {
                     false
                 }
             });
-            existing_alias_output
+            existing_account_output
                 .ok_or_else(|| Error::MintingFailed("account output is not available".to_string()))?
                 .clone()
         } else {
@@ -97,8 +97,8 @@ where
 
         drop(account_details);
 
-        let alias_output = if let Output::Account(alias_output) = existing_alias_output.output {
-            alias_output
+        let account_output = if let Output::Account(account_output) = existing_account_output.output {
+            account_output
         } else {
             unreachable!("We checked if it's an account output before")
         };
@@ -109,8 +109,8 @@ where
         };
 
         // Create the next account output with the same data, just updated state_index
-        let new_alias_output_builder =
-            AccountOutputBuilder::from(&alias_output).with_state_index(alias_output.state_index() + 1);
+        let new_account_output_builder =
+            AccountOutputBuilder::from(&account_output).with_state_index(account_output.state_index() + 1);
 
         // Create next foundry output with minted native tokens
 
@@ -126,7 +126,7 @@ where
             FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
 
         let outputs = [
-            new_alias_output_builder.finish_output(token_supply)?,
+            new_account_output_builder.finish_output(token_supply)?,
             new_foundry_output_builder.finish_output(token_supply)?,
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
