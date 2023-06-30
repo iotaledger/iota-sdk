@@ -83,7 +83,7 @@ impl InputSelection {
                 }
             }
             Address::Account(alias_address) => Ok(Some(Requirement::Account(
-                *alias_address.alias_id(),
+                *alias_address.account_id(),
                 AccountTransition::State,
             ))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
@@ -174,7 +174,7 @@ impl InputSelection {
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
             Output::Account(output) => Some(Address::Account(AccountAddress::from(
-                output.alias_id_non_null(input.output_id()),
+                output.account_id_non_null(input.output_id()),
             ))),
             Output::Nft(output) => Some(Address::Nft(NftAddress::from(
                 output.nft_id_non_null(input.output_id()),
@@ -297,7 +297,7 @@ impl InputSelection {
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Account(unlock_address) => {
                     if let Output::Account(alias_output) = &input_signing_data.output {
-                        *unlock_address.alias_id() == alias_output.alias_id_non_null(input_signing_data.output_id())
+                        *unlock_address.account_id() == alias_output.account_id_non_null(input_signing_data.output_id())
                     } else {
                         false
                     }
@@ -319,7 +319,7 @@ impl InputSelection {
                     // insert before address
                     let alias_or_nft_address = match &input.output {
                         Output::Account(alias_output) => Some(Address::Account(AccountAddress::new(
-                            alias_output.alias_id_non_null(input.output_id()),
+                            alias_output.account_id_non_null(input.output_id()),
                         ))),
                         Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
                             nft_output.nft_id_non_null(input.output_id()),
@@ -455,7 +455,7 @@ impl InputSelection {
             match output {
                 Output::Account(alias_output) => {
                     // Null id outputs are just minted and can't be a transition
-                    if alias_output.alias_id().is_null() {
+                    if alias_output.account_id().is_null() {
                         continue;
                     }
 
@@ -463,7 +463,7 @@ impl InputSelection {
                         .iter()
                         .find(|i| {
                             if let Output::Account(alias_input) = &i.output {
-                                *alias_output.alias_id() == alias_input.alias_id_non_null(i.output_id())
+                                *alias_output.account_id() == alias_input.account_id_non_null(i.output_id())
                             } else {
                                 false
                             }
@@ -484,7 +484,7 @@ impl InputSelection {
                                 AccountTransition::State
                             };
                         return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                            *alias_output.alias_id(),
+                            *alias_output.account_id(),
                             alias_transition,
                         )));
                     }

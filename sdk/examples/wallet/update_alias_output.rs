@@ -20,7 +20,7 @@ use iota_sdk::{
 };
 
 // Replace with an account id held in an unspent output of the account
-const ALIAS_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
+const ACCOUNT_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
 // The metadata for the next state
 const NEW_STATE_METADATA: &str = "updated state metadata 1";
 
@@ -43,10 +43,10 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get the alias output by its account id
-    let alias_id = AccountId::from_str(ALIAS_ID)?;
-    if let Some(alias_output_data) = account.unspent_alias_output(&alias_id).await? {
+    let account_id = AccountId::from_str(ACCOUNT_ID)?;
+    if let Some(alias_output_data) = account.unspent_alias_output(&account_id).await? {
         println!(
-            "Alias '{ALIAS_ID}' found in unspent output: '{}'",
+            "Alias '{ACCOUNT_ID}' found in unspent output: '{}'",
             alias_output_data.output_id
         );
 
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
         let alias_output = alias_output_data.output.as_alias();
         let updated_alias_output = AccountOutputBuilder::from(alias_output)
             // Update the account id, as it might still be null
-            .with_alias_id(alias_output.alias_id_non_null(&alias_output_data.output_id))
+            .with_account_id(alias_output.account_id_non_null(&alias_output_data.output_id))
             // Minimum required storage deposit will change if the new metadata has a different size, so we will update
             // the amount
             .with_minimum_storage_deposit(rent_structure)

@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     // Get the first alias
-    if let Some(alias_id) = balance.aliases().first() {
+    if let Some(account_id) = balance.aliases().first() {
         let aliases_before = balance.aliases();
         println!("Aliases BEFORE destroying:\n{aliases_before:#?}",);
 
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
 
         println!("Sending alias burn transaction...");
 
-        let transaction = account.burn(*alias_id, None).await?;
+        let transaction = account.burn(*account_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        println!("Burned Alias '{}'", alias_id);
+        println!("Burned Alias '{}'", account_id);
 
         let balance = account.sync(None).await?;
         let aliases_after = balance.aliases();

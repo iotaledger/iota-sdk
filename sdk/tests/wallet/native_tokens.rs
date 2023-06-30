@@ -27,7 +27,7 @@ async fn create_and_mint_native_token() -> Result<()> {
     let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
-                alias_id: None,
+                account_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
                 foundry_metadata: None,
@@ -92,7 +92,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
     let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
-                alias_id: None,
+                account_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
                 foundry_metadata: Some(foundry_metadata.to_vec()),

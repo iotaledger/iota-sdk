@@ -15,7 +15,7 @@ use iota_sdk::{
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
-    ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
 };
 
@@ -545,14 +545,14 @@ fn missing_ed25519_sender() {
 #[test]
 fn alias_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -591,7 +591,7 @@ fn alias_sender() {
         selected
             .inputs
             .iter()
-            .any(|input| input.output.is_alias() && *input.output.as_alias().alias_id() == alias_id_1)
+            .any(|input| input.output.is_alias() && *input.output.as_alias().account_id() == account_id_1)
     );
     // Provided output + alias
     assert_eq!(selected.outputs.len(), 2);
@@ -601,13 +601,13 @@ fn alias_sender() {
 #[test]
 fn alias_sender_zero_id() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Account(
             1_000_000,
-            alias_id_0,
+            account_id_0,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -617,13 +617,13 @@ fn alias_sender_zero_id() {
             None,
         ),
     ]);
-    let alias_id = AccountId::from(inputs[1].output_id());
+    let account_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(
-            &Bech32Address::try_new("rms", AccountAddress::from(alias_id))
+            &Bech32Address::try_new("rms", AccountAddress::from(account_id))
                 .unwrap()
                 .to_string(),
         ),
@@ -648,7 +648,7 @@ fn alias_sender_zero_id() {
         selected
             .outputs
             .iter()
-            .any(|output| output.is_alias() && *output.as_alias().alias_id() == alias_id)
+            .any(|output| output.is_alias() && *output.as_alias().account_id() == account_id)
     );
 }
 

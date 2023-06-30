@@ -19,12 +19,12 @@ pub fn rand_address_unlock_condition() -> AddressUnlockCondition {
 
 /// Generates a random [`StateControllerAddressUnlockCondition`].
 pub fn rand_state_controller_address_unlock_condition_different_from(
-    alias_id: &AccountId,
+    account_id: &AccountId,
 ) -> StateControllerAddressUnlockCondition {
     let mut address = rand_address();
 
     if let Address::Account(mut alias_address) = &mut address {
-        while alias_address.alias_id() == alias_id {
+        while alias_address.account_id() == account_id {
             alias_address = rand_account_address();
         }
     }
@@ -32,12 +32,12 @@ pub fn rand_state_controller_address_unlock_condition_different_from(
     address.into()
 }
 
-/// Generates a random [`GovernorAddressUnlockCondition`] that is different from `alias_id`.
-pub fn rand_governor_address_unlock_condition_different_from(alias_id: &AccountId) -> GovernorAddressUnlockCondition {
+/// Generates a random [`GovernorAddressUnlockCondition`] that is different from `account_id`.
+pub fn rand_governor_address_unlock_condition_different_from(account_id: &AccountId) -> GovernorAddressUnlockCondition {
     let mut address = rand_address();
 
     if let Address::Account(mut alias_address) = &mut address {
-        while alias_address.alias_id() == alias_id {
+        while alias_address.account_id() == account_id {
             alias_address = rand_account_address();
         }
     }

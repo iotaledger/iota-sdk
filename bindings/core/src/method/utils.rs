@@ -35,7 +35,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 {
         /// Account ID
-        alias_id: AccountId,
+        account_id: AccountId,
         /// Human readable part
         bech32_hrp: Hrp,
     },

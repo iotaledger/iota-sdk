@@ -58,14 +58,14 @@ impl ClientInner {
 
     /// Get alias output by its accountID.
     /// api/indexer/v2/outputs/alias/:{AccountId}
-    pub async fn alias_output_id(&self, alias_id: AccountId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/alias/{alias_id}");
+    pub async fn alias_output_id(&self, account_id: AccountId) -> Result<OutputId> {
+        let route = format!("api/indexer/v2/outputs/alias/{account_id}");
 
         Ok(*(self
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::NoOutput(format!("{alias_id:?}")))?))
+            .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
     }
 
     /// Get foundry outputs filtered by the given parameters.

@@ -83,7 +83,7 @@ where
             // Get the alias output that controls the foundry output
             let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
                 if let Output::Account(output) = &output_data.output {
-                    output.alias_id_non_null(&output_data.output_id) == **foundry_output.alias_address()
+                    output.account_id_non_null(&output_data.output_id) == **foundry_output.alias_address()
                 } else {
                     false
                 }

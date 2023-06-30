@@ -56,8 +56,8 @@ impl InputSelection {
             Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
             Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
             Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
-            Requirement::Account(alias_id, alias_transition) => {
-                self.fulfill_account_requirement(alias_id, alias_transition)
+            Requirement::Account(account_id, alias_transition) => {
+                self.fulfill_account_requirement(account_id, alias_transition)
             }
             Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
@@ -74,10 +74,11 @@ impl InputSelection {
             let is_created = match output {
                 // Add an alias requirement if the alias output is transitioning and then required in the inputs.
                 Output::Account(alias_output) => {
-                    let is_created = alias_output.alias_id().is_null();
+                    let is_created = alias_output.account_id().is_null();
 
                     if !is_created {
-                        let requirement = Requirement::Account(*alias_output.alias_id(), AccountTransition::Governance);
+                        let requirement =
+                            Requirement::Account(*alias_output.account_id(), AccountTransition::Governance);
                         log::debug!("Adding {requirement:?} from output");
                         self.requirements.push(requirement);
                     }
@@ -115,7 +116,7 @@ impl InputSelection {
                     }
 
                     let requirement =
-                        Requirement::Account(*foundry_output.alias_address().alias_id(), AccountTransition::State);
+                        Requirement::Account(*foundry_output.alias_address().account_id(), AccountTransition::State);
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
 
@@ -145,16 +146,16 @@ impl InputSelection {
     /// Gets requirements from burn.
     pub(crate) fn burn_requirements(&mut self) -> Result<(), Error> {
         if let Some(burn) = self.burn.as_ref() {
-            for alias_id in &burn.aliases {
+            for account_id in &burn.aliases {
                 if self
                     .outputs
                     .iter()
-                    .any(|output| is_account_with_id_non_null(output, alias_id))
+                    .any(|output| is_account_with_id_non_null(output, account_id))
                 {
-                    return Err(Error::BurnAndTransition(ChainId::from(*alias_id)));
+                    return Err(Error::BurnAndTransition(ChainId::from(*account_id)));
                 }
 
-                let requirement = Requirement::Account(*alias_id, AccountTransition::Governance);
+                let requirement = Requirement::Account(*account_id, AccountTransition::Governance);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
             }

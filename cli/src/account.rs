@@ -12,7 +12,7 @@ use crate::{
     command::account::{
         addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
         claimable_outputs_command, consolidate_command, create_account_outputs_command, create_native_token_command,
-        decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
+        decrease_voting_power_command, destroy_account_command, destroy_foundry_command, faucet_command,
         increase_voting_power_command, melt_native_token_command, mint_native_token, mint_nft_command,
         new_address_command, node_info_command, output_command, outputs_command, participation_overview_command,
         send_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
@@ -92,7 +92,7 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                     )
                     .await
                 }
-                AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(&account, alias_id).await,
+                AccountCommand::DestroyAccount { account_id } => destroy_account_command(&account, account_id).await,
                 AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(&account, foundry_id).await,
                 AccountCommand::Exit => {
                     return Ok(true);

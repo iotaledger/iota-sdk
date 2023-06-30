@@ -119,7 +119,7 @@ async fn create_and_melt_native_token() -> Result<()> {
 
     let circulating_supply = U256::from(60i32);
     let params = CreateNativeTokenParams {
-        alias_id: None,
+        account_id: None,
         circulating_supply,
         maximum_supply: U256::from(100i32),
         foundry_metadata: None,
@@ -210,10 +210,10 @@ async fn destroy_alias(account: &Account) -> Result<()> {
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    // Let's destroy the first alias we can find
-    let alias_id = *balance.aliases().first().unwrap();
-    println!("alias_id -> {alias_id}");
-    let transaction = account.burn(alias_id, None).await.unwrap();
+    // Let's destroy the first account we can find
+    let account_id = *balance.aliases().first().unwrap();
+    println!("account_id -> {account_id}");
+    let transaction = account.burn(account_id, None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
@@ -221,7 +221,7 @@ async fn destroy_alias(account: &Account) -> Result<()> {
     let search = balance
         .aliases()
         .iter()
-        .find(|&balance_alias_id| *balance_alias_id == alias_id);
+        .find(|&balance_account_id| *balance_account_id == account_id);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_none());
 
@@ -249,7 +249,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
     let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
-                alias_id: None,
+                account_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
                 foundry_metadata: None,
@@ -301,10 +301,10 @@ async fn mint_and_burn_nft_with_alias() -> Result<()> {
     let nft_id = NftId::from(&output_id);
 
     let balance = account.sync(None).await?;
-    let alias_id = balance.aliases().first().unwrap();
+    let account_id = balance.aliases().first().unwrap();
 
     let burn_tx = account
-        .burn(Burn::new().add_nft(nft_id).add_alias(*alias_id), None)
+        .burn(Burn::new().add_nft(nft_id).add_alias(*account_id), None)
         .await?;
     account
         .retry_transaction_until_included(&burn_tx.transaction_id, None, None)

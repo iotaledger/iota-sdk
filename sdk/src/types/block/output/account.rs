@@ -64,7 +64,7 @@ impl core::fmt::Display for AccountTransition {
 pub struct AccountOutputBuilder {
     amount: OutputBuilderAmount,
     native_tokens: BTreeSet<NativeToken>,
-    alias_id: AccountId,
+    account_id: AccountId,
     state_index: Option<u32>,
     state_metadata: Vec<u8>,
     foundry_counter: Option<u32>,
@@ -75,21 +75,21 @@ pub struct AccountOutputBuilder {
 
 impl AccountOutputBuilder {
     /// Creates an [`AccountOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, alias_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::Amount(amount), alias_id)
+    pub fn new_with_amount(amount: u64, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::Amount(amount), account_id)
     }
 
     /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), alias_id)
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), account_id)
     }
 
-    fn new(amount: OutputBuilderAmount, alias_id: AccountId) -> Self {
+    fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
         Self {
             amount,
             native_tokens: BTreeSet::new(),
-            alias_id,
+            account_id,
             state_index: None,
             state_metadata: Vec::new(),
             foundry_counter: None,
@@ -129,8 +129,8 @@ impl AccountOutputBuilder {
 
     /// Sets the account ID to the provided value.
     #[inline(always)]
-    pub fn with_alias_id(mut self, alias_id: AccountId) -> Self {
-        self.alias_id = alias_id;
+    pub fn with_account_id(mut self, account_id: AccountId) -> Self {
+        self.account_id = account_id;
         self
     }
 
@@ -250,11 +250,11 @@ impl AccountOutputBuilder {
             .try_into()
             .map_err(Error::InvalidStateMetadataLength)?;
 
-        verify_index_counter(&self.alias_id, state_index, foundry_counter)?;
+        verify_index_counter(&self.account_id, state_index, foundry_counter)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
-        verify_unlock_conditions(&unlock_conditions, &self.alias_id)?;
+        verify_unlock_conditions(&unlock_conditions, &self.account_id)?;
 
         let features = Features::from_set(self.features)?;
 
@@ -267,7 +267,7 @@ impl AccountOutputBuilder {
         let mut output = AccountOutput {
             amount: 1,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
-            alias_id: self.alias_id,
+            account_id: self.account_id,
             state_index,
             state_metadata,
             foundry_counter,
@@ -306,7 +306,7 @@ impl From<&AccountOutput> for AccountOutputBuilder {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             native_tokens: output.native_tokens.iter().copied().collect(),
-            alias_id: output.alias_id,
+            account_id: output.account_id,
             state_index: Some(output.state_index),
             state_metadata: output.state_metadata.to_vec(),
             foundry_counter: Some(output.foundry_counter),
@@ -328,7 +328,7 @@ pub struct AccountOutput {
     // Native tokens held by the output.
     native_tokens: NativeTokens,
     // Unique identifier of the alias.
-    alias_id: AccountId,
+    account_id: AccountId,
     // A counter that must increase by 1 every time the alias is state transitioned.
     state_index: u32,
     // Metadata that can only be changed by the state controller.
@@ -357,8 +357,8 @@ impl AccountOutput {
 
     /// Creates a new [`AccountOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, alias_id: AccountId) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_amount(amount, alias_id)
+    pub fn build_with_amount(amount: u64, account_id: AccountId) -> AccountOutputBuilder {
+        AccountOutputBuilder::new_with_amount(amount, account_id)
     }
 
     /// Creates a new [`AccountOutputBuilder`] with a provided rent structure.
@@ -366,9 +366,9 @@ impl AccountOutput {
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
         rent_structure: RentStructure,
-        alias_id: AccountId,
+        account_id: AccountId,
     ) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, account_id)
     }
 
     ///
@@ -385,14 +385,14 @@ impl AccountOutput {
 
     ///
     #[inline(always)]
-    pub fn alias_id(&self) -> &AccountId {
-        &self.alias_id
+    pub fn account_id(&self) -> &AccountId {
+        &self.account_id
     }
 
     /// Returns the account ID if not null, or creates it from the output ID.
     #[inline(always)]
-    pub fn alias_id_non_null(&self, output_id: &OutputId) -> AccountId {
-        self.alias_id.or_from_output_id(output_id)
+    pub fn account_id_non_null(&self, output_id: &OutputId) -> AccountId {
+        self.account_id.or_from_output_id(output_id)
     }
 
     ///
@@ -454,12 +454,12 @@ impl AccountOutput {
     ///
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
-        ChainId::Account(self.alias_id)
+        ChainId::Account(self.account_id)
     }
 
     /// Returns the account address for this output.
     pub fn alias_address(&self, output_id: &OutputId) -> AccountAddress {
-        AccountAddress::new(self.alias_id_non_null(output_id))
+        AccountAddress::new(self.account_id_non_null(output_id))
     }
 
     ///
@@ -470,12 +470,12 @@ impl AccountOutput {
         inputs: &[(OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
-        let alias_id = if self.alias_id().is_null() {
+        let account_id = if self.account_id().is_null() {
             AccountId::from(output_id)
         } else {
-            *self.alias_id()
+            *self.account_id()
         };
-        let next_state = context.output_chains.get(&ChainId::from(alias_id));
+        let next_state = context.output_chains.get(&ChainId::from(account_id));
 
         match next_state {
             Some(Output::Account(next_state)) => {
@@ -487,7 +487,7 @@ impl AccountOutput {
                     // sender/issuer validations.
                     context
                         .unlocked_addresses
-                        .insert(Address::from(AccountAddress::from(alias_id)));
+                        .insert(Address::from(AccountAddress::from(account_id)));
                 }
             }
             None => self.governor_address().unlock(unlock, inputs, context)?,
@@ -520,7 +520,7 @@ impl AccountOutput {
 
             let created_foundries = outputs.iter().filter_map(|output| {
                 if let Output::Foundry(foundry) = output {
-                    if foundry.alias_address().alias_id() == &next_state.alias_id
+                    if foundry.alias_address().account_id() == &next_state.account_id
                         && !input_chains.contains_key(&foundry.chain_id())
                     {
                         Some(foundry)
@@ -567,7 +567,7 @@ impl AccountOutput {
 
 impl StateTransitionVerifier for AccountOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.alias_id.is_null() {
+        if !next_state.account_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
 
@@ -605,7 +605,7 @@ impl Packable for AccountOutput {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
         self.native_tokens.pack(packer)?;
-        self.alias_id.pack(packer)?;
+        self.account_id.pack(packer)?;
         self.state_index.pack(packer)?;
         self.state_metadata.pack(packer)?;
         self.foundry_counter.pack(packer)?;
@@ -625,7 +625,7 @@ impl Packable for AccountOutput {
         verify_output_amount::<VERIFY>(&amount, &visitor.token_supply()).map_err(UnpackError::Packable)?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
-        let alias_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_metadata = BoxedSlicePrefix::<u8, StateMetadataLength>::unpack::<_, VERIFY>(unpacker, &())
             .map_packable_err(|err| Error::InvalidStateMetadataLength(err.into_prefix_err().into()))?;
@@ -633,13 +633,13 @@ impl Packable for AccountOutput {
         let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if VERIFY {
-            verify_index_counter(&alias_id, state_index, foundry_counter).map_err(UnpackError::Packable)?;
+            verify_index_counter(&account_id, state_index, foundry_counter).map_err(UnpackError::Packable)?;
         }
 
         let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
 
         if VERIFY {
-            verify_unlock_conditions(&unlock_conditions, &alias_id).map_err(UnpackError::Packable)?;
+            verify_unlock_conditions(&unlock_conditions, &account_id).map_err(UnpackError::Packable)?;
         }
 
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
@@ -658,7 +658,7 @@ impl Packable for AccountOutput {
         Ok(Self {
             amount,
             native_tokens,
-            alias_id,
+            account_id,
             state_index,
             state_metadata,
             foundry_counter,
@@ -670,19 +670,19 @@ impl Packable for AccountOutput {
 }
 
 #[inline]
-fn verify_index_counter(alias_id: &AccountId, state_index: u32, foundry_counter: u32) -> Result<(), Error> {
-    if alias_id.is_null() && (state_index != 0 || foundry_counter != 0) {
+fn verify_index_counter(account_id: &AccountId, state_index: u32, foundry_counter: u32) -> Result<(), Error> {
+    if account_id.is_null() && (state_index != 0 || foundry_counter != 0) {
         Err(Error::NonZeroStateIndexOrFoundryCounter)
     } else {
         Ok(())
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &AccountId) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
         if let Address::Account(alias_address) = unlock_condition.address() {
-            if alias_address.alias_id() == alias_id {
-                return Err(Error::SelfControlledAccountOutput(*alias_id));
+            if alias_address.account_id() == account_id {
+                return Err(Error::SelfControlledAccountOutput(*account_id));
             }
         }
     } else {
@@ -691,8 +691,8 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Acc
 
     if let Some(unlock_condition) = unlock_conditions.governor_address() {
         if let Address::Account(alias_address) = unlock_condition.address() {
-            if alias_address.alias_id() == alias_id {
-                return Err(Error::SelfControlledAccountOutput(*alias_id));
+            if alias_address.account_id() == account_id {
+                return Err(Error::SelfControlledAccountOutput(*account_id));
             }
         }
     } else {
@@ -726,7 +726,7 @@ pub mod dto {
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         // Unique identifier of the alias.
-        pub alias_id: AccountId,
+        pub account_id: AccountId,
         // A counter that must increase by 1 every time the alias is state transitioned.
         pub state_index: u32,
         // Metadata that can only be changed by the state controller.
@@ -750,7 +750,7 @@ pub mod dto {
                 kind: AccountOutput::KIND,
                 amount: value.amount().to_string(),
                 native_tokens: value.native_tokens().to_vec(),
-                alias_id: *value.alias_id(),
+                account_id: *value.account_id(),
                 state_index: value.state_index(),
                 state_metadata: prefix_hex::encode(value.state_metadata()),
                 foundry_counter: value.foundry_counter(),
@@ -765,7 +765,7 @@ pub mod dto {
         pub fn try_from_dto(value: AccountOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.alias_id,
+                value.account_id,
             );
 
             builder = builder.with_state_index(value.state_index);
@@ -801,7 +801,7 @@ pub mod dto {
         pub fn try_from_dto_unverified(value: AccountOutputDto) -> Result<Self, Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.alias_id,
+                value.account_id,
             );
 
             builder = builder.with_state_index(value.state_index);
@@ -838,7 +838,7 @@ pub mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
-            alias_id: &AccountId,
+            account_id: &AccountId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
             foundry_counter: Option<u32>,
@@ -850,10 +850,10 @@ pub mod dto {
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => AccountOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    *alias_id,
+                    *account_id,
                 ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *alias_id)
+                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *account_id)
                 }
             };
 
@@ -928,18 +928,18 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let alias_id = rand_account_id();
-        let foundry_id = FoundryId::build(&AccountAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
-        let gov_address_1 = rand_governor_address_unlock_condition_different_from(&alias_id);
-        let gov_address_2 = rand_governor_address_unlock_condition_different_from(&alias_id);
-        let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
-        let state_address_2 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+        let account_id = rand_account_id();
+        let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 0, SimpleTokenScheme::KIND);
+        let gov_address_1 = rand_governor_address_unlock_condition_different_from(&account_id);
+        let gov_address_2 = rand_governor_address_unlock_condition_different_from(&account_id);
+        let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&account_id);
+        let state_address_2 = rand_state_controller_address_unlock_condition_different_from(&account_id);
         let sender_1 = rand_sender_feature();
         let sender_2 = rand_sender_feature();
         let issuer_1 = rand_issuer_feature();
         let issuer_2 = rand_issuer_feature();
 
-        let mut builder = AccountOutput::build_with_amount(0, alias_id)
+        let mut builder = AccountOutput::build_with_amount(0, account_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
             .add_unlock_condition(gov_address_1)
             .add_unlock_condition(state_address_1)
@@ -976,8 +976,10 @@ mod tests {
 
         let output = builder
             .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
-            .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
-            .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
+            .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
+                &account_id,
+            ))
+            .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&account_id))
             .with_features([Feature::from(metadata.clone()), sender_1.into()])
             .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
             .finish(protocol_parameters.token_supply())
@@ -1015,7 +1017,7 @@ mod tests {
         let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
             Some(output.native_tokens().to_vec()),
-            output.alias_id(),
+            output.account_id(),
             output.state_index().into(),
             output.state_metadata().to_owned().into(),
             output.foundry_counter().into(),
@@ -1027,16 +1029,16 @@ mod tests {
         .unwrap();
         assert_eq!(output, output_split);
 
-        let alias_id = rand_account_id();
+        let account_id = rand_account_id();
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let gov_address = rand_governor_address_unlock_condition_different_from(&alias_id);
-        let state_address = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+        let gov_address = rand_governor_address_unlock_condition_different_from(&account_id);
+        let state_address = rand_state_controller_address_unlock_condition_different_from(&account_id);
 
         let test_split_dto = |builder: AccountOutputBuilder| {
             let output_split = AccountOutput::try_from_dtos(
                 (&builder.amount).into(),
                 Some(builder.native_tokens.iter().copied().collect()),
-                &builder.alias_id,
+                &builder.account_id,
                 builder.state_index,
                 builder.state_metadata.to_owned().into(),
                 builder.foundry_counter,
@@ -1052,7 +1054,7 @@ mod tests {
             );
         };
 
-        let builder = AccountOutput::build_with_amount(100, alias_id)
+        let builder = AccountOutput::build_with_amount(100, account_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
             .add_unlock_condition(gov_address)
             .add_unlock_condition(state_address)
@@ -1061,7 +1063,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
+            AccountOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
                 .add_unlock_condition(gov_address)
                 .add_unlock_condition(state_address)

@@ -34,8 +34,8 @@ impl Burn {
     }
 
     /// Adds an alias to [`Burn`].
-    pub fn add_alias(mut self, alias_id: AccountId) -> Self {
-        self.aliases.insert(alias_id);
+    pub fn add_alias(mut self, account_id: AccountId) -> Self {
+        self.aliases.insert(account_id);
         self
     }
 

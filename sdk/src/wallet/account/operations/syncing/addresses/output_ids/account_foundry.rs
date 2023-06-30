@@ -115,8 +115,9 @@ where
 
         for alias_output_with_meta in alias_outputs_with_meta {
             if let Output::Account(alias_output) = alias_output_with_meta.output() {
-                let alias_address =
-                    AccountAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
+                let alias_address = AccountAddress::from(
+                    alias_output.account_id_non_null(alias_output_with_meta.metadata().output_id()),
+                );
                 let alias_bech32_address = alias_address.to_bech32(bech32_hrp);
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {

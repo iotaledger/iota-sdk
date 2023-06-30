@@ -121,14 +121,14 @@ impl ClientInner {
     }
 
     /// Transforms an account id to a bech32 encoded address
-    pub async fn alias_id_to_bech32(
+    pub async fn account_id_to_bech32(
         &self,
-        alias_id: AccountId,
+        account_id: AccountId,
         bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
-            Some(hrp) => Ok(alias_id.to_bech32(hrp.convert()?)),
-            None => Ok(alias_id.to_bech32(self.get_bech32_hrp().await?)),
+            Some(hrp) => Ok(account_id.to_bech32(hrp.convert()?)),
+            None => Ok(account_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 

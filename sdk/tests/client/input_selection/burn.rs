@@ -19,18 +19,19 @@ use primitive_types::U256;
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry, Nft},
-    ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, TOKEN_ID_1, TOKEN_ID_2,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, TOKEN_ID_1,
+    TOKEN_ID_2,
 };
 
 #[test]
 fn burn_alias_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -58,7 +59,7 @@ fn burn_alias_present() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_alias(account_id_1))
     .select()
     .unwrap();
 
@@ -70,12 +71,12 @@ fn burn_alias_present() {
 #[test]
 fn burn_alias_present_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -103,7 +104,7 @@ fn burn_alias_present_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_alias(account_id_1))
     .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
@@ -114,7 +115,7 @@ fn burn_alias_present_and_required() {
 }
 
 #[test]
-fn burn_alias_id_zero() {
+fn burn_account_id_zero() {
     let protocol_parameters = protocol_parameters();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
@@ -162,7 +163,7 @@ fn burn_alias_id_zero() {
 #[test]
 fn burn_alias_absent() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -191,25 +192,25 @@ fn burn_alias_absent() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_alias(account_id_1))
     .select();
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::Governance))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::Governance))) if account_id == account_id_1
     ));
 }
 
 #[test]
 fn burn_aliases_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
-    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -220,7 +221,7 @@ fn burn_aliases_present() {
         ),
         Account(
             1_000_000,
-            alias_id_2,
+            account_id_2,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -248,7 +249,7 @@ fn burn_aliases_present() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().set_aliases(HashSet::from([alias_id_1, alias_id_2])))
+    .burn(Burn::new().set_aliases(HashSet::from([account_id_1, account_id_2])))
     .select()
     .unwrap();
 
@@ -259,12 +260,12 @@ fn burn_aliases_present() {
 #[test]
 fn burn_alias_in_outputs() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -278,7 +279,7 @@ fn burn_alias_in_outputs() {
     let outputs = build_outputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -296,12 +297,12 @@ fn burn_alias_in_outputs() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_alias(account_id_1))
     .select();
 
     assert!(matches!(
         selected,
-        Err(Error::BurnAndTransition(ChainId::Account(alias_id))) if alias_id == alias_id_1
+        Err(Error::BurnAndTransition(ChainId::Account(account_id))) if account_id == account_id_1
     ));
 }
 
@@ -399,12 +400,12 @@ fn burn_nft_present_and_required() {
 #[test]
 fn burn_nft_id_zero() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_0,
+            account_id_0,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -425,7 +426,7 @@ fn burn_nft_id_zero() {
         None,
         None,
     )]);
-    let alias_id = AccountId::from(inputs[0].output_id());
+    let account_id = AccountId::from(inputs[0].output_id());
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -433,7 +434,7 @@ fn burn_nft_id_zero() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id))
+    .burn(Burn::new().add_alias(account_id))
     .select()
     .unwrap();
 
@@ -591,19 +592,19 @@ fn burn_nft_in_outputs() {
 #[test]
 fn burn_foundry_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -652,7 +653,7 @@ fn burn_foundry_present() {
             } else if output.is_alias() {
                 assert_eq!(output.amount(), 1_000_000);
                 assert_eq!(output.as_alias().native_tokens().len(), 0);
-                assert_eq!(*output.as_alias().alias_id(), alias_id_1);
+                assert_eq!(*output.as_alias().account_id(), account_id_1);
                 assert_eq!(output.as_alias().unlock_conditions().len(), 2);
                 assert_eq!(output.as_alias().features().len(), 0);
                 assert_eq!(output.as_alias().immutable_features().len(), 0);
@@ -674,10 +675,10 @@ fn burn_foundry_present() {
 #[test]
 fn burn_foundry_absent() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id_1 = build_inputs([Foundry(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
         None,
@@ -689,7 +690,7 @@ fn burn_foundry_absent() {
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -729,26 +730,26 @@ fn burn_foundry_absent() {
 #[test]
 fn burn_foundries_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
         Foundry(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             2,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             2,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -790,7 +791,7 @@ fn burn_foundries_present() {
             assert!(output.is_alias());
             assert_eq!(output.amount(), 1_000_000);
             assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_eq!(*output.as_alias().alias_id(), alias_id_1);
+            assert_eq!(*output.as_alias().account_id(), account_id_1);
             assert_eq!(output.as_alias().unlock_conditions().len(), 2);
             assert_eq!(output.as_alias().features().len(), 0);
             assert_eq!(output.as_alias().immutable_features().len(), 0);
@@ -809,12 +810,12 @@ fn burn_foundries_present() {
 #[test]
 fn burn_foundry_in_outputs() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
@@ -824,7 +825,7 @@ fn burn_foundry_in_outputs() {
     let outputs = build_outputs([
         Foundry(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
@@ -889,19 +890,19 @@ fn burn_native_tokens() {
 #[test]
 fn burn_foundry_and_its_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -932,12 +933,12 @@ fn burn_foundry_and_its_alias() {
     .burn(
         Burn::new()
             .add_foundry(inputs[0].output.as_foundry().id())
-            .add_alias(alias_id_1),
+            .add_alias(account_id_1),
     )
     .select();
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_1
     ));
 }

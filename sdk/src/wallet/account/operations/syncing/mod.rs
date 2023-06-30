@@ -216,7 +216,7 @@ where
                 match &output_data.output {
                     Output::Account(alias_output) => {
                         let alias_address =
-                            AccountAddress::from(alias_output.alias_id_non_null(&output_data.output_id));
+                            AccountAddress::from(alias_output.account_id_non_null(&output_data.output_id));
 
                         new_alias_and_nft_addresses.insert(Address::Account(alias_address), output_data.address);
                     }

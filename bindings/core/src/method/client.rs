@@ -31,7 +31,7 @@ pub enum ClientMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        alias_id: AccountId,
+        account_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
@@ -205,7 +205,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     AccountOutputId {
         /// Account id
-        alias_id: AccountId,
+        account_id: AccountId,
     },
     /// Fetch NFT output IDs
     #[serde(rename_all = "camelCase")]
@@ -331,7 +331,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 {
         /// Account ID
-        alias_id: AccountId,
+        account_id: AccountId,
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },

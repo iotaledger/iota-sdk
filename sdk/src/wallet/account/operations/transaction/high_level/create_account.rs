@@ -122,7 +122,7 @@ where
     }
 
     /// Get an existing alias output
-    pub(crate) async fn get_alias_output(&self, alias_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
+    pub(crate) async fn get_alias_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_alias_output]");
         self.details()
             .await
@@ -130,13 +130,13 @@ where
             .values()
             .find_map(|output_data| match &output_data.output {
                 Output::Account(alias_output) => {
-                    let output_alias_id = alias_output.alias_id_non_null(&output_data.output_id);
+                    let output_account_id = alias_output.account_id_non_null(&output_data.output_id);
 
-                    alias_id.map_or_else(
-                        || Some((output_alias_id, output_data.clone())),
-                        |alias_id| {
-                            if output_alias_id == alias_id {
-                                Some((output_alias_id, output_data.clone()))
+                    account_id.map_or_else(
+                        || Some((output_account_id, output_data.clone())),
+                        |account_id| {
+                            if output_account_id == account_id {
+                                Some((output_account_id, output_data.clone()))
                             } else {
                                 None
                             }

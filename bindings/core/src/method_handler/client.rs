@@ -60,7 +60,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildAccountOutput {
             amount,
             native_tokens,
-            alias_id,
+            account_id,
             state_index,
             state_metadata,
             foundry_counter,
@@ -75,7 +75,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
-                &alias_id,
+                &account_id,
                 state_index,
                 state_metadata.map(prefix_hex::decode).transpose()?,
                 foundry_counter,
@@ -250,7 +250,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::AccountOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.alias_output_ids(query_parameters).await?)
         }
-        ClientMethod::AccountOutputId { alias_id } => Response::OutputId(client.alias_output_id(alias_id).await?),
+        ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.alias_output_id(account_id).await?),
         ClientMethod::NftOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
         }
@@ -337,8 +337,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
         }
-        ClientMethod::AccountIdToBech32 { alias_id, bech32_hrp } => {
-            Response::Bech32Address(client.alias_id_to_bech32(alias_id, bech32_hrp).await?)
+        ClientMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
+            Response::Bech32Address(client.account_id_to_bech32(account_id, bech32_hrp).await?)
         }
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
             Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)

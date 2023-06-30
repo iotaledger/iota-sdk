@@ -26,13 +26,13 @@ impl AccountAddress {
 
     /// Returns the [`AccountId`] of an [`AccountAddress`].
     #[inline(always)]
-    pub fn alias_id(&self) -> &AccountId {
+    pub fn account_id(&self) -> &AccountId {
         &self.0
     }
 
     /// Consumes an [`AccountAddress`] and returns its [`AccountId`].
     #[inline(always)]
-    pub fn into_alias_id(self) -> AccountId {
+    pub fn into_account_id(self) -> AccountId {
         self.0
     }
 }
@@ -75,14 +75,14 @@ pub mod dto {
     pub struct AccountAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub alias_id: String,
+        pub account_id: String,
     }
 
     impl From<&AccountAddress> for AccountAddressDto {
         fn from(value: &AccountAddress) -> Self {
             Self {
                 kind: AccountAddress::KIND,
-                alias_id: value.to_string(),
+                account_id: value.to_string(),
             }
         }
     }
@@ -92,7 +92,7 @@ pub mod dto {
 
         fn try_from(value: AccountAddressDto) -> Result<Self, Self::Error> {
             value
-                .alias_id
+                .account_id
                 .parse::<Self>()
                 .map_err(|_| Error::InvalidField("accountId"))
         }

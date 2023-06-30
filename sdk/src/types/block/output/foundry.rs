@@ -471,7 +471,7 @@ impl FoundryOutput {
 
 impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let alias_chain_id = ChainId::from(*next_state.alias_address().alias_id());
+        let alias_chain_id = ChainId::from(*next_state.alias_address().account_id());
 
         if let (Some(Output::Account(input_alias)), Some(Output::Account(output_alias))) = (
             context.input_chains.get(&alias_chain_id),

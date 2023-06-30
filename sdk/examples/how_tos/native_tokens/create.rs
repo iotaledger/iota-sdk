@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
     println!("Preparing transaction to create native token...");
 
     let params = CreateNativeTokenParams {
-        alias_id: None,
+        account_id: None,
         circulating_supply: U256::from(CIRCULATING_SUPPLY),
         maximum_supply: U256::from(MAXIMUM_SUPPLY),
         foundry_metadata: None,

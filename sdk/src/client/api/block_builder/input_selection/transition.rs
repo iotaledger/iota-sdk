@@ -21,16 +21,16 @@ impl InputSelection {
         output_id: &OutputId,
         alias_transition: AccountTransition,
     ) -> Result<Option<Output>, Error> {
-        let alias_id = input.alias_id_non_null(output_id);
+        let account_id = input.account_id_non_null(output_id);
 
         // Do not create an alias output if the alias input is to be burned.
         if self
             .burn
             .as_ref()
-            .map(|burn| burn.aliases.contains(&alias_id))
+            .map(|burn| burn.aliases.contains(&account_id))
             .unwrap_or(false)
         {
-            log::debug!("No transition of {output_id:?}/{alias_id:?} as it needs to be burned");
+            log::debug!("No transition of {output_id:?}/{account_id:?} as it needs to be burned");
             return Ok(None);
         }
 
@@ -38,16 +38,16 @@ impl InputSelection {
         if self
             .outputs
             .iter()
-            .any(|output| is_account_with_id_non_null(output, &alias_id))
+            .any(|output| is_account_with_id_non_null(output, &account_id))
         {
-            log::debug!("No transition of {output_id:?}/{alias_id:?} as output already exists");
+            log::debug!("No transition of {output_id:?}/{account_id:?} as output already exists");
             return Ok(None);
         }
 
         let mut highest_foundry_serial_number = 0;
         for output in self.outputs.iter() {
             if let Output::Foundry(foundry) = output {
-                if *foundry.alias_address().alias_id() == alias_id {
+                if *foundry.alias_address().account_id() == account_id {
                     highest_foundry_serial_number = u32::max(highest_foundry_serial_number, foundry.serial_number());
                 }
             }
@@ -57,7 +57,7 @@ impl InputSelection {
         let features = input.features().iter().cloned().filter(|feature| !feature.is_sender());
 
         let mut builder = AccountOutputBuilder::from(input)
-            .with_alias_id(alias_id)
+            .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
@@ -68,9 +68,9 @@ impl InputSelection {
         let output = builder.finish_output(self.protocol_parameters.token_supply())?;
 
         self.automatically_transitioned
-            .insert(ChainId::from(alias_id), Some(alias_transition));
+            .insert(ChainId::from(account_id), Some(alias_transition));
 
-        log::debug!("Automatic {alias_transition} transition of {output_id:?}/{alias_id:?}");
+        log::debug!("Automatic {alias_transition} transition of {output_id:?}/{account_id:?}");
 
         Ok(Some(output))
     }

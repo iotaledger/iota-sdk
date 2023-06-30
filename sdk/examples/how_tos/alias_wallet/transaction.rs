@@ -47,11 +47,11 @@ async fn main() -> Result<()> {
     let total_base_token_balance = balance.base_coin().total();
     println!("Balance before sending funds from alias: {total_base_token_balance:#?}");
 
-    let alias_id = balance.aliases().first().unwrap();
-    println!("Account Id: {alias_id}");
+    let account_id = balance.aliases().first().unwrap();
+    println!("Account Id: {account_id}");
 
     // Get account address
-    let alias_address = AccountAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let alias_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
     // Find first output unlockable by the account address
     let input = *account

@@ -27,7 +27,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenParams {
     /// The account id which should be used to create the foundry.
-    pub alias_id: Option<AccountId>,
+    pub account_id: Option<AccountId>,
     /// Circulating supply
     pub circulating_supply: U256,
     /// Maximum supply
@@ -97,7 +97,7 @@ where
     /// Address needs to be Bech32 encoded
     /// ```ignore
     /// let params = CreateNativeTokenParams {
-    ///     alias_id: None,
+    ///     account_id: None,
     ///     circulating_supply: U256::from(100),
     ///     maximum_supply: U256::from(100),
     ///     foundry_metadata: None
@@ -136,21 +136,21 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let (alias_id, alias_output) = self
-            .get_alias_output(params.alias_id)
+        let (account_id, alias_output) = self
+            .get_alias_output(params.account_id)
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
 
         if let Output::Account(alias_output) = &alias_output.output {
             // Create the new alias output with the same feature blocks, just updated state_index and foundry_counter
             let new_alias_output_builder = AccountOutputBuilder::from(alias_output)
-                .with_alias_id(alias_id)
+                .with_account_id(account_id)
                 .with_state_index(alias_output.state_index() + 1)
                 .with_foundry_counter(alias_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens
             let foundry_id = FoundryId::build(
-                &AccountAddress::new(alias_id),
+                &AccountAddress::new(account_id),
                 alias_output.foundry_counter() + 1,
                 SimpleTokenScheme::KIND,
             );
@@ -169,7 +169,7 @@ where
                         )?),
                     )
                     .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
-                        alias_id,
+                        account_id,
                     )));
 
                     if let Some(foundry_metadata) = params.foundry_metadata {

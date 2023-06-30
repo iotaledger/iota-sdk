@@ -252,8 +252,8 @@ impl fmt::Display for Error {
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }
-            Self::SelfControlledAccountOutput(alias_id) => {
-                write!(f, "self controlled account output, account ID {alias_id}")
+            Self::SelfControlledAccountOutput(account_id) => {
+                write!(f, "self controlled account output, account ID {account_id}")
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")

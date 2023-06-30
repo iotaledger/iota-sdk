@@ -59,7 +59,7 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        alias_id: AccountId,
+        account_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
@@ -144,13 +144,13 @@ pub enum AccountMethod {
         params: Option<CreateAccountParams>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
+    /// Destroy an account output. Outputs controlled by it will be swept before if they don't have a
     /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
     /// sent to the governor address.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    DestroyAlias {
-        alias_id: AccountId,
+    DestroyAccount {
+        account_id: AccountId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.

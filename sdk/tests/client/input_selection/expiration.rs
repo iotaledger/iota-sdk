@@ -14,7 +14,7 @@ use iota_sdk::{
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
-    ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
+    ACCOUNT_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
     NFT_ID_1,
 };
 
@@ -666,7 +666,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 #[test]
 fn expiration_expired_only_alias_addresses() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(
@@ -681,7 +681,7 @@ fn expiration_expired_only_alias_addresses() {
         ),
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,

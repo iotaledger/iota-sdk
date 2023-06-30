@@ -398,7 +398,7 @@ impl WalletMessageHandler {
             AccountMethod::BuildAccountOutput {
                 amount,
                 native_tokens,
-                alias_id,
+                account_id,
                 state_index,
                 state_metadata,
                 foundry_counter,
@@ -413,7 +413,7 @@ impl WalletMessageHandler {
                         OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
                     native_tokens,
-                    &alias_id,
+                    &account_id,
                     state_index,
                     state_metadata,
                     foundry_counter,
@@ -545,10 +545,10 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::DestroyAlias { alias_id, options } => {
+            AccountMethod::DestroyAccount { account_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn(alias_id, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .burn(account_id, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })

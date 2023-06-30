@@ -84,7 +84,7 @@ pub struct FilterOptions {
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
     /// Return all alias outputs matching these IDs.
-    pub alias_ids: Option<HashSet<AccountId>>,
+    pub account_ids: Option<HashSet<AccountId>>,
     /// Return all foundry outputs matching these IDs.
     pub foundry_ids: Option<HashSet<FoundryId>>,
     /// Return all nft outputs matching these IDs.
@@ -319,9 +319,9 @@ impl AccountInner {
             for output in outputs {
                 match &output.output {
                     Output::Account(alias) => {
-                        if let Some(alias_ids) = &filter.alias_ids {
-                            let alias_id = alias.alias_id_non_null(&output.output_id);
-                            if alias_ids.contains(&alias_id) {
+                        if let Some(account_ids) = &filter.account_ids {
+                            let account_id = alias.account_id_non_null(&output.output_id);
+                            if account_ids.contains(&account_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -386,9 +386,9 @@ impl AccountInner {
     }
 
     /// Gets the unspent alias output matching the given ID.
-    pub async fn unspent_alias_output(&self, alias_id: &AccountId) -> Result<Option<OutputData>> {
+    pub async fn unspent_alias_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
-            alias_ids: Some([*alias_id].into()),
+            account_ids: Some([*account_id].into()),
             ..Default::default()
         })
         .await

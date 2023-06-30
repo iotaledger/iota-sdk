@@ -35,7 +35,7 @@ use iota_sdk::{
 use crate::client::{
     build_inputs, build_outputs,
     Build::{Account, Basic, Nft},
-    ALIAS_ID_1, ALIAS_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
 };
 
 #[tokio::test]
@@ -58,12 +58,12 @@ async fn all_combined() -> Result<()> {
     let ed25519_bech32_address_1 = &ed25519_bech32_addresses[1].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let ed25519_bech32_address_2 = &ed25519_bech32_addresses[2].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let alias_id_1 = AccountId::from_str(ALIAS_ID_1)?;
-    let alias_id_2 = AccountId::from_str(ALIAS_ID_2)?;
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2)?;
     let alias_1_bech32_address =
-        &Address::Account(AccountAddress::new(alias_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        &Address::Account(AccountAddress::new(account_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let alias_2_bech32_address =
-        &Address::Account(AccountAddress::new(alias_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        &Address::Account(AccountAddress::new(account_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let nft_id_1 = NftId::from_str(NFT_ID_1)?;
     let nft_id_2 = NftId::from_str(NFT_ID_2)?;
@@ -77,7 +77,7 @@ async fn all_combined() -> Result<()> {
     let inputs = build_inputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             &nft_1_bech32_address.to_string(),
             &nft_1_bech32_address.to_string(),
@@ -88,7 +88,7 @@ async fn all_combined() -> Result<()> {
         ),
         Account(
             1_000_000,
-            alias_id_2,
+            account_id_2,
             0,
             &ed25519_bech32_address_0.to_string(),
             &ed25519_bech32_address_1.to_string(),
@@ -277,7 +277,7 @@ async fn all_combined() -> Result<()> {
     let outputs = build_outputs([
         Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             &nft_1_bech32_address.to_string(),
             &nft_1_bech32_address.to_string(),
@@ -288,7 +288,7 @@ async fn all_combined() -> Result<()> {
         ),
         Account(
             1_000_000,
-            alias_id_2,
+            account_id_2,
             1,
             &ed25519_bech32_address_0.to_string(),
             &ed25519_bech32_address_1.to_string(),

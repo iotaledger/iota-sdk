@@ -55,12 +55,14 @@ pub fn rand_account_id() -> AccountId {
 /// Generates a random [`AccountOutput`](AccountOutput).
 pub fn rand_account_output(token_supply: u64) -> AccountOutput {
     // We need to make sure that `AccountId` and `Address` don't match.
-    let alias_id = rand_account_id();
+    let account_id = rand_account_id();
 
-    AccountOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), alias_id)
+    AccountOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), account_id)
         .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
-        .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
-        .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
+        .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
+            &account_id,
+        ))
+        .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&account_id))
         .finish(token_supply)
         .unwrap()
 }

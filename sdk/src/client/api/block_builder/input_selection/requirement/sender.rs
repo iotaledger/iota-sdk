@@ -29,7 +29,7 @@ impl InputSelection {
                 log::debug!("Treating {address:?} sender requirement as an alias requirement");
 
                 // A state transition is required to unlock the account address.
-                match self.fulfill_account_requirement(alias_address.into_alias_id(), AccountTransition::State) {
+                match self.fulfill_account_requirement(alias_address.into_account_id(), AccountTransition::State) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Account(_, _))) => {
                         Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))

@@ -47,11 +47,11 @@ where
         log::debug!("[TRANSACTION] prepare_melt_native_token");
 
         let foundry_id = FoundryId::from(token_id);
-        let alias_id = *foundry_id.alias_address().alias_id();
+        let account_id = *foundry_id.alias_address().account_id();
         let token_supply = self.client().get_token_supply().await?;
 
         let (existing_alias_output_data, existing_foundry_output) = self
-            .find_alias_and_foundry_output_data(alias_id, foundry_id)
+            .find_alias_and_foundry_output_data(account_id, foundry_id)
             .await
             .map(|(alias_data, foundry_data)| match foundry_data.output {
                 Output::Foundry(foundry_output) => (alias_data, foundry_output),
@@ -61,7 +61,7 @@ where
         if let Output::Account(alias_output) = &existing_alias_output_data.output {
             // Create the new alias output with updated amount and state_index
             let alias_output = AccountOutputBuilder::from(alias_output)
-                .with_alias_id(alias_id)
+                .with_account_id(account_id)
                 .with_state_index(alias_output.state_index() + 1)
                 .finish_output(token_supply)?;
 
@@ -83,10 +83,10 @@ where
         }
     }
 
-    /// Find and return unspent `OutputData` for given `alias_id` and `foundry_id`
+    /// Find and return unspent `OutputData` for given `account_id` and `foundry_id`
     async fn find_alias_and_foundry_output_data(
         &self,
-        alias_id: AccountId,
+        account_id: AccountId,
         foundry_id: FoundryId,
     ) -> crate::wallet::Result<(OutputData, OutputData)> {
         let mut existing_alias_output_data = None;
@@ -95,7 +95,7 @@ where
         for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Account(output) => {
-                    if output.alias_id_non_null(output_id) == alias_id {
+                    if output.account_id_non_null(output_id) == account_id {
                         existing_alias_output_data = Some(output_data.clone());
                     }
                 }

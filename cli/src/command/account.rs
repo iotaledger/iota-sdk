@@ -80,10 +80,10 @@ pub enum AccountCommand {
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
-    /// Destroy an alias.
-    DestroyAlias {
+    /// Destroy an account output.
+    DestroyAccount {
         /// Account ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
-        alias_id: String,
+        account_id: String,
     },
     /// Destroy a foundry.
     DestroyFoundry {
@@ -445,7 +445,7 @@ pub async fn create_native_token_command(
     }
 
     let params = CreateNativeTokenParams {
-        alias_id: None,
+        account_id: None,
         circulating_supply: U256::from_dec_str(&circulating_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
         maximum_supply: U256::from_dec_str(&maximum_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
         foundry_metadata,
@@ -462,11 +462,11 @@ pub async fn create_native_token_command(
     Ok(())
 }
 
-// `destroy-alias` command
-pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
-    println_log_info!("Destroying alias {alias_id}.");
+// `destroy-account` command
+pub async fn destroy_account_command(account: &Account, account_id: String) -> Result<(), Error> {
+    println_log_info!("Destroying alias {account_id}.");
 
-    let transaction = account.burn(AccountId::from_str(&alias_id)?, None).await?;
+    let transaction = account.burn(AccountId::from_str(&account_id)?, None).await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",
