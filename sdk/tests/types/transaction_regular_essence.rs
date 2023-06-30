@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    address::{Address, AliasAddress, Ed25519Address},
+    address::{AccountAddress, Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{
         unlock_condition::{
-            AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
+            AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition,
             StateControllerAddressUnlockCondition,
         },
-        AliasId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
+        AccountId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
         SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
@@ -398,7 +398,7 @@ fn duplicate_output_alias() {
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
-    let alias_id = AliasId::from(bytes);
+    let alias_id = AccountId::from(bytes);
     let alias = AliasOutput::build_with_amount(1_000_000, alias_id)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
@@ -412,7 +412,7 @@ fn duplicate_output_alias() {
 
     assert!(matches!(
         essence,
-        Err(Error::DuplicateOutputChain(ChainId::Alias(alias_id_0))) if alias_id_0 == alias_id
+        Err(Error::DuplicateOutputChain(ChainId::Account(alias_id_0))) if alias_id_0 == alias_id
     ));
 }
 
@@ -429,14 +429,16 @@ fn duplicate_output_foundry() {
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
-    let alias_id = AliasId::from(bytes);
+    let alias_id = AccountId::from(bytes);
     let token_scheme =
         TokenScheme::Simple(SimpleTokenScheme::new(U256::from(70u8), U256::from(0u8), U256::from(100u8)).unwrap());
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id), 1, token_scheme.kind());
     let token_id = TokenId::from(foundry_id);
     let foundry = FoundryOutput::build_with_amount(1_000_000, 1, token_scheme)
         .add_native_token(NativeToken::new(token_id, U256::from(70u8)).unwrap())
-        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
+        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
+            alias_id,
+        )))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 

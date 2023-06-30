@@ -7,7 +7,7 @@ use iota_sdk::{
             AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
             StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
         },
-        AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
+        AccountId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
     },
     wallet::{account::SyncOptions, Result},
 };
@@ -106,7 +106,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
+        AliasOutputBuilder::new_with_amount(1_000_000, AccountId::null())
             .with_unlock_conditions([
                 UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address)),

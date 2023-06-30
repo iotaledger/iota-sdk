@@ -7,7 +7,7 @@ use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId};
+use crate::types::block::output::{feature::MetadataFeature, AccountId, FoundryId, NftId, OutputId, TokenId};
 
 /// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
 /// [`crate::wallet::account::Account::balance()`].
@@ -24,7 +24,7 @@ pub struct Balance {
     /// Nfts
     pub(crate) nfts: Vec<NftId>,
     /// Aliases
-    pub(crate) aliases: Vec<AliasId>,
+    pub(crate) aliases: Vec<AccountId>,
     /// Foundries
     pub(crate) foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
@@ -187,7 +187,7 @@ impl Balance {
         )
         .collect::<Vec<_>>();
 
-        let aliases = std::iter::repeat_with(|| AliasId::from(rand_bytes_array()))
+        let aliases = std::iter::repeat_with(|| AccountId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
             .collect::<Vec<_>>();
         let nfts = std::iter::repeat_with(|| NftId::from(rand_bytes_array()))

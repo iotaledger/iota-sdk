@@ -15,9 +15,9 @@ use iota_sdk::{
         Client, Result,
     },
     types::block::{
-        address::{Address, AliasAddress, ToBech32Ext},
+        address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AliasId, InputsCommitment},
+        output::{AccountId, InputsCommitment},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
@@ -56,7 +56,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_1)?;
+    let alias_id = AccountId::from_str(ALIAS_ID_1)?;
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -147,7 +147,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_1)?;
+    let alias_id = AccountId::from_str(ALIAS_ID_1)?;
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -238,8 +238,8 @@ async fn alias_reference_unlocks() -> Result<()> {
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_1)?;
-    let alias_bech32_address = &Address::Alias(AliasAddress::new(alias_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let alias_id = AccountId::from_str(ALIAS_ID_1)?;
+    let alias_bech32_address = &Address::Alias(AccountAddress::new(alias_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let inputs = build_inputs([
         Alias(

@@ -14,12 +14,12 @@ use packable::{
 };
 
 use crate::types::block::{
-    address::{Address, AliasAddress},
+    address::{AccountAddress, Address},
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent,
-        RentStructure, StateTransitionError, StateTransitionVerifier,
+        verify_output_amount, AccountId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+        Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
     },
     protocol::ProtocolParameters,
     semantic::{ConflictReason, ValidationContext},
@@ -27,17 +27,17 @@ use crate::types::block::{
     Error,
 };
 
-/// Types of alias transition.
+/// Types of account transition.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum AliasTransition {
+pub enum AccountTransition {
     /// State transition.
     State,
     /// Governance transition.
     Governance,
 }
 
-impl AliasTransition {
+impl AccountTransition {
     /// Checks whether the alias transition is a state one.
     pub fn is_state(&self) -> bool {
         matches!(self, Self::State)
@@ -49,7 +49,7 @@ impl AliasTransition {
     }
 }
 
-impl core::fmt::Display for AliasTransition {
+impl core::fmt::Display for AccountTransition {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::State => write!(f, "state"),
@@ -64,7 +64,7 @@ impl core::fmt::Display for AliasTransition {
 pub struct AliasOutputBuilder {
     amount: OutputBuilderAmount,
     native_tokens: BTreeSet<NativeToken>,
-    alias_id: AliasId,
+    alias_id: AccountId,
     state_index: Option<u32>,
     state_metadata: Vec<u8>,
     foundry_counter: Option<u32>,
@@ -75,17 +75,17 @@ pub struct AliasOutputBuilder {
 
 impl AliasOutputBuilder {
     /// Creates an [`AliasOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, alias_id: AliasId) -> Self {
+    pub fn new_with_amount(amount: u64, alias_id: AccountId) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), alias_id)
     }
 
     /// Creates an [`AliasOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> Self {
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AccountId) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), alias_id)
     }
 
-    fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Self {
+    fn new(amount: OutputBuilderAmount, alias_id: AccountId) -> Self {
         Self {
             amount,
             native_tokens: BTreeSet::new(),
@@ -129,7 +129,7 @@ impl AliasOutputBuilder {
 
     /// Sets the alias ID to the provided value.
     #[inline(always)]
-    pub fn with_alias_id(mut self, alias_id: AliasId) -> Self {
+    pub fn with_alias_id(mut self, alias_id: AccountId) -> Self {
         self.alias_id = alias_id;
         self
     }
@@ -328,7 +328,7 @@ pub struct AliasOutput {
     // Native tokens held by the output.
     native_tokens: NativeTokens,
     // Unique identifier of the alias.
-    alias_id: AliasId,
+    alias_id: AccountId,
     // A counter that must increase by 1 every time the alias is state transitioned.
     state_index: u32,
     // Metadata that can only be changed by the state controller.
@@ -357,14 +357,17 @@ impl AliasOutput {
 
     /// Creates a new [`AliasOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, alias_id: AliasId) -> AliasOutputBuilder {
+    pub fn build_with_amount(amount: u64, alias_id: AccountId) -> AliasOutputBuilder {
         AliasOutputBuilder::new_with_amount(amount, alias_id)
     }
 
     /// Creates a new [`AliasOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> AliasOutputBuilder {
+    pub fn build_with_minimum_storage_deposit(
+        rent_structure: RentStructure,
+        alias_id: AccountId,
+    ) -> AliasOutputBuilder {
         AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
     }
 
@@ -382,13 +385,13 @@ impl AliasOutput {
 
     ///
     #[inline(always)]
-    pub fn alias_id(&self) -> &AliasId {
+    pub fn alias_id(&self) -> &AccountId {
         &self.alias_id
     }
 
     /// Returns the alias ID if not null, or creates it from the output ID.
     #[inline(always)]
-    pub fn alias_id_non_null(&self, output_id: &OutputId) -> AliasId {
+    pub fn alias_id_non_null(&self, output_id: &OutputId) -> AccountId {
         self.alias_id.or_from_output_id(output_id)
     }
 
@@ -451,12 +454,12 @@ impl AliasOutput {
     ///
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
-        ChainId::Alias(self.alias_id)
+        ChainId::Account(self.alias_id)
     }
 
     /// Returns the alias address for this output.
-    pub fn alias_address(&self, output_id: &OutputId) -> AliasAddress {
-        AliasAddress::new(self.alias_id_non_null(output_id))
+    pub fn alias_address(&self, output_id: &OutputId) -> AccountAddress {
+        AccountAddress::new(self.alias_id_non_null(output_id))
     }
 
     ///
@@ -468,7 +471,7 @@ impl AliasOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         let alias_id = if self.alias_id().is_null() {
-            AliasId::from(output_id)
+            AccountId::from(output_id)
         } else {
             *self.alias_id()
         };
@@ -484,7 +487,7 @@ impl AliasOutput {
                     // sender/issuer validations.
                     context
                         .unlocked_addresses
-                        .insert(Address::from(AliasAddress::from(alias_id)));
+                        .insert(Address::from(AccountAddress::from(alias_id)));
                 }
             }
             None => self.governor_address().unlock(unlock, inputs, context)?,
@@ -622,7 +625,7 @@ impl Packable for AliasOutput {
         verify_output_amount::<VERIFY>(&amount, &visitor.token_supply()).map_err(UnpackError::Packable)?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
-        let alias_id = AliasId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let alias_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_metadata = BoxedSlicePrefix::<u8, StateMetadataLength>::unpack::<_, VERIFY>(unpacker, &())
             .map_packable_err(|err| Error::InvalidStateMetadataLength(err.into_prefix_err().into()))?;
@@ -667,7 +670,7 @@ impl Packable for AliasOutput {
 }
 
 #[inline]
-fn verify_index_counter(alias_id: &AliasId, state_index: u32, foundry_counter: u32) -> Result<(), Error> {
+fn verify_index_counter(alias_id: &AccountId, state_index: u32, foundry_counter: u32) -> Result<(), Error> {
     if alias_id.is_null() && (state_index != 0 || foundry_counter != 0) {
         Err(Error::NonZeroStateIndexOrFoundryCounter)
     } else {
@@ -675,11 +678,11 @@ fn verify_index_counter(alias_id: &AliasId, state_index: u32, foundry_counter: u
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &AliasId) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
         if let Address::Alias(alias_address) = unlock_condition.address() {
             if alias_address.alias_id() == alias_id {
-                return Err(Error::SelfControlledAliasOutput(*alias_id));
+                return Err(Error::SelfControlledAccountOutput(*alias_id));
             }
         }
     } else {
@@ -689,7 +692,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Ali
     if let Some(unlock_condition) = unlock_conditions.governor_address() {
         if let Address::Alias(alias_address) = unlock_condition.address() {
             if alias_address.alias_id() == alias_id {
-                return Err(Error::SelfControlledAliasOutput(*alias_id));
+                return Err(Error::SelfControlledAccountOutput(*alias_id));
             }
         }
     } else {
@@ -723,7 +726,7 @@ pub mod dto {
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         // Unique identifier of the alias.
-        pub alias_id: AliasId,
+        pub alias_id: AccountId,
         // A counter that must increase by 1 every time the alias is state transitioned.
         pub state_index: u32,
         // Metadata that can only be changed by the state controller.
@@ -835,7 +838,7 @@ pub mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
-            alias_id: &AliasId,
+            alias_id: &AccountId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
             foundry_counter: Option<u32>,
@@ -903,14 +906,14 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        address::AliasAddress,
+        address::AccountAddress,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             FoundryId, SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::{
-            address::rand_alias_address,
+            address::rand_account_address,
             output::{
                 feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
                 rand_alias_id, rand_alias_output,
@@ -926,7 +929,7 @@ mod tests {
     fn builder() {
         let protocol_parameters = protocol_parameters();
         let alias_id = rand_alias_id();
-        let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&AccountAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
         let gov_address_1 = rand_governor_address_unlock_condition_different_from(&alias_id);
         let gov_address_2 = rand_governor_address_unlock_condition_different_from(&alias_id);
         let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
@@ -1025,7 +1028,7 @@ mod tests {
         assert_eq!(output, output_split);
 
         let alias_id = rand_alias_id();
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let gov_address = rand_governor_address_unlock_condition_different_from(&alias_id);
         let state_address = rand_state_controller_address_unlock_condition_different_from(&alias_id);
 

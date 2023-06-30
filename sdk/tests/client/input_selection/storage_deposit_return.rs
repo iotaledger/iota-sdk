@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{output::AliasId, protocol::protocol_parameters},
+    types::block::{output::AccountId, protocol::protocol_parameters},
 };
 
 use crate::client::{
@@ -489,7 +489,7 @@ fn useless_sdruc_required_for_sender_feature() {
 #[test]
 fn sdruc_required_non_ed25519_in_address_unlock() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(
@@ -552,7 +552,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
 #[test]
 fn useless_sdruc_non_ed25519_in_address_unlock() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(

@@ -10,7 +10,7 @@ use crate::{
         output::{
             feature::MetadataFeature,
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, Output,
+            AccountId, AliasOutputBuilder, Output,
         },
     },
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
@@ -19,7 +19,7 @@ use crate::{
 /// Params `create_alias_output()`
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CreateAliasParams {
+pub struct CreateAccountParams {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<Bech32Address>,
@@ -40,7 +40,7 @@ where
 {
     /// Function to create an alias output.
     /// ```ignore
-    /// let params = CreateAliasParams {
+    /// let params = CreateAccountParams {
     ///     address: None,
     ///     immutable_metadata: Some(b"some immutable alias metadata".to_vec()),
     ///     metadata: Some(b"some alias metadata".to_vec()),
@@ -56,7 +56,7 @@ where
     /// ```
     pub async fn create_alias_output(
         &self,
-        params: Option<CreateAliasParams>,
+        params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
@@ -69,7 +69,7 @@ where
     /// [Account.create_alias_output()](crate::account::Account.create_alias_output)
     pub async fn prepare_create_alias_output(
         &self,
-        params: Option<CreateAliasParams>,
+        params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_alias_output");
@@ -92,12 +92,12 @@ where
         };
 
         let mut alias_output_builder =
-            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
+            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
                 .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
-        if let Some(CreateAliasParams {
+        if let Some(CreateAccountParams {
             immutable_metadata,
             metadata,
             state_metadata,
@@ -122,7 +122,7 @@ where
     }
 
     /// Get an existing alias output
-    pub(crate) async fn get_alias_output(&self, alias_id: Option<AliasId>) -> Option<(AliasId, OutputData)> {
+    pub(crate) async fn get_alias_output(&self, alias_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_alias_output]");
         self.details()
             .await
@@ -154,7 +154,7 @@ mod tests {
 
     #[test]
     fn create_alias_params_serde() {
-        let params_none_1 = CreateAliasParams {
+        let params_none_1 = CreateAccountParams {
             address: None,
             immutable_metadata: None,
             metadata: None,
@@ -165,7 +165,7 @@ mod tests {
 
         assert_eq!(params_none_1, params_none_2);
 
-        let params_some_1 = CreateAliasParams {
+        let params_some_1 = CreateAccountParams {
             address: None,
             immutable_metadata: Some(b"immutable_metadata".to_vec()),
             metadata: Some(b"metadata".to_vec()),

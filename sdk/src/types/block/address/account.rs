@@ -5,58 +5,58 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::{output::AliasId, Error};
+use crate::types::block::{output::AccountId, Error};
 
-/// An alias address.
+/// An account address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
 #[as_ref(forward)]
-pub struct AliasAddress(AliasId);
+pub struct AccountAddress(AccountId);
 
-impl AliasAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of an [`AliasAddress`].
+impl AccountAddress {
+    /// The [`Address`](crate::types::block::address::Address) kind of an [`AccountAddress`].
     pub const KIND: u8 = 8;
-    /// The length of an [`AliasAddress`].
-    pub const LENGTH: usize = AliasId::LENGTH;
+    /// The length of an [`AccountAddress`].
+    pub const LENGTH: usize = AccountId::LENGTH;
 
-    /// Creates a new [`AliasAddress`].
+    /// Creates a new [`AccountAddress`].
     #[inline(always)]
-    pub fn new(id: AliasId) -> Self {
+    pub fn new(id: AccountId) -> Self {
         Self::from(id)
     }
 
-    /// Returns the [`AliasId`] of an [`AliasAddress`].
+    /// Returns the [`AccountId`] of an [`AccountAddress`].
     #[inline(always)]
-    pub fn alias_id(&self) -> &AliasId {
+    pub fn alias_id(&self) -> &AccountId {
         &self.0
     }
 
-    /// Consumes an [`AliasAddress`] and returns its [`AliasId`].
+    /// Consumes an [`AccountAddress`] and returns its [`AccountId`].
     #[inline(always)]
-    pub fn into_alias_id(self) -> AliasId {
+    pub fn into_alias_id(self) -> AccountId {
         self.0
     }
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(AliasAddress);
+string_serde_impl!(AccountAddress);
 
-impl FromStr for AliasAddress {
+impl FromStr for AccountAddress {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::new(AliasId::from_str(s)?))
+        Ok(Self::new(AccountId::from_str(s)?))
     }
 }
 
-impl core::fmt::Display for AliasAddress {
+impl core::fmt::Display for AccountAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl core::fmt::Debug for AliasAddress {
+impl core::fmt::Debug for AccountAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "AliasAddress({self})")
+        write!(f, "AccountAddress({self})")
     }
 }
 
@@ -72,25 +72,25 @@ pub mod dto {
     /// Describes an alias address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AliasAddressDto {
+    pub struct AccountAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub alias_id: String,
     }
 
-    impl From<&AliasAddress> for AliasAddressDto {
-        fn from(value: &AliasAddress) -> Self {
+    impl From<&AccountAddress> for AccountAddressDto {
+        fn from(value: &AccountAddress) -> Self {
             Self {
-                kind: AliasAddress::KIND,
+                kind: AccountAddress::KIND,
                 alias_id: value.to_string(),
             }
         }
     }
 
-    impl TryFrom<AliasAddressDto> for AliasAddress {
+    impl TryFrom<AccountAddressDto> for AccountAddress {
         type Error = Error;
 
-        fn try_from(value: AliasAddressDto) -> Result<Self, Self::Error> {
+        fn try_from(value: AccountAddressDto) -> Result<Self, Self::Error> {
             value
                 .alias_id
                 .parse::<Self>()

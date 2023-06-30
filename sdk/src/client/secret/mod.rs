@@ -38,7 +38,7 @@ use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
         api::{
-            input_selection::{is_alias_transition, Error as InputSelectionError},
+            input_selection::{is_account_transition, Error as InputSelectionError},
             transaction::validate_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
@@ -50,7 +50,7 @@ use crate::{
         payload::{transaction::TransactionEssence, Payload, TransactionPayload},
         semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
-        unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
     utils::unix_timestamp_now,
 };
@@ -437,7 +437,7 @@ where
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let alias_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) = input.output.required_and_unlocked_address(
             time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
             input.output_metadata.output_id(),
@@ -448,7 +448,7 @@ where
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Alias(_alias) => blocks.push(Unlock::Alias(AliasUnlock::new(*block_index as u16)?)),
+                Address::Alias(_alias) => blocks.push(Unlock::Alias(AccountUnlock::new(*block_index as u16)?)),
                 Address::Ed25519(_ed25519) => {
                     blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }

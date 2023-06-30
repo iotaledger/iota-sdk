@@ -5,7 +5,7 @@ use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
         address::{dto::AddressDto, Address, ToBech32Ext},
-        output::{AliasId, FoundryId, NftId},
+        output::{AccountId, FoundryId, NftId},
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::Ed25519Signature,
         Block,
@@ -20,7 +20,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
     let response = match method {
         UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(bech32)?),
         UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, bech32_hrp)?),
-        UtilsMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
+        UtilsMethod::AccountIdToBech32 { alias_id, bech32_hrp } => {
             Response::Bech32Address(alias_id.to_bech32(bech32_hrp))
         }
         UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Response::Bech32Address(nft_id.to_bech32(bech32_hrp)),
@@ -43,7 +43,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let payload = TransactionPayload::try_from_dto_unverified(payload)?;
             Response::TransactionId(payload.id())
         }
-        UtilsMethod::ComputeAliasId { output_id } => Response::AliasId(AliasId::from(&output_id)),
+        UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
         UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
             alias_address,

@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias;
+mod account;
 mod nft;
 mod reference;
 mod signature;
@@ -13,7 +13,7 @@ use derive_more::{Deref, From};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-pub use self::{alias::AliasUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
+pub use self::{account::AccountUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX, INPUT_INDEX_RANGE},
     Error,
@@ -47,8 +47,8 @@ pub enum Unlock {
     #[packable(tag = ReferenceUnlock::KIND)]
     Reference(ReferenceUnlock),
     /// An alias unlock.
-    #[packable(tag = AliasUnlock::KIND)]
-    Alias(AliasUnlock),
+    #[packable(tag = AccountUnlock::KIND)]
+    Alias(AccountUnlock),
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
@@ -71,7 +71,7 @@ impl Unlock {
         match self {
             Self::Signature(_) => SignatureUnlock::KIND,
             Self::Reference(_) => ReferenceUnlock::KIND,
-            Self::Alias(_) => AliasUnlock::KIND,
+            Self::Alias(_) => AccountUnlock::KIND,
             Self::Nft(_) => NftUnlock::KIND,
         }
     }
@@ -152,7 +152,7 @@ pub mod dto {
 
     use super::*;
     pub use super::{
-        alias::dto::AliasUnlockDto, nft::dto::NftUnlockDto, reference::dto::ReferenceUnlockDto,
+        account::dto::AccountUnlockDto, nft::dto::NftUnlockDto, reference::dto::ReferenceUnlockDto,
         signature::dto::SignatureUnlockDto,
     };
     use crate::types::block::{
@@ -168,7 +168,7 @@ pub mod dto {
     pub enum UnlockDto {
         Signature(SignatureUnlockDto),
         Reference(ReferenceUnlockDto),
-        Alias(AliasUnlockDto),
+        Alias(AccountUnlockDto),
         Nft(NftUnlockDto),
     }
 
@@ -189,8 +189,8 @@ pub mod dto {
                     kind: ReferenceUnlock::KIND,
                     index: r.index(),
                 }),
-                Unlock::Alias(a) => Self::Alias(AliasUnlockDto {
-                    kind: AliasUnlock::KIND,
+                Unlock::Alias(a) => Self::Alias(AccountUnlockDto {
+                    kind: AccountUnlock::KIND,
                     index: a.index(),
                 }),
                 Unlock::Nft(n) => Self::Nft(NftUnlockDto {
@@ -218,7 +218,7 @@ pub mod dto {
                     }
                 },
                 UnlockDto::Reference(r) => Ok(Self::Reference(ReferenceUnlock::new(r.index)?)),
-                UnlockDto::Alias(a) => Ok(Self::Alias(AliasUnlock::new(a.index)?)),
+                UnlockDto::Alias(a) => Ok(Self::Alias(AccountUnlock::new(a.index)?)),
                 UnlockDto::Nft(n) => Ok(Self::Nft(NftUnlock::new(n.index)?)),
             }
         }
@@ -243,8 +243,8 @@ pub mod dto {
                             serde::de::Error::custom(format!("cannot deserialize reference unlock: {e}"))
                         })?)
                     }
-                    AliasUnlock::KIND => Self::Alias(
-                        AliasUnlockDto::deserialize(value)
+                    AccountUnlock::KIND => Self::Alias(
+                        AccountUnlockDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias unlock: {e}")))?,
                     ),
                     NftUnlock::KIND => Self::Nft(
@@ -267,7 +267,7 @@ pub mod dto {
             enum UnlockDto_<'a> {
                 T1(&'a SignatureUnlockDto),
                 T2(&'a ReferenceUnlockDto),
-                T3(&'a AliasUnlockDto),
+                T3(&'a AccountUnlockDto),
                 T4(&'a NftUnlockDto),
             }
             #[derive(Serialize)]

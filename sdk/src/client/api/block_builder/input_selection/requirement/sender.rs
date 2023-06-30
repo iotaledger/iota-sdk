@@ -4,7 +4,7 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::{address::Address, output::AliasTransition},
+    types::block::{address::Address, output::AccountTransition},
 };
 
 impl InputSelection {
@@ -12,7 +12,7 @@ impl InputSelection {
     pub(crate) fn fulfill_sender_requirement(
         &mut self,
         address: Address,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         match address {
             Address::Ed25519(_) => {
                 log::debug!("Treating {address:?} sender requirement as an ed25519 requirement");
@@ -29,9 +29,9 @@ impl InputSelection {
                 log::debug!("Treating {address:?} sender requirement as an alias requirement");
 
                 // A state transition is required to unlock the alias address.
-                match self.fulfill_alias_requirement(alias_address.into_alias_id(), AliasTransition::State) {
+                match self.fulfill_account_requirement(alias_address.into_alias_id(), AccountTransition::State) {
                     Ok(res) => Ok(res),
-                    Err(Error::UnfulfillableRequirement(Requirement::Alias(_, _))) => {
+                    Err(Error::UnfulfillableRequirement(Requirement::Account(_, _))) => {
                         Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
                     }
                     Err(e) => Err(e),

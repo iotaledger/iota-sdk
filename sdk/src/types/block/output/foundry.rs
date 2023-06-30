@@ -16,7 +16,7 @@ use packable::{
 use primitive_types::U256;
 
 use crate::types::block::{
-    address::{Address, AliasAddress},
+    address::{AccountAddress, Address},
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
@@ -354,10 +354,10 @@ impl FoundryOutput {
 
     ///
     #[inline(always)]
-    pub fn alias_address(&self) -> &AliasAddress {
-        // A FoundryOutput must have an ImmutableAliasAddressUnlockCondition.
+    pub fn alias_address(&self) -> &AccountAddress {
+        // A FoundryOutput must have an ImmutableAccountAddressUnlockCondition.
         self.unlock_conditions
-            .immutable_alias_address()
+            .immutable_account_address()
             .map(|unlock_condition| unlock_condition.alias_address())
             .unwrap()
     }
@@ -596,7 +596,7 @@ impl Packable for FoundryOutput {
 }
 
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
-    if unlock_conditions.immutable_alias_address().is_none() {
+    if unlock_conditions.immutable_account_address().is_none() {
         Err(Error::MissingAddressUnlockCondition)
     } else {
         verify_allowed_unlock_conditions(unlock_conditions, FoundryOutput::ALLOWED_UNLOCK_CONDITIONS)
@@ -769,12 +769,12 @@ mod tests {
     use super::*;
     use crate::types::block::{
         output::{
-            dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
+            dto::OutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, SimpleTokenScheme,
             TokenId,
         },
         protocol::protocol_parameters,
         rand::{
-            address::rand_alias_address,
+            address::rand_account_address,
             output::{
                 feature::{rand_allowed_features, rand_metadata_feature},
                 rand_foundry_output, rand_token_scheme,
@@ -785,9 +785,9 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
-        let alias_1 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
-        let alias_2 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
+        let alias_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
+        let alias_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
         let metadata_1 = rand_metadata_feature();
         let metadata_2 = rand_metadata_feature();
 
@@ -802,7 +802,7 @@ mod tests {
 
         let output = builder.clone().finish_unverified().unwrap();
         assert_eq!(output.serial_number(), 85);
-        assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_1));
+        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&alias_1));
         assert_eq!(output.features().metadata(), Some(&metadata_2));
         assert_eq!(output.immutable_features().metadata(), Some(&metadata_1));
 
@@ -812,13 +812,13 @@ mod tests {
             .clear_immutable_features()
             .replace_unlock_condition(alias_2);
         let output = builder.clone().finish_unverified().unwrap();
-        assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_2));
+        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&alias_2));
         assert!(output.features().is_empty());
         assert!(output.immutable_features().is_empty());
 
         let output = builder
             .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
-            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .finish(protocol_parameters.token_supply())
             .unwrap();
 
@@ -847,7 +847,7 @@ mod tests {
         let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
         let test_split_dto = |builder: FoundryOutputBuilder| {
             let output_split = FoundryOutput::try_from_dtos(
@@ -869,7 +869,7 @@ mod tests {
 
         let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .add_immutable_feature(rand_metadata_feature())
             .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
@@ -880,7 +880,7 @@ mod tests {
             rand_token_scheme(),
         )
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
         .add_immutable_feature(rand_metadata_feature())
         .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);

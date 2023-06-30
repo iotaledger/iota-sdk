@@ -9,7 +9,7 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AliasId,
+            dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AccountId,
             FoundryId, NativeToken, NftId, OutputId,
         },
         payload::{dto::PayloadDto, transaction::TransactionId},
@@ -31,7 +31,7 @@ pub enum ClientMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        alias_id: AliasId,
+        alias_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
@@ -205,7 +205,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     AliasOutputId {
         /// Alias id
-        alias_id: AliasId,
+        alias_id: AccountId,
     },
     /// Fetch NFT output IDs
     #[serde(rename_all = "camelCase")]
@@ -329,9 +329,9 @@ pub enum ClientMethod {
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
-    AliasIdToBech32 {
+    AccountIdToBech32 {
         /// Alias ID
-        alias_id: AliasId,
+        alias_id: AccountId,
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },

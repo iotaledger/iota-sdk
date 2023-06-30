@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias_id;
+mod account_id;
 mod chain_id;
 mod foundry_id;
 mod inputs_commitment;
@@ -15,7 +15,7 @@ mod token_id;
 mod token_scheme;
 
 ///
-pub mod alias;
+pub mod account;
 ///
 pub mod basic;
 ///
@@ -39,15 +39,15 @@ use packable::{
 };
 
 pub(crate) use self::{
-    alias::StateMetadataLength,
+    account::StateMetadataLength,
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };
 pub use self::{
-    alias::{AliasOutput, AliasOutputBuilder, AliasTransition},
-    alias_id::AliasId,
+    account::{AccountTransition, AliasOutput, AliasOutputBuilder},
+    account_id::AccountId,
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
     feature::{Feature, Features},
@@ -287,11 +287,11 @@ impl Output {
         &self,
         current_time: u32,
         output_id: &OutputId,
-        alias_transition: Option<AliasTransition>,
+        alias_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Alias(output) => {
-                if alias_transition.unwrap_or(AliasTransition::State) == AliasTransition::State {
+                if alias_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
                     // Alias address is only unlocked if it's a state transition
                     Ok((
                         *output.state_controller_address(),
@@ -476,7 +476,7 @@ pub mod dto {
 
     use super::*;
     pub use super::{
-        alias::dto::AliasOutputDto,
+        account::dto::AliasOutputDto,
         basic::dto::BasicOutputDto,
         foundry::dto::FoundryOutputDto,
         metadata::dto::OutputMetadataDto,

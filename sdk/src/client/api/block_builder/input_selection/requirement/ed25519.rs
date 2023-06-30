@@ -1,16 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{alias::is_alias_transition, Error, InputSelection, Requirement};
+use super::{account::is_account_transition, Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::{address::Address, output::AliasTransition},
+    types::block::{address::Address, output::AccountTransition},
 };
 
 impl InputSelection {
     // Checks if a selected input unlocks a given ED25519 address.
     fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        let alias_transition = is_alias_transition(
+        let alias_transition = is_account_transition(
             &input.output,
             *input.output_id(),
             self.outputs.as_slice(),
@@ -39,19 +39,19 @@ impl InputSelection {
         &self,
         input: &InputSigningData,
         address: &Address,
-    ) -> (bool, Option<AliasTransition>) {
+    ) -> (bool, Option<AccountTransition>) {
         if input.output.is_alias() {
             // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
             // PANIC: safe to unwrap as aliases have a state controller address.
             if unlock_conditions.state_controller_address().unwrap().address() == address {
-                return (self.addresses.contains(address), Some(AliasTransition::State));
+                return (self.addresses.contains(address), Some(AccountTransition::State));
             }
 
             // PANIC: safe to unwrap as aliases have a governor address.
             if unlock_conditions.governor_address().unwrap().address() == address {
-                return (self.addresses.contains(address), Some(AliasTransition::Governance));
+                return (self.addresses.contains(address), Some(AccountTransition::Governance));
             }
 
             (false, None)
@@ -69,7 +69,7 @@ impl InputSelection {
     pub(crate) fn fulfill_ed25519_requirement(
         &mut self,
         address: Address,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         // Checks if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs

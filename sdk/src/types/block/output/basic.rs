@@ -452,7 +452,7 @@ mod tests {
         },
         protocol::protocol_parameters,
         rand::{
-            address::rand_alias_address,
+            address::rand_account_address,
             output::{
                 feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
                 rand_basic_output,
@@ -464,7 +464,7 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let address_1 = rand_address_unlock_condition();
         let address_2 = rand_address_unlock_condition();
         let sender_1 = rand_sender_feature();
@@ -534,7 +534,7 @@ mod tests {
         .unwrap();
         assert_eq!(output, output_split);
 
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let address = rand_address_unlock_condition();
 
         let test_split_dto = |builder: BasicOutputBuilder| {

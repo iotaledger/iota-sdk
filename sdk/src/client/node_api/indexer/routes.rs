@@ -16,7 +16,7 @@ use crate::{
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
-        block::output::{AliasId, FoundryId, NftId, OutputId},
+        block::output::{AccountId, FoundryId, NftId, OutputId},
     },
 };
 
@@ -57,8 +57,8 @@ impl ClientInner {
     }
 
     /// Get alias output by its aliasID.
-    /// api/indexer/v2/outputs/alias/:{AliasId}
-    pub async fn alias_output_id(&self, alias_id: AliasId) -> Result<OutputId> {
+    /// api/indexer/v2/outputs/alias/:{AccountId}
+    pub async fn alias_output_id(&self, alias_id: AccountId) -> Result<OutputId> {
         let route = format!("api/indexer/v2/outputs/alias/{alias_id}");
 
         Ok(*(self

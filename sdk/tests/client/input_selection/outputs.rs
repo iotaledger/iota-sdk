@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
-    types::block::{output::AliasId, protocol::protocol_parameters},
+    types::block::{output::AccountId, protocol::protocol_parameters},
 };
 
 use crate::client::{
@@ -71,7 +71,7 @@ fn no_outputs() {
 #[test]
 fn no_outputs_but_burn() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,

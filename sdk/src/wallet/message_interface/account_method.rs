@@ -21,7 +21,7 @@ use crate::{
             dto::{OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
+            AccountId, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
@@ -33,7 +33,7 @@ use crate::{
                 syncing::SyncOptions,
                 transaction::{
                     high_level::{
-                        create_alias::CreateAliasParams,
+                        create_account::CreateAccountParams,
                         minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
@@ -59,7 +59,7 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        alias_id: AliasId,
+        alias_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
@@ -141,7 +141,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        params: Option<CreateAliasParams>,
+        params: Option<CreateAccountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
@@ -150,7 +150,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyAlias {
-        alias_id: AliasId,
+        alias_id: AccountId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.

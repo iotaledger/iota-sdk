@@ -2,24 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{
-    requirement::{alias::is_alias_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null},
+    requirement::{account::is_account_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null},
     Error, InputSelection,
 };
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{
-        AliasOutput, AliasOutputBuilder, AliasTransition, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput,
+        AccountTransition, AliasOutput, AliasOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput,
         NftOutputBuilder, Output, OutputId,
     },
 };
 
 impl InputSelection {
     /// Transitions an alias input by creating a new alias output if required.
-    fn transition_alias_input(
+    fn transition_account_input(
         &mut self,
         input: &AliasOutput,
         output_id: &OutputId,
-        alias_transition: AliasTransition,
+        alias_transition: AccountTransition,
     ) -> Result<Option<Output>, Error> {
         let alias_id = input.alias_id_non_null(output_id);
 
@@ -38,7 +38,7 @@ impl InputSelection {
         if self
             .outputs
             .iter()
-            .any(|output| is_alias_with_id_non_null(output, &alias_id))
+            .any(|output| is_account_with_id_non_null(output, &alias_id))
         {
             log::debug!("No transition of {output_id:?}/{alias_id:?} as output already exists");
             return Ok(None);
@@ -158,13 +158,13 @@ impl InputSelection {
     pub(crate) fn transition_input(
         &mut self,
         input: &InputSigningData,
-        alias_transition: Option<AliasTransition>,
+        alias_transition: Option<AccountTransition>,
     ) -> Result<Option<Output>, Error> {
         match &input.output {
-            Output::Alias(alias_input) => self.transition_alias_input(
+            Output::Alias(alias_input) => self.transition_account_input(
                 alias_input,
                 input.output_id(),
-                alias_transition.unwrap_or(AliasTransition::State),
+                alias_transition.unwrap_or(AccountTransition::State),
             ),
             Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),

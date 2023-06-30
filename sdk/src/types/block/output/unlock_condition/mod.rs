@@ -4,7 +4,7 @@
 mod address;
 mod expiration;
 mod governor_address;
-mod immutable_alias_address;
+mod immutable_account_address;
 mod state_controller_address;
 mod storage_deposit_return;
 mod timelock;
@@ -25,7 +25,8 @@ use packable::{
 
 pub use self::{
     address::AddressUnlockCondition, expiration::ExpirationUnlockCondition,
-    governor_address::GovernorAddressUnlockCondition, immutable_alias_address::ImmutableAliasAddressUnlockCondition,
+    governor_address::GovernorAddressUnlockCondition,
+    immutable_account_address::ImmutableAccountAddressUnlockCondition,
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
@@ -51,8 +52,8 @@ pub enum UnlockCondition {
     StateControllerAddress(StateControllerAddressUnlockCondition),
     /// A governor address unlock condition.
     GovernorAddress(GovernorAddressUnlockCondition),
-    /// An immutable alias address unlock condition.
-    ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition),
+    /// An immutable account address unlock condition.
+    ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition),
 }
 
 impl PartialOrd for UnlockCondition {
@@ -75,7 +76,7 @@ impl core::fmt::Debug for UnlockCondition {
             Self::Expiration(unlock_condition) => unlock_condition.fmt(f),
             Self::StateControllerAddress(unlock_condition) => unlock_condition.fmt(f),
             Self::GovernorAddress(unlock_condition) => unlock_condition.fmt(f),
-            Self::ImmutableAliasAddress(unlock_condition) => unlock_condition.fmt(f),
+            Self::ImmutableAccountAddress(unlock_condition) => unlock_condition.fmt(f),
         }
     }
 }
@@ -90,7 +91,7 @@ impl UnlockCondition {
             Self::Expiration(_) => ExpirationUnlockCondition::KIND,
             Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
             Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-            Self::ImmutableAliasAddress(_) => ImmutableAliasAddressUnlockCondition::KIND,
+            Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
         }
     }
 
@@ -103,7 +104,7 @@ impl UnlockCondition {
             Self::Expiration(_) => UnlockConditionFlags::EXPIRATION,
             Self::StateControllerAddress(_) => UnlockConditionFlags::STATE_CONTROLLER_ADDRESS,
             Self::GovernorAddress(_) => UnlockConditionFlags::GOVERNOR_ADDRESS,
-            Self::ImmutableAliasAddress(_) => UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS,
+            Self::ImmutableAccountAddress(_) => UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS,
         }
     }
 }
@@ -119,7 +120,7 @@ create_bitflags!(
         (EXPIRATION, ExpirationUnlockCondition),
         (STATE_CONTROLLER_ADDRESS, StateControllerAddressUnlockCondition),
         (GOVERNOR_ADDRESS, GovernorAddressUnlockCondition),
-        (IMMUTABLE_ALIAS_ADDRESS, ImmutableAliasAddressUnlockCondition),
+        (IMMUTABLE_ALIAS_ADDRESS, ImmutableAccountAddressUnlockCondition),
     ]
 );
 
@@ -153,8 +154,8 @@ impl Packable for UnlockCondition {
                 GovernorAddressUnlockCondition::KIND.pack(packer)?;
                 unlock_condition.pack(packer)
             }
-            Self::ImmutableAliasAddress(unlock_condition) => {
-                ImmutableAliasAddressUnlockCondition::KIND.pack(packer)?;
+            Self::ImmutableAccountAddress(unlock_condition) => {
+                ImmutableAccountAddressUnlockCondition::KIND.pack(packer)?;
                 unlock_condition.pack(packer)
             }
         }?;
@@ -185,8 +186,8 @@ impl Packable for UnlockCondition {
             GovernorAddressUnlockCondition::KIND => {
                 Self::from(GovernorAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
             }
-            ImmutableAliasAddressUnlockCondition::KIND => {
-                Self::from(ImmutableAliasAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
+            ImmutableAccountAddressUnlockCondition::KIND => {
+                Self::from(ImmutableAccountAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
             }
             k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
         })
@@ -334,13 +335,13 @@ impl UnlockConditions {
         }
     }
 
-    /// Gets a reference to an [`ImmutableAliasAddressUnlockCondition`], if any.
+    /// Gets a reference to an [`ImmutableAccountAddressUnlockCondition`], if any.
     #[inline(always)]
-    pub fn immutable_alias_address(&self) -> Option<&ImmutableAliasAddressUnlockCondition> {
-        if let Some(UnlockCondition::ImmutableAliasAddress(immutable_alias_address)) =
-            self.get(ImmutableAliasAddressUnlockCondition::KIND)
+    pub fn immutable_account_address(&self) -> Option<&ImmutableAccountAddressUnlockCondition> {
+        if let Some(UnlockCondition::ImmutableAccountAddress(immutable_account_address)) =
+            self.get(ImmutableAccountAddressUnlockCondition::KIND)
         {
-            Some(immutable_alias_address)
+            Some(immutable_account_address)
         } else {
             None
         }
@@ -433,7 +434,7 @@ pub mod dto {
     pub use self::{
         address::dto::AddressUnlockConditionDto, expiration::dto::ExpirationUnlockConditionDto,
         governor_address::dto::GovernorAddressUnlockConditionDto,
-        immutable_alias_address::dto::ImmutableAliasAddressUnlockConditionDto,
+        immutable_account_address::dto::ImmutableAccountAddressUnlockConditionDto,
         state_controller_address::dto::StateControllerAddressUnlockConditionDto,
         storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
     };
@@ -455,7 +456,7 @@ pub mod dto {
         /// A governor address unlock condition.
         GovernorAddress(GovernorAddressUnlockConditionDto),
         /// An immutable alias address unlock condition.
-        ImmutableAliasAddress(ImmutableAliasAddressUnlockConditionDto),
+        ImmutableAccountAddress(ImmutableAccountAddressUnlockConditionDto),
     }
 
     impl<'de> Deserialize<'de> for UnlockConditionDto {
@@ -502,8 +503,8 @@ pub mod dto {
                             serde::de::Error::custom(format!("cannot deserialize governor unlock condition: {e}"))
                         })?)
                     }
-                    ImmutableAliasAddressUnlockCondition::KIND => Self::ImmutableAliasAddress(
-                        ImmutableAliasAddressUnlockConditionDto::deserialize(value).map_err(|e| {
+                    ImmutableAccountAddressUnlockCondition::KIND => Self::ImmutableAccountAddress(
+                        ImmutableAccountAddressUnlockConditionDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!(
                                 "cannot deserialize immutable alias address unlock condition: {e}"
                             ))
@@ -529,7 +530,7 @@ pub mod dto {
                 T4(&'a ExpirationUnlockConditionDto),
                 T5(&'a StateControllerAddressUnlockConditionDto),
                 T6(&'a GovernorAddressUnlockConditionDto),
-                T7(&'a ImmutableAliasAddressUnlockConditionDto),
+                T7(&'a ImmutableAccountAddressUnlockConditionDto),
             }
             #[derive(Serialize)]
             struct TypedUnlockCondition<'a> {
@@ -555,7 +556,7 @@ pub mod dto {
                 Self::GovernorAddress(o) => TypedUnlockCondition {
                     unlock_condition: UnlockConditionDto_::T6(o),
                 },
-                Self::ImmutableAliasAddress(o) => TypedUnlockCondition {
+                Self::ImmutableAccountAddress(o) => TypedUnlockCondition {
                     unlock_condition: UnlockConditionDto_::T7(o),
                 },
             };
@@ -578,8 +579,8 @@ pub mod dto {
                 UnlockCondition::GovernorAddress(v) => {
                     Self::GovernorAddress(GovernorAddressUnlockConditionDto::from(v))
                 }
-                UnlockCondition::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockConditionDto::from(v))
+                UnlockCondition::ImmutableAccountAddress(v) => {
+                    Self::ImmutableAccountAddress(ImmutableAccountAddressUnlockConditionDto::from(v))
                 }
             }
         }
@@ -600,8 +601,8 @@ pub mod dto {
                 UnlockConditionDto::GovernorAddress(v) => {
                     Self::GovernorAddress(GovernorAddressUnlockCondition::try_from(v)?)
                 }
-                UnlockConditionDto::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition::try_from(v)?)
+                UnlockConditionDto::ImmutableAccountAddress(v) => {
+                    Self::ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition::try_from(v)?)
                 }
             })
         }
@@ -620,8 +621,8 @@ pub mod dto {
                 UnlockConditionDto::GovernorAddress(v) => {
                     Self::GovernorAddress(GovernorAddressUnlockCondition::try_from(v)?)
                 }
-                UnlockConditionDto::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition::try_from(v)?)
+                UnlockConditionDto::ImmutableAccountAddress(v) => {
+                    Self::ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition::try_from(v)?)
                 }
             })
         }
@@ -637,7 +638,7 @@ pub mod dto {
                 Self::Expiration(_) => ExpirationUnlockCondition::KIND,
                 Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
                 Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-                Self::ImmutableAliasAddress(_) => ImmutableAliasAddressUnlockCondition::KIND,
+                Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
             }
         }
     }

@@ -22,16 +22,16 @@ use tokio::sync::Mutex;
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
-        is_alias_transition,
+        is_account_transition,
         types::{LedgerApp, LedgerDeviceType},
         LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
-        address::{Address, AliasAddress, Ed25519Address, NftAddress},
+        address::{AccountAddress, Address, Ed25519Address, NftAddress},
         output::Output,
         payload::{transaction::TransactionEssence, Payload},
         signature::{Ed25519Signature, Signature},
-        unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, Unlock, Unlocks},
+        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, Unlock, Unlocks},
     },
     utils::unix_timestamp_now,
 };
@@ -492,7 +492,7 @@ fn merge_unlocks(
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let alias_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) =
             input
                 .output
@@ -502,7 +502,7 @@ fn merge_unlocks(
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Alias(_alias) => merged_unlocks.push(Unlock::Alias(AliasUnlock::new(*block_index as u16)?)),
+                Address::Alias(_alias) => merged_unlocks.push(Unlock::Alias(AccountUnlock::new(*block_index as u16)?)),
                 Address::Ed25519(_ed25519) => {
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
@@ -540,7 +540,7 @@ fn merge_unlocks(
         // that have the corresponding alias or nft address in their unlock condition
         match &input.output {
             Output::Alias(alias_output) => block_indexes.insert(
-                Address::Alias(AliasAddress::new(alias_output.alias_id_non_null(input.output_id()))),
+                Address::Alias(AccountAddress::new(alias_output.alias_id_non_null(input.output_id()))),
                 current_block_index,
             ),
             Output::Nft(nft_output) => block_indexes.insert(

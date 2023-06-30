@@ -10,7 +10,7 @@ use std::env::var;
 
 use iota_sdk::{
     client::node_api::indexer::query_parameters::QueryParameter,
-    types::block::address::{AliasAddress, ToBech32Ext},
+    types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
         Result, SendAmountParams,
@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     println!("Alias Id: {alias_id}");
 
     // Get alias address
-    let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let alias_address = AccountAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
     // Find first output unlockable by the alias address
     let input = *account

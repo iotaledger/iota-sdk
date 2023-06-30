@@ -4,15 +4,15 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::AliasAddress,
-    output::{AliasId, FoundryId, SimpleTokenScheme, TokenScheme},
+    address::AccountAddress,
+    output::{AccountId, FoundryId, SimpleTokenScheme, TokenScheme},
 };
 use primitive_types::U256;
 
 #[test]
 fn getters() {
-    let alias_address = AliasAddress::from(
-        AliasId::from_str("0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649").unwrap(),
+    let alias_address = AccountAddress::from(
+        AccountId::from_str("0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649").unwrap(),
     );
     let serial_number = 42;
     let token_scheme =

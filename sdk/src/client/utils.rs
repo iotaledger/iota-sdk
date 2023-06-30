@@ -18,7 +18,7 @@ use crate::{
     client::{Error, Result},
     types::block::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-        output::{AliasId, NftId},
+        output::{AccountId, NftId},
         payload::TaggedDataPayload,
         ConvertTo,
     },
@@ -123,7 +123,7 @@ impl ClientInner {
     /// Transforms an alias id to a bech32 encoded address
     pub async fn alias_id_to_bech32(
         &self,
-        alias_id: AliasId,
+        alias_id: AccountId,
         bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {

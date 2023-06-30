@@ -6,8 +6,8 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{Address, AliasAddress, Bech32Address, NftAddress},
-        output::{AliasId, NftId},
+        address::{AccountAddress, Address, Bech32Address, NftAddress},
+        output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
 };
@@ -545,7 +545,7 @@ fn missing_ed25519_sender() {
 #[test]
 fn alias_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -601,7 +601,7 @@ fn alias_sender() {
 #[test]
 fn alias_sender_zero_id() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -617,13 +617,13 @@ fn alias_sender_zero_id() {
             None,
         ),
     ]);
-    let alias_id = AliasId::from(inputs[1].output_id());
+    let alias_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(
-            &Bech32Address::try_new("rms", AliasAddress::from(alias_id))
+            &Bech32Address::try_new("rms", AccountAddress::from(alias_id))
                 .unwrap()
                 .to_string(),
         ),

@@ -10,7 +10,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::{Client, Result},
-    types::block::output::AliasId,
+    types::block::output::AccountId,
 };
 
 #[tokio::main]
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Take the alias ID from command line argument or use a default one.
-    let alias_id = AliasId::from_str(
+    let alias_id = AccountId::from_str(
         &std::env::args()
             .nth(2)
             .unwrap_or_else(|| String::from("0xdb4db7643d768139d6f8ac3f9c9b7a82a245b619fa9f7c18fcd8f0f67e57abc2")),

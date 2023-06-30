@@ -7,9 +7,9 @@ use crate::types::block::{
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition,
         },
-        AliasId, NftId,
+        AccountId, NftId,
     },
-    rand::address::{rand_address, rand_alias_address, rand_nft_address},
+    rand::address::{rand_account_address, rand_address, rand_nft_address},
 };
 
 /// Generates a random [`AddressUnlockCondition`].
@@ -19,13 +19,13 @@ pub fn rand_address_unlock_condition() -> AddressUnlockCondition {
 
 /// Generates a random [`StateControllerAddressUnlockCondition`].
 pub fn rand_state_controller_address_unlock_condition_different_from(
-    alias_id: &AliasId,
+    alias_id: &AccountId,
 ) -> StateControllerAddressUnlockCondition {
     let mut address = rand_address();
 
     if let Address::Alias(mut alias_address) = &mut address {
         while alias_address.alias_id() == alias_id {
-            alias_address = rand_alias_address();
+            alias_address = rand_account_address();
         }
     }
 
@@ -33,12 +33,12 @@ pub fn rand_state_controller_address_unlock_condition_different_from(
 }
 
 /// Generates a random [`GovernorAddressUnlockCondition`] that is different from `alias_id`.
-pub fn rand_governor_address_unlock_condition_different_from(alias_id: &AliasId) -> GovernorAddressUnlockCondition {
+pub fn rand_governor_address_unlock_condition_different_from(alias_id: &AccountId) -> GovernorAddressUnlockCondition {
     let mut address = rand_address();
 
     if let Address::Alias(mut alias_address) = &mut address {
         while alias_address.alias_id() == alias_id {
-            alias_address = rand_alias_address();
+            alias_address = rand_account_address();
         }
     }
 

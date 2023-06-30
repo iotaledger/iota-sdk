@@ -11,7 +11,7 @@ use iota_sdk::{
         block::{
             address::Bech32Address,
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
+                unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
@@ -466,7 +466,7 @@ pub async fn create_native_token_command(
 pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
     println_log_info!("Destroying alias {alias_id}.");
 
-    let transaction = account.burn(AliasId::from_str(&alias_id)?, None).await?;
+    let transaction = account.burn(AccountId::from_str(&alias_id)?, None).await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",

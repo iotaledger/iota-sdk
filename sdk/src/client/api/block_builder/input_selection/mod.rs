@@ -14,7 +14,7 @@ use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
 use packable::PackableExt;
-pub(crate) use requirement::is_alias_transition;
+pub(crate) use requirement::is_account_transition;
 
 pub use self::{
     burn::{Burn, BurnDto},
@@ -25,10 +25,10 @@ pub use self::{
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
-        address::{Address, AliasAddress, NftAddress},
+        address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
-            AliasOutput, AliasTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
+            AccountTransition, AliasOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
             OUTPUT_COUNT_RANGE,
         },
         protocol::ProtocolParameters,
@@ -49,7 +49,7 @@ pub struct InputSelection {
     protocol_parameters: ProtocolParameters,
     timestamp: u32,
     requirements: Vec<Requirement>,
-    automatically_transitioned: HashMap<ChainId, Option<AliasTransition>>,
+    automatically_transitioned: HashMap<ChainId, Option<AccountTransition>>,
 }
 
 /// Result of the input selection algorithm.
@@ -66,7 +66,7 @@ pub struct Selected {
 impl InputSelection {
     fn required_alias_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let alias_transition =
-            is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
+            is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
             .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?
@@ -82,9 +82,9 @@ impl InputSelection {
                     Ok(None)
                 }
             }
-            Address::Alias(alias_address) => Ok(Some(Requirement::Alias(
+            Address::Alias(alias_address) => Ok(Some(Requirement::Account(
                 *alias_address.alias_id(),
-                AliasTransition::State,
+                AccountTransition::State,
             ))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
         }
@@ -93,7 +93,7 @@ impl InputSelection {
     fn select_input(
         &mut self,
         input: InputSigningData,
-        alias_transition: Option<AliasTransition>,
+        alias_transition: Option<AccountTransition>,
     ) -> Result<(), Error> {
         log::debug!("Selecting input {:?}", input.output_id());
 
@@ -173,7 +173,7 @@ impl InputSelection {
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
-            Output::Alias(output) => Some(Address::Alias(AliasAddress::from(
+            Output::Alias(output) => Some(Address::Alias(AccountAddress::from(
                 output.alias_id_non_null(input.output_id()),
             ))),
             Output::Nft(output) => Some(Address::Nft(NftAddress::from(
@@ -272,7 +272,7 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, alias_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let alias_transition = is_alias_transition(
+                let alias_transition = is_account_transition(
                     &input_signing_data.output,
                     *input_signing_data.output_id(),
                     outputs,
@@ -288,7 +288,7 @@ impl InputSelection {
             });
 
         for input in alias_nft_address_inputs {
-            let alias_transition = is_alias_transition(&input.output, *input.output_id(), outputs, None);
+            let alias_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
             let (input_address, _) =
                 input
                     .output
@@ -318,7 +318,7 @@ impl InputSelection {
                 None => {
                     // insert before address
                     let alias_or_nft_address = match &input.output {
-                        Output::Alias(alias_output) => Some(Address::Alias(AliasAddress::new(
+                        Output::Alias(alias_output) => Some(Address::Alias(AccountAddress::new(
                             alias_output.alias_id_non_null(input.output_id()),
                         ))),
                         Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
@@ -330,7 +330,7 @@ impl InputSelection {
                     if let Some(alias_or_nft_address) = alias_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let alias_transition = is_alias_transition(
+                            let alias_transition = is_account_transition(
                                 &input_signing_data.output,
                                 *input_signing_data.output_id(),
                                 outputs,
@@ -479,11 +479,11 @@ impl InputSelection {
                         log::debug!("validate_transitions error {err:?}");
                         let alias_transition =
                             if alias_input.output.as_alias().state_index() == alias_output.state_index() {
-                                AliasTransition::Governance
+                                AccountTransition::Governance
                             } else {
-                                AliasTransition::State
+                                AccountTransition::State
                             };
-                        return Err(Error::UnfulfillableRequirement(Requirement::Alias(
+                        return Err(Error::UnfulfillableRequirement(Requirement::Account(
                             *alias_output.alias_id(),
                             alias_transition,
                         )));

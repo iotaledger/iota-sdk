@@ -10,7 +10,7 @@ use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection, Requirement},
     types::block::{
         address::Address,
-        output::{AliasId, AliasTransition, ChainId, NftId, SimpleTokenScheme, TokenId},
+        output::{AccountId, AccountTransition, ChainId, NftId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
     },
 };
@@ -25,7 +25,7 @@ use crate::client::{
 #[test]
 fn burn_alias_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -70,7 +70,7 @@ fn burn_alias_present() {
 #[test]
 fn burn_alias_present_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -162,7 +162,7 @@ fn burn_alias_id_zero() {
 #[test]
 fn burn_alias_absent() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -196,15 +196,15 @@ fn burn_alias_absent() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::Governance))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::Governance))) if alias_id == alias_id_1
     ));
 }
 
 #[test]
 fn burn_aliases_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -259,7 +259,7 @@ fn burn_aliases_present() {
 #[test]
 fn burn_alias_in_outputs() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -301,7 +301,7 @@ fn burn_alias_in_outputs() {
 
     assert!(matches!(
         selected,
-        Err(Error::BurnAndTransition(ChainId::Alias(alias_id))) if alias_id == alias_id_1
+        Err(Error::BurnAndTransition(ChainId::Account(alias_id))) if alias_id == alias_id_1
     ));
 }
 
@@ -399,7 +399,7 @@ fn burn_nft_present_and_required() {
 #[test]
 fn burn_nft_id_zero() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -425,7 +425,7 @@ fn burn_nft_id_zero() {
         None,
         None,
     )]);
-    let alias_id = AliasId::from(inputs[0].output_id());
+    let alias_id = AccountId::from(inputs[0].output_id());
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -591,7 +591,7 @@ fn burn_nft_in_outputs() {
 #[test]
 fn burn_foundry_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
@@ -674,7 +674,7 @@ fn burn_foundry_present() {
 #[test]
 fn burn_foundry_absent() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
     let foundry_id_1 = build_inputs([Foundry(
         1_000_000,
         alias_id_1,
@@ -729,7 +729,7 @@ fn burn_foundry_absent() {
 #[test]
 fn burn_foundries_present() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
@@ -809,7 +809,7 @@ fn burn_foundries_present() {
 #[test]
 fn burn_foundry_in_outputs() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
@@ -889,7 +889,7 @@ fn burn_native_tokens() {
 #[test]
 fn burn_foundry_and_its_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Foundry(
@@ -938,6 +938,6 @@ fn burn_foundry_and_its_alias() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_1
     ));
 }

@@ -9,10 +9,10 @@ use iota_sdk::{
         secret::types::InputSigningData,
     },
     types::block::{
-        address::{Address, AliasAddress},
+        address::{AccountAddress, Address},
         output::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, SimpleTokenScheme, TokenId,
+            AccountId, AccountTransition, AliasOutputBuilder, FoundryId, Output, SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::output::rand_output_metadata,
@@ -29,7 +29,7 @@ use crate::client::{
 #[test]
 fn missing_input_alias_for_foundry() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -59,14 +59,14 @@ fn missing_input_alias_for_foundry() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_2
     ));
 }
 
 #[test]
 fn existing_input_alias_for_foundry_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_251_500,
@@ -111,7 +111,7 @@ fn existing_input_alias_for_foundry_alias() {
 #[test]
 fn minted_native_tokens_in_new_remainder() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -163,8 +163,8 @@ fn minted_native_tokens_in_new_remainder() {
 #[test]
 fn minted_native_tokens_in_provided_output() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_2), 1, SimpleTokenScheme::KIND);
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id_2), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
@@ -220,7 +220,7 @@ fn minted_native_tokens_in_provided_output() {
 #[test]
 fn melt_native_tokens() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let mut inputs = build_inputs([
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -287,7 +287,7 @@ fn melt_native_tokens() {
 #[test]
 fn destroy_foundry_with_alias_state_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -335,7 +335,7 @@ fn destroy_foundry_with_alias_state_transition() {
 #[test]
 fn destroy_foundry_with_alias_governance_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -370,14 +370,14 @@ fn destroy_foundry_with_alias_governance_transition() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_2
     ));
 }
 
 #[test]
 fn destroy_foundry_with_alias_burn() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -425,14 +425,14 @@ fn destroy_foundry_with_alias_burn() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_2
     ));
 }
 
 #[test]
 fn prefer_basic_to_foundry() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -483,7 +483,7 @@ fn prefer_basic_to_foundry() {
 #[test]
 fn simple_foundry_transition_basic_not_needed() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let mut inputs = build_inputs([
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -558,7 +558,7 @@ fn simple_foundry_transition_basic_not_needed() {
 #[test]
 fn simple_foundry_transition_basic_not_needed_with_remainder() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let mut inputs = build_inputs([
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -643,7 +643,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 // #[test]
 // fn alias_required_through_sender_and_sufficient() {
 //     let protocol_parameters = protocol_parameters();
-//     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+//     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
 //     let mut inputs = build_inputs([(BECH32_ADDRESS, 1_000_000, None)]);
 //     inputs.extend(build_input_signing_data_foundry_outputs([(
@@ -709,8 +709,8 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 #[test]
 fn mint_and_burn_at_the_same_time() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 1, SimpleTokenScheme::KIND);
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let mut inputs = build_inputs([Foundry(
@@ -763,8 +763,8 @@ fn mint_and_burn_at_the_same_time() {
 #[test]
 fn take_amount_from_alias_and_foundry_to_fund_basic() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let mut inputs = build_inputs([
@@ -827,8 +827,8 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
 #[test]
 fn create_native_token_but_burn_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
@@ -870,15 +870,15 @@ fn create_native_token_but_burn_alias() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_1
     ));
 }
 
 #[test]
 fn melted_tokens_not_provided() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 1, SimpleTokenScheme::KIND);
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id_1), 1, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
@@ -929,8 +929,8 @@ fn melted_tokens_not_provided() {
 #[test]
 fn burned_tokens_not_provided() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
@@ -982,7 +982,7 @@ fn burned_tokens_not_provided() {
 #[test]
 fn foundry_in_outputs_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let mut inputs = build_inputs([Foundry(
         1_000_000,

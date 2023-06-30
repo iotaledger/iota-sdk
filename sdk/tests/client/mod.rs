@@ -24,15 +24,15 @@ use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
-        address::{Address, AliasAddress, Bech32Address},
+        address::{AccountAddress, Address, Bech32Address},
         output::{
             feature::{IssuerFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-                ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
+                ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens, NftId,
+            AccountId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens, NftId,
             NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
         },
         rand::{block::rand_block_id, slot::rand_slot_commitment_id, transaction::rand_transaction_id},
@@ -85,7 +85,7 @@ enum Build<'a> {
     ),
     Alias(
         u64,
-        AliasId,
+        AccountId,
         u32,
         &'a str,
         &'a str,
@@ -94,7 +94,7 @@ enum Build<'a> {
         Option<&'a str>,
         Option<Chain>,
     ),
-    Foundry(u64, AliasId, u32, SimpleTokenScheme, Option<Vec<(&'a str, u64)>>),
+    Foundry(u64, AccountId, u32, SimpleTokenScheme, Option<Vec<(&'a str, u64)>>),
 }
 
 fn build_basic_output(
@@ -182,7 +182,7 @@ fn build_nft_output(
 #[allow(clippy::too_many_arguments)]
 fn build_alias_output(
     amount: u64,
-    alias_id: AliasId,
+    alias_id: AccountId,
     state_index: u32,
     state_address: Bech32Address,
     governor_address: Bech32Address,
@@ -216,13 +216,15 @@ fn build_alias_output(
 
 fn build_foundry_output(
     amount: u64,
-    alias_id: AliasId,
+    alias_id: AccountId,
     serial_number: u32,
     token_scheme: SimpleTokenScheme,
     native_tokens: Option<Vec<(&str, u64)>>,
 ) -> Output {
     let mut builder = FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
-        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::new(alias_id)));
+        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::new(
+            alias_id,
+        )));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(

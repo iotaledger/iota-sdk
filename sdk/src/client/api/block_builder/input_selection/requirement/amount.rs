@@ -10,7 +10,7 @@ use crate::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AliasOutputBuilder, AliasTransition,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountTransition, AliasOutputBuilder,
             FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, Rent,
         },
     },
@@ -73,7 +73,7 @@ pub(crate) fn amount_sums(
 
 #[derive(Debug, Clone)]
 struct AmountSelection {
-    newly_selected_inputs: HashMap<OutputId, (InputSigningData, Option<AliasTransition>)>,
+    newly_selected_inputs: HashMap<OutputId, (InputSigningData, Option<AccountTransition>)>,
     inputs_sum: u64,
     outputs_sum: u64,
     inputs_sdr: HashMap<Address, u64>,
@@ -158,7 +158,7 @@ impl AmountSelection {
         false
     }
 
-    fn into_newly_selected_inputs(self) -> Vec<(InputSigningData, Option<AliasTransition>)> {
+    fn into_newly_selected_inputs(self) -> Vec<(InputSigningData, Option<AccountTransition>)> {
         self.newly_selected_inputs.into_values().collect()
     }
 }
@@ -278,7 +278,7 @@ impl InputSelection {
 
     pub(crate) fn fulfill_amount_requirement(
         &mut self,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         let mut amount_selection = AmountSelection::new(self)?;
 
         if amount_selection.missing_amount() == 0 {
@@ -347,7 +347,7 @@ impl InputSelection {
     fn fulfill_amount_requirement_inner(
         &mut self,
         amount_selection: &mut AmountSelection,
-    ) -> Option<Vec<(InputSigningData, Option<AliasTransition>)>> {
+    ) -> Option<Vec<(InputSigningData, Option<AccountTransition>)>> {
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {
             if let Output::Basic(output) = &input.output {
                 output

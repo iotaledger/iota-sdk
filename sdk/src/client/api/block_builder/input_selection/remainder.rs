@@ -5,7 +5,7 @@ use crypto::keys::slip10::Chain;
 
 use super::{
     requirement::{
-        alias::is_alias_transition,
+        account::is_account_transition,
         amount::amount_sums,
         native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     },
@@ -27,7 +27,7 @@ impl InputSelection {
         }
 
         for input in &self.selected_inputs {
-            let alias_transition = is_alias_transition(
+            let alias_transition = is_account_transition(
                 &input.output,
                 *input.output_id(),
                 self.outputs.as_slice(),

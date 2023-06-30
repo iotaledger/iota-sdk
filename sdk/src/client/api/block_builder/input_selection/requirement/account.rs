@@ -4,15 +4,15 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{
     client::{api::input_selection::Burn, secret::types::InputSigningData},
-    types::block::output::{AliasId, AliasTransition, Output, OutputId},
+    types::block::output::{AccountId, AccountTransition, Output, OutputId},
 };
 
-pub fn is_alias_transition<'a>(
+pub fn is_account_transition<'a>(
     input: &Output,
     input_id: OutputId,
     outputs: &[Output],
     burn: impl Into<Option<&'a Burn>>,
-) -> Option<AliasTransition> {
+) -> Option<AccountTransition> {
     if let Output::Alias(alias_input) = &input {
         let alias_id = alias_input.alias_id_non_null(&input_id);
         // Checks if the alias exists in the outputs and gets the transition type.
@@ -21,17 +21,17 @@ pub fn is_alias_transition<'a>(
                 if *alias_output.alias_id() == alias_id {
                     if alias_output.state_index() == alias_input.state_index() {
                         // Governance transition.
-                        return Some(AliasTransition::Governance);
+                        return Some(AccountTransition::Governance);
                     } else {
                         // State transition.
-                        return Some(AliasTransition::State);
+                        return Some(AccountTransition::State);
                     }
                 }
             }
         }
         if let Some(burn) = burn.into() {
             if burn.aliases().contains(&alias_id) {
-                return Some(AliasTransition::Governance);
+                return Some(AccountTransition::Governance);
             }
         }
     }
@@ -40,7 +40,7 @@ pub fn is_alias_transition<'a>(
 
 /// Checks if an output is an alias with a given non null alias ID.
 /// Calling it with a null alias ID may lead to undefined behavior.
-pub(crate) fn is_alias_with_id_non_null(output: &Output, alias_id: &AliasId) -> bool {
+pub(crate) fn is_account_with_id_non_null(output: &Output, alias_id: &AccountId) -> bool {
     if let Output::Alias(alias) = output {
         alias.alias_id() == alias_id
     } else {
@@ -49,7 +49,7 @@ pub(crate) fn is_alias_with_id_non_null(output: &Output, alias_id: &AliasId) -> 
 }
 
 /// Checks if an output is an alias with output ID that matches the given alias ID.
-pub(crate) fn is_alias_with_id(output: &Output, output_id: &OutputId, alias_id: &AliasId) -> bool {
+pub(crate) fn is_account_with_id(output: &Output, output_id: &OutputId, alias_id: &AccountId) -> bool {
     if let Output::Alias(alias) = output {
         &alias.alias_id_non_null(output_id) == alias_id
     } else {
@@ -59,11 +59,11 @@ pub(crate) fn is_alias_with_id(output: &Output, output_id: &OutputId, alias_id: 
 
 impl InputSelection {
     /// Fulfills an alias requirement by selecting the appropriate alias from the available inputs.
-    pub(crate) fn fulfill_alias_requirement(
+    pub(crate) fn fulfill_account_requirement(
         &mut self,
-        alias_id: AliasId,
-        alias_transition: AliasTransition,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+        alias_id: AccountId,
+        alias_transition: AccountTransition,
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         // Check that the alias is not burned when a state transition is required.
         if alias_transition.is_state()
             && self
@@ -71,7 +71,7 @@ impl InputSelection {
                 .as_ref()
                 .map_or(false, |burn| burn.aliases.contains(&alias_id))
         {
-            return Err(Error::UnfulfillableRequirement(Requirement::Alias(
+            return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 alias_id,
                 alias_transition,
             )));
@@ -80,7 +80,7 @@ impl InputSelection {
         let selected_input = self
             .selected_inputs
             .iter()
-            .find(|input| is_alias_with_id(&input.output, input.output_id(), &alias_id));
+            .find(|input| is_account_with_id(&input.output, input.output_id(), &alias_id));
 
         // If a state transition is not required and the alias has already been selected, no additional check has to be
         // performed.
@@ -95,11 +95,11 @@ impl InputSelection {
         let available_index = self
             .available_inputs
             .iter()
-            .position(|input| is_alias_with_id(&input.output, input.output_id(), &alias_id));
+            .position(|input| is_account_with_id(&input.output, input.output_id(), &alias_id));
 
         // If the alias was not already selected and it not available, the requirement can't be fulfilled.
         if selected_input.is_none() && available_index.is_none() {
-            return Err(Error::UnfulfillableRequirement(Requirement::Alias(
+            return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 alias_id,
                 alias_transition,
             )));
@@ -125,10 +125,10 @@ impl InputSelection {
         // PANIC: safe to unwrap as it's been checked that both can't be None at the same time.
         let input = selected_input.unwrap_or_else(|| &self.available_inputs[available_index.unwrap()]);
 
-        if is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref())
-            == Some(AliasTransition::Governance)
+        if is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref())
+            == Some(AccountTransition::Governance)
         {
-            return Err(Error::UnfulfillableRequirement(Requirement::Alias(
+            return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 alias_id,
                 alias_transition,
             )));

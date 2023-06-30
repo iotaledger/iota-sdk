@@ -14,7 +14,7 @@
 use std::{env::var, str::FromStr, time::Instant};
 
 use iota_sdk::{
-    types::block::output::{AliasId, AliasOutputBuilder, Output},
+    types::block::output::{AccountId, AliasOutputBuilder, Output},
     wallet::{Account, Result},
     Wallet,
 };
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get the alias output by its alias id
-    let alias_id = AliasId::from_str(ALIAS_ID)?;
+    let alias_id = AccountId::from_str(ALIAS_ID)?;
     if let Some(alias_output_data) = account.unspent_alias_output(&alias_id).await? {
         println!(
             "Alias '{ALIAS_ID}' found in unspent output: '{}'",

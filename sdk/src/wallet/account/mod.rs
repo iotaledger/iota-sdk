@@ -38,7 +38,7 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::CreateAliasParams,
+                create_account::CreateAccountParams,
                 minting::{
                     create_native_token::{
                         CreateNativeTokenParams, CreateNativeTokenTransactionDto,
@@ -62,7 +62,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
+            output::{AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
@@ -84,7 +84,7 @@ pub struct FilterOptions {
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
     /// Return all alias outputs matching these IDs.
-    pub alias_ids: Option<HashSet<AliasId>>,
+    pub alias_ids: Option<HashSet<AccountId>>,
     /// Return all foundry outputs matching these IDs.
     pub foundry_ids: Option<HashSet<FoundryId>>,
     /// Return all nft outputs matching these IDs.
@@ -386,7 +386,7 @@ impl AccountInner {
     }
 
     /// Gets the unspent alias output matching the given ID.
-    pub async fn unspent_alias_output(&self, alias_id: &AliasId) -> Result<Option<OutputData>> {
+    pub async fn unspent_alias_output(&self, alias_id: &AccountId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
             alias_ids: Some([*alias_id].into()),
             ..Default::default()

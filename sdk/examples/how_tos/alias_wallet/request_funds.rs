@@ -10,7 +10,7 @@ use std::env::var;
 
 use iota_sdk::{
     client::request_funds_from_faucet,
-    types::block::address::{AliasAddress, ToBech32Ext},
+    types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions},
         Result,
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     println!("Alias Id: {alias_id}");
 
     // Get alias address
-    let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let alias_address = AccountAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
     let faucet_response = request_funds_from_faucet(&faucet_url, &alias_address).await?;
 
     println!("{faucet_response}");

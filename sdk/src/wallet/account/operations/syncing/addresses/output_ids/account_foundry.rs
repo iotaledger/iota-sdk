@@ -11,7 +11,7 @@ use crate::{
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
-            address::{AliasAddress, Bech32Address, ToBech32Ext},
+            address::{AccountAddress, Bech32Address, ToBech32Ext},
             output::{Output, OutputId},
             ConvertTo,
         },
@@ -116,12 +116,12 @@ where
         for alias_output_with_meta in alias_outputs_with_meta {
             if let Output::Alias(alias_output) = alias_output_with_meta.output() {
                 let alias_address =
-                    AliasAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
+                    AccountAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
                 let alias_bech32_address = alias_address.to_bech32(bech32_hrp);
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
-                        .foundry_output_ids([QueryParameter::AliasAddress(alias_bech32_address)])
+                        .foundry_output_ids([QueryParameter::AccountAddress(alias_bech32_address)])
                         .await
                         .map_err(From::from)
                 })));

@@ -8,7 +8,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::types::block::{
-    output::{AliasId, FoundryId, NativeToken, NftId, TokenId},
+    output::{AccountId, FoundryId, NativeToken, NftId, TokenId},
     Error,
 };
 
@@ -18,7 +18,7 @@ use crate::types::block::{
 #[serde(rename_all = "camelCase")]
 pub struct Burn {
     /// Aliases to burn.
-    pub(crate) aliases: HashSet<AliasId>,
+    pub(crate) aliases: HashSet<AccountId>,
     /// NFTs to burn.
     pub(crate) nfts: HashSet<NftId>,
     /// Foundries to burn.
@@ -34,19 +34,19 @@ impl Burn {
     }
 
     /// Adds an alias to [`Burn`].
-    pub fn add_alias(mut self, alias_id: AliasId) -> Self {
+    pub fn add_alias(mut self, alias_id: AccountId) -> Self {
         self.aliases.insert(alias_id);
         self
     }
 
     /// Sets the aliases to [`Burn`].
-    pub fn set_aliases(mut self, aliases: HashSet<AliasId>) -> Self {
+    pub fn set_aliases(mut self, aliases: HashSet<AccountId>) -> Self {
         self.aliases = aliases;
         self
     }
 
     /// Returns the aliases to [`Burn`].
-    pub fn aliases(&self) -> &HashSet<AliasId> {
+    pub fn aliases(&self) -> &HashSet<AccountId> {
         &self.aliases
     }
 
@@ -111,8 +111,8 @@ impl From<FoundryId> for Burn {
     }
 }
 
-impl From<AliasId> for Burn {
-    fn from(id: AliasId) -> Self {
+impl From<AccountId> for Burn {
+    fn from(id: AccountId) -> Self {
         Self::new().add_alias(id)
     }
 }
@@ -135,7 +135,7 @@ impl From<NativeToken> for Burn {
 pub struct BurnDto {
     /// Aliases to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) aliases: Option<HashSet<AliasId>>,
+    pub(crate) aliases: Option<HashSet<AccountId>>,
     /// NFTs to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) nfts: Option<HashSet<NftId>>,

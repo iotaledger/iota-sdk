@@ -5,10 +5,10 @@ use std::str::FromStr;
 
 use iota_sdk::types::block::{
     address::{
-        dto::{AddressDto, AliasAddressDto},
-        Address, AliasAddress, Bech32Address, ToBech32Ext,
+        dto::{AccountAddressDto, AddressDto},
+        AccountAddress, Address, Bech32Address, ToBech32Ext,
     },
-    output::AliasId,
+    output::AccountId,
     Error,
 };
 use packable::PackableExt;
@@ -19,21 +19,21 @@ const ALIAS_ID_INVALID: &str = "0xb0c800965d7511f5fb4406274d4e607f87d5c5970bc05e
 
 #[test]
 fn kind() {
-    assert_eq!(AliasAddress::KIND, 8);
+    assert_eq!(AccountAddress::KIND, 8);
 
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
 
-    assert_eq!(address.kind(), AliasAddress::KIND);
+    assert_eq!(address.kind(), AccountAddress::KIND);
 }
 
 #[test]
 fn length() {
-    assert_eq!(AliasAddress::LENGTH, 32);
+    assert_eq!(AccountAddress::LENGTH, 32);
 }
 
 #[test]
 fn is_methods() {
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
 
     assert!(!address.is_ed25519());
     assert!(address.is_alias());
@@ -42,7 +42,7 @@ fn is_methods() {
 
 #[test]
 fn as_methods() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
+    let alias_address = AccountAddress::from_str(ALIAS_ID).unwrap();
     let address = Address::from(alias_address);
 
     assert!(std::panic::catch_unwind(|| address.as_ed25519()).is_err());
@@ -52,47 +52,47 @@ fn as_methods() {
 
 #[test]
 fn new_alias_id() {
-    let alias_id = AliasId::from_str(ALIAS_ID).unwrap();
-    let alias_address = AliasAddress::new(alias_id);
+    let alias_id = AccountId::from_str(ALIAS_ID).unwrap();
+    let alias_address = AccountAddress::new(alias_id);
 
     assert_eq!(alias_address.alias_id(), &alias_id);
 }
 
 #[test]
 fn new_into_alias_id() {
-    let alias_id = AliasId::from_str(ALIAS_ID).unwrap();
-    let alias_address = AliasAddress::new(alias_id);
+    let alias_id = AccountId::from_str(ALIAS_ID).unwrap();
+    let alias_address = AccountAddress::new(alias_id);
 
     assert_eq!(alias_address.into_alias_id(), alias_id);
 }
 
 #[test]
 fn from_str_to_str() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
+    let alias_address = AccountAddress::from_str(ALIAS_ID).unwrap();
 
     assert_eq!(alias_address.to_string(), ALIAS_ID);
 }
 
 #[test]
 fn debug() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
+    let alias_address = AccountAddress::from_str(ALIAS_ID).unwrap();
 
     assert_eq!(
         format!("{alias_address:?}"),
-        "AliasAddress(0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee)"
+        "AccountAddress(0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee)"
     );
 }
 
 #[test]
 fn bech32() {
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
 
     assert_eq!(address.to_bech32_unchecked("rms"), ALIAS_BECH32);
 }
 
 #[test]
 fn bech32_roundtrip() {
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
     let bech32 = address.to_bech32_unchecked("rms").to_string();
 
     assert_eq!(
@@ -103,10 +103,10 @@ fn bech32_roundtrip() {
 
 #[test]
 fn dto_fields() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
-    let alias_dto = AliasAddressDto::from(&alias_address);
+    let alias_address = AccountAddress::from_str(ALIAS_ID).unwrap();
+    let alias_dto = AccountAddressDto::from(&alias_address);
 
-    assert_eq!(alias_dto.kind, AliasAddress::KIND);
+    assert_eq!(alias_dto.kind, AccountAddress::KIND);
     assert_eq!(alias_dto.alias_id, ALIAS_ID.to_string());
 
     let address = Address::from(alias_address);
@@ -117,10 +117,10 @@ fn dto_fields() {
 
 #[test]
 fn dto_roundtrip() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
-    let alias_dto = AliasAddressDto::from(&alias_address);
+    let alias_address = AccountAddress::from_str(ALIAS_ID).unwrap();
+    let alias_dto = AccountAddressDto::from(&alias_address);
 
-    assert_eq!(AliasAddress::try_from(alias_dto).unwrap(), alias_address);
+    assert_eq!(AccountAddress::try_from(alias_dto).unwrap(), alias_address);
 
     let address = Address::from(alias_address);
     let dto = AddressDto::from(&address);
@@ -130,33 +130,33 @@ fn dto_roundtrip() {
 
 #[test]
 fn dto_invalid_alias_id() {
-    let dto = AliasAddressDto {
-        kind: AliasAddress::KIND,
+    let dto = AccountAddressDto {
+        kind: AccountAddress::KIND,
         alias_id: ALIAS_ID_INVALID.to_string(),
     };
 
     assert!(matches!(
-        AliasAddress::try_from(dto),
+        AccountAddress::try_from(dto),
         Err(Error::InvalidField("aliasId"))
     ));
 }
 
 #[test]
 fn packed_len() {
-    let address = AliasAddress::from_str(ALIAS_ID).unwrap();
+    let address = AccountAddress::from_str(ALIAS_ID).unwrap();
 
-    assert_eq!(address.packed_len(), AliasAddress::LENGTH);
-    assert_eq!(address.pack_to_vec().len(), AliasAddress::LENGTH);
+    assert_eq!(address.packed_len(), AccountAddress::LENGTH);
+    assert_eq!(address.pack_to_vec().len(), AccountAddress::LENGTH);
 
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
 
-    assert_eq!(address.packed_len(), 1 + AliasAddress::LENGTH);
-    assert_eq!(address.pack_to_vec().len(), 1 + AliasAddress::LENGTH);
+    assert_eq!(address.packed_len(), 1 + AccountAddress::LENGTH);
+    assert_eq!(address.pack_to_vec().len(), 1 + AccountAddress::LENGTH);
 }
 
 #[test]
 fn pack_unpack() {
-    let address = AliasAddress::from_str(ALIAS_ID).unwrap();
+    let address = AccountAddress::from_str(ALIAS_ID).unwrap();
     let packed_address = address.pack_to_vec();
 
     assert_eq!(
@@ -164,7 +164,7 @@ fn pack_unpack() {
         PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
     );
 
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
     let packed_address = address.pack_to_vec();
 
     assert_eq!(

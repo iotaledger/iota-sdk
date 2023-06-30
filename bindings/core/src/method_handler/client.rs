@@ -337,7 +337,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
         }
-        ClientMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
+        ClientMethod::AccountIdToBech32 { alias_id, bech32_hrp } => {
             Response::Bech32Address(client.alias_id_to_bech32(alias_id, bech32_hrp).await?)
         }
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {

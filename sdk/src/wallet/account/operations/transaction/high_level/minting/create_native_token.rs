@@ -10,9 +10,9 @@ use crate::{
         secret::SecretManage,
     },
     types::block::{
-        address::AliasAddress,
+        address::AccountAddress,
         output::{
-            feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
+            feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId,
             AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
@@ -27,7 +27,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenParams {
     /// The alias id which should be used to create the foundry.
-    pub alias_id: Option<AliasId>,
+    pub alias_id: Option<AccountId>,
     /// Circulating supply
     pub circulating_supply: U256,
     /// Maximum supply
@@ -150,7 +150,7 @@ where
 
             // create foundry output with minted native tokens
             let foundry_id = FoundryId::build(
-                &AliasAddress::new(alias_id),
+                &AccountAddress::new(alias_id),
                 alias_output.foundry_counter() + 1,
                 SimpleTokenScheme::KIND,
             );
@@ -168,7 +168,9 @@ where
                             params.maximum_supply,
                         )?),
                     )
-                    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
+                    .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
+                        alias_id,
+                    )));
 
                     if let Some(foundry_metadata) = params.foundry_metadata {
                         foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)

@@ -12,7 +12,7 @@ use primitive_types::U256;
 use crate::types::block::{
     input::UtxoInput,
     output::{
-        feature::FeatureCount, unlock_condition::UnlockConditionCount, AliasId, ChainId, MetadataFeatureLength,
+        feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
     payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
@@ -96,7 +96,7 @@ pub enum Error {
     ProtocolVersionMismatch { expected: u8, actual: u8 },
     NonceNotFound,
     RemainingBytesAfterBlock,
-    SelfControlledAliasOutput(AliasId),
+    SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch { expected: String, actual: String },
     StorageDepositReturnOverflow,
@@ -249,8 +249,8 @@ impl fmt::Display for Error {
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }
-            Self::SelfControlledAliasOutput(alias_id) => {
-                write!(f, "self controlled alias output, alias ID {alias_id}")
+            Self::SelfControlledAccountOutput(alias_id) => {
+                write!(f, "self controlled account output, alias ID {alias_id}")
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")

@@ -25,7 +25,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
-                AliasId, FoundryId, NftId, OutputId,
+                AccountId, FoundryId, NftId, OutputId,
             },
             payload::{dto::PayloadDto, transaction::TransactionId},
             protocol::dto::ProtocolParametersDto,
@@ -179,8 +179,8 @@ pub enum Response {
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:
-    /// - [`ComputeAliasId`](crate::method::UtilsMethod::ComputeAliasId)
-    AliasId(AliasId),
+    /// - [`ComputeAccountId`](crate::method::UtilsMethod::ComputeAccountId)
+    AccountId(AccountId),
     /// Response for:
     /// - [`ComputeNftId`](crate::method::UtilsMethod::ComputeNftId)
     NftId(NftId),
@@ -205,7 +205,7 @@ pub enum Response {
     /// - [`PrepareOutput`](crate::method::AccountMethod::PrepareOutput)
     Output(OutputDto),
     /// Response for:
-    /// - [`AliasIdToBech32`](crate::method::ClientMethod::AliasIdToBech32)
+    /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)

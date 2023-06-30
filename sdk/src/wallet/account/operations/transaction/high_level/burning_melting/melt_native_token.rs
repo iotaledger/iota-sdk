@@ -6,7 +6,7 @@ use primitive_types::U256;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::output::{
-        AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+        AccountId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
         account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
@@ -85,7 +85,7 @@ where
     /// Find and return unspent `OutputData` for given `alias_id` and `foundry_id`
     async fn find_alias_and_foundry_output_data(
         &self,
-        alias_id: AliasId,
+        alias_id: AccountId,
         foundry_id: FoundryId,
     ) -> crate::wallet::Result<(OutputData, OutputData)> {
         let mut existing_alias_output_data = None;

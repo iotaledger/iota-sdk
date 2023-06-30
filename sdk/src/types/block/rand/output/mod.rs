@@ -13,11 +13,11 @@ use primitive_types::U256;
 pub use self::metadata::rand_output_metadata;
 use crate::types::block::{
     output::{
-        unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId, AliasOutput, BasicOutput, FoundryOutput,
+        unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AliasOutput, BasicOutput, FoundryOutput,
         InputsCommitment, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, OUTPUT_INDEX_RANGE,
     },
     rand::{
-        address::rand_alias_address,
+        address::rand_account_address,
         bytes::rand_bytes_array,
         number::{rand_number, rand_number_range},
         output::{
@@ -47,14 +47,14 @@ pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
         .unwrap()
 }
 
-/// Generates a random [`AliasId`](AliasId).
-pub fn rand_alias_id() -> AliasId {
-    AliasId::from(rand_bytes_array())
+/// Generates a random [`AccountId`](AccountId).
+pub fn rand_alias_id() -> AccountId {
+    AccountId::from(rand_bytes_array())
 }
 
 /// Generates a random [`AliasOutput`](AliasOutput).
 pub fn rand_alias_output(token_supply: u64) -> AliasOutput {
-    // We need to make sure that `AliasId` and `Address` don't match.
+    // We need to make sure that `AccountId` and `Address` don't match.
     let alias_id = rand_alias_id();
 
     AliasOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), alias_id)
@@ -82,7 +82,7 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
         rand_token_scheme(),
     )
     .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES))
-    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+    .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
     .finish(token_supply)
     .unwrap()
 }

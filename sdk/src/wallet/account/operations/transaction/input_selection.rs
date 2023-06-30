@@ -7,7 +7,7 @@ use std::collections::{hash_map::Values, HashSet};
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::input_selection::{is_alias_transition, Burn, InputSelection, Selected},
+        api::input_selection::{is_account_transition, Burn, InputSelection, Selected},
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
@@ -256,7 +256,7 @@ fn filter_inputs(
         }
 
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
-        let alias_state_transition = is_alias_transition(&output_data.output, output_data.output_id, outputs, burn);
+        let alias_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
 
         if let Some(available_input) = output_data.input_signing_data(account, current_time, alias_state_transition)? {
             available_outputs_signing_data.push(available_input);

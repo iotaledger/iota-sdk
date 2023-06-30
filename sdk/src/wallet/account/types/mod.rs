@@ -24,7 +24,7 @@ use crate::{
             address::{dto::AddressDto, Address},
             output::{
                 dto::{OutputDto, OutputMetadataDto},
-                AliasTransition, Output, OutputId, OutputMetadata,
+                AccountTransition, Output, OutputId, OutputMetadata,
             },
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             BlockId,
@@ -58,7 +58,7 @@ impl OutputData {
         &self,
         account: &AccountDetails,
         current_time: u32,
-        alias_transition: Option<AliasTransition>,
+        alias_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let (unlock_address, _unlocked_alias_or_nft_address) =
             self.output

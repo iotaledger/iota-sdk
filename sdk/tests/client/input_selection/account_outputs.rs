@@ -12,7 +12,7 @@ use iota_sdk::{
         address::Address,
         output::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, AliasTransition, Output,
+            AccountId, AccountTransition, AliasOutputBuilder, Output,
         },
         protocol::protocol_parameters,
         rand::output::rand_output_metadata,
@@ -29,7 +29,7 @@ use crate::client::{
 #[test]
 fn input_alias_eq_output_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -70,7 +70,7 @@ fn input_alias_eq_output_alias() {
 #[test]
 fn transition_alias_id_zero() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -83,7 +83,7 @@ fn transition_alias_id_zero() {
         None,
         None,
     )]);
-    let alias_id = AliasId::from(inputs[0].output_id());
+    let alias_id = AccountId::from(inputs[0].output_id());
     let outputs = build_outputs([Alias(
         1_000_000,
         alias_id,
@@ -112,7 +112,7 @@ fn transition_alias_id_zero() {
 #[test]
 fn input_amount_lt_output_amount() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -157,7 +157,7 @@ fn input_amount_lt_output_amount() {
 #[test]
 fn input_amount_lt_output_amount_2() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -205,7 +205,7 @@ fn input_amount_lt_output_amount_2() {
 #[test]
 fn basic_output_with_alias_input() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         2_251_500,
@@ -246,7 +246,7 @@ fn basic_output_with_alias_input() {
 #[test]
 fn create_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         2_000_000,
@@ -295,7 +295,7 @@ fn create_alias() {
 #[test]
 fn burn_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -336,7 +336,7 @@ fn burn_alias() {
 #[test]
 fn not_enough_storage_deposit_for_remainder() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_001,
@@ -381,7 +381,7 @@ fn not_enough_storage_deposit_for_remainder() {
 #[test]
 fn missing_input_for_alias_output() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -415,15 +415,15 @@ fn missing_input_for_alias_output() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::Governance))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::Governance))) if alias_id == alias_id_2
     ));
 }
 
 #[test]
 fn missing_input_for_alias_output_2() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -461,14 +461,14 @@ fn missing_input_for_alias_output_2() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::Governance))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::Governance))) if alias_id == alias_id_2
     ));
 }
 
 #[test]
 fn missing_input_for_alias_output_but_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -506,7 +506,7 @@ fn missing_input_for_alias_output_but_created() {
 #[test]
 fn alias_in_output_and_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -554,7 +554,7 @@ fn alias_in_output_and_sender() {
 #[test]
 fn missing_ed25519_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -596,7 +596,7 @@ fn missing_ed25519_sender() {
 #[test]
 fn missing_ed25519_issuer_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -637,7 +637,7 @@ fn missing_ed25519_issuer_created() {
 #[test]
 fn missing_ed25519_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -676,7 +676,7 @@ fn missing_ed25519_issuer_transition() {
 #[test]
 fn missing_alias_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -718,7 +718,7 @@ fn missing_alias_sender() {
 #[test]
 fn missing_alias_issuer_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -759,7 +759,7 @@ fn missing_alias_issuer_created() {
 #[test]
 fn missing_alias_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -798,7 +798,7 @@ fn missing_alias_issuer_transition() {
 #[test]
 fn missing_nft_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -840,7 +840,7 @@ fn missing_nft_sender() {
 #[test]
 fn missing_nft_issuer_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -881,7 +881,7 @@ fn missing_nft_issuer_created() {
 #[test]
 fn missing_nft_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         1_000_000,
@@ -920,7 +920,7 @@ fn missing_nft_issuer_transition() {
 #[test]
 fn increase_alias_amount() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -964,7 +964,7 @@ fn increase_alias_amount() {
 #[test]
 fn decrease_alias_amount() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -1020,7 +1020,7 @@ fn decrease_alias_amount() {
 #[test]
 fn prefer_basic_to_alias() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -1064,7 +1064,7 @@ fn prefer_basic_to_alias() {
 #[test]
 fn take_amount_from_alias_to_fund_basic() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -1127,7 +1127,7 @@ fn take_amount_from_alias_to_fund_basic() {
 #[test]
 fn alias_burn_should_not_validate_alias_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -1172,7 +1172,7 @@ fn alias_burn_should_not_validate_alias_sender() {
 #[test]
 fn alias_burn_should_not_validate_alias_address() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
@@ -1210,14 +1210,14 @@ fn alias_burn_should_not_validate_alias_address() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_1
     ));
 }
 
 #[test]
 fn alias_governance_transition_should_not_validate_alias_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -1262,7 +1262,7 @@ fn alias_governance_transition_should_not_validate_alias_sender() {
 #[test]
 fn alias_governance_transition_should_not_validate_alias_address() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
@@ -1300,14 +1300,14 @@ fn alias_governance_transition_should_not_validate_alias_address() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(alias_id, AccountTransition::State))) if alias_id == alias_id_1
     ));
 }
 
 #[test]
 fn transitioned_zero_alias_id_no_longer_is_zero() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1367,8 +1367,8 @@ fn transitioned_zero_alias_id_no_longer_is_zero() {
 #[test]
 fn two_aliases_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -1442,7 +1442,7 @@ fn two_aliases_required() {
 #[test]
 fn state_controller_sender_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1493,7 +1493,7 @@ fn state_controller_sender_required() {
 #[test]
 fn state_controller_sender_required_already_selected() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1547,7 +1547,7 @@ fn state_controller_sender_required_already_selected() {
 #[test]
 fn state_controller_sender_required_but_governance() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1602,7 +1602,7 @@ fn state_controller_sender_required_but_governance() {
 #[test]
 fn governor_sender_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -1656,7 +1656,7 @@ fn governor_sender_required() {
 #[test]
 fn governor_sender_required_already_selected() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -1713,7 +1713,7 @@ fn governor_sender_required_already_selected() {
 #[test]
 fn governance_transition_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1755,7 +1755,7 @@ fn governance_transition_and_required() {
 #[test]
 fn state_transition_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1797,7 +1797,7 @@ fn state_transition_and_required() {
 #[test]
 fn governor_sender_required_but_state() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1852,7 +1852,7 @@ fn governor_sender_required_but_state() {
 #[test]
 fn both_state_controller_and_governor_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1905,7 +1905,7 @@ fn both_state_controller_and_governor_sender() {
 #[test]
 fn remainder_address_in_state_controller() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -1957,7 +1957,7 @@ fn remainder_address_in_state_controller() {
 #[test]
 fn remainder_address_in_governor() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
         Alias(
@@ -2014,7 +2014,7 @@ fn remainder_address_in_governor() {
 #[test]
 fn do_not_change_amount_of_governance_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2058,7 +2058,7 @@ fn do_not_change_amount_of_governance_transition() {
 #[test]
 fn state_transition_required_but_state_controller_not_provided() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2102,7 +2102,7 @@ fn state_transition_required_but_state_controller_not_provided() {
 #[test]
 fn state_transition_but_state_controller_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2144,7 +2144,7 @@ fn state_transition_but_state_controller_not_owned() {
 #[test]
 fn governance_transition_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2186,7 +2186,7 @@ fn governance_transition_but_governor_not_owned() {
 #[test]
 fn burn_alias_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2228,7 +2228,7 @@ fn burn_alias_but_governor_not_owned() {
 #[test]
 fn sender_in_state_controller_but_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2269,7 +2269,7 @@ fn sender_in_state_controller_but_not_owned() {
 #[test]
 fn sender_in_governor_but_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([Alias(
         2_000_000,
@@ -2310,7 +2310,7 @@ fn sender_in_governor_but_not_owned() {
 #[test]
 fn new_state_metadata() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let alias_output =
         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
@@ -2356,7 +2356,7 @@ fn new_state_metadata() {
 #[test]
 fn new_state_metadata_but_same_state_index() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let alias_output =
         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
@@ -2395,7 +2395,7 @@ fn new_state_metadata_but_same_state_index() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(
+        Err(Error::UnfulfillableRequirement(Requirement::Account(
             alias_id,
             _alias_transition,
         ))) if alias_id == alias_id_1

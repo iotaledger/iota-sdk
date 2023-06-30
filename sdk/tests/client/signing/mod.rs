@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias;
+mod account;
 mod basic;
 mod nft;
 
@@ -19,9 +19,9 @@ use iota_sdk::{
         Result,
     },
     types::block::{
-        address::{Address, AliasAddress, NftAddress, ToBech32Ext},
+        address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AliasId, InputsCommitment, NftId},
+        output::{AccountId, InputsCommitment, NftId},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
@@ -58,10 +58,10 @@ async fn all_combined() -> Result<()> {
     let ed25519_bech32_address_1 = &ed25519_bech32_addresses[1].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let ed25519_bech32_address_2 = &ed25519_bech32_addresses[2].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1)?;
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2)?;
-    let alias_1_bech32_address = &Address::Alias(AliasAddress::new(alias_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let alias_2_bech32_address = &Address::Alias(AliasAddress::new(alias_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let alias_id_1 = AccountId::from_str(ALIAS_ID_1)?;
+    let alias_id_2 = AccountId::from_str(ALIAS_ID_2)?;
+    let alias_1_bech32_address = &Address::Alias(AccountAddress::new(alias_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let alias_2_bech32_address = &Address::Alias(AccountAddress::new(alias_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let nft_id_1 = NftId::from_str(NFT_ID_1)?;
     let nft_id_2 = NftId::from_str(NFT_ID_2)?;
