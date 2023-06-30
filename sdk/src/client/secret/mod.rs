@@ -448,7 +448,7 @@ where
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Account(_alias) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
+                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Ed25519(_ed25519) => {
                     blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }

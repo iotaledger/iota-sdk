@@ -27,7 +27,7 @@ use crate::client::{
 };
 
 #[test]
-fn input_account_eq_output_alias() {
+fn input_account_eq_output_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -244,7 +244,7 @@ fn basic_output_with_account_input() {
 }
 
 #[test]
-fn create_alias() {
+fn create_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
@@ -293,7 +293,7 @@ fn create_alias() {
 }
 
 #[test]
-fn burn_alias() {
+fn burn_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -1018,7 +1018,7 @@ fn decrease_account_amount() {
 }
 
 #[test]
-fn prefer_basic_to_alias() {
+fn prefer_basic_to_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1365,7 +1365,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
 }
 
 #[test]
-fn two_aliases_required() {
+fn two_accounts_required() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();

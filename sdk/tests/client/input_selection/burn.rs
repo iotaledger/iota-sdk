@@ -202,7 +202,7 @@ fn burn_account_absent() {
 }
 
 #[test]
-fn burn_aliases_present() {
+fn burn_accounts_present() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
@@ -888,7 +888,7 @@ fn burn_native_tokens() {
 }
 
 #[test]
-fn burn_foundry_and_its_alias() {
+fn burn_foundry_and_its_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 

@@ -178,7 +178,7 @@ async fn create_and_melt_native_token() -> Result<()> {
 
     // Call to run tests in sequence
     destroy_foundry(account).await?;
-    destroy_alias(account).await?;
+    destroy_account(account).await?;
 
     tear_down(storage_path)
 }
@@ -206,7 +206,7 @@ async fn destroy_foundry(account: &Account) -> Result<()> {
     Ok(())
 }
 
-async fn destroy_alias(account: &Account) -> Result<()> {
+async fn destroy_account(account: &Account) -> Result<()> {
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -277,8 +277,8 @@ async fn create_and_burn_native_tokens() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_nft_with_alias() -> Result<()> {
-    let storage_path = "test-storage/mint_and_burn_nft_with_alias";
+async fn mint_and_burn_nft_with_account() -> Result<()> {
+    let storage_path = "test-storage/mint_and_burn_nft_with_account";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;

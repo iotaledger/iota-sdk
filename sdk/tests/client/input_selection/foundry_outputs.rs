@@ -64,7 +64,7 @@ fn missing_input_account_for_foundry() {
 }
 
 #[test]
-fn existing_input_account_for_foundry_alias() {
+fn existing_input_account_for_foundry_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -825,7 +825,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 }
 
 #[test]
-fn create_native_token_but_burn_alias() {
+fn create_native_token_but_burn_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);

@@ -386,7 +386,7 @@ fn duplicate_output_nft_null() {
 }
 
 #[test]
-fn duplicate_output_alias() {
+fn duplicate_output_account() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());

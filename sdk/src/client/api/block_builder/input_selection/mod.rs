@@ -423,7 +423,7 @@ impl InputSelection {
     fn validate_transitions(&self) -> Result<(), Error> {
         let mut input_native_tokens_builder = NativeTokensBuilder::new();
         let mut output_native_tokens_builder = NativeTokensBuilder::new();
-        let mut input_aliases = Vec::new();
+        let mut input_accounts = Vec::new();
         let mut input_chains_foundries = hashbrown::HashMap::new();
         let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
@@ -433,7 +433,7 @@ impl InputSelection {
             }
             match &input.output {
                 Output::Account(_) => {
-                    input_aliases.push(input);
+                    input_accounts.push(input);
                 }
                 Output::Foundry(foundry) => {
                     input_chains_foundries.insert(foundry.chain_id(), &input.output);
@@ -461,7 +461,7 @@ impl InputSelection {
                         continue;
                     }
 
-                    let account_input = input_aliases
+                    let account_input = input_accounts
                         .iter()
                         .find(|i| {
                             if let Output::Account(account_input) = &i.output {

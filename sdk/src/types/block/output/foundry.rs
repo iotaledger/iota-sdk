@@ -473,12 +473,12 @@ impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
-        if let (Some(Output::Account(input_alias)), Some(Output::Account(output_alias))) = (
+        if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
             context.input_chains.get(&account_chain_id),
             context.output_chains.get(&account_chain_id),
         ) {
-            if input_alias.foundry_counter() >= next_state.serial_number()
-                || next_state.serial_number() > output_alias.foundry_counter()
+            if input_account.foundry_counter() >= next_state.serial_number()
+                || next_state.serial_number() > output_account.foundry_counter()
             {
                 return Err(StateTransitionError::InconsistentFoundrySerialNumber);
             }
