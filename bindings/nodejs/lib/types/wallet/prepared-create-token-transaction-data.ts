@@ -3,7 +3,7 @@
 
 import { Type } from 'class-transformer';
 import { Transaction } from '../wallet';
-import { PreparedTransactionData } from './prepared-transaction-data';
+import { PreparedTransactionData } from '../client/prepared-transaction-data';
 
 /** The result of preparing an operation to create a native token */
 export class PreparedCreateNativeTokenTransactionData {

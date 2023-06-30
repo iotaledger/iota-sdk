@@ -35,12 +35,12 @@ import {
     BuildNftOutputData,
     SignedTransactionEssence,
     PreparedTransaction,
+    PreparedCreateNativeTokenTransactionData,
 } from '../types/wallet';
 import {
     INode,
     Burn,
     PreparedTransactionData,
-    PreparedCreateNativeTokenTransactionData,
 } from '../client';
 import {
     AliasOutput,
