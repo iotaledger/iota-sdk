@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Transaction } from '../wallet';
+import { Transaction } from './transaction';
 import { PreparedTransactionData } from '../client/prepared-transaction-data';
 
 /** The result of preparing an operation to create a native token */
