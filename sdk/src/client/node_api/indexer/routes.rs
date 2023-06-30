@@ -72,7 +72,7 @@ impl ClientInner {
     /// Get foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "address", "createdBefore", "createdAfter"
-    /// Returns Err(Node(NotFound) if not results are found.
+    /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v1/outputs/foundry
     pub async fn foundry_output_ids(
         &self,
@@ -101,7 +101,7 @@ impl ClientInner {
     /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
     /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
     /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
-    /// Returns Err(Node(NotFound) if not results are found.
+    /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v1/outputs/nft
     pub async fn nft_output_ids(
         &self,

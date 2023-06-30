@@ -129,12 +129,12 @@ class Utils():
         })
         
     @staticmethod
-    def compute_output_id(transaction_id: HexStr, index: int) -> HexStr:
+    def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
         """Returns the output ID from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {
             'transactionId': transaction_id,
-            'index': serial_number,
+            'index': index,
         }))
 
     @staticmethod

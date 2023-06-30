@@ -225,7 +225,7 @@ pub enum Response {
     FoundryId(FoundryId),
     /// Response for:
     /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
-    /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
+    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
@@ -311,6 +311,7 @@ pub enum Response {
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for:
     /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
+    /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)

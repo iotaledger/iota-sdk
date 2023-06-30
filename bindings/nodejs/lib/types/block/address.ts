@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HexEncodedString } from '../utils';
-import { AliasId } from './id';
+import { AliasId, NftId } from './id';
 
 enum AddressType {
     Ed25519 = 0,
@@ -68,15 +68,15 @@ class AliasAddress extends Address {
  * NFT address.
  */
 class NftAddress extends Address {
-    private nftId: HexEncodedString;
-    constructor(address: HexEncodedString) {
+    private nftId: NftId;
+    constructor(address: NftId) {
         super(AddressType.Nft);
         this.nftId = address;
     }
     /**
      * The NFT Id.
      */
-    getNftId(): HexEncodedString {
+    getNftId(): NftId {
         return this.nftId;
     }
 
