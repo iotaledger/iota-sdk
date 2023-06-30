@@ -13,7 +13,7 @@ use crate::{
         address::AccountAddress,
         output::{
             feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId,
-            AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+            AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
     wallet::account::{
@@ -141,9 +141,9 @@ where
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
 
-        if let Output::Alias(alias_output) = &alias_output.output {
+        if let Output::Account(alias_output) = &alias_output.output {
             // Create the new alias output with the same feature blocks, just updated state_index and foundry_counter
-            let new_alias_output_builder = AliasOutputBuilder::from(alias_output)
+            let new_alias_output_builder = AccountOutputBuilder::from(alias_output)
                 .with_alias_id(alias_id)
                 .with_state_index(alias_output.state_index() + 1)
                 .with_foundry_counter(alias_output.foundry_counter() + 1);

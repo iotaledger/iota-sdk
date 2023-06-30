@@ -46,7 +46,7 @@ pub(crate) use self::{
     unlock_condition::AddressUnlockCondition,
 };
 pub use self::{
-    account::{AccountTransition, AliasOutput, AliasOutputBuilder},
+    account::{AccountOutput, AccountOutputBuilder, AccountTransition},
     account_id::AccountId,
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
@@ -127,8 +127,8 @@ impl OutputWithMetadata {
 pub enum Output {
     /// A basic output.
     Basic(BasicOutput),
-    /// An alias output.
-    Alias(AliasOutput),
+    /// An account output.
+    Account(AccountOutput),
     /// A foundry output.
     Foundry(FoundryOutput),
     /// An NFT output.
@@ -139,7 +139,7 @@ impl core::fmt::Debug for Output {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::Basic(output) => output.fmt(f),
-            Self::Alias(output) => output.fmt(f),
+            Self::Account(output) => output.fmt(f),
             Self::Foundry(output) => output.fmt(f),
             Self::Nft(output) => output.fmt(f),
         }
@@ -154,7 +154,7 @@ impl Output {
     pub fn kind(&self) -> u8 {
         match self {
             Self::Basic(_) => BasicOutput::KIND,
-            Self::Alias(_) => AliasOutput::KIND,
+            Self::Account(_) => AccountOutput::KIND,
             Self::Foundry(_) => FoundryOutput::KIND,
             Self::Nft(_) => NftOutput::KIND,
         }
@@ -164,7 +164,7 @@ impl Output {
     pub fn amount(&self) -> u64 {
         match self {
             Self::Basic(output) => output.amount(),
-            Self::Alias(output) => output.amount(),
+            Self::Account(output) => output.amount(),
             Self::Foundry(output) => output.amount(),
             Self::Nft(output) => output.amount(),
         }
@@ -174,7 +174,7 @@ impl Output {
     pub fn native_tokens(&self) -> Option<&NativeTokens> {
         match self {
             Self::Basic(output) => Some(output.native_tokens()),
-            Self::Alias(output) => Some(output.native_tokens()),
+            Self::Account(output) => Some(output.native_tokens()),
             Self::Foundry(output) => Some(output.native_tokens()),
             Self::Nft(output) => Some(output.native_tokens()),
         }
@@ -184,7 +184,7 @@ impl Output {
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
             Self::Basic(output) => Some(output.unlock_conditions()),
-            Self::Alias(output) => Some(output.unlock_conditions()),
+            Self::Account(output) => Some(output.unlock_conditions()),
             Self::Foundry(output) => Some(output.unlock_conditions()),
             Self::Nft(output) => Some(output.unlock_conditions()),
         }
@@ -194,7 +194,7 @@ impl Output {
     pub fn features(&self) -> Option<&Features> {
         match self {
             Self::Basic(output) => Some(output.features()),
-            Self::Alias(output) => Some(output.features()),
+            Self::Account(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
         }
@@ -204,7 +204,7 @@ impl Output {
     pub fn immutable_features(&self) -> Option<&Features> {
         match self {
             Self::Basic(_) => None,
-            Self::Alias(output) => Some(output.immutable_features()),
+            Self::Account(output) => Some(output.immutable_features()),
             Self::Foundry(output) => Some(output.immutable_features()),
             Self::Nft(output) => Some(output.immutable_features()),
         }
@@ -214,7 +214,7 @@ impl Output {
     pub fn chain_id(&self) -> Option<ChainId> {
         match self {
             Self::Basic(_) => None,
-            Self::Alias(output) => Some(output.chain_id()),
+            Self::Account(output) => Some(output.chain_id()),
             Self::Foundry(output) => Some(output.chain_id()),
             Self::Nft(output) => Some(output.chain_id()),
         }
@@ -235,15 +235,15 @@ impl Output {
         }
     }
 
-    /// Checks whether the output is an [`AliasOutput`].
+    /// Checks whether the output is an [`AccountOutput`].
     pub fn is_alias(&self) -> bool {
-        matches!(self, Self::Alias(_))
+        matches!(self, Self::Account(_))
     }
 
-    /// Gets the output as an actual [`AliasOutput`].
+    /// Gets the output as an actual [`AccountOutput`].
     /// PANIC: do not call on a non-alias output.
-    pub fn as_alias(&self) -> &AliasOutput {
-        if let Self::Alias(output) = self {
+    pub fn as_alias(&self) -> &AccountOutput {
+        if let Self::Account(output) = self {
             output
         } else {
             panic!("as_alias called on a non-alias output");
@@ -290,7 +290,7 @@ impl Output {
         alias_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
-            Self::Alias(output) => {
+            Self::Account(output) => {
                 if alias_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
                     // Alias address is only unlocked if it's a state transition
                     Ok((
@@ -325,13 +325,13 @@ impl Output {
     ) -> Result<(), StateTransitionError> {
         match (current_state, next_state) {
             // Creations.
-            (None, Some(Self::Alias(next_state))) => AliasOutput::creation(next_state, context),
+            (None, Some(Self::Account(next_state))) => AccountOutput::creation(next_state, context),
             (None, Some(Self::Foundry(next_state))) => FoundryOutput::creation(next_state, context),
             (None, Some(Self::Nft(next_state))) => NftOutput::creation(next_state, context),
 
             // Transitions.
-            (Some(Self::Alias(current_state)), Some(Self::Alias(next_state))) => {
-                AliasOutput::transition(current_state, next_state, context)
+            (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
+                AccountOutput::transition(current_state, next_state, context)
             }
             (Some(Self::Foundry(current_state)), Some(Self::Foundry(next_state))) => {
                 FoundryOutput::transition(current_state, next_state, context)
@@ -341,7 +341,7 @@ impl Output {
             }
 
             // Destructions.
-            (Some(Self::Alias(current_state)), None) => AliasOutput::destruction(current_state, context),
+            (Some(Self::Account(current_state)), None) => AccountOutput::destruction(current_state, context),
             (Some(Self::Foundry(current_state)), None) => FoundryOutput::destruction(current_state, context),
             (Some(Self::Nft(current_state)), None) => NftOutput::destruction(current_state, context),
 
@@ -403,8 +403,8 @@ impl Packable for Output {
                 BasicOutput::KIND.pack(packer)?;
                 output.pack(packer)
             }
-            Self::Alias(output) => {
-                AliasOutput::KIND.pack(packer)?;
+            Self::Account(output) => {
+                AccountOutput::KIND.pack(packer)?;
                 output.pack(packer)
             }
             Self::Foundry(output) => {
@@ -426,7 +426,7 @@ impl Packable for Output {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
             BasicOutput::KIND => Self::from(BasicOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AliasOutput::KIND => Self::from(AliasOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            AccountOutput::KIND => Self::from(AccountOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
@@ -476,7 +476,7 @@ pub mod dto {
 
     use super::*;
     pub use super::{
-        account::dto::AliasOutputDto,
+        account::dto::AccountOutputDto,
         basic::dto::BasicOutputDto,
         foundry::dto::FoundryOutputDto,
         metadata::dto::OutputMetadataDto,
@@ -505,7 +505,7 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum OutputDto {
         Basic(BasicOutputDto),
-        Alias(AliasOutputDto),
+        Account(AccountOutputDto),
         Foundry(FoundryOutputDto),
         Nft(NftOutputDto),
     }
@@ -514,7 +514,7 @@ pub mod dto {
         fn from(value: &Output) -> Self {
             match value {
                 Output::Basic(o) => Self::Basic(o.into()),
-                Output::Alias(o) => Self::Alias(o.into()),
+                Output::Account(o) => Self::Account(o.into()),
                 Output::Foundry(o) => Self::Foundry(o.into()),
                 Output::Nft(o) => Self::Nft(o.into()),
             }
@@ -525,7 +525,7 @@ pub mod dto {
         pub fn try_from_dto(value: OutputDto, token_supply: u64) -> Result<Self, Error> {
             Ok(match value {
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto(o, token_supply)?),
+                OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto(o, token_supply)?),
                 OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto(o, token_supply)?),
                 OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto(o, token_supply)?),
             })
@@ -534,7 +534,7 @@ pub mod dto {
         pub fn try_from_dto_unverified(value: OutputDto) -> Result<Self, Error> {
             Ok(match value {
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_unverified(o)?),
-                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto_unverified(o)?),
+                OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto_unverified(o)?),
                 OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_unverified(o)?),
                 OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_unverified(o)?),
             })
@@ -554,8 +554,8 @@ pub mod dto {
                         BasicOutputDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic output: {e}")))?,
                     ),
-                    AliasOutput::KIND => Self::Alias(
-                        AliasOutputDto::deserialize(value)
+                    AccountOutput::KIND => Self::Account(
+                        AccountOutputDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias output: {e}")))?,
                     ),
                     FoundryOutput::KIND => Self::Foundry(
@@ -581,7 +581,7 @@ pub mod dto {
             #[serde(untagged)]
             enum OutputDto_<'a> {
                 T2(&'a BasicOutputDto),
-                T3(&'a AliasOutputDto),
+                T3(&'a AccountOutputDto),
                 T4(&'a FoundryOutputDto),
                 T5(&'a NftOutputDto),
             }
@@ -594,7 +594,7 @@ pub mod dto {
                 Self::Basic(o) => TypedOutput {
                     output: OutputDto_::T2(o),
                 },
-                Self::Alias(o) => TypedOutput {
+                Self::Account(o) => TypedOutput {
                     output: OutputDto_::T3(o),
                 },
                 Self::Foundry(o) => TypedOutput {

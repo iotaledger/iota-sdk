@@ -10,7 +10,7 @@ use crate::{
         output::{
             feature::MetadataFeature,
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AccountId, AliasOutputBuilder, Output,
+            AccountId, AccountOutputBuilder, Output,
         },
     },
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
@@ -92,7 +92,7 @@ where
         };
 
         let mut alias_output_builder =
-            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
+            AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
@@ -129,7 +129,7 @@ where
             .unspent_outputs()
             .values()
             .find_map(|output_data| match &output_data.output {
-                Output::Alias(alias_output) => {
+                Output::Account(alias_output) => {
                     let output_alias_id = alias_output.alias_id_non_null(&output_data.output_id);
 
                     alias_id.map_or_else(

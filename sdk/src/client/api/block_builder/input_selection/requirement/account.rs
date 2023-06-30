@@ -13,11 +13,11 @@ pub fn is_account_transition<'a>(
     outputs: &[Output],
     burn: impl Into<Option<&'a Burn>>,
 ) -> Option<AccountTransition> {
-    if let Output::Alias(alias_input) = &input {
+    if let Output::Account(alias_input) = &input {
         let alias_id = alias_input.alias_id_non_null(&input_id);
         // Checks if the alias exists in the outputs and gets the transition type.
         for output in outputs.iter() {
-            if let Output::Alias(alias_output) = output {
+            if let Output::Account(alias_output) = output {
                 if *alias_output.alias_id() == alias_id {
                     if alias_output.state_index() == alias_input.state_index() {
                         // Governance transition.
@@ -41,7 +41,7 @@ pub fn is_account_transition<'a>(
 /// Checks if an output is an alias with a given non null alias ID.
 /// Calling it with a null alias ID may lead to undefined behavior.
 pub(crate) fn is_account_with_id_non_null(output: &Output, alias_id: &AccountId) -> bool {
-    if let Output::Alias(alias) = output {
+    if let Output::Account(alias) = output {
         alias.alias_id() == alias_id
     } else {
         false
@@ -50,7 +50,7 @@ pub(crate) fn is_account_with_id_non_null(output: &Output, alias_id: &AccountId)
 
 /// Checks if an output is an alias with output ID that matches the given alias ID.
 pub(crate) fn is_account_with_id(output: &Output, output_id: &OutputId, alias_id: &AccountId) -> bool {
-    if let Output::Alias(alias) = output {
+    if let Output::Account(alias) = output {
         &alias.alias_id_non_null(output_id) == alias_id
     } else {
         false

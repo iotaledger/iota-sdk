@@ -28,7 +28,7 @@ use crate::{
         address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
-            AccountTransition, AliasOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
+            AccountOutput, AccountTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
             OUTPUT_COUNT_RANGE,
         },
         protocol::ProtocolParameters,
@@ -173,7 +173,7 @@ impl InputSelection {
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
-            Output::Alias(output) => Some(Address::Alias(AccountAddress::from(
+            Output::Account(output) => Some(Address::Alias(AccountAddress::from(
                 output.alias_id_non_null(input.output_id()),
             ))),
             Output::Nft(output) => Some(Address::Nft(NftAddress::from(
@@ -296,7 +296,7 @@ impl InputSelection {
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Alias(unlock_address) => {
-                    if let Output::Alias(alias_output) = &input_signing_data.output {
+                    if let Output::Account(alias_output) = &input_signing_data.output {
                         *unlock_address.alias_id() == alias_output.alias_id_non_null(input_signing_data.output_id())
                     } else {
                         false
@@ -318,7 +318,7 @@ impl InputSelection {
                 None => {
                     // insert before address
                     let alias_or_nft_address = match &input.output {
-                        Output::Alias(alias_output) => Some(Address::Alias(AccountAddress::new(
+                        Output::Account(alias_output) => Some(Address::Alias(AccountAddress::new(
                             alias_output.alias_id_non_null(input.output_id()),
                         ))),
                         Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
@@ -430,7 +430,7 @@ impl InputSelection {
                 input_native_tokens_builder.add_native_tokens(native_tokens.clone())?;
             }
             match &input.output {
-                Output::Alias(_) => {
+                Output::Account(_) => {
                     input_aliases.push(input);
                 }
                 Output::Foundry(foundry) => {
@@ -453,7 +453,7 @@ impl InputSelection {
         // Validate utxo chain transitions
         for output in self.outputs.iter() {
             match output {
-                Output::Alias(alias_output) => {
+                Output::Account(alias_output) => {
                     // Null id outputs are just minted and can't be a transition
                     if alias_output.alias_id().is_null() {
                         continue;
@@ -462,7 +462,7 @@ impl InputSelection {
                     let alias_input = input_aliases
                         .iter()
                         .find(|i| {
-                            if let Output::Alias(alias_input) = &i.output {
+                            if let Output::Account(alias_input) = &i.output {
                                 *alias_output.alias_id() == alias_input.alias_id_non_null(i.output_id())
                             } else {
                                 false
@@ -470,7 +470,7 @@ impl InputSelection {
                         })
                         .expect("ISA is broken because there is no alias input");
 
-                    if let Err(err) = AliasOutput::transition_inner(
+                    if let Err(err) = AccountOutput::transition_inner(
                         alias_input.output.as_alias(),
                         alias_output,
                         &input_chains_foundries,

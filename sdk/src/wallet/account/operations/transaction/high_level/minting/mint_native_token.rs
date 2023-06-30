@@ -5,7 +5,9 @@ use primitive_types::U256;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
+    types::block::output::{
+        AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+    },
     wallet::{
         account::{types::Transaction, Account, TransactionOptions},
         Error,
@@ -80,7 +82,7 @@ where
 
             // Get the alias output that controls the foundry output
             let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
-                if let Output::Alias(output) = &output_data.output {
+                if let Output::Account(output) = &output_data.output {
                     output.alias_id_non_null(&output_data.output_id) == **foundry_output.alias_address()
                 } else {
                     false
@@ -95,7 +97,7 @@ where
 
         drop(account_details);
 
-        let alias_output = if let Output::Alias(alias_output) = existing_alias_output.output {
+        let alias_output = if let Output::Account(alias_output) = existing_alias_output.output {
             alias_output
         } else {
             unreachable!("We checked if it's an alias output before")
@@ -108,7 +110,7 @@ where
 
         // Create the next alias output with the same data, just updated state_index
         let new_alias_output_builder =
-            AliasOutputBuilder::from(&alias_output).with_state_index(alias_output.state_index() + 1);
+            AccountOutputBuilder::from(&alias_output).with_state_index(alias_output.state_index() + 1);
 
         // Create next foundry output with minted native tokens
 

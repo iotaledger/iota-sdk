@@ -19,7 +19,7 @@ use iota_sdk::{
                 ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AccountId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
         },
     },
 };
@@ -45,7 +45,8 @@ async fn main() -> Result<()> {
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(address));
-    let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
+    let alias_output_builder =
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 

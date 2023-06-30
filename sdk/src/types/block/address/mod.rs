@@ -148,7 +148,7 @@ impl Address {
             }
             (Self::Alias(alias_address), Unlock::Alias(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Alias(alias_output)) = inputs[unlock.index() as usize] {
+                if let (output_id, Output::Account(alias_output)) = inputs[unlock.index() as usize] {
                     if &alias_output.alias_id_non_null(&output_id) != alias_address.alias_id() {
                         return Err(ConflictReason::InvalidUnlock);
                     }

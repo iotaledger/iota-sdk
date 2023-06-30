@@ -73,7 +73,7 @@ impl InputSelection {
         for output in outputs {
             let is_created = match output {
                 // Add an alias requirement if the alias output is transitioning and then required in the inputs.
-                Output::Alias(alias_output) => {
+                Output::Account(alias_output) => {
                     let is_created = alias_output.alias_id().is_null();
 
                     if !is_created {

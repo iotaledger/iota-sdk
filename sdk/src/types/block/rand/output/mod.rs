@@ -13,7 +13,7 @@ use primitive_types::U256;
 pub use self::metadata::rand_output_metadata;
 use crate::types::block::{
     output::{
-        unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AliasOutput, BasicOutput, FoundryOutput,
+        unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, BasicOutput, FoundryOutput,
         InputsCommitment, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, OUTPUT_INDEX_RANGE,
     },
     rand::{
@@ -48,17 +48,17 @@ pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
 }
 
 /// Generates a random [`AccountId`](AccountId).
-pub fn rand_alias_id() -> AccountId {
+pub fn rand_account_id() -> AccountId {
     AccountId::from(rand_bytes_array())
 }
 
-/// Generates a random [`AliasOutput`](AliasOutput).
-pub fn rand_alias_output(token_supply: u64) -> AliasOutput {
+/// Generates a random [`AccountOutput`](AccountOutput).
+pub fn rand_account_output(token_supply: u64) -> AccountOutput {
     // We need to make sure that `AccountId` and `Address` don't match.
-    let alias_id = rand_alias_id();
+    let alias_id = rand_account_id();
 
-    AliasOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), alias_id)
-        .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
+    AccountOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), alias_id)
+        .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
         .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
         .finish(token_supply)
@@ -108,7 +108,7 @@ pub fn rand_inputs_commitment() -> InputsCommitment {
 pub fn rand_output(token_supply: u64) -> Output {
     match rand_number::<u64>() % 5 {
         1 => rand_basic_output(token_supply).into(),
-        2 => rand_alias_output(token_supply).into(),
+        2 => rand_account_output(token_supply).into(),
         3 => rand_foundry_output(token_supply).into(),
         4 => rand_nft_output(token_supply).into(),
         _ => unreachable!(),

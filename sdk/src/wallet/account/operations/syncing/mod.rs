@@ -214,7 +214,7 @@ where
             // Add new alias and nft addresses
             for output_data in new_outputs_data.iter() {
                 match &output_data.output {
-                    Output::Alias(alias_output) => {
+                    Output::Account(alias_output) => {
                         let alias_address =
                             AccountAddress::from(alias_output.alias_id_non_null(&output_data.output_id));
 

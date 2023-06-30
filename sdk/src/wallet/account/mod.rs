@@ -318,7 +318,7 @@ impl AccountInner {
 
             for output in outputs {
                 match &output.output {
-                    Output::Alias(alias) => {
+                    Output::Account(alias) => {
                         if let Some(alias_ids) = &filter.alias_ids {
                             let alias_id = alias.alias_id_non_null(&output.output_id);
                             if alias_ids.contains(&alias_id) {

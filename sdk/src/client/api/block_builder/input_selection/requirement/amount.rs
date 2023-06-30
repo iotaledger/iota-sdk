@@ -10,7 +10,7 @@ use crate::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AccountTransition, AliasOutputBuilder,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AccountTransition,
             FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, Rent,
         },
     },
@@ -27,7 +27,11 @@ pub(crate) fn sdruc_not_expired(output: &Output, current_time: u32) -> Option<&S
             .map_or(false, |expiration| current_time >= expiration.timestamp());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired { Some(sdr) } else { None }
+        if !expired {
+            Some(sdr)
+        } else {
+            None
+        }
     })
 }
 
@@ -250,7 +254,7 @@ impl InputSelection {
             );
 
             let new_output = match output {
-                Output::Alias(output) => AliasOutputBuilder::from(&*output)
+                Output::Account(output) => AccountOutputBuilder::from(&*output)
                     .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
                 Output::Nft(output) => NftOutputBuilder::from(&*output)
@@ -388,7 +392,7 @@ impl InputSelection {
             .filter(|input| match &input.output {
                 Output::Basic(_) => false,
                 // If alias, we are only interested in state transitions as governance can't move funds.
-                Output::Alias(alias) => self.addresses.contains(alias.state_controller_address()),
+                Output::Account(alias) => self.addresses.contains(alias.state_controller_address()),
                 _ => true,
             })
             .peekable();

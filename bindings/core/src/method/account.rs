@@ -149,9 +149,9 @@ pub enum AccountMethod {
         force: bool,
         output_consolidation_threshold: Option<usize>,
     },
-    /// Create an alias output.
+    /// Create an account output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareCreateAliasOutput {
+    PrepareCreateAccountOutput {
         params: Option<CreateAccountParams>,
         options: Option<TransactionOptionsDto>,
     },

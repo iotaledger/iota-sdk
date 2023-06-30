@@ -6,7 +6,8 @@ use primitive_types::U256;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::output::{
-        AccountId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+        AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
+        TokenScheme,
     },
     wallet::{
         account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
@@ -57,9 +58,9 @@ where
                 _ => unreachable!("We already checked it's a foundry output"),
             })?;
 
-        if let Output::Alias(alias_output) = &existing_alias_output_data.output {
+        if let Output::Account(alias_output) = &existing_alias_output_data.output {
             // Create the new alias output with updated amount and state_index
-            let alias_output = AliasOutputBuilder::from(alias_output)
+            let alias_output = AccountOutputBuilder::from(alias_output)
                 .with_alias_id(alias_id)
                 .with_state_index(alias_output.state_index() + 1)
                 .finish_output(token_supply)?;
@@ -93,7 +94,7 @@ where
 
         for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
-                Output::Alias(output) => {
+                Output::Account(output) => {
                     if output.alias_id_non_null(output_id) == alias_id {
                         existing_alias_output_data = Some(output_data.clone());
                     }

@@ -65,8 +65,8 @@ pub enum AccountCommand {
     ClaimableOutputs,
     /// Consolidate all basic outputs into one address.
     Consolidate,
-    /// Create a new alias output.
-    CreateAliasOutput,
+    /// Create a new account output.
+    CreateAccountOutput,
     /// Create a native token.
     CreateNativeToken {
         /// Circulating supply of the native token to be minted, e.g. 100.
@@ -407,8 +407,8 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-// `create-alias-output` command
-pub async fn create_alias_outputs_command(account: &Account) -> Result<(), Error> {
+// `create-account-output` command
+pub async fn create_account_outputs_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Creating alias output.");
 
     let transaction = account.create_alias_output(None, None).await?;

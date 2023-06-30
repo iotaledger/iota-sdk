@@ -61,7 +61,7 @@ impl core::fmt::Display for AccountTransition {
 ///
 #[derive(Clone)]
 #[must_use]
-pub struct AliasOutputBuilder {
+pub struct AccountOutputBuilder {
     amount: OutputBuilderAmount,
     native_tokens: BTreeSet<NativeToken>,
     alias_id: AccountId,
@@ -73,13 +73,13 @@ pub struct AliasOutputBuilder {
     immutable_features: BTreeSet<Feature>,
 }
 
-impl AliasOutputBuilder {
-    /// Creates an [`AliasOutputBuilder`] with a provided amount.
+impl AccountOutputBuilder {
+    /// Creates an [`AccountOutputBuilder`] with a provided amount.
     pub fn new_with_amount(amount: u64, alias_id: AccountId) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), alias_id)
     }
 
-    /// Creates an [`AliasOutputBuilder`] with a provided rent structure.
+    /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AccountId) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), alias_id)
@@ -240,7 +240,7 @@ impl AliasOutputBuilder {
     }
 
     ///
-    pub fn finish_unverified(self) -> Result<AliasOutput, Error> {
+    pub fn finish_unverified(self) -> Result<AccountOutput, Error> {
         let state_index = self.state_index.unwrap_or(0);
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
@@ -258,13 +258,13 @@ impl AliasOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
-        verify_allowed_features(&features, AliasOutput::ALLOWED_FEATURES)?;
+        verify_allowed_features(&features, AccountOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
 
-        verify_allowed_features(&immutable_features, AliasOutput::ALLOWED_IMMUTABLE_FEATURES)?;
+        verify_allowed_features(&immutable_features, AccountOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        let mut output = AliasOutput {
+        let mut output = AccountOutput {
             amount: 1,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             alias_id: self.alias_id,
@@ -279,7 +279,7 @@ impl AliasOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Alias(output.clone()).rent_cost(&rent_structure)
+                Output::Account(output.clone()).rent_cost(&rent_structure)
             }
         };
 
@@ -287,7 +287,7 @@ impl AliasOutputBuilder {
     }
 
     ///
-    pub fn finish(self, token_supply: u64) -> Result<AliasOutput, Error> {
+    pub fn finish(self, token_supply: u64) -> Result<AccountOutput, Error> {
         let output = self.finish_unverified()?;
 
         verify_output_amount::<true>(&output.amount, &token_supply)?;
@@ -295,14 +295,14 @@ impl AliasOutputBuilder {
         Ok(output)
     }
 
-    /// Finishes the [`AliasOutputBuilder`] into an [`Output`].
+    /// Finishes the [`AccountOutputBuilder`] into an [`Output`].
     pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Alias(self.finish(token_supply)?))
+        Ok(Output::Account(self.finish(token_supply)?))
     }
 }
 
-impl From<&AliasOutput> for AliasOutputBuilder {
-    fn from(output: &AliasOutput) -> Self {
+impl From<&AccountOutput> for AccountOutputBuilder {
+    fn from(output: &AccountOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             native_tokens: output.native_tokens.iter().copied().collect(),
@@ -317,12 +317,12 @@ impl From<&AliasOutput> for AliasOutputBuilder {
     }
 }
 
-pub(crate) type StateMetadataLength = BoundedU16<0, { AliasOutput::STATE_METADATA_LENGTH_MAX }>;
+pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METADATA_LENGTH_MAX }>;
 
 /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AliasOutput {
+pub struct AccountOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
     // Native tokens held by the output.
@@ -342,33 +342,33 @@ pub struct AliasOutput {
     immutable_features: Features,
 }
 
-impl AliasOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AliasOutput`].
+impl AccountOutput {
+    /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
     pub const KIND: u8 = 4;
     /// Maximum possible length in bytes of the state metadata.
     pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
-    /// The set of allowed [`UnlockCondition`]s for an [`AliasOutput`].
+    /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
         UnlockConditionFlags::STATE_CONTROLLER_ADDRESS.union(UnlockConditionFlags::GOVERNOR_ADDRESS);
-    /// The set of allowed [`Feature`]s for an [`AliasOutput`].
+    /// The set of allowed [`Feature`]s for an [`AccountOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
-    /// The set of allowed immutable [`Feature`]s for an [`AliasOutput`].
+    /// The set of allowed immutable [`Feature`]s for an [`AccountOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`AliasOutputBuilder`] with a provided amount.
+    /// Creates a new [`AccountOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, alias_id: AccountId) -> AliasOutputBuilder {
-        AliasOutputBuilder::new_with_amount(amount, alias_id)
+    pub fn build_with_amount(amount: u64, alias_id: AccountId) -> AccountOutputBuilder {
+        AccountOutputBuilder::new_with_amount(amount, alias_id)
     }
 
-    /// Creates a new [`AliasOutputBuilder`] with a provided rent structure.
+    /// Creates a new [`AccountOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
         rent_structure: RentStructure,
         alias_id: AccountId,
-    ) -> AliasOutputBuilder {
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
+    ) -> AccountOutputBuilder {
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
     }
 
     ///
@@ -434,7 +434,7 @@ impl AliasOutput {
     ///
     #[inline(always)]
     pub fn state_controller_address(&self) -> &Address {
-        // An AliasOutput must have a StateControllerAddressUnlockCondition.
+        // An AccountOutput must have a StateControllerAddressUnlockCondition.
         self.unlock_conditions
             .state_controller_address()
             .map(|unlock_condition| unlock_condition.address())
@@ -444,7 +444,7 @@ impl AliasOutput {
     ///
     #[inline(always)]
     pub fn governor_address(&self) -> &Address {
-        // An AliasOutput must have a GovernorAddressUnlockCondition.
+        // An AccountOutput must have a GovernorAddressUnlockCondition.
         self.unlock_conditions
             .governor_address()
             .map(|unlock_condition| unlock_condition.address())
@@ -478,7 +478,7 @@ impl AliasOutput {
         let next_state = context.output_chains.get(&ChainId::from(alias_id));
 
         match next_state {
-            Some(Output::Alias(next_state)) => {
+            Some(Output::Account(next_state)) => {
                 if self.state_index() == next_state.state_index() {
                     self.governor_address().unlock(unlock, inputs, context)?;
                 } else {
@@ -565,7 +565,7 @@ impl AliasOutput {
     }
 }
 
-impl StateTransitionVerifier for AliasOutput {
+impl StateTransitionVerifier for AccountOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.alias_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
@@ -598,7 +598,7 @@ impl StateTransitionVerifier for AliasOutput {
     }
 }
 
-impl Packable for AliasOutput {
+impl Packable for AccountOutput {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
@@ -699,7 +699,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Acc
         return Err(Error::MissingGovernorUnlockCondition);
     }
 
-    verify_allowed_unlock_conditions(unlock_conditions, AliasOutput::ALLOWED_UNLOCK_CONDITIONS)
+    verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
 #[allow(missing_docs)]
@@ -717,7 +717,7 @@ pub mod dto {
     /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AliasOutputDto {
+    pub struct AccountOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
@@ -744,10 +744,10 @@ pub mod dto {
         pub immutable_features: Vec<FeatureDto>,
     }
 
-    impl From<&AliasOutput> for AliasOutputDto {
-        fn from(value: &AliasOutput) -> Self {
+    impl From<&AccountOutput> for AccountOutputDto {
+        fn from(value: &AccountOutput) -> Self {
             Self {
-                kind: AliasOutput::KIND,
+                kind: AccountOutput::KIND,
                 amount: value.amount().to_string(),
                 native_tokens: value.native_tokens().to_vec(),
                 alias_id: *value.alias_id(),
@@ -761,9 +761,9 @@ pub mod dto {
         }
     }
 
-    impl AliasOutput {
-        pub fn try_from_dto(value: AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = AliasOutputBuilder::new_with_amount(
+    impl AccountOutput {
+        pub fn try_from_dto(value: AccountOutputDto, token_supply: u64) -> Result<Self, Error> {
+            let mut builder = AccountOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 value.alias_id,
             );
@@ -798,8 +798,8 @@ pub mod dto {
             builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: AliasOutputDto) -> Result<Self, Error> {
-            let mut builder = AliasOutputBuilder::new_with_amount(
+        pub fn try_from_dto_unverified(value: AccountOutputDto) -> Result<Self, Error> {
+            let mut builder = AccountOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 value.alias_id,
             );
@@ -848,12 +848,12 @@ pub mod dto {
             token_supply: u64,
         ) -> Result<Self, Error> {
             let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
+                OutputBuilderAmountDto::Amount(amount) => AccountOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
                     *alias_id,
                 ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *alias_id)
+                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *alias_id)
                 }
             };
 
@@ -916,7 +916,7 @@ mod tests {
             address::rand_account_address,
             output::{
                 feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
-                rand_alias_id, rand_alias_output,
+                rand_account_id, rand_account_output,
                 unlock_condition::{
                     rand_governor_address_unlock_condition_different_from,
                     rand_state_controller_address_unlock_condition_different_from,
@@ -928,7 +928,7 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let alias_id = rand_alias_id();
+        let alias_id = rand_account_id();
         let foundry_id = FoundryId::build(&AccountAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
         let gov_address_1 = rand_governor_address_unlock_condition_different_from(&alias_id);
         let gov_address_2 = rand_governor_address_unlock_condition_different_from(&alias_id);
@@ -939,7 +939,7 @@ mod tests {
         let issuer_1 = rand_issuer_feature();
         let issuer_2 = rand_issuer_feature();
 
-        let mut builder = AliasOutput::build_with_amount(0, alias_id)
+        let mut builder = AccountOutput::build_with_amount(0, alias_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
             .add_unlock_condition(gov_address_1)
             .add_unlock_condition(state_address_1)
@@ -985,7 +985,7 @@ mod tests {
 
         assert_eq!(
             output.amount(),
-            Output::Alias(output.clone()).rent_cost(protocol_parameters.rent_structure())
+            Output::Account(output.clone()).rent_cost(protocol_parameters.rent_structure())
         );
         assert_eq!(output.features().metadata(), Some(&metadata));
         assert_eq!(output.features().sender(), Some(&sender_1));
@@ -996,23 +996,23 @@ mod tests {
     #[test]
     fn pack_unpack() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_alias_output(protocol_parameters.token_supply());
+        let output = rand_account_output(protocol_parameters.token_supply());
         let bytes = output.pack_to_vec();
-        let output_unpacked = AliasOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+        let output_unpacked = AccountOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
         assert_eq!(output, output_unpacked);
     }
 
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_alias_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Alias((&output).into());
+        let output = rand_account_output(protocol_parameters.token_supply());
+        let dto = OutputDto::Account((&output).into());
         let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_alias());
         let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_alias());
 
-        let output_split = AliasOutput::try_from_dtos(
+        let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
             Some(output.native_tokens().to_vec()),
             output.alias_id(),
@@ -1027,13 +1027,13 @@ mod tests {
         .unwrap();
         assert_eq!(output, output_split);
 
-        let alias_id = rand_alias_id();
+        let alias_id = rand_account_id();
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let gov_address = rand_governor_address_unlock_condition_different_from(&alias_id);
         let state_address = rand_state_controller_address_unlock_condition_different_from(&alias_id);
 
-        let test_split_dto = |builder: AliasOutputBuilder| {
-            let output_split = AliasOutput::try_from_dtos(
+        let test_split_dto = |builder: AccountOutputBuilder| {
+            let output_split = AccountOutput::try_from_dtos(
                 (&builder.amount).into(),
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.alias_id,
@@ -1052,20 +1052,21 @@ mod tests {
             );
         };
 
-        let builder = AliasOutput::build_with_amount(100, alias_id)
+        let builder = AccountOutput::build_with_amount(100, alias_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
             .add_unlock_condition(gov_address)
             .add_unlock_condition(state_address)
-            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
+            .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
 
-        let builder = AliasOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(gov_address)
-            .add_unlock_condition(state_address)
-            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
+        let builder =
+            AccountOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
+                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+                .add_unlock_condition(gov_address)
+                .add_unlock_condition(state_address)
+                .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
+                .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
     }
 }

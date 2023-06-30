@@ -93,7 +93,7 @@ where
                     // Add alias and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
                     match output {
-                        Output::Alias(output) => {
+                        Output::Account(output) => {
                             // Add amount
                             balance.base_coin.total += output.amount();
                             // Add storage deposit

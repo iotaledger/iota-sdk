@@ -51,11 +51,11 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Build an AliasOutput.
+    /// Build an AccountOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
-    BuildAliasOutput {
+    BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
@@ -140,7 +140,7 @@ pub enum AccountMethod {
     /// Create an alias output.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    CreateAliasOutput {
+    CreateAccountOutput {
         params: Option<CreateAccountParams>,
         options: Option<TransactionOptionsDto>,
     },

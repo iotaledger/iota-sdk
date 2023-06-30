@@ -8,7 +8,7 @@ use crate::types::block::{unlock::UnlockIndex, Error};
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = Error::InvalidAliasIndex)]
 pub struct AccountUnlock(
-    /// Index of input and unlock corresponding to an [`AliasOutput`](crate::types::block::output::AliasOutput).
+    /// Index of input and unlock corresponding to an [`AccountOutput`](crate::types::block::output::AccountOutput).
     UnlockIndex,
 );
 

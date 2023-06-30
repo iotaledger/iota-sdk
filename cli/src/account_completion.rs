@@ -16,7 +16,7 @@ pub(crate) const ACCOUNT_COMPLETION: AccountCompletion = AccountCompletion {
         "claim",
         "claimable-outputs",
         "consolidate",
-        "create-alias-output",
+        "create-account-output",
         "create-native-token",
         "destroy-alias",
         "destroy-foundry",

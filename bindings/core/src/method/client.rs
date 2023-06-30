@@ -23,11 +23,11 @@ use serde::{Deserialize, Serialize};
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum ClientMethod {
-    /// Build an AliasOutput.
+    /// Build an AccountOutput.
     /// Expected response: [`Output`](crate::Response::Output)
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
-    BuildAliasOutput {
+    BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
@@ -197,13 +197,13 @@ pub enum ClientMethod {
     },
     /// Fetch alias output IDs
     #[serde(rename_all = "camelCase")]
-    AliasOutputIds {
+    AccountOutputIds {
         /// Query parameters for output requests
         query_parameters: Vec<QueryParameter>,
     },
     /// Fetch alias output ID
     #[serde(rename_all = "camelCase")]
-    AliasOutputId {
+    AccountOutputId {
         /// Alias id
         alias_id: AccountId,
     },

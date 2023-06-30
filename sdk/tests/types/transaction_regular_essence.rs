@@ -9,8 +9,8 @@ use iota_sdk::types::block::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition,
             StateControllerAddressUnlockCondition,
         },
-        AccountId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
-        SimpleTokenScheme, TokenId, TokenScheme,
+        AccountId, AccountOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput,
+        Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
         transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
@@ -399,7 +399,7 @@ fn duplicate_output_alias() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let alias_id = AccountId::from(bytes);
-    let alias = AliasOutput::build_with_amount(1_000_000, alias_id)
+    let alias = AccountOutput::build_with_amount(1_000_000, alias_id)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())

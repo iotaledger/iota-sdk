@@ -11,7 +11,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
+                AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
             },
             payload::Payload,
             protocol::dto::ProtocolParametersDto,
@@ -57,7 +57,7 @@ where
 /// Call a client method.
 pub(crate) async fn call_client_method_internal(client: &Client, method: ClientMethod) -> Result<Response> {
     let response = match method {
-        ClientMethod::BuildAliasOutput {
+        ClientMethod::BuildAccountOutput {
             amount,
             native_tokens,
             alias_id,
@@ -68,7 +68,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(AliasOutput::try_from_dtos(
+            let output = Output::from(AccountOutput::try_from_dtos(
                 if let Some(amount) = amount {
                     OutputBuilderAmountDto::Amount(amount)
                 } else {
@@ -247,10 +247,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BasicOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.basic_output_ids(query_parameters).await?)
         }
-        ClientMethod::AliasOutputIds { query_parameters } => {
+        ClientMethod::AccountOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.alias_output_ids(query_parameters).await?)
         }
-        ClientMethod::AliasOutputId { alias_id } => Response::OutputId(client.alias_output_id(alias_id).await?),
+        ClientMethod::AccountOutputId { alias_id } => Response::OutputId(client.alias_output_id(alias_id).await?),
         ClientMethod::NftOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
         }

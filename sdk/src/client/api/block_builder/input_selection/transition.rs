@@ -8,8 +8,8 @@ use super::{
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{
-        AccountTransition, AliasOutput, AliasOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput,
-        NftOutputBuilder, Output, OutputId,
+        AccountOutput, AccountOutputBuilder, AccountTransition, ChainId, FoundryOutput, FoundryOutputBuilder,
+        NftOutput, NftOutputBuilder, Output, OutputId,
     },
 };
 
@@ -17,7 +17,7 @@ impl InputSelection {
     /// Transitions an alias input by creating a new alias output if required.
     fn transition_account_input(
         &mut self,
-        input: &AliasOutput,
+        input: &AccountOutput,
         output_id: &OutputId,
         alias_transition: AccountTransition,
     ) -> Result<Option<Output>, Error> {
@@ -56,7 +56,7 @@ impl InputSelection {
         // Remove potential sender feature because it will not be needed anymore as it only needs to be verified once.
         let features = input.features().iter().cloned().filter(|feature| !feature.is_sender());
 
-        let mut builder = AliasOutputBuilder::from(input)
+        let mut builder = AccountOutputBuilder::from(input)
             .with_alias_id(alias_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
@@ -161,7 +161,7 @@ impl InputSelection {
         alias_transition: Option<AccountTransition>,
     ) -> Result<Option<Output>, Error> {
         match &input.output {
-            Output::Alias(alias_input) => self.transition_account_input(
+            Output::Account(alias_input) => self.transition_account_input(
                 alias_input,
                 input.output_id(),
                 alias_transition.unwrap_or(AccountTransition::State),

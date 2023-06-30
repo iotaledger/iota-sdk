@@ -12,7 +12,7 @@ use iota_sdk::{
         address::Address,
         output::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AccountId, AccountTransition, AliasOutputBuilder, Output,
+            AccountId, AccountOutputBuilder, AccountTransition, Output,
         },
         protocol::protocol_parameters,
         rand::output::rand_output_metadata,
@@ -284,7 +284,7 @@ fn create_alias() {
     assert_eq!(selected.outputs.len(), 2);
     // Output contains the new minted alias id
     assert!(selected.outputs.iter().any(|output| {
-        if let Output::Alias(alias_output) = output {
+        if let Output::Account(alias_output) = output {
             *alias_output.alias_id() == alias_id_0
         } else {
             false
@@ -522,7 +522,7 @@ fn alias_in_output_and_sender() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let alias_output = AliasOutputBuilder::from(inputs[0].output.as_alias())
+    let alias_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
         .with_state_index(inputs[0].output.as_alias().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
@@ -1417,26 +1417,22 @@ fn two_aliases_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.alias_id() == &alias_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.alias_id() == &alias_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.alias_id() == &alias_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.alias_id() == &alias_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1478,16 +1474,14 @@ fn state_controller_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index() + 1
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.state_index() == inputs[0].output.as_alias().state_index() + 1
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1641,16 +1635,14 @@ fn governor_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index()
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.state_index() == inputs[0].output.as_alias().state_index()
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -2313,7 +2305,7 @@ fn new_state_metadata() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let alias_output =
-        AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2331,7 +2323,7 @@ fn new_state_metadata() {
     }];
 
     // New alias output, with updated state index
-    let updated_alias_output = AliasOutputBuilder::from(alias_output.as_alias())
+    let updated_alias_output = AccountOutputBuilder::from(alias_output.as_alias())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .with_state_index(alias_output.as_alias().state_index() + 1)
@@ -2359,7 +2351,7 @@ fn new_state_metadata_but_same_state_index() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let alias_output =
-        AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2377,7 +2369,7 @@ fn new_state_metadata_but_same_state_index() {
     }];
 
     // New alias output, without updated state index
-    let updated_alias_output = AliasOutputBuilder::from(alias_output.as_alias())
+    let updated_alias_output = AccountOutputBuilder::from(alias_output.as_alias())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .finish_output(protocol_parameters.token_supply())

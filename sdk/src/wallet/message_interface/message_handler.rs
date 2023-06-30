@@ -29,7 +29,7 @@ use crate::{
         address::{Hrp, ToBech32Ext},
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
-            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+            AccountOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
         signature::Ed25519Signature,
         ConvertTo, Error,
@@ -395,7 +395,7 @@ impl WalletMessageHandler {
         let account = self.wallet.get_account(account_id.clone()).await?;
 
         match method {
-            AccountMethod::BuildAliasOutput {
+            AccountMethod::BuildAccountOutput {
                 amount,
                 native_tokens,
                 alias_id,
@@ -406,7 +406,7 @@ impl WalletMessageHandler {
                 features,
                 immutable_features,
             } => {
-                let output = Output::from(AliasOutput::try_from_dtos(
+                let output = Output::from(AccountOutput::try_from_dtos(
                     if let Some(amount) = amount {
                         OutputBuilderAmountDto::Amount(amount)
                     } else {
@@ -536,7 +536,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::CreateAliasOutput { params, options } => {
+            AccountMethod::CreateAccountOutput { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
                         .create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)

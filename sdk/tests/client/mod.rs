@@ -32,8 +32,8 @@ use iota_sdk::{
                 ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
-            AccountId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens, NftId,
-            NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens,
+            NftId, NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
         },
         rand::{block::rand_block_id, slot::rand_slot_commitment_id, transaction::rand_transaction_id},
     },
@@ -190,7 +190,7 @@ fn build_alias_output(
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
 ) -> Output {
-    let mut builder = AliasOutputBuilder::new_with_amount(amount, alias_id)
+    let mut builder = AccountOutputBuilder::new_with_amount(amount, alias_id)
         .with_state_index(state_index)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(governor_address));
