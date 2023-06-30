@@ -22,8 +22,8 @@ use iota_sdk::{
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
-    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ALIAS_2, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ACCOUNT_2,
+    BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
 };
 
 #[test]
@@ -530,7 +530,7 @@ fn account_in_output_and_sender() {
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -696,7 +696,7 @@ fn missing_account_sender() {
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
     )]);
@@ -711,7 +711,7 @@ fn missing_account_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -738,7 +738,7 @@ fn missing_account_issuer_created() {
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
     )]);
 
@@ -752,7 +752,7 @@ fn missing_account_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -769,7 +769,7 @@ fn missing_account_issuer_transition() {
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
     )]);
     let outputs = build_outputs([Account(
@@ -780,7 +780,7 @@ fn missing_account_issuer_transition() {
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
     )]);
 
@@ -1147,7 +1147,7 @@ fn account_burn_should_not_validate_account_sender() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -1165,7 +1165,7 @@ fn account_burn_should_not_validate_account_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -1175,7 +1175,7 @@ fn account_burn_should_not_validate_account_address() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
+        Basic(2_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
         Account(
             1_000_000,
             account_id_1,
@@ -1237,7 +1237,7 @@ fn account_governance_transition_should_not_validate_account_sender() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -1255,7 +1255,7 @@ fn account_governance_transition_should_not_validate_account_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -1265,7 +1265,7 @@ fn account_governance_transition_should_not_validate_account_address() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
+        Basic(2_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
         Account(
             1_000_000,
             account_id_1,
@@ -1912,7 +1912,7 @@ fn remainder_address_in_state_controller() {
         account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ALIAS_2,
+        BECH32_ADDRESS_ACCOUNT_2,
         None,
         None,
         None,
@@ -1923,7 +1923,7 @@ fn remainder_address_in_state_controller() {
         account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ALIAS_2,
+        BECH32_ADDRESS_ACCOUNT_2,
         None,
         None,
         None,
@@ -1964,7 +1964,7 @@ fn remainder_address_in_governor() {
             1_000_000,
             account_id_1,
             0,
-            BECH32_ADDRESS_ALIAS_2,
+            BECH32_ADDRESS_ACCOUNT_2,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -1977,7 +1977,7 @@ fn remainder_address_in_governor() {
         1_000_000,
         account_id_1,
         0,
-        BECH32_ADDRESS_ALIAS_2,
+        BECH32_ADDRESS_ACCOUNT_2,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,

@@ -662,7 +662,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //         1_000_000,
 //         BECH32_ADDRESS,
 //         None,
-//         Some(BECH32_ADDRESS_ALIAS_SENDER),
+//         Some(BECH32_ADDRESS_ACCOUNT_SENDER),
 //     )];
 
 //     let selected = InputSelection::new(inputs.clone(), outputs.clone(), [],protocol_parameters)

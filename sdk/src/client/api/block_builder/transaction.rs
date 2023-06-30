@@ -21,7 +21,7 @@ const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize = Block::LENGTH_MAX - Block:
 // signature)
 const SINGLE_UNLOCK_LENGTH: usize = 1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
 // Type + reference index
-const REFERENCE_ALIAS_NFT_UNLOCK_LENGTH: usize = 1 + 2;
+const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 
 // TODO @thibault-martinez: this is very cumbersome with the current state, will refactor.
 /// Verifies the semantic of a prepared transaction.
@@ -80,7 +80,7 @@ pub fn validate_regular_transaction_essence_length(
     // later again, when we built the transaction payload)
     let max_length = MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS
         - SINGLE_UNLOCK_LENGTH
-        - (reference_account_nft_unlocks_amount * REFERENCE_ALIAS_NFT_UNLOCK_LENGTH);
+        - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
 
     if regular_transaction_essence_bytes.len() > max_length {
         return Err(Error::InvalidRegularTransactionEssenceLength {

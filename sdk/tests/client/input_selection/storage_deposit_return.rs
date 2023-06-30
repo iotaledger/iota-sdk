@@ -11,7 +11,8 @@ use iota_sdk::{
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
-    ACCOUNT_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
+    ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    BECH32_ADDRESS_ED25519_2,
 };
 
 #[test]
@@ -494,7 +495,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ALIAS_1,
+            BECH32_ADDRESS_ACCOUNT_1,
             None,
             None,
             Some((BECH32_ADDRESS_ED25519_2, 1_000_000)),
@@ -518,7 +519,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
         1_000_000,
         BECH32_ADDRESS_ED25519_2,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -557,7 +558,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
     let inputs = build_inputs([
         Basic(
             1_000_000,
-            BECH32_ADDRESS_ALIAS_1,
+            BECH32_ADDRESS_ACCOUNT_1,
             None,
             None,
             Some((BECH32_ADDRESS_ED25519_2, 1_000_000)),
@@ -565,7 +566,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             None,
             None,
         ),
-        Basic(1_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
         Account(
             1_000_000,
             account_id_1,
