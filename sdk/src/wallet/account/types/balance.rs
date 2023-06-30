@@ -23,8 +23,8 @@ pub struct Balance {
     pub(crate) native_tokens: Vec<NativeTokensBalance>,
     /// Nfts
     pub(crate) nfts: Vec<NftId>,
-    /// Aliases
-    pub(crate) aliases: Vec<AccountId>,
+    /// Accounts
+    pub(crate) accounts: Vec<AccountId>,
     /// Foundries
     pub(crate) foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
@@ -52,7 +52,7 @@ impl std::ops::AddAssign for Balance {
         }
 
         self.nfts.extend(rhs.nfts.into_iter());
-        self.aliases.extend(rhs.aliases.into_iter());
+        self.accounts.extend(rhs.accounts.into_iter());
         self.foundries.extend(rhs.foundries.into_iter());
     }
 }
@@ -187,7 +187,7 @@ impl Balance {
         )
         .collect::<Vec<_>>();
 
-        let aliases = std::iter::repeat_with(|| AccountId::from(rand_bytes_array()))
+        let accounts = std::iter::repeat_with(|| AccountId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
             .collect::<Vec<_>>();
         let nfts = std::iter::repeat_with(|| NftId::from(rand_bytes_array()))
@@ -211,7 +211,7 @@ impl Balance {
                 nft: total / 2,
             },
             native_tokens,
-            aliases,
+            accounts,
             foundries,
             nfts,
             ..Default::default()

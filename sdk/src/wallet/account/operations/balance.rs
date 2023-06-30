@@ -105,7 +105,7 @@ where
                             total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
                             let account_id = output.account_id_non_null(output_id);
-                            balance.aliases.push(account_id);
+                            balance.accounts.push(account_id);
                         }
                         Output::Foundry(output) => {
                             // Add amount

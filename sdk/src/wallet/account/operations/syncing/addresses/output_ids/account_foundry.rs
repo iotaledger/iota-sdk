@@ -100,7 +100,7 @@ where
         Ok(output_ids.into_iter().collect())
     }
 
-    /// Returns output ids of foundries controlled by the provided aliases
+    /// Returns output ids of foundries controlled by the provided accounts
     pub(crate) async fn get_foundry_output_ids(
         &self,
         account_output_ids: &HashSet<OutputId>,

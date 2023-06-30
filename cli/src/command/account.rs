@@ -430,7 +430,7 @@ pub async fn create_native_token_command(
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no account output exists, create one first
-    if account.balance().await?.aliases().is_empty() {
+    if account.balance().await?.accounts().is_empty() {
         let transaction = account.create_account_output(None, None).await?;
         println_log_info!(
             "Account output minting transaction sent:\n{:?}\n{:?}",

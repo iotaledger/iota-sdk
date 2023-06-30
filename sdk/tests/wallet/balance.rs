@@ -28,7 +28,7 @@ fn balance_add_assign() {
     let sdr_nft1 = balance1.required_storage_deposit().nft();
 
     let native_tokens1 = balance1.native_tokens().clone();
-    let num_accounts_1 = balance1.aliases().len();
+    let num_accounts_1 = balance1.accounts().len();
     let num_foundries1 = balance1.foundries().len();
     let num_nfts1 = balance1.nfts().len();
 
@@ -44,7 +44,7 @@ fn balance_add_assign() {
     let sdr_nft2 = balance2.required_storage_deposit().nft();
 
     let native_tokens2 = balance2.native_tokens().clone();
-    let num_accounts_2 = balance2.aliases().len();
+    let num_accounts_2 = balance2.accounts().len();
     let num_foundries2 = balance2.foundries().len();
     let num_nfts2 = balance2.nfts().len();
 
@@ -66,7 +66,7 @@ fn balance_add_assign() {
     );
     assert_eq!(balance1.required_storage_deposit().nft(), sdr_nft1 + sdr_nft2);
 
-    assert_eq!(balance1.aliases().len(), num_accounts_1 + num_accounts_2);
+    assert_eq!(balance1.accounts().len(), num_accounts_1 + num_accounts_2);
     assert_eq!(balance1.foundries().len(), num_foundries1 + num_foundries2);
     assert_eq!(balance1.nfts().len(), num_nfts1 + num_nfts2);
 

@@ -111,7 +111,7 @@ where
             || (address.is_nft() && sync_options.nft.account_outputs)
             || (address.is_account() && sync_options.alias.account_outputs)
         {
-            // aliases and foundries
+            // accounts and foundries
             #[cfg(target_family = "wasm")]
             {
                 results.push(

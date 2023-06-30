@@ -32,9 +32,9 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     // Get the first alias
-    if let Some(account_id) = balance.aliases().first() {
-        let aliases_before = balance.aliases();
-        println!("Aliases BEFORE destroying:\n{aliases_before:#?}",);
+    if let Some(account_id) = balance.accounts().first() {
+        let accounts_before = balance.accounts();
+        println!("Aliases BEFORE destroying:\n{accounts_before:#?}",);
 
         // Set the stronghold password
         wallet
@@ -59,8 +59,8 @@ async fn main() -> Result<()> {
         println!("Burned Alias '{}'", account_id);
 
         let balance = account.sync(None).await?;
-        let aliases_after = balance.aliases();
-        println!("Aliases AFTER destroying:\n{aliases_after:#?}",);
+        let accounts_after = balance.accounts();
+        println!("Aliases AFTER destroying:\n{accounts_after:#?}",);
     } else {
         println!("No Alias available in account '{alias}'");
     }

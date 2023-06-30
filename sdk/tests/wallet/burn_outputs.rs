@@ -211,7 +211,7 @@ async fn destroy_account(account: &Account) -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
     // Let's destroy the first account we can find
-    let account_id = *balance.aliases().first().unwrap();
+    let account_id = *balance.accounts().first().unwrap();
     println!("account_id -> {account_id}");
     let transaction = account.burn(account_id, None).await.unwrap();
     account
@@ -219,7 +219,7 @@ async fn destroy_account(account: &Account) -> Result<()> {
         .await?;
     let balance = account.sync(None).await.unwrap();
     let search = balance
-        .aliases()
+        .accounts()
         .iter()
         .find(|&balance_account_id| *balance_account_id == account_id);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
@@ -301,7 +301,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
     let nft_id = NftId::from(&output_id);
 
     let balance = account.sync(None).await?;
-    let account_id = balance.aliases().first().unwrap();
+    let account_id = balance.accounts().first().unwrap();
 
     let burn_tx = account
         .burn(Burn::new().add_nft(nft_id).add_account(*account_id), None)
@@ -311,7 +311,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
         .await?;
     let balance = account.sync(None).await?;
 
-    assert!(balance.aliases().is_empty());
+    assert!(balance.accounts().is_empty());
     assert!(balance.nfts().is_empty());
 
     tear_down(storage_path)

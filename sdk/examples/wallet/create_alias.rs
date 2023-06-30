@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
-    println!("Aliases BEFORE:\n{:#?}", balance.aliases());
+    println!("Aliases BEFORE:\n{:#?}", balance.accounts());
 
     // Set the stronghold password
     wallet
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
     );
 
     let balance = account.sync(None).await?;
-    println!("Aliases AFTER:\n{:#?}", balance.aliases());
+    println!("Aliases AFTER:\n{:#?}", balance.accounts());
 
     Ok(())
 }

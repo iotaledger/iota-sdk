@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     let total_base_token_balance = balance.base_coin().total();
     println!("Balance before sending funds from alias: {total_base_token_balance:#?}");
 
-    let account_id = balance.aliases().first().unwrap();
+    let account_id = balance.accounts().first().unwrap();
     println!("Account Id: {account_id}");
 
     // Get account address

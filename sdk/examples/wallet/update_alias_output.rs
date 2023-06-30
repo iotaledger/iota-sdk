@@ -80,7 +80,7 @@ async fn sync_and_print_balance(account: &Account) -> Result<()> {
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     println!("{alias}'s base coin balance:\n{:#?}", balance.base_coin());
-    println!("{alias}'s aliases:\n{:#?}", balance.aliases());
+    println!("{alias}'s accounts:\n{:#?}", balance.accounts());
     Ok(())
 }
 
