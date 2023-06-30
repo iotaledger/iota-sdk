@@ -37,11 +37,7 @@ import {
     PreparedTransaction,
     PreparedCreateNativeTokenTransactionData,
 } from '../types/wallet';
-import {
-    INode,
-    Burn,
-    PreparedTransactionData,
-} from '../client';
+import { INode, Burn, PreparedTransactionData } from '../client';
 import {
     AliasOutput,
     NftOutput,
