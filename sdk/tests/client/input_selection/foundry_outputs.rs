@@ -214,7 +214,7 @@ fn minted_native_tokens_in_provided_output() {
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
     assert!(selected.outputs.contains(&outputs[1]));
-    assert!(selected.outputs.iter().any(|output| output.is_alias()));
+    assert!(selected.outputs.iter().any(|output| output.is_account()));
 }
 
 #[test]
@@ -309,9 +309,9 @@ fn destroy_foundry_with_account_state_transition() {
             None,
         ),
     ]);
-    let account_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_amount(103_100)
-        .with_state_index(inputs[0].output.as_alias().state_index() + 1)
+        .with_state_index(inputs[0].output.as_account().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
     // Account output gets the amount from the foundry output added
@@ -419,7 +419,7 @@ fn destroy_foundry_with_account_burn() {
     .burn(
         Burn::new()
             .add_foundry(inputs[1].output.as_foundry().id())
-            .add_alias(account_id_2),
+            .add_account(account_id_2),
     )
     .select();
 
@@ -536,19 +536,19 @@ fn simple_foundry_transition_basic_not_needed() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
             assert_eq!(output.amount(), 2_000_000);
-            assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_eq!(*output.as_alias().account_id(), account_id_1);
-            assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-            assert_eq!(output.as_alias().features().len(), 0);
-            assert_eq!(output.as_alias().immutable_features().len(), 0);
+            assert_eq!(output.as_account().native_tokens().len(), 0);
+            assert_eq!(*output.as_account().account_id(), account_id_1);
+            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().features().len(), 0);
+            assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_alias().state_controller_address(),
+                *output.as_account().state_controller_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
-                *output.as_alias().governor_address(),
+                *output.as_account().governor_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -610,19 +610,19 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            if output.is_alias() {
+            if output.is_account() {
                 assert_eq!(output.amount(), 2_000_000);
-                assert_eq!(output.as_alias().native_tokens().len(), 0);
-                assert_eq!(*output.as_alias().account_id(), account_id_1);
-                assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-                assert_eq!(output.as_alias().features().len(), 0);
-                assert_eq!(output.as_alias().immutable_features().len(), 0);
+                assert_eq!(output.as_account().native_tokens().len(), 0);
+                assert_eq!(*output.as_account().account_id(), account_id_1);
+                assert_eq!(output.as_account().unlock_conditions().len(), 2);
+                assert_eq!(output.as_account().features().len(), 0);
+                assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
-                    *output.as_alias().state_controller_address(),
+                    *output.as_account().state_controller_address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
                 assert_eq!(
-                    *output.as_alias().governor_address(),
+                    *output.as_account().governor_address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else if output.is_basic() {
@@ -675,19 +675,19 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //     // assert!(selected.outputs.contains(&outputs[0]));
 //     // selected.outputs.iter().for_each(|output| {
 //     //     if !outputs.contains(output) {
-//     //         if output.is_alias() {
+//     //         if output.is_account() {
 //     //             assert_eq!(output.amount(), 2_000_000);
-//     //             assert_eq!(output.as_alias().native_tokens().len(), 0);
-//     //             assert_eq!(*output.as_alias().account_id(), account_id_1);
-//     //             assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-//     //             assert_eq!(output.as_alias().features().len(), 0);
-//     //             assert_eq!(output.as_alias().immutable_features().len(), 0);
+//     //             assert_eq!(output.as_account().native_tokens().len(), 0);
+//     //             assert_eq!(*output.as_account().account_id(), account_id_1);
+//     //             assert_eq!(output.as_account().unlock_conditions().len(), 2);
+//     //             assert_eq!(output.as_account().features().len(), 0);
+//     //             assert_eq!(output.as_account().immutable_features().len(), 0);
 //     //             assert_eq!(
-//     //                 *output.as_alias().state_controller_address(),
+//     //                 *output.as_account().state_controller_address(),
 //     //                 Address::try_from_bech32(BECH32_ADDRESS).unwrap().1
 //     //             );
 //     //             assert_eq!(
-//     //                 *output.as_alias().governor_address(),
+//     //                 *output.as_account().governor_address(),
 //     //                 Address::try_from_bech32(BECH32_ADDRESS).unwrap().1
 //     //             );
 //     //         } else if output.is_basic() {
@@ -816,7 +816,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.iter().any(|output| output.is_alias()));
+    assert!(selected.outputs.iter().any(|output| output.is_account()));
     assert!(selected.outputs.iter().any(|output| output.is_foundry()));
     assert_eq!(
         selected.outputs.iter().map(|output| output.amount()).sum::<u64>(),
@@ -865,7 +865,7 @@ fn create_native_token_but_burn_alias() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1030,7 +1030,7 @@ fn foundry_in_outputs_and_required() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert_eq!(*output.as_alias().account_id(), account_id_2);
+            assert_eq!(*output.as_account().account_id(), account_id_2);
         }
     });
 }

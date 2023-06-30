@@ -14,7 +14,7 @@ use crate::{
 };
 
 impl InputSelection {
-    /// Transitions an alias input by creating a new account output if required.
+    /// Transitions an account input by creating a new account output if required.
     fn transition_account_input(
         &mut self,
         input: &AccountOutput,
@@ -23,11 +23,11 @@ impl InputSelection {
     ) -> Result<Option<Output>, Error> {
         let account_id = input.account_id_non_null(output_id);
 
-        // Do not create an account output if the alias input is to be burned.
+        // Do not create an account output if the account input is to be burned.
         if self
             .burn
             .as_ref()
-            .map(|burn| burn.aliases.contains(&account_id))
+            .map(|burn| burn.accounts.contains(&account_id))
             .unwrap_or(false)
         {
             log::debug!("No transition of {output_id:?}/{account_id:?} as it needs to be burned");

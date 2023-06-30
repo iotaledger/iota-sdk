@@ -36,7 +36,7 @@ fn is_methods() {
     let address = Address::from(AccountAddress::from_str(ACCOUNT_ID).unwrap());
 
     assert!(!address.is_ed25519());
-    assert!(address.is_alias());
+    assert!(address.is_account());
     assert!(!address.is_nft());
 }
 
@@ -46,7 +46,7 @@ fn as_methods() {
     let address = Address::from(account_address);
 
     assert!(std::panic::catch_unwind(|| address.as_ed25519()).is_err());
-    assert_eq!(address.as_alias(), &account_address);
+    assert_eq!(address.as_account(), &account_address);
     assert!(std::panic::catch_unwind(|| address.as_nft()).is_err());
 }
 

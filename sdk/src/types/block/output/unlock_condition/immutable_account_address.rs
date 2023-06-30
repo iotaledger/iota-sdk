@@ -29,19 +29,19 @@ impl ImmutableAccountAddressUnlockCondition {
     pub fn address(&self) -> &Address {
         // An ImmutableAccountAddressUnlockCondition must have an AccountAddress.
         // It has already been validated at construction that the address is an `AccountAddress`.
-        debug_assert!(&self.0.is_alias());
+        debug_assert!(&self.0.is_account());
         &self.0
     }
 
     /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
     pub fn account_address(&self) -> &AccountAddress {
         // It has already been validated at construction that the address is an `AccountAddress`.
-        self.0.as_alias()
+        self.0.as_account()
     }
 }
 
 fn verify_account_address<const VERIFY: bool>(address: &Address, _: &()) -> Result<(), Error> {
-    if VERIFY && !address.is_alias() {
+    if VERIFY && !address.is_account() {
         Err(Error::InvalidAddressKind(address.kind()))
     } else {
         Ok(())

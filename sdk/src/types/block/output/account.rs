@@ -1010,9 +1010,9 @@ mod tests {
         let output = rand_account_output(protocol_parameters.token_supply());
         let dto = OutputDto::Account((&output).into());
         let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_alias());
+        assert_eq!(&output, output_unver.as_account());
         let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(&output, output_ver.as_alias());
+        assert_eq!(&output, output_ver.as_account());
 
         let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),

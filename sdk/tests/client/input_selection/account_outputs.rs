@@ -325,7 +325,7 @@ fn burn_alias() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_2))
+    .burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
 
@@ -522,8 +522,8 @@ fn account_in_output_and_sender() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let account_output = AccountOutputBuilder::from(inputs[0].output.as_alias())
-        .with_state_index(inputs[0].output.as_alias().state_index() + 1)
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_state_index(inputs[0].output.as_account().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
     let mut outputs = build_outputs([Basic(
@@ -1105,19 +1105,19 @@ fn take_amount_from_account_to_fund_basic() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
             assert_eq!(output.amount(), 1_800_000);
-            assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_eq!(*output.as_alias().account_id(), account_id_1);
-            assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-            assert_eq!(output.as_alias().features().len(), 0);
-            assert_eq!(output.as_alias().immutable_features().len(), 0);
+            assert_eq!(output.as_account().native_tokens().len(), 0);
+            assert_eq!(*output.as_account().account_id(), account_id_1);
+            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().features().len(), 0);
+            assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_alias().state_controller_address(),
+                *output.as_account().state_controller_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
-                *output.as_alias().governor_address(),
+                *output.as_account().governor_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -1160,7 +1160,7 @@ fn account_burn_should_not_validate_account_sender() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1205,7 +1205,7 @@ fn account_burn_should_not_validate_account_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1345,19 +1345,19 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
-            assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_ne!(*output.as_alias().account_id(), account_id_0);
-            assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-            assert_eq!(output.as_alias().features().len(), 0);
-            assert_eq!(output.as_alias().immutable_features().len(), 0);
+            assert_eq!(output.as_account().native_tokens().len(), 0);
+            assert_ne!(*output.as_account().account_id(), account_id_0);
+            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().features().len(), 0);
+            assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_alias().state_controller_address(),
+                *output.as_account().state_controller_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
-                *output.as_alias().governor_address(),
+                *output.as_account().governor_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -1483,7 +1483,7 @@ fn state_controller_sender_required() {
             .outputs
             .iter()
             .any(|output| if let Output::Account(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index() + 1
+                output.state_index() == inputs[0].output.as_account().state_index() + 1
             } else {
                 false
             })
@@ -1646,7 +1646,7 @@ fn governor_sender_required() {
             .outputs
             .iter()
             .any(|output| if let Output::Account(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index()
+                output.state_index() == inputs[0].output.as_account().state_index()
             } else {
                 false
             })
@@ -2216,7 +2216,7 @@ fn burn_account_but_governor_not_owned() {
         addresses([BECH32_ADDRESS_ED25519_2]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -2331,10 +2331,10 @@ fn new_state_metadata() {
     }];
 
     // New account output, with updated state index
-    let updated_account_output = AccountOutputBuilder::from(account_output.as_alias())
+    let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
-        .with_state_index(account_output.as_alias().state_index() + 1)
+        .with_state_index(account_output.as_account().state_index() + 1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
@@ -2377,7 +2377,7 @@ fn new_state_metadata_but_same_state_index() {
     }];
 
     // New account output, without updated state index
-    let updated_account_output = AccountOutputBuilder::from(account_output.as_alias())
+    let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .finish_output(protocol_parameters.token_supply())

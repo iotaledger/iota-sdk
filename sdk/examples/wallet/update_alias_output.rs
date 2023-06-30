@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
         let token_supply = account.client().get_token_supply().await?;
         let rent_structure = account.client().get_rent_structure().await?;
 
-        let account_output = account_output_data.output.as_alias();
+        let account_output = account_output_data.output.as_account();
         let updated_account_output = AccountOutputBuilder::from(account_output)
             // Update the account id, as it might still be null
             .with_account_id(account_output.account_id_non_null(&account_output_data.output_id))

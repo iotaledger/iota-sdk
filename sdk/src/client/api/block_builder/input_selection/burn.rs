@@ -17,8 +17,8 @@ use crate::types::block::{
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Burn {
-    /// Aliases to burn.
-    pub(crate) aliases: HashSet<AccountId>,
+    /// Accounts to burn.
+    pub(crate) accounts: HashSet<AccountId>,
     /// NFTs to burn.
     pub(crate) nfts: HashSet<NftId>,
     /// Foundries to burn.
@@ -33,21 +33,21 @@ impl Burn {
         Self::default()
     }
 
-    /// Adds an alias to [`Burn`].
-    pub fn add_alias(mut self, account_id: AccountId) -> Self {
-        self.aliases.insert(account_id);
+    /// Adds an account to [`Burn`].
+    pub fn add_account(mut self, account_id: AccountId) -> Self {
+        self.accounts.insert(account_id);
         self
     }
 
-    /// Sets the aliases to [`Burn`].
-    pub fn set_aliases(mut self, aliases: HashSet<AccountId>) -> Self {
-        self.aliases = aliases;
+    /// Sets the accounts to [`Burn`].
+    pub fn set_accounts(mut self, accounts: HashSet<AccountId>) -> Self {
+        self.accounts = accounts;
         self
     }
 
-    /// Returns the aliases to [`Burn`].
-    pub fn aliases(&self) -> &HashSet<AccountId> {
-        &self.aliases
+    /// Returns the accounts to [`Burn`].
+    pub fn accounts(&self) -> &HashSet<AccountId> {
+        &self.accounts
     }
 
     /// Adds an NFT to [`Burn`].
@@ -113,7 +113,7 @@ impl From<FoundryId> for Burn {
 
 impl From<AccountId> for Burn {
     fn from(id: AccountId) -> Self {
-        Self::new().add_alias(id)
+        Self::new().add_account(id)
     }
 }
 
@@ -135,7 +135,7 @@ impl From<NativeToken> for Burn {
 pub struct BurnDto {
     /// Aliases to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) aliases: Option<HashSet<AccountId>>,
+    pub(crate) accounts: Option<HashSet<AccountId>>,
     /// NFTs to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) nfts: Option<HashSet<NftId>>,
@@ -150,7 +150,7 @@ pub struct BurnDto {
 impl From<&Burn> for BurnDto {
     fn from(value: &Burn) -> Self {
         Self {
-            aliases: (!value.aliases.is_empty()).then_some(value.aliases.clone()),
+            accounts: (!value.accounts.is_empty()).then_some(value.accounts.clone()),
             nfts: (!value.nfts.is_empty()).then_some(value.nfts.clone()),
             foundries: (!value.foundries.is_empty()).then_some(value.foundries.clone()),
             native_tokens: (!value.native_tokens.is_empty()).then_some(BTreeMap::from_iter(
@@ -168,7 +168,7 @@ impl TryFrom<BurnDto> for Burn {
 
     fn try_from(value: BurnDto) -> Result<Self, Self::Error> {
         Ok(Self {
-            aliases: value.aliases.unwrap_or_default(),
+            accounts: value.accounts.unwrap_or_default(),
             nfts: value.nfts.unwrap_or_default(),
             foundries: value.foundries.unwrap_or_default(),
             native_tokens: value.native_tokens.unwrap_or_default(),

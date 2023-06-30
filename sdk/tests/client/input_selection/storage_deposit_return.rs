@@ -538,7 +538,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
-        if !outputs.contains(output) && !output.is_alias() {
+        if !outputs.contains(output) && !output.is_account() {
             assert!(is_remainder_or_return(
                 output,
                 1_000_000,
@@ -605,7 +605,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
         }
     });
 }

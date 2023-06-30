@@ -304,7 +304,7 @@ async fn mint_and_burn_nft_with_alias() -> Result<()> {
     let account_id = balance.aliases().first().unwrap();
 
     let burn_tx = account
-        .burn(Burn::new().add_nft(nft_id).add_alias(*account_id), None)
+        .burn(Burn::new().add_nft(nft_id).add_account(*account_id), None)
         .await?;
     account
         .retry_transaction_until_included(&burn_tx.transaction_id, None, None)

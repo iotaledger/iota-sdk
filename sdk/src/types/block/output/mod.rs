@@ -236,17 +236,17 @@ impl Output {
     }
 
     /// Checks whether the output is an [`AccountOutput`].
-    pub fn is_alias(&self) -> bool {
+    pub fn is_account(&self) -> bool {
         matches!(self, Self::Account(_))
     }
 
     /// Gets the output as an actual [`AccountOutput`].
     /// PANIC: do not call on a non-account output.
-    pub fn as_alias(&self) -> &AccountOutput {
+    pub fn as_account(&self) -> &AccountOutput {
         if let Self::Account(output) = self {
             output
         } else {
-            panic!("as_alias called on a non-account output");
+            panic!("as_account called on a non-account output");
         }
     }
 

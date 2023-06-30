@@ -78,7 +78,9 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with immutable alias unlock condition
         foundry_output_builder
-            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(*account_address.as_alias()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(
+                *account_address.as_account(),
+            ))
             .finish_output(token_supply)?,
     ];
 

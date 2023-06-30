@@ -52,7 +52,7 @@ where
 
         if (address.is_ed25519() && sync_options.account.basic_outputs)
             || (address.is_nft() && sync_options.nft.basic_outputs)
-            || (address.is_alias() && sync_options.alias.basic_outputs)
+            || (address.is_account() && sync_options.alias.basic_outputs)
         {
             // basic outputs
             #[cfg(target_family = "wasm")]
@@ -82,7 +82,7 @@ where
 
         if (address.is_ed25519() && sync_options.account.nft_outputs)
             || (address.is_nft() && sync_options.nft.nft_outputs)
-            || (address.is_alias() && sync_options.alias.nft_outputs)
+            || (address.is_account() && sync_options.alias.nft_outputs)
         {
             // nfts
             #[cfg(target_family = "wasm")]
@@ -109,7 +109,7 @@ where
 
         if (address.is_ed25519() && sync_options.account.account_outputs)
             || (address.is_nft() && sync_options.nft.account_outputs)
-            || (address.is_alias() && sync_options.alias.account_outputs)
+            || (address.is_account() && sync_options.alias.account_outputs)
         {
             // aliases and foundries
             #[cfg(target_family = "wasm")]

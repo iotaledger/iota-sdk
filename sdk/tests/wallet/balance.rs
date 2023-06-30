@@ -22,13 +22,13 @@ fn balance_add_assign() {
     #[cfg(feature = "participation")]
     let voting_power1 = balance1.base_coin().voting_power();
 
-    let sdr_alias1 = balance1.required_storage_deposit().alias();
+    let sdr_account_1 = balance1.required_storage_deposit().alias();
     let sdr_basic1 = balance1.required_storage_deposit().basic();
     let sdr_foundry1 = balance1.required_storage_deposit().foundry();
     let sdr_nft1 = balance1.required_storage_deposit().nft();
 
     let native_tokens1 = balance1.native_tokens().clone();
-    let num_aliases1 = balance1.aliases().len();
+    let num_accounts_1 = balance1.aliases().len();
     let num_foundries1 = balance1.foundries().len();
     let num_nfts1 = balance1.nfts().len();
 
@@ -38,13 +38,13 @@ fn balance_add_assign() {
     #[cfg(feature = "participation")]
     let voting_power2 = balance2.base_coin().voting_power();
 
-    let sdr_alias2 = balance2.required_storage_deposit().alias();
+    let sdr_account_2 = balance2.required_storage_deposit().alias();
     let sdr_basic2 = balance2.required_storage_deposit().basic();
     let sdr_foundry2 = balance2.required_storage_deposit().foundry();
     let sdr_nft2 = balance2.required_storage_deposit().nft();
 
     let native_tokens2 = balance2.native_tokens().clone();
-    let num_aliases2 = balance2.aliases().len();
+    let num_accounts_2 = balance2.aliases().len();
     let num_foundries2 = balance2.foundries().len();
     let num_nfts2 = balance2.nfts().len();
 
@@ -55,7 +55,10 @@ fn balance_add_assign() {
     #[cfg(feature = "participation")]
     assert_eq!(balance1.base_coin().voting_power(), voting_power1 + voting_power2);
 
-    assert_eq!(balance1.required_storage_deposit().alias(), sdr_alias1 + sdr_alias2);
+    assert_eq!(
+        balance1.required_storage_deposit().alias(),
+        sdr_account_1 + sdr_account_2
+    );
     assert_eq!(balance1.required_storage_deposit().basic(), sdr_basic1 + sdr_basic2);
     assert_eq!(
         balance1.required_storage_deposit().foundry(),
@@ -63,7 +66,7 @@ fn balance_add_assign() {
     );
     assert_eq!(balance1.required_storage_deposit().nft(), sdr_nft1 + sdr_nft2);
 
-    assert_eq!(balance1.aliases().len(), num_aliases1 + num_aliases2);
+    assert_eq!(balance1.aliases().len(), num_accounts_1 + num_accounts_2);
     assert_eq!(balance1.foundries().len(), num_foundries1 + num_foundries2);
     assert_eq!(balance1.nfts().len(), num_nfts1 + num_nfts2);
 

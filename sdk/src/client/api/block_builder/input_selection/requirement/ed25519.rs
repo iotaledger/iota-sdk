@@ -40,7 +40,7 @@ impl InputSelection {
         input: &InputSigningData,
         address: &Address,
     ) -> (bool, Option<AccountTransition>) {
-        if input.output.is_alias() {
+        if input.output.is_account() {
             // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 

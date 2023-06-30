@@ -146,7 +146,7 @@ impl InputSelection {
     /// Gets requirements from burn.
     pub(crate) fn burn_requirements(&mut self) -> Result<(), Error> {
         if let Some(burn) = self.burn.as_ref() {
-            for account_id in &burn.aliases {
+            for account_id in &burn.accounts {
                 if self
                     .outputs
                     .iter()

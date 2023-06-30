@@ -591,7 +591,7 @@ fn account_sender() {
         selected
             .inputs
             .iter()
-            .any(|input| input.output.is_alias() && *input.output.as_alias().account_id() == account_id_1)
+            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
     );
     // Provided output + alias
     assert_eq!(selected.outputs.len(), 2);
@@ -648,7 +648,7 @@ fn account_sender_zero_id() {
         selected
             .outputs
             .iter()
-            .any(|output| output.is_alias() && *output.as_alias().account_id() == account_id)
+            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
     );
 }
 

@@ -79,17 +79,17 @@ impl Address {
     }
 
     /// Checks whether the address is an [`AccountAddress`].
-    pub fn is_alias(&self) -> bool {
+    pub fn is_account(&self) -> bool {
         matches!(self, Self::Account(_))
     }
 
     /// Gets the address as an actual [`AccountAddress`].
     /// PANIC: do not call on a non-account address.
-    pub fn as_alias(&self) -> &AccountAddress {
+    pub fn as_account(&self) -> &AccountAddress {
         if let Self::Account(address) = self {
             address
         } else {
-            panic!("as_alias called on a non-account address");
+            panic!("as_account called on a non-account address");
         }
     }
 

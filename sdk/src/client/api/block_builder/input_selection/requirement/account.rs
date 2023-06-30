@@ -30,7 +30,7 @@ pub fn is_account_transition<'a>(
             }
         }
         if let Some(burn) = burn.into() {
-            if burn.aliases().contains(&account_id) {
+            if burn.accounts().contains(&account_id) {
                 return Some(AccountTransition::Governance);
             }
         }
@@ -69,7 +69,7 @@ impl InputSelection {
             && self
                 .burn
                 .as_ref()
-                .map_or(false, |burn| burn.aliases.contains(&account_id))
+                .map_or(false, |burn| burn.accounts.contains(&account_id))
         {
             return Err(Error::UnfulfillableRequirement(Requirement::Account(
                 account_id,

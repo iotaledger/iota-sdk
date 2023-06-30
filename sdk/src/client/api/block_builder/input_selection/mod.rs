@@ -232,7 +232,7 @@ impl InputSelection {
         self.available_inputs.retain(|input| {
             // Keep account outputs because at this point we do not know if a state or governor address will be
             // required.
-            if input.output.is_alias() {
+            if input.output.is_account() {
                 return true;
             }
             // Filter out non basic/foundry/nft outputs.
@@ -473,14 +473,14 @@ impl InputSelection {
                         .expect("ISA is broken because there is no alias input");
 
                     if let Err(err) = AccountOutput::transition_inner(
-                        account_input.output.as_alias(),
+                        account_input.output.as_account(),
                         account_output,
                         &input_chains_foundries,
                         &self.outputs,
                     ) {
                         log::debug!("validate_transitions error {err:?}");
                         let account_transition =
-                            if account_input.output.as_alias().state_index() == account_output.state_index() {
+                            if account_input.output.as_account().state_index() == account_output.state_index() {
                                 AccountTransition::Governance
                             } else {
                                 AccountTransition::State

@@ -59,7 +59,7 @@ fn burn_account_present() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
@@ -104,7 +104,7 @@ fn burn_account_present_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
@@ -192,7 +192,7 @@ fn burn_account_absent() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -249,7 +249,7 @@ fn burn_aliases_present() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().set_aliases(HashSet::from([account_id_1, account_id_2])))
+    .burn(Burn::new().set_accounts(HashSet::from([account_id_1, account_id_2])))
     .select()
     .unwrap();
 
@@ -297,7 +297,7 @@ fn burn_account_in_outputs() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -434,7 +434,7 @@ fn burn_nft_id_zero() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(account_id))
+    .burn(Burn::new().add_account(account_id))
     .select()
     .unwrap();
 
@@ -650,19 +650,19 @@ fn burn_foundry_present() {
                     BECH32_ADDRESS_ED25519_0,
                     None,
                 ));
-            } else if output.is_alias() {
+            } else if output.is_account() {
                 assert_eq!(output.amount(), 1_000_000);
-                assert_eq!(output.as_alias().native_tokens().len(), 0);
-                assert_eq!(*output.as_alias().account_id(), account_id_1);
-                assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-                assert_eq!(output.as_alias().features().len(), 0);
-                assert_eq!(output.as_alias().immutable_features().len(), 0);
+                assert_eq!(output.as_account().native_tokens().len(), 0);
+                assert_eq!(*output.as_account().account_id(), account_id_1);
+                assert_eq!(output.as_account().unlock_conditions().len(), 2);
+                assert_eq!(output.as_account().features().len(), 0);
+                assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
-                    *output.as_alias().state_controller_address(),
+                    *output.as_account().state_controller_address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
                 assert_eq!(
-                    *output.as_alias().governor_address(),
+                    *output.as_account().governor_address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else {
@@ -788,19 +788,19 @@ fn burn_foundries_present() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
-            assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_eq!(*output.as_alias().account_id(), account_id_1);
-            assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-            assert_eq!(output.as_alias().features().len(), 0);
-            assert_eq!(output.as_alias().immutable_features().len(), 0);
+            assert_eq!(output.as_account().native_tokens().len(), 0);
+            assert_eq!(*output.as_account().account_id(), account_id_1);
+            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().features().len(), 0);
+            assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_alias().state_controller_address(),
+                *output.as_account().state_controller_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
-                *output.as_alias().governor_address(),
+                *output.as_account().governor_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -933,7 +933,7 @@ fn burn_foundry_and_its_alias() {
     .burn(
         Burn::new()
             .add_foundry(inputs[0].output.as_foundry().id())
-            .add_alias(account_id_1),
+            .add_account(account_id_1),
     )
     .select();
 
