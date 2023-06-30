@@ -159,3 +159,15 @@ class NodeCoreAPI():
         return self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         })
+
+    def plugin_fetch(self, base_plugin_path: str, method: 'GET' | 'POST',
+        method_path: str, query_params: str[] = [], request: str = None):
+        """Extension method which provides request methods for plugins.
+        """
+        return self._call_method('pluginFetch', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'methodPath': method_path,
+            'queryParams': query_params,
+            'request': request,
+        })

@@ -21,11 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0-rc.2 - 2023-0x-xx
 
+### Added
+- `PluginFetch` to Client to fetch data from custom node plugins;
+- `ComputeTokenId `, `ComputeOutputId`, `ComputeInputsCommitment` and `ComputeStorageDeposit` to Utils;
+- Type alias for Ids whioch were previously just `HexEncodedString`;
+- List of `ConfictReason` explanations matching the enum;
+- `units-helper` class for IOTA units conversion;
+
 ### Changed
 
 - Rename `Account::prepareMintNativeToken` to `prepareCreateNativeToken`, `Account::prepareIncreaseNativeTokenSupply` to `prepareMintNativeToken`, `Account::prepareDecreaseNativeTokenSupply` to `prepareMeltNativeToken`;
 - Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 - Rename `MintTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding `Data` types);
+- `Response::MilestoneRaw` to `Raw` to be used in `PluginFetch` as well;
+- `Output.getNntId` into `Output.getNftId`;
 
 ### Fixed
 

@@ -130,7 +130,7 @@ class Utils():
         
     @staticmethod
     def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
-        """Returns the output ID from transaction id and output index.
+        """Returns the output id from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {
             'transactionId': transaction_id,
@@ -139,7 +139,7 @@ class Utils():
 
     @staticmethod
     def compute_token_id(alias_id: HexStr, serial_number: int, token_scheme_kind: int) -> HexStr:
-        """Constructs a tokenId from the aliasId, serial number and token scheme type.
+        """Constructs a token id from the alias id, serial number and token scheme type.
         """
         return _call_method('computeTokenId', {
             'aliasId': alias_id,
