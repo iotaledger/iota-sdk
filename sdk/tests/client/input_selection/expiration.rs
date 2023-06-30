@@ -13,7 +13,7 @@ use iota_sdk::{
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Nft},
+    Build::{Account, Basic, Nft},
     ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
     NFT_ID_1,
 };
@@ -679,7 +679,7 @@ fn expiration_expired_only_alias_addresses() {
             Some((BECH32_ADDRESS_ALIAS_1, 50)),
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,

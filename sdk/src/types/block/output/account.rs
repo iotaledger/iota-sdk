@@ -680,7 +680,7 @@ fn verify_index_counter(alias_id: &AccountId, state_index: u32, foundry_counter:
 
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
-        if let Address::Alias(alias_address) = unlock_condition.address() {
+        if let Address::Account(alias_address) = unlock_condition.address() {
             if alias_address.alias_id() == alias_id {
                 return Err(Error::SelfControlledAccountOutput(*alias_id));
             }
@@ -690,7 +690,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Acc
     }
 
     if let Some(unlock_condition) = unlock_conditions.governor_address() {
-        if let Address::Alias(alias_address) = unlock_condition.address() {
+        if let Address::Account(alias_address) = unlock_condition.address() {
             if alias_address.alias_id() == alias_id {
                 return Err(Error::SelfControlledAccountOutput(*alias_id));
             }

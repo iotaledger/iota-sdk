@@ -83,7 +83,7 @@ enum Build<'a> {
         Option<(&'a str, u32)>,
         Option<Chain>,
     ),
-    Alias(
+    Account(
         u64,
         AccountId,
         u32,
@@ -274,7 +274,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
             ),
             chain,
         ),
-        Build::Alias(
+        Build::Account(
             amount,
             alias_id,
             state_index,

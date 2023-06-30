@@ -46,9 +46,9 @@ pub enum Unlock {
     /// A reference unlock.
     #[packable(tag = ReferenceUnlock::KIND)]
     Reference(ReferenceUnlock),
-    /// An alias unlock.
+    /// An account unlock.
     #[packable(tag = AccountUnlock::KIND)]
-    Alias(AccountUnlock),
+    Account(AccountUnlock),
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
@@ -59,7 +59,7 @@ impl core::fmt::Debug for Unlock {
         match self {
             Self::Signature(unlock) => unlock.fmt(f),
             Self::Reference(unlock) => unlock.fmt(f),
-            Self::Alias(unlock) => unlock.fmt(f),
+            Self::Account(unlock) => unlock.fmt(f),
             Self::Nft(unlock) => unlock.fmt(f),
         }
     }
@@ -71,7 +71,7 @@ impl Unlock {
         match self {
             Self::Signature(_) => SignatureUnlock::KIND,
             Self::Reference(_) => ReferenceUnlock::KIND,
-            Self::Alias(_) => AccountUnlock::KIND,
+            Self::Account(_) => AccountUnlock::KIND,
             Self::Nft(_) => NftUnlock::KIND,
         }
     }
@@ -126,9 +126,9 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
                         return Err(Error::InvalidUnlockReference(index));
                     }
                 }
-                Unlock::Alias(alias) => {
+                Unlock::Account(alias) => {
                     if index == 0 || alias.index() >= index {
-                        return Err(Error::InvalidUnlockAlias(index));
+                        return Err(Error::InvalidUnlockAccount(index));
                     }
                 }
                 Unlock::Nft(nft) => {
@@ -168,7 +168,7 @@ pub mod dto {
     pub enum UnlockDto {
         Signature(SignatureUnlockDto),
         Reference(ReferenceUnlockDto),
-        Alias(AccountUnlockDto),
+        Account(AccountUnlockDto),
         Nft(NftUnlockDto),
     }
 
@@ -189,7 +189,7 @@ pub mod dto {
                     kind: ReferenceUnlock::KIND,
                     index: r.index(),
                 }),
-                Unlock::Alias(a) => Self::Alias(AccountUnlockDto {
+                Unlock::Account(a) => Self::Account(AccountUnlockDto {
                     kind: AccountUnlock::KIND,
                     index: a.index(),
                 }),
@@ -218,7 +218,7 @@ pub mod dto {
                     }
                 },
                 UnlockDto::Reference(r) => Ok(Self::Reference(ReferenceUnlock::new(r.index)?)),
-                UnlockDto::Alias(a) => Ok(Self::Alias(AccountUnlock::new(a.index)?)),
+                UnlockDto::Account(a) => Ok(Self::Account(AccountUnlock::new(a.index)?)),
                 UnlockDto::Nft(n) => Ok(Self::Nft(NftUnlock::new(n.index)?)),
             }
         }
@@ -243,7 +243,7 @@ pub mod dto {
                             serde::de::Error::custom(format!("cannot deserialize reference unlock: {e}"))
                         })?)
                     }
-                    AccountUnlock::KIND => Self::Alias(
+                    AccountUnlock::KIND => Self::Account(
                         AccountUnlockDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias unlock: {e}")))?,
                     ),
@@ -282,7 +282,7 @@ pub mod dto {
                 Self::Reference(o) => TypedUnlock {
                     unlock: UnlockDto_::T2(o),
                 },
-                Self::Alias(o) => TypedUnlock {
+                Self::Account(o) => TypedUnlock {
                     unlock: UnlockDto_::T3(o),
                 },
                 Self::Nft(o) => TypedUnlock {

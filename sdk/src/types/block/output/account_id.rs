@@ -26,6 +26,6 @@ impl AccountId {
 
 impl From<AccountId> for Address {
     fn from(value: AccountId) -> Self {
-        Self::Alias(AccountAddress::new(value))
+        Self::Account(AccountAddress::new(value))
     }
 }

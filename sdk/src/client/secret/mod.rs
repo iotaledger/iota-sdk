@@ -448,7 +448,7 @@ where
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Alias(_alias) => blocks.push(Unlock::Alias(AccountUnlock::new(*block_index as u16)?)),
+                Address::Account(_alias) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Ed25519(_ed25519) => {
                     blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
@@ -474,11 +474,11 @@ where
         }
 
         // When we have an alias or Nft output, we will add their alias or nft address to block_indexes,
-        // because they can be used to unlock outputs via [Unlock::Alias] or [Unlock::Nft],
+        // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
         // that have the corresponding alias or nft address in their unlock condition
         match &input.output {
             Output::Account(alias_output) => block_indexes.insert(
-                Address::Alias(alias_output.alias_address(input.output_id())),
+                Address::Account(alias_output.alias_address(input.output_id())),
                 current_block_index,
             ),
             Output::Nft(nft_output) => block_indexes.insert(

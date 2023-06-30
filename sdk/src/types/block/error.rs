@@ -79,7 +79,7 @@ pub enum Error {
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
-    InvalidUnlockAlias(u16),
+    InvalidUnlockAccount(u16),
     InvalidUnlockNft(u16),
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
@@ -216,8 +216,8 @@ impl fmt::Display for Error {
             Self::InvalidUnlockReference(index) => {
                 write!(f, "invalid unlock reference: {index}")
             }
-            Self::InvalidUnlockAlias(index) => {
-                write!(f, "invalid unlock alias: {index}")
+            Self::InvalidUnlockAccount(index) => {
+                write!(f, "invalid unlock account: {index}")
             }
             Self::InvalidUnlockNft(index) => {
                 write!(f, "invalid unlock nft: {index}")

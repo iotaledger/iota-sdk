@@ -21,7 +21,7 @@ use iota_sdk::{
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
+    Build::{Account, Basic},
     ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ALIAS_2, BECH32_ADDRESS_ED25519_0,
     BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
 };
@@ -31,7 +31,7 @@ fn input_alias_eq_output_alias() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -42,7 +42,7 @@ fn input_alias_eq_output_alias() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -72,7 +72,7 @@ fn transition_alias_id_zero() {
     let protocol_parameters = protocol_parameters();
     let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_0,
         0,
@@ -84,7 +84,7 @@ fn transition_alias_id_zero() {
         None,
     )]);
     let alias_id = AccountId::from(inputs[0].output_id());
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id,
         0,
@@ -114,7 +114,7 @@ fn input_amount_lt_output_amount() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -160,7 +160,7 @@ fn input_amount_lt_output_amount_2() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_2,
             0,
@@ -207,7 +207,7 @@ fn basic_output_with_alias_input() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_251_500,
         alias_id_2,
         0,
@@ -258,7 +258,7 @@ fn create_alias() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_0,
         0,
@@ -297,7 +297,7 @@ fn burn_alias() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_2,
         0,
@@ -338,7 +338,7 @@ fn not_enough_storage_deposit_for_remainder() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_001,
         alias_id_2,
         0,
@@ -349,7 +349,7 @@ fn not_enough_storage_deposit_for_remainder() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -393,7 +393,7 @@ fn missing_input_for_alias_output() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -426,7 +426,7 @@ fn missing_input_for_alias_output_2() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             0,
@@ -439,7 +439,7 @@ fn missing_input_for_alias_output_2() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -480,7 +480,7 @@ fn missing_input_for_alias_output_but_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_0,
         0,
@@ -509,7 +509,7 @@ fn alias_in_output_and_sender() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -556,7 +556,7 @@ fn missing_ed25519_sender() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -567,7 +567,7 @@ fn missing_ed25519_sender() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -608,7 +608,7 @@ fn missing_ed25519_issuer_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_0,
         0,
@@ -639,7 +639,7 @@ fn missing_ed25519_issuer_transition() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_1,
         1,
@@ -650,7 +650,7 @@ fn missing_ed25519_issuer_transition() {
         Some(BECH32_ADDRESS_ED25519_1),
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_1,
         2,
@@ -678,7 +678,7 @@ fn missing_alias_sender() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -689,7 +689,7 @@ fn missing_alias_sender() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -730,7 +730,7 @@ fn missing_alias_issuer_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_0,
         0,
@@ -761,7 +761,7 @@ fn missing_alias_issuer_transition() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_2,
         1,
@@ -772,7 +772,7 @@ fn missing_alias_issuer_transition() {
         Some(BECH32_ADDRESS_ALIAS_1),
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         1,
@@ -800,7 +800,7 @@ fn missing_nft_sender() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -811,7 +811,7 @@ fn missing_nft_sender() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_2,
         0,
@@ -852,7 +852,7 @@ fn missing_nft_issuer_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_0,
         0,
@@ -883,7 +883,7 @@ fn missing_nft_issuer_transition() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id_1,
         0,
@@ -894,7 +894,7 @@ fn missing_nft_issuer_transition() {
         Some(BECH32_ADDRESS_NFT_1),
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_1,
         0,
@@ -923,7 +923,7 @@ fn increase_alias_amount() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             0,
@@ -936,7 +936,7 @@ fn increase_alias_amount() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         3_000_000,
         alias_id_1,
         1,
@@ -967,7 +967,7 @@ fn decrease_alias_amount() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             0,
@@ -980,7 +980,7 @@ fn decrease_alias_amount() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_1,
         1,
@@ -1023,7 +1023,7 @@ fn prefer_basic_to_alias() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1067,7 +1067,7 @@ fn take_amount_from_alias_to_fund_basic() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             0,
@@ -1131,7 +1131,7 @@ fn alias_burn_should_not_validate_alias_sender() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1176,7 +1176,7 @@ fn alias_burn_should_not_validate_alias_address() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1221,7 +1221,7 @@ fn alias_governance_transition_should_not_validate_alias_sender() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1266,7 +1266,7 @@ fn alias_governance_transition_should_not_validate_alias_address() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1309,7 +1309,7 @@ fn transitioned_zero_alias_id_no_longer_is_zero() {
     let protocol_parameters = protocol_parameters();
     let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_0,
         0,
@@ -1371,7 +1371,7 @@ fn two_aliases_required() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             0,
@@ -1382,7 +1382,7 @@ fn two_aliases_required() {
             None,
             None,
         ),
-        Alias(
+        Account(
             2_000_000,
             alias_id_2,
             0,
@@ -1417,22 +1417,26 @@ fn two_aliases_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.alias_id() == &alias_id_1
-        } else {
-            false
-        }));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.alias_id() == &alias_id_2
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.alias_id() == &alias_id_1
+            } else {
+                false
+            })
+    );
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.alias_id() == &alias_id_2
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1440,7 +1444,7 @@ fn state_controller_sender_required() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1474,14 +1478,16 @@ fn state_controller_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.state_index() == inputs[0].output.as_alias().state_index() + 1
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.state_index() == inputs[0].output.as_alias().state_index() + 1
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1489,7 +1495,7 @@ fn state_controller_sender_required_already_selected() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1501,7 +1507,7 @@ fn state_controller_sender_required_already_selected() {
         None,
     )]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             1,
@@ -1543,7 +1549,7 @@ fn state_controller_sender_required_but_governance() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1555,7 +1561,7 @@ fn state_controller_sender_required_but_governance() {
         None,
     )]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1599,7 +1605,7 @@ fn governor_sender_required() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             0,
@@ -1635,14 +1641,16 @@ fn governor_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.state_index() == inputs[0].output.as_alias().state_index()
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.state_index() == inputs[0].output.as_alias().state_index()
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1651,7 +1659,7 @@ fn governor_sender_required_already_selected() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1665,7 +1673,7 @@ fn governor_sender_required_already_selected() {
         Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1707,7 +1715,7 @@ fn governance_transition_and_required() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1718,7 +1726,7 @@ fn governance_transition_and_required() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1749,7 +1757,7 @@ fn state_transition_and_required() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1760,7 +1768,7 @@ fn state_transition_and_required() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
         alias_id_1,
         1,
@@ -1791,7 +1799,7 @@ fn governor_sender_required_but_state() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1803,7 +1811,7 @@ fn governor_sender_required_but_state() {
         None,
     )]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             1,
@@ -1846,7 +1854,7 @@ fn both_state_controller_and_governor_sender() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1899,7 +1907,7 @@ fn remainder_address_in_state_controller() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -1910,7 +1918,7 @@ fn remainder_address_in_state_controller() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_1,
         1,
@@ -1952,7 +1960,7 @@ fn remainder_address_in_governor() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -1965,7 +1973,7 @@ fn remainder_address_in_governor() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id_1,
         0,
@@ -2008,7 +2016,7 @@ fn do_not_change_amount_of_governance_transition() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2052,7 +2060,7 @@ fn state_transition_required_but_state_controller_not_provided() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2096,7 +2104,7 @@ fn state_transition_but_state_controller_not_owned() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2107,7 +2115,7 @@ fn state_transition_but_state_controller_not_owned() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
         alias_id_1,
         1,
@@ -2138,7 +2146,7 @@ fn governance_transition_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2149,7 +2157,7 @@ fn governance_transition_but_governor_not_owned() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2180,7 +2188,7 @@ fn burn_alias_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2222,7 +2230,7 @@ fn sender_in_state_controller_but_not_owned() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,
@@ -2263,7 +2271,7 @@ fn sender_in_governor_but_not_owned() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_1,
         0,

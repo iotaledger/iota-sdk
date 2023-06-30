@@ -18,7 +18,7 @@ use primitive_types::U256;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Foundry, Nft},
+    Build::{Account, Basic, Foundry, Nft},
     ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, TOKEN_ID_1, TOKEN_ID_2,
 };
 
@@ -28,7 +28,7 @@ fn burn_alias_present() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -73,7 +73,7 @@ fn burn_alias_present_and_required() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -207,7 +207,7 @@ fn burn_aliases_present() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -218,7 +218,7 @@ fn burn_aliases_present() {
             None,
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             0,
@@ -262,7 +262,7 @@ fn burn_alias_in_outputs() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -276,7 +276,7 @@ fn burn_alias_in_outputs() {
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -402,7 +402,7 @@ fn burn_nft_id_zero() {
     let alias_id_0 = AccountId::from_str(ALIAS_ID_0).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_0,
             0,
@@ -601,7 +601,7 @@ fn burn_foundry_present() {
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -687,7 +687,7 @@ fn burn_foundry_absent() {
         .id();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -746,7 +746,7 @@ fn burn_foundries_present() {
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             2,
@@ -899,7 +899,7 @@ fn burn_foundry_and_its_alias() {
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,

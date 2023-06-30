@@ -21,7 +21,7 @@ impl ImmutableAccountAddressUnlockCondition {
     /// Creates a new [`ImmutableAccountAddressUnlockCondition`].
     #[inline(always)]
     pub fn new(address: impl Into<AccountAddress>) -> Self {
-        Self(Address::Alias(address.into()))
+        Self(Address::Account(address.into()))
     }
 
     /// Returns the address of an [`ImmutableAccountAddressUnlockCondition`].
@@ -81,7 +81,7 @@ pub mod dto {
                 .map_err(|_e| Error::InvalidField("immutableAccountAddressUnlockCondition"))?;
 
             // An ImmutableAccountAddressUnlockCondition must have an AccountAddress.
-            if let Address::Alias(alias_address) = address {
+            if let Address::Account(alias_address) = address {
                 Ok(Self::new(alias_address))
             } else {
                 Err(Error::InvalidField("immutableAccountAddressUnlockCondition"))

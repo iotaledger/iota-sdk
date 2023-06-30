@@ -30,7 +30,7 @@ use iota_sdk::{
 
 use crate::client::{
     build_inputs, build_outputs,
-    Build::{Alias, Basic},
+    Build::{Account, Basic},
     ALIAS_ID_1,
 };
 
@@ -58,7 +58,7 @@ async fn sign_alias_state_transition() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let alias_id = AccountId::from_str(ALIAS_ID_1)?;
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id,
         0,
@@ -70,7 +70,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id,
         1,
@@ -149,7 +149,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let alias_id = AccountId::from_str(ALIAS_ID_1)?;
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
         alias_id,
         0,
@@ -161,7 +161,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
     )]);
 
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
         alias_id,
         0,
@@ -239,10 +239,10 @@ async fn alias_reference_unlocks() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
     let alias_id = AccountId::from_str(ALIAS_ID_1)?;
-    let alias_bech32_address = &Address::Alias(AccountAddress::new(alias_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let alias_bech32_address = &Address::Account(AccountAddress::new(alias_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id,
             0,
@@ -276,7 +276,7 @@ async fn alias_reference_unlocks() -> Result<()> {
     ]);
 
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id,
             1,
@@ -327,13 +327,13 @@ async fn alias_reference_unlocks() -> Result<()> {
     assert_eq!(unlocks.len(), 3);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 0);
         }
         _ => panic!("Invalid unlock"),
     }
     match (*unlocks).get(2).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 0);
         }
         _ => panic!("Invalid unlock"),

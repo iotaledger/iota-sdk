@@ -82,7 +82,7 @@ impl InputSelection {
                     Ok(None)
                 }
             }
-            Address::Alias(alias_address) => Ok(Some(Requirement::Account(
+            Address::Account(alias_address) => Ok(Some(Requirement::Account(
                 *alias_address.alias_id(),
                 AccountTransition::State,
             ))),
@@ -173,7 +173,7 @@ impl InputSelection {
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
-            Output::Account(output) => Some(Address::Alias(AccountAddress::from(
+            Output::Account(output) => Some(Address::Account(AccountAddress::from(
                 output.alias_id_non_null(input.output_id()),
             ))),
             Output::Nft(output) => Some(Address::Nft(NftAddress::from(
@@ -295,7 +295,7 @@ impl InputSelection {
                     .required_and_unlocked_address(time, input.output_id(), alias_transition)?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
-                Address::Alias(unlock_address) => {
+                Address::Account(unlock_address) => {
                     if let Output::Account(alias_output) = &input_signing_data.output {
                         *unlock_address.alias_id() == alias_output.alias_id_non_null(input_signing_data.output_id())
                     } else {
@@ -318,7 +318,7 @@ impl InputSelection {
                 None => {
                     // insert before address
                     let alias_or_nft_address = match &input.output {
-                        Output::Account(alias_output) => Some(Address::Alias(AccountAddress::new(
+                        Output::Account(alias_output) => Some(Address::Account(AccountAddress::new(
                             alias_output.alias_id_non_null(input.output_id()),
                         ))),
                         Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(

@@ -14,7 +14,7 @@ use iota_sdk::{
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Nft},
+    Build::{Account, Basic, Nft},
     ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
 };
@@ -550,7 +550,7 @@ fn alias_sender() {
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -605,7 +605,7 @@ fn alias_sender_zero_id() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_0,
             0,

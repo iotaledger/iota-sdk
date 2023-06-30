@@ -10,7 +10,7 @@ use iota_sdk::{
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
+    Build::{Account, Basic},
     ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
 };
 
@@ -73,7 +73,7 @@ fn no_outputs_but_burn() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
         alias_id_2,
         0,

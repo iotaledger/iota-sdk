@@ -26,7 +26,7 @@ impl FoundryId {
         let mut packer = SlicePacker::new(&mut bytes);
 
         // PANIC: packing to an array of the correct length can't fail.
-        Address::Alias(*alias_address).pack(&mut packer).unwrap();
+        Address::Account(*alias_address).pack(&mut packer).unwrap();
         serial_number.pack(&mut packer).unwrap();
         token_scheme_kind.pack(&mut packer).unwrap();
 

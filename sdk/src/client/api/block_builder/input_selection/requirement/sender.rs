@@ -25,7 +25,7 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
-            Address::Alias(alias_address) => {
+            Address::Account(alias_address) => {
                 log::debug!("Treating {address:?} sender requirement as an alias requirement");
 
                 // A state transition is required to unlock the alias address.

@@ -112,7 +112,7 @@ fn dto_fields() {
     let address = Address::from(alias_address);
     let dto = AddressDto::from(&address);
 
-    assert_eq!(dto, AddressDto::Alias(alias_dto));
+    assert_eq!(dto, AddressDto::Account(alias_dto));
 }
 
 #[test]

@@ -10,7 +10,7 @@ use iota_sdk::{
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
+    Build::{Account, Basic},
     ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
 };
 
@@ -502,7 +502,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             None,
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -566,7 +566,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,

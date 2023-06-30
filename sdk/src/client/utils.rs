@@ -28,7 +28,7 @@ use crate::{
 pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
     Ok(match bech32.convert()?.inner() {
         Address::Ed25519(ed) => ed.to_string(),
-        Address::Alias(alias) => alias.to_string(),
+        Address::Account(alias) => alias.to_string(),
         Address::Nft(nft) => nft.to_string(),
     })
 }

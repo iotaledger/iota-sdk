@@ -34,7 +34,7 @@ use iota_sdk::{
 
 use crate::client::{
     build_inputs, build_outputs,
-    Build::{Alias, Basic, Nft},
+    Build::{Account, Basic, Nft},
     ALIAS_ID_1, ALIAS_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
 };
 
@@ -60,8 +60,10 @@ async fn all_combined() -> Result<()> {
 
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1)?;
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2)?;
-    let alias_1_bech32_address = &Address::Alias(AccountAddress::new(alias_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let alias_2_bech32_address = &Address::Alias(AccountAddress::new(alias_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let alias_1_bech32_address =
+        &Address::Account(AccountAddress::new(alias_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let alias_2_bech32_address =
+        &Address::Account(AccountAddress::new(alias_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let nft_id_1 = NftId::from_str(NFT_ID_1)?;
     let nft_id_2 = NftId::from_str(NFT_ID_2)?;
@@ -73,7 +75,7 @@ async fn all_combined() -> Result<()> {
     let nft_4_bech32_address = &Address::Nft(NftAddress::new(nft_id_4)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             0,
@@ -84,7 +86,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             0,
@@ -273,7 +275,7 @@ async fn all_combined() -> Result<()> {
     ]);
 
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             1,
@@ -284,7 +286,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             1,
@@ -416,13 +418,13 @@ async fn all_combined() -> Result<()> {
         _ => panic!("Invalid unlock 5"),
     }
     match (*unlocks).get(6).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 5);
         }
         _ => panic!("Invalid unlock 6"),
     }
     match (*unlocks).get(7).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 5);
         }
         _ => panic!("Invalid unlock 7"),
@@ -441,19 +443,19 @@ async fn all_combined() -> Result<()> {
         _ => panic!("Invalid unlock 9"),
     }
     match (*unlocks).get(10).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 9);
         }
         _ => panic!("Invalid unlock 10"),
     }
     match (*unlocks).get(11).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 9);
         }
         _ => panic!("Invalid unlock 11"),
     }
     match (*unlocks).get(12).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 9);
         }
         _ => panic!("Invalid unlock 12"),

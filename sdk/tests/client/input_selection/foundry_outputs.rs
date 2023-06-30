@@ -22,7 +22,7 @@ use primitive_types::U256;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Foundry},
+    Build::{Account, Basic, Foundry},
     ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, TOKEN_SUPPLY,
 };
 
@@ -68,7 +68,7 @@ fn existing_input_alias_for_foundry_alias() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_251_500,
         alias_id_2,
         0,
@@ -115,7 +115,7 @@ fn minted_native_tokens_in_new_remainder() {
 
     let inputs = build_inputs([
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             0,
@@ -169,7 +169,7 @@ fn minted_native_tokens_in_provided_output() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             0,
@@ -290,7 +290,7 @@ fn destroy_foundry_with_alias_state_transition() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             50_300,
             alias_id_2,
             1,
@@ -338,7 +338,7 @@ fn destroy_foundry_with_alias_governance_transition() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             1,
@@ -380,7 +380,7 @@ fn destroy_foundry_with_alias_burn() {
     let alias_id_2 = AccountId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_2,
             1,
@@ -435,7 +435,7 @@ fn prefer_basic_to_foundry() {
     let alias_id_1 = AccountId::from_str(ALIAS_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
             alias_id_1,
             1,
@@ -832,7 +832,7 @@ fn create_native_token_but_burn_alias() {
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             1,
@@ -882,7 +882,7 @@ fn melted_tokens_not_provided() {
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             1,
@@ -934,7 +934,7 @@ fn burned_tokens_not_provided() {
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
             alias_id_1,
             1,
