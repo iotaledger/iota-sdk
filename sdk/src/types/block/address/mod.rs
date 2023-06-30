@@ -84,12 +84,12 @@ impl Address {
     }
 
     /// Gets the address as an actual [`AccountAddress`].
-    /// PANIC: do not call on a non-alias address.
+    /// PANIC: do not call on a non-account address.
     pub fn as_alias(&self) -> &AccountAddress {
         if let Self::Account(address) = self {
             address
         } else {
-            panic!("as_alias called on a non-alias address");
+            panic!("as_alias called on a non-account address");
         }
     }
 

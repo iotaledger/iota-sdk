@@ -69,7 +69,7 @@ pub mod dto {
     use super::*;
     use crate::types::block::Error;
 
-    /// Describes an alias address.
+    /// Describes an account address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct AccountAddressDto {
@@ -94,7 +94,7 @@ pub mod dto {
             value
                 .alias_id
                 .parse::<Self>()
-                .map_err(|_| Error::InvalidField("aliasId"))
+                .map_err(|_| Error::InvalidField("accountId"))
         }
     }
 }

@@ -106,7 +106,7 @@ where
         alias_output_ids: &HashSet<OutputId>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_foundry_output_ids");
-        // Get alias outputs, so we can then get the foundry outputs with the alias addresses
+        // Get alias outputs, so we can then get the foundry outputs with the account addresses
         let alias_outputs_with_meta = self.get_outputs(alias_output_ids.iter().copied().collect()).await?;
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;

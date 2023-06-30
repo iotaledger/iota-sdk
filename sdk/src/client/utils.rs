@@ -120,7 +120,7 @@ impl ClientInner {
         }
     }
 
-    /// Transforms an alias id to a bech32 encoded address
+    /// Transforms an account id to a bech32 encoded address
     pub async fn alias_id_to_bech32(
         &self,
         alias_id: AccountId,

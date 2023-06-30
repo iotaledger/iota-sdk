@@ -56,7 +56,7 @@ impl ClientInner {
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
-    /// Get alias output by its aliasID.
+    /// Get alias output by its accountID.
     /// api/indexer/v2/outputs/alias/:{AccountId}
     pub async fn alias_output_id(&self, alias_id: AccountId) -> Result<OutputId> {
         let route = format!("api/indexer/v2/outputs/alias/{alias_id}");

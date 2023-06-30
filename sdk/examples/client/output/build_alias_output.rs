@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    // Alias id needs to be null the first time
+    // Account id needs to be null the first time
     let alias_output = AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
         // `hello` in bytes
         .with_state_metadata([104, 101, 108, 108, 111])

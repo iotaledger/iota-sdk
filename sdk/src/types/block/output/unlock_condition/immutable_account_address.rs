@@ -33,7 +33,7 @@ impl ImmutableAccountAddressUnlockCondition {
         &self.0
     }
 
-    /// Returns the alias address of an [`ImmutableAccountAddressUnlockCondition`].
+    /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
     pub fn alias_address(&self) -> &AccountAddress {
         // It has already been validated at construction that the address is an `AccountAddress`.
         self.0.as_alias()

@@ -282,7 +282,7 @@ fn create_alias() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     // One output should be added for the remainder
     assert_eq!(selected.outputs.len(), 2);
-    // Output contains the new minted alias id
+    // Output contains the new minted account id
     assert!(selected.outputs.iter().any(|output| {
         if let Output::Account(alias_output) = output {
             *alias_output.alias_id() == alias_id_0

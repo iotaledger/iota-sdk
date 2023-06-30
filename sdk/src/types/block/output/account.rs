@@ -127,7 +127,7 @@ impl AccountOutputBuilder {
         self
     }
 
-    /// Sets the alias ID to the provided value.
+    /// Sets the account ID to the provided value.
     #[inline(always)]
     pub fn with_alias_id(mut self, alias_id: AccountId) -> Self {
         self.alias_id = alias_id;
@@ -389,7 +389,7 @@ impl AccountOutput {
         &self.alias_id
     }
 
-    /// Returns the alias ID if not null, or creates it from the output ID.
+    /// Returns the account ID if not null, or creates it from the output ID.
     #[inline(always)]
     pub fn alias_id_non_null(&self, output_id: &OutputId) -> AccountId {
         self.alias_id.or_from_output_id(output_id)
@@ -457,7 +457,7 @@ impl AccountOutput {
         ChainId::Account(self.alias_id)
     }
 
-    /// Returns the alias address for this output.
+    /// Returns the account address for this output.
     pub fn alias_address(&self, output_id: &OutputId) -> AccountAddress {
         AccountAddress::new(self.alias_id_non_null(output_id))
     }
@@ -483,7 +483,7 @@ impl AccountOutput {
                     self.governor_address().unlock(unlock, inputs, context)?;
                 } else {
                     self.state_controller_address().unlock(unlock, inputs, context)?;
-                    // Only a state transition can be used to consider the alias address for output unlocks and
+                    // Only a state transition can be used to consider the account address for output unlocks and
                     // sender/issuer validations.
                     context
                         .unlocked_addresses

@@ -36,12 +36,12 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     let total_base_token_balance = balance.base_coin().total();
-    println!("Balance before requesting funds on alias address: {total_base_token_balance:#?}");
+    println!("Balance before requesting funds on account address: {total_base_token_balance:#?}");
 
     let alias_id = balance.aliases().first().unwrap();
-    println!("Alias Id: {alias_id}");
+    println!("Account Id: {alias_id}");
 
-    // Get alias address
+    // Get account address
     let alias_address = AccountAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
     let faucet_response = request_funds_from_faucet(&faucet_url, &alias_address).await?;
 
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
         ..Default::default()
     };
     let total_base_token_balance = account.sync(Some(sync_options)).await?.base_coin().total();
-    println!("Balance after requesting funds on alias address: {total_base_token_balance:#?}");
+    println!("Balance after requesting funds on account address: {total_base_token_balance:#?}");
 
     Ok(())
 }

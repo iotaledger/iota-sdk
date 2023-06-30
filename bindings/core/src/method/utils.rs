@@ -31,10 +31,10 @@ pub enum UtilsMethod {
         /// Human readable part
         bech32_hrp: Hrp,
     },
-    /// Transforms an alias id to a bech32 encoded address
+    /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 {
-        /// Alias ID
+        /// Account ID
         alias_id: AccountId,
         /// Human readable part
         bech32_hrp: Hrp,
@@ -83,7 +83,7 @@ pub enum UtilsMethod {
         /// Transaction Payload
         payload: TransactionPayloadDto,
     },
-    /// Computes the alias ID
+    /// Computes the account ID
     #[serde(rename_all = "camelCase")]
     ComputeAccountId {
         /// Output ID
@@ -98,7 +98,7 @@ pub enum UtilsMethod {
     /// Computes the Foundry ID
     #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
-        /// Alias address
+        /// Account address
         alias_address: AccountAddress,
         /// Serial number
         serial_number: u32,

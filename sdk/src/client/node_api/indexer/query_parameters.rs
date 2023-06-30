@@ -131,7 +131,7 @@ impl QueryParameter {
     fn to_query_string(&self) -> String {
         match self {
             Self::Address(v) => format!("address={v}"),
-            Self::AccountAddress(v) => format!("aliasAddress={v}"),
+            Self::AccountAddress(v) => format!("accountAddress={v}"),
             Self::CreatedAfter(v) => format!("createdAfter={v}"),
             Self::CreatedBefore(v) => format!("createdBefore={v}"),
             Self::Cursor(v) => format!("cursor={v}"),

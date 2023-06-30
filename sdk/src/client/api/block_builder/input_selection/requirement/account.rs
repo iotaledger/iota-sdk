@@ -38,8 +38,8 @@ pub fn is_account_transition<'a>(
     None
 }
 
-/// Checks if an output is an alias with a given non null alias ID.
-/// Calling it with a null alias ID may lead to undefined behavior.
+/// Checks if an output is an account with a given non null account ID.
+/// Calling it with a null account ID may lead to undefined behavior.
 pub(crate) fn is_account_with_id_non_null(output: &Output, alias_id: &AccountId) -> bool {
     if let Output::Account(alias) = output {
         alias.alias_id() == alias_id
@@ -48,7 +48,7 @@ pub(crate) fn is_account_with_id_non_null(output: &Output, alias_id: &AccountId)
     }
 }
 
-/// Checks if an output is an alias with output ID that matches the given alias ID.
+/// Checks if an output is an alias with output ID that matches the given account ID.
 pub(crate) fn is_account_with_id(output: &Output, output_id: &OutputId, alias_id: &AccountId) -> bool {
     if let Output::Account(alias) = output {
         &alias.alias_id_non_null(output_id) == alias_id

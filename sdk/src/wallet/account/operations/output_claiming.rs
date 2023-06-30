@@ -68,7 +68,7 @@ where
                             &[],
                             output_data,
                             local_time,
-                            // Not relevant without alias addresses
+                            // Not relevant without account addresses
                             None,
                         )?
                     {

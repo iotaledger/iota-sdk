@@ -19,7 +19,7 @@ use iota_sdk::{
     Wallet,
 };
 
-// Replace with an alias id held in an unspent output of the account
+// Replace with an account id held in an unspent output of the account
 const ALIAS_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
 // The metadata for the next state
 const NEW_STATE_METADATA: &str = "updated state metadata 1";
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Get the alias output by its alias id
+    // Get the alias output by its account id
     let alias_id = AccountId::from_str(ALIAS_ID)?;
     if let Some(alias_output_data) = account.unspent_alias_output(&alias_id).await? {
         println!(
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
 
         let alias_output = alias_output_data.output.as_alias();
         let updated_alias_output = AccountOutputBuilder::from(alias_output)
-            // Update the alias id, as it might still be null
+            // Update the account id, as it might still be null
             .with_alias_id(alias_output.alias_id_non_null(&alias_output_data.output_id))
             // Minimum required storage deposit will change if the new metadata has a different size, so we will update
             // the amount

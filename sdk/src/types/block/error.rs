@@ -235,7 +235,10 @@ impl fmt::Display for Error {
                 write!(f, "network ID mismatch: expected {expected} but got {actual}")
             }
             Self::NonZeroStateIndexOrFoundryCounter => {
-                write!(f, "non zero state index or foundry counter while alias ID is all zero")
+                write!(
+                    f,
+                    "non zero state index or foundry counter while account ID is all zero"
+                )
             }
             Self::ParentsNotUniqueSorted => {
                 write!(f, "parents are not unique and/or sorted")
@@ -250,7 +253,7 @@ impl fmt::Display for Error {
                 write!(f, "remaining bytes after block")
             }
             Self::SelfControlledAccountOutput(alias_id) => {
-                write!(f, "self controlled account output, alias ID {alias_id}")
+                write!(f, "self controlled account output, account ID {alias_id}")
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")

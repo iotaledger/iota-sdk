@@ -82,7 +82,7 @@ pub enum AccountCommand {
     },
     /// Destroy an alias.
     DestroyAlias {
-        /// Alias ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
+        /// Account ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
         alias_id: String,
     },
     /// Destroy a foundry.

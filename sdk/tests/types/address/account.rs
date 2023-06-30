@@ -137,7 +137,7 @@ fn dto_invalid_alias_id() {
 
     assert!(matches!(
         AccountAddress::try_from(dto),
-        Err(Error::InvalidField("aliasId"))
+        Err(Error::InvalidField("accountId"))
     ));
 }
 

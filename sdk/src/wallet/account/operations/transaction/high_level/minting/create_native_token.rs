@@ -26,7 +26,7 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenParams {
-    /// The alias id which should be used to create the foundry.
+    /// The account id which should be used to create the foundry.
     pub alias_id: Option<AccountId>,
     /// Circulating supply
     pub circulating_supply: U256,

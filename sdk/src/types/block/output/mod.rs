@@ -292,7 +292,7 @@ impl Output {
         match self {
             Self::Account(output) => {
                 if alias_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
-                    // Alias address is only unlocked if it's a state transition
+                    // Account address is only unlocked if it's a state transition
                     Ok((
                         *output.state_controller_address(),
                         Some(Address::Account(output.alias_address(output_id))),

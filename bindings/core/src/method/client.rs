@@ -204,7 +204,7 @@ pub enum ClientMethod {
     /// Fetch alias output ID
     #[serde(rename_all = "camelCase")]
     AccountOutputId {
-        /// Alias id
+        /// Account id
         alias_id: AccountId,
     },
     /// Fetch NFT output IDs
@@ -327,10 +327,10 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
-    /// Transforms an alias id to a bech32 encoded address
+    /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 {
-        /// Alias ID
+        /// Account ID
         alias_id: AccountId,
         /// Human readable part
         bech32_hrp: Option<Hrp>,

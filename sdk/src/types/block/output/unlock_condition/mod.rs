@@ -455,7 +455,7 @@ pub mod dto {
         StateControllerAddress(StateControllerAddressUnlockConditionDto),
         /// A governor address unlock condition.
         GovernorAddress(GovernorAddressUnlockConditionDto),
-        /// An immutable alias address unlock condition.
+        /// An immutable account address unlock condition.
         ImmutableAccountAddress(ImmutableAccountAddressUnlockConditionDto),
     }
 
@@ -506,7 +506,7 @@ pub mod dto {
                     ImmutableAccountAddressUnlockCondition::KIND => Self::ImmutableAccountAddress(
                         ImmutableAccountAddressUnlockConditionDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!(
-                                "cannot deserialize immutable alias address unlock condition: {e}"
+                                "cannot deserialize immutable account address unlock condition: {e}"
                             ))
                         })?,
                     ),

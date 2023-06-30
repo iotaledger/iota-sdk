@@ -48,12 +48,12 @@ async fn main() -> Result<()> {
     println!("Balance before sending funds from alias: {total_base_token_balance:#?}");
 
     let alias_id = balance.aliases().first().unwrap();
-    println!("Alias Id: {alias_id}");
+    println!("Account Id: {alias_id}");
 
-    // Get alias address
+    // Get account address
     let alias_address = AccountAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
-    // Find first output unlockable by the alias address
+    // Find first output unlockable by the account address
     let input = *account
         .client()
         .basic_output_ids([QueryParameter::Address(alias_address)])
