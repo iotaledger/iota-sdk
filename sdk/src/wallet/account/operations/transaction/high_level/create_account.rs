@@ -21,7 +21,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct CreateAccountParams {
     /// Bech32 encoded address which will control the account. Default will use the first
-    /// address of the account
+    /// ed25519 address of the wallet account
     pub address: Option<Bech32Address>,
     /// Immutable account metadata
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
