@@ -205,7 +205,7 @@ where
 
 /// Filter available outputs to only include outputs that don't have unlock conditions, that could create
 /// conflicting transactions or need a new output for the storage deposit return
-/// Also only include Alias, Nft and Foundry outputs, if a corresponding output with the same id exists in the output,
+/// Also only include Account, Nft and Foundry outputs, if a corresponding output with the same id exists in the output,
 /// so they don't get burned
 ///
 /// Note: this is only for the default input selection, it's still possible to send these outputs by using

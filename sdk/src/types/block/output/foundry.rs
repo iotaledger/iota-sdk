@@ -483,7 +483,7 @@ impl StateTransitionVerifier for FoundryOutput {
                 return Err(StateTransitionError::InconsistentFoundrySerialNumber);
             }
         } else {
-            return Err(StateTransitionError::MissingAliasForFoundry);
+            return Err(StateTransitionError::MissingAccountForFoundry);
         }
 
         let token_id = next_state.token_id();

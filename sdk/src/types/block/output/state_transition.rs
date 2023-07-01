@@ -15,7 +15,7 @@ pub enum StateTransitionError {
     InconsistentNativeTokensTransition,
     InconsistentNativeTokensMeltBurn,
     IssuerNotUnlocked,
-    MissingAliasForFoundry,
+    MissingAccountForFoundry,
     MutatedFieldWithoutRights,
     MutatedImmutableField,
     NonMonotonicallyIncreasingNativeTokens,

@@ -360,7 +360,7 @@ impl SecretManage for LedgerSecretManager {
         }
 
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
-        // Alias/Nft/Reference unlocks
+        // Account/Nft/Reference unlocks
         if blind_signing {
             unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), time)?;
         }
@@ -474,7 +474,7 @@ impl LedgerSecretManager {
     }
 }
 
-// Merge signature unlocks with Alias/Nft/Reference unlocks
+// Merge signature unlocks with Account/Nft/Reference unlocks
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,

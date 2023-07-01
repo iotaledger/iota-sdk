@@ -26,10 +26,10 @@ pub struct CreateAccountParams {
     /// Immutable account metadata
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
-    /// Alias metadata
+    /// Account metadata
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub metadata: Option<Vec<u8>>,
-    /// Alias state metadata
+    /// Account state metadata
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub state_metadata: Option<Vec<u8>>,
 }

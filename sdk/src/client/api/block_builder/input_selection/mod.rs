@@ -249,7 +249,7 @@ impl InputSelection {
 
             let required_address = input
                 .output
-                // Alias transition is irrelevant here as we keep accounts anyway.
+                // Account transition is irrelevant here as we keep accounts anyway.
                 .required_and_unlocked_address(self.timestamp, input.output_id(), None)
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()

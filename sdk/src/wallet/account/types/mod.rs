@@ -83,7 +83,7 @@ impl OutputData {
                 return Ok(None);
             }
         } else {
-            // Alias and NFT addresses have no chain
+            // Account and NFT addresses have no chain
             None
         };
 
@@ -204,7 +204,7 @@ pub enum InclusionState {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OutputKind {
     /// Account output.
-    Alias,
+    Account,
     /// Basic output.
     Basic,
     /// Foundry output.
@@ -218,7 +218,7 @@ impl FromStr for OutputKind {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let kind = match s {
-            "Alias" => Self::Alias,
+            "Account" => Self::Account,
             "Basic" => Self::Basic,
             "Foundry" => Self::Foundry,
             "Nft" => Self::Nft,

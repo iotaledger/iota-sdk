@@ -97,9 +97,9 @@ fn existing_input_account_for_foundry_account() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
-    // Alias next state + foundry
+    // Account next state + foundry
     assert_eq!(selected.outputs.len(), 2);
-    // Alias state index is increased
+    // Account state index is increased
     selected.outputs.iter().for_each(|output| {
         if let Output::Account(account_output) = &output {
             // Input account has index 0, output should have index 1
@@ -145,9 +145,9 @@ fn minted_native_tokens_in_new_remainder() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
-    // Alias next state + foundry + basic output with native tokens
+    // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.outputs.len(), 3);
-    // Alias state index is increased
+    // Account state index is increased
     selected.outputs.iter().for_each(|output| {
         if let Output::Account(account_output) = &output {
             // Input account has index 0, output should have index 1
@@ -269,9 +269,9 @@ fn melt_native_tokens() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
-    // Alias next state + foundry + basic output with native tokens
+    // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.outputs.len(), 3);
-    // Alias state index is increased
+    // Account state index is increased
     selected.outputs.iter().for_each(|output| {
         if let Output::Account(account_output) = &output {
             // Input account has index 0, output should have index 1
@@ -328,7 +328,7 @@ fn destroy_foundry_with_account_state_transition() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
-    // Alias next state
+    // Account next state
     assert_eq!(selected.outputs.len(), 1);
 }
 

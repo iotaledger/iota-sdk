@@ -133,7 +133,7 @@ impl From<NativeToken> for Burn {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BurnDto {
-    /// Aliases to burn.
+    /// Accounts to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) accounts: Option<HashSet<AccountId>>,
     /// NFTs to burn.

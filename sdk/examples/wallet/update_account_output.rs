@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     let account_id = AccountId::from_str(ACCOUNT_ID)?;
     if let Some(account_output_data) = account.unspent_account_output(&account_id).await? {
         println!(
-            "Alias '{ACCOUNT_ID}' found in unspent output: '{}'",
+            "Account '{ACCOUNT_ID}' found in unspent output: '{}'",
             account_output_data.output_id
         );
 

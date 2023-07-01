@@ -81,7 +81,7 @@ pub struct FilterOptions {
     pub lower_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs where the booked milestone index is above the specified timestamp
     pub upper_bound_booked_timestamp: Option<u32>,
-    /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
+    /// Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
     /// Return all account outputs matching these IDs.
     pub account_ids: Option<HashSet<AccountId>>,

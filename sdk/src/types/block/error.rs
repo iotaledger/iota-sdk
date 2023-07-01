@@ -35,7 +35,7 @@ pub enum Error {
     InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
     InvalidAddress,
     InvalidAddressKind(u8),
-    InvalidAliasIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount { amount: u64, required: u64 },
@@ -142,7 +142,7 @@ impl fmt::Display for Error {
             }
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
-            Self::InvalidAliasIndex(index) => write!(f, "invalid alias index: {index}"),
+            Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")

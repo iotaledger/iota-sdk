@@ -6,7 +6,7 @@ use crate::types::block::{unlock::UnlockIndex, Error};
 /// Points to the unlock of a consumed account output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = Error, with = Error::InvalidAliasIndex)]
+#[packable(unpack_error = Error, with = Error::InvalidAccountIndex)]
 pub struct AccountUnlock(
     /// Index of input and unlock corresponding to an [`AccountOutput`](crate::types::block::output::AccountOutput).
     UnlockIndex,
@@ -27,7 +27,7 @@ impl AccountUnlock {
     /// Creates a new [`AccountUnlock`].
     #[inline(always)]
     pub fn new(index: u16) -> Result<Self, Error> {
-        index.try_into().map(Self).map_err(Error::InvalidAliasIndex)
+        index.try_into().map(Self).map_err(Error::InvalidAccountIndex)
     }
 
     /// Return the index of an [`AccountUnlock`].
