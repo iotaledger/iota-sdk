@@ -45,6 +45,7 @@ pub struct SyncOptions {
     pub account: AccountSyncOptions,
     /// Specifies what outputs should be synced for the address of an account output.
     #[serde(default)]
+    // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
     pub alias: AliasSyncOptions,
     /// Specifies what outputs should be synced for the address of an nft output.
     #[serde(default)]

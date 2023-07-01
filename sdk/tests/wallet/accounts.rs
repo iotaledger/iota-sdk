@@ -104,8 +104,8 @@ async fn remove_latest_account() -> Result<()> {
 }
 
 #[tokio::test]
-async fn account_account_already_exists() -> Result<()> {
-    let storage_path = "test-storage/account_account_already_exists";
+async fn account_alias_already_exists() -> Result<()> {
+    let storage_path = "test-storage/account_alias_already_exists";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
