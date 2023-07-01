@@ -13,6 +13,7 @@ use crate::{
 pub(crate) fn can_output_be_unlocked_now(
     // We use the addresses with unspent outputs, because other addresses of the account without unspent outputs can't
     // be related to this output
+    // TODO disambiguate these two parameters when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647
     account_addresses: &[AddressWithUnspentOutputs],
     account_and_nft_addresses: &[Address],
     output_data: &OutputData,
