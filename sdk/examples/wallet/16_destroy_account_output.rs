@@ -1,8 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will try to destroy the first account output there is in the account. This is only possible if
-//! possible foundry outputs have circulating supply of 0.
+//! In this example we will try to destroy the first account output there is in the account.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
