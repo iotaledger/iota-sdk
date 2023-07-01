@@ -87,7 +87,7 @@ fn debug() {
 fn bech32() {
     let address = Address::from(AccountAddress::from_str(ACCOUNT_ID).unwrap());
 
-    assert_eq!(address.to_bech32_unchecked("rms"), ALIAS_BECH32);
+    assert_eq!(address.to_bech32_unchecked("rms"), ACCOUNT_BECH32);
 }
 
 #[test]
