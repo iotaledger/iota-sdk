@@ -1,9 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.signature import Ed25519Signature
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 
 class PayloadType(Enum):
@@ -40,13 +43,29 @@ class Payload():
         return config
 
 
+@dataclass
 class MilestonePayload(Payload):
-    def __init__(self, essence, signatures):
-        """Initialize a MilestonePayload
-        """
-        self.essence = essence
-        self.signatures = signatures
-        super().__init__(PayloadType.Milestone, milestone=self)
+    """Initialize a MilestonePayload
+    """
+    index: int
+    timestamp: int
+    protocolVersion: int
+    previousMilestone_id: HexStr
+    parents: List[HexStr]
+    inclusionMerkleRoot: HexStr
+    appliedMerkleRoot: HexStr
+    signatures: List[Ed25519Signature]
+    options: Optional[List[Any]] = None
+    metadata: Optional[HexStr] = None
+
+    @classmethod
+    def from_dict(cls, milestone) -> MilestonePayload:
+        obj = cls.__new__(cls)
+        super(MilestonePayload, obj).__init__(milestone["type"])
+        del milestone["type"]
+        for k, v in milestone.items():
+            setattr(obj, k, v)
+        return obj
 
 
 class TaggedDataPayload(Payload):
