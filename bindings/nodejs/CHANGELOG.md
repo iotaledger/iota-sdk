@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `callPluginRoute` to Client to fetch data from custom node plugins;
 - `ComputeTokenId `, `ComputeOutputId`, `ComputeInputsCommitment` and `ComputeStorageDeposit` to Utils;
-- Type alias for Ids whioch were previously just `HexEncodedString`;
+- Type alias for Ids which were previously just `HexEncodedString`;
 - List of `ConfictReason` explanations matching the enum;
 - `units-helper` class for IOTA units conversion;
 - `Client::destroy` to close an open handle;
