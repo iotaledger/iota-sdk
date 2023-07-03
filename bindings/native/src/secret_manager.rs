@@ -1,7 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
+use std::{
+    ffi::{c_char, CStr, CString},
+    ptr::null,
+    sync::Arc,
+};
 
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
@@ -9,9 +13,6 @@ use iota_sdk_bindings_core::{
     SecretManagerMethod,
 };
 use tokio::sync::RwLock;
-
-use std::ffi::{c_char, CStr, CString};
-use std::ptr::null;
 
 use crate::error::{set_last_error, Result};
 

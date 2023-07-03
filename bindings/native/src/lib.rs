@@ -6,11 +6,12 @@ mod error;
 mod secret_manager;
 mod wallet;
 
-use std::ffi::{c_char, CStr, CString};
-use std::ptr::null;
-use std::sync::Mutex;
+use std::{
+    ffi::{c_char, CStr, CString},
+    ptr::null,
+    sync::Mutex,
+};
 
-use crate::error::set_last_error;
 use iota_sdk_bindings_core::{
     call_utils_method as rust_call_utils_method, init_logger as rust_init_logger, UtilsMethod,
 };
@@ -21,6 +22,7 @@ use self::{
     error::{Error, Result},
     secret_manager::*,
 };
+use crate::error::set_last_error;
 
 /// Use one runtime.
 pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {

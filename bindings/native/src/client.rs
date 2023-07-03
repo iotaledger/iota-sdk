@@ -1,8 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::ffi::{c_char, CStr, CString};
-use std::ptr::null;
+use std::{
+    ffi::{c_char, CStr, CString},
+    ptr::null,
+};
 
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,

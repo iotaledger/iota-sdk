@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use core::convert::{From, Infallible};
-use std::cell::RefCell;
-use std::ffi::{c_char, CString};
-use std::ptr;
+use std::{
+    cell::RefCell,
+    ffi::{c_char, CString},
+    ptr,
+};
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
 
