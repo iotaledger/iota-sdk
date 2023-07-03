@@ -6,11 +6,9 @@ use std::sync::{
     Arc,
 };
 #[cfg(feature = "storage")]
-use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
+use std::{collections::HashSet, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
-#[cfg(feature = "storage")]
-use serde::Deserialize;
 use serde::Serialize;
 use tokio::sync::RwLock;
 
@@ -22,10 +20,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
     account::AccountDetails,
-    storage::{
-        constants::default_storage_path,
-        manager::{StorageKind, StorageManager},
-    },
+    storage::{manager::StorageManager, StorageOptions},
 };
 use crate::{
     client::secret::{SecretManage, SecretManager},
@@ -51,27 +46,6 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
             #[cfg(feature = "storage")]
             storage_options: Default::default(),
             secret_manager: Default::default(),
-        }
-    }
-}
-
-#[cfg(feature = "storage")]
-#[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct StorageOptions {
-    pub(crate) path: PathBuf,
-    pub(crate) encryption_key: Option<[u8; 32]>,
-    pub(crate) kind: StorageKind,
-}
-
-#[cfg(feature = "storage")]
-impl Default for StorageOptions {
-    fn default() -> Self {
-        Self {
-            path: default_storage_path().into(),
-            encryption_key: None,
-            kind: StorageKind::default(),
         }
     }
 }

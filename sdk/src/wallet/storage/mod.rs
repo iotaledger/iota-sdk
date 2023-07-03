@@ -7,6 +7,8 @@ pub mod adapter;
 pub mod constants;
 /// Storage manager.
 pub mod manager;
+/// Storage options.
+pub mod options;
 /// Storage functions related to participation.
 #[cfg(feature = "participation")]
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
@@ -16,6 +18,7 @@ use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
 use self::adapter::DynStorageAdapter;
+pub use self::options::StorageOptions;
 use crate::client::storage::StorageAdapter;
 
 #[derive(Debug)]
