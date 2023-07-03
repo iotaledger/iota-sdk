@@ -203,7 +203,7 @@ async fn message_interface_events() -> Result<()> {
 
     let response = wallet_handle.send_message(transaction).await;
 
-    let Response::SentTransaction(_)= response else {
+    let Response::SentTransaction(_) = response else {
         panic!("unexpected response {response:?}");
     };
 
