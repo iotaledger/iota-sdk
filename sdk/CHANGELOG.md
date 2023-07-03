@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 - `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
 - Support for `LedgerSecretManager::sign_ed25519`;
+- `call_plugin_route` to Client to fetch data from custom node plugins;
 
 ### Changed
 
