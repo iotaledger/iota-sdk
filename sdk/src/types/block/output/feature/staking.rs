@@ -1,11 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Stakes IOTA coins to become eligible for committee selection, validate the network and receive Mana rewards.
+/// Stakes coins to become eligible for committee selection, validate the network and receive Mana rewards.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StakingFeature {
-    /// The amount of IOTA coins that are locked and staked in the containing account.
+    /// The amount of coins that are locked and staked in the containing account.
     staked_amount: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
     fixed_cost: u64,
