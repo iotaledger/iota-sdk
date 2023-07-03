@@ -50,7 +50,7 @@ class MilestonePayload(Payload):
     index: int
     timestamp: int
     protocolVersion: int
-    previousMilestone_id: HexStr
+    previousMilestoneId: HexStr
     parents: List[HexStr]
     inclusionMerkleRoot: HexStr
     appliedMerkleRoot: HexStr
