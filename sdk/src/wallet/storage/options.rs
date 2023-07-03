@@ -1,10 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    ops::Deref,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
@@ -55,7 +52,7 @@ impl StorageOptions {
 
     /// Returns the encryption key of the [`StorageOptions`];
     pub fn encryption_key(&self) -> Option<&[u8; 32]> {
-        self.encryption_key.as_ref().map(|k| k.deref())
+        self.encryption_key.as_deref()
     }
 
     /// Returns the kind of the [`StorageOptions`];
