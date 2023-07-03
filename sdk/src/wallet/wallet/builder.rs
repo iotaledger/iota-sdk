@@ -58,6 +58,7 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
 #[cfg(feature = "storage")]
 #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StorageOptions {
     pub(crate) path: PathBuf,
     pub(crate) file_name: Option<String>,
