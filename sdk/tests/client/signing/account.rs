@@ -15,9 +15,9 @@ use iota_sdk::{
         Client, Result,
     },
     types::block::{
-        address::{Address, AliasAddress, ToBech32Ext},
+        address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AliasId, InputsCommitment},
+        output::{AccountId, InputsCommitment},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
@@ -30,12 +30,12 @@ use iota_sdk::{
 
 use crate::client::{
     build_inputs, build_outputs,
-    Build::{Alias, Basic},
-    ALIAS_ID_1,
+    Build::{Account, Basic},
+    ACCOUNT_ID_1,
 };
 
 #[tokio::test]
-async fn sign_alias_state_transition() -> Result<()> {
+async fn sign_account_state_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
@@ -56,11 +56,11 @@ async fn sign_alias_state_transition() -> Result<()> {
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_1)?;
+    let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id,
+        account_id,
         0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
@@ -70,9 +70,9 @@ async fn sign_alias_state_transition() -> Result<()> {
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id,
+        account_id,
         1,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
@@ -126,7 +126,7 @@ async fn sign_alias_state_transition() -> Result<()> {
 }
 
 #[tokio::test]
-async fn sign_alias_governance_transition() -> Result<()> {
+async fn sign_account_governance_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
@@ -147,11 +147,11 @@ async fn sign_alias_governance_transition() -> Result<()> {
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_1)?;
+    let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id,
+        account_id,
         0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
@@ -161,9 +161,9 @@ async fn sign_alias_governance_transition() -> Result<()> {
         Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
     )]);
 
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id,
+        account_id,
         0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
@@ -217,7 +217,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
 }
 
 #[tokio::test]
-async fn alias_reference_unlocks() -> Result<()> {
+async fn account_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
@@ -238,13 +238,14 @@ async fn alias_reference_unlocks() -> Result<()> {
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_1)?;
-    let alias_bech32_address = &Address::Alias(AliasAddress::new(alias_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
+    let account_bech32_address =
+        &Address::Account(AccountAddress::new(account_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id,
+            account_id,
             0,
             &bech32_address_0.to_string(),
             &bech32_address_1.to_string(),
@@ -255,7 +256,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_bech32_address.to_string(),
+            &account_bech32_address.to_string(),
             None,
             None,
             None,
@@ -265,7 +266,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &alias_bech32_address.to_string(),
+            &account_bech32_address.to_string(),
             None,
             None,
             None,
@@ -276,9 +277,9 @@ async fn alias_reference_unlocks() -> Result<()> {
     ]);
 
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id,
+            account_id,
             1,
             &bech32_address_0.to_string(),
             &bech32_address_1.to_string(),
@@ -289,7 +290,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         ),
         Basic(
             2_000_000,
-            &alias_bech32_address.to_string(),
+            &account_bech32_address.to_string(),
             None,
             None,
             None,
@@ -331,13 +332,13 @@ async fn alias_reference_unlocks() -> Result<()> {
     assert_eq!(unlocks.len(), 3);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 0);
         }
         _ => panic!("Invalid unlock"),
     }
     match (*unlocks).get(2).unwrap() {
-        Unlock::Alias(a) => {
+        Unlock::Account(a) => {
             assert_eq!(a.index(), 0);
         }
         _ => panic!("Invalid unlock"),

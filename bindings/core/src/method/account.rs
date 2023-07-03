@@ -19,7 +19,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            ConsolidationParams, CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
+            ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
             OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
@@ -129,7 +129,7 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
-    /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+    /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
     /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
@@ -145,8 +145,8 @@ pub enum AccountMethod {
     PrepareConsolidateOutputs { params: ConsolidationParams },
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareCreateAliasOutput {
-        params: Option<CreateAliasParams>,
+    PrepareCreateAccountOutput {
+        params: Option<CreateAccountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to create a native token.

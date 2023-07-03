@@ -18,7 +18,7 @@ use primitive_types::U256;
 use super::verify_output_amount_packable;
 use crate::types::{
     block::{
-        address::{Address, AliasAddress},
+        address::{AccountAddress, Address},
         output::{
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
@@ -278,14 +278,14 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
     }
 }
 
-/// Describes a foundry output that is controlled by an alias.
+/// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
     // Native tokens held by the output.
     native_tokens: NativeTokens,
-    // The serial number of the foundry with respect to the controlling alias.
+    // The serial number of the foundry with respect to the controlling account.
     serial_number: u32,
     token_scheme: TokenScheme,
     unlock_conditions: UnlockConditions,
@@ -297,7 +297,7 @@ impl FoundryOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`FoundryOutput`].
     pub const KIND: u8 = 5;
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
-    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS;
+    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS;
     /// The set of allowed [`Feature`]s for a [`FoundryOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA;
     /// The set of allowed immutable [`Feature`]s for a [`FoundryOutput`].
@@ -364,17 +364,17 @@ impl FoundryOutput {
 
     ///
     #[inline(always)]
-    pub fn alias_address(&self) -> &AliasAddress {
-        // A FoundryOutput must have an ImmutableAliasAddressUnlockCondition.
+    pub fn account_address(&self) -> &AccountAddress {
+        // A FoundryOutput must have an ImmutableAccountAddressUnlockCondition.
         self.unlock_conditions
-            .immutable_alias_address()
-            .map(|unlock_condition| unlock_condition.alias_address())
+            .immutable_account_address()
+            .map(|unlock_condition| unlock_condition.account_address())
             .unwrap()
     }
 
     /// Returns the [`FoundryId`] of the [`FoundryOutput`].
     pub fn id(&self) -> FoundryId {
-        FoundryId::build(self.alias_address(), self.serial_number, self.token_scheme.kind())
+        FoundryId::build(self.account_address(), self.serial_number, self.token_scheme.kind())
     }
 
     /// Returns the [`TokenId`] of the [`FoundryOutput`].
@@ -396,7 +396,7 @@ impl FoundryOutput {
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
-        Address::from(*self.alias_address()).unlock(unlock, inputs, context)
+        Address::from(*self.account_address()).unlock(unlock, inputs, context)
     }
 
     // Transition, just without full ValidationContext
@@ -406,7 +406,7 @@ impl FoundryOutput {
         input_native_tokens: &BTreeMap<TokenId, U256>,
         output_native_tokens: &BTreeMap<TokenId, U256>,
     ) -> Result<(), StateTransitionError> {
-        if current_state.alias_address() != next_state.alias_address()
+        if current_state.account_address() != next_state.account_address()
             || current_state.serial_number != next_state.serial_number
             || current_state.immutable_features != next_state.immutable_features
         {
@@ -481,19 +481,19 @@ impl FoundryOutput {
 
 impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let alias_chain_id = ChainId::from(*next_state.alias_address().alias_id());
+        let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
-        if let (Some(Output::Alias(input_alias)), Some(Output::Alias(output_alias))) = (
-            context.input_chains.get(&alias_chain_id),
-            context.output_chains.get(&alias_chain_id),
+        if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
+            context.input_chains.get(&account_chain_id),
+            context.output_chains.get(&account_chain_id),
         ) {
-            if input_alias.foundry_counter() >= next_state.serial_number()
-                || next_state.serial_number() > output_alias.foundry_counter()
+            if input_account.foundry_counter() >= next_state.serial_number()
+                || next_state.serial_number() > output_account.foundry_counter()
             {
                 return Err(StateTransitionError::InconsistentFoundrySerialNumber);
             }
         } else {
-            return Err(StateTransitionError::MissingAliasForFoundry);
+            return Err(StateTransitionError::MissingAccountForFoundry);
         }
 
         let token_id = next_state.token_id();
@@ -606,7 +606,7 @@ impl Packable for FoundryOutput {
 }
 
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
-    if unlock_conditions.immutable_alias_address().is_none() {
+    if unlock_conditions.immutable_account_address().is_none() {
         Err(Error::MissingAddressUnlockCondition)
     } else {
         verify_allowed_unlock_conditions(unlock_conditions, FoundryOutput::ALLOWED_UNLOCK_CONDITIONS)
@@ -630,7 +630,7 @@ pub(crate) mod dto {
         TryFromDto,
     };
 
-    /// Describes a foundry output that is controlled by an alias.
+    /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct FoundryOutputDto {
@@ -641,7 +641,7 @@ pub(crate) mod dto {
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // The serial number of the foundry with respect to the controlling alias.
+        // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
         pub token_scheme: TokenSchemeDto,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -762,12 +762,12 @@ mod tests {
     use crate::types::{
         block::{
             output::{
-                dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
+                dto::OutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, SimpleTokenScheme,
                 TokenId,
             },
             protocol::protocol_parameters,
             rand::{
-                address::rand_alias_address,
+                address::rand_account_address,
                 output::{
                     feature::{rand_allowed_features, rand_metadata_feature},
                     rand_foundry_output, rand_token_scheme,
@@ -780,16 +780,16 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
-        let alias_1 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
-        let alias_2 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
+        let account_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
+        let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
         let metadata_1 = rand_metadata_feature();
         let metadata_2 = rand_metadata_feature();
 
         let mut builder = FoundryOutput::build_with_amount(0, 234, rand_token_scheme())
             .with_serial_number(85)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .with_unlock_conditions([alias_1])
+            .with_unlock_conditions([account_1])
             .add_feature(metadata_1.clone())
             .replace_feature(metadata_2.clone())
             .with_immutable_features([metadata_2.clone()])
@@ -797,7 +797,7 @@ mod tests {
 
         let output = builder.clone().finish().unwrap();
         assert_eq!(output.serial_number(), 85);
-        assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_1));
+        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_1));
         assert_eq!(output.features().metadata(), Some(&metadata_2));
         assert_eq!(output.immutable_features().metadata(), Some(&metadata_1));
 
@@ -805,15 +805,15 @@ mod tests {
             .clear_unlock_conditions()
             .clear_features()
             .clear_immutable_features()
-            .replace_unlock_condition(alias_2);
+            .replace_unlock_condition(account_2);
         let output = builder.clone().finish().unwrap();
-        assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_2));
+        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_2));
         assert!(output.features().is_empty());
         assert!(output.immutable_features().is_empty());
 
         let output = builder
             .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
-            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .finish_with_params(&protocol_parameters)
             .unwrap();
 
@@ -842,7 +842,7 @@ mod tests {
         let output_ver = Output::try_from_dto_with_params(dto, protocol_parameters.clone()).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
         let test_split_dto = |builder: FoundryOutputBuilder| {
             let output_split = FoundryOutput::try_from_dtos(
@@ -864,7 +864,7 @@ mod tests {
 
         let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .add_immutable_feature(rand_metadata_feature())
             .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
@@ -875,7 +875,7 @@ mod tests {
             rand_token_scheme(),
         )
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
         .add_immutable_feature(rand_metadata_feature())
         .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);

@@ -240,7 +240,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
         for output in outputs.iter() {
             let (amount, native_tokens, chain_id) = match output {
                 Output::Basic(output) => (output.amount(), output.native_tokens(), None),
-                Output::Alias(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
+                Output::Account(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
             };

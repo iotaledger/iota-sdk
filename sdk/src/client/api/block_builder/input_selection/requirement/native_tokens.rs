@@ -8,7 +8,7 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{AliasTransition, NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
+    types::block::output::{AccountTransition, NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
 };
 
 pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -> Result<NativeTokensBuilder, Error> {
@@ -113,7 +113,7 @@ pub(crate) fn get_native_tokens_diff(
 impl InputSelection {
     pub(crate) fn fulfill_native_tokens_requirement(
         &mut self,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
         let mut output_native_tokens = get_native_tokens(self.outputs.iter())?;
         let (minted_native_tokens, melted_native_tokens) =

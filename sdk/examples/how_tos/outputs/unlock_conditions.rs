@@ -16,10 +16,10 @@ use iota_sdk::{
             dto::OutputDto,
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-                ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
+                ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
         },
     },
 };
@@ -38,13 +38,14 @@ async fn main() -> Result<()> {
     let rent_structure = client.get_rent_structure().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
-    let alias_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
+    let account_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
 
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(address));
-    let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null());
+    let account_output_builder =
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
@@ -70,13 +71,15 @@ async fn main() -> Result<()> {
             .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output(token_supply)?,
         // with governor and state controller unlock condition
-        alias_output_builder
+        account_output_builder
             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
-        // with immutable alias unlock condition
+        // with immutable account unlock condition
         foundry_output_builder
-            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(*alias_address.as_alias()))
+            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(
+                *account_address.as_account(),
+            ))
             .finish_output(token_supply)?,
     ];
 

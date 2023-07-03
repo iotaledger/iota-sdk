@@ -10,10 +10,10 @@ use crate::{
         secret::SecretManage,
     },
     types::block::{
-        address::AliasAddress,
+        address::AccountAddress,
         output::{
-            feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
-            AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+            feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId,
+            AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
     wallet::account::{
@@ -26,8 +26,8 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenParams {
-    /// The alias id which should be used to create the foundry.
-    pub alias_id: Option<AliasId>,
+    /// The account id which should be used to create the foundry.
+    pub account_id: Option<AccountId>,
     /// Circulating supply
     pub circulating_supply: U256,
     /// Maximum supply
@@ -95,7 +95,7 @@ where
     /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
-    ///     alias_id: None,
+    ///     account_id: None,
     ///     circulating_supply: U256::from(100),
     ///     maximum_supply: U256::from(100),
     ///     foundry_metadata: None
@@ -134,39 +134,41 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let (alias_id, alias_output) = self
-            .get_alias_output(params.alias_id)
+        let (account_id, account_output) = self
+            .get_account_output(params.account_id)
             .await
-            .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
+            .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
-        if let Output::Alias(alias_output) = &alias_output.output {
-            // Create the new alias output with the same feature blocks, just updated state_index and foundry_counter
-            let new_alias_output_builder = AliasOutputBuilder::from(alias_output)
-                .with_alias_id(alias_id)
-                .with_state_index(alias_output.state_index() + 1)
-                .with_foundry_counter(alias_output.foundry_counter() + 1);
+        if let Output::Account(account_output) = &account_output.output {
+            // Create the new account output with the same feature blocks, just updated state_index and foundry_counter
+            let new_account_output_builder = AccountOutputBuilder::from(account_output)
+                .with_account_id(account_id)
+                .with_state_index(account_output.state_index() + 1)
+                .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens
             let foundry_id = FoundryId::build(
-                &AliasAddress::new(alias_id),
-                alias_output.foundry_counter() + 1,
+                &AccountAddress::new(account_id),
+                account_output.foundry_counter() + 1,
                 SimpleTokenScheme::KIND,
             );
             let token_id = TokenId::from(foundry_id);
 
             let outputs = [
-                new_alias_output_builder.finish_output(token_supply)?,
+                new_account_output_builder.finish_output(token_supply)?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
                         rent_structure,
-                        alias_output.foundry_counter() + 1,
+                        account_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
                             0,
                             params.maximum_supply,
                         )?),
                     )
-                    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
+                    .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
+                        account_id,
+                    )));
 
                     if let Some(foundry_metadata) = params.foundry_metadata {
                         foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
@@ -180,7 +182,7 @@ where
                 .await
                 .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {
-            unreachable!("We checked if it's an alias output before")
+            unreachable!("We checked if it's an account output before")
         }
     }
 }

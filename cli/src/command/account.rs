@@ -11,7 +11,7 @@ use iota_sdk::{
         block::{
             address::Bech32Address,
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
+                unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
@@ -65,8 +65,8 @@ pub enum AccountCommand {
     ClaimableOutputs,
     /// Consolidate all basic outputs into one address.
     Consolidate,
-    /// Create a new alias output.
-    CreateAliasOutput,
+    /// Create a new account output.
+    CreateAccountOutput,
     /// Create a native token.
     CreateNativeToken {
         /// Circulating supply of the native token to be minted, e.g. 100.
@@ -80,10 +80,10 @@ pub enum AccountCommand {
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
-    /// Destroy an alias.
-    DestroyAlias {
-        /// Alias ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
-        alias_id: String,
+    /// Destroy an account output.
+    DestroyAccount {
+        /// Account ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
+        account_id: String,
     },
     /// Destroy a foundry.
     DestroyFoundry {
@@ -409,14 +409,14 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-// `create-alias-output` command
-pub async fn create_alias_outputs_command(account: &Account) -> Result<(), Error> {
-    println_log_info!("Creating alias output.");
+// `create-account-output` command
+pub async fn create_account_output_command(account: &Account) -> Result<(), Error> {
+    println_log_info!("Creating account output.");
 
-    let transaction = account.create_alias_output(None, None).await?;
+    let transaction = account.create_account_output(None, None).await?;
 
     println_log_info!(
-        "Alias output creation transaction sent:\n{:?}\n{:?}",
+        "Account output creation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
@@ -431,23 +431,23 @@ pub async fn create_native_token_command(
     maximum_supply: String,
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
-    // If no alias output exists, create one first
-    if account.balance().await?.aliases().is_empty() {
-        let transaction = account.create_alias_output(None, None).await?;
+    // If no account output exists, create one first
+    if account.balance().await?.accounts().is_empty() {
+        let transaction = account.create_account_output(None, None).await?;
         println_log_info!(
-            "Alias output minting transaction sent:\n{:?}\n{:?}",
+            "Account output minting transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,
             transaction.block_id
         );
         account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        // Sync account after the transaction got confirmed, so the alias output is available
+        // Sync account after the transaction got confirmed, so the account output is available
         account.sync(None).await?;
     }
 
     let params = CreateNativeTokenParams {
-        alias_id: None,
+        account_id: None,
         circulating_supply: U256::from_dec_str(&circulating_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
         maximum_supply: U256::from_dec_str(&maximum_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
         foundry_metadata,
@@ -464,14 +464,14 @@ pub async fn create_native_token_command(
     Ok(())
 }
 
-// `destroy-alias` command
-pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
-    println_log_info!("Destroying alias {alias_id}.");
+// `destroy-account` command
+pub async fn destroy_account_command(account: &Account, account_id: String) -> Result<(), Error> {
+    println_log_info!("Destroying account {account_id}.");
 
-    let transaction = account.burn(AliasId::from_str(&alias_id)?, None).await?;
+    let transaction = account.burn(AccountId::from_str(&account_id)?, None).await?;
 
     println_log_info!(
-        "Destroying alias transaction sent:\n{:?}\n{:?}",
+        "Destroying account transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );

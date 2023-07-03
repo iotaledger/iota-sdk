@@ -122,7 +122,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::block::Error;
 
-    /// Describes a foundry output that is controlled by an alias.
+    /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct SimpleTokenSchemeDto {

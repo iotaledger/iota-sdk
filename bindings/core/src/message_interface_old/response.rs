@@ -52,7 +52,7 @@ pub enum Response {
     /// [`RetryTransactionUntilIncluded`](crate::wallet::message_interface::AccountMethod::RetryTransactionUntilIncluded)
     BlockId(BlockId),
     /// Response for
-    /// [`BuildAliasOutput`](crate::wallet::message_interface::AccountMethod::BuildAliasOutput)
+    /// [`BuildAccountOutput`](crate::wallet::message_interface::AccountMethod::BuildAccountOutput)
     /// [`BuildBasicOutput`](crate::wallet::message_interface::AccountMethod::BuildBasicOutput)
     /// [`BuildFoundryOutput`](crate::wallet::message_interface::AccountMethod::BuildFoundryOutput)
     /// [`BuildNftOutput`](crate::wallet::message_interface::AccountMethod::BuildNftOutput)
@@ -112,7 +112,8 @@ pub enum Response {
     /// Response for
     /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
-    /// [`CreateAliasOutput`](crate::wallet::message_interface::AccountMethod::CreateAliasOutput)
+    /// [`CreateAccountOutput`](crate::wallet::message_interface::AccountMethod::CreateAccountOutput)
+    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
     /// [`MintNfts`](crate::wallet::message_interface::AccountMethod::MintNfts),
     /// [`Send`](crate::wallet::message_interface::AccountMethod::Send),
     /// [`SendNativeTokens`](crate::wallet::message_interface::AccountMethod::SendNativeTokens),

@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we use an alias as wallet.
+//! In this example we use an account as wallet.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example alias_wallet_request_funds`
+//! `cargo run --release --all-features --example account_wallet_request_funds`
 
 use iota_sdk::{
     client::request_funds_from_faucet,
-    types::block::address::{AliasAddress, ToBech32Ext},
+    types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions},
         Result,
@@ -34,14 +34,14 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     let total_base_token_balance = balance.base_coin().total();
-    println!("Balance before requesting funds on alias address: {total_base_token_balance:#?}");
+    println!("Balance before requesting funds on account address: {total_base_token_balance:#?}");
 
-    let alias_id = balance.aliases().first().unwrap();
-    println!("Alias Id: {alias_id}");
+    let account_id = balance.accounts().first().unwrap();
+    println!("Account Id: {account_id}");
 
-    // Get alias address
-    let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
-    let faucet_response = request_funds_from_faucet(&faucet_url, &alias_address).await?;
+    // Get account address
+    let account_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let faucet_response = request_funds_from_faucet(&faucet_url, &account_address).await?;
 
     println!("{faucet_response}");
 
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
         ..Default::default()
     };
     let total_base_token_balance = account.sync(Some(sync_options)).await?.base_coin().total();
-    println!("Balance after requesting funds on alias address: {total_base_token_balance:#?}");
+    println!("Balance after requesting funds on account address: {total_base_token_balance:#?}");
 
     Ok(())
 }

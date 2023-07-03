@@ -22,7 +22,7 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             address::{dto::AddressDto, Address},
-            output::{dto::OutputDto, AliasTransition, Output, OutputId, OutputMetadata},
+            output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             BlockId, Error as BlockError,
         },
@@ -56,11 +56,11 @@ impl OutputData {
         &self,
         account: &AccountDetails,
         current_time: u32,
-        alias_transition: Option<AliasTransition>,
+        account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let (unlock_address, _unlocked_alias_or_nft_address) =
+        let (unlock_address, _unlocked_account_or_nft_address) =
             self.output
-                .required_and_unlocked_address(current_time, &self.output_id, alias_transition)?;
+                .required_and_unlocked_address(current_time, &self.output_id, account_transition)?;
 
         let chain = if unlock_address == self.address {
             self.chain
@@ -80,7 +80,7 @@ impl OutputData {
                 return Ok(None);
             }
         } else {
-            // Alias and NFT addresses have no chain
+            // Account and NFT addresses have no chain
             None
         };
 
@@ -254,8 +254,8 @@ pub enum InclusionState {
 /// The output kind enum.
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OutputKind {
-    /// Alias output.
-    Alias,
+    /// Account output.
+    Account,
     /// Basic output.
     Basic,
     /// Foundry output.
@@ -269,7 +269,7 @@ impl FromStr for OutputKind {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let kind = match s {
-            "Alias" => Self::Alias,
+            "Account" => Self::Account,
             "Basic" => Self::Basic,
             "Foundry" => Self::Foundry,
             "Nft" => Self::Nft,

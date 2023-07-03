@@ -12,7 +12,7 @@ use iota_sdk::{
             dto::{OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NativeToken, NftId, OutputId,
+            AccountId, FoundryId, NativeToken, NftId, OutputId,
         },
         payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
@@ -26,15 +26,15 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum ClientMethod {
-    /// Build an AliasOutput.
+    /// Build an AccountOutput.
     /// Expected response: [`Output`](crate::Response::Output)
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
-    BuildAliasOutput {
+    BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        alias_id: AliasId,
+        account_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
@@ -207,17 +207,17 @@ pub enum ClientMethod {
         /// Query parameters for output requests
         query_parameters: Vec<QueryParameter>,
     },
-    /// Fetch alias output IDs
+    /// Fetch account output IDs
     #[serde(rename_all = "camelCase")]
-    AliasOutputIds {
+    AccountOutputIds {
         /// Query parameters for output requests
         query_parameters: Vec<QueryParameter>,
     },
-    /// Fetch alias output ID
+    /// Fetch account output ID
     #[serde(rename_all = "camelCase")]
-    AliasOutputId {
-        /// Alias id
-        alias_id: AliasId,
+    AccountOutputId {
+        /// Account id
+        account_id: AccountId,
     },
     /// Fetch NFT output IDs
     #[serde(rename_all = "camelCase")]
@@ -330,11 +330,11 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
-    /// Transforms an alias id to a bech32 encoded address
+    /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
-    AliasIdToBech32 {
-        /// Alias ID
-        alias_id: AliasId,
+    AccountIdToBech32 {
+        /// Account ID
+        account_id: AccountId,
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },

@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias;
+mod account;
 mod bech32;
 mod ed25519;
 mod nft;
@@ -9,7 +9,7 @@ mod nft;
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{Address, AliasAddress, Ed25519Address, NftAddress},
+    address::{AccountAddress, Address, Ed25519Address, NftAddress},
     Error,
 };
 
@@ -34,11 +34,11 @@ fn debug() {
         "Ed25519Address(0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655)"
     );
 
-    let address = Address::from(AliasAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
 
     assert_eq!(
         format!("{address:?}"),
-        "AliasAddress(0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee)"
+        "AccountAddress(0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee)"
     );
 
     let address = Address::from(NftAddress::from_str(NFT_ID).unwrap());

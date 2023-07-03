@@ -4,7 +4,7 @@
 mod address;
 mod expiration;
 mod governor_address;
-mod immutable_alias_address;
+mod immutable_account_address;
 mod state_controller_address;
 mod storage_deposit_return;
 mod timelock;
@@ -25,7 +25,8 @@ use packable::{
 
 pub use self::{
     address::AddressUnlockCondition, expiration::ExpirationUnlockCondition,
-    governor_address::GovernorAddressUnlockCondition, immutable_alias_address::ImmutableAliasAddressUnlockCondition,
+    governor_address::GovernorAddressUnlockCondition,
+    immutable_account_address::ImmutableAccountAddressUnlockCondition,
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
@@ -49,8 +50,8 @@ pub enum UnlockCondition {
     StateControllerAddress(StateControllerAddressUnlockCondition),
     /// A governor address unlock condition.
     GovernorAddress(GovernorAddressUnlockCondition),
-    /// An immutable alias address unlock condition.
-    ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition),
+    /// An immutable account address unlock condition.
+    ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition),
 }
 
 impl PartialOrd for UnlockCondition {
@@ -73,7 +74,7 @@ impl core::fmt::Debug for UnlockCondition {
             Self::Expiration(unlock_condition) => unlock_condition.fmt(f),
             Self::StateControllerAddress(unlock_condition) => unlock_condition.fmt(f),
             Self::GovernorAddress(unlock_condition) => unlock_condition.fmt(f),
-            Self::ImmutableAliasAddress(unlock_condition) => unlock_condition.fmt(f),
+            Self::ImmutableAccountAddress(unlock_condition) => unlock_condition.fmt(f),
         }
     }
 }
@@ -88,7 +89,7 @@ impl UnlockCondition {
             Self::Expiration(_) => ExpirationUnlockCondition::KIND,
             Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
             Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-            Self::ImmutableAliasAddress(_) => ImmutableAliasAddressUnlockCondition::KIND,
+            Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
         }
     }
 
@@ -101,7 +102,7 @@ impl UnlockCondition {
             Self::Expiration(_) => UnlockConditionFlags::EXPIRATION,
             Self::StateControllerAddress(_) => UnlockConditionFlags::STATE_CONTROLLER_ADDRESS,
             Self::GovernorAddress(_) => UnlockConditionFlags::GOVERNOR_ADDRESS,
-            Self::ImmutableAliasAddress(_) => UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS,
+            Self::ImmutableAccountAddress(_) => UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS,
         }
     }
 
@@ -195,18 +196,18 @@ impl UnlockCondition {
         }
     }
 
-    /// Checks whether the unlock condition is an [`ImmutableAliasAddressUnlockCondition`].
-    pub fn is_immutable_alias_address(&self) -> bool {
-        matches!(self, Self::ImmutableAliasAddress(_))
+    /// Checks whether the unlock condition is an [`ImmutableAccountAddressUnlockCondition`].
+    pub fn is_immutable_account_address(&self) -> bool {
+        matches!(self, Self::ImmutableAccountAddress(_))
     }
 
-    /// Gets the unlock condition as an actual [`ImmutableAliasAddressUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not an [`ImmutableAliasAddressUnlockCondition`].
-    pub fn as_immutable_alias_address(&self) -> &ImmutableAliasAddressUnlockCondition {
-        if let Self::ImmutableAliasAddress(unlock_condition) = self {
+    /// Gets the unlock condition as an actual [`ImmutableAccountAddressUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not an [`ImmutableAccountAddressUnlockCondition`].
+    pub fn as_immutable_account_address(&self) -> &ImmutableAccountAddressUnlockCondition {
+        if let Self::ImmutableAccountAddress(unlock_condition) = self {
             unlock_condition
         } else {
-            panic!("invalid downcast of non-ImmutableAliasAddressUnlockCondition");
+            panic!("invalid downcast of non-ImmutableAccountAddressUnlockCondition");
         }
     }
 }
@@ -222,7 +223,7 @@ create_bitflags!(
         (EXPIRATION, ExpirationUnlockCondition),
         (STATE_CONTROLLER_ADDRESS, StateControllerAddressUnlockCondition),
         (GOVERNOR_ADDRESS, GovernorAddressUnlockCondition),
-        (IMMUTABLE_ALIAS_ADDRESS, ImmutableAliasAddressUnlockCondition),
+        (IMMUTABLE_ACCOUNT_ADDRESS, ImmutableAccountAddressUnlockCondition),
     ]
 );
 
@@ -256,8 +257,8 @@ impl Packable for UnlockCondition {
                 GovernorAddressUnlockCondition::KIND.pack(packer)?;
                 unlock_condition.pack(packer)
             }
-            Self::ImmutableAliasAddress(unlock_condition) => {
-                ImmutableAliasAddressUnlockCondition::KIND.pack(packer)?;
+            Self::ImmutableAccountAddress(unlock_condition) => {
+                ImmutableAccountAddressUnlockCondition::KIND.pack(packer)?;
                 unlock_condition.pack(packer)
             }
         }?;
@@ -288,8 +289,8 @@ impl Packable for UnlockCondition {
             GovernorAddressUnlockCondition::KIND => {
                 Self::from(GovernorAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
             }
-            ImmutableAliasAddressUnlockCondition::KIND => {
-                Self::from(ImmutableAliasAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
+            ImmutableAccountAddressUnlockCondition::KIND => {
+                Self::from(ImmutableAccountAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
             }
             k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
         })
@@ -412,11 +413,11 @@ impl UnlockConditions {
             .map(UnlockCondition::as_governor_address)
     }
 
-    /// Gets a reference to an [`ImmutableAliasAddressUnlockCondition`], if any.
+    /// Gets a reference to an [`ImmutableAccountAddressUnlockCondition`], if any.
     #[inline(always)]
-    pub fn immutable_alias_address(&self) -> Option<&ImmutableAliasAddressUnlockCondition> {
-        self.get(ImmutableAliasAddressUnlockCondition::KIND)
-            .map(UnlockCondition::as_immutable_alias_address)
+    pub fn immutable_account_address(&self) -> Option<&ImmutableAccountAddressUnlockCondition> {
+        self.get(ImmutableAccountAddressUnlockCondition::KIND)
+            .map(UnlockCondition::as_immutable_account_address)
     }
 
     /// Returns the address to be unlocked.
@@ -490,7 +491,7 @@ mod test {
                 UnlockConditionFlags::EXPIRATION,
                 UnlockConditionFlags::STATE_CONTROLLER_ADDRESS,
                 UnlockConditionFlags::GOVERNOR_ADDRESS,
-                UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS
+                UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS
             ]
         );
     }
@@ -505,7 +506,7 @@ pub mod dto {
     pub use self::{
         address::dto::AddressUnlockConditionDto, expiration::dto::ExpirationUnlockConditionDto,
         governor_address::dto::GovernorAddressUnlockConditionDto,
-        immutable_alias_address::dto::ImmutableAliasAddressUnlockConditionDto,
+        immutable_account_address::dto::ImmutableAccountAddressUnlockConditionDto,
         state_controller_address::dto::StateControllerAddressUnlockConditionDto,
         storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
     };
@@ -526,8 +527,8 @@ pub mod dto {
         StateControllerAddress(StateControllerAddressUnlockConditionDto),
         /// A governor address unlock condition.
         GovernorAddress(GovernorAddressUnlockConditionDto),
-        /// An immutable alias address unlock condition.
-        ImmutableAliasAddress(ImmutableAliasAddressUnlockConditionDto),
+        /// An immutable account address unlock condition.
+        ImmutableAccountAddress(ImmutableAccountAddressUnlockConditionDto),
     }
 
     impl<'de> Deserialize<'de> for UnlockConditionDto {
@@ -574,10 +575,10 @@ pub mod dto {
                             serde::de::Error::custom(format!("cannot deserialize governor unlock condition: {e}"))
                         })?)
                     }
-                    ImmutableAliasAddressUnlockCondition::KIND => Self::ImmutableAliasAddress(
-                        ImmutableAliasAddressUnlockConditionDto::deserialize(value).map_err(|e| {
+                    ImmutableAccountAddressUnlockCondition::KIND => Self::ImmutableAccountAddress(
+                        ImmutableAccountAddressUnlockConditionDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!(
-                                "cannot deserialize immutable alias address unlock condition: {e}"
+                                "cannot deserialize immutable account address unlock condition: {e}"
                             ))
                         })?,
                     ),
@@ -601,7 +602,7 @@ pub mod dto {
                 T4(&'a ExpirationUnlockConditionDto),
                 T5(&'a StateControllerAddressUnlockConditionDto),
                 T6(&'a GovernorAddressUnlockConditionDto),
-                T7(&'a ImmutableAliasAddressUnlockConditionDto),
+                T7(&'a ImmutableAccountAddressUnlockConditionDto),
             }
             #[derive(Serialize)]
             struct TypedUnlockCondition<'a> {
@@ -627,7 +628,7 @@ pub mod dto {
                 Self::GovernorAddress(o) => TypedUnlockCondition {
                     unlock_condition: UnlockConditionDto_::T6(o),
                 },
-                Self::ImmutableAliasAddress(o) => TypedUnlockCondition {
+                Self::ImmutableAccountAddress(o) => TypedUnlockCondition {
                     unlock_condition: UnlockConditionDto_::T7(o),
                 },
             };
@@ -650,8 +651,8 @@ pub mod dto {
                 UnlockCondition::GovernorAddress(v) => {
                     Self::GovernorAddress(GovernorAddressUnlockConditionDto::from(v))
                 }
-                UnlockCondition::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockConditionDto::from(v))
+                UnlockCondition::ImmutableAccountAddress(v) => {
+                    Self::ImmutableAccountAddress(ImmutableAccountAddressUnlockConditionDto::from(v))
                 }
             }
         }
@@ -675,8 +676,8 @@ pub mod dto {
                 UnlockConditionDto::GovernorAddress(v) => {
                     Self::GovernorAddress(GovernorAddressUnlockCondition::try_from(v)?)
                 }
-                UnlockConditionDto::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition::try_from(v)?)
+                UnlockConditionDto::ImmutableAccountAddress(v) => {
+                    Self::ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition::try_from(v)?)
                 }
             })
         }
@@ -692,7 +693,7 @@ pub mod dto {
                 Self::Expiration(_) => ExpirationUnlockCondition::KIND,
                 Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
                 Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-                Self::ImmutableAliasAddress(_) => ImmutableAliasAddressUnlockCondition::KIND,
+                Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
             }
         }
     }

@@ -13,7 +13,7 @@ use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
 use packable::PackableExt;
-pub(crate) use requirement::is_alias_transition;
+pub(crate) use requirement::is_account_transition;
 
 pub use self::{
     burn::{Burn, BurnDto},
@@ -23,10 +23,10 @@ pub use self::{
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
-        address::{Address, AliasAddress, NftAddress},
+        address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
-            AliasOutput, AliasTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
+            AccountOutput, AccountTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
             OUTPUT_COUNT_RANGE,
         },
         protocol::ProtocolParameters,
@@ -47,7 +47,7 @@ pub struct InputSelection {
     protocol_parameters: ProtocolParameters,
     timestamp: u32,
     requirements: Vec<Requirement>,
-    automatically_transitioned: HashMap<ChainId, Option<AliasTransition>>,
+    automatically_transitioned: HashMap<ChainId, Option<AccountTransition>>,
 }
 
 /// Result of the input selection algorithm.
@@ -62,27 +62,27 @@ pub struct Selected {
 }
 
 impl InputSelection {
-    fn required_alias_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let alias_transition =
-            is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
+    fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
+        let account_transition =
+            is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
-            .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?
+            .required_and_unlocked_address(self.timestamp, input.output_id(), account_transition)?
             .0;
 
         match required_address {
             Address::Ed25519(_) => {
-                if alias_transition.is_some() {
-                    // Only add the requirement if the output is an alias because other types of output have been
+                if account_transition.is_some() {
+                    // Only add the requirement if the output is an account because other types of output have been
                     // filtered by address already.
                     Ok(Some(Requirement::Ed25519(required_address)))
                 } else {
                     Ok(None)
                 }
             }
-            Address::Alias(alias_address) => Ok(Some(Requirement::Alias(
-                *alias_address.alias_id(),
-                AliasTransition::State,
+            Address::Account(account_address) => Ok(Some(Requirement::Account(
+                *account_address.account_id(),
+                AccountTransition::State,
             ))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
         }
@@ -91,20 +91,20 @@ impl InputSelection {
     fn select_input(
         &mut self,
         input: InputSigningData,
-        alias_transition: Option<AliasTransition>,
+        account_transition: Option<AccountTransition>,
     ) -> Result<(), Error> {
         log::debug!("Selecting input {:?}", input.output_id());
 
-        if let Some(output) = self.transition_input(&input, alias_transition)? {
+        if let Some(output) = self.transition_input(&input, account_transition)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
             // - the issuer feature doesn't need to be verified as the chain is not new
             // - input doesn't need to be checked for as we just transitioned it
-            // - foundry alias requirement should have been met already by a prior `required_alias_nft_addresses`
+            // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
             self.outputs.push(output);
         }
 
-        if let Some(requirement) = self.required_alias_nft_addresses(&input)? {
+        if let Some(requirement) = self.required_account_nft_addresses(&input)? {
             log::debug!("Adding {requirement:?} from input {:?}", input.output_id());
             self.requirements.push(requirement);
         }
@@ -171,8 +171,8 @@ impl InputSelection {
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
-            Output::Alias(output) => Some(Address::Alias(AliasAddress::from(
-                output.alias_id_non_null(input.output_id()),
+            Output::Account(output) => Some(Address::Account(AccountAddress::from(
+                output.account_id_non_null(input.output_id()),
             ))),
             Output::Nft(output) => Some(Address::Nft(NftAddress::from(
                 output.nft_id_non_null(input.output_id()),
@@ -228,8 +228,9 @@ impl InputSelection {
 
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
-            // Keep alias outputs because at this point we do not know if a state or governor address will be required.
-            if input.output.is_alias() {
+            // Keep account outputs because at this point we do not know if a state or governor address will be
+            // required.
+            if input.output.is_account() {
                 return true;
             }
             // Filter out non basic/foundry/nft outputs.
@@ -237,7 +238,7 @@ impl InputSelection {
                 return false;
             }
 
-            // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
             if unlock_conditions.is_time_locked(self.timestamp) {
@@ -246,9 +247,9 @@ impl InputSelection {
 
             let required_address = input
                 .output
-                // Alias transition is irrelevant here as we keep aliases anyway.
+                // Account transition is irrelevant here as we keep accounts anyway.
                 .required_and_unlocked_address(self.timestamp, input.output_id(), None)
-                // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+                // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
 
@@ -268,9 +269,9 @@ impl InputSelection {
         // might be a more efficient way to do this
         inputs.sort_by_key(|i| i.output.pack_to_vec());
         // filter for ed25519 address first
-        let (mut sorted_inputs, alias_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
+        let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let alias_transition = is_alias_transition(
+                let account_transition = is_account_transition(
                     &input_signing_data.output,
                     *input_signing_data.output_id(),
                     outputs,
@@ -278,24 +279,25 @@ impl InputSelection {
                 );
                 let (input_address, _) = input_signing_data
                     .output
-                    .required_and_unlocked_address(time, input_signing_data.output_id(), alias_transition)
+                    .required_and_unlocked_address(time, input_signing_data.output_id(), account_transition)
                     // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
                 input_address.is_ed25519()
             });
 
-        for input in alias_nft_address_inputs {
-            let alias_transition = is_alias_transition(&input.output, *input.output_id(), outputs, None);
+        for input in account_nft_address_inputs {
+            let account_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
             let (input_address, _) =
                 input
                     .output
-                    .required_and_unlocked_address(time, input.output_id(), alias_transition)?;
+                    .required_and_unlocked_address(time, input.output_id(), account_transition)?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
-                Address::Alias(unlock_address) => {
-                    if let Output::Alias(alias_output) = &input_signing_data.output {
-                        *unlock_address.alias_id() == alias_output.alias_id_non_null(input_signing_data.output_id())
+                Address::Account(unlock_address) => {
+                    if let Output::Account(account_output) = &input_signing_data.output {
+                        *unlock_address.account_id()
+                            == account_output.account_id_non_null(input_signing_data.output_id())
                     } else {
                         false
                     }
@@ -315,9 +317,9 @@ impl InputSelection {
                 }
                 None => {
                     // insert before address
-                    let alias_or_nft_address = match &input.output {
-                        Output::Alias(alias_output) => Some(Address::Alias(AliasAddress::new(
-                            alias_output.alias_id_non_null(input.output_id()),
+                    let account_or_nft_address = match &input.output {
+                        Output::Account(account_output) => Some(Address::Account(AccountAddress::new(
+                            account_output.account_id_non_null(input.output_id()),
                         ))),
                         Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
                             nft_output.nft_id_non_null(input.output_id()),
@@ -325,10 +327,10 @@ impl InputSelection {
                         _ => None,
                     };
 
-                    if let Some(alias_or_nft_address) = alias_or_nft_address {
+                    if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let alias_transition = is_alias_transition(
+                            let account_transition = is_account_transition(
                                 &input_signing_data.output,
                                 *input_signing_data.output_id(),
                                 outputs,
@@ -336,11 +338,11 @@ impl InputSelection {
                             );
                             let (input_address, _) = input_signing_data
                                 .output
-                                .required_and_unlocked_address(time, input.output_id(), alias_transition)
+                                .required_and_unlocked_address(time, input.output_id(), account_transition)
                                 // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 
-                            input_address == alias_or_nft_address
+                            input_address == account_or_nft_address
                         }) {
                             Some(position) => {
                                 // Insert before the output with this address required for unlocking
@@ -385,8 +387,8 @@ impl InputSelection {
             let inputs = self.fulfill_requirement(requirement)?;
 
             // Select suggested inputs.
-            for (input, alias_transition) in inputs {
-                self.select_input(input, alias_transition)?;
+            for (input, account_transition) in inputs {
+                self.select_input(input, account_transition)?;
             }
         }
 
@@ -419,7 +421,7 @@ impl InputSelection {
     fn validate_transitions(&self) -> Result<(), Error> {
         let mut input_native_tokens_builder = NativeTokensBuilder::new();
         let mut output_native_tokens_builder = NativeTokensBuilder::new();
-        let mut input_aliases = Vec::new();
+        let mut input_accounts = Vec::new();
         let mut input_chains_foundries = hashbrown::HashMap::new();
         let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
@@ -428,8 +430,8 @@ impl InputSelection {
                 input_native_tokens_builder.add_native_tokens(native_tokens.clone())?;
             }
             match &input.output {
-                Output::Alias(_) => {
-                    input_aliases.push(input);
+                Output::Account(_) => {
+                    input_accounts.push(input);
                 }
                 Output::Foundry(foundry) => {
                     input_chains_foundries.insert(foundry.chain_id(), &input.output);
@@ -451,39 +453,39 @@ impl InputSelection {
         // Validate utxo chain transitions
         for output in self.outputs.iter() {
             match output {
-                Output::Alias(alias_output) => {
+                Output::Account(account_output) => {
                     // Null id outputs are just minted and can't be a transition
-                    if alias_output.alias_id().is_null() {
+                    if account_output.account_id().is_null() {
                         continue;
                     }
 
-                    let alias_input = input_aliases
+                    let account_input = input_accounts
                         .iter()
                         .find(|i| {
-                            if let Output::Alias(alias_input) = &i.output {
-                                *alias_output.alias_id() == alias_input.alias_id_non_null(i.output_id())
+                            if let Output::Account(account_input) = &i.output {
+                                *account_output.account_id() == account_input.account_id_non_null(i.output_id())
                             } else {
                                 false
                             }
                         })
-                        .expect("ISA is broken because there is no alias input");
+                        .expect("ISA is broken because there is no account input");
 
-                    if let Err(err) = AliasOutput::transition_inner(
-                        alias_input.output.as_alias(),
-                        alias_output,
+                    if let Err(err) = AccountOutput::transition_inner(
+                        account_input.output.as_account(),
+                        account_output,
                         &input_chains_foundries,
                         &self.outputs,
                     ) {
                         log::debug!("validate_transitions error {err:?}");
-                        let alias_transition =
-                            if alias_input.output.as_alias().state_index() == alias_output.state_index() {
-                                AliasTransition::Governance
+                        let account_transition =
+                            if account_input.output.as_account().state_index() == account_output.state_index() {
+                                AccountTransition::Governance
                             } else {
-                                AliasTransition::State
+                                AccountTransition::State
                             };
-                        return Err(Error::UnfulfillableRequirement(Requirement::Alias(
-                            *alias_output.alias_id(),
-                            alias_transition,
+                        return Err(Error::UnfulfillableRequirement(Requirement::Account(
+                            *account_output.account_id(),
+                            account_transition,
                         )));
                     }
                 }

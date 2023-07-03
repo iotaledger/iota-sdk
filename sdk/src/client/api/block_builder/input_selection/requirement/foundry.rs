@@ -4,7 +4,7 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{AliasTransition, FoundryId, Output},
+    types::block::output::{AccountTransition, FoundryId, Output},
 };
 
 /// Checks if an output is a foundry with a given foundry ID.
@@ -21,7 +21,7 @@ impl InputSelection {
     pub(crate) fn fulfill_foundry_requirement(
         &mut self,
         foundry_id: FoundryId,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
