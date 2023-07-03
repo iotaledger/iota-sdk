@@ -63,11 +63,12 @@ impl From<&str> for Error {
 
 impl From<String> for Error {
     fn from(err: String) -> Self {
-        Self { error: err.to_string() }
+        Self { error: err }
     }
 }
 
 thread_local! {
+    #[allow(clippy::box_collection)]
     static LAST_ERROR: RefCell<Option<Box<String>>> = RefCell::new(None);
 }
 

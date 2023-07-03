@@ -80,7 +80,7 @@ unsafe fn internal_call_wallet_method(wallet_ptr: *mut Wallet, method_ptr: *cons
     };
 
     let method_string = CStr::from_ptr(method_ptr).to_str().unwrap();
-    let method = serde_json::from_str::<WalletMethod>(&method_string)?;
+    let method = serde_json::from_str::<WalletMethod>(method_string)?;
 
     let response = crate::block_on(async {
         match wallet.wallet.read().await.as_ref() {
@@ -115,7 +115,7 @@ unsafe fn internal_listen_wallet(wallet_ptr: *mut Wallet, events_ptr: *const c_c
     let events_string = CStr::from_ptr(events_ptr).to_str().unwrap();
     let rust_events= serde_json::from_str::<Vec<String>>(events_string);
 
-    if !rust_events.is_ok() {
+    if rust_events.is_err() {
         return Ok(false);
     }
 
@@ -139,15 +139,12 @@ unsafe fn internal_listen_wallet(wallet_ptr: *mut Wallet, events_ptr: *const c_c
             .as_ref()
             .expect("wallet got destroyed")
             .listen(wallet_events, move |event_data| {
-                match serde_json::to_string(event_data) {
-                    Ok(event_str) => {
-                        let s = CString::new(event_str).unwrap();
-                        handler(s.into_raw())
-                    },
-                    _ => {}
+                if let Ok(event_str) = serde_json::to_string(event_data) {
+                    let s = CString::new(event_str).unwrap();
+                    handler(s.into_raw())
                 }
             })
-            .await;
+            .await
     });
 
     Ok(true)

@@ -56,8 +56,9 @@ unsafe fn internal_init_logger(config_ptr: *const c_char) -> Result<()> {
     Ok(())
 }
 
+/// # Safety
 #[no_mangle]
-unsafe extern "C" fn init_logger(config_ptr: *const c_char) -> bool {
+pub unsafe extern "C" fn init_logger(config_ptr: *const c_char) -> bool {
     match internal_init_logger(config_ptr) {
         Ok(_) => true,
         Err(e) => {
@@ -67,11 +68,10 @@ unsafe extern "C" fn init_logger(config_ptr: *const c_char) -> bool {
     }
 }
 
-#[no_mangle]
 unsafe fn internal_call_utils_method(method_ptr: *const c_char) -> Result<*const c_char> {
     let method_str = CStr::from_ptr(method_ptr).to_str().unwrap();
 
-    let method = serde_json::from_str::<UtilsMethod>(&method_str)?;
+    let method = serde_json::from_str::<UtilsMethod>(method_str)?;
     let response = rust_call_utils_method(method);
 
     let response_string = serde_json::to_string(&response)?;
@@ -80,6 +80,7 @@ unsafe fn internal_call_utils_method(method_ptr: *const c_char) -> Result<*const
     Ok(s.into_raw())
 }
 
+/// # Safety
 #[no_mangle]
 pub unsafe extern "C" fn call_utils_method(config_ptr: *const c_char) -> *const c_char {
     match internal_call_utils_method(config_ptr) {
@@ -90,25 +91,3 @@ pub unsafe extern "C" fn call_utils_method(config_ptr: *const c_char) -> *const 
         }
     }
 }
-
-/*
-/// Migrates a stronghold snapshot from v2 to v3.
-#[no_mangle]
-pub extern "C" fn migrate_stronghold_snapshot_v2_to_v3(
-    current_path: String,
-    current_password: String,
-    salt: &str,
-    rounds: u32,
-    new_path: Option<String>,
-    new_password: Option<String>,
-) -> Result<()> {
-    Ok(StrongholdAdapter::migrate_snapshot_v2_to_v3(
-        &current_path,
-        current_password.into(),
-        salt,
-        rounds,
-        new_path.as_ref(),
-        new_password.map(Into::into),
-    )
-    .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::Stronghold)?)
-}*/

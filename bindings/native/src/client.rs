@@ -21,11 +21,11 @@ unsafe fn internal_create_client(options_ptr: *const c_char) -> Result<*const Cl
     let runtime = tokio::runtime::Runtime::new()?;
 
     let client = runtime.block_on(async move {
-        if options_string.len() == 0 {
+        if options_string.is_empty() {
             return ClientBuilder::new().finish().await;
         }
 
-        return ClientBuilder::new().from_json(&options_string)?.finish().await;
+        ClientBuilder::new().from_json(options_string)?.finish().await
     })?;
 
     let client_wrap = Client { client };
@@ -78,7 +78,7 @@ unsafe fn internal_call_client_method(client_ptr: *mut Client, method_ptr: *mut 
         &mut *client_ptr
     };
 
-    let method = serde_json::from_str::<ClientMethod>(&method_str)?;
+    let method = serde_json::from_str::<ClientMethod>(method_str)?;
     let response = crate::block_on(async { rust_call_client_method(&client.client, method).await });
 
     let response_string = serde_json::to_string(&response)?;
