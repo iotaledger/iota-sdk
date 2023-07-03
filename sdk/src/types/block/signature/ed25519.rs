@@ -122,9 +122,9 @@ impl Packable for Ed25519Signature {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
         let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        Ok(Self::try_from_bytes(public_key, signature)
+        Self::try_from_bytes(public_key, signature)
             .map_err(UnpackError::Packable)
-            .coerce()?)
+            .coerce()
     }
 }
 

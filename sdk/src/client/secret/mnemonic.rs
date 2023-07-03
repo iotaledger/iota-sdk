@@ -102,7 +102,7 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_ed25519(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
         let private_key = self
@@ -118,7 +118,7 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         // Get the private and public key for this secp256k1_ecdsa key
         let private_key = self

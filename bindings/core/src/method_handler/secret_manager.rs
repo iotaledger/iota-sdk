@@ -54,7 +54,7 @@ pub(crate) async fn call_secret_manager_method_internal(
             let unlock: Unlock = secret_manager
                 .signature_unlock(
                     &transaction_essence_hash,
-                    &chain.into_iter().map(Segment::harden).collect(),
+                    &chain.into_iter().map(Segment::harden).collect::<Vec<_>>(),
                 )
                 .await?;
 
@@ -63,7 +63,7 @@ pub(crate) async fn call_secret_manager_method_internal(
         SecretManagerMethod::SignEd25519 { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
             let signature = secret_manager
-                .sign_ed25519(&msg, &chain.into_iter().map(Segment::harden).collect())
+                .sign_ed25519(&msg, &chain.into_iter().map(Segment::harden).collect::<Vec<_>>())
                 .await?;
             Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }

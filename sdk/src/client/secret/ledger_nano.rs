@@ -176,7 +176,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_ed25519(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<Ed25519Signature, Self::Error> {
         if msg.len() != 32 {
             return Err(Error::UnsupportedOperation.into());
@@ -218,7 +218,7 @@ impl SecretManage for LedgerSecretManager {
 
         // Unpack and return signature.
         return match Unlock::unpack::<_, true>(&mut unpacker, &())? {
-            Unlock::Signature(SignatureUnlock(Signature::Ed25519(signature))) => Ok(signature),
+            Unlock::Signature(SignatureUnlock(Signature::Ed25519(signature))) => Ok(*signature),
             _ => Err(Error::UnsupportedOperation.into()),
         };
     }
@@ -226,7 +226,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         _msg: &[u8],
-        _chain: &Vec<impl Segment + Send + Sync>,
+        _chain: &[impl Segment + Send + Sync],
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         Err(Error::UnsupportedOperation.into())
     }

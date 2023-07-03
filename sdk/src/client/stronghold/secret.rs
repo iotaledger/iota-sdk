@@ -171,7 +171,7 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_ed25519(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<Ed25519Signature, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
@@ -218,7 +218,7 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
@@ -330,7 +330,7 @@ impl StrongholdAdapter {
     async fn slip10_derive(
         &self,
         curve: Curve,
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
         input: Slip10DeriveInput,
         output: Location,
     ) -> Result<(), Error> {

@@ -34,7 +34,7 @@ fn from_ed25519() {
     ));
 
     assert!(matches!(signature.signature(), Signature::Ed25519(signature)
-        if signature.public_key().as_ref() == &public_key_bytes
+        if signature.public_key().as_ref() == public_key_bytes
         && signature.signature().to_bytes() == signature_bytes
     ));
 }

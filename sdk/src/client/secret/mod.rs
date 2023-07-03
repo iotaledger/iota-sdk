@@ -83,23 +83,23 @@ pub trait SecretManage: Send + Sync {
     async fn sign_ed25519(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Secp256k1.
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
     async fn signature_unlock(
         &self,
         essence_hash: &[u8; 32],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<Unlock, Self::Error> {
-        Ok(Unlock::Signature(SignatureUnlock::new(Signature::Ed25519(
+        Ok(Unlock::Signature(SignatureUnlock::new(Signature::from(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
     }
@@ -316,7 +316,7 @@ impl SecretManage for SecretManager {
     async fn sign_ed25519(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> crate::client::Result<Ed25519Signature> {
         match self {
             #[cfg(feature = "stronghold")]
@@ -331,7 +331,7 @@ impl SecretManage for SecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Vec<impl Segment + Send + Sync>,
+        chain: &[impl Segment + Send + Sync],
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]

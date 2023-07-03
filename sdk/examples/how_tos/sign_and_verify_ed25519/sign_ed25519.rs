@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     ]
     .into_iter()
     .map(Segment::harden)
-    .collect();
+    .collect::<Vec<_>>();
 
     let message = FOUNDRY_METADATA.as_bytes();
     let signature = SecretManager::Stronghold(stronghold)
