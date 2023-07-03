@@ -3,6 +3,7 @@
 
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedCreateTokenTransaction
+from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
@@ -341,7 +342,7 @@ class Account:
             }
         )
 
-    def sync(self, options=None):
+    def sync(self, options: Optional[SyncOptions] = None):
         """Sync the account by fetching new information from the nodes.
            Will also retry pending transactions and consolidate outputs if necessary.
            A custom default can be set using set_default_sync_options
@@ -393,7 +394,7 @@ class Account:
             }
         )
 
-    def set_default_sync_options(self, options):
+    def set_default_sync_options(self, options: SyncOptions):
         """Set the fallback SyncOptions for account syncing.
            If storage is enabled, will persist during restarts.
         """

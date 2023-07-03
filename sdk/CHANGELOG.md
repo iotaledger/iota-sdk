@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 - `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
+- Support for `LedgerSecretManager::sign_ed25519`;
 
 ### Changed
 

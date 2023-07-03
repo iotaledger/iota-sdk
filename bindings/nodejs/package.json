@@ -14,7 +14,7 @@
         "prebuild-arm64": "prebuild --runtime napi --target 6 --prepack scripts/neon-build.js --strip --arch arm64",
         "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
         "install": "prebuild-install --runtime napi --tag-prefix='iota-sdk-nodejs-v' && tsc || npm run rebuild",
-        "test": "jest --forceExit"
+        "test": "jest"
     },
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",
