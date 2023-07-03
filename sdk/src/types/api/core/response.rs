@@ -9,6 +9,7 @@ use crate::types::block::{
         OutputId, OutputWithMetadata,
     },
     protocol::dto::ProtocolParametersDto,
+    semantic::ConflictReason,
     slot::SlotIndex,
     BlockId, IssuerId,
 };
@@ -121,17 +122,35 @@ pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 
-/// Describes the ledger inclusion state of a transaction.
+/// Describes the state of a block and/or transaction.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub enum LedgerInclusionState {
-    Conflicting,
-    Included,
-    NoTransaction,
+pub enum BlockTransactionState {
+    // Stored but not confirmed or contains not yet included transaction.
+    Pending,
+    // Confirmed with the first level of knowledge.
+    Confirmed,
+    // Included and cannot be reverted anymore.
+    Finalized,
+}
+
+/// Describes the reason of a block state.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[non_exhaustive]
+#[repr(u8)]
+pub enum BlockStateReason {
+    Invalid = 1,
+    OrphanedCongestionControl = 2,
+    OrphanedNegativeManaBalance = 3,
 }
 
 /// Response of GET /api/core/v3/blocks/{block_id}/metadata.
@@ -144,22 +163,21 @@ pub enum LedgerInclusionState {
 )]
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
-    pub parents: Vec<BlockId>,
-    pub is_solid: bool,
+    pub strong_parents: Vec<BlockId>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub referenced_by_milestone_index: Option<u32>,
+    pub weak_parents: Option<Vec<BlockId>>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_index: Option<u32>,
+    pub shallow_like_parents: Option<Vec<BlockId>>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ledger_inclusion_state: Option<LedgerInclusionState>,
+    pub block_state: Option<BlockTransactionState>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub conflict_reason: Option<u8>,
+    pub tx_state: Option<BlockTransactionState>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub white_flag_index: Option<u32>,
+    pub block_state_reason: Option<BlockStateReason>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub should_promote: Option<bool>,
+    pub tx_state_reason: Option<ConflictReason>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub should_reattach: Option<bool>,
+    pub reissue_payload: Option<bool>,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.

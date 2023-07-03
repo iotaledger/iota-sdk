@@ -45,12 +45,15 @@ impl std::error::Error for ConflictError {}
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = ConflictError)]
 #[packable(tag_type = u8, with_error = ConflictError::InvalidConflict)]
+// TODO may want to rename this to TransactionStateReason
 pub enum ConflictReason {
     /// The block has no conflict.
     None = 0,
     /// The referenced Utxo was already spent.
     InputUtxoAlreadySpent = 1,
     /// The referenced Utxo was already spent while confirming this milestone.
+    /// TODO weird
+    ///  * `2` - denotes that the transaction is conflicting with another transaction.
     InputUtxoAlreadySpentInThisMilestone = 2,
     /// The referenced Utxo cannot be found.
     InputUtxoNotFound = 3,
