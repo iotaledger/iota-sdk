@@ -1,6 +1,5 @@
 from iota_sdk import Wallet, utf8_to_hex
 from dotenv import load_dotenv
-import time
 import os
 
 load_dotenv()

@@ -4,6 +4,7 @@
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 from iota_sdk.wallet.account import Account, _call_method_routine
+from iota_sdk.wallet.sync_options import SyncOptions
 from json import dumps
 from typing import Any, Dict, List, Optional
 
@@ -114,7 +115,7 @@ class Wallet():
             'isStrongholdPasswordAvailable'
         )
 
-    def recover_accounts(self, account_start_index: int, account_gap_limit: int, address_gap_limit: int, sync_options: Optional[Any] = None):
+    def recover_accounts(self, account_start_index: int, account_gap_limit: int, address_gap_limit: int, sync_options: Optional[SyncOptions] = None):
         """Recover accounts.
         """
         return self._call_method(
@@ -214,7 +215,7 @@ class Wallet():
 
         )
 
-    def start_background_sync(self, options, interval_in_milliseconds: int):
+    def start_background_sync(self, options: Optional[SyncOptions] = None, interval_in_milliseconds: Optional[int] = None):
         """Start background sync.
         """
         return self._call_method(

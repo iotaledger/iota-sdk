@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, Utils, NodeIndexerAPI
+from iota_sdk import Wallet, Utils, NodeIndexerAPI, SyncOptions, AliasSyncOptions
 from dotenv import load_dotenv
 import os
 
@@ -6,11 +6,7 @@ import os
 
 load_dotenv()
 
-sync_options = {
-    'alias': {
-        'basicOutputs': True
-    }
-}
+sync_options = SyncOptions(alias=AliasSyncOptions(basic_outputs=True))
 
 wallet = Wallet('./alice-database')
 
@@ -30,7 +26,8 @@ alias_id = balance['aliases'][0]
 print(f'Alias Id: {alias_id}')
 
 # Get alias address
-alias_address = Utils.alias_id_to_bech32(alias_id, wallet.get_client().get_bech32_hrp())
+alias_address = Utils.alias_id_to_bech32(
+    alias_id, wallet.get_client().get_bech32_hrp())
 
 # Find first output unlockable by the alias address
 query_parameters = NodeIndexerAPI.QueryParameters(alias_address)
@@ -44,8 +41,10 @@ options = {
     'mandatoryInputs': [input],
 }
 transaction = account.send_amount(params, options)
-account.retry_transaction_until_included(transaction['transactionId'], None, None)
-print(f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction["transactionId"]}')
+account.retry_transaction_until_included(
+    transaction['transactionId'], None, None)
+print(
+    f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction["transactionId"]}')
 
 total_base_token_balance = account.sync(sync_options)['baseCoin']['total']
 print(f'Balance after sending funds from alias: {total_base_token_balance}')
