@@ -5,6 +5,8 @@
 pub mod adapter;
 /// Storage constants.
 pub mod constants;
+/// Storage kind.
+pub mod kind;
 /// Storage manager.
 pub mod manager;
 /// Storage options.
@@ -18,7 +20,7 @@ use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
 use self::adapter::DynStorageAdapter;
-pub use self::options::StorageOptions;
+pub use self::{kind::StorageKind, options::StorageOptions};
 use crate::client::storage::StorageAdapter;
 
 #[derive(Debug)]

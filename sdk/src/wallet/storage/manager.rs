@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use futures::{StreamExt, TryStreamExt};
-use serde::{Deserialize, Serialize};
 
 use crate::{
     client::storage::StorageAdapter,
@@ -12,30 +11,6 @@ use crate::{
         storage::{constants::*, DynStorageAdapter, Storage},
     },
 };
-
-/// The type of storage used by the manager.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum StorageKind {
-    /// RocksDB storage.
-    #[cfg(feature = "rocksdb")]
-    Rocksdb,
-    /// Storage backed by a Map in memory.
-    Memory,
-    /// Wasm storage.
-    #[cfg(target_family = "wasm")]
-    Wasm,
-}
-
-impl Default for StorageKind {
-    fn default() -> Self {
-        #[cfg(feature = "rocksdb")]
-        return Self::Rocksdb;
-        #[cfg(target_family = "wasm")]
-        return Self::Wasm;
-        #[cfg(not(any(feature = "rocksdb", target_family = "wasm")))]
-        Self::Memory
-    }
-}
 
 /// Storage manager
 #[derive(Debug)]
@@ -149,6 +124,8 @@ impl StorageAdapter for StorageManager {
 
 #[cfg(test)]
 mod tests {
+    use serde::{Deserialize, Serialize};
+
     use super::*;
     use crate::{
         client::secret::SecretManager,
@@ -195,21 +172,17 @@ mod tests {
     #[tokio::test]
     async fn save_get_wallet_data() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_none());
 
         let wallet_builder = WalletBuilder::<SecretManager>::new();
         wallet_builder.save(&storage_manager).await.unwrap();
 
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_some()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_some());
     }
 }
