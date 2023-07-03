@@ -1,14 +1,17 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 from iota_sdk import call_utils_method
-from iota_sdk.types.address import Ed25519Address
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
-from typing import Any, Dict
+from typing import Any, Dict, TYPE_CHECKING
 
+# Required to prevent circular import
+if TYPE_CHECKING:
+    from iota_sdk.types.block import Block
 
 class Utils():
 
@@ -113,11 +116,11 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block) -> HexStr:
+    def block_id(block: Block) -> HexStr:
         """ Returns a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block
+            'block': block.__dict__
         })
 
     @staticmethod

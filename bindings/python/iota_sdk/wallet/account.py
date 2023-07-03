@@ -330,7 +330,7 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def retry_transaction_until_included(self, transaction_id: HexStr, interval=None, max_attempts=None):
+    def retry_transaction_until_included(self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
         """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
