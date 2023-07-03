@@ -25,7 +25,7 @@ pub fn minimum_storage_deposit_basic_output(
         basic_output_builder = basic_output_builder.with_native_tokens(native_tokens.clone());
     }
     let basic_output = basic_output_builder
-        // Null address because we only care about the size and ed25519, alias and nft addresses have the same size.
+        // Null address because we only care about the size and ed25519, account and nft addresses have the same size.
         .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
             [0; Ed25519Address::LENGTH],
         ))))

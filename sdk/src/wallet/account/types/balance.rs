@@ -7,7 +7,7 @@ use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId};
+use crate::types::block::output::{feature::MetadataFeature, AccountId, FoundryId, NftId, OutputId, TokenId};
 
 /// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
 /// [`crate::wallet::account::Account::balance()`].
@@ -23,8 +23,8 @@ pub struct Balance {
     pub(crate) native_tokens: Vec<NativeTokensBalance>,
     /// Nfts
     pub(crate) nfts: Vec<NftId>,
-    /// Aliases
-    pub(crate) aliases: Vec<AliasId>,
+    /// Accounts
+    pub(crate) accounts: Vec<AccountId>,
     /// Foundries
     pub(crate) foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
@@ -52,7 +52,7 @@ impl std::ops::AddAssign for Balance {
         }
 
         self.nfts.extend(rhs.nfts.into_iter());
-        self.aliases.extend(rhs.aliases.into_iter());
+        self.accounts.extend(rhs.accounts.into_iter());
         self.foundries.extend(rhs.foundries.into_iter());
     }
 }
@@ -89,7 +89,7 @@ impl std::ops::AddAssign for BaseCoinBalance {
 #[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
     #[serde(with = "crate::utils::serde::string")]
-    pub(crate) alias: u64,
+    pub(crate) account: u64,
     #[serde(with = "crate::utils::serde::string")]
     pub(crate) basic: u64,
     #[serde(with = "crate::utils::serde::string")]
@@ -100,7 +100,7 @@ pub struct RequiredStorageDeposit {
 
 impl std::ops::AddAssign for RequiredStorageDeposit {
     fn add_assign(&mut self, rhs: Self) {
-        self.alias += rhs.alias;
+        self.account += rhs.account;
         self.basic += rhs.basic;
         self.foundry += rhs.foundry;
         self.nft += rhs.nft;
@@ -187,7 +187,7 @@ impl Balance {
         )
         .collect::<Vec<_>>();
 
-        let aliases = std::iter::repeat_with(|| AliasId::from(rand_bytes_array()))
+        let accounts = std::iter::repeat_with(|| AccountId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
             .collect::<Vec<_>>();
         let nfts = std::iter::repeat_with(|| NftId::from(rand_bytes_array()))
@@ -205,13 +205,13 @@ impl Balance {
                 voting_power: total / 4,
             },
             required_storage_deposit: RequiredStorageDeposit {
-                alias: total / 16,
+                account: total / 16,
                 basic: total / 8,
                 foundry: total / 4,
                 nft: total / 2,
             },
             native_tokens,
-            aliases,
+            accounts,
             foundries,
             nfts,
             ..Default::default()

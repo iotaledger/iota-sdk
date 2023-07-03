@@ -21,7 +21,7 @@ use crate::{
             dto::{OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
+            AccountId, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
@@ -33,7 +33,7 @@ use crate::{
                 syncing::SyncOptions,
                 transaction::{
                     high_level::{
-                        create_alias::CreateAliasParams,
+                        create_account::CreateAccountParams,
                         minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
@@ -51,15 +51,15 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Build an AliasOutput.
+    /// Build an AccountOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
-    BuildAliasOutput {
+    BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        alias_id: AliasId,
+        account_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
@@ -137,24 +137,24 @@ pub enum AccountMethod {
         force: bool,
         output_consolidation_threshold: Option<usize>,
     },
-    /// Create an alias output.
+    /// Create an account output.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    CreateAliasOutput {
-        params: Option<CreateAliasParams>,
+    CreateAccountOutput {
+        params: Option<CreateAccountParams>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
+    /// Destroy an account output. Outputs controlled by it will be swept before if they don't have a
     /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
     /// sent to the governor address.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    DestroyAlias {
-        alias_id: AliasId,
+    DestroyAccount {
+        account_id: AccountId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
+    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyFoundry {

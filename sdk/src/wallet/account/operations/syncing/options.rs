@@ -43,14 +43,15 @@ pub struct SyncOptions {
     /// Specifies what outputs should be synced for the ed25519 addresses from the account.
     #[serde(default)]
     pub account: AccountSyncOptions,
-    /// Specifies what outputs should be synced for the address of an alias output.
+    /// Specifies what outputs should be synced for the address of an account output.
     #[serde(default)]
+    // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
     pub alias: AliasSyncOptions,
     /// Specifies what outputs should be synced for the address of an nft output.
     #[serde(default)]
     pub nft: NftSyncOptions,
     /// Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
-    /// `account`, `alias` and `nft` options.
+    /// `account`, `account` and `nft` options.
     #[serde(default = "default_sync_only_most_basic_outputs")]
     pub sync_only_most_basic_outputs: bool,
     /// Sync native token foundries, so their metadata can be returned in the balance.
@@ -106,7 +107,7 @@ impl Default for SyncOptions {
 pub struct AccountSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
-    pub alias_outputs: bool,
+    pub account_outputs: bool,
 }
 
 impl Default for AccountSyncOptions {
@@ -114,18 +115,18 @@ impl Default for AccountSyncOptions {
         Self {
             basic_outputs: true,
             nft_outputs: true,
-            alias_outputs: true,
+            account_outputs: true,
         }
     }
 }
 
-/// Sync options for addresses from alias outputs
+/// Sync options for addresses from account outputs
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct AliasSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
-    pub alias_outputs: bool,
+    pub account_outputs: bool,
     pub foundry_outputs: bool,
 }
 
@@ -135,7 +136,7 @@ impl Default for AliasSyncOptions {
         Self {
             basic_outputs: false,
             nft_outputs: false,
-            alias_outputs: false,
+            account_outputs: false,
             foundry_outputs: true,
         }
     }
@@ -147,5 +148,5 @@ impl Default for AliasSyncOptions {
 pub struct NftSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
-    pub alias_outputs: bool,
+    pub account_outputs: bool,
 }

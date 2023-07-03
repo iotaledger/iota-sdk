@@ -7,7 +7,7 @@ use crate::{
     client::{
         node_api::indexer::{
             query_parameters::{
-                verify_query_parameters_alias_outputs, verify_query_parameters_basic_outputs,
+                verify_query_parameters_account_outputs, verify_query_parameters_basic_outputs,
                 verify_query_parameters_foundry_outputs, verify_query_parameters_nft_outputs, QueryParameter,
             },
             QueryParameters,
@@ -16,7 +16,7 @@ use crate::{
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
-        block::output::{AliasId, FoundryId, NftId, OutputId},
+        block::output::{AccountId, FoundryId, NftId, OutputId},
     },
 };
 
@@ -40,32 +40,32 @@ impl ClientInner {
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
-    /// Get alias outputs filtered by the given parameters.
+    /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
-    /// api/indexer/v2/outputs/alias
-    pub async fn alias_output_ids(
+    /// api/indexer/v2/outputs/account
+    pub async fn account_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v2/outputs/alias";
+        let route = "api/indexer/v2/outputs/account";
 
-        let query_parameters = verify_query_parameters_alias_outputs(query_parameters.into())?;
+        let query_parameters = verify_query_parameters_account_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
-    /// Get alias output by its aliasID.
-    /// api/indexer/v2/outputs/alias/:{AliasId}
-    pub async fn alias_output_id(&self, alias_id: AliasId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/alias/{alias_id}");
+    /// Get account output by its accountID.
+    /// api/indexer/v2/outputs/account/:{AccountId}
+    pub async fn account_output_id(&self, account_id: AccountId) -> Result<OutputId> {
+        let route = format!("api/indexer/v2/outputs/account/{account_id}");
 
         Ok(*(self
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::NoOutput(format!("{alias_id:?}")))?))
+            .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
     }
 
     /// Get foundry outputs filtered by the given parameters.

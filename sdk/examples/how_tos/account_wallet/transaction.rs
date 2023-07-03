@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we use an alias as wallet.
+//! In this example we use an account as wallet.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example alias_wallet_transaction`
+//! `cargo run --release --all-features --example account_wallet_transaction`
 
 use iota_sdk::{
     client::node_api::indexer::query_parameters::QueryParameter,
-    types::block::address::{AliasAddress, ToBech32Ext},
+    types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
         Result, SendAmountParams,
@@ -43,18 +43,18 @@ async fn main() -> Result<()> {
     let balance = account.sync(Some(sync_options.clone())).await?;
 
     let total_base_token_balance = balance.base_coin().total();
-    println!("Balance before sending funds from alias: {total_base_token_balance:#?}");
+    println!("Balance before sending funds from account: {total_base_token_balance:#?}");
 
-    let alias_id = balance.aliases().first().unwrap();
-    println!("Alias Id: {alias_id}");
+    let account_id = balance.accounts().first().unwrap();
+    println!("Account Id: {account_id}");
 
-    // Get alias address
-    let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    // Get account address
+    let account_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
-    // Find first output unlockable by the alias address
+    // Find first output unlockable by the account address
     let input = *account
         .client()
-        .basic_output_ids([QueryParameter::Address(alias_address)])
+        .basic_output_ids([QueryParameter::Address(account_address)])
         .await?
         .items
         .first()
@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
     );
 
     let total_base_token_balance = account.sync(Some(sync_options)).await?.base_coin().total();
-    println!("Balance after sending funds from alias: {total_base_token_balance:#?}");
+    println!("Balance after sending funds from account: {total_base_token_balance:#?}");
 
     Ok(())
 }

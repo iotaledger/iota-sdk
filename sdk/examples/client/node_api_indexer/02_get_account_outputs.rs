@@ -1,14 +1,14 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all alias output ids associated with an address by querying the
-//! `api/indexer/v2/outputs/alias` node endpoint.
+//! Gets all account output ids associated with an address by querying the
+//! `api/indexer/v2/outputs/account` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example node_api_indexer_get_alias_outputs <ADDRESS> [NODE URL]
+//! cargo run --release --example node_api_indexer_get_account_outputs <ADDRESS> [NODE URL]
 //! ```
 
 use iota_sdk::{
@@ -39,15 +39,15 @@ async fn main() -> Result<()> {
         .expect("missing example argument: ADDRESS")
         .parse::<Bech32Address>()?;
 
-    // Get output IDs of alias outputs that can be controlled by this address.
+    // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
-        .alias_output_ids([
+        .account_output_ids([
             QueryParameter::Governor(address),
             QueryParameter::StateController(address),
         ])
         .await?;
 
-    println!("Alias output IDs: {output_ids_response:#?}");
+    println!("Account output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(&output_ids_response.items).await?;

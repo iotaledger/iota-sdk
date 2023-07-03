@@ -1,24 +1,24 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will update the state metadata of an alias output.
+//! In this example we will update the state metadata of an account output.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example update_alias_output
+//! cargo run --release --all-features --example update_account_output
 //! ```
 
 use iota_sdk::{
-    types::block::output::{AliasOutputBuilder, Output},
+    types::block::output::{AccountId, AccountOutputBuilder, Output},
     wallet::{Account, Result},
     Wallet,
 };
 
-// Replace with an alias id held in an unspent output of the account
-const ALIAS_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
+// Replace with an account id held in an unspent output of the account
+const ACCOUNT_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
 // The metadata for the next state
 const NEW_STATE_METADATA: &str = "updated state metadata 1";
 
@@ -40,32 +40,32 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Get the alias output by its alias id
-    let alias_id = ALIAS_ID.parse()?;
-    if let Some(alias_output_data) = account.unspent_alias_output(&alias_id).await? {
+    // Get the account output by its account id
+    let account_id = AccountId::from_str(ACCOUNT_ID)?;
+    if let Some(account_output_data) = account.unspent_account_output(&account_id).await? {
         println!(
-            "Alias '{ALIAS_ID}' found in unspent output: '{}'",
-            alias_output_data.output_id
+            "Account '{ACCOUNT_ID}' found in unspent output: '{}'",
+            account_output_data.output_id
         );
 
         let token_supply = account.client().get_token_supply().await?;
         let rent_structure = account.client().get_rent_structure().await?;
 
-        let alias_output = alias_output_data.output.as_alias();
-        let updated_alias_output = AliasOutputBuilder::from(alias_output)
-            // Update the alias id, as it might still be null
-            .with_alias_id(alias_output.alias_id_non_null(&alias_output_data.output_id))
+        let account_output = account_output_data.output.as_account();
+        let updated_account_output = AccountOutputBuilder::from(account_output)
+            // Update the account id, as it might still be null
+            .with_account_id(account_output.account_id_non_null(&account_output_data.output_id))
             // Minimum required storage deposit will change if the new metadata has a different size, so we will update
             // the amount
             .with_minimum_storage_deposit(rent_structure)
             .with_state_metadata(NEW_STATE_METADATA.as_bytes().to_vec())
-            .with_state_index(alias_output.state_index() + 1)
+            .with_state_index(account_output.state_index() + 1)
             .finish_output(token_supply)?;
 
         println!("Sending transaction...",);
-        send_and_wait_for_inclusion(&account, vec![updated_alias_output]).await?;
+        send_and_wait_for_inclusion(&account, vec![updated_account_output]).await?;
     } else {
-        panic!("alias doesn't exist or is not unspent");
+        panic!("account doesn't exist or is not unspent");
     }
 
     println!("Example finished successfully");
@@ -78,7 +78,7 @@ async fn sync_and_print_balance(account: &Account) -> Result<()> {
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     println!("{alias}'s base coin balance:\n{:#?}", balance.base_coin());
-    println!("{alias}'s aliases:\n{:#?}", balance.aliases());
+    println!("{alias}'s accounts:\n{:#?}", balance.accounts());
     Ok(())
 }
 

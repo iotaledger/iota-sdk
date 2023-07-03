@@ -99,7 +99,7 @@ where
             }
         }
         // known output is unspent, so insert it to the unspent outputs again, because if it was an
-        // alias/nft/foundry output it could have been removed when syncing without them
+        // account/nft/foundry output it could have been removed when syncing without them
         for (output_id, output_data) in unspent_outputs {
             account_details.unspent_outputs.insert(output_id, output_data);
         }

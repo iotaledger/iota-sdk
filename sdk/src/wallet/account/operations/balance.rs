@@ -90,22 +90,22 @@ where
                     let output = &data.output;
                     let rent = output.rent_cost(&rent_structure);
 
-                    // Add alias and foundry outputs here because they can't have a
+                    // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
                     match output {
-                        Output::Alias(output) => {
+                        Output::Account(output) => {
                             // Add amount
                             balance.base_coin.total += output.amount();
                             // Add storage deposit
-                            balance.required_storage_deposit.alias += rent;
+                            balance.required_storage_deposit.account += rent;
                             if !account_details.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
                             // Add native tokens
                             total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
-                            let alias_id = output.alias_id_non_null(output_id);
-                            balance.aliases.push(alias_id);
+                            let account_id = output.account_id_non_null(output_id);
+                            balance.accounts.push(account_id);
                         }
                         Output::Foundry(output) => {
                             // Add amount

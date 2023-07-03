@@ -1,19 +1,19 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets the alias output from the corresponding alias id by querying the
-//! `api/indexer/v2/outputs/alias/{aliasId}` node endpoint.
+//! Gets the account output from the corresponding account id by querying the
+//! `api/indexer/v2/outputs/account/{accountId}` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example node_api_indexer_get_alias_output <ALIAS ID> [NODE URL]
+//! cargo run --release --example node_api_indexer_get_account_output <ACCOUNT_ID> [NODE URL]
 //! ```
 
 use iota_sdk::{
     client::{Client, Result},
-    types::block::output::AliasId,
+    types::block::output::AccountId,
 };
 
 #[tokio::main]
@@ -29,16 +29,16 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the alias id from the command line, or panic.
-    let alias_id = std::env::args()
+    // Take the account id from the command line, or panic.
+    let account_id = std::env::args()
         .nth(1)
-        .expect("missing example argument: ALIAS ID")
+        .expect("missing example argument: ACCOUNT_ID")
         .parse::<AliasId>()?;
 
-    // Get the output ID by providing the corresponding alias ID.
-    let output_id = client.alias_output_id(alias_id).await?;
+    // Get the output ID by providing the corresponding account ID.
+    let output_id = client.account_output_id(account_id).await?;
 
-    println!("Alias output ID: {output_id}");
+    println!("Account output ID: {output_id}");
 
     // Get the output by its ID.
     let output_response = client.get_output(&output_id).await?;

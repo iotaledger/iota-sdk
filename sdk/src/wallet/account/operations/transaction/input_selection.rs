@@ -7,7 +7,7 @@ use std::collections::{hash_map::Values, HashSet};
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::input_selection::{is_alias_transition, Burn, InputSelection, Selected},
+        api::input_selection::{is_account_transition, Burn, InputSelection, Selected},
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
@@ -205,7 +205,7 @@ where
 
 /// Filter available outputs to only include outputs that don't have unlock conditions, that could create
 /// conflicting transactions or need a new output for the storage deposit return
-/// Also only include Alias, Nft and Foundry outputs, if a corresponding output with the same id exists in the output,
+/// Also only include Account, Nft and Foundry outputs, if a corresponding output with the same id exists in the output,
 /// so they don't get burned
 ///
 /// Note: this is only for the default input selection, it's still possible to send these outputs by using
@@ -256,9 +256,11 @@ fn filter_inputs(
         }
 
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
-        let alias_state_transition = is_alias_transition(&output_data.output, output_data.output_id, outputs, burn);
+        let account_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
 
-        if let Some(available_input) = output_data.input_signing_data(account, current_time, alias_state_transition)? {
+        if let Some(available_input) =
+            output_data.input_signing_data(account, current_time, account_state_transition)?
+        {
             available_outputs_signing_data.push(available_input);
         }
     }

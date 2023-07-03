@@ -4,8 +4,8 @@
 use packable::{packer::SlicePacker, Packable};
 
 use crate::types::block::{
-    address::{Address, AliasAddress},
-    output::{AliasId, TokenId},
+    address::{AccountAddress, Address},
+    output::{AccountId, TokenId},
 };
 
 impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
@@ -21,29 +21,29 @@ impl From<TokenId> for FoundryId {
 
 impl FoundryId {
     /// Builds a new [`FoundryId`] from its components.
-    pub fn build(alias_address: &AliasAddress, serial_number: u32, token_scheme_kind: u8) -> Self {
+    pub fn build(account_address: &AccountAddress, serial_number: u32, token_scheme_kind: u8) -> Self {
         let mut bytes = [0u8; Self::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
 
         // PANIC: packing to an array of the correct length can't fail.
-        Address::Alias(*alias_address).pack(&mut packer).unwrap();
+        Address::Account(*account_address).pack(&mut packer).unwrap();
         serial_number.pack(&mut packer).unwrap();
         token_scheme_kind.pack(&mut packer).unwrap();
 
         Self::new(bytes)
     }
 
-    /// Returns the [`AliasAddress`] of the [`FoundryId`].
-    pub fn alias_address(&self) -> AliasAddress {
+    /// Returns the [`AccountAddress`] of the [`FoundryId`].
+    pub fn account_address(&self) -> AccountAddress {
         // PANIC: the lengths are known.
-        AliasAddress::from(AliasId::new(self.0[1..AliasId::LENGTH + 1].try_into().unwrap()))
+        AccountAddress::from(AccountId::new(self.0[1..AccountId::LENGTH + 1].try_into().unwrap()))
     }
 
     /// Returns the serial number of the [`FoundryId`].
     pub fn serial_number(&self) -> u32 {
         // PANIC: the lengths are known.
         u32::from_le_bytes(
-            self.0[AliasId::LENGTH + 1..AliasId::LENGTH + 1 + core::mem::size_of::<u32>()]
+            self.0[AccountId::LENGTH + 1..AccountId::LENGTH + 1 + core::mem::size_of::<u32>()]
                 .try_into()
                 .unwrap(),
         )
