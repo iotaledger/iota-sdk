@@ -582,7 +582,7 @@ impl WalletMessageHandler {
             AccountMethod::VerifyEd25519Signature { signature, message } => {
                 let signature = Ed25519Signature::try_from(signature)?;
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
-                Ok(Response::Bool(signature.verify(&message)?))
+                Ok(Response::Bool(signature.verify(&message)))
             }
             AccountMethod::VerifySecp256k1EcdsaSignature {
                 public_key,

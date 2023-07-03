@@ -64,7 +64,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
             let signature = Ed25519Signature::try_from(signature)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.verify(&message)?)
+            Response::Bool(signature.verify(&message))
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,

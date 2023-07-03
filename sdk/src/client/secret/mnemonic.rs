@@ -109,8 +109,8 @@ impl SecretManage for MnemonicSecretManager {
             .0
             .derive::<ed25519::SecretKey, _>(chain.iter().copied().map(Segment::harden))
             .secret_key();
-        let public_key = private_key.public_key().to_bytes();
-        let signature = private_key.sign(msg).to_bytes();
+        let public_key = private_key.public_key();
+        let signature = private_key.sign(msg);
 
         Ok(Ed25519Signature::new(public_key, signature))
     }

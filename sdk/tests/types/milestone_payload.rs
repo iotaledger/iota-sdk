@@ -37,7 +37,9 @@ fn new_valid() {
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
-            vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))]
+            vec![Signature::from(
+                Ed25519Signature::try_from_bytes([0; 32], [0; 64]).unwrap()
+            )]
         )
         .is_ok()
     );
@@ -81,7 +83,7 @@ fn new_invalid_too_many_signatures() {
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
-            vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64])); 300]
+            vec![Signature::from(Ed25519Signature::try_from_bytes([0; 32], [0; 64]).unwrap()); 300]
         ),
         Err(Error::MilestoneInvalidSignatureCount(TryIntoBoundedU8Error::Truncated(
             300
@@ -105,8 +107,8 @@ fn packed_len() {
         )
         .unwrap(),
         vec![
-            Signature::from(Ed25519Signature::new([0; 32], [0; 64])),
-            Signature::from(Ed25519Signature::new([1; 32], [1; 64])),
+            Signature::from(Ed25519Signature::try_from_bytes([0; 32], [0; 64]).unwrap()),
+            Signature::from(Ed25519Signature::try_from_bytes([1; 32], [1; 64]).unwrap()),
         ],
     )
     .unwrap();
@@ -131,7 +133,9 @@ fn pack_unpack_valid() {
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
-        vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))],
+        vec![Signature::from(
+            Ed25519Signature::try_from_bytes([0; 32], [0; 64]).unwrap(),
+        )],
     )
     .unwrap();
 
@@ -158,7 +162,9 @@ fn getters() {
         MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();
-    let signatures = vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))];
+    let signatures = vec![Signature::from(
+        Ed25519Signature::try_from_bytes([0; 32], [0; 64]).unwrap(),
+    )];
     let milestone = MilestonePayload::new(essence.clone(), signatures.clone()).unwrap();
 
     assert_eq!(essence, *milestone.essence());

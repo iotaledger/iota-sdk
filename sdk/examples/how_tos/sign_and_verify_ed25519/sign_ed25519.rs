@@ -56,12 +56,12 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Public key: {}\nSignature: {}",
-        prefix_hex::encode(signature.public_key()),
-        prefix_hex::encode(signature.signature()),
+        prefix_hex::encode(signature.public_key().as_ref()),
+        prefix_hex::encode(signature.signature().to_bytes()),
     );
 
     // Hash the public key to get the address
-    let bech32_address = hex_public_key_to_bech32_address(&prefix_hex::encode(signature.public_key()), "rms")?;
+    let bech32_address = hex_public_key_to_bech32_address(&prefix_hex::encode(signature.public_key().as_ref()), "rms")?;
     println!("Address: {bech32_address}");
 
     Ok(())

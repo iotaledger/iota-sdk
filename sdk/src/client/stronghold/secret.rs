@@ -9,7 +9,10 @@ use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     keys::{bip39::Mnemonic, slip10::Segment},
-    signatures::secp256k1_ecdsa::{self, EvmAddress},
+    signatures::{
+        ed25519,
+        secp256k1_ecdsa::{self, EvmAddress},
+    },
 };
 use instant::Duration;
 use iota_stronghold::{
@@ -364,31 +367,33 @@ impl StrongholdAdapter {
 
     /// Execute [Procedure::PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10
     /// private key located in `private_key`.
-    async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32], Error> {
-        Ok(self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::PublicKey {
-                ty: KeyType::Ed25519,
-                private_key,
-            })?
-            .try_into()
-            .unwrap())
+    async fn ed25519_public_key(&self, private_key: Location) -> Result<ed25519::PublicKey, Error> {
+        Ok(ed25519::PublicKey::try_from_bytes(
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .execute_procedure(procedures::PublicKey {
+                    ty: KeyType::Ed25519,
+                    private_key,
+                })?
+                .try_into()
+                .unwrap(),
+        )?)
     }
 
     /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
-    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64], Error> {
-        Ok(self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::Ed25519Sign {
-                private_key,
-                msg: msg.to_vec(),
-            })?)
+    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<ed25519::Signature, Error> {
+        Ok(ed25519::Signature::from_bytes(
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .execute_procedure(procedures::Ed25519Sign {
+                    private_key,
+                    msg: msg.to_vec(),
+                })?,
+        ))
     }
 
     /// Execute [Procedure::Secp256k1EcdsaSign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold
