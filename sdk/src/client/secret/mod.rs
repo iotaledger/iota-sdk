@@ -21,7 +21,7 @@ use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
-    keys::slip10::Chain,
+    keys::{bip39::Mnemonic, slip10::Segment},
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -80,17 +80,25 @@ pub trait SecretManage: Send + Sync {
     ) -> Result<Vec<EvmAddress>, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Ed25519.
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
+    async fn sign_ed25519(
+        &self,
+        msg: &[u8],
+        chain: &Vec<impl Segment + Send + Sync>,
+    ) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Secp256k1.
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
+        chain: &Vec<impl Segment + Send + Sync>,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> Result<Unlock, Self::Error> {
+    async fn signature_unlock(
+        &self,
+        essence_hash: &[u8; 32],
+        chain: &Vec<impl Segment + Send + Sync>,
+    ) -> Result<Unlock, Self::Error> {
         Ok(Unlock::Signature(SignatureUnlock::new(Signature::Ed25519(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
@@ -210,7 +218,9 @@ impl TryFrom<SecretManagerDto> for SecretManager {
             #[cfg(feature = "ledger_nano")]
             SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(is_simulator)),
 
-            SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
+            SecretManagerDto::Mnemonic(mnemonic) => {
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
+            }
 
             SecretManagerDto::HexSeed(hex_seed) => {
                 // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
@@ -303,7 +313,11 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> crate::client::Result<Ed25519Signature> {
+    async fn sign_ed25519(
+        &self,
+        msg: &[u8],
+        chain: &Vec<impl Segment + Send + Sync>,
+    ) -> crate::client::Result<Ed25519Signature> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
@@ -317,7 +331,7 @@ impl SecretManage for SecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
+        chain: &Vec<impl Segment + Send + Sync>,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
@@ -401,7 +415,7 @@ impl SecretManagerConfig for SecretManager {
                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
             }
             SecretManagerDto::Mnemonic(mnemonic) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
             SecretManagerDto::Placeholder => Self::Placeholder,
         })
@@ -410,7 +424,7 @@ impl SecretManagerConfig for SecretManager {
 
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 

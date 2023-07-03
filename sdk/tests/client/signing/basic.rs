@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::Segment;
 use iota_sdk::{
     client::{
         api::{
@@ -51,7 +51,12 @@ async fn single_ed25519_unlock() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+        Some(
+            [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                .into_iter()
+                .map(Segment::harden)
+                .collect(),
+        ),
     )]);
 
     let outputs = build_outputs([Basic(
@@ -62,7 +67,12 @@ async fn single_ed25519_unlock() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+        Some(
+            [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                .into_iter()
+                .map(Segment::harden)
+                .collect(),
+        ),
     )]);
 
     let essence = TransactionEssence::Regular(
@@ -132,7 +142,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+            Some(
+                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect(),
+            ),
         ),
         Basic(
             1_000_000,
@@ -142,7 +157,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+            Some(
+                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect(),
+            ),
         ),
         Basic(
             1_000_000,
@@ -152,7 +172,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+            Some(
+                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect(),
+            ),
         ),
     ]);
 
@@ -164,7 +189,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+        Some(
+            [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                .into_iter()
+                .map(Segment::harden)
+                .collect(),
+        ),
     )]);
 
     let essence = TransactionEssence::Regular(
@@ -254,7 +284,12 @@ async fn two_signature_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+            Some(
+                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect(),
+            ),
         ),
         Basic(
             1_000_000,
@@ -264,7 +299,12 @@ async fn two_signature_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
+            Some(
+                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect(),
+            ),
         ),
     ]);
 
@@ -276,7 +316,12 @@ async fn two_signature_unlocks() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+        Some(
+            [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                .into_iter()
+                .map(Segment::harden)
+                .collect(),
+        ),
     )]);
 
     let essence = TransactionEssence::Regular(

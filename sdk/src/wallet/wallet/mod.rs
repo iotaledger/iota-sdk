@@ -9,6 +9,7 @@ use std::sync::{
     Arc,
 };
 
+use crypto::keys::bip39::{Mnemonic, MnemonicRef};
 use tokio::sync::RwLock;
 
 #[cfg(feature = "storage")]
@@ -197,12 +198,12 @@ impl<S: SecretManage> WalletInner<S> {
     }
 
     /// Generates a new random mnemonic.
-    pub fn generate_mnemonic(&self) -> crate::wallet::Result<String> {
+    pub fn generate_mnemonic(&self) -> crate::wallet::Result<Mnemonic> {
         Ok(Client::generate_mnemonic()?)
     }
 
     /// Verify that a &str is a valid mnemonic.
-    pub fn verify_mnemonic(&self, mnemonic: &str) -> crate::wallet::Result<()> {
+    pub fn verify_mnemonic(&self, mnemonic: &MnemonicRef) -> crate::wallet::Result<()> {
         verify_mnemonic(mnemonic)?;
         Ok(())
     }

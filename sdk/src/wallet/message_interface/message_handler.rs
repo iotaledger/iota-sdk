@@ -10,10 +10,9 @@ use std::{
 };
 
 use backtrace::Backtrace;
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip39::Mnemonic;
 use futures::{Future, FutureExt};
 use primitive_types::U256;
-use zeroize::Zeroize;
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{Event, WalletEventType};
@@ -236,12 +235,14 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            Message::GenerateMnemonic => {
-                convert_panics(|| self.wallet.generate_mnemonic().map(Response::GeneratedMnemonic))
-            }
-            Message::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
+            Message::GenerateMnemonic => convert_panics(|| {
+                self.wallet
+                    .generate_mnemonic()
+                    .map(|m| Response::GeneratedMnemonic(m.as_ref().to_owned()))
+            }),
+            Message::VerifyMnemonic { mnemonic } => convert_panics(|| {
+                let mnemonic = Mnemonic::from(mnemonic);
                 self.wallet.verify_mnemonic(&mnemonic)?;
-                mnemonic.zeroize();
                 Ok(Response::Ok(()))
             }),
             Message::SetClientOptions { client_options } => {
@@ -313,6 +314,7 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::StoreMnemonic { mnemonic } => {
+                let mnemonic = mnemonic.into();
                 convert_async_panics(|| async {
                     self.wallet.store_mnemonic(mnemonic).await?;
                     Ok(Response::Ok(()))
@@ -602,7 +604,7 @@ impl WalletMessageHandler {
                     .secret_manager
                     .read()
                     .await
-                    .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
+                    .sign_secp256k1_ecdsa(&msg, &chain)
                     .await?;
                 Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),

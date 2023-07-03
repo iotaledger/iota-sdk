@@ -10,6 +10,7 @@
 
 use std::env::var;
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
@@ -38,7 +39,7 @@ async fn main() -> Result<()> {
         .password(var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
-    let mnemonic = var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic = Mnemonic::from(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap());
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;

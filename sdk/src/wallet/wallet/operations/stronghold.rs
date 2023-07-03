@@ -3,6 +3,8 @@
 
 use std::time::Duration;
 
+use crypto::keys::bip39::Mnemonic;
+
 use crate::{
     client::{secret::SecretManager, stronghold::StrongholdAdapter, utils::Password},
     wallet::Wallet,
@@ -44,7 +46,7 @@ impl Wallet {
     }
 
     /// Stores a mnemonic into the Stronghold vault
-    pub async fn store_mnemonic(&self, mnemonic: String) -> crate::wallet::Result<()> {
+    pub async fn store_mnemonic(&self, mnemonic: Mnemonic) -> crate::wallet::Result<()> {
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
             stronghold.store_mnemonic(mnemonic).await?;
         }
@@ -98,7 +100,7 @@ impl Wallet<StrongholdAdapter> {
     }
 
     /// Stores a mnemonic into the Stronghold vault
-    pub async fn store_mnemonic(&self, mnemonic: String) -> crate::wallet::Result<()> {
+    pub async fn store_mnemonic(&self, mnemonic: Mnemonic) -> crate::wallet::Result<()> {
         Ok(self.secret_manager.write().await.store_mnemonic(mnemonic).await?)
     }
 

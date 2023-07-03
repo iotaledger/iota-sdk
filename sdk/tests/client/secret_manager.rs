@@ -34,8 +34,8 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     let dto = r#"{"stronghold": {"password": "some_hopefully_secure_password", "snapshotPath": "snapshot_test_dir/test.stronghold"}}"#;
-    let mnemonic = String::from(
-        "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast",
+    let mnemonic = crypto::keys::bip39::Mnemonic::from(
+        "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned(),
     );
 
     let mut secret_manager: SecretManager = dto.parse()?;

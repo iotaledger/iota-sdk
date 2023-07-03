@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip39::Mnemonic;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 #[cfg(feature = "storage")]
@@ -83,7 +84,7 @@ async fn changed_coin_type() -> Result<()> {
     let storage_path = "test-storage/changed_coin_type";
     setup(storage_path)?;
 
-    let mnemonic = DEFAULT_MNEMONIC.to_owned();
+    let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
 
     let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None).await?;
     let _account = wallet.create_account().with_alias("Alice").finish().await?;
@@ -129,7 +130,7 @@ async fn shimmer_coin_type() -> Result<()> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC.to_owned()), None).await?;
+    let wallet = make_wallet(storage_path, Some(Mnemonic::from(DEFAULT_MNEMONIC.to_owned())), None).await?;
     let account = wallet.create_account().finish().await?;
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
@@ -211,7 +212,9 @@ async fn wallet_address_generation() -> Result<()> {
         let secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password".to_owned())
             .build("test-storage/wallet_address_generation/test.stronghold")?;
-        secret_manager.store_mnemonic(DEFAULT_MNEMONIC.to_string()).await?;
+        secret_manager
+            .store_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_string()))
+            .await?;
 
         let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
         #[allow(unused_mut)]

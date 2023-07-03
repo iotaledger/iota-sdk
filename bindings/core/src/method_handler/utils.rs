@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
@@ -11,7 +12,6 @@ use iota_sdk::{
         Block,
     },
 };
-use zeroize::Zeroize;
 
 use crate::{method::UtilsMethod, response::Response, Result};
 
@@ -29,11 +29,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
-        UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
-        UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {
-            let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
-            mnemonic.zeroize();
-            response
+        UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.to_string()),
+        UtilsMethod::MnemonicToHexSeed { mnemonic } => {
+            let mnemonic = Mnemonic::from(mnemonic);
+            Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?)
         }
         UtilsMethod::BlockId { block } => {
             let block = Block::try_from_dto_unverified(block)?;
@@ -57,9 +56,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),
-        UtilsMethod::VerifyMnemonic { mut mnemonic } => {
+        UtilsMethod::VerifyMnemonic { mnemonic } => {
+            let mnemonic = Mnemonic::from(mnemonic);
             verify_mnemonic(&mnemonic)?;
-            mnemonic.zeroize();
             Response::Ok
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {

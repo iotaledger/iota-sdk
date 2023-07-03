@@ -9,7 +9,7 @@ use std::{collections::HashMap, ops::Range};
 
 use async_trait::async_trait;
 use crypto::{
-    keys::slip10::{Chain, Segment},
+    keys::slip10::Segment,
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
@@ -140,11 +140,11 @@ impl SecretManage for LedgerSecretManager {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<Ed25519Address>, Self::Error> {
         let options = options.into().unwrap_or_default();
-        let bip32_account = account_index | Segment::HARDEN_MASK;
+        let bip32_account = account_index.harden().into();
 
         let bip32 = LedgerBIP32Index {
-            bip32_index: address_indexes.start | Segment::HARDEN_MASK,
-            bip32_change: u32::from(options.internal) | Segment::HARDEN_MASK,
+            bip32_index: address_indexes.start.harden().into(),
+            bip32_change: u32::from(options.internal).harden().into(),
         };
 
         // lock the mutex to prevent multiple simultaneous requests to a ledger
@@ -173,25 +173,24 @@ impl SecretManage for LedgerSecretManager {
     }
 
     /// Ledger only allows signing messages of 32 bytes, anything else is unsupported and will result in an error.
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(
+        &self,
+        msg: &[u8],
+        chain: &Vec<impl Segment + Send + Sync>,
+    ) -> Result<Ed25519Signature, Self::Error> {
         if msg.len() != 32 {
             return Err(Error::UnsupportedOperation.into());
         }
 
         let msg = msg.to_vec();
 
-        let bip32_chain = chain
-            .segments()
-            .iter()
-            // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
-            .map(|seg| u32::from_be_bytes(seg.bs()))
-            .collect::<Vec<_>>();
+        let bip32_chain = chain.iter().copied().map(Into::<u32>::into).collect::<Vec<_>>();
 
-        let coin_type = bip32_chain[1] & !Segment::HARDEN_MASK;
-        let account_index = bip32_chain[2] | Segment::HARDEN_MASK;
+        let coin_type = bip32_chain[1].unharden().into();
+        let account_index = bip32_chain[2].harden().into();
         let bip32_index = LedgerBIP32Index {
-            bip32_change: bip32_chain[3] | Segment::HARDEN_MASK,
-            bip32_index: bip32_chain[4] | Segment::HARDEN_MASK,
+            bip32_change: bip32_chain[3].harden().into(),
+            bip32_index: bip32_chain[4].harden().into(),
         };
 
         // Lock the mutex to prevent multiple simultaneous requests to a ledger.
@@ -227,7 +226,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         _msg: &[u8],
-        _chain: &Chain,
+        _chain: &Vec<impl Segment + Send + Sync>,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         Err(Error::UnsupportedOperation.into())
     }
@@ -245,14 +244,7 @@ impl SecretManage for LedgerSecretManager {
 
         for input in &prepared_transaction.inputs_data {
             let bip32_indices = match &input.chain {
-                Some(chain) => {
-                    chain
-                        .segments()
-                        .iter()
-                        // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
-                        .map(|seg| u32::from_be_bytes(seg.bs()))
-                        .collect::<Vec<_>>()
-                }
+                Some(chain) => chain.iter().copied().map(Into::<u32>::into).collect::<Vec<_>>(),
                 None => return Err(Error::MissingBip32Chain)?,
             };
 
@@ -266,8 +258,8 @@ impl SecretManage for LedgerSecretManager {
             coin_type = Some(bip32_indices[1]);
             account_index = Some(bip32_indices[2]);
             input_bip32_indices.push(LedgerBIP32Index {
-                bip32_change: bip32_indices[3] | Segment::HARDEN_MASK,
-                bip32_index: bip32_indices[4] | Segment::HARDEN_MASK,
+                bip32_change: bip32_indices[3].harden().into(),
+                bip32_index: bip32_indices[4].harden().into(),
             });
         }
 
@@ -275,8 +267,8 @@ impl SecretManage for LedgerSecretManager {
             return Err(Error::NoAvailableInputsProvided)?;
         }
 
-        let coin_type = coin_type.unwrap() & !Segment::HARDEN_MASK;
-        let bip32_account = account_index.unwrap() | Segment::HARDEN_MASK;
+        let coin_type = coin_type.unwrap().unharden().into();
+        let bip32_account = account_index.unwrap().harden().into();
 
         // pack essence and hash into vec
         let essence_bytes = prepared_transaction.essence.pack_to_vec();
@@ -303,21 +295,14 @@ impl SecretManage for LedgerSecretManager {
                 match &prepared_transaction.remainder {
                     Some(a) => {
                         let remainder_bip32_indices = match &a.chain {
-                            Some(chain) => {
-                                chain
-                                    .segments()
-                                    .iter()
-                                    // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
-                                    .map(|seg| u32::from_be_bytes(seg.bs()))
-                                    .collect::<Vec<_>>()
-                            }
+                            Some(chain) => chain.iter().copied().map(Into::<u32>::into).collect::<Vec<_>>(),
                             None => return Err(Error::MissingBip32Chain.into()),
                         };
                         (
                             Some(&a.address),
                             LedgerBIP32Index {
-                                bip32_change: remainder_bip32_indices[3] | Segment::HARDEN_MASK,
-                                bip32_index: remainder_bip32_indices[4] | Segment::HARDEN_MASK,
+                                bip32_change: remainder_bip32_indices[3].harden().into(),
+                                bip32_index: remainder_bip32_indices[4].harden().into(),
                             },
                         )
                     }

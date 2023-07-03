@@ -5,7 +5,7 @@
 
 use std::collections::HashSet;
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::Segment;
 
 use crate::{
     client::{
@@ -71,13 +71,18 @@ impl<'a> ClientBlockBuilder<'a> {
                             required_inputs.push(InputSigningData {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
-                                chain: Some(Chain::from_u32_hardened([
-                                    HD_WALLET_TYPE,
-                                    self.coin_type,
-                                    self.account_index,
-                                    internal as u32,
-                                    address_index,
-                                ])),
+                                chain: Some(
+                                    [
+                                        HD_WALLET_TYPE,
+                                        self.coin_type,
+                                        self.account_index,
+                                        internal as u32,
+                                        address_index,
+                                    ]
+                                    .into_iter()
+                                    .map(Segment::harden)
+                                    .collect(),
+                                ),
                             });
                             found_output = true;
                             break;
@@ -131,13 +136,16 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened([
+                                    [
                                         HD_WALLET_TYPE,
                                         self.coin_type,
                                         self.account_index,
                                         internal as u32,
                                         address_index,
-                                    ])
+                                    ]
+                                    .into_iter()
+                                    .map(Segment::harden)
+                                    .collect()
                                 }),
                             });
                         }
@@ -188,13 +196,16 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened([
+                                    [
                                         HD_WALLET_TYPE,
                                         self.coin_type,
                                         self.account_index,
                                         internal as u32,
                                         address_index,
-                                    ])
+                                    ]
+                                    .into_iter()
+                                    .map(Segment::harden)
+                                    .collect()
                                 }),
                             });
                         }

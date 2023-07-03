@@ -8,13 +8,13 @@
 //! cargo run --release --all-features --example sign_ed25519
 //! ```
 
+use crypto::keys::{bip39::Mnemonic, slip10::Segment};
 use iota_sdk::{
     client::{
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
         hex_public_key_to_bech32_address,
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    crypto::keys::slip10::Chain,
     wallet::Result,
 };
 
@@ -34,16 +34,21 @@ async fn main() -> Result<()> {
         .build("sign_ed25519.stronghold")?;
 
     stronghold
-        .store_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())
+        .store_mnemonic(Mnemonic::from(
+            std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap(),
+        ))
         .await?;
 
-    let bip32_chain = Chain::from_u32_hardened([
+    let bip32_chain = [
         HD_WALLET_TYPE,
         SHIMMER_COIN_TYPE,
         ACCOUNT_INDEX,
         INTERNAL_ADDRESS as u32,
         ADDRESS_INDEX,
-    ]);
+    ]
+    .into_iter()
+    .map(Segment::harden)
+    .collect();
 
     let message = FOUNDRY_METADATA.as_bytes();
     let signature = SecretManager::Stronghold(stronghold)

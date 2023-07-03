@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::Segment;
 use instant::Instant;
 
 use crate::{
@@ -49,13 +49,16 @@ where
                     .map_or(false, |tx| !tx.incoming);
 
                 // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                let chain = Chain::from_u32_hardened([
+                let chain = [
                     HD_WALLET_TYPE,
                     account_details.coin_type,
                     account_details.index,
                     associated_address.internal as u32,
                     associated_address.key_index,
-                ]);
+                ]
+                .into_iter()
+                .map(Segment::harden)
+                .collect();
 
                 OutputData {
                     output_id: output_with_meta.metadata().output_id().to_owned(),

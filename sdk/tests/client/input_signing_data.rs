@@ -3,7 +3,7 @@
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::Segment;
 use iota_sdk::{
     client::{
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
@@ -43,7 +43,7 @@ fn input_signing_data_conversion() {
             0,
             0,
         ),
-        chain: Some(Chain::from_u32_hardened(bip32_chain)),
+        chain: Some(bip32_chain.into_iter().map(Segment::harden).collect()),
     };
 
     let input_signing_data_dto = InputSigningDataDto::from(&input_signing_data);
@@ -68,6 +68,6 @@ fn input_signing_data_conversion() {
     assert!(restored_input_signing_data.output.is_basic());
     assert_eq!(
         restored_input_signing_data.chain,
-        Some(Chain::from_u32_hardened(bip32_chain))
+        Some(bip32_chain.into_iter().map(Segment::harden).collect())
     );
 }

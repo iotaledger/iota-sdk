@@ -199,7 +199,7 @@ async fn address_generation() {
                 .unwrap();
 
             stronghold_secret_manager
-                .store_mnemonic(address.mnemonic.clone())
+                .store_mnemonic(address.mnemonic.clone().into())
                 .await
                 .unwrap();
 

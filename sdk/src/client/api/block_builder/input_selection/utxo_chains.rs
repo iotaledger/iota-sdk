@@ -3,7 +3,7 @@
 
 //! input selection for utxo chains
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::Segment;
 
 use crate::{
     client::{
@@ -190,13 +190,16 @@ impl<'a> ClientBlockBuilder<'a> {
                 output: output_with_meta.output,
                 output_metadata: output_with_meta.metadata,
                 chain: address_index_internal.map(|(address_index, internal)| {
-                    Chain::from_u32_hardened([
+                    [
                         HD_WALLET_TYPE,
                         self.coin_type,
                         self.account_index,
                         internal as u32,
                         address_index,
-                    ])
+                    ]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect()
                 }),
             });
         }

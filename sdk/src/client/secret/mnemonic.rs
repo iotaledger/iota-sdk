@@ -8,7 +8,10 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::slip10::{Chain, Seed},
+    keys::{
+        bip39::Mnemonic,
+        slip10::{Seed, Segment},
+    },
     signatures::{
         ed25519,
         secp256k1_ecdsa::{self, EvmAddress},
@@ -48,17 +51,13 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(address_indexes
             .map(|address_index| {
-                let chain = Chain::from_u32_hardened([
-                    HD_WALLET_TYPE,
-                    coin_type,
-                    account_index,
-                    internal as u32,
-                    address_index,
-                ]);
+                let chain = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]
+                    .into_iter()
+                    .map(Segment::harden);
 
                 let public_key = self
                     .0
-                    .derive::<ed25519::SecretKey>(&chain)?
+                    .derive::<ed25519::SecretKey, _>(chain)
                     .secret_key()
                     .public_key()
                     .to_bytes();
@@ -84,12 +83,14 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(address_indexes
             .map(|address_index| {
-                let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
-                    .join(Chain::from_u32([internal as u32, address_index]));
+                let chain = [HD_WALLET_TYPE, coin_type, account_index]
+                    .into_iter()
+                    .map(|s| s.harden().into())
+                    .chain([internal as u32, address_index]);
 
                 let public_key = self
                     .0
-                    .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
+                    .derive::<secp256k1_ecdsa::SecretKey, _>(chain)
                     .secret_key()
                     .public_key();
 
@@ -98,9 +99,16 @@ impl SecretManage for MnemonicSecretManager {
             .collect::<Result<_, _>>()?)
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(
+        &self,
+        msg: &[u8],
+        chain: &Vec<impl Segment + Send + Sync>,
+    ) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let private_key = self.0.derive::<ed25519::SecretKey>(chain)?.secret_key();
+        let private_key = self
+            .0
+            .derive::<ed25519::SecretKey, _>(chain.iter().copied().map(Segment::harden))
+            .secret_key();
         let public_key = private_key.public_key().to_bytes();
         let signature = private_key.sign(msg).to_bytes();
 
@@ -110,10 +118,13 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
+        chain: &Vec<impl Segment + Send + Sync>,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         // Get the private and public key for this secp256k1_ecdsa key
-        let private_key = self.0.derive::<secp256k1_ecdsa::SecretKey>(chain)?.secret_key();
+        let private_key = self
+            .0
+            .derive::<secp256k1_ecdsa::SecretKey, _>(chain.iter().copied().map(Into::<u32>::into))
+            .secret_key();
         let public_key = private_key.public_key();
         let signature = private_key.sign(msg);
 
@@ -140,8 +151,8 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?))
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
+        Ok(Self(Client::mnemonic_to_seed(&mnemonic.into())?.into()))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.

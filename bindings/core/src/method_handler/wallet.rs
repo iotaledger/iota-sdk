@@ -162,6 +162,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::StoreMnemonic { mnemonic } => {
+            let mnemonic = mnemonic.into();
             wallet.store_mnemonic(mnemonic).await?;
             Response::Ok
         }

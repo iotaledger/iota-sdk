@@ -3,7 +3,7 @@
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::Segment;
 use iota_sdk::{
     client::{
         api::{
@@ -61,7 +61,12 @@ async fn nft_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+            Some(
+                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
+                    .into_iter()
+                    .map(Segment::harden)
+                    .collect(),
+            ),
         ),
         Basic(
             1_000_000,
