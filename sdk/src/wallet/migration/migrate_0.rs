@@ -114,6 +114,19 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
     Ok(())
 }
 
+fn migrate_storage_options(storage_options: &mut serde_json::Value) -> Result<()> {
+    if !storage_options.is_null() {
+        *storage_options = serde_json::json!({
+            "path": storage_options["storage_path"],
+            "fileName": storage_options["storage_file_name"],
+            "encryptionKey": storage_options["storage_encryption_key"],
+            "kind": storage_options["manager_store"]
+        });
+    }
+
+    Ok(())
+}
+
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 0;
@@ -146,6 +159,7 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
             migrate_client_options(&mut wallet["client_options"])?;
+            migrate_storage_options(&mut wallet["storage_options"])?;
 
             storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
         }
