@@ -6,7 +6,7 @@
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client,
+        request_funds_from_faucet, secret::SecretManager, Client, NodeInfoWrapper,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
@@ -411,22 +411,13 @@ async fn test_mqtt() {
 async fn test_call_plugin_route() {
     let c = setup_client_with_node_health_ignored().await;
 
-    let nft_id = "0x0000000000000000000000000000000000000000000000000000000000000000"
-        .try_into()
-        .unwrap();
-
-    let route = format!("outputs/nft/{nft_id}");
-
-    let plugin_res: OutputIdsResponse = c
-        .call_plugin_route::<OutputIdsResponse>("api/indexer/v1/", "GET", &route, vec![], None)
+    // we call the "custom" plugin "node info"
+    let plugin_res: NodeInfoWrapper = c
+        .call_plugin_route("/api/core/v2/", "GET", "info", vec![], None)
         .await
         .unwrap();
-    let nft_1 = plugin_res.items.first();
 
-    let nft_2 = c.nft_output_id(nft_id).await;
+    let info = c.get_info().await.unwrap();
 
-    // Actually this returns Err(Error::Node(crate::client::node_api::error::Error::NotFound(e)))
-    if let (Some(id_1), Ok(id_2)) = (nft_1, &nft_2) {
-        assert_eq!(id_1, id_2);
-    }
+    assert_eq!(plugin_res, info);
 }
