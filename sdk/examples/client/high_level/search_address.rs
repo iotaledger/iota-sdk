@@ -28,8 +28,10 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let mut args = std::env::args().skip(1);
-    let address = if let Some(addr) = args.next().map(|addr| addr.parse().expect("invalid address")) {
+    let address = if let Some(addr) = std::env::args()
+        .nth(1)
+        .map(|addr| addr.parse().expect("invalid address"))
+    {
         addr
     } else {
         secret_manager
@@ -38,8 +40,8 @@ async fn main() -> Result<()> {
     };
     println!("Search address: {address:#?}");
 
-    let address_range_start = args.next().map(|s| s.parse::<u32>().unwrap()).unwrap_or(0);
-    let address_range_len = args.next().map(|s| s.parse::<u32>().unwrap()).unwrap_or(10);
+    let address_range_start = std::env::args().nth(2).map(|s| s.parse::<u32>().unwrap()).unwrap_or(0);
+    let address_range_len = std::env::args().nth(3).map(|s| s.parse::<u32>().unwrap()).unwrap_or(10);
     let address_range = address_range_start..address_range_start + address_range_len;
 
     let (address_index, is_internal) = search_address(

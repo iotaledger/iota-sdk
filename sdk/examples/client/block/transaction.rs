@@ -18,8 +18,10 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
-    let mut args = std::env::args().skip(1);
-    let amount = args.next().map(|s| s.parse::<u64>().unwrap()).unwrap_or(1_000_000u64);
+    let amount = std::env::args()
+        .nth(1)
+        .map(|s| s.parse::<u64>().unwrap())
+        .unwrap_or(1_000_000u64);
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -40,7 +42,10 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     // If no custom address is provided, we will use the first address from the seed.
-    let recv_address = args.next().map(|s| s.parse().unwrap()).unwrap_or(first_address);
+    let recv_address = std::env::args()
+        .nth(2)
+        .map(|s| s.parse().unwrap())
+        .unwrap_or(first_address);
 
     let block = client
         .block()

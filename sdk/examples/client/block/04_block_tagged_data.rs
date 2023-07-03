@@ -20,9 +20,8 @@ async fn main() -> Result<()> {
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
-    let mut args = std::env::args().skip(1);
-    let tag = args.next().unwrap_or_else(|| "Hello".to_string());
-    let data = args.next().unwrap_or_else(|| "Tangle".to_string());
+    let tag = std::env::args().nth(1).unwrap_or_else(|| "Hello".to_string());
+    let data = std::env::args().nth(2).unwrap_or_else(|| "Tangle".to_string());
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

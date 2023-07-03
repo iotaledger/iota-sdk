@@ -22,12 +22,10 @@ async fn main() -> Result<()> {
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
-    let mut args = std::env::args().skip(1);
-
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
-    let transaction_id = args
-        .next()
+    let transaction_id = std::env::args()
+        .nth(1)
         .expect("missing example argument: TRANSACTION ID")
         .parse::<TransactionId>()?;
 
