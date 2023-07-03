@@ -1,10 +1,16 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/basic`.
+//! Gets all basic output ids accociated with an address by querying the
+//! `api/indexer/v1/outputs/basic` node endpoint.
 //!
-//! `cargo run --release --example get_outputs -- [NODE_URL] [ADDRESS]`.
+//! Make sure that the node has the indexer plugin enabled.
+//! Make sure to provide a somewhat recently used address to make this example run successfully!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example get_outputs [ADDRESS] [NODE_URL]
+//! ```
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
@@ -13,24 +19,21 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
-    let client = Client::builder()
-        // The node needs to have the indexer plugin enabled.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+
+    // Create a node client.
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the address from command line argument or use a default one.
     let address = Bech32Address::try_from_str(
         std::env::args()
-            .nth(2)
+            .nth(1)
             .as_deref()
             .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
     )?;

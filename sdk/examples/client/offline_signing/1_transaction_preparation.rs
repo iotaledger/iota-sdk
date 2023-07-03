@@ -3,13 +3,12 @@
 
 //! In this example we get inputs and prepare a transaction.
 //!
-//! `cargo run --example 1_transaction_preparation --release`
-
-use std::{
-    fs::File,
-    io::{prelude::*, BufWriter},
-    path::Path,
-};
+//! Make sure to run `0_address_generation` before.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 1_transaction_preparation [RECV ADDRESS] [AMOUNT]
+//! ```
 
 use iota_sdk::{
     client::{
@@ -30,19 +29,23 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
 
     // Address to which we want to send the amount.
-    let address = "rms1qruzprxum2934lr3p77t96pzlecxv8pjzvtjrzdcgh2f5exa22n6ga0vm69";
+    let recv_address = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "rms1qruzprxum2934lr3p77t96pzlecxv8pjzvtjrzdcgh2f5exa22n6ga0vm69".to_string());
+    let recv_address = recv_address.as_str();
+
     // The amount to send.
-    let amount = 1_000_000;
+    let amount = std::env::args()
+        .nth(2)
+        .map(|s| s.parse::<u64>().unwrap())
+        .unwrap_or(1_000_000u64);
 
-    // Create a client instance.
-    let online_client = Client::builder()
-        // Insert your node URL in the .env.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    // Create a node client.
+    let online_client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Recovers addresses from example `0_address_generation`.
-    let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;
+    // Recovers addresses from the previous example.
+    let addresses = read_addresses_from_file(ADDRESS_FILE_NAME).await?;
+
     // Gets enough inputs related to these addresses to cover the amount.
     let inputs = online_client.find_inputs(addresses, amount).await?;
 
@@ -52,34 +55,40 @@ async fn main() -> Result<()> {
         transaction_builder = transaction_builder.with_input(input)?;
     }
     let prepared_transaction = transaction_builder
-        .with_output(address, amount)
+        .with_output(recv_address, amount)
         .await?
         .prepare_transaction()
         .await?;
 
-    println!("Prepared transaction sending {amount} to {address}.");
+    println!("Prepared transaction sending {amount} to {recv_address}.");
 
-    write_prepared_transaction_to_file(PREPARED_TRANSACTION_FILE_NAME, &prepared_transaction)
+    write_prepared_transaction_to_file(PREPARED_TRANSACTION_FILE_NAME, &prepared_transaction).await?;
+
+    Ok(())
 }
 
-fn read_addresses_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<Bech32Address>> {
-    let mut file = File::open(&path).unwrap();
+async fn read_addresses_from_file(path: impl AsRef<std::path::Path>) -> Result<Vec<Bech32Address>> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(&path).await.expect("failed to open file");
     let mut json = String::new();
-    file.read_to_string(&mut json).unwrap();
+    file.read_to_string(&mut json).await.expect("failed to read file");
 
     Ok(serde_json::from_str(&json)?)
 }
 
-fn write_prepared_transaction_to_file<P: AsRef<Path>>(
-    path: P,
+async fn write_prepared_transaction_to_file(
+    path: impl AsRef<std::path::Path>,
     prepared_transaction: &PreparedTransactionData,
 ) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(prepared_transaction))?;
-    let mut file = BufWriter::new(File::create(path).unwrap());
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
 
     println!("{json}");
 
-    file.write_all(json.as_bytes()).unwrap();
+    file.write_all(json.as_bytes()).await.expect("failed to write file");
 
     Ok(())
 }

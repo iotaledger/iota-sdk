@@ -14,8 +14,6 @@
 //! cargo run --release --all-features --example ledger_nano
 //! ```
 
-use std::{env::var, time::Instant};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -38,11 +36,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = LedgerSecretManager::new(true);
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -59,7 +57,7 @@ async fn main() -> Result<()> {
     };
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let addresses = account
         .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
         .await?;
@@ -67,7 +65,7 @@ async fn main() -> Result<()> {
 
     println!("ADDRESSES:\n{addresses:#?}");
 
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("Account synced in: {:.2?}", now.elapsed());
 
@@ -82,12 +80,12 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("Account synced in: {:.2?}", now.elapsed());
 

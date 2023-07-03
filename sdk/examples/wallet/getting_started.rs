@@ -4,14 +4,12 @@
 //! In this example we will create a new wallet, a mnemonic, and an initial account. Then, we'll print the first address
 //! of that account.
 //!
-//! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//! Make sure there's no `STRONGHOLD_SNAPSHOT_PATH` file and no `WALLET_DB_PATH` folder yet!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example wallet_getting_started
 //! ```
-
-use std::env::var;
 
 use iota_sdk::{
     client::{
@@ -28,15 +26,15 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(var("STRONGHOLD_PASSWORD").unwrap())
-        .build(var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()

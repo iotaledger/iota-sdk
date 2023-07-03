@@ -3,7 +3,10 @@
 
 //! In this example we will create an address with a stronghold secret manager.
 //!
-//! `cargo run --example stronghold --features=stronghold --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example client_stronghold
+//! ```
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::client::{

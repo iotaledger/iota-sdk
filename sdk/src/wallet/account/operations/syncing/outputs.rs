@@ -138,6 +138,7 @@ where
                     .inaccessible_incoming_transactions
                     .contains(transaction_id))
         });
+        drop(account_details);
 
         // Limit parallel requests to 100, to avoid timeouts
         let results =

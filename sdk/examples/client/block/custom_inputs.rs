@@ -1,10 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send 1_000_000 tokens to atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r.
-//! This address belongs to the first seed in .env.example.
+//! In this example we will send a certain amount of tokens to some address using custom inputs.
 //!
-//! `cargo run --example custom_inputs --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example custom_inputs [AMOUNT] [ADDRESS]
+//! ```
 
 use iota_sdk::{
     client::{
@@ -22,36 +24,46 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
-    // Create a client instance
-    let client = Client::builder()
-        .with_node(&node_url)? // Insert your node URL here
-        .finish()
-        .await?;
+    let amount = std::env::args()
+        .nth(1)
+        .map(|s| s.parse::<u64>().unwrap())
+        .unwrap_or(1_000_000u64);
 
-    // First address from the seed below is atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r
+    // Create a node client.
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
+
     let secret_manager =
-        SecretManager::try_from_hex_seed(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let addresses = secret_manager
+    // Get the first address of the seed
+    let first_address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
-        .await?;
-    println!("{:?}", addresses[0]);
+        .await?[0];
+    println!("1st address: {first_address:#?}");
 
-    println!("{}", request_funds_from_faucet(&faucet_url, &addresses[0]).await?);
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&faucet_url, &first_address).await?
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let output_ids_response = client.basic_output_ids([QueryParameter::Address(addresses[0])]).await?;
+    let output_ids_response = client
+        .basic_output_ids([QueryParameter::Address(first_address)])
+        .await?;
     println!("{output_ids_response:?}");
+
+    // If no custom address is provided, we will use the first address from the seed.
+    let recv_address = std::env::args()
+        .nth(2)
+        .map(|s| s.parse().unwrap())
+        .unwrap_or(first_address);
 
     let block = client
         .block()
         .with_secret_manager(&secret_manager)
         .with_input(UtxoInput::from(output_ids_response.items[0]))?
         //.with_input_range(20..25)
-        .with_output(
-            "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r",
-            1_000_000,
-        )
+        .with_output(recv_address, amount)
         .await?
         .finish()
         .await?;

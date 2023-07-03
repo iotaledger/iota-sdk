@@ -8,8 +8,6 @@
 //! cargo run --release --all-features --example 0_generate_addresses
 //! ```
 
-use std::env::var;
-
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
@@ -17,10 +15,6 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
     wallet::{Account, ClientOptions, Result, Wallet},
-};
-use tokio::{
-    fs::File,
-    io::{AsyncWriteExt, BufWriter},
 };
 
 const OFFLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-offline-walletdb";
@@ -36,10 +30,10 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
-    let mnemonic = Mnemonic::from(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap());
+    let mnemonic = Mnemonic::from(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap());
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
@@ -67,9 +61,11 @@ async fn main() -> Result<()> {
 }
 
 async fn write_addresses_to_file(account: &Account) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let addresses = account.addresses().await?;
     let json = serde_json::to_string_pretty(&addresses)?;
-    let mut file = BufWriter::new(File::create(ADDRESSES_FILE_PATH).await?);
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(ADDRESSES_FILE_PATH).await?);
     println!("example.addresses.json:\n{json}");
     file.write_all(json.as_bytes()).await?;
     file.flush().await?;
