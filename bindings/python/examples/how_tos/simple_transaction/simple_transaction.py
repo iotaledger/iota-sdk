@@ -24,4 +24,4 @@ outputs = [{
 }]
 
 transaction = account.send_amount(outputs)
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
