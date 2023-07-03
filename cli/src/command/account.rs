@@ -408,7 +408,7 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
 }
 
 // `create-account-output` command
-pub async fn create_account_outputs_command(account: &Account) -> Result<(), Error> {
+pub async fn create_account_output_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Creating account output.");
 
     let transaction = account.create_account_output(None, None).await?;
