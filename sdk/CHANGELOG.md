@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 - `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
 - Support for `LedgerSecretManager::sign_ed25519`;
+- `UnlockCondition::{is_address, is_storage_deposit_return, is_timelock, is_expiration, is_state_controller_address, is_governor_address, is_immutable_alias_address}`;
+- `UnlockCondition::{as_address, as_storage_deposit_return, as_timelock, as_expiration, as_state_controller_address, as_governor_address, as_immutable_alias_address}`;
 - `call_plugin_route` to Client to fetch data from custom node plugins;
 
 ### Changed
