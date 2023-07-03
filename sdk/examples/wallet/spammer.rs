@@ -49,6 +49,7 @@ async fn main() -> Result<()> {
     let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
 
     let recv_address = *account.addresses().await?[0].address();
+    println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.
     ensure_enough_funds(&account, &recv_address).await?;

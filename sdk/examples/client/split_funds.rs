@@ -39,12 +39,7 @@ async fn main() -> Result<()> {
     let mut block_builder = client.block().with_secret_manager(&secret_manager);
     // Insert the output address and amount to spent. The amount cannot be zero.
     for _ in 0..100 {
-        block_builder = block_builder
-            .with_output(
-                address, // &client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0],
-                1_000_000,
-            )
-            .await?;
+        block_builder = block_builder.with_output(address, 1_000_000).await?;
     }
     let block = block_builder.finish().await?;
 
