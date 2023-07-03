@@ -78,8 +78,8 @@ impl QueryParameters {
 pub enum QueryParameter {
     /// Bech32-encoded address that should be searched for.
     Address(Bech32Address),
-    /// Filter foundry outputs based on bech32-encoded address of the controlling alias.
-    AliasAddress(Bech32Address),
+    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
+    AccountAddress(Bech32Address),
     /// Returns outputs that were created after a certain Unix timestamp.
     CreatedAfter(u32),
     /// Returns outputs that were created before a certain Unix timestamp.
@@ -131,7 +131,7 @@ impl QueryParameter {
     fn to_query_string(&self) -> String {
         match self {
             Self::Address(v) => format!("address={v}"),
-            Self::AliasAddress(v) => format!("aliasAddress={v}"),
+            Self::AccountAddress(v) => format!("accountAddress={v}"),
             Self::CreatedAfter(v) => format!("createdAfter={v}"),
             Self::CreatedBefore(v) => format!("createdBefore={v}"),
             Self::Cursor(v) => format!("cursor={v}"),
@@ -159,7 +159,7 @@ impl QueryParameter {
     pub(crate) fn kind(&self) -> u8 {
         match self {
             Self::Address(_) => 0,
-            Self::AliasAddress(_) => 1,
+            Self::AccountAddress(_) => 1,
             Self::CreatedAfter(_) => 2,
             Self::CreatedBefore(_) => 3,
             Self::Cursor(_) => 4,
@@ -230,7 +230,9 @@ pub(crate) fn verify_query_parameters_basic_outputs(query_parameters: Vec<QueryP
     Ok(QueryParameters::new(query_parameters))
 }
 
-pub(crate) fn verify_query_parameters_alias_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {
+pub(crate) fn verify_query_parameters_account_outputs(
+    query_parameters: Vec<QueryParameter>,
+) -> Result<QueryParameters> {
     verify_query_parameters!(
         query_parameters,
         QueryParameter::StateController,
@@ -254,7 +256,7 @@ pub(crate) fn verify_query_parameters_foundry_outputs(
 ) -> Result<QueryParameters> {
     verify_query_parameters!(
         query_parameters,
-        QueryParameter::AliasAddress,
+        QueryParameter::AccountAddress,
         QueryParameter::HasNativeTokens,
         QueryParameter::MinNativeTokenCount,
         QueryParameter::MaxNativeTokenCount,

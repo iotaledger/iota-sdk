@@ -18,7 +18,7 @@ use crate::{
     client::{Error, Result},
     types::block::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-        output::{AliasId, NftId},
+        output::{AccountId, NftId},
         payload::TaggedDataPayload,
         ConvertTo,
     },
@@ -28,7 +28,7 @@ use crate::{
 pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
     Ok(match bech32.convert()?.inner() {
         Address::Ed25519(ed) => ed.to_string(),
-        Address::Alias(alias) => alias.to_string(),
+        Address::Account(account) => account.to_string(),
         Address::Nft(nft) => nft.to_string(),
     })
 }
@@ -120,15 +120,15 @@ impl ClientInner {
         }
     }
 
-    /// Transforms an alias id to a bech32 encoded address
-    pub async fn alias_id_to_bech32(
+    /// Transforms an account id to a bech32 encoded address
+    pub async fn account_id_to_bech32(
         &self,
-        alias_id: AliasId,
+        account_id: AccountId,
         bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
-            Some(hrp) => Ok(alias_id.to_bech32(hrp.convert()?)),
-            None => Ok(alias_id.to_bech32(self.get_bech32_hrp().await?)),
+            Some(hrp) => Ok(account_id.to_bech32(hrp.convert()?)),
+            None => Ok(account_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 

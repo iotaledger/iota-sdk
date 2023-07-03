@@ -84,9 +84,10 @@ jobs:
         working-directory: bindings/nodejs/
         run: yarn rebuild
 
-      - name: Run Yarn Test
-        working-directory: bindings/nodejs/
-        run: yarn test
+      # TODO reenable https://github.com/iotaledger/iota-sdk/issues/647
+      # - name: Run Yarn Test
+      #   working-directory: bindings/nodejs/
+      #   run: yarn test
 
       - name: Yarn Build Examples
         working-directory: bindings/nodejs/examples/

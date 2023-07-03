@@ -13,7 +13,7 @@ pub use self::options::SyncOptions;
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::{Address, AliasAddress, NftAddress, ToBech32Ext},
+        address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         output::{FoundryId, Output, OutputId, OutputMetadata},
     },
     wallet::account::{
@@ -154,22 +154,22 @@ where
         .await
     }
 
-    // First request all outputs directly related to the ed25519 addresses, then for each nft and alias output we got,
-    // request all outputs that are related to their alias/nft addresses in a loop until no new alias or nft outputs is
-    // found
+    // First request all outputs directly related to the ed25519 addresses, then for each nft and account output we got,
+    // request all outputs that are related to their account/nft addresses in a loop until no new account or nft outputs
+    // is found
     async fn request_outputs_recursively(
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<AddressWithUnspentOutputs>, Vec<OutputData>)> {
-        // Cache the alias and nft address with the related ed2559 address, so we can update the account address with
+        // Cache the account and nft address with the related ed2559 address, so we can update the account address with
         // the new output ids
-        let mut new_alias_and_nft_addresses = HashMap::new();
+        let mut new_account_and_nft_addresses = HashMap::new();
         let (mut spent_or_not_synced_output_ids, mut addresses_with_unspent_outputs, mut outputs_data) =
             (Vec::new(), Vec::new(), Vec::new());
 
         loop {
-            let new_outputs_data = if new_alias_and_nft_addresses.is_empty() {
+            let new_outputs_data = if new_account_and_nft_addresses.is_empty() {
                 // Get outputs for addresses and add them also the the addresses_with_unspent_outputs
                 let (addresses_with_output_ids, spent_or_not_synced_output_ids_inner) = self
                     .get_output_ids_for_addresses(options, addresses_to_sync.clone())
@@ -185,8 +185,8 @@ where
             } else {
                 let bech32_hrp = self.client().get_bech32_hrp().await?;
                 let mut new_outputs_data = Vec::new();
-                for (alias_or_nft_address, ed25519_address) in new_alias_and_nft_addresses {
-                    let output_ids = self.get_output_ids_for_address(alias_or_nft_address, options).await?;
+                for (account_or_nft_address, ed25519_address) in new_account_and_nft_addresses {
+                    let output_ids = self.get_output_ids_for_address(account_or_nft_address, options).await?;
 
                     // Update address with unspent outputs
                     let address_with_unspent_outputs = addresses_with_unspent_outputs
@@ -210,26 +210,27 @@ where
             };
 
             // Clear, so we only get new addresses
-            new_alias_and_nft_addresses = HashMap::new();
-            // Add new alias and nft addresses
+            new_account_and_nft_addresses = HashMap::new();
+            // Add new account and nft addresses
             for output_data in new_outputs_data.iter() {
                 match &output_data.output {
-                    Output::Alias(alias_output) => {
-                        let alias_address = AliasAddress::from(alias_output.alias_id_non_null(&output_data.output_id));
+                    Output::Account(account_output) => {
+                        let account_address =
+                            AccountAddress::from(account_output.account_id_non_null(&output_data.output_id));
 
-                        new_alias_and_nft_addresses.insert(Address::Alias(alias_address), output_data.address);
+                        new_account_and_nft_addresses.insert(Address::Account(account_address), output_data.address);
                     }
                     Output::Nft(nft_output) => {
                         let nft_address = NftAddress::from(nft_output.nft_id_non_null(&output_data.output_id));
 
-                        new_alias_and_nft_addresses.insert(Address::Nft(nft_address), output_data.address);
+                        new_account_and_nft_addresses.insert(Address::Nft(nft_address), output_data.address);
                     }
                     _ => {}
                 }
             }
 
-            log::debug!("[SYNC] new_alias_and_nft_addresses: {new_alias_and_nft_addresses:?}");
-            if new_alias_and_nft_addresses.is_empty() {
+            log::debug!("[SYNC] new_account_and_nft_addresses: {new_account_and_nft_addresses:?}");
+            if new_account_and_nft_addresses.is_empty() {
                 break;
             }
         }

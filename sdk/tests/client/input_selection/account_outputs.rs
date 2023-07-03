@@ -12,7 +12,7 @@ use iota_sdk::{
         address::Address,
         output::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, AliasTransition, Output,
+            AccountId, AccountOutputBuilder, AccountTransition, Output,
         },
         protocol::protocol_parameters,
         rand::output::rand_output_metadata,
@@ -21,19 +21,19 @@ use iota_sdk::{
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
-    ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ALIAS_2, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
+    Build::{Account, Basic},
+    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ACCOUNT_2,
+    BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
 };
 
 #[test]
-fn input_alias_eq_output_alias() {
+fn input_account_eq_output_account() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -42,9 +42,9 @@ fn input_alias_eq_output_alias() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -68,13 +68,13 @@ fn input_alias_eq_output_alias() {
 }
 
 #[test]
-fn transition_alias_id_zero() {
+fn transition_account_id_zero() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -83,10 +83,10 @@ fn transition_alias_id_zero() {
         None,
         None,
     )]);
-    let alias_id = AliasId::from(inputs[0].output_id());
-    let outputs = build_outputs([Alias(
+    let account_id = AccountId::from(inputs[0].output_id());
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id,
+        account_id,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -112,11 +112,11 @@ fn transition_alias_id_zero() {
 #[test]
 fn input_amount_lt_output_amount() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -148,7 +148,7 @@ fn input_amount_lt_output_amount() {
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_000,
-            // Amount we want to send + storage deposit for alias remainder
+            // Amount we want to send + storage deposit for account remainder
             required: 2_251_500,
         })
     ));
@@ -157,12 +157,12 @@ fn input_amount_lt_output_amount() {
 #[test]
 fn input_amount_lt_output_amount_2() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_2,
+            account_id_2,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -196,20 +196,20 @@ fn input_amount_lt_output_amount_2() {
         selected,
         Err(Error::InsufficientAmount {
             found: 3_000_000,
-            // Amount we want to send + storage deposit for alias remainder
+            // Amount we want to send + storage deposit for account remainder
             required: 3_251_501
         })
     ));
 }
 
 #[test]
-fn basic_output_with_alias_input() {
+fn basic_output_with_account_input() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_251_500,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -239,14 +239,14 @@ fn basic_output_with_alias_input() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
-    // basic output + alias remainder
+    // basic output + account remainder
     assert_eq!(selected.outputs.len(), 2);
 }
 
 #[test]
-fn create_alias() {
+fn create_account() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         2_000_000,
@@ -258,9 +258,9 @@ fn create_alias() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -282,10 +282,10 @@ fn create_alias() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     // One output should be added for the remainder
     assert_eq!(selected.outputs.len(), 2);
-    // Output contains the new minted alias id
+    // Output contains the new minted account id
     assert!(selected.outputs.iter().any(|output| {
-        if let Output::Alias(alias_output) = output {
-            *alias_output.alias_id() == alias_id_0
+        if let Output::Account(account_output) = output {
+            *account_output.account_id() == account_id_0
         } else {
             false
         }
@@ -293,13 +293,13 @@ fn create_alias() {
 }
 
 #[test]
-fn burn_alias() {
+fn burn_account() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -325,7 +325,7 @@ fn burn_alias() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_2))
+    .burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
 
@@ -336,11 +336,11 @@ fn burn_alias() {
 #[test]
 fn not_enough_storage_deposit_for_remainder() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_001,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -349,9 +349,9 @@ fn not_enough_storage_deposit_for_remainder() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -379,9 +379,9 @@ fn not_enough_storage_deposit_for_remainder() {
 }
 
 #[test]
-fn missing_input_for_alias_output() {
+fn missing_input_for_account_output() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -393,9 +393,9 @@ fn missing_input_for_alias_output() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -415,20 +415,20 @@ fn missing_input_for_alias_output() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::Governance))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::Governance))) if account_id == account_id_2
     ));
 }
 
 #[test]
-fn missing_input_for_alias_output_2() {
+fn missing_input_for_account_output_2() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -439,9 +439,9 @@ fn missing_input_for_alias_output_2() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -461,14 +461,14 @@ fn missing_input_for_alias_output_2() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::Governance))) if alias_id == alias_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::Governance))) if account_id == account_id_2
     ));
 }
 
 #[test]
-fn missing_input_for_alias_output_but_created() {
+fn missing_input_for_account_output_but_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -480,9 +480,9 @@ fn missing_input_for_alias_output_but_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -504,14 +504,14 @@ fn missing_input_for_alias_output_but_created() {
 }
 
 #[test]
-fn alias_in_output_and_sender() {
+fn account_in_output_and_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -522,21 +522,21 @@ fn alias_in_output_and_sender() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let alias_output = AliasOutputBuilder::from(inputs[0].output.as_alias())
-        .with_state_index(inputs[0].output.as_alias().state_index() + 1)
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_state_index(inputs[0].output.as_account().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
     let mut outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
         None,
     )]);
-    outputs.push(alias_output);
+    outputs.push(account_output);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -554,11 +554,11 @@ fn alias_in_output_and_sender() {
 #[test]
 fn missing_ed25519_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -567,9 +567,9 @@ fn missing_ed25519_sender() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -596,7 +596,7 @@ fn missing_ed25519_sender() {
 #[test]
 fn missing_ed25519_issuer_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -608,9 +608,9 @@ fn missing_ed25519_issuer_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -637,11 +637,11 @@ fn missing_ed25519_issuer_created() {
 #[test]
 fn missing_ed25519_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -650,9 +650,9 @@ fn missing_ed25519_issuer_transition() {
         Some(BECH32_ADDRESS_ED25519_1),
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         2,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -674,13 +674,13 @@ fn missing_ed25519_issuer_transition() {
 }
 
 #[test]
-fn missing_alias_sender() {
+fn missing_account_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -689,14 +689,14 @@ fn missing_alias_sender() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
     )]);
@@ -711,14 +711,14 @@ fn missing_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
 #[test]
-fn missing_alias_issuer_created() {
+fn missing_account_issuer_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -730,15 +730,15 @@ fn missing_alias_issuer_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
     )]);
 
@@ -752,35 +752,35 @@ fn missing_alias_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
 #[test]
-fn missing_alias_issuer_transition() {
+fn missing_account_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
     )]);
 
@@ -798,11 +798,11 @@ fn missing_alias_issuer_transition() {
 #[test]
 fn missing_nft_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -811,9 +811,9 @@ fn missing_nft_sender() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_2,
+        account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -840,7 +840,7 @@ fn missing_nft_sender() {
 #[test]
 fn missing_nft_issuer_created() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([Basic(
         1_000_000,
@@ -852,9 +852,9 @@ fn missing_nft_issuer_created() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -881,11 +881,11 @@ fn missing_nft_issuer_created() {
 #[test]
 fn missing_nft_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -894,9 +894,9 @@ fn missing_nft_issuer_transition() {
         Some(BECH32_ADDRESS_NFT_1),
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -918,14 +918,14 @@ fn missing_nft_issuer_transition() {
 }
 
 #[test]
-fn increase_alias_amount() {
+fn increase_account_amount() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -936,9 +936,9 @@ fn increase_alias_amount() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         3_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -962,14 +962,14 @@ fn increase_alias_amount() {
 }
 
 #[test]
-fn decrease_alias_amount() {
+fn decrease_account_amount() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -980,9 +980,9 @@ fn decrease_alias_amount() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -1018,14 +1018,14 @@ fn decrease_alias_amount() {
 }
 
 #[test]
-fn prefer_basic_to_alias() {
+fn prefer_basic_to_account() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1062,14 +1062,14 @@ fn prefer_basic_to_alias() {
 }
 
 #[test]
-fn take_amount_from_alias_to_fund_basic() {
+fn take_amount_from_account_to_fund_basic() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1105,19 +1105,19 @@ fn take_amount_from_alias_to_fund_basic() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
             assert_eq!(output.amount(), 1_800_000);
-            assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_eq!(*output.as_alias().alias_id(), alias_id_1);
-            assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-            assert_eq!(output.as_alias().features().len(), 0);
-            assert_eq!(output.as_alias().immutable_features().len(), 0);
+            assert_eq!(output.as_account().native_tokens().len(), 0);
+            assert_eq!(*output.as_account().account_id(), account_id_1);
+            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().features().len(), 0);
+            assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_alias().state_controller_address(),
+                *output.as_account().state_controller_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
-                *output.as_alias().governor_address(),
+                *output.as_account().governor_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -1125,15 +1125,15 @@ fn take_amount_from_alias_to_fund_basic() {
 }
 
 #[test]
-fn alias_burn_should_not_validate_alias_sender() {
+fn account_burn_should_not_validate_account_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1147,7 +1147,7 @@ fn alias_burn_should_not_validate_alias_sender() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -1160,25 +1160,25 @@ fn alias_burn_should_not_validate_alias_sender() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
 #[test]
-fn alias_burn_should_not_validate_alias_address() {
+fn account_burn_should_not_validate_account_address() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
-        Alias(
+        Basic(2_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1205,25 +1205,25 @@ fn alias_burn_should_not_validate_alias_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_1
     ));
 }
 
 #[test]
-fn alias_governance_transition_should_not_validate_alias_sender() {
+fn account_governance_transition_should_not_validate_account_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1237,7 +1237,7 @@ fn alias_governance_transition_should_not_validate_alias_sender() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -1255,20 +1255,20 @@ fn alias_governance_transition_should_not_validate_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
 #[test]
-fn alias_governance_transition_should_not_validate_alias_address() {
+fn account_governance_transition_should_not_validate_account_address() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
-        Alias(
+        Basic(2_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1300,18 +1300,18 @@ fn alias_governance_transition_should_not_validate_alias_address() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_1
     ));
 }
 
 #[test]
-fn transitioned_zero_alias_id_no_longer_is_zero() {
+fn transitioned_zero_account_id_no_longer_is_zero() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_0,
+        account_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -1345,19 +1345,19 @@ fn transitioned_zero_alias_id_no_longer_is_zero() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
-            assert_eq!(output.as_alias().native_tokens().len(), 0);
-            assert_ne!(*output.as_alias().alias_id(), alias_id_0);
-            assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-            assert_eq!(output.as_alias().features().len(), 0);
-            assert_eq!(output.as_alias().immutable_features().len(), 0);
+            assert_eq!(output.as_account().native_tokens().len(), 0);
+            assert_ne!(*output.as_account().account_id(), account_id_0);
+            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().features().len(), 0);
+            assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_alias().state_controller_address(),
+                *output.as_account().state_controller_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
-                *output.as_alias().governor_address(),
+                *output.as_account().governor_address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -1365,15 +1365,15 @@ fn transitioned_zero_alias_id_no_longer_is_zero() {
 }
 
 #[test]
-fn two_aliases_required() {
+fn two_accounts_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1382,9 +1382,9 @@ fn two_aliases_required() {
             None,
             None,
         ),
-        Alias(
+        Account(
             2_000_000,
-            alias_id_2,
+            account_id_2,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -1421,8 +1421,8 @@ fn two_aliases_required() {
         selected
             .outputs
             .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.alias_id() == &alias_id_1
+            .any(|output| if let Output::Account(output) = output {
+                output.account_id() == &account_id_1
             } else {
                 false
             })
@@ -1431,8 +1431,8 @@ fn two_aliases_required() {
         selected
             .outputs
             .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.alias_id() == &alias_id_2
+            .any(|output| if let Output::Account(output) = output {
+                output.account_id() == &account_id_2
             } else {
                 false
             })
@@ -1442,11 +1442,11 @@ fn two_aliases_required() {
 #[test]
 fn state_controller_sender_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1482,8 +1482,8 @@ fn state_controller_sender_required() {
         selected
             .outputs
             .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index() + 1
+            .any(|output| if let Output::Account(output) = output {
+                output.state_index() == inputs[0].output.as_account().state_index() + 1
             } else {
                 false
             })
@@ -1493,11 +1493,11 @@ fn state_controller_sender_required() {
 #[test]
 fn state_controller_sender_required_already_selected() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1507,9 +1507,9 @@ fn state_controller_sender_required_already_selected() {
         None,
     )]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_1,
@@ -1547,11 +1547,11 @@ fn state_controller_sender_required_already_selected() {
 #[test]
 fn state_controller_sender_required_but_governance() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1561,9 +1561,9 @@ fn state_controller_sender_required_but_governance() {
         None,
     )]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_1,
@@ -1602,12 +1602,12 @@ fn state_controller_sender_required_but_governance() {
 #[test]
 fn governor_sender_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             2_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_1,
@@ -1645,8 +1645,8 @@ fn governor_sender_required() {
         selected
             .outputs
             .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index()
+            .any(|output| if let Output::Account(output) = output {
+                output.state_index() == inputs[0].output.as_account().state_index()
             } else {
                 false
             })
@@ -1656,12 +1656,12 @@ fn governor_sender_required() {
 #[test]
 fn governor_sender_required_already_selected() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_1,
@@ -1673,9 +1673,9 @@ fn governor_sender_required_already_selected() {
         Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_1,
@@ -1713,11 +1713,11 @@ fn governor_sender_required_already_selected() {
 #[test]
 fn governance_transition_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1726,9 +1726,9 @@ fn governance_transition_and_required() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1755,11 +1755,11 @@ fn governance_transition_and_required() {
 #[test]
 fn state_transition_and_required() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1768,9 +1768,9 @@ fn state_transition_and_required() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1797,11 +1797,11 @@ fn state_transition_and_required() {
 #[test]
 fn governor_sender_required_but_state() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1811,9 +1811,9 @@ fn governor_sender_required_but_state() {
         None,
     )]);
     let outputs = build_outputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_1,
@@ -1852,11 +1852,11 @@ fn governor_sender_required_but_state() {
 #[test]
 fn both_state_controller_and_governor_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -1905,25 +1905,25 @@ fn both_state_controller_and_governor_sender() {
 #[test]
 fn remainder_address_in_state_controller() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ALIAS_2,
+        BECH32_ADDRESS_ACCOUNT_2,
         None,
         None,
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ALIAS_2,
+        BECH32_ADDRESS_ACCOUNT_2,
         None,
         None,
         None,
@@ -1957,14 +1957,14 @@ fn remainder_address_in_state_controller() {
 #[test]
 fn remainder_address_in_governor() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
-            BECH32_ADDRESS_ALIAS_2,
+            BECH32_ADDRESS_ACCOUNT_2,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -1973,11 +1973,11 @@ fn remainder_address_in_governor() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         1_000_000,
-        alias_id_1,
+        account_id_1,
         0,
-        BECH32_ADDRESS_ALIAS_2,
+        BECH32_ADDRESS_ACCOUNT_2,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -2014,11 +2014,11 @@ fn remainder_address_in_governor() {
 #[test]
 fn do_not_change_amount_of_governance_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2058,11 +2058,11 @@ fn do_not_change_amount_of_governance_transition() {
 #[test]
 fn state_transition_required_but_state_controller_not_provided() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2102,11 +2102,11 @@ fn state_transition_required_but_state_controller_not_provided() {
 #[test]
 fn state_transition_but_state_controller_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2115,9 +2115,9 @@ fn state_transition_but_state_controller_not_owned() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2144,11 +2144,11 @@ fn state_transition_but_state_controller_not_owned() {
 #[test]
 fn governance_transition_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2157,9 +2157,9 @@ fn governance_transition_but_governor_not_owned() {
         None,
         None,
     )]);
-    let outputs = build_outputs([Alias(
+    let outputs = build_outputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2184,13 +2184,13 @@ fn governance_transition_but_governor_not_owned() {
 }
 
 #[test]
-fn burn_alias_but_governor_not_owned() {
+fn burn_account_but_governor_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2216,7 +2216,7 @@ fn burn_alias_but_governor_not_owned() {
         addresses([BECH32_ADDRESS_ED25519_2]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_alias(alias_id_1))
+    .burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -2228,11 +2228,11 @@ fn burn_alias_but_governor_not_owned() {
 #[test]
 fn sender_in_state_controller_but_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2269,11 +2269,11 @@ fn sender_in_state_controller_but_not_owned() {
 #[test]
 fn sender_in_governor_but_not_owned() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = build_inputs([Alias(
+    let inputs = build_inputs([Account(
         2_000_000,
-        alias_id_1,
+        account_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_1,
@@ -2310,10 +2310,10 @@ fn sender_in_governor_but_not_owned() {
 #[test]
 fn new_state_metadata() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let alias_output =
-        AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
+    let account_output =
+        AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2325,20 +2325,20 @@ fn new_state_metadata() {
             .unwrap();
 
     let inputs = [InputSigningData {
-        output: alias_output.clone(),
+        output: account_output.clone(),
         output_metadata: rand_output_metadata(),
         chain: None,
     }];
 
-    // New alias output, with updated state index
-    let updated_alias_output = AliasOutputBuilder::from(alias_output.as_alias())
+    // New account output, with updated state index
+    let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
-        .with_state_index(alias_output.as_alias().state_index() + 1)
+        .with_state_index(account_output.as_account().state_index() + 1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_alias_output];
+    let outputs = [updated_account_output];
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -2356,10 +2356,10 @@ fn new_state_metadata() {
 #[test]
 fn new_state_metadata_but_same_state_index() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let alias_output =
-        AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
+    let account_output =
+        AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2371,19 +2371,19 @@ fn new_state_metadata_but_same_state_index() {
             .unwrap();
 
     let inputs = [InputSigningData {
-        output: alias_output.clone(),
+        output: account_output.clone(),
         output_metadata: rand_output_metadata(),
         chain: None,
     }];
 
-    // New alias output, without updated state index
-    let updated_alias_output = AliasOutputBuilder::from(alias_output.as_alias())
+    // New account output, without updated state index
+    let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_alias_output];
+    let outputs = [updated_account_output];
 
     let selected = InputSelection::new(
         inputs,
@@ -2395,9 +2395,9 @@ fn new_state_metadata_but_same_state_index() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Alias(
-            alias_id,
-            _alias_transition,
-        ))) if alias_id == alias_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(
+            account_id,
+            _account_transition,
+        ))) if account_id == account_id_1
     ));
 }

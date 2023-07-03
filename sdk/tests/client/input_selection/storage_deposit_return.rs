@@ -5,13 +5,14 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{output::AliasId, protocol::protocol_parameters},
+    types::block::{output::AccountId, protocol::protocol_parameters},
 };
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
-    ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
+    Build::{Account, Basic},
+    ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    BECH32_ADDRESS_ED25519_2,
 };
 
 #[test]
@@ -489,12 +490,12 @@ fn useless_sdruc_required_for_sender_feature() {
 #[test]
 fn sdruc_required_non_ed25519_in_address_unlock() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ALIAS_1,
+            BECH32_ADDRESS_ACCOUNT_1,
             None,
             None,
             Some((BECH32_ADDRESS_ED25519_2, 1_000_000)),
@@ -502,9 +503,9 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             None,
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -518,7 +519,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
         1_000_000,
         BECH32_ADDRESS_ED25519_2,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -538,7 +539,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
-        if !outputs.contains(output) && !output.is_alias() {
+        if !outputs.contains(output) && !output.is_account() {
             assert!(is_remainder_or_return(
                 output,
                 1_000_000,
@@ -552,12 +553,12 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
 #[test]
 fn useless_sdruc_non_ed25519_in_address_unlock() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(
             1_000_000,
-            BECH32_ADDRESS_ALIAS_1,
+            BECH32_ADDRESS_ACCOUNT_1,
             None,
             None,
             Some((BECH32_ADDRESS_ED25519_2, 1_000_000)),
@@ -565,10 +566,10 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             None,
             None,
         ),
-        Basic(1_000_000, BECH32_ADDRESS_ALIAS_1, None, None, None, None, None, None),
-        Alias(
+        Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -605,7 +606,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(output.is_alias());
+            assert!(output.is_account());
         }
     });
 }

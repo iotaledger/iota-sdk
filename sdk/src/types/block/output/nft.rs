@@ -635,7 +635,7 @@ mod tests {
         },
         protocol::protocol_parameters,
         rand::{
-            address::rand_alias_address,
+            address::rand_account_address,
             output::{
                 feature::{rand_allowed_features, rand_issuer_feature, rand_sender_feature},
                 rand_nft_output,
@@ -647,7 +647,7 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let address_1 = rand_address_unlock_condition();
         let address_2 = rand_address_unlock_condition();
         let sender_1 = rand_sender_feature();
@@ -709,7 +709,7 @@ mod tests {
         let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_nft());
 
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),

@@ -45,7 +45,7 @@ where
         bech32_address: impl ConvertTo<Bech32Address>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         let bech32_address = bech32_address.convert()?;
-        // aliases and foundries
+        // accounts and foundries
         #[cfg(target_family = "wasm")]
         {
             let mut output_ids = Vec::new();

@@ -3,7 +3,7 @@
 
 #![allow(clippy::type_complexity)]
 
-mod alias_outputs;
+mod account_outputs;
 mod basic_outputs;
 mod burn;
 mod expiration;

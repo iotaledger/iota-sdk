@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-pub(crate) mod alias;
+pub(crate) mod account;
 pub(crate) mod amount;
 pub(crate) mod ed25519;
 pub(crate) mod foundry;
@@ -10,14 +10,14 @@ pub(crate) mod native_tokens;
 pub(crate) mod nft;
 pub(crate) mod sender;
 
-pub(crate) use self::alias::is_alias_transition;
-use self::{alias::is_alias_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null};
+pub(crate) use self::account::is_account_transition;
+use self::{account::is_account_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null};
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
         address::Address,
-        output::{AliasId, AliasTransition, ChainId, Features, FoundryId, NftId, Output},
+        output::{AccountId, AccountTransition, ChainId, Features, FoundryId, NftId, Output},
     },
 };
 
@@ -32,8 +32,8 @@ pub enum Requirement {
     Ed25519(Address),
     /// Foundry requirement.
     Foundry(FoundryId),
-    /// Alias requirement and whether it needs to be state transitioned (true) or not (false).
-    Alias(AliasId, AliasTransition),
+    /// Account requirement and whether it needs to be state transitioned (true) or not (false).
+    Account(AccountId, AccountTransition),
     /// Nft requirement.
     Nft(NftId),
     /// Native tokens requirement.
@@ -48,7 +48,7 @@ impl InputSelection {
     pub(crate) fn fulfill_requirement(
         &mut self,
         requirement: Requirement,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {
@@ -56,8 +56,8 @@ impl InputSelection {
             Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
             Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
             Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
-            Requirement::Alias(alias_id, alias_transition) => {
-                self.fulfill_alias_requirement(alias_id, alias_transition)
+            Requirement::Account(account_id, account_transition) => {
+                self.fulfill_account_requirement(account_id, account_transition)
             }
             Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
@@ -72,12 +72,13 @@ impl InputSelection {
 
         for output in outputs {
             let is_created = match output {
-                // Add an alias requirement if the alias output is transitioning and then required in the inputs.
-                Output::Alias(alias_output) => {
-                    let is_created = alias_output.alias_id().is_null();
+                // Add an account requirement if the account output is transitioning and then required in the inputs.
+                Output::Account(account_output) => {
+                    let is_created = account_output.account_id().is_null();
 
                     if !is_created {
-                        let requirement = Requirement::Alias(*alias_output.alias_id(), AliasTransition::Governance);
+                        let requirement =
+                            Requirement::Account(*account_output.account_id(), AccountTransition::Governance);
                         log::debug!("Adding {requirement:?} from output");
                         self.requirements.push(requirement);
                     }
@@ -97,7 +98,7 @@ impl InputSelection {
                     is_created
                 }
                 // Add a foundry requirement if the foundry output is transitioning and then required in the inputs.
-                // Also add an alias requirement since the associated alias output needs to be transitioned.
+                // Also add an account requirement since the associated account output needs to be transitioned.
                 Output::Foundry(foundry_output) => {
                     // TODO add some tests
                     let is_created = !inputs.clone().any(|input| {
@@ -115,7 +116,7 @@ impl InputSelection {
                     }
 
                     let requirement =
-                        Requirement::Alias(*foundry_output.alias_address().alias_id(), AliasTransition::State);
+                        Requirement::Account(*foundry_output.account_address().account_id(), AccountTransition::State);
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
 
@@ -145,16 +146,16 @@ impl InputSelection {
     /// Gets requirements from burn.
     pub(crate) fn burn_requirements(&mut self) -> Result<(), Error> {
         if let Some(burn) = self.burn.as_ref() {
-            for alias_id in &burn.aliases {
+            for account_id in &burn.accounts {
                 if self
                     .outputs
                     .iter()
-                    .any(|output| is_alias_with_id_non_null(output, alias_id))
+                    .any(|output| is_account_with_id_non_null(output, account_id))
                 {
-                    return Err(Error::BurnAndTransition(ChainId::from(*alias_id)));
+                    return Err(Error::BurnAndTransition(ChainId::from(*account_id)));
                 }
 
-                let requirement = Requirement::Alias(*alias_id, AliasTransition::Governance);
+                let requirement = Requirement::Account(*account_id, AccountTransition::Governance);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
             }

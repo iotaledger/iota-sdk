@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will build an alias output.
+//! In this example we will build an account output.
 //!
-//! `cargo run --example build_alias_output --release`
+//! `cargo run --example build_account_output --release`
 
 use iota_sdk::{
     client::{Client, Result},
@@ -12,7 +12,7 @@ use iota_sdk::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder,
+            AccountId, AccountOutputBuilder,
         },
     },
 };
@@ -32,8 +32,8 @@ async fn main() -> Result<()> {
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    // Alias id needs to be null the first time
-    let alias_output = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
+    // Account id needs to be null the first time
+    let account_output = AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
         // `hello` in bytes
         .with_state_metadata([104, 101, 108, 108, 111])
         .add_feature(SenderFeature::new(address))
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
         .finish_output(token_supply)?;
 
-    println!("{alias_output:#?}");
+    println!("{account_output:#?}");
 
     Ok(())
 }

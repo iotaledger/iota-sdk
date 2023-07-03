@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! TODO: <insert example description> by calling
-//! `GET api/indexer/v2/outputs/alias`.
+//! `GET api/indexer/v2/outputs/account`.
 //!
-//! `cargo run --example node_api_indexer_get_alias_outputs --release -- [NODE URL] [ADDRESS]`
+//! `cargo run --example node_api_indexer_get_account_outputs --release -- [NODE URL] [ADDRESS]`
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
@@ -35,15 +35,15 @@ async fn main() -> Result<()> {
             .unwrap_or("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"),
     )?;
 
-    // Get output IDs of alias outputs that can be controlled by this address.
+    // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
-        .alias_output_ids([
+        .account_output_ids([
             QueryParameter::Governor(address),
             QueryParameter::StateController(address),
         ])
         .await?;
 
-    println!("Alias output IDs: {output_ids_response:#?}");
+    println!("Account output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(&output_ids_response.items).await?;

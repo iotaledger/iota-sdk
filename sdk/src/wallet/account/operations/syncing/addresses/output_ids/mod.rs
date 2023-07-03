@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias_foundry;
+mod account_foundry;
 mod basic;
 mod nft;
 
@@ -28,8 +28,8 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
-    /// (alias/nft address in AddressUnlockCondition and the alias/nft output is controlled with the Ed25519 address)
-    /// connected to
+    /// (account/nft address in AddressUnlockCondition and the account/nft output is controlled with the Ed25519
+    /// address) connected to
     pub(crate) async fn get_output_ids_for_address(
         &self,
         address: Address,
@@ -52,7 +52,7 @@ where
 
         if (address.is_ed25519() && sync_options.account.basic_outputs)
             || (address.is_nft() && sync_options.nft.basic_outputs)
-            || (address.is_alias() && sync_options.alias.basic_outputs)
+            || (address.is_account() && sync_options.alias.basic_outputs)
         {
             // basic outputs
             #[cfg(target_family = "wasm")]
@@ -82,7 +82,7 @@ where
 
         if (address.is_ed25519() && sync_options.account.nft_outputs)
             || (address.is_nft() && sync_options.nft.nft_outputs)
-            || (address.is_alias() && sync_options.alias.nft_outputs)
+            || (address.is_account() && sync_options.alias.nft_outputs)
         {
             // nfts
             #[cfg(target_family = "wasm")]
@@ -107,15 +107,15 @@ where
             }
         }
 
-        if (address.is_ed25519() && sync_options.account.alias_outputs)
-            || (address.is_nft() && sync_options.nft.alias_outputs)
-            || (address.is_alias() && sync_options.alias.alias_outputs)
+        if (address.is_ed25519() && sync_options.account.account_outputs)
+            || (address.is_nft() && sync_options.nft.account_outputs)
+            || (address.is_account() && sync_options.alias.account_outputs)
         {
-            // aliases and foundries
+            // accounts and foundries
             #[cfg(target_family = "wasm")]
             {
                 results.push(
-                    self.get_alias_and_foundry_output_ids(bech32_address, sync_options)
+                    self.get_account_and_foundry_output_ids(bech32_address, sync_options)
                         .await,
                 )
             }
@@ -128,7 +128,7 @@ where
                         let account = self.clone();
                         tokio::spawn(async move {
                             account
-                                .get_alias_and_foundry_output_ids(bech32_address, &sync_options)
+                                .get_account_and_foundry_output_ids(bech32_address, &sync_options)
                                 .await
                         })
                         .await
@@ -162,7 +162,7 @@ where
         let address_output_ids_start_time = Instant::now();
 
         let mut addresses_with_outputs = Vec::new();
-        // spent outputs or alias/nft/foundries that don't get synced anymore, because of other sync options
+        // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
         let mut spent_or_not_anymore_synced_outputs = Vec::new();
         // We split the addresses into chunks so we don't get timeouts if we have thousands
         for addresses_chunk in &mut addresses_with_unspent_outputs
@@ -204,7 +204,7 @@ where
                 let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
                 // only return addresses with outputs
                 if !output_ids.is_empty() {
-                    // outputs we had before, but now not anymore, got spent or are alias/nft/foundries that don't get
+                    // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
                     // synced anymore because of other sync options
                     for output_id in address.output_ids {
                         if !output_ids.contains(&output_id) {
@@ -214,7 +214,7 @@ where
                     address.output_ids = output_ids;
                     addresses_with_outputs.push(address);
                 } else {
-                    // outputs we had before, but now not anymore, got spent or are alias/nft/foundries that don't get
+                    // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
                     // synced anymore because of other sync options
                     spent_or_not_anymore_synced_outputs.extend(address.output_ids.into_iter());
                 }
@@ -222,7 +222,7 @@ where
         }
 
         log::debug!(
-            "[SYNC] spent or not anymore synced alias/nft/foundries outputs: {:?}",
+            "[SYNC] spent or not anymore synced account/nft/foundries outputs: {:?}",
             spent_or_not_anymore_synced_outputs
         );
         log::debug!(

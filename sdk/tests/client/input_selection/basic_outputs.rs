@@ -6,16 +6,16 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{Address, AliasAddress, Bech32Address, NftAddress},
-        output::{AliasId, NftId},
+        address::{AccountAddress, Address, Bech32Address, NftAddress},
+        output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
 };
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Nft},
-    ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    Build::{Account, Basic, Nft},
+    ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
 };
 
@@ -543,16 +543,16 @@ fn missing_ed25519_sender() {
 }
 
 #[test]
-fn alias_sender() {
+fn account_sender() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -569,7 +569,7 @@ fn alias_sender() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -591,23 +591,23 @@ fn alias_sender() {
         selected
             .inputs
             .iter()
-            .any(|input| input.output.is_alias() && *input.output.as_alias().alias_id() == alias_id_1)
+            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
     );
-    // Provided output + alias
+    // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
 }
 
 #[test]
-fn alias_sender_zero_id() {
+fn account_sender_zero_id() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
+        Account(
             1_000_000,
-            alias_id_0,
+            account_id_0,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
@@ -617,13 +617,13 @@ fn alias_sender_zero_id() {
             None,
         ),
     ]);
-    let alias_id = AliasId::from(inputs[1].output_id());
+    let account_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(
-            &Bech32Address::try_new("rms", AliasAddress::from(alias_id))
+            &Bech32Address::try_new("rms", AccountAddress::from(account_id))
                 .unwrap()
                 .to_string(),
         ),
@@ -648,12 +648,12 @@ fn alias_sender_zero_id() {
         selected
             .outputs
             .iter()
-            .any(|output| output.is_alias() && *output.as_alias().alias_id() == alias_id)
+            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
     );
 }
 
 #[test]
-fn missing_alias_sender() {
+fn missing_account_sender() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([Basic(
@@ -670,7 +670,7 @@ fn missing_alias_sender() {
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -687,7 +687,7 @@ fn missing_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 

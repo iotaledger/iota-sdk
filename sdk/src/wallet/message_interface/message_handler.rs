@@ -29,7 +29,7 @@ use crate::{
         address::{Hrp, ToBech32Ext},
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
-            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+            AccountOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
         signature::Ed25519Signature,
         ConvertTo, Error,
@@ -395,10 +395,10 @@ impl WalletMessageHandler {
         let account = self.wallet.get_account(account_id.clone()).await?;
 
         match method {
-            AccountMethod::BuildAliasOutput {
+            AccountMethod::BuildAccountOutput {
                 amount,
                 native_tokens,
-                alias_id,
+                account_id,
                 state_index,
                 state_metadata,
                 foundry_counter,
@@ -406,14 +406,14 @@ impl WalletMessageHandler {
                 features,
                 immutable_features,
             } => {
-                let output = Output::from(AliasOutput::try_from_dtos(
+                let output = Output::from(AccountOutput::try_from_dtos(
                     if let Some(amount) = amount {
                         OutputBuilderAmountDto::Amount(amount)
                     } else {
                         OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
                     native_tokens,
-                    &alias_id,
+                    &account_id,
                     state_index,
                     state_metadata,
                     foundry_counter,
@@ -536,19 +536,19 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::CreateAliasOutput { params, options } => {
+            AccountMethod::CreateAccountOutput { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .create_account_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }
-            AccountMethod::DestroyAlias { alias_id, options } => {
+            AccountMethod::DestroyAccount { account_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn(alias_id, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .burn(account_id, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })

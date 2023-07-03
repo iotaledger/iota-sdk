@@ -180,10 +180,10 @@ impl Topic {
                 r"^transactions/0x([a-f0-9]{64})/included-block$",
                 // Output topics.
                 r"^outputs/0x([a-f0-9]{64})(\d{4})$",
-                r"^outputs/alias/0x([a-f0-9]{64})$",
+                r"^outputs/account/0x([a-f0-9]{64})$",
                 r"^outputs/nft/0x([a-f0-9]{64})$",
                 r"^outputs/foundry/0x([a-f0-9]{76})$",
-                r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-alias)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",
+                r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-account)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",
             ]).expect("cannot build regex set") => RegexSet);
         valid_topics.is_match(&self.0)
     }

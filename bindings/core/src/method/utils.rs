@@ -3,8 +3,8 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{AliasAddress, Bech32Address, Hrp},
-    output::{AliasId, NftId, OutputId},
+    address::{AccountAddress, Bech32Address, Hrp},
+    output::{AccountId, NftId, OutputId},
     payload::transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
     signature::dto::Ed25519SignatureDto,
     BlockDto,
@@ -31,11 +31,11 @@ pub enum UtilsMethod {
         /// Human readable part
         bech32_hrp: Hrp,
     },
-    /// Transforms an alias id to a bech32 encoded address
+    /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
-    AliasIdToBech32 {
-        /// Alias ID
-        alias_id: AliasId,
+    AccountIdToBech32 {
+        /// Account ID
+        account_id: AccountId,
         /// Human readable part
         bech32_hrp: Hrp,
     },
@@ -83,9 +83,9 @@ pub enum UtilsMethod {
         /// Transaction Payload
         payload: TransactionPayloadDto,
     },
-    /// Computes the alias ID
+    /// Computes the account ID
     #[serde(rename_all = "camelCase")]
-    ComputeAliasId {
+    ComputeAccountId {
         /// Output ID
         output_id: OutputId,
     },
@@ -98,8 +98,8 @@ pub enum UtilsMethod {
     /// Computes the Foundry ID
     #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
-        /// Alias address
-        alias_address: AliasAddress,
+        /// Account address
+        account_address: AccountAddress,
         /// Serial number
         serial_number: u32,
         /// Token scheme kind

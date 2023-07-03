@@ -4,7 +4,7 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::{address::Address, output::AliasTransition},
+    types::block::{address::Address, output::AccountTransition},
 };
 
 impl InputSelection {
@@ -13,7 +13,7 @@ impl InputSelection {
     pub(crate) fn fulfill_issuer_requirement(
         &mut self,
         address: Address,
-    ) -> Result<Vec<(InputSigningData, Option<AliasTransition>)>, Error> {
+    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         log::debug!("Treating {address:?} issuer requirement as a sender requirement");
 
         match self.fulfill_sender_requirement(address) {

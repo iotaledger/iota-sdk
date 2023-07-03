@@ -16,7 +16,7 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Get the addresses that should be synced with the current known unspent output ids
-    /// Also adds alias and nft addresses from unspent alias or nft outputs that have no Timelock, Expiration or
+    /// Also adds account and nft addresses from unspent account or nft outputs that have no Timelock, Expiration or
     /// StorageDepositReturn [`UnlockCondition`]
     pub(crate) async fn get_addresses_to_sync(
         &self,

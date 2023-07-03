@@ -219,13 +219,13 @@ required-features = [ "rocksdb", "stronghold" ]
 # Alias wallet example
 
 [[example]]
-name = "alias_wallet_request_funds"
-path = "examples/how_tos/alias_wallet/request_funds.rs"
+name = "account_wallet_request_funds"
+path = "examples/how_tos/account_wallet/request_funds.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
-name = "alias_wallet_transaction"
-path = "examples/how_tos/alias_wallet/transaction.rs"
+name = "account_wallet_transaction"
+path = "examples/how_tos/account_wallet/transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 # Outputs
@@ -347,13 +347,13 @@ required-features = [ "client" ]
 # Node API indexer examples
 
 [[example]]
-name = "node_api_indexer_get_alias_output"
-path = "examples/client/node_api_indexer/01_get_alias_output.rs"
+name = "node_api_indexer_get_account_output"
+path = "examples/client/node_api_indexer/01_get_account_output.rs"
 required-features = [ "client" ]
 
 [[example]]
-name = "node_api_indexer_get_alias_outputs"
-path = "examples/client/node_api_indexer/02_get_alias_outputs.rs"
+name = "node_api_indexer_get_account_outputs"
+path = "examples/client/node_api_indexer/02_get_account_outputs.rs"
 required-features = [ "client" ]
 
 [[example]]
@@ -414,8 +414,8 @@ path = "examples/client/stronghold.rs"
 required-features = [ "client", "stronghold" ]
 
 [[example]]
-name = "build_alias_output"
-path = "examples/client/output/build_alias_output.rs"
+name = "build_account_output"
+path = "examples/client/output/build_account_output.rs"
 required-features = [ "client" ]
 
 [[example]]
@@ -481,13 +481,13 @@ path = "examples/how_tos/nfts/burn_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "create_alias"
-path = "examples/wallet/create_alias.rs"
+name = "create_account_output"
+path = "examples/wallet/create_account_output.rs"
 required-features = [ "stronghold" ]
 
 [[example]]
-name = "destroy_alias"
-path = "examples/wallet/16_destroy_alias.rs"
+name = "destroy_account_output"
+path = "examples/wallet/16_destroy_account_output.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
@@ -546,8 +546,8 @@ path = "examples/wallet/storage.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
-name = "update_alias_output"
-path = "examples/wallet/update_alias_output.rs"
+name = "update_account_output"
+path = "examples/wallet/update_account_output.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
