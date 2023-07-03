@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use futures::{StreamExt, TryStreamExt};
+use zeroize::Zeroizing;
 
 use crate::{
     client::storage::StorageAdapter,
@@ -23,7 +24,7 @@ pub(crate) struct StorageManager {
 impl StorageManager {
     pub(crate) async fn new(
         storage: impl DynStorageAdapter + 'static,
-        encryption_key: impl Into<Option<[u8; 32]>> + Send,
+        encryption_key: impl Into<Option<Zeroizing<[u8; 32]>>> + Send,
     ) -> crate::wallet::Result<Self> {
         let storage = Storage {
             inner: Box::new(storage) as _,

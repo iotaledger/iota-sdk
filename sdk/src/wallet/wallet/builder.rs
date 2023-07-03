@@ -140,7 +140,7 @@ where
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key).await?;
+        let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
 
         #[cfg(feature = "storage")]
         let read_manager_builder = Self::load(&storage_manager).await?;
