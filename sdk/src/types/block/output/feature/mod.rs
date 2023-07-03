@@ -4,6 +4,7 @@
 mod issuer;
 mod metadata;
 mod sender;
+mod staking;
 mod tag;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
@@ -13,7 +14,9 @@ use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
-pub use self::{issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, tag::TagFeature};
+pub use self::{
+    issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, staking::StakingFeature, tag::TagFeature,
+};
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
 
@@ -39,6 +42,9 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
+    /// A staking feature.
+    #[packable(tag = StakingFeature::KIND)]
+    Staking(StakingFeature),
 }
 
 impl PartialOrd for Feature {
@@ -46,6 +52,7 @@ impl PartialOrd for Feature {
         self.kind().partial_cmp(&other.kind())
     }
 }
+
 impl Ord for Feature {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.partial_cmp(other).unwrap()
@@ -59,6 +66,7 @@ impl core::fmt::Debug for Feature {
             Self::Issuer(feature) => feature.fmt(f),
             Self::Metadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
+            Self::Staking(feature) => feature.fmt(f),
         }
     }
 }
@@ -71,6 +79,7 @@ impl Feature {
             Self::Issuer(_) => IssuerFeature::KIND,
             Self::Metadata(_) => MetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
+            Self::Staking(_) => StakingFeature::KIND,
         }
     }
 
@@ -81,6 +90,7 @@ impl Feature {
             Self::Issuer(_) => FeatureFlags::ISSUER,
             Self::Metadata(_) => FeatureFlags::METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
+            Self::Staking(_) => FeatureFlags::STAKING,
         }
     }
 
@@ -143,6 +153,21 @@ impl Feature {
             panic!("invalid downcast of non-TagFeature");
         }
     }
+
+    /// Checks whether the feature is a [`StakingFeature`].
+    pub fn is_staking(&self) -> bool {
+        matches!(self, Self::Staking(_))
+    }
+
+    /// Gets the feature as an actual [`StakingFeature`].
+    /// PANIC: do not call on a non-staking feature.
+    pub fn as_staking(&self) -> &StakingFeature {
+        if let Self::Staking(feature) = self {
+            feature
+        } else {
+            panic!("as_staking called on a non-staking feature");
+        }
+    }
 }
 
 create_bitflags!(
@@ -154,6 +179,7 @@ create_bitflags!(
         (ISSUER, IssuerFeature),
         (METADATA, MetadataFeature),
         (TAG, TagFeature),
+        (STAKING, StakingFeature),
     ]
 );
 
@@ -194,7 +220,7 @@ impl IntoIterator for Features {
 
 impl Features {
     ///
-    pub const COUNT_MAX: u8 = 4;
+    pub const COUNT_MAX: u8 = 5;
 
     /// Creates a new [`Features`] from a vec.
     pub fn from_vec(features: Vec<Feature>) -> Result<Self, Error> {
@@ -248,6 +274,15 @@ impl Features {
     pub fn tag(&self) -> Option<&TagFeature> {
         self.get(TagFeature::KIND).map(Feature::as_tag)
     }
+
+    /// Gets a reference to a [`StakingFeature`], if any.
+    pub fn staking(&self) -> Option<&StakingFeature> {
+        if let Some(Feature::Staking(staking)) = self.get(StakingFeature::KIND) {
+            Some(staking)
+        } else {
+            None
+        }
+    }
 }
 
 #[inline]
@@ -284,7 +319,8 @@ mod test {
                 FeatureFlags::SENDER,
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
-                FeatureFlags::TAG
+                FeatureFlags::TAG,
+                FeatureFlags::STAKING
             ]
         );
     }
@@ -299,7 +335,7 @@ pub mod dto {
 
     pub use self::{
         issuer::dto::IssuerFeatureDto, metadata::dto::MetadataFeatureDto, sender::dto::SenderFeatureDto,
-        tag::dto::TagFeatureDto,
+        staking::dto::StakingFeatureDto, tag::dto::TagFeatureDto,
     };
     use super::*;
     use crate::types::block::{address::Address, Error};
@@ -314,6 +350,8 @@ pub mod dto {
         Metadata(MetadataFeatureDto),
         /// A tag feature.
         Tag(TagFeatureDto),
+        /// A staking feature.
+        Staking(StakingFeatureDto),
     }
 
     impl<'de> Deserialize<'de> for FeatureDto {
@@ -342,6 +380,11 @@ pub mod dto {
                         TagFeatureDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize tag feature: {e}")))?,
                     ),
+                    StakingFeature::KIND => {
+                        Self::Staking(StakingFeatureDto::deserialize(value).map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize staking feature: {e}"))
+                        })?)
+                    }
                     _ => return Err(serde::de::Error::custom("invalid feature type")),
                 },
             )
@@ -360,6 +403,7 @@ pub mod dto {
                 T2(&'a IssuerFeatureDto),
                 T3(&'a MetadataFeatureDto),
                 T4(&'a TagFeatureDto),
+                T6(&'a StakingFeatureDto),
             }
             #[derive(Serialize)]
             struct TypedFeature<'a> {
@@ -378,6 +422,9 @@ pub mod dto {
                 },
                 Self::Tag(o) => TypedFeature {
                     feature: FeatureDto_::T4(o),
+                },
+                Self::Staking(o) => TypedFeature {
+                    feature: FeatureDto_::T6(o),
                 },
             };
             feature.serialize(serializer)
@@ -403,6 +450,13 @@ pub mod dto {
                     kind: TagFeature::KIND,
                     tag: v.to_string(),
                 }),
+                Feature::Staking(v) => Self::Staking(StakingFeatureDto {
+                    kind: TagFeature::KIND,
+                    staked_amount: v.staked_amount(),
+                    fixed_cost: v.fixed_cost(),
+                    start_epoch: v.start_epoch(),
+                    end_epoch: v.end_epoch(),
+                }),
             }
         }
     }
@@ -420,6 +474,12 @@ pub mod dto {
                 FeatureDto::Tag(v) => Self::Tag(TagFeature::new(
                     prefix_hex::decode::<Vec<u8>>(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
                 )?),
+                FeatureDto::Staking(v) => Self::Staking(StakingFeature::new(
+                    v.staked_amount,
+                    v.fixed_cost,
+                    v.start_epoch,
+                    v.end_epoch,
+                )),
             })
         }
     }
@@ -432,6 +492,7 @@ pub mod dto {
                 Self::Issuer(_) => IssuerFeature::KIND,
                 Self::Metadata(_) => MetadataFeature::KIND,
                 Self::Tag(_) => TagFeature::KIND,
+                Self::Staking(_) => StakingFeature::KIND,
             }
         }
     }
