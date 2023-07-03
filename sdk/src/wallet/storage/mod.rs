@@ -6,11 +6,11 @@ pub mod adapter;
 /// Storage constants.
 pub mod constants;
 /// Storage kind.
-pub mod kind;
+mod kind;
 /// Storage manager.
-pub mod manager;
+mod manager;
 /// Storage options.
-pub mod options;
+mod options;
 /// Storage functions related to participation.
 #[cfg(feature = "participation")]
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
@@ -20,6 +20,7 @@ use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
 use self::adapter::DynStorageAdapter;
+pub(crate) use self::manager::StorageManager;
 pub use self::{kind::StorageKind, options::StorageOptions};
 use crate::client::storage::StorageAdapter;
 

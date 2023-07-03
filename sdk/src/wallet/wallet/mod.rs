@@ -18,7 +18,7 @@ use crate::wallet::events::{
     EventEmitter,
 };
 #[cfg(feature = "storage")]
-use crate::wallet::storage::{manager::StorageManager, StorageOptions};
+use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::{
         secret::{SecretManage, SecretManager},

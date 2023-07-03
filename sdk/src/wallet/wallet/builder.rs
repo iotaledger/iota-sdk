@@ -20,7 +20,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
     account::AccountDetails,
-    storage::{manager::StorageManager, StorageOptions},
+    storage::{StorageManager, StorageOptions},
 };
 use crate::{
     client::secret::{SecretManage, SecretManager},
