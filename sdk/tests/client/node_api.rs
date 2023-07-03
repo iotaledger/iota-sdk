@@ -8,14 +8,11 @@ use iota_sdk::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
         request_funds_from_faucet, secret::SecretManager, Client, NodeInfoWrapper,
     },
-    types::{
-        api::plugins::indexer::OutputIdsResponse,
-        block::{
-            address::ToBech32Ext,
-            output::OutputId,
-            payload::{transaction::TransactionId, Payload},
-            BlockId,
-        },
+    types::block::{
+        address::ToBech32Ext,
+        output::OutputId,
+        payload::{transaction::TransactionId, Payload},
+        BlockId,
     },
 };
 
