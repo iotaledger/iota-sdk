@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
 - Support for `LedgerSecretManager::sign_ed25519`;
 - `WalletBuilder::with_storage_options` method, allowing storage encryption;
+- `StorageOptions::{new, with_encryption_key}` methods and getters;
 
 ### Changed
 
@@ -112,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 - Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
 - Made `ManagerStorage` public and renamed it to `StorageKind`;
-- Fields of `StorageOptions` are now public;
+- Made `StorageOptions` public;
 
 ### Removed
 
