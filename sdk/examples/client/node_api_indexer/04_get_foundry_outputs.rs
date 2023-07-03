@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all foundry output ids associated with an alias address by querying the
+//! Gets all foundry output ids associated with an account address by querying the
 //! `api/indexer/v2/outputs/foundry` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of foundry outputs that can be controlled by this address.
     let output_ids_response = client
-        .foundry_output_ids([QueryParameter::AliasAddress(address)])
+        .foundry_output_ids([QueryParameter::AccountAddress(address)])
         .await?;
 
     println!("Foundry output IDs: {output_ids_response:#?}");

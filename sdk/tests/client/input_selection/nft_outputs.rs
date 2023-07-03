@@ -19,7 +19,7 @@ use iota_sdk::{
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Basic, Nft},
-    BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, NFT_ID_0,
+    BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, NFT_ID_0,
     NFT_ID_1, NFT_ID_2,
 };
 
@@ -593,7 +593,7 @@ fn missing_ed25519_issuer_transition() {
 }
 
 #[test]
-fn missing_alias_sender() {
+fn missing_account_sender() {
     let protocol_parameters = protocol_parameters();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
@@ -613,7 +613,7 @@ fn missing_alias_sender() {
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -630,12 +630,12 @@ fn missing_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
 #[test]
-fn missing_alias_issuer_created() {
+fn missing_account_issuer_created() {
     let protocol_parameters = protocol_parameters();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
@@ -655,7 +655,7 @@ fn missing_alias_issuer_created() {
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -671,12 +671,12 @@ fn missing_alias_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
 #[test]
-fn missing_alias_issuer_transition() {
+fn missing_account_issuer_transition() {
     let protocol_parameters = protocol_parameters();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
@@ -686,7 +686,7 @@ fn missing_alias_issuer_transition() {
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -697,7 +697,7 @@ fn missing_alias_issuer_transition() {
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        Some(BECH32_ADDRESS_ALIAS_1),
+        Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
         None,
@@ -1201,13 +1201,13 @@ fn changed_immutable_metadata() {
     }];
 
     // New nft output with changed immutable metadata feature
-    let updated_alias_output = NftOutputBuilder::from(nft_output.as_nft())
+    let updated_account_output = NftOutputBuilder::from(nft_output.as_nft())
         .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
         .with_immutable_features(MetadataFeature::new([4, 5, 6]))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_alias_output];
+    let outputs = [updated_account_output];
 
     let selected = InputSelection::new(
         inputs,

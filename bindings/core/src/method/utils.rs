@@ -4,7 +4,7 @@
 use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure, TokenScheme},
+    output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure, TokenScheme},
     payload::transaction::{
         dto::{TransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
@@ -34,11 +34,11 @@ pub enum UtilsMethod {
         /// Human readable part
         bech32_hrp: Hrp,
     },
-    /// Transforms an alias id to a bech32 encoded address
+    /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
-    AliasIdToBech32 {
-        /// Alias ID
-        alias_id: AliasId,
+    AccountIdToBech32 {
+        /// Account ID
+        account_id: AccountId,
         /// Human readable part
         bech32_hrp: Hrp,
     },
@@ -86,9 +86,9 @@ pub enum UtilsMethod {
         /// Transaction Payload
         payload: TransactionPayloadDto,
     },
-    /// Computes the alias ID
+    /// Computes the account ID
     #[serde(rename_all = "camelCase")]
-    ComputeAliasId {
+    ComputeAccountId {
         /// Output ID
         output_id: OutputId,
     },
@@ -96,7 +96,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
         /// Alias id
-        alias_id: AliasId,
+        account_id: AccountId,
         /// Serial number
         serial_number: u32,
         /// Token scheme kind
@@ -113,7 +113,7 @@ pub enum UtilsMethod {
     /// Computes a tokenId from the aliasId, serial number and token scheme type.
     #[serde(rename_all = "camelCase")]
     ComputeTokenId {
-        alias_id: AliasId,
+        account_id: AccountId,
         serial_number: u32,
         token_scheme_type: TokenScheme,
     },

@@ -38,7 +38,7 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::CreateAliasParams,
+                create_account::CreateAccountParams,
                 minting::{
                     create_native_token::{
                         CreateNativeTokenParams, CreateNativeTokenTransactionDto,
@@ -62,7 +62,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{dto::FoundryOutputDto, AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
+            output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
@@ -81,10 +81,10 @@ pub struct FilterOptions {
     pub lower_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs where the booked milestone index is above the specified timestamp
     pub upper_bound_booked_timestamp: Option<u32>,
-    /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
+    /// Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
-    /// Return all alias outputs matching these IDs.
-    pub alias_ids: Option<HashSet<AliasId>>,
+    /// Return all account outputs matching these IDs.
+    pub account_ids: Option<HashSet<AccountId>>,
     /// Return all foundry outputs matching these IDs.
     pub foundry_ids: Option<HashSet<FoundryId>>,
     /// Return all nft outputs matching these IDs.
@@ -324,10 +324,10 @@ impl AccountInner {
 
             for output in outputs {
                 match &output.output {
-                    Output::Alias(alias) => {
-                        if let Some(alias_ids) = &filter.alias_ids {
-                            let alias_id = alias.alias_id_non_null(&output.output_id);
-                            if alias_ids.contains(&alias_id) {
+                    Output::Account(alias) => {
+                        if let Some(account_ids) = &filter.account_ids {
+                            let account_id = alias.account_id_non_null(&output.output_id);
+                            if account_ids.contains(&account_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -391,10 +391,10 @@ impl AccountInner {
         self.filter_outputs(self.details().await.unspent_outputs.values(), filter)
     }
 
-    /// Gets the unspent alias output matching the given ID.
-    pub async fn unspent_alias_output(&self, alias_id: &AliasId) -> Result<Option<OutputData>> {
+    /// Gets the unspent account output matching the given ID.
+    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
-            alias_ids: Some([*alias_id].into()),
+            account_ids: Some([*account_id].into()),
             ..Default::default()
         })
         .await

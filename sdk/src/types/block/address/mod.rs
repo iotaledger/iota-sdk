@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias;
+mod account;
 mod bech32;
 mod ed25519;
 mod nft;
@@ -9,7 +9,7 @@ mod nft;
 use derive_more::From;
 
 pub use self::{
-    alias::AliasAddress,
+    account::AccountAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     nft::NftAddress,
@@ -35,9 +35,9 @@ pub enum Address {
     /// An Ed25519 address.
     #[packable(tag = Ed25519Address::KIND)]
     Ed25519(Ed25519Address),
-    /// An alias address.
-    #[packable(tag = AliasAddress::KIND)]
-    Alias(AliasAddress),
+    /// An account address.
+    #[packable(tag = AccountAddress::KIND)]
+    Account(AccountAddress),
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
@@ -47,7 +47,7 @@ impl core::fmt::Debug for Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::Ed25519(address) => address.fmt(f),
-            Self::Alias(address) => address.fmt(f),
+            Self::Account(address) => address.fmt(f),
             Self::Nft(address) => address.fmt(f),
         }
     }
@@ -58,7 +58,7 @@ impl Address {
     pub fn kind(&self) -> u8 {
         match self {
             Self::Ed25519(_) => Ed25519Address::KIND,
-            Self::Alias(_) => AliasAddress::KIND,
+            Self::Account(_) => AccountAddress::KIND,
             Self::Nft(_) => NftAddress::KIND,
         }
     }
@@ -78,18 +78,18 @@ impl Address {
         }
     }
 
-    /// Checks whether the address is an [`AliasAddress`].
-    pub fn is_alias(&self) -> bool {
-        matches!(self, Self::Alias(_))
+    /// Checks whether the address is an [`AccountAddress`].
+    pub fn is_account(&self) -> bool {
+        matches!(self, Self::Account(_))
     }
 
-    /// Gets the address as an actual [`AliasAddress`].
-    /// PANIC: do not call on a non-alias address.
-    pub fn as_alias(&self) -> &AliasAddress {
-        if let Self::Alias(address) = self {
+    /// Gets the address as an actual [`AccountAddress`].
+    /// PANIC: do not call on a non-account address.
+    pub fn as_account(&self) -> &AccountAddress {
+        if let Self::Account(address) = self {
             address
         } else {
-            panic!("as_alias called on a non-alias address");
+            panic!("as_account called on a non-account address");
         }
     }
 
@@ -146,10 +146,10 @@ impl Address {
                     return Err(ConflictReason::InvalidUnlock);
                 }
             }
-            (Self::Alias(alias_address), Unlock::Alias(unlock)) => {
+            (Self::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Alias(alias_output)) = inputs[unlock.index() as usize] {
-                    if &alias_output.alias_id_non_null(&output_id) != alias_address.alias_id() {
+                if let (output_id, Output::Account(account_output)) = inputs[unlock.index() as usize] {
+                    if &account_output.account_id_non_null(&output_id) != account_address.account_id() {
                         return Err(ConflictReason::InvalidUnlock);
                     }
                     if !context.unlocked_addresses.contains(self) {
@@ -223,7 +223,7 @@ pub mod dto {
     use serde_json::Value;
 
     use super::*;
-    pub use super::{alias::dto::AliasAddressDto, ed25519::dto::Ed25519AddressDto, nft::dto::NftAddressDto};
+    pub use super::{account::dto::AccountAddressDto, ed25519::dto::Ed25519AddressDto, nft::dto::NftAddressDto};
     use crate::types::block::Error;
 
     /// Describes all the different address types.
@@ -231,8 +231,8 @@ pub mod dto {
     pub enum AddressDto {
         /// An Ed25519 address.
         Ed25519(Ed25519AddressDto),
-        /// An alias address.
-        Alias(AliasAddressDto),
+        /// An account address.
+        Account(AccountAddressDto),
         /// A NFT address.
         Nft(NftAddressDto),
     }
@@ -241,7 +241,7 @@ pub mod dto {
         fn from(value: &Address) -> Self {
             match value {
                 Address::Ed25519(a) => Self::Ed25519(a.into()),
-                Address::Alias(a) => Self::Alias(a.into()),
+                Address::Account(a) => Self::Account(a.into()),
                 Address::Nft(a) => Self::Nft(a.into()),
             }
         }
@@ -253,7 +253,7 @@ pub mod dto {
         fn try_from(value: AddressDto) -> Result<Self, Self::Error> {
             match value {
                 AddressDto::Ed25519(a) => Ok(Self::Ed25519(a.try_into()?)),
-                AddressDto::Alias(a) => Ok(Self::Alias(a.try_into()?)),
+                AddressDto::Account(a) => Ok(Self::Account(a.try_into()?)),
                 AddressDto::Nft(a) => Ok(Self::Nft(a.try_into()?)),
             }
         }
@@ -273,10 +273,11 @@ pub mod dto {
                             serde::de::Error::custom(format!("cannot deserialize ed25519 address: {e}"))
                         })?)
                     }
-                    AliasAddress::KIND => Self::Alias(
-                        AliasAddressDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias address: {e}")))?,
-                    ),
+                    AccountAddress::KIND => {
+                        Self::Account(AccountAddressDto::deserialize(value).map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize account address: {e}"))
+                        })?)
+                    }
                     NftAddress::KIND => Self::Nft(
                         NftAddressDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT address: {e}")))?,
@@ -296,7 +297,7 @@ pub mod dto {
             #[serde(untagged)]
             enum AddressDto_<'a> {
                 T1(&'a Ed25519AddressDto),
-                T2(&'a AliasAddressDto),
+                T2(&'a AccountAddressDto),
                 T3(&'a NftAddressDto),
             }
             #[derive(Serialize)]
@@ -308,7 +309,7 @@ pub mod dto {
                 Self::Ed25519(o) => TypedAddress {
                     address: AddressDto_::T1(o),
                 },
-                Self::Alias(o) => TypedAddress {
+                Self::Account(o) => TypedAddress {
                     address: AddressDto_::T2(o),
                 },
                 Self::Nft(o) => TypedAddress {

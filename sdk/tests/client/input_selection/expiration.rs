@@ -6,16 +6,16 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
     types::block::{
-        output::{AliasId, NftId},
+        output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
 };
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Nft},
-    ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2,
-    NFT_ID_1,
+    Build::{Account, Basic, Nft},
+    ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    BECH32_ADDRESS_ED25519_2, NFT_ID_1,
 };
 
 #[test]
@@ -580,7 +580,7 @@ fn remainder_in_expiration() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ALIAS_1,
+        BECH32_ADDRESS_ACCOUNT_1,
         None,
         None,
         None,
@@ -630,7 +630,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ALIAS_1,
+        BECH32_ADDRESS_ACCOUNT_1,
         None,
         None,
         None,
@@ -664,24 +664,24 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 }
 
 #[test]
-fn expiration_expired_only_alias_addresses() {
+fn expiration_expired_only_account_addresses() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ALIAS_1,
+            BECH32_ADDRESS_ACCOUNT_1,
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ALIAS_1, 50)),
+            Some((BECH32_ADDRESS_ACCOUNT_1, 50)),
             None,
         ),
-        Alias(
+        Account(
             1_000_000,
-            alias_id_1,
+            account_id_1,
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,

@@ -38,11 +38,11 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
-    // therefore we can reuse an existing one
-    if balance.aliases().is_empty() {
-        // If we don't have an alias, we need to create one
-        let transaction = account.create_alias_output(None, None).await?;
+    // We can first check if we already have an account output in our account, because an account can have many foundry
+    // outputs and therefore we can reuse an existing one
+    if balance.accounts().is_empty() {
+        // If we don't have an account, we need to create one
+        let transaction = account.create_account_output(None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
     println!("Preparing transaction to create native token...");
 
     let params = CreateNativeTokenParams {
-        alias_id: None,
+        account_id: None,
         circulating_supply: U256::from(CIRCULATING_SUPPLY),
         maximum_supply: U256::from(MAXIMUM_SUPPLY),
         foundry_metadata: None,

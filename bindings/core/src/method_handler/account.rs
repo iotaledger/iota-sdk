@@ -125,9 +125,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareCreateAliasOutput { params, options } => {
+        AccountMethod::PrepareCreateAccountOutput { params, options } => {
             let data = account
-                .prepare_create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .prepare_create_account_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }

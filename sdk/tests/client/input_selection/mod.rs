@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod alias_outputs;
+mod account_outputs;
 mod basic_outputs;
 mod burn;
 mod expiration;

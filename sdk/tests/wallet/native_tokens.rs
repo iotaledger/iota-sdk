@@ -18,7 +18,7 @@ async fn create_and_mint_native_token() -> Result<()> {
 
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let tx = account.create_alias_output(None, None).await?;
+    let tx = account.create_account_output(None, None).await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
@@ -27,7 +27,7 @@ async fn create_and_mint_native_token() -> Result<()> {
     let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
-                alias_id: None,
+                account_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
                 foundry_metadata: None,
@@ -79,7 +79,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
 
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let tx = account.create_alias_output(None, None).await?;
+    let tx = account.create_account_output(None, None).await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
@@ -90,7 +90,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
     let create_tx = account
         .create_native_token(
             CreateNativeTokenParams {
-                alias_id: None,
+                account_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
                 foundry_metadata: Some(foundry_metadata.to_vec()),

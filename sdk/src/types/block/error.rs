@@ -12,7 +12,7 @@ use primitive_types::U256;
 use crate::types::block::{
     input::UtxoInput,
     output::{
-        feature::FeatureCount, unlock_condition::UnlockConditionCount, AliasId, ChainId, MetadataFeatureLength,
+        feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
     payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
@@ -35,7 +35,7 @@ pub enum Error {
     InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
     InvalidAddress,
     InvalidAddressKind(u8),
-    InvalidAliasIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount { amount: u64, required: u64 },
@@ -79,7 +79,7 @@ pub enum Error {
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
-    InvalidUnlockAlias(u16),
+    InvalidUnlockAccount(u16),
     InvalidUnlockNft(u16),
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
@@ -96,7 +96,7 @@ pub enum Error {
     ProtocolVersionMismatch { expected: u8, actual: u8 },
     NonceNotFound,
     RemainingBytesAfterBlock,
-    SelfControlledAliasOutput(AliasId),
+    SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch { expected: String, actual: String },
     StorageDepositReturnOverflow,
@@ -142,7 +142,7 @@ impl fmt::Display for Error {
             }
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
-            Self::InvalidAliasIndex(index) => write!(f, "invalid alias index: {index}"),
+            Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
@@ -216,8 +216,8 @@ impl fmt::Display for Error {
             Self::InvalidUnlockReference(index) => {
                 write!(f, "invalid unlock reference: {index}")
             }
-            Self::InvalidUnlockAlias(index) => {
-                write!(f, "invalid unlock alias: {index}")
+            Self::InvalidUnlockAccount(index) => {
+                write!(f, "invalid unlock account: {index}")
             }
             Self::InvalidUnlockNft(index) => {
                 write!(f, "invalid unlock nft: {index}")
@@ -235,7 +235,10 @@ impl fmt::Display for Error {
                 write!(f, "network ID mismatch: expected {expected} but got {actual}")
             }
             Self::NonZeroStateIndexOrFoundryCounter => {
-                write!(f, "non zero state index or foundry counter while alias ID is all zero")
+                write!(
+                    f,
+                    "non zero state index or foundry counter while account ID is all zero"
+                )
             }
             Self::ParentsNotUniqueSorted => {
                 write!(f, "parents are not unique and/or sorted")
@@ -249,8 +252,8 @@ impl fmt::Display for Error {
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }
-            Self::SelfControlledAliasOutput(alias_id) => {
-                write!(f, "self controlled alias output, alias ID {alias_id}")
+            Self::SelfControlledAccountOutput(account_id) => {
+                write!(f, "self controlled account output, account ID {account_id}")
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")

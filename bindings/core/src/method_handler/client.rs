@@ -11,7 +11,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent, RentStructure,
+                AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent, RentStructure,
             },
             payload::Payload,
             protocol::dto::ProtocolParametersDto,
@@ -57,10 +57,10 @@ where
 /// Call a client method.
 pub(crate) async fn call_client_method_internal(client: &Client, method: ClientMethod) -> Result<Response> {
     let response = match method {
-        ClientMethod::BuildAliasOutput {
+        ClientMethod::BuildAccountOutput {
             amount,
             native_tokens,
-            alias_id,
+            account_id,
             state_index,
             state_metadata,
             foundry_counter,
@@ -68,14 +68,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(AliasOutput::try_from_dtos(
+            let output = Output::from(AccountOutput::try_from_dtos(
                 if let Some(amount) = amount {
                     OutputBuilderAmountDto::Amount(amount)
                 } else {
                     OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
-                &alias_id,
+                &account_id,
                 state_index,
                 state_metadata.map(prefix_hex::decode).transpose()?,
                 foundry_counter,
@@ -247,10 +247,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BasicOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.basic_output_ids(query_parameters).await?)
         }
-        ClientMethod::AliasOutputIds { query_parameters } => {
-            Response::OutputIdsResponse(client.alias_output_ids(query_parameters).await?)
+        ClientMethod::AccountOutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.account_output_ids(query_parameters).await?)
         }
-        ClientMethod::AliasOutputId { alias_id } => Response::OutputId(client.alias_output_id(alias_id).await?),
+        ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.account_output_id(account_id).await?),
         ClientMethod::NftOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
         }
@@ -337,8 +337,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
         }
-        ClientMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
-            Response::Bech32Address(client.alias_id_to_bech32(alias_id, bech32_hrp).await?)
+        ClientMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
+            Response::Bech32Address(client.account_id_to_bech32(account_id, bech32_hrp).await?)
         }
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
             Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)

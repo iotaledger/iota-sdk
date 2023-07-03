@@ -22,16 +22,16 @@ use tokio::sync::Mutex;
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
-        is_alias_transition,
+        is_account_transition,
         types::{LedgerApp, LedgerDeviceType},
         LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
-        address::{Address, AliasAddress, Ed25519Address, NftAddress},
+        address::{AccountAddress, Address, Ed25519Address, NftAddress},
         output::Output,
         payload::{transaction::TransactionEssence, Payload},
         signature::{Ed25519Signature, Signature},
-        unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
     utils::unix_timestamp_now,
 };
@@ -388,7 +388,7 @@ impl SecretManage for LedgerSecretManager {
         }
 
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
-        // Alias/Nft/Reference unlocks
+        // Account/Nft/Reference unlocks
         if blind_signing {
             unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), time)?;
         }
@@ -503,7 +503,7 @@ impl LedgerSecretManager {
     }
 }
 
-// Merge signature unlocks with Alias/Nft/Reference unlocks
+// Merge signature unlocks with Account/Nft/Reference unlocks
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
@@ -521,24 +521,26 @@ fn merge_unlocks(
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) =
             input
                 .output
-                .required_and_unlocked_address(time, input.output_metadata.output_id(), alias_transition)?;
+                .required_and_unlocked_address(time, input.output_metadata.output_id(), account_transition)?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Alias(_alias) => merged_unlocks.push(Unlock::Alias(AliasUnlock::new(*block_index as u16)?)),
+                Address::Account(_account) => {
+                    merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
+                }
                 Address::Ed25519(_ed25519) => {
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
                 Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
             },
             None => {
-                // We can only sign ed25519 addresses and block_indexes needs to contain the alias or nft
+                // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
                 if !input_address.is_ed25519() {
@@ -564,12 +566,14 @@ fn merge_unlocks(
             }
         }
 
-        // When we have an alias or Nft output, we will add their alias or nft address to block_indexes,
-        // because they can be used to unlock outputs via [Unlock::Alias] or [Unlock::Nft],
-        // that have the corresponding alias or nft address in their unlock condition
+        // When we have an account or Nft output, we will add their account or nft address to block_indexes,
+        // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
+        // that have the corresponding account or nft address in their unlock condition
         match &input.output {
-            Output::Alias(alias_output) => block_indexes.insert(
-                Address::Alias(AliasAddress::new(alias_output.alias_id_non_null(input.output_id()))),
+            Output::Account(account_output) => block_indexes.insert(
+                Address::Account(AccountAddress::new(
+                    account_output.account_id_non_null(input.output_id()),
+                )),
                 current_block_index,
             ),
             Output::Nft(nft_output) => block_indexes.insert(
