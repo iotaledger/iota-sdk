@@ -38,8 +38,9 @@ unsafe fn internal_destroy_string(ptr: *mut c_char) -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
-unsafe extern "C" fn destroy_string(ptr: *mut c_char) -> bool {
+pub unsafe extern "C" fn destroy_string(ptr: *mut c_char) -> bool {
     match internal_destroy_string(ptr) {
         Ok(_) => true,
         Err(e) => {
@@ -56,7 +57,7 @@ unsafe fn internal_init_logger(config_ptr: *const c_char) -> Result<()> {
     Ok(())
 }
 
-/// # Safety
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn init_logger(config_ptr: *const c_char) -> bool {
     match internal_init_logger(config_ptr) {
@@ -80,7 +81,7 @@ unsafe fn internal_call_utils_method(method_ptr: *const c_char) -> Result<*const
     Ok(s.into_raw())
 }
 
-/// # Safety
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn call_utils_method(config_ptr: *const c_char) -> *const c_char {
     match internal_call_utils_method(config_ptr) {
