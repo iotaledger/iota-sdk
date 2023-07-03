@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.4.0 - 2023-06-14
+## 0.4.0 - 2023-xx-xx
 
 ### Added
 
@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 - `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
+- Support for `LedgerSecretManager::sign_ed25519`;
 - `WalletBuilder::with_storage_options` method, allowing storage encryption;
 
 ### Changed
@@ -103,6 +104,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
 - Made `Account::get_basic_outputs_for_additional_inputs` private;
 - `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
+- Use concrete ID types instead of String in HTTP responses;
+- `Client::get_outputs_metadata_ignore_errors` returns `OutputMetadata` instead of DTO;
+- `ClientInner::get_output_metadata` returns `OutputMetadata` instead of DTO;
+- Rename `Account::mint_native_token` to `create_native_token`, `Account::increase_native_token_supply` to `mint_native_token`, `Account::decrease_native_token_supply` to `melt_native_token`;
+- Rename `Account::prepare_mint_native_token` to `prepare_create_native_token`, `Account::prepare_increase_native_token_supply` to `prepare_mint_native_token`, `Account::prepare_decrease_native_token_supply` to `prepare_melt_native_token`;
+- Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
+- Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
 - Made `ManagerStorage` public and renamed it to `StorageKind`;
 - Fields of `StorageOptions` are now public;
 
@@ -127,6 +135,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NativeTokensBalanceDto` and `BalanceDto`;
 - `RentStructureBuilder`;
 - `PlaceholderSecretManager`;
+- `block::Error::{InvalidControllerKind, MigratedFundsNotSorted, MissingPayload, MissingRequiredSenderBlock}` variants;
+- `client::Error::InvalidBIP32ChainData`;
+- `BlockResponse`, `OutputResponse` and `MilestoneResponse`;
+- `ClientError::UnexpectedApiResponse`;
 
 ### Fixed
 
@@ -135,6 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validation for transitions in the input selection;
 - Automatically increase foundry counter of alias outputs;
 - Validate that foundry outputs can't have serial number `0`;
+- Allow QueryParameter::Issuer for NFTs;
 
 ## 0.3.0 - 2023-05-02
 

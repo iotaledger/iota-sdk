@@ -18,7 +18,7 @@ pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
     types::block::{
-        payload::{milestone::ReceiptMilestoneOption, MilestonePayload},
+        payload::{milestone::ReceiptMilestoneOption, Payload},
         Block,
     },
 };
@@ -206,11 +206,18 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
-                                        match MilestonePayload::unpack_verified(payload, protocol_parameters) {
-                                            Ok(milestone_payload) => Ok(TopicEvent {
+                                        match Payload::unpack_verified(payload, protocol_parameters) {
+                                            Ok(Payload::Milestone(milestone)) => Ok(TopicEvent {
                                                 topic: p.topic.clone(),
-                                                payload: MqttPayload::MilestonePayload(milestone_payload),
+                                                payload: MqttPayload::MilestonePayload(*milestone),
                                             }),
+                                            Ok(p) => {
+                                                warn!(
+                                                    "'milestone' topic returned non-milestone payload, kind: {:?}",
+                                                    p.kind()
+                                                );
+                                                Err(())
+                                            }
                                             Err(e) => {
                                                 warn!("MilestonePayload unpacking failed: {:?}", e);
                                                 Err(())

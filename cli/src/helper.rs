@@ -1,6 +1,8 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::path::Path;
+
 use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
@@ -9,7 +11,7 @@ use iota_sdk::{
     wallet::{Account, Wallet},
 };
 use tokio::{
-    fs::OpenOptions,
+    fs::{self, OpenOptions},
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
 };
 
@@ -27,6 +29,7 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error>
     password.with_prompt(prompt);
 
     if confirmation {
+        password.with_prompt("Provide a new Stronghold password");
         password.with_confirmation("Confirm password", "Password mismatch");
     }
 
@@ -243,4 +246,19 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     ))?;
 
     Ok(DateTime::from_utc(naive_time, Utc))
+}
+
+pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
+    if !fs::try_exists(path).await.map_err(|e| {
+        Error::Miscellaneous(format!(
+            "Error while accessing the file '{path}': '{e}'",
+            path = path.display()
+        ))
+    })? {
+        return Err(Error::Miscellaneous(format!(
+            "File '{path}' does not exist.",
+            path = path.display()
+        )));
+    }
+    Ok(())
 }

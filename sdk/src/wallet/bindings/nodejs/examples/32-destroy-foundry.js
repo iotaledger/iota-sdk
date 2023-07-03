@@ -12,7 +12,7 @@ async function run() {
         await account.sync();
 
         // Get a foundry id from your account balance after running example
-        // 22-mint-native-tokens.js
+        // 22-create-native-token.js
         let foundryId =
             '0x08e6210d29881310db2afde095e594f6f006fcdbd06e7a83b74bd2bdf3b5190d0e0200000000';
 

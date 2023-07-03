@@ -17,8 +17,8 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
-    println_log_info,
+    helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
+    println_log_error, println_log_info,
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
@@ -123,6 +123,8 @@ pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) 
     let new_password = get_password("Stronghold new password", true)?;
     wallet.change_stronghold_password(password, new_password).await?;
 
+    println_log_info!("The password has been changed");
+
     Ok(wallet)
 }
 
@@ -165,15 +167,12 @@ pub async fn init_command(
 }
 
 pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {
+    let snapshot_path = path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH);
+    check_file_exists(snapshot_path.as_ref()).await?;
+
     let password = get_password("Stronghold password", false)?;
-    StrongholdAdapter::migrate_snapshot_v2_to_v3(
-        path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
-        password,
-        "wallet.rs",
-        100,
-        None,
-        None,
-    )?;
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(snapshot_path, password, "wallet.rs", 100, None, None)?;
+
     println_log_info!("Stronghold snapshot successfully migrated from v2 to v3.");
 
     Ok(())
@@ -208,6 +207,8 @@ pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
 }
 
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
+    check_file_exists(backup_path).await?;
+
     let password = get_password("Stronghold password", false)?;
     let secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
@@ -225,6 +226,11 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .await?;
 
     wallet.restore_backup(backup_path.into(), password, None, None).await?;
+
+    println_log_info!(
+        "Wallet has been restored from the backup file \"{}\".",
+        backup_path.display()
+    );
 
     Ok(wallet)
 }
@@ -263,13 +269,17 @@ pub async fn unlock_wallet(
         None
     };
 
-    let wallet = Wallet::builder()
+    let maybe_wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .finish()
-        .await?;
+        .await;
 
-    Ok(wallet)
+    if let Err(iota_sdk::wallet::Error::MissingParameter(_)) = maybe_wallet {
+        println_log_error!("Please make sure the wallet is initialized.");
+    }
+
+    Ok(maybe_wallet?)
 }
 
 pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {

@@ -6,7 +6,7 @@ use std::sync::Arc;
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager, SecretManagerDto},
-    Response, SecretManagerMethod,
+    Response, Result, SecretManagerMethod,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;
@@ -19,15 +19,14 @@ pub struct SecretManagerMethodHandler {
 impl Finalize for SecretManagerMethodHandler {}
 
 impl SecretManagerMethodHandler {
-    fn new(channel: Channel, options: String) -> Arc<Self> {
-        let secret_manager_dto =
-            serde_json::from_str::<SecretManagerDto>(&options).expect("error initializing secret manager");
-        let secret_manager = SecretManager::try_from(secret_manager_dto).expect("error initializing secret manager");
+    fn new(channel: Channel, options: String) -> Result<Arc<Self>> {
+        let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options)?;
+        let secret_manager = SecretManager::try_from(secret_manager_dto)?;
 
-        Arc::new(Self {
+        Ok(Arc::new(Self {
             channel,
             secret_manager: Arc::new(RwLock::new(secret_manager)),
-        })
+        }))
     }
 
     pub fn new_with_secret_manager(channel: Channel, secret_manager: Arc<RwLock<SecretManager>>) -> Arc<Self> {
@@ -66,7 +65,8 @@ pub fn create_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<Secr
     let options = options.value(&mut cx);
     let channel = cx.channel();
 
-    let method_handler = SecretManagerMethodHandler::new(channel, options);
+    let method_handler = SecretManagerMethodHandler::new(channel, options)
+        .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
 
     Ok(cx.boxed(method_handler))
 }

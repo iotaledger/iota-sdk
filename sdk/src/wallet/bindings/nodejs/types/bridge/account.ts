@@ -24,7 +24,7 @@ import type { SignedTransactionEssence } from '../signedTransactionEssence';
 import type { PreparedTransactionData } from '../preparedTransactionData';
 import type {
     AliasOutputParams,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     TransactionOptions,
     MintNftParams,
 } from '../transactionOptions';
@@ -95,8 +95,8 @@ export type __CreateAliasOutputMethod__ = {
     };
 };
 
-export type __DecreaseNativeTokenSupplyMethod__ = {
-    name: 'decreaseNativeTokenSupply';
+export type __MeltNativeTokenMethod__ = {
+    name: 'meltNativeToken';
     data: {
         tokenId: string;
         meltAmount: HexEncodedAmount;
@@ -247,8 +247,8 @@ export type __MinimumRequiredStorageDepositMethod__ = {
     };
 };
 
-export type __IncreaseNativeTokenSupplyMethod__ = {
-    name: 'increaseNativeTokenSupply';
+export type __MintNativeTokenMethod__ = {
+    name: 'mintNativeToken';
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
@@ -256,10 +256,10 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     };
 };
 
-export type __MintNativeTokenMethod__ = {
-    name: 'mintNativeToken';
+export type __CreateNativeTokenMethod__ = {
+    name: 'createNativeToken';
     data: {
-        params: MintNativeTokenParams;
+        params: CreateNativeTokenParams;
         options?: TransactionOptions;
     };
 };
