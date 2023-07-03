@@ -59,20 +59,20 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
 #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StorageOptions {
-    pub(crate) storage_path: PathBuf,
-    pub(crate) storage_file_name: Option<String>,
-    pub(crate) storage_encryption_key: Option<[u8; 32]>,
-    pub(crate) manager_store: StorageKind,
+    pub(crate) path: PathBuf,
+    pub(crate) file_name: Option<String>,
+    pub(crate) encryption_key: Option<[u8; 32]>,
+    pub(crate) kind: StorageKind,
 }
 
 #[cfg(feature = "storage")]
 impl Default for StorageOptions {
     fn default() -> Self {
         Self {
-            storage_path: default_storage_path().into(),
-            storage_file_name: None,
-            storage_encryption_key: None,
-            manager_store: StorageKind::default(),
+            path: default_storage_path().into(),
+            file_name: None,
+            encryption_key: None,
+            kind: StorageKind::default(),
         }
     }
 }
@@ -127,7 +127,7 @@ where
     #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
     pub fn with_storage_path(mut self, path: &str) -> Self {
         self.storage_options = Some(StorageOptions {
-            storage_path: path.into(),
+            path: path.into(),
             ..Default::default()
         });
         self
@@ -148,7 +148,7 @@ where
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
-        if !storage_options.storage_path.is_dir() {
+        if !storage_options.path.is_dir() {
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
             }
@@ -162,12 +162,12 @@ where
 
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
         let storage =
-            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.storage_path.clone())?;
+            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
         #[cfg(all(not(feature = "rocksdb"), feature = "storage"))]
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = StorageManager::new(storage, storage_options.storage_encryption_key).await?;
+        let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key).await?;
 
         #[cfg(feature = "storage")]
         let read_manager_builder = Self::load(&storage_manager).await?;
