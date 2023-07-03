@@ -112,6 +112,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `Account::prepare_mint_native_token` to `prepare_create_native_token`, `Account::prepare_increase_native_token_supply` to `prepare_mint_native_token`, `Account::prepare_decrease_native_token_supply` to `prepare_melt_native_token`;
 - Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 - Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
+- `Signature::Ed25519` now holds a boxed type;
+- `Ed25519Signature::new` renamed to `try_from_bytes` and returns a Result;
+- `Ed25519Signature::new`, `public_key`, `signature` now use concrete types;
+- `Ed25519Signature::verify` is no longer fallable;
 
 ### Removed
 
