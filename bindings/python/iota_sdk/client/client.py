@@ -7,6 +7,7 @@ from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
+from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
@@ -384,7 +385,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              inputs: Optional[List[Dict[str, Any]]] = None,
                              output: Optional[Dict[str, Any]] = None,
                              outputs: Optional[List[Any]] = None,
-                             tag: Optional[HexStr] = None):
+                             tag: Optional[HexStr] = None) -> List[HexStr|Block]:
         """Build and post a block.
 
         Parameters
@@ -441,10 +442,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         options = humps.camelize(options)
 
-        return self._call_method('buildAndPostBlock', {
+        result = self._call_method('buildAndPostBlock', {
             'secretManager': secret_manager,
             'options': options
         })
+        result[1] = Block.from_dict(result[1])
+        return result
 
     def get_node(self) -> Dict[str, Any]:
         """Get a node candidate from the healthy node pool.
@@ -507,9 +510,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def submit_payload(self, payload):
+    def submit_payload(self, payload) -> List[HexStr|Block]:
         """Submit a payload in a block.
         """
-        return self._call_method('postBlockPayload', {
+        result = self._call_method('postBlockPayload', {
             'payload': payload
         })
+        result[1] = Block.from_dict(result[1])
+        return result

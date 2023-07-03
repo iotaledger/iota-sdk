@@ -3,8 +3,8 @@
 
 //! In this example we will melt an existing native token with its foundry.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! You may provide a TOKEN_ID that is available in the account. The foundry
 //! output which minted it needs to be available as well. You can check this by
@@ -33,9 +33,7 @@ async fn main() -> Result<()> {
     let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
-
-    let balance = account.balance().await?;
+    let balance = account.sync(None).await?;
 
     // Find first foundry and corresponding token id
     let token_id = std::env::args()

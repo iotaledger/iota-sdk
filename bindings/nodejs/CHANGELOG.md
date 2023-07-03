@@ -22,11 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 1.0.0-rc.2 - 2023-0x-xx
 
 ### Added
-- `PluginFetch` to Client to fetch data from custom node plugins;
+- `callPluginRoute` to Client to fetch data from custom node plugins;
 - `ComputeTokenId `, `ComputeOutputId`, `ComputeInputsCommitment` and `ComputeStorageDeposit` to Utils;
 - Type alias for Ids whioch were previously just `HexEncodedString`;
 - List of `ConfictReason` explanations matching the enum;
 - `units-helper` class for IOTA units conversion;
+- `Client::destroy` to close an open handle;
 
 ### Changed
 
@@ -40,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Moved `internal` field from `IGenerateAddressesOptions` to `IGenerateAddressOptions`;
 - Error handling in `Client`, `SecretManager` and `Wallet` constructors;
+- Deadlock in .sync() with incoming transactions;
 
 ## 1.0.0-rc.1 - 2023-06-19
 

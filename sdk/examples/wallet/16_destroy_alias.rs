@@ -4,15 +4,13 @@
 //! In this example we will try to destroy the first alias there is in the account. This is only possible if possible
 //! foundry outputs have circulating supply of 0.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example destroy_alias
 //! ```
-
-use std::env::var;
 
 use iota_sdk::{wallet::Result, Wallet};
 
@@ -22,7 +20,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let alias = "Alice";
@@ -38,7 +36,7 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         println!("Sending alias burn transaction...");
@@ -51,8 +49,8 @@ async fn main() -> Result<()> {
             .await?;
 
         println!(
-            "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );
 

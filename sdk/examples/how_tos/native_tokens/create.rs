@@ -11,8 +11,6 @@
 //! cargo run --release --all-features --example create_native_token
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     wallet::{CreateNativeTokenParams, Result},
     Wallet, U256,
@@ -29,7 +27,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -37,7 +35,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
@@ -51,7 +49,11 @@ async fn main() -> Result<()> {
         let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
 
         account.sync(None).await?;
         println!("Account synced");
@@ -73,7 +75,11 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
-    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
     println!("Created token: {}", transaction.token_id);
 
     // Ensure the account is synced after creating the native token.

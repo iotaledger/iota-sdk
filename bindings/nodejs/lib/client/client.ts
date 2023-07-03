@@ -63,6 +63,10 @@ export class Client {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
+    async destroy() {
+        return this.methodHandler.destroy();
+    }
+
     /**
      * Returns the node information together with the url of the used node
      * @returns { Promise<INodeInfoWrapper> }.

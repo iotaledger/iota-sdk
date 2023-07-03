@@ -1,6 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.block import Block, BlockMetadata
+from iota_sdk.types.payload import MilestonePayload
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from typing import List
@@ -38,35 +40,35 @@ class NodeCoreAPI():
         """
         return self._call_method('getTips')
 
-    def post_block(self, block):
+    def post_block(self, block: Block) -> HexStr:
         """Post block.
         """
-        return self._call_method('postBlockJson', {
-            'block': block
+        return self._call_method('postBlock', {
+            'block': block.__dict__
         })
 
-    def get_block_data(self, block_id: HexStr):
-        """Post block.
+    def get_block_data(self, block_id: HexStr) -> Block:
+        """Get a block.
         """
-        return self._call_method('getBlock', {
+        return Block.from_dict(self._call_method('getBlock', {
             'blockId': block_id
-        })
+        }))
 
-    def get_block_metadata(self, block_id: HexStr):
+    def get_block_metadata(self, block_id: HexStr) -> BlockMetadata:
         """Get block metadata with block_id.
         """
-        return self._call_method('getBlockMetadata', {
+        return BlockMetadata.from_dict(self._call_method('getBlockMetadata', {
             'blockId': block_id
-        })
+        }))
 
-    def get_block_raw(self, block_id: HexStr):
+    def get_block_raw(self, block_id: HexStr) -> List[int]:
         """Get block raw.
         """
         return self._call_method('getBlockRaw', {
             'blockId': block_id
         })
 
-    def post_block_raw(self, block_bytes):
+    def post_block_raw(self, block_bytes: List[int]) -> HexStr:
         """Post block raw.
         """
         return self._call_method('postBlockRaw', {
@@ -87,28 +89,30 @@ class NodeCoreAPI():
             'outputId': output_id
         })
 
-    def get_milestone_by_id(self, milestone_id: HexStr):
+    def get_milestone_by_id(self, milestone_id: HexStr) -> MilestonePayload:
         """Get the milestone by the given milestone id.
         """
-        return self._call_method('getMilestoneById', {
+        result = self._call_method('getMilestoneById', {
             'milestoneId': milestone_id
         })
+        return MilestonePayload.from_dict(result)
 
-    def get_milestone_by_id_raw(self, milestone_id: HexStr):
+    def get_milestone_by_id_raw(self, milestone_id: HexStr) -> List[int]:
         """Get the raw milestone by the given milestone id.
         """
         return self._call_method('getMilestoneByIdRaw', {
             'milestoneId': milestone_id
         })
 
-    def get_milestone_by_index(self, index: int):
+    def get_milestone_by_index(self, index: int) -> MilestonePayload:
         """Get the milestone by the given index.
         """
-        return self._call_method('getMilestoneByIndex', {
+        result = self._call_method('getMilestoneByIndex', {
             'index': index
         })
+        return MilestonePayload.from_dict(result)
 
-    def get_milestone_by_index_raw(self, index: int):
+    def get_milestone_by_index_raw(self, index: int) -> List[int]:
         """Get the milestone by the given index.
         """
         return self._call_method('getMilestoneByIndexRaw', {
@@ -146,19 +150,19 @@ class NodeCoreAPI():
         """
         return self._call_method('getTreasury')
 
-    def get_included_block(self, transaction_id: HexStr):
+    def get_included_block(self, transaction_id: HexStr) -> Block:
         """Returns the included block of the transaction.
         """
-        return self._call_method('getIncludedBlock', {
+        return Block.from_dict(self._call_method('getIncludedBlock', {
             'transactionId': transaction_id
-        })
+        }))
 
-    def get_included_block_metadata(self, transaction_id: HexStr):
+    def get_included_block_metadata(self, transaction_id: HexStr) -> BlockMetadata:
         """Returns the metadata of the included block of the transaction.
         """
-        return self._call_method('getIncludedBlockMetadata', {
+        return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
-        })
+        }))
 
     def call_plugin_route(self, base_plugin_path: str, method: str, method_path: str, query_params: [str] = None, request: str = None):
         """Extension method which provides request methods for plugins.

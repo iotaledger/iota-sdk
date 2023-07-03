@@ -190,6 +190,7 @@ pub trait ToBech32Ext: Sized {
     /// validity.
     fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address;
 }
+
 impl<T: Into<Address>> ToBech32Ext for T {
     /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
     fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error> {

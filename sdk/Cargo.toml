@@ -76,7 +76,7 @@ iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync", "fs" ] }
+tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
@@ -92,7 +92,7 @@ rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
-stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
@@ -298,6 +298,23 @@ name = "transaction"
 path = "examples/client/block/transaction.rs"
 required-features = [ "client" ]
 
+# High Level examples
+
+[[example]]
+name = "address_consolidation"
+path = "examples/client/high_level/consolidation.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "inputs_from_transaction_id"
+path = "examples/client/high_level/inputs_from_transaction_id.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "search_address"
+path = "examples/client/high_level/search_address.rs"
+required-features = [ "client" ]
+
 # Node API core examples
 
 [[example]]
@@ -445,14 +462,34 @@ required-features = [ "client" ]
 #######
 
 [[example]]
-name = "generate_addresses"
+name = "01_generate_addresses"
 path = "examples/client/01_generate_addresses.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "02_address_balance"
+path = "examples/client/02_address_balance.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "03_simple_block"
+path = "examples/client/03_simple_block.rs"
 required-features = [ "client" ]
 
 [[example]]
 name = "07_mqtt"
 path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
+
+[[example]]
+name = "client_config"
+path = "examples/client/client_config.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "custom_remainder_address"
+path = "examples/client/custom_remainder_address.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "get_block"
@@ -468,6 +505,11 @@ required-features = [ "client", "ledger_nano" ]
 name = "ledger_nano_transaction"
 path = "examples/client/ledger_nano_transaction.rs"
 required-features = [ "client", "ledger_nano" ]
+
+[[example]]
+name = "client_logger"
+path = "examples/client/logger.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "stronghold"
@@ -563,6 +605,26 @@ required-features = [ "client" ]
 name = "participation"
 path = "examples/client/participation.rs"
 required-features = [ "client", "participation" ]
+
+[[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "client_split_funds"
+path = "examples/client/split_funds.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
+required-features = [ "client" ]
 
 ### Wallet
 
