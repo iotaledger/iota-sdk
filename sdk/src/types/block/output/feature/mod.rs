@@ -160,12 +160,12 @@ impl Feature {
     }
 
     /// Gets the feature as an actual [`StakingFeature`].
-    /// PANIC: do not call on a non-staking feature.
+    /// NOTE: Will panic if the feature is not a [`StakingFeature`].
     pub fn as_staking(&self) -> &StakingFeature {
         if let Self::Staking(feature) = self {
             feature
         } else {
-            panic!("as_staking called on a non-staking feature");
+            panic!("invalid downcast of non-StakingFeature");
         }
     }
 }
@@ -277,11 +277,7 @@ impl Features {
 
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
-        if let Some(Feature::Staking(staking)) = self.get(StakingFeature::KIND) {
-            Some(staking)
-        } else {
-            None
-        }
+        self.get(StakingFeature::KIND).map(Feature::as_staking)
     }
 }
 
