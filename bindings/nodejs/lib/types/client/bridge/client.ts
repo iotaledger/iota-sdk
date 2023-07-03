@@ -432,8 +432,8 @@ export type __RequestFundsFromFaucetMethod__ = {
     };
 };
 
-export type __PluginFetchMethodMethod__ = {
-    name: 'pluginFetch';
+export type __CallPluginRouteMethodMethod__ = {
+    name: 'callPluginRoute';
     data: {
         basePluginPath: string;
         method: 'GET' | 'POST';

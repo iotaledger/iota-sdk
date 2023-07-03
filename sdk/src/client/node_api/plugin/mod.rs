@@ -11,7 +11,7 @@ use crate::client::{ClientInner, Result};
 
 impl ClientInner {
     /// Extension method which provides request methods for plugins.
-    pub async fn plugin_fetch<T>(
+    pub async fn call_plugin_route<T>(
         &self,
         base_plugin_path: &str,
         method: &str,

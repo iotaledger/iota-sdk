@@ -1009,17 +1009,17 @@ export class Client {
      * @param methodPath The path for the plugin request.
      * @param queryParams Additional query params for the request.
      * @param request The request object.
-     * @returns The response Uint8Array.
+     * @returns The response json.
      */
-    async pluginFetch(
+    async callPluginRoute(
         basePluginPath: string,
         method: 'GET' | 'POST',
         methodPath: string,
         queryParams?: string[],
         request?: string,
-    ): Promise<Uint8Array> {
+    ): Promise<string> {
         const response = await this.methodHandler.callMethod({
-            name: 'pluginFetch',
+            name: 'callPluginRoute',
             data: {
                 basePluginPath,
                 method,

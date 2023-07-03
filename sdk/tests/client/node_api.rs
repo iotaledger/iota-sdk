@@ -8,11 +8,14 @@ use iota_sdk::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
         request_funds_from_faucet, secret::SecretManager, Client,
     },
-    types::block::{
-        address::ToBech32Ext,
-        output::OutputId,
-        payload::{transaction::TransactionId, Payload},
-        BlockId,
+    types::{
+        api::plugins::indexer::OutputIdsResponse,
+        block::{
+            address::ToBech32Ext,
+            output::OutputId,
+            payload::{transaction::TransactionId, Payload},
+            BlockId,
+        },
     },
 };
 
@@ -405,7 +408,7 @@ async fn test_mqtt() {
 
 #[ignore]
 #[tokio::test]
-async fn test_plugin_fetch() {
+async fn test_call_plugin_route() {
     let c = setup_client_with_node_health_ignored().await;
 
     let nft_id = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -414,13 +417,16 @@ async fn test_plugin_fetch() {
 
     let route = format!("outputs/nft/{nft_id}");
 
-    let nft_1 = c
-        .plugin_fetch::<OutputId>("api/indexer/v1/", "GET", &route, vec![], None)
-        .await;
+    let plugin_res: OutputIdsResponse = c
+        .call_plugin_route::<OutputIdsResponse>("api/indexer/v1/", "GET", &route, vec![], None)
+        .await
+        .unwrap();
+    let nft_1 = plugin_res.items.first();
+
     let nft_2 = c.nft_output_id(nft_id).await;
 
     // Actually this returns Err(Error::Node(crate::client::node_api::error::Error::NotFound(e)))
-    if let (Ok(id_1), Ok(id_2)) = (&nft_1, &nft_2) {
+    if let (Some(id_1), Ok(id_2)) = (nft_1, &nft_2) {
         assert_eq!(id_1, id_2);
     }
 }

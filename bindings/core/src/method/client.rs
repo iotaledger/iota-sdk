@@ -127,7 +127,7 @@ pub enum ClientMethod {
     UnhealthyNodes,
     /// Extension method which provides request methods for plugins.
     #[serde(rename_all = "camelCase")]
-    PluginFetch {
+    CallPluginRoute {
         base_plugin_path: String,
         method: String,
         method_path: String,

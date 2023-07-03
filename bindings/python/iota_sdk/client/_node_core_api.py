@@ -160,11 +160,12 @@ class NodeCoreAPI():
             'transactionId': transaction_id
         })
 
-    def plugin_fetch(self, base_plugin_path: str, method: 'GET' | 'POST',
-        method_path: str, query_params: str[] = [], request: str = None):
+    def call_plugin_route(self, base_plugin_path: str, method: str, method_path: str, query_params: [str] = None, request: str = None):
         """Extension method which provides request methods for plugins.
         """
-        return self._call_method('pluginFetch', {
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
             'basePluginPath': base_plugin_path,
             'method': method,
             'methodPath': method_path,

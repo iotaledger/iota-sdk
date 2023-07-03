@@ -231,6 +231,8 @@ pub enum Response {
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
+    /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
+    CustomJson(String),
 
     // Responses in client and wallet
     /// Response for:

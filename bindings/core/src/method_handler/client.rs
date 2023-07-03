@@ -459,17 +459,17 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)
         }
-        ClientMethod::PluginFetch {
+        ClientMethod::CallPluginRoute {
             base_plugin_path,
             method,
             method_path,
             query_params,
             request_object,
         } => {
-            let data: String = client
-                .plugin_fetch(&base_plugin_path, &method, &method_path, query_params, request_object)
+            let data: serde_json::Value = client
+                .call_plugin_route(&base_plugin_path, &method, &method_path, query_params, request_object)
                 .await?;
-            Response::Raw(data.as_bytes().to_vec())
+            Response::CustomJson(serde_json::to_string(&data)?)
         }
     };
     Ok(response)
