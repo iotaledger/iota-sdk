@@ -1,9 +1,21 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will create a transaction with a ledger nano hardware wallet.
+//! In this example we will create a testnet transaction with a simulated ledger nano hardware wallet.
 //!
-//! `cargo run --example ledger_nano_transaction --features=ledger_nano --release`
+//! To use the ledger nano simulator, run the following commands:
+//! 1. `clone https://github.com/iotaledger/ledger-shimmer-app`
+//! 2. `cd ledger-shimmer-app`
+//! 3. `git submodule init && git submodule update --recursive`
+//! 4. `./build.sh -m nanos|nanox|nanosplus -s`
+//!
+//! Then, open the ledger nano web interface at `http://localhost:5000`. You'll have to approve the
+//! transaction the same way as you would with a regular ledger nano device.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example ledger_nano_transaction
+//! ```
 
 use iota_sdk::client::{
     api::GetAddressesOptions,
@@ -11,16 +23,16 @@ use iota_sdk::client::{
     Client, Result,
 };
 
+const AMOUNT: u64 = 1_000_000;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-
     // Create a client instance
     let client = Client::builder()
-        .with_node(&node_url)? // Insert your node URL here
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
@@ -36,17 +48,15 @@ async fn main() -> Result<()> {
         )
         .await?;
 
-    println!("List of generated public addresses:\n{addresses:?}\n");
+    println!("List of generated public addresses:\n{addresses:#?}\n");
 
+    let recv_address = addresses[1];
+
+    println!("Sending {AMOUNT} to {recv_address}");
     let block = client
         .block()
         .with_secret_manager(&secret_manager)
-        // Insert the output address and amount to spent. The amount cannot be zero.
-        .with_output(
-            // We generate an address from our seed so that we send the funds to ourselves
-            addresses[1],
-            1_000_000,
-        )
+        .with_output(recv_address, AMOUNT)
         .await?
         .finish()
         .await?;

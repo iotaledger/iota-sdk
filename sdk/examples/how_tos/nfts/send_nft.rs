@@ -1,12 +1,15 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send an nft.
-//! Rename `.env.example` to `.env` first.
+//! In this example we will send an NFT.
 //!
-//! `cargo run --release --example send_nft`
-
-use std::env::var;
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example send_nft
+//! ```
 
 use iota_sdk::{
     wallet::{Result, SendNftParams},
@@ -23,7 +26,7 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -35,7 +38,7 @@ async fn main() -> Result<()> {
     if let Some(nft_id) = balance.nfts().first() {
         // Set the stronghold password
         wallet
-            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let outputs = [SendNftParams::new(RECV_ADDRESS, *nft_id)?];
@@ -50,7 +53,11 @@ async fn main() -> Result<()> {
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
 
-        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
     } else {
         println!("No available NFTs");
     }

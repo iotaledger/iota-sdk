@@ -8,8 +8,6 @@
 //! cargo run --release --all-features --example 2_sign_transaction
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     client::{
         api::{
@@ -20,10 +18,6 @@ use iota_sdk::{
     },
     types::block::{output::RentStructure, payload::TransactionPayload, protocol::ProtocolParameters},
     wallet::Result,
-};
-use tokio::{
-    fs::File,
-    io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
 };
 
 const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
@@ -37,7 +31,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
     // Load snapshot file
@@ -84,7 +78,9 @@ async fn main() -> Result<()> {
 async fn read_prepared_transaction_from_file(
     protocol_parameters: &ProtocolParameters,
 ) -> Result<PreparedTransactionData> {
-    let mut file = BufReader::new(File::open(PREPARED_TRANSACTION_FILE_PATH).await?);
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::io::BufReader::new(tokio::fs::File::open(PREPARED_TRANSACTION_FILE_PATH).await?);
     let mut json = String::new();
     file.read_to_string(&mut json).await?;
 
@@ -95,9 +91,11 @@ async fn read_prepared_transaction_from_file(
 }
 
 async fn write_signed_transaction_to_file(signed_transaction_data: &SignedTransactionData) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let dto = SignedTransactionDataDto::from(signed_transaction_data);
     let json = serde_json::to_string_pretty(&dto)?;
-    let mut file = BufWriter::new(File::create(SIGNED_TRANSACTION_FILE_PATH).await?);
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(SIGNED_TRANSACTION_FILE_PATH).await?);
     println!("example.signed_transaction.json:\n{json}");
     file.write_all(json.as_bytes()).await?;
     file.flush().await?;

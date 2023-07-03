@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will create a client from a JSON config.
-//! 
-//! `cargo run --example client_config --release`
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example client_config
+//! ```
 
 use iota_sdk::client::{Client, Result};
 
@@ -32,10 +35,11 @@ async fn main() -> Result<()> {
                 }
              }"#,
         )?
-        .finish()?;
+        .finish()
+        .await?;
 
     let info = client.get_info().await?;
-    println!("Node Info: {info:?}");
+    println!("{info:#?}");
 
     Ok(())
 }

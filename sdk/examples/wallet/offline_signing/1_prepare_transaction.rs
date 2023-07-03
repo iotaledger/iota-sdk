@@ -8,8 +8,6 @@
 //! cargo run --release --all-features --example 1_prepare_transaction
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
@@ -17,10 +15,6 @@ use iota_sdk::{
         secret::SecretManager,
     },
     wallet::{account::types::AccountAddress, ClientOptions, Result, SendAmountParams, Wallet},
-};
-use tokio::{
-    fs::File,
-    io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -41,7 +35,7 @@ async fn main() -> Result<()> {
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file().await?;
 
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
@@ -73,7 +67,9 @@ async fn main() -> Result<()> {
 }
 
 async fn read_addresses_from_file() -> Result<Vec<AccountAddress>> {
-    let mut file = BufReader::new(File::open(ADDRESSES_FILE_PATH).await?);
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESSES_FILE_PATH).await?);
     let mut json = String::new();
     file.read_to_string(&mut json).await?;
 
@@ -81,8 +77,10 @@ async fn read_addresses_from_file() -> Result<Vec<AccountAddress>> {
 }
 
 async fn write_transaction_to_file(prepared_transaction: PreparedTransactionData) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(&prepared_transaction))?;
-    let mut file = BufWriter::new(File::create(PREPARED_TRANSACTION_FILE_PATH).await?);
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(PREPARED_TRANSACTION_FILE_PATH).await?);
     println!("example.prepared_transaction.json:\n{json}");
     file.write_all(json.as_bytes()).await?;
     file.flush().await?;

@@ -3,15 +3,13 @@
 
 //! In this example we will generate addresses for an already existing wallet.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example create_address`
 //! ```
-
-use std::env::var;
 
 use iota_sdk::{wallet::Result, Wallet};
 
@@ -24,17 +22,17 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
 
     // Provide the stronghold password
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let explorer_url = var("EXPLORER_URL").ok();
+    let explorer_url = std::env::var("EXPLORER_URL").ok();
     let address_url = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
 
     println!("Current addresses:");
