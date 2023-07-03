@@ -118,7 +118,6 @@ fn migrate_storage_options(storage_options: &mut serde_json::Value) -> Result<()
     if !storage_options.is_null() {
         *storage_options = serde_json::json!({
             "path": storage_options["storage_path"],
-            "fileName": storage_options["storage_file_name"],
             "encryptionKey": storage_options["storage_encryption_key"],
             "kind": storage_options["manager_store"]
         });

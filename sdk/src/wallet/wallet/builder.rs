@@ -61,7 +61,6 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
 #[serde(rename_all = "camelCase")]
 pub struct StorageOptions {
     pub(crate) path: PathBuf,
-    pub(crate) file_name: Option<String>,
     pub(crate) encryption_key: Option<[u8; 32]>,
     pub(crate) kind: StorageKind,
 }
@@ -71,7 +70,6 @@ impl Default for StorageOptions {
     fn default() -> Self {
         Self {
             path: default_storage_path().into(),
-            file_name: None,
             encryption_key: None,
             kind: StorageKind::default(),
         }
