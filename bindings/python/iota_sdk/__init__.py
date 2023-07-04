@@ -16,6 +16,7 @@ from .types.burn import *
 from .types.common import *
 from .types.feature import *
 from .types.native_token import *
+from .types.node_info import *
 from .types.output_id import *
 from .types.payload import *
 from .types.token_scheme import *
