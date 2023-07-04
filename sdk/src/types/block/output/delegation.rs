@@ -57,7 +57,7 @@ pub struct DelegationOutputBuilder {
 }
 
 impl DelegationOutputBuilder {
-    /// Creates an [`DelegationOutputBuilder`] with a provided amount.
+    /// Creates a [`DelegationOutputBuilder`] with a provided amount.
     pub fn new_with_amount(
         amount: u64,
         delegated_amount: u64,
