@@ -8,7 +8,7 @@ import {
     SyncOptions,
     AccountMeta,
     AccountAddress,
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
@@ -885,14 +885,14 @@ export class Account {
      * or custom inputs.
      * @returns The prepared transaction data.
      */
-    async prepareSendAmount(
-        params: SendAmountParams[],
+    async prepareSend(
+        params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareSendAmount',
+                name: 'prepareSend',
                 data: {
                     params,
                     options,
@@ -983,14 +983,14 @@ export class Account {
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendAmount(
-        params: SendAmountParams[],
+    async send(
+        params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendAmount',
+                name: 'send',
                 data: {
                     params,
                     options: transactionOptions,

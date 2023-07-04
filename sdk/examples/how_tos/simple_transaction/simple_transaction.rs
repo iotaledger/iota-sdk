@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{Result, SendAmountParams},
+    wallet::{Result, SendParams},
     Wallet,
 };
 
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let params = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let params = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
     let transaction = account.send(params, None).await?;
 
     // Wait for transaction to get included

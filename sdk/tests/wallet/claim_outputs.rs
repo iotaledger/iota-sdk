@@ -8,7 +8,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{OutputsToClaim, TransactionOptions},
-        CreateNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams,
+        CreateNativeTokenParams, Result, SendNativeTokensParams, SendParams,
     },
     U256,
 };
@@ -29,8 +29,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = accounts[1]
         .send(
             [
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
+                SendParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
+                SendParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -79,8 +79,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = accounts[1]
         .send(
             [
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), amount)?,
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), 0)?,
+                SendParams::new(*accounts[0].addresses().await?[0].address(), amount)?,
+                SendParams::new(*accounts[0].addresses().await?[0].address(), 0)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -520,7 +520,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     let micro_amount = 1;
     let tx = account_0
         .send(
-            [SendAmountParams::new(
+            [SendParams::new(
                 *account_1.addresses().await?[0].address(),
                 micro_amount,
             )?],

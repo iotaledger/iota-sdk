@@ -28,9 +28,9 @@ use crate::{
     },
 };
 
-/// Parameters for `send_amount()`
+/// Parameters for `send()`
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
-pub struct SendAmountParams {
+pub struct SendParams {
     /// Bech32 encoded address
     #[getset(get = "pub")]
     address: Bech32Address,
@@ -50,7 +50,7 @@ pub struct SendAmountParams {
     expiration: Option<u32>,
 }
 
-impl SendAmountParams {
+impl SendParams {
     pub fn new(address: impl ConvertTo<Bech32Address>, amount: u64) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
             address: address.convert()?,
@@ -87,20 +87,20 @@ where
     ///
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally.
     /// The options may define the remainder value strategy or custom inputs.
-    /// Addresses provided with [`SendAmountParams`] need to be bech32-encoded.
+    /// Addresses provided with [`SendParams`] need to be bech32-encoded.
     /// ```ignore
-    /// let params = [SendAmountParams::new(
+    /// let params = [SendParams::new(
     ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     ///     1_000_000)?
     /// ];
     ///
-    /// let tx = account.send_amount(params, None ).await?;
+    /// let tx = account.send(params, None ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send<I: IntoIterator<Item = SendAmountParams> + Send>(
+    pub async fn send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -116,7 +116,7 @@ where
 
     /// Account method to prepare the transaction for
     /// [Account::send()](crate::account::Account::send)
-    pub async fn prepare_send<I: IntoIterator<Item = SendAmountParams> + Send>(
+    pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -135,7 +135,7 @@ where
         let local_time = self.client().get_time_checked().await?;
 
         let mut outputs = Vec::new();
-        for SendAmountParams {
+        for SendParams {
             address,
             amount,
             return_address,

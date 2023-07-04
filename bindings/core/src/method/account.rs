@@ -21,7 +21,7 @@ use iota_sdk::{
             CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
             SyncOptions, TransactionOptionsDto,
         },
-        SendAmountParams, SendNativeTokensParams, SendNftParams,
+        SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -209,10 +209,10 @@ pub enum AccountMethod {
         params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
-    /// Prepare send amount.
+    /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareSendAmount {
-        params: Vec<SendAmountParams>,
+    PrepareSend {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to send native tokens.
@@ -269,10 +269,10 @@ pub enum AccountMethod {
         /// Maximum attempts
         max_attempts: Option<u64>,
     },
-    /// Send amount.
+    /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendAmount {
-        params: Vec<SendAmountParams>,
+    Send {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send outputs in a transaction.

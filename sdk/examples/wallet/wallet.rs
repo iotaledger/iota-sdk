@@ -22,7 +22,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::payload::transaction::TransactionId,
-    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{Account, ClientOptions, Result, SendParams, Wallet},
 };
 
 // The number of addresses to generate in this account
@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     print_addresses_with_funds(&account).await?;
 
     println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let params = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let params = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
     let transaction = account.send(params, None).await?;
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 

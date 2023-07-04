@@ -20,7 +20,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
-        CreateNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams,
+        CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -641,7 +641,7 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let params = [SendAmountParams::new(address, amount)?
+    let params = [SendParams::new(address, amount)?
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
         .with_expiration(expiration)];
     let transaction = account

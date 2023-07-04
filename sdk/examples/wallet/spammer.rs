@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
-    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
 };
 
 // The account alias used in this example.
@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         println!("Creating unspent outputs...");
 
         let transaction = account
-            .send(vec![SendAmountParams::new(recv_address, SEND_AMOUNT)?; 127], None)
+            .send(vec![SendParams::new(recv_address, SEND_AMOUNT)?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
@@ -93,7 +93,7 @@ async fn main() -> Result<()> {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = tokio::time::Instant::now();
-                let params = vec![SendAmountParams::new(recv_address, SEND_AMOUNT).map_err(|err| (n, err))?];
+                let params = vec![SendParams::new(recv_address, SEND_AMOUNT).map_err(|err| (n, err))?];
                 let transaction = account_clone.send(params, None).await.map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();
 

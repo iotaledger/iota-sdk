@@ -754,7 +754,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::PrepareSendAmount { params, options } => {
+            AccountMethod::PrepareSend { params, options } => {
                 convert_async_panics(|| async {
                     let data = account
                         .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
@@ -793,7 +793,7 @@ impl WalletMessageHandler {
                 .await
             }
             AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
-            AccountMethod::SendAmount { params, options } => {
+            AccountMethod::Send { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
                         .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
