@@ -51,7 +51,7 @@ pub use self::{
     account_id::AccountId,
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
-    delegation::{DelegationOutput, DelegationOutputBuilder},
+    delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryOutput, FoundryOutputBuilder},
     foundry_id::FoundryId,

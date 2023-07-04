@@ -14,6 +14,7 @@ use crate::types::block::{
     address::Address,
     output::{
         account_id::AccountId,
+        chain_id::ChainId,
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
         verify_output_amount, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
@@ -363,6 +364,12 @@ impl DelegationOutput {
             .address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
+    }
+
+    ///
+    #[inline(always)]
+    pub fn chain_id(&self) -> ChainId {
+        ChainId::Delegation(self.delegation_id)
     }
 
     ///

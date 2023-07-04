@@ -3,18 +3,20 @@
 
 use derive_more::From;
 
-use crate::types::block::output::{AccountId, FoundryId, NftId, OutputId};
+use crate::types::block::output::{AccountId, DelegationId, FoundryId, NftId, OutputId};
 
 ///
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd, From)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChainId {
-    ///
+    /// An account id.
     Account(AccountId),
-    ///
+    /// A foundry id.
     Foundry(FoundryId),
-    ///
+    /// An NFT id.
     Nft(NftId),
+    /// A delegation id.
+    Delegation(DelegationId),
 }
 
 impl core::fmt::Debug for ChainId {
@@ -24,6 +26,7 @@ impl core::fmt::Debug for ChainId {
             Self::Account(id) => formatter.field(id),
             Self::Foundry(id) => formatter.field(id),
             Self::Nft(id) => formatter.field(id),
+            Self::Delegation(id) => formatter.field(id),
         };
         formatter.finish()
     }
@@ -36,6 +39,7 @@ impl ChainId {
             Self::Account(id) => id.is_null(),
             Self::Foundry(id) => id.is_null(),
             Self::Nft(id) => id.is_null(),
+            Self::Delegation(id) => id.is_null(),
         }
     }
 
@@ -49,6 +53,7 @@ impl ChainId {
             Self::Account(_) => Self::Account(AccountId::from(output_id)),
             Self::Foundry(_) => self,
             Self::Nft(_) => Self::Nft(NftId::from(output_id)),
+            Self::Delegation(_) => Self::Delegation(DelegationId::from(output_id)),
         }
     }
 }
@@ -59,6 +64,7 @@ impl core::fmt::Display for ChainId {
             Self::Account(id) => write!(f, "{id}"),
             Self::Foundry(id) => write!(f, "{id}"),
             Self::Nft(id) => write!(f, "{id}"),
+            Self::Delegation(id) => write!(f, "{id}"),
         }
     }
 }
