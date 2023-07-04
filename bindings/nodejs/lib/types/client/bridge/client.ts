@@ -432,7 +432,7 @@ export type __RequestFundsFromFaucetMethod__ = {
     };
 };
 
-export type __CallPluginRouteMethodMethod__ = {
+export type __CallPluginRouteMethod__ = {
     name: 'callPluginRoute';
     data: {
         basePluginPath: string;

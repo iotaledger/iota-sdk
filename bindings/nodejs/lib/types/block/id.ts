@@ -7,9 +7,6 @@ export type AliasId = HexEncodedString;
 
 export type NftId = HexEncodedString;
 
-/** A block identifier, the BLAKE2b-256 hash of the block bytes.
- * See <https://www.blake2.net/> for more information.
- */
 export type BlockId = HexEncodedString;
 
 export type TokenId = HexEncodedString;

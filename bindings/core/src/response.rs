@@ -137,7 +137,6 @@ pub enum Response {
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
     /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
     /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
-    /// - [`PluginFetch`](crate::method::ClientMethod::PluginFetch)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)

@@ -101,7 +101,7 @@ class Utils():
     def compute_foundry_id(alias_id: str, serial_number: int, token_scheme_kind: int) -> HexStr:
         """Computes the foundry id.
         """
-        return _call_method('computeNftId', {
+        return _call_method('computeFoundryId', {
             'aliasId': alias_id,
             'serialNumber': serial_number,
             'tokenSchemeKind': token_scheme_kind
