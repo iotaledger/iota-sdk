@@ -40,7 +40,7 @@ params = [{
 options = {
     'mandatoryInputs': [input],
 }
-transaction = account.send_amount(params, options)
+transaction = account.send(params, options)
 account.retry_transaction_until_included(
     transaction['transactionId'], None, None)
 print(

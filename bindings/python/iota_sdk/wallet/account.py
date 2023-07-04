@@ -353,7 +353,7 @@ class Account:
             }
         )
 
-    def send_amount(self, params, options: Optional[TransactionOptions] = None):
+    def send(self, params, options: Optional[TransactionOptions] = None):
         """Send amount.
         """
         return self._call_account_method(
