@@ -109,7 +109,7 @@ class Utils():
 
     @staticmethod
     def compute_inputs_commitment(inputs) -> HexStr:
-        """Calculate the input commitment from the output objects that are used as inputs to fund the transaction.
+        """Computes the input commitment from the output objects that are used as inputs to fund the transaction.
         """
         return _call_method('computeInputsCommitment', {
             'inputs': inputs
@@ -117,7 +117,7 @@ class Utils():
 
     @staticmethod
     def compute_storage_deposit(output, rent) -> HexStr:
-        """Calculates the required storage deposit of an output.
+        """Computes the required storage deposit of an output.
         """
         return _call_method('computeStorageDeposit', {
             'inputs': inputs
@@ -133,7 +133,7 @@ class Utils():
         
     @staticmethod
     def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
-        """Returns the output id from transaction id and output index.
+        """Computes the output id from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {
             'transactionId': transaction_id,
@@ -142,7 +142,7 @@ class Utils():
 
     @staticmethod
     def compute_token_id(alias_id: HexStr, serial_number: int, token_scheme_kind: int) -> HexStr:
-        """Constructs a token id from the alias id, serial number and token scheme type.
+        """Computes a token id from the alias id, serial number and token scheme type.
         """
         return _call_method('computeTokenId', {
             'aliasId': alias_id,

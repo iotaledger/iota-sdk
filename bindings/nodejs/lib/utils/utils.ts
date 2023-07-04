@@ -89,7 +89,7 @@ export class Utils {
     }
 
     /**
-     * Calculate the inputCommitment from the output objects that are used as inputs to fund the transaction.
+     * Computes the inputCommitment from the output objects that are used as inputs to fund the transaction.
      * @param inputs The output objects used as inputs for the transaction.
      * @returns The inputs commitment.
      */
@@ -103,7 +103,7 @@ export class Utils {
     }
 
     /**
-     * Returns the output ID from transaction id and output index.
+     * Computes the output ID from transaction id and output index.
      * @param transactionId The id of the transaction.
      * @param outputIndex The index of the output.
      * @returns The output id.
@@ -119,7 +119,7 @@ export class Utils {
     }
 
     /**
-     * Calculates the required storage deposit of an output.
+     * Computes the required storage deposit of an output.
      * @param output The output.
      * @param rentStructure Rent cost of objects which take node resources.
      * @returns The required storage deposit.
@@ -138,7 +138,7 @@ export class Utils {
     }
 
     /**
-     * Constructs a tokenId from the aliasId, serial number and token scheme type.
+     * Computes a tokenId from the aliasId, serial number and token scheme type.
      * @param aliasId The alias that controls the foundry.
      * @param serialNumber The serial number of the foundry.
      * @param tokenSchemeType The tokenSchemeType of the foundry.

@@ -6,14 +6,14 @@
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client, NodeInfoWrapper,
+        request_funds_from_faucet, secret::SecretManager, Client,
     },
-    types::block::{
+    types::{block::{
         address::ToBech32Ext,
         output::OutputId,
         payload::{transaction::TransactionId, Payload},
         BlockId,
-    },
+    }, api::core::response::InfoResponse},
 };
 
 use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL, NODE_LOCAL};
@@ -403,18 +403,18 @@ async fn test_mqtt() {
     client.subscriber().disconnect().await.unwrap();
 }
 
-#[ignore]
 #[tokio::test]
 async fn test_call_plugin_route() {
     let c = setup_client_with_node_health_ignored().await;
 
     // we call the "custom" plugin "node info"
-    let plugin_res: NodeInfoWrapper = c
+    let plugin_res: InfoResponse = c
         .call_plugin_route("/api/core/v2/", "GET", "info", vec![], None)
         .await
         .unwrap();
 
     let info = c.get_info().await.unwrap();
 
-    assert_eq!(plugin_res, info);
+    // Just check name as info can change between 2 calls
+    assert_eq!(plugin_res.name, info.node_info.name);
 }
