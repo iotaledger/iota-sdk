@@ -215,7 +215,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PrepareSendAmount { params, options } => {
             let data = account
-                .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
@@ -277,7 +277,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::SendAmount { params, options } => {
             let transaction = account
-                .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }

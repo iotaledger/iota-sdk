@@ -41,8 +41,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let params = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let transaction = account.send(params, None).await?;
 
     // Wait for transaction to get included
     let block_id = account

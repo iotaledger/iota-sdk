@@ -83,7 +83,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Account method to send a certain amount of base coins.
+    /// Account method to send base coins.
     ///
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally.
     /// The options may define the remainder value strategy or custom inputs.
@@ -100,7 +100,7 @@ where
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_amount<I: IntoIterator<Item = SendAmountParams> + Send>(
+    pub async fn send<I: IntoIterator<Item = SendAmountParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -109,14 +109,14 @@ where
         I::IntoIter: Send,
     {
         let options = options.into();
-        let prepared_transaction = self.prepare_send_amount(params, options.clone()).await?;
+        let prepared_transaction = self.prepare_send(params, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.send_amount()](crate::account::Account.send_amount)
-    pub async fn prepare_send_amount<I: IntoIterator<Item = SendAmountParams> + Send>(
+    /// Account method to prepare the transaction for
+    /// [Account::send()](crate::account::Account::send)
+    pub async fn prepare_send<I: IntoIterator<Item = SendAmountParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -124,7 +124,7 @@ where
     where
         I::IntoIter: Send,
     {
-        log::debug!("[TRANSACTION] prepare_send_amount");
+        log::debug!("[TRANSACTION] prepare_send");
         let options = options.into();
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

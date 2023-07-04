@@ -645,7 +645,7 @@ pub async fn send_command(
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
         .with_expiration(expiration)];
     let transaction = account
-        .send_amount(
+        .send(
             params,
             TransactionOptions {
                 allow_micro_amount,

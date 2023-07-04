@@ -72,8 +72,8 @@ async fn main() -> Result<()> {
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
     println!("Sending the coin-transfer transaction...");
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let params = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let transaction = account.send(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

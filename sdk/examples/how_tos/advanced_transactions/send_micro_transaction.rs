@@ -43,11 +43,11 @@ async fn main() -> Result<()> {
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_MICRO_AMOUNT)?];
+    let params = [SendAmountParams::new(RECV_ADDRESS, SEND_MICRO_AMOUNT)?];
 
     let transaction = account
-        .send_amount(
-            outputs,
+        .send(
+            params,
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()

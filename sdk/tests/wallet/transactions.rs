@@ -18,7 +18,7 @@ async fn send_amount() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
+        .send(
             [SendAmountParams::new(
                 *account_1.addresses().await?[0].address(),
                 amount,
@@ -50,9 +50,9 @@ async fn send_amount_127_outputs() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
+        .send(
             vec![
-SendAmountParams::new(
+                SendAmountParams::new(
                     *account_1.addresses().await?[0].address(),
                     amount,
                 )?;
@@ -87,7 +87,7 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send 10 outputs to account_1
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
+        .send(
             vec![SendAmountParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
             None,
         )
@@ -103,7 +103,7 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send back with custom provided input
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
-        .send_amount(
+        .send(
             [SendAmountParams::new(
                 *account_0.addresses().await?[0].address(),
                 amount,
@@ -176,7 +176,7 @@ async fn send_with_note() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
+        .send(
             [SendAmountParams::new(
                 *account_1.addresses().await?[0].address(),
                 amount,

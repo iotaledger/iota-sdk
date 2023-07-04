@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     // Sync the account to get the outputs for the addresses
     account.sync(None).await?;
 
-    let prepared_transaction = account.prepare_send_amount(outputs.clone(), None).await?;
+    let prepared_transaction = account.prepare_send(outputs.clone(), None).await?;
 
     println!("Prepared transaction sending {outputs:?}");
 

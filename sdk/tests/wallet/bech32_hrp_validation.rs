@@ -20,7 +20,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let account = wallet.create_account().finish().await?;
 
     let error = account
-        .send_amount(
+        .send(
             [SendAmountParams::new(
                 Bech32Address::try_new("wronghrp", account.addresses().await?[0].address())?,
                 1_000_000,

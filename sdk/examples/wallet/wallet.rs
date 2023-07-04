@@ -51,8 +51,8 @@ async fn main() -> Result<()> {
     print_addresses_with_funds(&account).await?;
 
     println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let params = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let transaction = account.send(params, None).await?;
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     sync_print_balance(&account, false).await?;

@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
         .unwrap();
 
     let transaction = account
-        .send_amount(
+        .send(
             SendAmountParams::new(
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
                 1_000_000,
