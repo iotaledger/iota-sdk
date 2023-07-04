@@ -1,0 +1,35 @@
+{
+  "unversionedId": "how_tos/accounts_and_addresses/list_outputs",
+  "id": "how_tos/accounts_and_addresses/list_outputs",
+  "title": "List Outputs",
+  "description": "How to list outputs",
+  "source": "@site/docs/how_tos/accounts_and_addresses/list_outputs.mdx",
+  "sourceDirName": "how_tos/accounts_and_addresses",
+  "slug": "/how_tos/accounts_and_addresses/list_outputs",
+  "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_outputs",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/accounts_and_addresses/list_outputs.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "List Outputs",
+    "description": "How to list outputs",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "list outputs",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "List Transactions",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_transactions"
+  },
+  "next": {
+    "title": "Request Funds",
+    "permalink": "/iota-sdk/how_tos/simple_transaction/request_funds"
+  }
+}

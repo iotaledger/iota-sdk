@@ -1,0 +1,35 @@
+{
+  "unversionedId": "how_tos/nfts/mint_nft copy",
+  "id": "how_tos/nfts/mint_nft copy",
+  "title": "Mint NFT",
+  "description": "How to mint NFT",
+  "source": "@site/docs/how_tos/nfts/mint_nft copy.mdx",
+  "sourceDirName": "how_tos/nfts",
+  "slug": "/how_tos/nfts/mint_nft copy",
+  "permalink": "/iota-sdk/how_tos/nfts/mint_nft copy",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/nfts/mint_nft copy.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Mint NFT",
+    "description": "How to mint NFT",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "list transactions",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Mint NFT",
+    "permalink": "/iota-sdk/how_tos/nfts/mint_nft copy 2"
+  },
+  "next": {
+    "title": "Mint NFT",
+    "permalink": "/iota-sdk/how_tos/nfts/mint_nft"
+  }
+}

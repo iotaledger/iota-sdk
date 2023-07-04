@@ -1,0 +1,36 @@
+{
+  "unversionedId": "how_tos/outputs/features",
+  "id": "how_tos/outputs/features",
+  "title": "Features",
+  "description": "How to create ouputs with different features",
+  "source": "@site/docs/how_tos/outputs/features.mdx",
+  "sourceDirName": "how_tos/outputs",
+  "slug": "/how_tos/outputs/features",
+  "permalink": "/iota-sdk/how_tos/outputs/features",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/outputs/features.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Features",
+    "description": "How to create ouputs with different features",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "outputs",
+      "features",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Verify Ed25519 Signature",
+    "permalink": "/iota-sdk/how_tos/sign_and_verify_ed25519/verify_ed25519_signature"
+  },
+  "next": {
+    "title": "Unlock Conditions",
+    "permalink": "/iota-sdk/how_tos/outputs/unlock_conditions"
+  }
+}

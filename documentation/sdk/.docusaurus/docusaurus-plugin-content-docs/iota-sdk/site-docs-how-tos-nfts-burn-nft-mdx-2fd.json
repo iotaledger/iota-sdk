@@ -1,0 +1,36 @@
+{
+  "unversionedId": "how_tos/nfts/burn_nft",
+  "id": "how_tos/nfts/burn_nft",
+  "title": "Burn NFT",
+  "description": "How to burn NFT",
+  "source": "@site/docs/how_tos/nfts/burn_nft.mdx",
+  "sourceDirName": "how_tos/nfts",
+  "slug": "/how_tos/nfts/burn_nft",
+  "permalink": "/iota-sdk/how_tos/nfts/burn_nft",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/nfts/burn_nft.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Burn NFT",
+    "description": "How to burn NFT",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "burn",
+      "nft",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Send NFT",
+    "permalink": "/iota-sdk/how_tos/nfts/send_nft"
+  },
+  "next": {
+    "title": "Troubleshooting",
+    "permalink": "/iota-sdk/troubleshooting"
+  }
+}

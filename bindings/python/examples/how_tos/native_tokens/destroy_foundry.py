@@ -1,7 +1,6 @@
 from iota_sdk import Wallet, HexStr
 from dotenv import load_dotenv
 import os
-import json
 
 load_dotenv()
 
@@ -28,7 +27,7 @@ transaction = account.prepare_destroy_foundry(foundry_id).send()
 print(f'Transaction sent: {transaction["transactionId"]}')
 
 # Wait for transaction to get included
-blockId = account.retry_transaction_until_included(transaction['transactionId'])
+blockId = account.retry_transaction_until_included(transaction.transactionId)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 balance = account.sync()

@@ -26,5 +26,4 @@ outputs = [{
 transaction = account.send_amount(outputs, TransactionOptions(remainder_value_strategy=RemainderValueStrategy.ReuseAddress,
                                   note="my first tx", tagged_data_payload=TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data"))))
 print(transaction)
-print(
-    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

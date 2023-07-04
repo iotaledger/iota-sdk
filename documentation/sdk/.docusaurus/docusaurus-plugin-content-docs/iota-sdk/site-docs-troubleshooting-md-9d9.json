@@ -1,0 +1,34 @@
+{
+  "unversionedId": "troubleshooting",
+  "id": "troubleshooting",
+  "title": "Troubleshooting",
+  "description": "Troubleshooting the IOTA SDK.",
+  "source": "@site/docs/troubleshooting.md",
+  "sourceDirName": ".",
+  "slug": "/troubleshooting",
+  "permalink": "/iota-sdk/troubleshooting",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/troubleshooting.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "description": "Troubleshooting the IOTA SDK.",
+    "keywords": [
+      "discussion",
+      "channel",
+      "problem",
+      "solution",
+      "discord",
+      "stackexchange"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Burn NFT",
+    "permalink": "/iota-sdk/how_tos/nfts/burn_nft"
+  },
+  "next": {
+    "title": "Contribute to the Project",
+    "permalink": "/iota-sdk/contribute"
+  }
+}

@@ -1,0 +1,85 @@
+:root {
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+Patch to style scrollbars consistently
+*/
+* {
+  scrollbar-color: var(--ifm-scrollbar-thumb-background-color)
+    var(--ifm-scrollbar-track-background-color);
+  scrollbar-width: var(--ifm-scrollbar-size);
+}
+
+::-webkit-scrollbar {
+  height: var(--ifm-scrollbar-size);
+  width: var(--ifm-scrollbar-size);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-scrollbar-track-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-scrollbar-thumb-background-color);
+  border-radius: var(--ifm-scrollbar-size);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-scrollbar-thumb-hover-background-color);
+}
+
+body {
+  scrollbar-width: 12px;
+}
+
+body::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+body::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+}
+
+/*
+Patch to avoid displaying a double header in imported DOCS
+*/
+.markdown > p > header > h1 {
+  display: none;
+}
+
+/*
+Patch to unify hr with border styling
+*/
+hr {
+  background-color: var(--ifm-hr-border-color);
+  border: none;
+  height: var(--ifm-hr-border-width);
+}
+
+.theme-doc-toc-mobile button::after {
+  background: none;
+  content: none;
+  display: none;
+  filter: none;
+  min-width: auto;
+}
+
+/*
+Patch to unify arrows in sidebar and navbar
+*/
+.dropdown > .navbar__link:after {
+  background: var(--ifm-menu-link-sublist-icon) 50% / 1.5rem 1.5rem;
+  border: none;
+  filter: var(--ifm-menu-link-sublist-icon-filter);
+  transform: rotate(180deg);
+  height: 0.9rem;
+  width: 0.9rem;
+}
+
+.menu__link--sublist-caret:after {
+  background: var(--ifm-menu-link-sublist-icon) 50% / 1.5rem 1.5rem;
+  height: 0.9rem;
+  width: 0.9rem;
+}

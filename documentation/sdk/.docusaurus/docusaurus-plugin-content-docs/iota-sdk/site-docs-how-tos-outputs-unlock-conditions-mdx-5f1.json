@@ -1,0 +1,36 @@
+{
+  "unversionedId": "how_tos/outputs/unlock_conditions",
+  "id": "how_tos/outputs/unlock_conditions",
+  "title": "Unlock Conditions",
+  "description": "How to set unlock conditions for outputs",
+  "source": "@site/docs/how_tos/outputs/unlock_conditions.mdx",
+  "sourceDirName": "how_tos/outputs",
+  "slug": "/how_tos/outputs/unlock_conditions",
+  "permalink": "/iota-sdk/how_tos/outputs/unlock_conditions",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/outputs/unlock_conditions.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Unlock Conditions",
+    "description": "How to set unlock conditions for outputs",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "outputs",
+      "unlock conditions",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Features",
+    "permalink": "/iota-sdk/how_tos/outputs/features"
+  },
+  "next": {
+    "title": "Mint NFT",
+    "permalink": "/iota-sdk/how_tos/nfts/mint_nft"
+  }
+}

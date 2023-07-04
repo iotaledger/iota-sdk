@@ -3,8 +3,8 @@
 
 //! In this example we will mint the issuer NFT for the NFT collection.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -72,7 +72,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .retry_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

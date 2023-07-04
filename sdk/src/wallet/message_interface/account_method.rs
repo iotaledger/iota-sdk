@@ -34,7 +34,7 @@ use crate::{
                 transaction::{
                     high_level::{
                         create_alias::CreateAliasParams,
-                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
+                        minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
                     TransactionOptionsDto,
@@ -238,11 +238,11 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     PendingTransactions,
-    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// Melt native tokens. This happens with the foundry output which minted them, by increasing its
     /// `melted_tokens` field.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    DecreaseNativeTokenSupply {
+    MeltNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
@@ -253,21 +253,22 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit { output: OutputDto },
-    /// Mint more native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Mint additional native tokens.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    IncreaseNativeTokenSupply {
+    MintNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
-    /// Mint native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Create a native token.
+    /// Expected response:
+    /// [`CreateNativeTokenTransaction`](crate::wallet::message_interface::Response::CreateNativeTokenTransaction)
     #[serde(rename_all = "camelCase")]
-    MintNativeToken {
-        params: MintNativeTokenParams,
+    CreateNativeToken {
+        params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.

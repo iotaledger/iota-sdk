@@ -1,11 +1,14 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Find an output, as raw bytes, by its identifier by calling `GET /api/core/v2/outputs/{outputId}`.
+//! Find an output, as raw bytes, by its identifier by querying the `/api/core/v2/outputs/{outputId}` node endpoint.
 //!
-//! `cargo run --example node_api_core_get_output_raw --release -- [NODE URL] [OUTPUT ID]`
-
-use std::str::FromStr;
+//! Make sure to provide a somewhat recent output id to make this example run successfully!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_output_raw <OUTPUT ID> [NODE URL]
+//! ```
 
 use iota_sdk::{
     client::{Client, Result},
@@ -14,26 +17,27 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // If not provided we use the default node from the `.env` file.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the output ID from command line argument or use a default one.
-    let output_id =
-        OutputId::from_str(&std::env::args().nth(2).unwrap_or_else(|| {
-            String::from("0xb66fd384cb5755668f1890ea2e41d699db9cf32f3bc422ad3c24ffeb9c7f01d00000")
-        }))?;
+    // Take the output id from the command line, or panic.
+    let output_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: OUTPUT ID")
+        .parse::<OutputId>()?;
 
     // Get the output as raw bytes.
     let output_bytes = client.get_output_raw(&output_id).await?;
 
-    println!("Output bytes: {output_bytes:?}");
+    println!("Output bytes:\n{output_bytes:?}");
 
     Ok(())
 }

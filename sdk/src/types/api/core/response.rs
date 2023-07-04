@@ -1,19 +1,16 @@
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, string::String, vec::Vec};
+use alloc::{string::String, vec::Vec};
 
 use crate::types::block::{
     output::{
         dto::{OutputDto, OutputMetadataDto},
         OutputId, OutputWithMetadata,
     },
-    payload::{
-        dto::MilestonePayloadDto,
-        milestone::{option::dto::ReceiptMilestoneOptionDto, MilestoneId},
-    },
+    payload::milestone::{option::dto::ReceiptMilestoneOptionDto, MilestoneId},
     protocol::dto::ProtocolParametersDto,
-    BlockDto, BlockId,
+    BlockId,
 };
 
 /// Response of GET /api/core/v2/info.
@@ -162,20 +159,6 @@ pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 
-/// Response of GET /api/core/v2/blocks/{block_id}.
-/// Returns a specific block.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase"),
-    serde(untagged)
-)]
-pub enum BlockResponse {
-    Json(BlockDto),
-    Raw(Vec<u8>),
-}
-
 /// Describes the ledger inclusion state of a transaction.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -245,20 +228,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     }
 }
 
-/// Response of GET /api/core/v2/outputs/{output_id}.
-/// Returns an output and its metadata as JSON or raw bytes.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase"),
-    serde(untagged)
-)]
-pub enum OutputResponse {
-    Json(Box<OutputWithMetadataResponse>),
-    Raw(Vec<u8>),
-}
-
 /// Describes a receipt.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -291,20 +260,6 @@ pub struct ReceiptsResponse {
 pub struct TreasuryResponse {
     pub milestone_id: MilestoneId,
     pub amount: String,
-}
-
-/// Response of GET /api/core/v2/milestone/{milestone_index}.
-/// Returns information about a milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase"),
-    serde(untagged)
-)]
-pub enum MilestoneResponse {
-    Json(MilestonePayloadDto),
-    Raw(Vec<u8>),
 }
 
 /// Response of GET /api/core/v2/milestone/{milestone_index}/utxo-changes.

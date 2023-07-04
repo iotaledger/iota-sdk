@@ -1,0 +1,36 @@
+{
+  "unversionedId": "how_tos/accounts_and_addresses/check_balance",
+  "id": "how_tos/accounts_and_addresses/check_balance",
+  "title": "Check Balance",
+  "description": "How to check a wallet account's balance.",
+  "source": "@site/docs/how_tos/accounts_and_addresses/check_balance.mdx",
+  "sourceDirName": "how_tos/accounts_and_addresses",
+  "slug": "/how_tos/accounts_and_addresses/check_balance",
+  "permalink": "/iota-sdk/how_tos/accounts_and_addresses/check_balance",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/accounts_and_addresses/check_balance.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Check Balance",
+    "description": "How to check a wallet account's balance.",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "get balance",
+      "check balance",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "List Accounts",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_accounts"
+  },
+  "next": {
+    "title": "List Addresses",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_addresses"
+  }
+}

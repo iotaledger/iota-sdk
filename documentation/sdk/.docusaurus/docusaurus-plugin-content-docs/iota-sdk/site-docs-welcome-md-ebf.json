@@ -1,0 +1,33 @@
+{
+  "unversionedId": "welcome",
+  "id": "welcome",
+  "title": "Welcome",
+  "description": "Official IOTA SDK which can be used to easily interact with the Tangle",
+  "source": "@site/docs/welcome.md",
+  "sourceDirName": ".",
+  "slug": "/welcome",
+  "permalink": "/iota-sdk/welcome",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/welcome.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "description": "Official IOTA SDK which can be used to easily interact with the Tangle",
+    "keywords": [
+      "requirements",
+      "wallet",
+      "software",
+      "library",
+      "rust",
+      "python",
+      "nodejs",
+      "java",
+      "client"
+    ]
+  },
+  "sidebar": "docs",
+  "next": {
+    "title": "Overview",
+    "permalink": "/iota-sdk/overview"
+  }
+}

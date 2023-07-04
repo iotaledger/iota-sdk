@@ -23,4 +23,4 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Send transaction.
 transaction = account.prepare_destroy_alias(ALIAS_ID).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

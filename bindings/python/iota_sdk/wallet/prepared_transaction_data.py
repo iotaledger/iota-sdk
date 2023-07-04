@@ -1,6 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.transaction import Transaction
+
 class PreparedTransactionData:
     def __init__(
         self,
@@ -35,7 +37,7 @@ class PreparedTransactionData:
 
     :returns: The send() method is returning a Transaction object after it has been signed and submitted.
     """
-    def send(self):
+    def send(self) -> Transaction:
         return self.sign_and_submit_transaction()
 
 
@@ -56,15 +58,15 @@ class PreparedTransactionData:
 
     :returns: A Transaction object.
     """
-    def sign_and_submit_transaction(self):
+    def sign_and_submit_transaction(self) -> Transaction:
         return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
 
-class PreparedMintTokenTransaction(PreparedTransactionData):
+class PreparedCreateTokenTransaction(PreparedTransactionData):
 
     """
     The function returns the token_id as a string.
 
-    :returns: The token id of the PreparedMintTokenTransaction.
+    :returns: The token id of the PreparedCreateTokenTransaction.
     """
     def token_id(self):
         return self.prepared_transaction_data_dto["tokenId"]

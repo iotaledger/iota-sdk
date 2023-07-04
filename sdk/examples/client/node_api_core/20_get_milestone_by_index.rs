@@ -1,28 +1,36 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns milestone data as JSON by its index by calling
-//! `GET /api/core/v2/milestones/by-index/{index}`.
+//! Returns milestone data as JSON by its index by querying the
+//! `/api/core/v2/milestones/by-index/{index}` node endpoint.
 //!
-//! `cargo run --example node_api_core_get_milestone_by_index --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_milestone_by_index [MILESTONE INDEX] [NODE URL]
+//! ```
 
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // If not provided we use the default node from the `.env` file.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Fetch the latest milestone index from the node.
-    let info = client.get_info().await?;
-    let milestone_index = info.node_info.status.latest_milestone.index;
+    // Take the milestone index from the command line, or use a default.
+    let milestone_index = if let Some(s) = std::env::args().nth(1) {
+        s.parse().expect("invalid milestone index")
+    } else {
+        client.get_info().await?.node_info.status.latest_milestone.index
+    };
+
     // Send the request.
     let milestone = client.get_milestone_by_index(milestone_index).await?;
 

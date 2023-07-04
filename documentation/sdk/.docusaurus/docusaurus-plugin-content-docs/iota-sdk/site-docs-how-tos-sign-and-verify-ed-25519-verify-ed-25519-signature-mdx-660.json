@@ -1,0 +1,37 @@
+{
+  "unversionedId": "how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+  "id": "how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+  "title": "Verify Ed25519 Signature",
+  "description": "How to verify an Ed25519 signature",
+  "source": "@site/docs/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.mdx",
+  "sourceDirName": "how_tos/sign_and_verify_ed25519",
+  "slug": "/how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+  "permalink": "/iota-sdk/how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Verify Ed25519 Signature",
+    "description": "How to verify an Ed25519 signature",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "verify",
+      "ed25519",
+      "signature",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Sign Ed25519",
+    "permalink": "/iota-sdk/how_tos/sign_and_verify_ed25519/sign_ed25519"
+  },
+  "next": {
+    "title": "Features",
+    "permalink": "/iota-sdk/how_tos/outputs/features"
+  }
+}

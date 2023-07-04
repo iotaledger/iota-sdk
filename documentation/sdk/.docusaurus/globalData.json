@@ -1,0 +1,138 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "iota-sdk": {
+      "path": "/iota-sdk",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/iota-sdk",
+          "mainDocId": "welcome",
+          "docs": [
+            {
+              "id": "contribute",
+              "path": "/iota-sdk/contribute",
+              "sidebar": "docs"
+            },
+            {
+              "id": "explanations/account_approaches",
+              "path": "/iota-sdk/explanations/account_approaches",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/check_balance",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/check_balance",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/create_account",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/create_account",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/create_address",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/create_address",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/create_mnemonic",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/create_mnemonic",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/list_accounts",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/list_accounts",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/list_addresses",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/list_addresses",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/list_outputs",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/list_outputs",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/accounts_and_addresses/list_transactions",
+              "path": "/iota-sdk/how_tos/accounts_and_addresses/list_transactions",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/nfts/burn_nft",
+              "path": "/iota-sdk/how_tos/nfts/burn_nft",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/nfts/mint_nft",
+              "path": "/iota-sdk/how_tos/nfts/mint_nft",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/nfts/send_nft",
+              "path": "/iota-sdk/how_tos/nfts/send_nft",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/outputs/features",
+              "path": "/iota-sdk/how_tos/outputs/features",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/outputs/unlock_conditions",
+              "path": "/iota-sdk/how_tos/outputs/unlock_conditions",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/sign_and_verify_ed25519/sign_ed25519",
+              "path": "/iota-sdk/how_tos/sign_and_verify_ed25519/sign_ed25519",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+              "path": "/iota-sdk/how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/simple_transaction/request_funds",
+              "path": "/iota-sdk/how_tos/simple_transaction/request_funds",
+              "sidebar": "docs"
+            },
+            {
+              "id": "how_tos/simple_transaction/simple_transaction",
+              "path": "/iota-sdk/how_tos/simple_transaction/",
+              "sidebar": "docs"
+            },
+            {
+              "id": "overview",
+              "path": "/iota-sdk/overview",
+              "sidebar": "docs"
+            },
+            {
+              "id": "troubleshooting",
+              "path": "/iota-sdk/troubleshooting",
+              "sidebar": "docs"
+            },
+            {
+              "id": "welcome",
+              "path": "/iota-sdk/welcome",
+              "sidebar": "docs"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "docs": {
+              "link": {
+                "path": "/iota-sdk/welcome",
+                "label": "welcome"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

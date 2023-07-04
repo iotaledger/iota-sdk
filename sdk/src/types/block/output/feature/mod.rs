@@ -90,12 +90,12 @@ impl Feature {
     }
 
     /// Gets the feature as an actual [`SenderFeature`].
-    /// PANIC: do not call on a non-sender feature.
+    /// NOTE: Will panic if the feature is not a [`SenderFeature`].
     pub fn as_sender(&self) -> &SenderFeature {
         if let Self::Sender(feature) = self {
             feature
         } else {
-            panic!("as_sender called on a non-sender feature");
+            panic!("invalid downcast of non-SenderFeature");
         }
     }
 
@@ -105,12 +105,12 @@ impl Feature {
     }
 
     /// Gets the feature as an actual [`IssuerFeature`].
-    /// PANIC: do not call on a non-issuer feature.
+    /// NOTE: Will panic if the feature is not an [`IssuerFeature`].
     pub fn as_issuer(&self) -> &IssuerFeature {
         if let Self::Issuer(feature) = self {
             feature
         } else {
-            panic!("as_issuer called on a non-issuer feature");
+            panic!("invalid downcast of non-IssuerFeature");
         }
     }
 
@@ -120,12 +120,12 @@ impl Feature {
     }
 
     /// Gets the feature as an actual [`MetadataFeature`].
-    /// PANIC: do not call on a non-metadata feature.
+    /// NOTE: Will panic if the feature is not a [`MetadataFeature`].
     pub fn as_metadata(&self) -> &MetadataFeature {
         if let Self::Metadata(feature) = self {
             feature
         } else {
-            panic!("as_metadata called on a non-metadata feature");
+            panic!("invalid downcast of non-MetadataFeature");
         }
     }
 
@@ -135,12 +135,12 @@ impl Feature {
     }
 
     /// Gets the feature as an actual [`TagFeature`].
-    /// PANIC: do not call on a non-tag feature.
+    /// NOTE: Will panic if the feature is not a [`TagFeature`].
     pub fn as_tag(&self) -> &TagFeature {
         if let Self::Tag(feature) = self {
             feature
         } else {
-            panic!("as_tag called on a non-tag feature");
+            panic!("invalid downcast of non-TagFeature");
         }
     }
 }
@@ -231,38 +231,22 @@ impl Features {
 
     /// Gets a reference to a [`SenderFeature`], if any.
     pub fn sender(&self) -> Option<&SenderFeature> {
-        if let Some(Feature::Sender(sender)) = self.get(SenderFeature::KIND) {
-            Some(sender)
-        } else {
-            None
-        }
+        self.get(SenderFeature::KIND).map(Feature::as_sender)
     }
 
     /// Gets a reference to a [`IssuerFeature`], if any.
     pub fn issuer(&self) -> Option<&IssuerFeature> {
-        if let Some(Feature::Issuer(issuer)) = self.get(IssuerFeature::KIND) {
-            Some(issuer)
-        } else {
-            None
-        }
+        self.get(IssuerFeature::KIND).map(Feature::as_issuer)
     }
 
     /// Gets a reference to a [`MetadataFeature`], if any.
     pub fn metadata(&self) -> Option<&MetadataFeature> {
-        if let Some(Feature::Metadata(metadata)) = self.get(MetadataFeature::KIND) {
-            Some(metadata)
-        } else {
-            None
-        }
+        self.get(MetadataFeature::KIND).map(Feature::as_metadata)
     }
 
     /// Gets a reference to a [`TagFeature`], if any.
     pub fn tag(&self) -> Option<&TagFeature> {
-        if let Some(Feature::Tag(tag)) = self.get(TagFeature::KIND) {
-            Some(tag)
-        } else {
-            None
-        }
+        self.get(TagFeature::KIND).map(Feature::as_tag)
     }
 }
 

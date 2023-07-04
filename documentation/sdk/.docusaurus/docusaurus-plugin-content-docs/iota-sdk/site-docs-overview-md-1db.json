@@ -1,0 +1,34 @@
+{
+  "unversionedId": "overview",
+  "id": "overview",
+  "title": "Overview",
+  "description": "The IOTA SDK is designed to simplify how you connect and interact with nodes in the Tangle.",
+  "source": "@site/docs/overview.md",
+  "sourceDirName": ".",
+  "slug": "/overview",
+  "permalink": "/iota-sdk/overview",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/overview.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "description": "The IOTA SDK is designed to simplify how you connect and interact with nodes in the Tangle.",
+    "keywords": [
+      "layered overview",
+      "high level",
+      "low level",
+      "stronghold",
+      "value transactions",
+      "explanation"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Welcome",
+    "permalink": "/iota-sdk/welcome"
+  },
+  "next": {
+    "title": "Account Approaches",
+    "permalink": "/iota-sdk/explanations/account_approaches"
+  }
+}

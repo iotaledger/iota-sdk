@@ -1,0 +1,37 @@
+{
+  "unversionedId": "how_tos/simple_transaction/simple_transaction",
+  "id": "how_tos/simple_transaction/simple_transaction",
+  "title": "Simple Transaction",
+  "description": "How to send a value transaction",
+  "source": "@site/docs/how_tos/simple_transaction/simple_transaction.mdx",
+  "sourceDirName": "how_tos/simple_transaction",
+  "slug": "/how_tos/simple_transaction/",
+  "permalink": "/iota-sdk/how_tos/simple_transaction/",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/simple_transaction/simple_transaction.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Simple Transaction",
+    "description": "How to send a value transaction",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "faucet",
+      "testnet",
+      "test funds",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Request Funds",
+    "permalink": "/iota-sdk/how_tos/simple_transaction/request_funds"
+  },
+  "next": {
+    "title": "Sign Ed25519",
+    "permalink": "/iota-sdk/how_tos/sign_and_verify_ed25519/sign_ed25519"
+  }
+}

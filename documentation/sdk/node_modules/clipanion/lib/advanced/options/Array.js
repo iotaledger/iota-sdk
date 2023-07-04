@@ -1,0 +1,37 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var utils = require('./utils.js');
+
+function Array(descriptor, initialValueBase, optsBase) {
+    const [initialValue, opts] = utils.rerouteArguments(initialValueBase, optsBase !== null && optsBase !== void 0 ? optsBase : {});
+    const { arity = 1 } = opts;
+    const optNames = descriptor.split(`,`);
+    const nameSet = new Set(optNames);
+    return utils.makeCommandOption({
+        definition(builder) {
+            builder.addOption({
+                names: optNames,
+                arity,
+                hidden: opts === null || opts === void 0 ? void 0 : opts.hidden,
+                description: opts === null || opts === void 0 ? void 0 : opts.description,
+                required: opts.required,
+            });
+        },
+        transformer(builder, key, state) {
+            let currentValue = typeof initialValue !== `undefined`
+                ? [...initialValue]
+                : undefined;
+            for (const { name, value } of state.options) {
+                if (!nameSet.has(name))
+                    continue;
+                currentValue = currentValue !== null && currentValue !== void 0 ? currentValue : [];
+                currentValue.push(value);
+            }
+            return currentValue;
+        },
+    });
+}
+
+exports.Array = Array;

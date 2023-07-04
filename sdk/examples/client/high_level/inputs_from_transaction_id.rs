@@ -3,9 +3,17 @@
 
 //! In this example we will fetch all inputs from a given transaction id.
 //!
-//! `cargo run --example inputs_from_transaction_id --release`
+//! Make sure to provide a somewhat recent transaction id to make this example run successfully!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example inputs_from_transaction_id <TRANSACTION_ID>
+//! ```
 
-use iota_sdk::client::{block::payload::transaction::TransactionId, Client, Result};
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::payload::transaction::TransactionId,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,14 +22,16 @@ async fn main() -> Result<()> {
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
-
-    let transaction_id =
-        "0xaf7579fb57746219561072c2cc0e4d0fbb8d493d075bd21bf25ae81a450c11ef".parse::<TransactionId>()?;
+    let transaction_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: TRANSACTION ID")
+        .parse::<TransactionId>()?;
 
     let inputs = client.inputs_from_transaction_id(&transaction_id).await?;
 
-    println!("Transaction inputs {:?}", inputs);
+    println!("Transaction inputs:\n{:#?}", inputs);
 
     Ok(())
 }

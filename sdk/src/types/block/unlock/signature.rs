@@ -9,7 +9,7 @@ use crate::types::block::signature::Signature;
 /// [`Input`](crate::types::block::input::Input).
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SignatureUnlock(Signature);
+pub struct SignatureUnlock(pub(crate) Signature);
 
 impl SignatureUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of a [`SignatureUnlock`].

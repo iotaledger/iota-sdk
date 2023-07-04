@@ -8,7 +8,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{OutputsToClaim, TransactionOptions},
-        MintNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams,
+        CreateNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams,
     },
     U256,
 };
@@ -189,9 +189,9 @@ async fn claim_2_native_tokens() -> Result<()> {
         .await?;
     accounts[1].sync(None).await?;
 
-    let mint_tx_0 = accounts[1]
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx_0 = accounts[1]
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -201,13 +201,13 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     accounts[1]
-        .retry_transaction_until_included(&mint_tx_0.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
     accounts[1].sync(None).await?;
 
-    let mint_tx_1 = accounts[1]
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx_1 = accounts[1]
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -217,7 +217,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     accounts[1]
-        .retry_transaction_until_included(&mint_tx_1.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
     accounts[1].sync(None).await?;
 
@@ -226,11 +226,11 @@ async fn claim_2_native_tokens() -> Result<()> {
             [
                 SendNativeTokensParams::new(
                     *accounts[0].addresses().await?[0].address(),
-                    [(mint_tx_0.token_id, native_token_amount)],
+                    [(create_tx_0.token_id, native_token_amount)],
                 )?,
                 SendNativeTokensParams::new(
                     *accounts[0].addresses().await?[0].address(),
-                    [(mint_tx_1.token_id, native_token_amount)],
+                    [(create_tx_1.token_id, native_token_amount)],
                 )?,
             ],
             None,
@@ -257,13 +257,13 @@ async fn claim_2_native_tokens() -> Result<()> {
     let native_token_0 = balance
         .native_tokens()
         .iter()
-        .find(|t| t.token_id() == &mint_tx_0.token_id)
+        .find(|t| t.token_id() == &create_tx_0.token_id)
         .unwrap();
     assert_eq!(native_token_0.total(), native_token_amount);
     let native_token_1 = balance
         .native_tokens()
         .iter()
-        .find(|t| t.token_id() == &mint_tx_1.token_id)
+        .find(|t| t.token_id() == &create_tx_1.token_id)
         .unwrap();
     assert_eq!(native_token_1.total(), native_token_amount);
 
@@ -289,9 +289,9 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .await?;
     account_0.sync(None).await?;
 
-    let mint_tx_0 = account_0
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx_0 = account_0
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -301,13 +301,13 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     account_0
-        .retry_transaction_until_included(&mint_tx_0.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
     account_0.sync(None).await?;
 
-    let mint_tx_1 = account_0
-        .mint_native_token(
-            MintNativeTokenParams {
+    let create_tx_1 = account_0
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -317,7 +317,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     account_0
-        .retry_transaction_until_included(&mint_tx_1.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
     account_0.sync(None).await?;
 
@@ -335,7 +335,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                         *account_0.addresses().await?[0].address().as_ref(),
                         account_0.client().get_time_checked().await? + 5000,
                     )?)
-                    .add_native_token(NativeToken::new(mint_tx_0.token_id, native_token_amount)?)
+                    .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
@@ -345,7 +345,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                         *account_0.addresses().await?[0].address().as_ref(),
                         account_0.client().get_time_checked().await? + 5000,
                     )?)
-                    .add_native_token(NativeToken::new(mint_tx_1.token_id, native_token_amount)?)
+                    .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
             ],
             None,
@@ -372,13 +372,13 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let native_token_0 = balance
         .native_tokens()
         .iter()
-        .find(|t| t.token_id() == &mint_tx_0.token_id)
+        .find(|t| t.token_id() == &create_tx_0.token_id)
         .unwrap();
     assert_eq!(native_token_0.total(), native_token_amount);
     let native_token_1 = balance
         .native_tokens()
         .iter()
-        .find(|t| t.token_id() == &mint_tx_1.token_id)
+        .find(|t| t.token_id() == &create_tx_1.token_id)
         .unwrap();
     assert_eq!(native_token_1.total(), native_token_amount);
 

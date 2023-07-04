@@ -1,0 +1,40 @@
+{
+  "unversionedId": "how_tos/accounts_and_addresses/create_address",
+  "id": "how_tos/accounts_and_addresses/create_address",
+  "title": "Create an Address",
+  "description": "How to generate an address for an account.",
+  "source": "@site/docs/how_tos/accounts_and_addresses/create_address.mdx",
+  "sourceDirName": "how_tos/accounts_and_addresses",
+  "slug": "/how_tos/accounts_and_addresses/create_address",
+  "permalink": "/iota-sdk/how_tos/accounts_and_addresses/create_address",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/accounts_and_addresses/create_address.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Create an Address",
+    "description": "How to generate an address for an account.",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "generate address",
+      "generate wallet address",
+      "account manager",
+      "multi account approach",
+      "single account approach",
+      "nodejs",
+      "python",
+      "java",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "List Addresses",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_addresses"
+  },
+  "next": {
+    "title": "List Transactions",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_transactions"
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "pluginId": "iota-sdk",
+  "version": "current",
+  "label": "Next",
+  "banner": null,
+  "badge": false,
+  "noIndex": false,
+  "className": "docs-version-current",
+  "isLast": true,
+  "docsSidebars": {
+    "docs": [
+      {
+        "type": "link",
+        "label": "Welcome",
+        "href": "/iota-sdk/welcome",
+        "docId": "welcome"
+      },
+      {
+        "type": "category",
+        "label": "Overview",
+        "items": [
+          {
+            "type": "link",
+            "label": "SDK Overview",
+            "href": "/iota-sdk/overview",
+            "docId": "overview"
+          },
+          {
+            "type": "link",
+            "label": "Account Approaches",
+            "href": "/iota-sdk/explanations/account_approaches",
+            "docId": "explanations/account_approaches"
+          }
+        ],
+        "collapsed": true,
+        "collapsible": true
+      },
+      {
+        "type": "category",
+        "label": "How To",
+        "items": [
+          {
+            "type": "category",
+            "label": "Accounts and Addresses",
+            "items": [
+              {
+                "type": "link",
+                "label": "Create Random Mnemonic",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/create_mnemonic",
+                "docId": "how_tos/accounts_and_addresses/create_mnemonic"
+              },
+              {
+                "type": "link",
+                "label": "Create an Account",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/create_account",
+                "docId": "how_tos/accounts_and_addresses/create_account"
+              },
+              {
+                "type": "link",
+                "label": "List Accounts",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/list_accounts",
+                "docId": "how_tos/accounts_and_addresses/list_accounts"
+              },
+              {
+                "type": "link",
+                "label": "Check Balance",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/check_balance",
+                "docId": "how_tos/accounts_and_addresses/check_balance"
+              },
+              {
+                "type": "link",
+                "label": "List Addresses",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/list_addresses",
+                "docId": "how_tos/accounts_and_addresses/list_addresses"
+              },
+              {
+                "type": "link",
+                "label": "Create an Address",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/create_address",
+                "docId": "how_tos/accounts_and_addresses/create_address"
+              },
+              {
+                "type": "link",
+                "label": "List Transactions",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/list_transactions",
+                "docId": "how_tos/accounts_and_addresses/list_transactions"
+              },
+              {
+                "type": "link",
+                "label": "List Outputs",
+                "href": "/iota-sdk/how_tos/accounts_and_addresses/list_outputs",
+                "docId": "how_tos/accounts_and_addresses/list_outputs"
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true
+          },
+          {
+            "type": "category",
+            "label": "Simple Transaction",
+            "items": [
+              {
+                "type": "link",
+                "label": "Request Funds",
+                "href": "/iota-sdk/how_tos/simple_transaction/request_funds",
+                "docId": "how_tos/simple_transaction/request_funds"
+              },
+              {
+                "type": "link",
+                "label": "Simple Transaction",
+                "href": "/iota-sdk/how_tos/simple_transaction/",
+                "docId": "how_tos/simple_transaction/simple_transaction"
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true
+          },
+          {
+            "type": "category",
+            "label": "Sign And Verify Ed25519",
+            "items": [
+              {
+                "type": "link",
+                "label": "Sign Ed25519",
+                "href": "/iota-sdk/how_tos/sign_and_verify_ed25519/sign_ed25519",
+                "docId": "how_tos/sign_and_verify_ed25519/sign_ed25519"
+              },
+              {
+                "type": "link",
+                "label": "Verify Ed25519 Signature",
+                "href": "/iota-sdk/how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+                "docId": "how_tos/sign_and_verify_ed25519/verify_ed25519_signature"
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true
+          },
+          {
+            "type": "category",
+            "label": "Outputs",
+            "items": [
+              {
+                "type": "link",
+                "label": "Features",
+                "href": "/iota-sdk/how_tos/outputs/features",
+                "docId": "how_tos/outputs/features"
+              },
+              {
+                "type": "link",
+                "label": "Unlock Conditions",
+                "href": "/iota-sdk/how_tos/outputs/unlock_conditions",
+                "docId": "how_tos/outputs/unlock_conditions"
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true
+          },
+          {
+            "type": "category",
+            "label": "NFTs",
+            "items": [
+              {
+                "type": "link",
+                "label": "Mint NFT",
+                "href": "/iota-sdk/how_tos/nfts/mint_nft",
+                "docId": "how_tos/nfts/mint_nft"
+              },
+              {
+                "type": "link",
+                "label": "Send NFT",
+                "href": "/iota-sdk/how_tos/nfts/send_nft",
+                "docId": "how_tos/nfts/send_nft"
+              },
+              {
+                "type": "link",
+                "label": "Burn NFT",
+                "href": "/iota-sdk/how_tos/nfts/burn_nft",
+                "docId": "how_tos/nfts/burn_nft"
+              }
+            ],
+            "collapsed": true,
+            "collapsible": true
+          }
+        ],
+        "collapsed": true,
+        "collapsible": true
+      },
+      {
+        "type": "link",
+        "label": "Troubleshooting",
+        "href": "/iota-sdk/troubleshooting",
+        "docId": "troubleshooting"
+      },
+      {
+        "type": "link",
+        "label": "Contribute",
+        "href": "/iota-sdk/contribute",
+        "docId": "contribute"
+      }
+    ]
+  },
+  "docs": {
+    "contribute": {
+      "id": "contribute",
+      "title": "Contribute to the Project",
+      "description": "Contribute to the IOTA SDK joining the IOTA Libraries Initiative, contributing to the official GitHub repository or sharing your knowledge on Discord.",
+      "sidebar": "docs"
+    },
+    "explanations/account_approaches": {
+      "id": "explanations/account_approaches",
+      "title": "Account Approaches",
+      "description": "In the IOTA SDK, you can use an account model",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/check_balance": {
+      "id": "how_tos/accounts_and_addresses/check_balance",
+      "title": "Check Balance",
+      "description": "How to check a wallet account's balance.",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/create_account": {
+      "id": "how_tos/accounts_and_addresses/create_account",
+      "title": "Create an Account",
+      "description": "How to create an account to start sending value transactions to the Tangle.",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/create_address": {
+      "id": "how_tos/accounts_and_addresses/create_address",
+      "title": "Create an Address",
+      "description": "How to generate an address for an account.",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/create_mnemonic": {
+      "id": "how_tos/accounts_and_addresses/create_mnemonic",
+      "title": "Create Random Mnemonic",
+      "description": "How to create a random Mnemonic",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/list_accounts": {
+      "id": "how_tos/accounts_and_addresses/list_accounts",
+      "title": "List Accounts",
+      "description": "How to list accounts",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/list_addresses": {
+      "id": "how_tos/accounts_and_addresses/list_addresses",
+      "title": "List Addresses",
+      "description": "How to list addresses",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/list_outputs": {
+      "id": "how_tos/accounts_and_addresses/list_outputs",
+      "title": "List Outputs",
+      "description": "How to list outputs",
+      "sidebar": "docs"
+    },
+    "how_tos/accounts_and_addresses/list_transactions": {
+      "id": "how_tos/accounts_and_addresses/list_transactions",
+      "title": "List Transactions",
+      "description": "How to list transactions",
+      "sidebar": "docs"
+    },
+    "how_tos/nfts/burn_nft": {
+      "id": "how_tos/nfts/burn_nft",
+      "title": "Burn NFT",
+      "description": "How to burn NFT",
+      "sidebar": "docs"
+    },
+    "how_tos/nfts/mint_nft": {
+      "id": "how_tos/nfts/mint_nft",
+      "title": "Mint NFT",
+      "description": "How to mint NFT",
+      "sidebar": "docs"
+    },
+    "how_tos/nfts/send_nft": {
+      "id": "how_tos/nfts/send_nft",
+      "title": "Send NFT",
+      "description": "How to send NFT to another address",
+      "sidebar": "docs"
+    },
+    "how_tos/outputs/features": {
+      "id": "how_tos/outputs/features",
+      "title": "Features",
+      "description": "How to create ouputs with different features",
+      "sidebar": "docs"
+    },
+    "how_tos/outputs/unlock_conditions": {
+      "id": "how_tos/outputs/unlock_conditions",
+      "title": "Unlock Conditions",
+      "description": "How to set unlock conditions for outputs",
+      "sidebar": "docs"
+    },
+    "how_tos/sign_and_verify_ed25519/sign_ed25519": {
+      "id": "how_tos/sign_and_verify_ed25519/sign_ed25519",
+      "title": "Sign Ed25519",
+      "description": "How to sign with Ed25519",
+      "sidebar": "docs"
+    },
+    "how_tos/sign_and_verify_ed25519/verify_ed25519_signature": {
+      "id": "how_tos/sign_and_verify_ed25519/verify_ed25519_signature",
+      "title": "Verify Ed25519 Signature",
+      "description": "How to verify an Ed25519 signature",
+      "sidebar": "docs"
+    },
+    "how_tos/simple_transaction/request_funds": {
+      "id": "how_tos/simple_transaction/request_funds",
+      "title": "Request Funds",
+      "description": "How to programmatically request testnet funds.",
+      "sidebar": "docs"
+    },
+    "how_tos/simple_transaction/simple_transaction": {
+      "id": "how_tos/simple_transaction/simple_transaction",
+      "title": "Simple Transaction",
+      "description": "How to send a value transaction",
+      "sidebar": "docs"
+    },
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "description": "The IOTA SDK is designed to simplify how you connect and interact with nodes in the Tangle.",
+      "sidebar": "docs"
+    },
+    "troubleshooting": {
+      "id": "troubleshooting",
+      "title": "Troubleshooting",
+      "description": "Troubleshooting the IOTA SDK.",
+      "sidebar": "docs"
+    },
+    "welcome": {
+      "id": "welcome",
+      "title": "Welcome",
+      "description": "Official IOTA SDK which can be used to easily interact with the Tangle",
+      "sidebar": "docs"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "unversionedId": "how_tos/accounts_and_addresses/create_mnemonic",
+  "id": "how_tos/accounts_and_addresses/create_mnemonic",
+  "title": "Create Random Mnemonic",
+  "description": "How to create a random Mnemonic",
+  "source": "@site/docs/how_tos/accounts_and_addresses/create_mnemonic.mdx",
+  "sourceDirName": "how_tos/accounts_and_addresses",
+  "slug": "/how_tos/accounts_and_addresses/create_mnemonic",
+  "permalink": "/iota-sdk/how_tos/accounts_and_addresses/create_mnemonic",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/accounts_and_addresses/create_mnemonic.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Create Random Mnemonic",
+    "description": "How to create a random Mnemonic",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "create mnemonic",
+      "nodejs",
+      "python",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Account Approaches",
+    "permalink": "/iota-sdk/explanations/account_approaches"
+  },
+  "next": {
+    "title": "Create an Account",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/create_account"
+  }
+}

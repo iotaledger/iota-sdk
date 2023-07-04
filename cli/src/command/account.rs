@@ -20,7 +20,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
-        MintNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams,
+        CreateNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
     U256,
 };
@@ -67,12 +67,18 @@ pub enum AccountCommand {
     Consolidate,
     /// Create a new alias output.
     CreateAliasOutput,
-    /// Melt an amount of native token.
-    DecreaseNativeTokenSupply {
-        /// Token ID to be melted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
-        token_id: String,
-        /// Amount to be melted, e.g. 100.
-        amount: String,
+    /// Create a native token.
+    CreateNativeToken {
+        /// Circulating supply of the native token to be minted, e.g. 100.
+        circulating_supply: String,
+        /// Maximum supply of the native token to be minted, e.g. 500.
+        maximum_supply: String,
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
+        #[arg(long, group = "foundry_metadata")]
+        foundry_metadata_hex: Option<String>,
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-file ./foundry-metadata.json.
+        #[arg(long, group = "foundry_metadata")]
+        foundry_metadata_file: Option<String>,
     },
     /// Destroy an alias.
     DestroyAlias {
@@ -94,25 +100,12 @@ pub enum AccountCommand {
         /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
     },
-    /// Mint more of a native token.
-    IncreaseNativeTokenSupply {
+    /// Mint additional native tokens.
+    MintNativeToken {
         /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
         /// Amount to be minted, e.g. 100.
         amount: String,
-    },
-    /// Mint a native token.
-    MintNativeToken {
-        /// Circulating supply of the native token to be minted, e.g. 100.
-        circulating_supply: String,
-        /// Maximum supply of the native token to be minted, e.g. 500.
-        maximum_supply: String,
-        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
-        #[arg(long, group = "foundry_metadata")]
-        foundry_metadata_hex: Option<String>,
-        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-file ./foundry-metadata.json.
-        #[arg(long, group = "foundry_metadata")]
-        foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
     /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
@@ -140,6 +133,13 @@ pub enum AccountCommand {
         /// Issuer feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
         issuer: Option<Bech32Address>,
+    },
+    /// Melt an amount of native token.
+    MeltNativeToken {
+        /// Token ID to be melted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
+        token_id: String,
+        /// Amount to be melted, e.g. 100.
+        amount: String,
     },
     /// Generate a new address.
     NewAddress,
@@ -260,6 +260,18 @@ pub async fn addresses_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
+// `balance` command
+pub async fn balance_command(account: &Account, addresses: Option<Vec<Bech32Address>>) -> Result<(), Error> {
+    let balance = if let Some(addresses) = addresses {
+        account.addresses_balance(addresses).await?
+    } else {
+        account.balance().await?
+    };
+    println_log_info!("{balance:#?}");
+
+    Ok(())
+}
+
 // `burn-native-token` command
 pub async fn burn_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
     println_log_info!("Burning native token {token_id} {amount}.");
@@ -294,18 +306,6 @@ pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), E
         transaction.transaction_id,
         transaction.block_id
     );
-
-    Ok(())
-}
-
-// `balance` command
-pub async fn balance_command(account: &Account, addresses: Option<Vec<Bech32Address>>) -> Result<(), Error> {
-    let balance = if let Some(addresses) = addresses {
-        account.addresses_balance(addresses).await?
-    } else {
-        account.balance().await?
-    };
-    println_log_info!("{balance:#?}");
 
     Ok(())
 }
@@ -422,20 +422,41 @@ pub async fn create_alias_outputs_command(account: &Account) -> Result<(), Error
     Ok(())
 }
 
-// `decrease-native-token-supply` command
-pub async fn decrease_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
-    let transaction = account
-        .decrease_native_token_supply(
-            TokenId::from_str(&token_id)?,
-            U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            None,
-        )
-        .await?;
+// `create-native-token` command
+pub async fn create_native_token_command(
+    account: &Account,
+    circulating_supply: String,
+    maximum_supply: String,
+    foundry_metadata: Option<Vec<u8>>,
+) -> Result<(), Error> {
+    // If no alias output exists, create one first
+    if account.balance().await?.aliases().is_empty() {
+        let transaction = account.create_alias_output(None, None).await?;
+        println_log_info!(
+            "Alias output minting transaction sent:\n{:?}\n{:?}",
+            transaction.transaction_id,
+            transaction.block_id
+        );
+        account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+        // Sync account after the transaction got confirmed, so the alias output is available
+        account.sync(None).await?;
+    }
+
+    let params = CreateNativeTokenParams {
+        alias_id: None,
+        circulating_supply: U256::from_dec_str(&circulating_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+        maximum_supply: U256::from_dec_str(&maximum_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+        foundry_metadata,
+    };
+
+    let create_transaction = account.create_native_token(params, None).await?;
 
     println_log_info!(
-        "Native token melting transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
+        "Transaction to create native token sent:\n{:?}\n{:?}",
+        create_transaction.transaction.transaction_id,
+        create_transaction.transaction.block_id
     );
 
     Ok(())
@@ -494,10 +515,10 @@ pub async fn faucet_command(
     Ok(())
 }
 
-// `increase-native-token-supply` command
-pub async fn increase_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
-    let mint_transaction = account
-        .increase_native_token_supply(
+// `melt-native-token` command
+pub async fn melt_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
+    let transaction = account
+        .melt_native_token(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             None,
@@ -505,49 +526,28 @@ pub async fn increase_native_token_command(account: &Account, token_id: String, 
         .await?;
 
     println_log_info!(
-        "Minting more native token transaction sent:\n{:?}\n{:?}",
-        mint_transaction.transaction.transaction_id,
-        mint_transaction.transaction.block_id
+        "Native token melting transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
     );
 
     Ok(())
 }
 
 // `mint-native-token` command
-pub async fn mint_native_token_command(
-    account: &Account,
-    circulating_supply: String,
-    maximum_supply: String,
-    foundry_metadata: Option<Vec<u8>>,
-) -> Result<(), Error> {
-    // If no alias output exists, create one first
-    if account.balance().await?.aliases().is_empty() {
-        let transaction = account.create_alias_output(None, None).await?;
-        println_log_info!(
-            "Alias output minting transaction sent:\n{:?}\n{:?}",
-            transaction.transaction_id,
-            transaction.block_id
-        );
-        account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
-            .await?;
-        // Sync account after the transaction got confirmed, so the alias output is available
-        account.sync(None).await?;
-    }
-
-    let params = MintNativeTokenParams {
-        alias_id: None,
-        circulating_supply: U256::from_dec_str(&circulating_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-        maximum_supply: U256::from_dec_str(&maximum_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-        foundry_metadata,
-    };
-
-    let mint_transaction = account.mint_native_token(params, None).await?;
+pub async fn mint_native_token(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
+    let mint_transaction = account
+        .mint_native_token(
+            TokenId::from_str(&token_id)?,
+            U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            None,
+        )
+        .await?;
 
     println_log_info!(
-        "Native token minting transaction sent:\n{:?}\n{:?}",
-        mint_transaction.transaction.transaction_id,
-        mint_transaction.transaction.block_id
+        "Transaction minting additional native tokens sent:\n{:?}\n{:?}",
+        mint_transaction.transaction_id,
+        mint_transaction.block_id
     );
 
     Ok(())

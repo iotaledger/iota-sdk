@@ -1,0 +1,40 @@
+{
+  "unversionedId": "how_tos/accounts_and_addresses/create_account",
+  "id": "how_tos/accounts_and_addresses/create_account",
+  "title": "Create an Account",
+  "description": "How to create an account to start sending value transactions to the Tangle.",
+  "source": "@site/docs/how_tos/accounts_and_addresses/create_account.mdx",
+  "sourceDirName": "how_tos/accounts_and_addresses",
+  "slug": "/how_tos/accounts_and_addresses/create_account",
+  "permalink": "/iota-sdk/how_tos/accounts_and_addresses/create_account",
+  "draft": false,
+  "editUrl": "https://github.com/iotaledger/iota-sdk/edit/documentation/sdk/docs/how_tos/accounts_and_addresses/create_account.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Create an Account",
+    "description": "How to create an account to start sending value transactions to the Tangle.",
+    "image": "/img/logo/iota_mark_light.png",
+    "keywords": [
+      "how to",
+      "create account",
+      "create wallet",
+      "account manager",
+      "multi account approach",
+      "single account approach",
+      "nodejs",
+      "python",
+      "java",
+      "rust"
+    ]
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Create Random Mnemonic",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/create_mnemonic"
+  },
+  "next": {
+    "title": "List Accounts",
+    "permalink": "/iota-sdk/how_tos/accounts_and_addresses/list_accounts"
+  }
+}
