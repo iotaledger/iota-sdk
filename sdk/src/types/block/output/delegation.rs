@@ -193,7 +193,7 @@ impl DelegationOutputBuilder {
         self
     }
 
-    ///
+    /// Finishes the builder into a [`DelegationOutput`] without amount verification.
     pub fn finish_unverified(self) -> Result<DelegationOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
@@ -224,7 +224,7 @@ impl DelegationOutputBuilder {
         Ok(output)
     }
 
-    ///
+    /// Finishes the builder into a [`DelegationOutput`] with amount verification.
     pub fn finish(self, token_supply: u64) -> Result<DelegationOutput, Error> {
         let output = self.finish_unverified()?;
 
@@ -308,52 +308,52 @@ impl DelegationOutput {
         )
     }
 
-    ///
+    /// Returns the amount of the [`DelegationOutput`].
     pub fn amount(&self) -> u64 {
         self.amount
     }
 
-    ///
+    /// Returns the delegated amount of the [`DelegationOutput`].
     pub fn delegated_amount(&self) -> u64 {
         self.delegated_amount
     }
 
-    ///
+    /// Returns the delegation ID of the [`DelegationOutput`].
     pub fn delegation_id(&self) -> &DelegationId {
         &self.delegation_id
     }
 
-    /// Returns the delegation ID if not null, or creates it from the output ID.
+    /// Returns the delegation ID of the [`DelegationOutput`] if not null, or creates it from the output ID.
     pub fn delegation_id_non_null(&self, output_id: &OutputId) -> DelegationId {
         self.delegation_id.or_from_output_id(output_id)
     }
 
-    ///
+    /// Returns the validator ID of the [`DelegationOutput`].
     pub fn validator_id(&self) -> &AccountId {
         &self.validator_id
     }
 
-    ///
+    /// Returns the start epoch of the [`DelegationOutput`].
     pub fn start_epoch(&self) -> u64 {
         self.start_epoch
     }
 
-    ///
+    /// Returns the end epoch of the [`DelegationOutput`].
     pub fn end_epoch(&self) -> u64 {
         self.end_epoch
     }
 
-    ///
+    /// Returns the unlock conditions of the [`DelegationOutput`].
     pub fn unlock_conditions(&self) -> &UnlockConditions {
         &self.unlock_conditions
     }
 
-    ///
+    /// Returns the immutable features of the [`DelegationOutput`].
     pub fn immutable_features(&self) -> &Features {
         &self.immutable_features
     }
 
-    ///
+    /// Returns the address of the [`DelegationOutput`].
     pub fn address(&self) -> &Address {
         // An DelegationOutput must have an AddressUnlockCondition.
         self.unlock_conditions
@@ -362,13 +362,13 @@ impl DelegationOutput {
             .unwrap()
     }
 
-    ///
+    /// Returns the chain ID of the [`DelegationOutput`].
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
         ChainId::Delegation(self.delegation_id)
     }
 
-    ///
+    /// Tries to unlock the [`DelegationOutput`].
     pub fn unlock(
         &self,
         _output_id: &OutputId,
