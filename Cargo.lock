@@ -75,12 +75,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "allocator-api2"
-version = "0.2.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56fc6cf8dc8c4158eed8649f9b8b0ea1518eb62b544fe9490d66fa0b349eafe9"
-
-[[package]]
 name = "android-tzdata"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -703,21 +697,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "curve25519-dalek"
-version = "4.0.0-rc.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03d928d978dbec61a1167414f5ec534f24bea0d7a0d24dd9b6233d3d8223e585"
-dependencies = [
- "cfg-if",
- "digest 0.10.7",
- "fiat-crypto",
- "packed_simd_2",
- "platforms",
- "subtle",
- "zeroize",
-]
-
-[[package]]
 name = "darling"
 version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -759,7 +738,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c7ed52955ce76b1554f509074bb357d3fb8ac9b51288a65a3fd480d1dfba946"
 dependencies = [
  "const-oid",
- "pem-rfc7468",
  "zeroize",
 ]
 
@@ -911,19 +889,8 @@ dependencies = [
  "digest 0.10.7",
  "elliptic-curve",
  "rfc6979",
- "serdect",
  "signature",
  "spki",
-]
-
-[[package]]
-name = "ed25519"
-version = "2.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fb04eee5d9d907f29e80ee6b0e78f7e2c82342c63e3580d8c4f69d9d5aad963"
-dependencies = [
- "serde",
- "signature",
 ]
 
 [[package]]
@@ -932,27 +899,11 @@ version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c24f403d068ad0b359e577a77f92392118be3f3c927538f2bb544a5ecd828c6"
 dependencies = [
- "curve25519-dalek 3.2.0",
+ "curve25519-dalek",
  "hashbrown 0.12.3",
  "hex",
  "rand_core 0.6.4",
  "sha2 0.9.9",
- "zeroize",
-]
-
-[[package]]
-name = "ed25519-zebra"
-version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6af5e1fb700a3c779c7a7ed25c8c0b7f193db101de3773ac46e704bcb882d772"
-dependencies = [
- "curve25519-dalek 4.0.0-rc.2",
- "ed25519",
- "hashbrown 0.14.0",
- "hex",
- "rand_core 0.6.4",
- "serde",
- "sha2 0.10.7",
  "zeroize",
 ]
 
@@ -969,11 +920,9 @@ dependencies = [
  "generic-array",
  "group",
  "hkdf",
- "pem-rfc7468",
  "pkcs8",
  "rand_core 0.6.4",
  "sec1",
- "serdect",
  "subtle",
  "zeroize",
 ]
@@ -1072,12 +1021,6 @@ dependencies = [
  "rand_core 0.6.4",
  "subtle",
 ]
-
-[[package]]
-name = "fiat-crypto"
-version = "0.1.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e825f6987101665dea6ec934c09ec6d721de7bc1bf92248e1d5810c8cd636b77"
 
 [[package]]
 name = "fixed-hash"
@@ -1367,10 +1310,6 @@ name = "hashbrown"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c6201b9ff9fd90a5a3bac2e56a830d0caa509576f0e503818ee82c181b3437a"
-dependencies = [
- "ahash 0.8.3",
- "allocator-api2",
-]
 
 [[package]]
 name = "heck"
@@ -1607,33 +1546,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7eb2df6763689b6e2b95787941eb9a58b29d16d17c2055392f550b3daf40bdce"
 dependencies = [
  "aead",
- "autocfg",
- "blake2",
- "chacha20poly1305",
- "cipher",
- "digest 0.10.7",
- "ed25519-zebra 3.1.0",
- "generic-array",
- "getrandom",
- "hmac",
- "k256",
- "num-traits",
- "pbkdf2",
- "rand",
- "serde",
- "sha2 0.10.7",
- "tiny-keccak",
- "unicode-normalization",
- "zeroize",
-]
-
-[[package]]
-name = "iota-crypto"
-version = "0.21.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d22b9d6f6b7601c3fcff97cdf6298cbfdd6fb44812b4e6f82a016152be1c891"
-dependencies = [
- "aead",
  "aes",
  "aes-gcm",
  "autocfg",
@@ -1641,15 +1553,15 @@ dependencies = [
  "blake2",
  "chacha20poly1305",
  "cipher",
- "curve25519-dalek 3.2.0",
+ "curve25519-dalek",
  "digest 0.10.7",
- "ed25519-zebra 4.0.0",
+ "ed25519-zebra",
  "generic-array",
  "getrandom",
  "hkdf",
  "hmac",
- "iterator-sorted",
  "k256",
+ "num-traits",
  "pbkdf2",
  "rand",
  "scrypt",
@@ -1704,7 +1616,7 @@ dependencies = [
  "heck",
  "hex",
  "instant",
- "iota-crypto 0.20.1",
+ "iota-crypto",
  "iota-ledger-nano",
  "iota-sdk",
  "iota_stronghold",
@@ -1741,7 +1653,7 @@ dependencies = [
  "derivative",
  "fern-logger",
  "futures",
- "iota-crypto 0.20.1",
+ "iota-crypto",
  "iota-sdk",
  "log",
  "packable",
@@ -1810,12 +1722,12 @@ dependencies = [
 
 [[package]]
 name = "iota_stronghold"
-version = "2.0.0-rc.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#87d0ae07a26fc6711843174d1d706b066c85f350"
+version = "1.1.0"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=9df6d19de325481771d69b47534d151e03eae623#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "bincode",
  "hkdf",
- "iota-crypto 0.21.2",
+ "iota-crypto",
  "rust-argon2",
  "serde",
  "stronghold-derive",
@@ -1882,7 +1794,6 @@ dependencies = [
  "ecdsa",
  "elliptic-curve",
  "once_cell",
- "serdect",
  "sha2 0.10.7",
 ]
 
@@ -1960,12 +1871,6 @@ dependencies = [
  "cfg-if",
  "winapi",
 ]
-
-[[package]]
-name = "libm"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fc7aa29613bd6a620df431842069224d8bc9011086b1db4c0e0cd47fa03ec9a"
 
 [[package]]
 name = "librocksdb-sys"
@@ -2255,16 +2160,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "packed_simd_2"
-version = "0.3.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1914cd452d8fccd6f9db48147b29fd4ae05bea9dc5d9ad578509f72415de282"
-dependencies = [
- "cfg-if",
- "libm",
-]
-
-[[package]]
 name = "parity-scale-codec"
 version = "3.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2336,15 +2231,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
 
 [[package]]
-name = "pem-rfc7468"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88b39c9bfcfc231068454382784bb460aae594343fb030d46e9f50a645418412"
-dependencies = [
- "base64ct",
-]
-
-[[package]]
 name = "percent-encoding"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2407,12 +2293,6 @@ name = "pkg-config"
 version = "0.3.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26072860ba924cbfa98ea39c8c19b4dd6a4a25423dbdf219c1eca91aa0cf6964"
-
-[[package]]
-name = "platforms"
-version = "3.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3d7ddaed09e0eb771a79ab0fd64609ba0afb0a8366421957936ad14cbd13630"
 
 [[package]]
 name = "poly1305"
@@ -2945,7 +2825,6 @@ dependencies = [
  "der",
  "generic-array",
  "pkcs8",
- "serdect",
  "subtle",
  "zeroize",
 ]
@@ -3054,16 +2933,6 @@ dependencies = [
  "form_urlencoded",
  "itoa",
  "ryu",
- "serde",
-]
-
-[[package]]
-name = "serdect"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a84f14a19e9a014bb9f4512488d9829a68e04ecabffb0f9904cd1ace94598177"
-dependencies = [
- "base16ct",
  "serde",
 ]
 
@@ -3207,7 +3076,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#87d0ae07a26fc6711843174d1d706b066c85f350"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=9df6d19de325481771d69b47534d151e03eae623#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3216,11 +3085,11 @@ dependencies = [
 
 [[package]]
 name = "stronghold-runtime"
-version = "2.0.0-rc.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#87d0ae07a26fc6711843174d1d706b066c85f350"
+version = "1.1.0"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=9df6d19de325481771d69b47534d151e03eae623#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "dirs",
- "iota-crypto 0.21.2",
+ "iota-crypto",
  "libc",
  "libsodium-sys",
  "log",
@@ -3235,7 +3104,7 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#87d0ae07a26fc6711843174d1d706b066c85f350"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=9df6d19de325481771d69b47534d151e03eae623#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -3243,13 +3112,13 @@ dependencies = [
 
 [[package]]
 name = "stronghold_engine"
-version = "2.0.0-rc.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#87d0ae07a26fc6711843174d1d706b066c85f350"
+version = "1.1.0"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=9df6d19de325481771d69b47534d151e03eae623#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "anyhow",
  "dirs-next",
  "hex",
- "iota-crypto 0.21.2",
+ "iota-crypto",
  "once_cell",
  "paste",
  "serde",
@@ -4037,7 +3906,7 @@ version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a0c105152107e3b96f6a00a65e86ce82d9b125230e1c4302940eca58ff71f4f"
 dependencies = [
- "curve25519-dalek 3.2.0",
+ "curve25519-dalek",
  "rand_core 0.5.1",
  "zeroize",
 ]

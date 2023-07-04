@@ -44,7 +44,7 @@ heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
 # iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
-iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", branch = "2.0", default-features = false, optional = true }
+iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", rev = "9df6d19de325481771d69b47534d151e03eae623", default-features = false, optional = true }
 log = { version = "0.4.18", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
 once_cell = { version = "1.17.2", default-features = false, optional = true }
