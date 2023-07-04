@@ -867,7 +867,7 @@ export class Account {
     }
 
     /**
-     * Prepare a send amount transaction, useful for offline signing.
+     * Prepare a send transaction, useful for offline signing.
      * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
