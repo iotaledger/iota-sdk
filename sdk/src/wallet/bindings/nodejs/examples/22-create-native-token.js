@@ -28,7 +28,7 @@ async function run() {
             maximumSupply: '0x64',
         };
 
-        let { transaction } = await account.mintNativeToken(
+        let { transaction } = await account.createNativeToken(
             params,
         );
         console.log(

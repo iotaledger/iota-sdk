@@ -3,13 +3,12 @@
 
 //! In this example we sign the prepared transaction.
 //!
-//! `cargo run --example 2_transaction_signing --release`
-
-use std::{
-    fs::File,
-    io::{prelude::*, BufWriter},
-    path::Path,
-};
+//! Make sure to run `1_transaction_preparation` before.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 2_transaction_signing
+//! ```
 
 use iota_sdk::{
     client::{
@@ -31,7 +30,7 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let prepared_transaction_data = read_prepared_transaction_from_file(PREPARED_TRANSACTION_FILE_NAME)?;
+    let prepared_transaction_data = read_prepared_transaction_from_file(PREPARED_TRANSACTION_FILE_NAME).await?;
 
     // Signs the prepared transaction offline.
     let unlocks = secret_manager
@@ -46,32 +45,34 @@ async fn main() -> Result<()> {
 
     println!("Signed transaction.");
 
-    write_signed_transaction_to_file(SIGNED_TRANSACTION_FILE_NAME, &signed_transaction_data)?;
+    write_signed_transaction_to_file(SIGNED_TRANSACTION_FILE_NAME, &signed_transaction_data).await?;
 
     Ok(())
 }
 
-fn read_prepared_transaction_from_file<P: AsRef<Path>>(path: P) -> Result<PreparedTransactionData> {
-    let mut file = File::open(&path).unwrap();
+async fn read_prepared_transaction_from_file(path: impl AsRef<std::path::Path>) -> Result<PreparedTransactionData> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(&path).await.expect("failed to open file");
     let mut json = String::new();
-    file.read_to_string(&mut json).unwrap();
+    file.read_to_string(&mut json).await.expect("failed to read file");
 
     Ok(PreparedTransactionData::try_from_dto_unverified(
         serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
     )?)
 }
 
-fn write_signed_transaction_to_file<P: AsRef<Path>>(
-    path: P,
+async fn write_signed_transaction_to_file(
+    path: impl AsRef<std::path::Path>,
     signed_transaction_data: &SignedTransactionData,
 ) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let dto = SignedTransactionDataDto::from(signed_transaction_data);
     let json = serde_json::to_string_pretty(&dto)?;
-    let mut file = BufWriter::new(File::create(path).unwrap());
-
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
     println!("{json}");
-
-    file.write_all(json.as_bytes()).unwrap();
+    file.write_all(json.as_bytes()).await.expect("failed to write file");
 
     Ok(())
 }

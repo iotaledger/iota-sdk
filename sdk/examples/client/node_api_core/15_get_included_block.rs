@@ -1,32 +1,37 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns the included block, as JSON, of a transaction by calling
-//! `GET /api/core/v2/transactions/{transactionId}/included-block`.
+//! Returns the included block, as JSON, of a transaction by querying the
+//! `/api/core/v2/transactions/{transactionId}/included-block` node endpoint.
 //!
-//! `cargo run --example node_api_core_get_included_block --release -- [NODE URL]`
+//! Make sure to provide a somewhat recent transaction id to make this example run successfully!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_included_block <TRANSACTION_ID> [NODE URL]
+//! ```
 
-use std::str::FromStr;
-
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::payload::transaction::TransactionId,
-};
+use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // If not provided we use the default node from the `.env` file.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").expect("NODE_URL not set"));
+
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Transactions get pruned from the node after some time, replace with a new TransactionId.
-    let transaction_id = TransactionId::from_str("0xb66fd384cb5755668f1890ea2e41d699db9cf32f3bc422ad3c24ffeb9c7f01d0")?;
+    // Take the transaction id from the command line, or panic.
+    let transaction_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: TRANSACTION ID")
+        .parse()?;
+
     // Send the request.
     let block = client.get_included_block(&transaction_id).await?;
 

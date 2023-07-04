@@ -3,17 +3,17 @@
 
 //! In this example we will melt an existing native token with its foundry.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! You may provide a TOKEN_ID that is available in the account. The foundry
 //! output which minted it needs to be available as well. You can check this by
-//! running the `get_balance` example. You can mint a new native token by running
-//! the `mint_native_token` example.
+//! running the `get_balance` example. You can create a new native token by running
+//! the `create_native_token` example.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example decrease_native_token_supply [TOKEN_ID]
+//! cargo run --release --all-features --example melt_native_token [TOKEN_ID]
 //! ```
 
 use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
@@ -33,9 +33,7 @@ async fn main() -> Result<()> {
     let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
-
-    let balance = account.balance().await?;
+    let balance = account.sync(None).await?;
 
     // Find first foundry and corresponding token id
     let token_id = std::env::args()
@@ -62,9 +60,7 @@ async fn main() -> Result<()> {
 
     // Melt some of the circulating supply
     let melt_amount = U256::from(MELT_AMOUNT);
-    let transaction = account
-        .decrease_native_token_supply(token_id, melt_amount, None)
-        .await?;
+    let transaction = account.melt_native_token(token_id, melt_amount, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

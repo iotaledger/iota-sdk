@@ -8,11 +8,11 @@ const MELT_AMOUNT = '0xA';
 
 // In this example we will melt an existing native token with its foundry.
 //
-// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/11-decrease-native-token-supply.ts
+// yarn run-example ./how_tos/native_tokens/melt.ts
 async function run() {
     try {
         // Create the wallet
@@ -23,6 +23,10 @@ async function run() {
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
+
+        if (balance.foundries.length == 0) {
+            throw new Error(`No Foundry available in account 'Alice'`);
+        }
 
         // Find first foundry and corresponding token id
         const tokenId = balance.foundries[0];
@@ -40,7 +44,7 @@ async function run() {
 
         // Melt some of the circulating supply
         const transaction = await account
-            .prepareDecreaseNativeTokenSupply(token.tokenId, MELT_AMOUNT)
+            .prepareMeltNativeToken(token.tokenId, MELT_AMOUNT)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);

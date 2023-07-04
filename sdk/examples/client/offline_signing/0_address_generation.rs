@@ -3,13 +3,10 @@
 
 //! In this example we generate an address which will be used later to find inputs.
 //!
-//! `cargo run --example 0_address_generation --release`
-
-use std::{
-    fs::File,
-    io::{BufWriter, Write},
-    path::Path,
-};
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 0_address_generation
+//! ```
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result},
@@ -36,16 +33,20 @@ async fn main() -> Result<()> {
         )
         .await?;
 
-    write_address_to_file(ADDRESS_FILE_NAME, &address)
+    write_address_to_file(ADDRESS_FILE_NAME, &address).await?;
+
+    Ok(())
 }
 
-fn write_address_to_file<P: AsRef<Path>>(path: P, address: &[Bech32Address]) -> Result<()> {
+async fn write_address_to_file(path: impl AsRef<std::path::Path>, address: &[Bech32Address]) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let json = serde_json::to_string_pretty(&address)?;
-    let mut file = BufWriter::new(File::create(path).unwrap());
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
 
     println!("{json}");
 
-    file.write_all(json.as_bytes()).unwrap();
+    file.write_all(json.as_bytes()).await.expect("failed to write to file");
 
     Ok(())
 }

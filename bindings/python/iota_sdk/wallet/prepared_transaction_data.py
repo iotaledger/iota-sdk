@@ -59,12 +59,12 @@ class PreparedTransactionData:
     def sign_and_submit_transaction(self):
         return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
 
-class PreparedMintTokenTransaction(PreparedTransactionData):
+class PreparedCreateTokenTransaction(PreparedTransactionData):
 
     """
     The function returns the token_id as a string.
 
-    :returns: The token id of the PreparedMintTokenTransaction.
+    :returns: The token id of the PreparedCreateTokenTransaction.
     """
     def token_id(self):
         return self.prepared_transaction_data_dto["tokenId"]

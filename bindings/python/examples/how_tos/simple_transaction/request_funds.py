@@ -1,6 +1,5 @@
 from iota_sdk import Wallet
 from dotenv import load_dotenv
-import json
 import os
 
 # This example requests funds from the faucet

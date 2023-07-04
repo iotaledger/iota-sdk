@@ -12,11 +12,11 @@ const BURN_AMOUNT = '0x1';
 // therefore the foundry output is also not required. But this will also make it impossible to destroy the foundry
 // output that minted it.
 //
-// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/13-burn-native-token.ts
+// yarn run-example ./how_tos/native_tokens/burn.ts
 async function run() {
     try {
         // Create the wallet

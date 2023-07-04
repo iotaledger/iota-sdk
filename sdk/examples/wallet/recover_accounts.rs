@@ -10,8 +10,6 @@
 //! cargo run --release --all-features --example recover_accounts
 //! ```
 
-use std::{env::var, time::Instant};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -32,7 +30,7 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -43,7 +41,7 @@ async fn main() -> Result<()> {
     println!("Recovered {} accounts", accounts.len());
     for account in accounts.iter() {
         println!("ACCOUNT #{}:", account.details().await.index());
-        let now = Instant::now();
+        let now = tokio::time::Instant::now();
         let balance = account.sync(None).await?;
         println!("Account synced in: {:.2?}", now.elapsed());
         println!("Balance: {balance:#?}");
