@@ -142,7 +142,9 @@ export class Client {
                 options,
             },
         });
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -308,8 +310,9 @@ export class Client {
                 payload,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -798,8 +801,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -820,8 +824,13 @@ export class Client {
                 maxAttempts,
             },
         });
+        const parsed = JSON.parse(response) as Response<[BlockId, Block][]>;
+        const arr: [BlockId, Block][] = [];
+        parsed.payload.forEach((payload) => {
+            arr.push([payload[0], plainToInstance(Block, payload[1])]);
+        });
 
-        return JSON.parse(response).payload;
+        return arr;
     }
 
     /**
@@ -854,8 +863,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -868,8 +878,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -883,8 +894,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
     /**
      * Promote a block without checking if it should be promoted
@@ -896,8 +908,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
