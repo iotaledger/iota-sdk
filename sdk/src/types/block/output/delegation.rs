@@ -543,6 +543,7 @@ pub mod dto {
             builder.finish_unverified()
         }
 
+        #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
             delegated_amount: String,
