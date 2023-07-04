@@ -1,7 +1,5 @@
 from iota_sdk import Wallet
 
-import json
-
 # In this example we will list transactions
 
 wallet = Wallet('./alice-database')
@@ -13,11 +11,11 @@ account.sync({ 'syncIncomingTransactions': True })
 transactions = account.transactions()
 print('Sent transactions:')
 for transaction in transactions:
-    print(transaction['transactionId'])
+    print(transaction.transactionId)
 
 
 # Incoming transactions
 incoming_transactions = account.incoming_transactions()
 print('Received transactions:')
 for transaction in incoming_transactions:
-    print(transaction['transactionId'])
+    print(transaction.transactionId)
