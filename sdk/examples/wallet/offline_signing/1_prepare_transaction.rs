@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let params = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
 
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file().await?;
@@ -57,9 +57,9 @@ async fn main() -> Result<()> {
     // Sync the account to get the outputs for the addresses
     account.sync(None).await?;
 
-    let prepared_transaction = account.prepare_send(outputs.clone(), None).await?;
+    let prepared_transaction = account.prepare_send(params.clone(), None).await?;
 
-    println!("Prepared transaction sending {outputs:?}");
+    println!("Prepared transaction sending {params:?}");
 
     write_transaction_to_file(prepared_transaction).await?;
 

@@ -21,5 +21,5 @@ params = SendParams(
 )
 
 # Create and post a block with a transaction
-block = client.build_and_post_block(secret_manager, output=params)
+block = client.build_and_post_block(secret_manager, params=params)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block[0]}')
