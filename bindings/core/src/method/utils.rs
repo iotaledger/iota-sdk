@@ -116,23 +116,23 @@ pub enum UtilsMethod {
         /// Output ID
         output_id: OutputId,
     },
-    /// Returns the output ID from transaction id and output index
+    /// Computes the output ID from transaction id and output index
     ComputeOutputId { id: TransactionId, index: u16 },
-    /// Constructs a tokenId from the aliasId, serial number and token scheme type.
+    /// Computes a tokenId from the aliasId, serial number and token scheme type.
     #[serde(rename_all = "camelCase")]
     ComputeTokenId {
         alias_id: AliasId,
         serial_number: u32,
         token_scheme_type: TokenScheme,
     },
-    /// Compute the hash of a transaction essence.
+    /// Computes the hash of a transaction essence.
     HashTransactionEssence {
         /// The transaction essence
         essence: TransactionEssenceDto,
     },
-    /// Calculate the input commitment from the output objects that are used as inputs to fund the transaction.
+    /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
     ComputeInputsCommitment { inputs: Vec<OutputDto> },
-    /// Calculates the required storage deposit of an output.
+    /// Computes the required storage deposit of an output.
     #[serde(rename_all = "camelCase")]
     ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
     /// Checks if the given mnemonic is valid.

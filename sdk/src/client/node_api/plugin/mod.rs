@@ -34,9 +34,8 @@ impl ClientInner {
         match req_method {
             Ok(Method::GET) => node_manager.get_request(&path, None, timeout, false, false).await,
             Ok(Method::POST) => {
-                let pow = self.get_local_pow().await;
                 node_manager
-                    .post_request_json(&path, timeout, request_object.into(), pow)
+                    .post_request_json(&path, timeout, request_object.into(), true)
                     .await
             }
             _ => Err(crate::client::Error::Node(
