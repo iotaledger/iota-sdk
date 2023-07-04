@@ -46,7 +46,7 @@ where
         self.sign_and_submit_transaction(prepared, None).await
     }
 
-    /// Account method to prepare the transaction for
+    /// Prepares the transaction for
     /// [Account::vote()](crate::account::Account::vote).
     pub async fn prepare_vote(
         &self,
@@ -141,7 +141,7 @@ where
         self.sign_and_submit_transaction(prepared, None).await
     }
 
-    /// Account method to prepare the transaction for
+    /// Prepares the transaction for
     /// [Account::stop_participating()](crate::account::Account::stop_participating).
     pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
         let voting_output = self

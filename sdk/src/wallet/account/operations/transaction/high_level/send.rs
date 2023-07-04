@@ -83,7 +83,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Account method to send base coins.
+    /// Sends base coins.
     ///
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally.
     /// The options may define the remainder value strategy or custom inputs.
@@ -114,8 +114,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Account method to prepare the transaction for
-    /// [Account::send()](crate::account::Account::send)
+    /// Prepares the transaction for
+    /// [Account::send()](crate::account::Account::send).
     pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,

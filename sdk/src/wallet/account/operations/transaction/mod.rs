@@ -38,7 +38,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Account method to send a transaction by specifying its outputs.
+    /// Sends a transaction by specifying its outputs.
     ///
     /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
     /// will retry sending the transaction during syncing.
@@ -101,7 +101,7 @@ where
             .await
     }
 
-    /// Sign a transaction, submit it to a node and store it in the account
+    /// Signs a transaction, submit it to a node and store it in the account
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
@@ -122,7 +122,7 @@ where
             .await
     }
 
-    /// Validate the transaction, submit it to a node and store it in the account
+    /// Validates the transaction, submit it to a node and store it in the account
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,

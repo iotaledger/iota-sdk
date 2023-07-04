@@ -91,7 +91,8 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Account method to create a new foundry output with minted native tokens.
+    /// Creates a new foundry output with minted native tokens.
+    ///
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally, the options may define the
     /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
@@ -124,7 +125,7 @@ where
             })
     }
 
-    /// Account method prepare the transaction for
+    /// Prepares the transaction for
     /// [Account::create_native_token()](crate::account::Account::create_native_token).
     pub async fn prepare_create_native_token(
         &self,

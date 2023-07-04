@@ -86,7 +86,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Account method to send native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
+    /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
     /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access
     /// to the output again after a predefined time (default 1 day).
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally. The options may define the
@@ -121,7 +121,7 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Account method to prepare the transaction for
+    /// Prepares the transaction for
     /// [Account::send_native_tokens()](crate::account::Account::send_native_tokens).
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,

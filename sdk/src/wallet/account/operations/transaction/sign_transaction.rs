@@ -24,7 +24,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Account method to sign a transaction essence.
+    /// Signs a transaction essence.
     pub async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
