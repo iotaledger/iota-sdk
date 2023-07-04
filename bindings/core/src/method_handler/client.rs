@@ -469,7 +469,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let data: serde_json::Value = client
                 .call_plugin_route(&base_plugin_path, &method, &method_path, query_params, request_object)
                 .await?;
-            Response::CustomJson(serde_json::to_string(&data)?)
+            Response::CustomJson(data)
         }
     };
     Ok(response)
