@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 1.0.0-rc.2 - 2023-0x-xx
 
 ### Added
+
 - `callPluginRoute` to Client to fetch data from custom node plugins;
 - `computeTokenId `, `computeOutputId`, `computeInputsCommitment` and `computeStorageDeposit` to Utils;
 - Type alias for Ids which were previously just `HexEncodedString`;
