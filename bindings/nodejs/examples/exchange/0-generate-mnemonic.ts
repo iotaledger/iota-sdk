@@ -9,8 +9,8 @@ import { Utils } from '@iota/sdk';
 // This example generates a new random mnemonic.
 async function run() {
     try {
-        console.log('Generated mnemonic:', Utils.generateMnemonic());
-        // Set generated mnemonic as env variable for MNEMONIC so it can be used in 1-create-account.js
+        console.log('Mnemonic:', Utils.generateMnemonic());
+        // Set generated mnemonic as env variable for MNEMONIC so it can be used in the next examples.
     } catch (error) {
         console.log('Error: ', error);
     }
