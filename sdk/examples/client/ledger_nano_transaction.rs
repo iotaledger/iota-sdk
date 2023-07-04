@@ -23,7 +23,7 @@ use iota_sdk::client::{
     Client, Result,
 };
 
-const AMOUNT: u64 = 1_000_000;
+// const AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
 async fn main() -> Result<()> {

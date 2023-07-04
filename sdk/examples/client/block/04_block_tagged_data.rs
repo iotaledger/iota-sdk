@@ -20,9 +20,6 @@ async fn main() -> Result<()> {
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
-    let tag = std::env::args().nth(1).unwrap_or_else(|| "Hello".to_string());
-    let data = std::env::args().nth(2).unwrap_or_else(|| "Tangle".to_string());
-
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
@@ -31,7 +28,17 @@ async fn main() -> Result<()> {
         .finish_block_builder(
             None,
             Some(Payload::TaggedData(Box::new(
-                TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
+                TaggedDataPayload::new(
+                    std::env::args()
+                        .nth(1)
+                        .unwrap_or_else(|| "Hello".to_string())
+                        .as_bytes(),
+                    std::env::args()
+                        .nth(2)
+                        .unwrap_or_else(|| "Tangle".to_string())
+                        .as_bytes(),
+                )
+                .unwrap(),
             ))),
         )
         .await?;

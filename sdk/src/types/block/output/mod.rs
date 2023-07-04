@@ -184,7 +184,7 @@ impl Output {
             Self::Account(output) => Some(output.native_tokens()),
             Self::Foundry(output) => Some(output.native_tokens()),
             Self::Nft(output) => Some(output.native_tokens()),
-            Self::Delegation(output) => None,
+            Self::Delegation(_) => None,
         }
     }
 
@@ -206,7 +206,7 @@ impl Output {
             Self::Account(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
-            Self::Delegation(output) => None,
+            Self::Delegation(_) => None,
         }
     }
 

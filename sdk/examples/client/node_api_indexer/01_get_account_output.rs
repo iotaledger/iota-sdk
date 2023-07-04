@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     let account_id = std::env::args()
         .nth(1)
         .expect("missing example argument: ACCOUNT_ID")
-        .parse::<AliasId>()?;
+        .parse::<AccountId>()?;
 
     // Get the output ID by providing the corresponding account ID.
     let output_id = client.account_output_id(account_id).await?;

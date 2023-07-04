@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let block = client.block().finish().await?;
+    let block = client.finish_block_builder(None, None).await?;
 
     println!(
         "Empty block sent: {}/block/{}",
