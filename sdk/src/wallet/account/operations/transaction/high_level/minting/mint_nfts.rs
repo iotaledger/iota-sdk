@@ -114,6 +114,7 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Account method to mint nfts.
+    ///
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally. The options may define the
     /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
@@ -148,8 +149,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
+    /// Account method to prepare the transaction for
+    /// [Account::mint_nfts()](crate::account::Account::mint_nfts).
     pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
         params: I,

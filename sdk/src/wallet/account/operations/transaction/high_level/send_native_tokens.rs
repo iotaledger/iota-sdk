@@ -121,8 +121,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
+    /// Account method to prepare the transaction for
+    /// [Account::send_native_tokens()](crate::account::Account::send_native_tokens).
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
         params: I,

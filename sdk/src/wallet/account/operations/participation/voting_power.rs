@@ -49,8 +49,8 @@ where
         self.sign_and_submit_transaction(prepared, None).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.increase_voting_power()](crate::account::Account.increase_voting_power)
+    /// Account method to prepare the transaction for
+    /// [Account::increase_voting_power()](crate::account::Account::increase_voting_power).
     pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let token_supply = self.client().get_token_supply().await?;
 
@@ -108,8 +108,8 @@ where
         self.sign_and_submit_transaction(prepared, None).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.decrease_voting_power()](crate::account::Account.decrease_voting_power)
+    /// Account method to prepare the transaction for
+    /// [Account::decrease_voting_power()](crate::account::Account::decrease_voting_power)
     pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let token_supply = self.client().get_token_supply().await?;
         let current_output_data = self

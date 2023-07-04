@@ -79,8 +79,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.send_nft()](crate::account::Account.send_nft)
+    /// Account method to prepare the transaction for
+    /// [Account::send_nft()](crate::account::Account::send_nft).
     pub async fn prepare_send_nft<I: IntoIterator<Item = SendNftParams> + Send>(
         &self,
         params: I,

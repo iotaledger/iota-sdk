@@ -89,8 +89,8 @@ where
         Ok(consolidation_tx)
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.consolidate_outputs()](crate::account::Account.consolidate_outputs)
+    /// Account method to prepare the transaction for
+    /// [Account::consolidate_outputs()](crate::account::Account::consolidate_outputs).
     pub async fn prepare_consolidate_outputs(
         &self,
         force: bool,

@@ -125,7 +125,7 @@ where
     }
 
     /// Account method prepare the transaction for
-    /// [Account.create_native_token()](crate::account::Account.create_native_token)
+    /// [Account::create_native_token()](crate::account::Account::create_native_token).
     pub async fn prepare_create_native_token(
         &self,
         params: CreateNativeTokenParams,
