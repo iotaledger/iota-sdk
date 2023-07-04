@@ -8,12 +8,15 @@ use iota_sdk::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
         request_funds_from_faucet, secret::SecretManager, Client,
     },
-    types::{block::{
-        address::ToBech32Ext,
-        output::OutputId,
-        payload::{transaction::TransactionId, Payload},
-        BlockId,
-    }, api::core::response::InfoResponse},
+    types::{
+        api::core::response::InfoResponse,
+        block::{
+            address::ToBech32Ext,
+            output::OutputId,
+            payload::{transaction::TransactionId, Payload},
+            BlockId,
+        },
+    },
 };
 
 use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL, NODE_LOCAL};
