@@ -383,7 +383,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              input_range_start: Optional[int] = None,
                              input_range_end: Optional[int] = None,
                              inputs: Optional[List[Dict[str, Any]]] = None,
-                             params: Optional[Dict[str, Any]] = None,
+                             output: Optional[Dict[str, Any]] = None,
                              outputs: Optional[List[Any]] = None,
                              tag: Optional[HexStr] = None) -> List[HexStr|Block]:
         """Build and post a block.
@@ -406,7 +406,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             End of the input range
         inputs : Array of Inputs
             Inputs to use
-        params : SendParams
+        output : Any # TODO: https://github.com/iotaledger/iota-sdk/issues/129
             Address and amount to send to
         outputs : Array of Outputs
             Outputs to use
@@ -425,8 +425,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         options = {k: v for k, v in options.items() if v != None}
 
-        if 'params' in options:
-            options['output'] = options.pop('params').as_dict()
+        if 'output' in options:
+            options['output'] = options.pop('output').as_dict()
 
         if 'coin_type' in options:
             options['coin_type'] = int(options.pop('coin_type'))
