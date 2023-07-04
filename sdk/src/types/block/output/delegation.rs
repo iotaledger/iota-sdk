@@ -38,7 +38,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -260,7 +264,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 pub struct DelegationOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
-    /// The amount of delegated IOTA coins.
+    /// The amount of delegated coins.
     delegated_amount: u64,
     /// Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.
     delegation_id: DelegationId,
@@ -275,11 +279,11 @@ pub struct DelegationOutput {
 }
 
 impl DelegationOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`DelegationOutput`].
+    /// The [`Output`](crate::types::block::output::Output) kind of a [`DelegationOutput`].
     pub const KIND: u8 = 7;
-    /// The set of allowed [`UnlockCondition`]s for an [`DelegationOutput`].
+    /// The set of allowed [`UnlockCondition`]s for a [`DelegationOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
-    /// The set of allowed immutable [`Feature`]s for an [`DelegationOutput`].
+    /// The set of allowed immutable [`Feature`]s for a [`DelegationOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER;
 
     /// Creates a new [`DelegationOutputBuilder`] with a provided amount.
