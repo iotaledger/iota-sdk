@@ -9,13 +9,13 @@ use crate::types::block::output::{AccountId, DelegationId, FoundryId, NftId, Out
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd, From)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChainId {
-    /// An account id.
+    ///
     Account(AccountId),
-    /// A foundry id.
+    ///
     Foundry(FoundryId),
-    /// An NFT id.
+    ///
     Nft(NftId),
-    /// A delegation id.
+    ///
     Delegation(DelegationId),
 }
 
