@@ -40,7 +40,7 @@ class NodeInfoMetrics:
 
 @dataclass
 class RentStructure:
-    """Rent structure for the storage deposit
+    """Rent structure for the storage deposit.
     """
     vByteCost: int
     vByteFactorData: int
