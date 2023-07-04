@@ -879,7 +879,7 @@ export class Account {
     }
 
     /**
-     * Prepare a send transaction, useful for offline signing.
+     * Prepare to send base coins, useful for offline signing.
      * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -977,7 +977,7 @@ export class Account {
     }
 
     /**
-     * Send a transaction with amounts from input addresses.
+     * Send base coins with amounts from input addresses.
      * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
