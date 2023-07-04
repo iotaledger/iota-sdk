@@ -232,7 +232,7 @@ required-features = [ "rocksdb", "stronghold" ]
 [[example]]
 name = "create_alias"
 path = "examples/how_tos/alias/create.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "destroy_alias"
