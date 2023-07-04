@@ -72,7 +72,7 @@ impl DelegationOutputBuilder {
         )
     }
 
-    /// Creates an [`DelegationOutputBuilder`] with a provided rent structure.
+    /// Creates a [`DelegationOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn new_with_minimum_storage_deposit(
         rent_structure: RentStructure,
