@@ -844,7 +844,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let token_supply = account.client().get_token_supply().await?;
                     let transaction = account
-                        .send(
+                        .send_outputs(
                             outputs
                                 .into_iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))

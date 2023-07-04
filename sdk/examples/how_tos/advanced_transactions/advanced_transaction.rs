@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
             .add_unlock_condition(TimelockUnlockCondition::new(in_an_hour)?)
             .finish_output(account.client().get_token_supply().await?)?;
 
-        let transaction = account.send(vec![basic_output], None).await?;
+        let transaction = account.send_outputs(vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included

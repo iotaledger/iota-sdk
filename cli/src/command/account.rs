@@ -641,12 +641,12 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = [SendAmountParams::new(address, amount)?
+    let params = [SendAmountParams::new(address, amount)?
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
         .with_expiration(expiration)];
     let transaction = account
         .send_amount(
-            outputs,
+            params,
             TransactionOptions {
                 allow_micro_amount,
                 ..Default::default()
@@ -687,7 +687,7 @@ pub async fn send_native_token_command(
             )?])
             .finish_output(token_supply)?];
 
-        account.send(outputs, None).await?
+        account.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
         let outputs = [SendNativeTokensParams::new(

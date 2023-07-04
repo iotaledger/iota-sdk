@@ -143,7 +143,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let outputs = vec![output; 2];
 
-    let tx = account_0.send(outputs, None).await?;
+    let tx = account_0.send_outputs(outputs, None).await?;
 
     account_0
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -325,7 +325,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let token_supply = account_0.client().get_token_supply().await?;
 
     let tx = account_0
-        .send(
+        .send_outputs(
             [
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
@@ -422,7 +422,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    let tx = accounts[1].send(outputs, None).await?;
+    let tx = accounts[1].send_outputs(outputs, None).await?;
     accounts[1]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
@@ -483,7 +483,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    let tx = account_0.send(outputs, None).await?;
+    let tx = account_0.send_outputs(outputs, None).await?;
     account_0
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;

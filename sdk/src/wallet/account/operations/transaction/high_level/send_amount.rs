@@ -83,17 +83,18 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to create basic outputs with which we then will call
-    /// [Account.send()](crate::account::Account.send), the options can define the
-    /// RemainderValueStrategy or custom inputs.
-    /// Address needs to be Bech32 encoded
+    /// Account method to send a certain amount of base coins.
+    ///
+    /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally.
+    /// The options may define the remainder value strategy or custom inputs.
+    /// Addresses provided with [`SendAmountParams`] need to be bech32-encoded.
     /// ```ignore
-    /// let outputs = [SendAmountParams::new(
+    /// let params = [SendAmountParams::new(
     ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     ///     1_000_000)?
     /// ];
     ///
-    /// let tx = account.send_amount(outputs, None ).await?;
+    /// let tx = account.send_amount(params, None ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

@@ -284,7 +284,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::SendOutputs { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
             let transaction = account
-                .send(
+                .send_outputs(
                     outputs
                         .into_iter()
                         .map(|o| Ok(Output::try_from_dto(o, token_supply)?))

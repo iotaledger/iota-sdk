@@ -38,7 +38,9 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
+    /// Account method to send a transaction by specifying its outputs.
+    ///
+    /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore
     /// let outputs = [
@@ -49,7 +51,7 @@ where
     ///    .finish_output(account.client.get_token_supply().await?;)?,
     /// ];
     /// let tx = account
-    ///     .send(
+    ///     .send_outputs(
     ///         outputs,
     ///         Some(TransactionOptions {
     ///             remainder_value_strategy: RemainderValueStrategy::ReuseAddress,
@@ -62,7 +64,7 @@ where
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send(
+    pub async fn send_outputs(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
