@@ -133,7 +133,6 @@ pub enum UtilsMethod {
     /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
     ComputeInputsCommitment { inputs: Vec<OutputDto> },
     /// Computes the required storage deposit of an output.
-    #[serde(rename_all = "camelCase")]
     ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
