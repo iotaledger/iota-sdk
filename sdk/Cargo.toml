@@ -229,6 +229,16 @@ name = "alias_wallet_transaction"
 path = "examples/how_tos/alias_wallet/transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+[[example]]
+name = "create_alias"
+path = "examples/how_tos/alias/create.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "destroy_alias"
+path = "examples/how_tos/alias/destroy.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Outputs
 
 [[example]]
@@ -614,16 +624,6 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "burn_nft"
 path = "examples/how_tos/nfts/burn_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "create_alias"
-path = "examples/how_tos/alias/create.rs"
-required-features = [ "stronghold" ]
-
-[[example]]
-name = "destroy_alias"
-path = "examples/how_tos/alias/destroy.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
