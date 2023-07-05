@@ -12,6 +12,12 @@ require('dotenv').config({ path: '.env' });
 // This example gets the balance of an account.
 async function run() {
     try {
+        if (!process.env.WALLET_DB_PATH) {
+            throw new Error(
+                '.env WALLET_DB_PATH is undefined, see .env.example',
+            );
+        }
+
         const wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
         });
@@ -27,7 +33,7 @@ async function run() {
 
         console.log('Balance', balance);
 
-        // Use the Faucet to send testnet tokens to your address:
+        // Use the faucet to send tokens to your address.
         console.log(
             'Fill your address with the Faucet: https://faucet.testnet.shimmer.network/',
         );
