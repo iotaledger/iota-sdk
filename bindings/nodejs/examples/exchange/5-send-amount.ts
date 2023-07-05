@@ -34,6 +34,10 @@ async function run() {
         const account = await wallet.getAccount('Alice');
         console.log('Account:', account);
 
+        // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
+        // have a storage deposit return, expiration or are nft/alias/foundry outputs.
+        await account.sync({ syncOnlyMostBasicOutputs: true });
+
         const response = await account.send([
             {
                 // Replace with the address of your choice!
