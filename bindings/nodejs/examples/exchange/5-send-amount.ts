@@ -12,6 +12,17 @@ require('dotenv').config({ path: '.env' });
 // This example sends tokens to an address.
 async function run() {
     try {
+        if (!process.env.WALLET_DB_PATH) {
+            throw new Error(
+                '.env WALLET_DB_PATH is undefined, see .env.example',
+            );
+        }
+        if (!process.env.STRONGHOLD_PASSWORD) {
+            throw new Error(
+                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+            );
+        }
+
         const wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
         });
@@ -35,7 +46,7 @@ async function run() {
         console.log(response);
 
         console.log(
-            `Check your block on https://explorer.testnet.shimmer.network/testnet/block/${response.blockId}`,
+            `Check your block on https://explorer.shimmer.network/testnet/block/${response.blockId}`,
         );
     } catch (error) {
         console.log('Error: ', error);
