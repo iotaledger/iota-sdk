@@ -79,7 +79,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
         ])
         .finish_output(token_supply)?];
 
-    let transaction = account_0.send(outputs, None).await?;
+    let transaction = account_0.send_outputs(outputs, None).await?;
     account_0
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendAmountParams, SendNftParams};
+use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendNftParams, SendParams};
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
@@ -18,11 +18,8 @@ async fn send_amount() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            [SendAmountParams::new(
-                *account_1.addresses().await?[0].address(),
-                amount,
-            )?],
+        .send(
+            [SendParams::new(*account_1.addresses().await?[0].address(), amount)?],
             None,
         )
         .await?;
@@ -50,9 +47,9 @@ async fn send_amount_127_outputs() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
+        .send(
             vec![
-SendAmountParams::new(
+                SendParams::new(
                     *account_1.addresses().await?[0].address(),
                     amount,
                 )?;
@@ -87,8 +84,8 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send 10 outputs to account_1
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            vec![SendAmountParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
+        .send(
+            vec![SendParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
             None,
         )
         .await?;
@@ -103,11 +100,8 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send back with custom provided input
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
-        .send_amount(
-            [SendAmountParams::new(
-                *account_0.addresses().await?[0].address(),
-                amount,
-            )?],
+        .send(
+            [SendParams::new(*account_0.addresses().await?[0].address(), amount)?],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()
@@ -176,11 +170,8 @@ async fn send_with_note() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            [SendAmountParams::new(
-                *account_1.addresses().await?[0].address(),
-                amount,
-            )?],
+        .send(
+            [SendParams::new(*account_1.addresses().await?[0].address(), amount)?],
             Some(TransactionOptions {
                 note: Some(String::from("send_with_note")),
                 ..Default::default()

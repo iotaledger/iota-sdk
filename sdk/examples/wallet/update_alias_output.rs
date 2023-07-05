@@ -83,7 +83,7 @@ async fn sync_and_print_balance(account: &Account) -> Result<()> {
 }
 
 async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<Output>) -> Result<()> {
-    let transaction = account.send(outputs, None).await?;
+    let transaction = account.send_outputs(outputs, None).await?;
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
