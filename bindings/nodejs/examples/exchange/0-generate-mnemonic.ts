@@ -12,7 +12,7 @@ async function run() {
         // Set the generated mnemonic as env variable MNEMONIC so it can be used in the next examples.
         console.log('Mnemonic:', Utils.generateMnemonic());
     } catch (error) {
-        console.log('Error: ', error);
+        console.error(error);
     }
 }
 

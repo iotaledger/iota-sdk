@@ -49,7 +49,7 @@ async function run() {
             `Check your block on https://explorer.shimmer.network/testnet/block/${response.blockId}`,
         );
     } catch (error) {
-        console.log('Error: ', error);
+        console.error(error);
     }
 }
 

@@ -53,7 +53,7 @@ async function run() {
             await account.sync({ syncOnlyMostBasicOutputs: true });
         }
     } catch (error) {
-        console.log('Error: ', error);
+        console.error(error);
     }
 }
 

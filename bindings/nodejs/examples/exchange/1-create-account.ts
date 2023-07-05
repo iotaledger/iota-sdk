@@ -59,7 +59,7 @@ async function run() {
 
         console.log(account);
     } catch (error) {
-        console.log('Error: ', error);
+        console.error(error);
     }
 }
 

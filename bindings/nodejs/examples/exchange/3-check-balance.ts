@@ -38,7 +38,7 @@ async function run() {
             'Fill your address with the Faucet: https://faucet.testnet.shimmer.network/',
         );
     } catch (error) {
-        console.log('Error: ', error);
+        console.error(error);
     }
 }
 

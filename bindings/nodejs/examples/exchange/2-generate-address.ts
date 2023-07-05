@@ -37,7 +37,7 @@ async function run() {
 
         console.log('Address:', address);
     } catch (error) {
-        console.log('Error: ', error);
+        console.error(error);
     }
 }
 
