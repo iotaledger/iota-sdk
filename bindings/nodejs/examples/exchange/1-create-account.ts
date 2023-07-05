@@ -34,7 +34,6 @@ async function run() {
             throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
 
-
         const walletOptions: WalletOptions = {
             storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
