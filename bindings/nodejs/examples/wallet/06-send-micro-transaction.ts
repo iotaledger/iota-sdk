@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SendAmountParams } from '@iota/sdk';
+import { SendParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from './common';
 
@@ -32,11 +32,11 @@ async function run() {
         console.log(
             `Sending '${SEND_MICRO_AMOUNT}' coin(s) to '${RECV_ADDRESS}'...`,
         );
-        const outputs: SendAmountParams[] = [
+        const params: SendParams[] = [
             { address: RECV_ADDRESS, amount: SEND_MICRO_AMOUNT },
         ];
 
-        const transaction = await account.sendAmount(outputs, {
+        const transaction = await account.send(params, {
             allowMicroAmount: true,
         });
         console.log(`Transaction sent: ${transaction.transactionId}`);

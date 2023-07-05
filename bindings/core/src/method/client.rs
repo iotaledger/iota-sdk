@@ -125,6 +125,15 @@ pub enum ClientMethod {
     /// Returns the unhealthy nodes.
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes,
+    /// Extension method which provides request methods for plugins.
+    #[serde(rename_all = "camelCase")]
+    CallPluginRoute {
+        base_plugin_path: String,
+        method: String,
+        endpoint: String,
+        query_params: Vec<String>,
+        request_object: Option<String>,
+    },
     /// Prepare a transaction for signing
     #[serde(rename_all = "camelCase")]
     PrepareTransaction {

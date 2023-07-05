@@ -3,7 +3,7 @@
 
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     GenerateAddressOptions,
@@ -219,10 +219,10 @@ export type __PrepareOutputMethod__ = {
     };
 };
 
-export type __PrepareSendAmountMethod__ = {
-    name: 'prepareSendAmount';
+export type __PrepareSendMethod__ = {
+    name: 'prepareSend';
     data: {
-        params: SendAmountParams[];
+        params: SendParams[];
         options?: TransactionOptions;
     };
 };
@@ -251,10 +251,10 @@ export type __RetryTransactionUntilIncludedMethod__ = {
     };
 };
 
-export type __SendAmountMethod__ = {
-    name: 'sendAmount';
+export type __SendMethod__ = {
+    name: 'send';
     data: {
-        params: SendAmountParams[];
+        params: SendParams[];
         options?: TransactionOptions;
     };
 };

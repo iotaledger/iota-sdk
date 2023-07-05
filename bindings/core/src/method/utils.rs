@@ -3,11 +3,14 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{AliasAddress, Bech32Address, Hrp},
-    output::{AliasId, NftId, OutputId},
+    address::{Bech32Address, Hrp},
+    output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure, TokenScheme},
     payload::{
         dto::MilestonePayloadDto,
-        transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
+        transaction::{
+            dto::{TransactionEssenceDto, TransactionPayloadDto},
+            TransactionId,
+        },
     },
     signature::dto::Ed25519SignatureDto,
     BlockDto,
@@ -97,27 +100,40 @@ pub enum UtilsMethod {
         /// Output ID
         output_id: OutputId,
     },
+    /// Computes the Foundry ID
+    #[serde(rename_all = "camelCase")]
+    ComputeFoundryId {
+        /// Alias id
+        alias_id: AliasId,
+        /// Serial number
+        serial_number: u32,
+        /// Token scheme kind
+        token_scheme_kind: u8,
+    },
     /// Computes the NFT ID
     #[serde(rename_all = "camelCase")]
     ComputeNftId {
         /// Output ID
         output_id: OutputId,
     },
-    /// Computes the Foundry ID
+    /// Computes the output ID from transaction id and output index
+    ComputeOutputId { id: TransactionId, index: u16 },
+    /// Computes a tokenId from the aliasId, serial number and token scheme type.
     #[serde(rename_all = "camelCase")]
-    ComputeFoundryId {
-        /// Alias address
-        alias_address: AliasAddress,
-        /// Serial number
+    ComputeTokenId {
+        alias_id: AliasId,
         serial_number: u32,
-        /// Token scheme kind
-        token_scheme_kind: u8,
+        token_scheme_type: TokenScheme,
     },
-    /// Compute the hash of a transaction essence.
+    /// Computes the hash of a transaction essence.
     HashTransactionEssence {
         /// The transaction essence
         essence: TransactionEssenceDto,
     },
+    /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
+    ComputeInputsCommitment { inputs: Vec<OutputDto> },
+    /// Computes the required storage deposit of an output.
+    ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
     VerifyMnemonic {

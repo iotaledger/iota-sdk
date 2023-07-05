@@ -75,7 +75,7 @@ pub enum Response {
     /// [`UnspentOutputs`](crate::wallet::message_interface::AccountMethod::UnspentOutputs)
     OutputsData(Vec<OutputDataDto>),
     /// Response for
-    /// [`PrepareSendAmount`](crate::wallet::message_interface::AccountMethod::PrepareSendAmount),
+    /// [`PrepareSend`](crate::wallet::message_interface::AccountMethod::PrepareSend),
     /// [`PrepareTransaction`](crate::wallet::message_interface::AccountMethod::PrepareTransaction)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
@@ -116,9 +116,8 @@ pub enum Response {
     /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
     /// [`CreateAliasOutput`](crate::wallet::message_interface::AccountMethod::CreateAliasOutput)
-    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
     /// [`MintNfts`](crate::wallet::message_interface::AccountMethod::MintNfts),
-    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
+    /// [`Send`](crate::wallet::message_interface::AccountMethod::Send),
     /// [`SendNativeTokens`](crate::wallet::message_interface::AccountMethod::SendNativeTokens),
     /// [`SendNft`](crate::wallet::message_interface::AccountMethod::SendNft),
     /// [`SendOutputs`](crate::wallet::message_interface::AccountMethod::SendOutputs)

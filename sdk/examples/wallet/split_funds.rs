@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
             SEND_AMOUNT,
             outputs_per_transaction.len()
         );
-        let transaction = account.send(outputs_per_transaction, None).await?;
+        let transaction = account.send_outputs(outputs_per_transaction, None).await?;
         println!(
             "Transaction sent: {}/transaction/{}",
             std::env::var("EXPLORER_URL").unwrap(),

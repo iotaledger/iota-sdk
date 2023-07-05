@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.types.block import Block, BlockMetadata
-from iota_sdk.types.payload import MilestonePayload
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.payload import MilestonePayload
 from typing import List
-
+from dacite import from_dict
 
 class NodeCoreAPI():
 
@@ -17,18 +18,18 @@ class NodeCoreAPI():
             'url': url
         })
 
-    def get_node_info(self, url: str, auth=None):
+    def get_node_info(self, url: str, auth=None) -> NodeInfo:
         """Get node info.
         """
-        return self._call_method('getNodeInfo', {
+        return from_dict(NodeInfo, self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
-        })
+        }))
 
-    def get_info(self):
+    def get_info(self) -> NodeInfoWrapper:
         """Returns the node information together with the url of the used node.
         """
-        return self._call_method('getInfo')
+        return from_dict(NodeInfoWrapper, self._call_method('getInfo'))
 
     def get_peers(self):
         """Get peers.
@@ -163,3 +164,16 @@ class NodeCoreAPI():
         return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         }))
+
+    def call_plugin_route(self, base_plugin_path: str, method: str, endpoint: str, query_params: [str] = None, request: str = None):
+        """Extension method which provides request methods for plugins.
+        """
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'endpoint': endpoint,
+            'queryParams': query_params,
+            'request': request,
+        })

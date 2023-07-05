@@ -239,7 +239,7 @@ class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
      * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
      * Unless its newly minted, then the id is zeroed.
      */
-    getNnftId(): HexEncodedString {
+    getNftId(): HexEncodedString {
         return this.nftId;
     }
 }

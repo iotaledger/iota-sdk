@@ -42,7 +42,7 @@ use crate::{
             },
             FilterOptions,
         },
-        SendAmountParams, SendNativeTokensParams, SendNftParams,
+        SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -153,7 +153,7 @@ pub enum AccountMethod {
         alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
-    /// Function to destroy a foundry output with a circulating supply of 0.
+    /// Destroy a foundry output with a circulating supply of 0.
     /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -294,11 +294,11 @@ pub enum AccountMethod {
         outputs: Vec<OutputDto>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Prepare send amount.
+    /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareSendAmount {
-        params: Vec<SendAmountParams>,
+    PrepareSend {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -320,11 +320,11 @@ pub enum AccountMethod {
         /// Sync options
         options: Option<SyncOptions>,
     },
-    /// Send amount.
+    /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    SendAmount {
-        params: Vec<SendAmountParams>,
+    Send {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.

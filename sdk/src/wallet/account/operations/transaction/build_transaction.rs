@@ -23,7 +23,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to build the transaction essence from the selected in and outputs
+    /// Builds the transaction essence from the selected in and outputs.
     pub(crate) async fn build_transaction_essence(
         &self,
         selected_transaction_data: Selected,

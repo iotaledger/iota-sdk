@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    let transaction = account.send(outputs, None).await?;
+    let transaction = account.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
