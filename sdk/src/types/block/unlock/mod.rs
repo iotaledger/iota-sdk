@@ -156,10 +156,7 @@ pub mod dto {
         signature::dto::SignatureUnlockDto,
     };
     use crate::types::block::{
-        signature::{
-            dto::{Ed25519SignatureDto, SignatureDto},
-            Ed25519Signature, Signature,
-        },
+        signature::{dto::SignatureDto, Ed25519Signature, Signature},
         Error,
     };
 
@@ -178,14 +175,7 @@ pub mod dto {
                 Unlock::Signature(signature) => match signature.signature() {
                     Signature::Ed25519(ed) => Self::Signature(SignatureUnlockDto {
                         kind: SignatureUnlock::KIND,
-                        signature: SignatureDto::Ed25519(
-                            Ed25519SignatureDto {
-                                kind: Ed25519Signature::KIND,
-                                public_key: *ed.public_key(),
-                                signature: *ed.signature(),
-                            }
-                            .into(),
-                        ),
+                        signature: SignatureDto::Ed25519(Box::new(ed.as_ref().into())),
                     }),
                 },
                 Unlock::Reference(r) => Self::Reference(ReferenceUnlockDto {
@@ -211,7 +201,7 @@ pub mod dto {
             match value {
                 UnlockDto::Signature(s) => match s.signature {
                     SignatureDto::Ed25519(ed) => Ok(Self::Signature(SignatureUnlock::from(Signature::Ed25519(
-                        Ed25519Signature::new(ed.public_key, ed.signature).into(),
+                        Ed25519Signature::try_from(*ed)?.into(),
                     )))),
                 },
                 UnlockDto::Reference(r) => Ok(Self::Reference(ReferenceUnlock::new(r.index)?)),

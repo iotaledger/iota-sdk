@@ -141,16 +141,16 @@ pub mod dto {
     pub struct Ed25519SignatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub public_key: PublicKey,
-        pub signature: Signature,
+        pub public_key: String,
+        pub signature: String,
     }
 
     impl From<&Ed25519Signature> for Ed25519SignatureDto {
         fn from(value: &Ed25519Signature) -> Self {
             Self {
                 kind: Ed25519Signature::KIND,
-                public_key: value.public_key,
-                signature: value.signature,
+                public_key: prefix_hex::encode(value.public_key.as_slice()),
+                signature: prefix_hex::encode(value.signature.to_bytes()),
             }
         }
     }
@@ -159,7 +159,10 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(value.public_key, value.signature))
+            Ok(Self::try_from_bytes(
+                prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
+                prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
+            )?)
         }
     }
 }
