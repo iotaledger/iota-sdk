@@ -19,8 +19,8 @@ async fn consolidation() -> Result<()> {
     // Send 10 outputs to account_1
     let amount = 1_000_000;
     let tx = account_0
-        .send(
-            vec![SendParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
+        .send_with_params(
+            vec![SendParams::new(amount, *account_1.addresses().await?[0].address())?; 10],
             None,
         )
         .await?;

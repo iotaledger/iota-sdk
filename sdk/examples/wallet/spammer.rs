@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         println!("Creating unspent outputs...");
 
         let transaction = account
-            .send(vec![SendParams::new(recv_address, SEND_AMOUNT)?; 127], None)
+            .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address)?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
@@ -93,8 +93,10 @@ async fn main() -> Result<()> {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = tokio::time::Instant::now();
-                let params = vec![SendParams::new(recv_address, SEND_AMOUNT).map_err(|err| (n, err))?];
-                let transaction = account_clone.send(params, None).await.map_err(|err| (n, err))?;
+                let transaction = account_clone
+                    .send(SEND_AMOUNT, recv_address, None)
+                    .await
+                    .map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();
 
                 println!(

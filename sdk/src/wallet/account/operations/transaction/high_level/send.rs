@@ -31,13 +31,13 @@ use crate::{
 /// Parameters for `send()`
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 pub struct SendParams {
-    /// Bech32 encoded address
-    #[getset(get = "pub")]
-    address: Bech32Address,
     /// Amount
     #[serde(with = "crate::utils::serde::string")]
     #[getset(get = "pub")]
     amount: u64,
+    /// Bech32 encoded address
+    #[getset(get = "pub")]
+    address: Bech32Address,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
     /// default to the first address of the account.
@@ -51,10 +51,10 @@ pub struct SendParams {
 }
 
 impl SendParams {
-    pub fn new(address: impl ConvertTo<Bech32Address>, amount: u64) -> Result<Self, crate::wallet::Error> {
+    pub fn new(amount: u64, address: impl ConvertTo<Bech32Address>) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
-            address: address.convert()?,
             amount,
+            address: address.convert()?,
             return_address: None,
             expiration: None,
         })
@@ -83,7 +83,22 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Sends base coins.
+    /// Sends a certain amount of base coins to a single address.
+    ///
+    /// Calls [Account::send_with_params()](crate::account::Account::send_with_params) internally.
+    /// The options may define the remainder value strategy or custom inputs.
+    /// The provided Addresses provided with [`SendParams`] need to be bech32-encoded.
+    pub async fn send(
+        &self,
+        amount: u64,
+        address: impl ConvertTo<Bech32Address>,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+        let params = [SendParams::new(amount, address)?];
+        self.send_with_params(params, options).await
+    }
+
+    /// Sends a certain amount of base coins with full customizability of the transaction.
     ///
     /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally.
     /// The options may define the remainder value strategy or custom inputs.
@@ -100,7 +115,7 @@ where
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send<I: IntoIterator<Item = SendParams> + Send>(
+    pub async fn send_with_params<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,

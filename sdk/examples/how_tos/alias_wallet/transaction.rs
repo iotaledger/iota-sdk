@@ -11,7 +11,7 @@ use iota_sdk::{
     types::block::address::{AliasAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
-        Result, SendParams,
+        Result,
     },
     Wallet,
 };
@@ -62,10 +62,8 @@ async fn main() -> Result<()> {
 
     let transaction = account
         .send(
-            SendParams::new(
-                "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-                1_000_000,
-            ),
+            1_000_000,
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             TransactionOptions {
                 mandatory_inputs: Some(vec![input]),
                 ..Default::default()
