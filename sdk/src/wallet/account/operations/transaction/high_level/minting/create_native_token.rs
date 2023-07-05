@@ -33,6 +33,7 @@ pub struct CreateNativeTokenParams {
     /// Maximum supply
     pub maximum_supply: U256,
     /// Foundry metadata
+    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub foundry_metadata: Option<Vec<u8>>,
 }

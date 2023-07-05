@@ -34,10 +34,12 @@ pub struct MintNftParams {
     sender: Option<Bech32Address>,
     /// NFT metadata feature.
     #[getset(get = "pub")]
+    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     metadata: Option<Vec<u8>>,
     /// NFT tag feature.
     #[getset(get = "pub")]
+    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     tag: Option<Vec<u8>>,
     /// NFT issuer feature.
@@ -45,6 +47,7 @@ pub struct MintNftParams {
     issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     #[getset(get = "pub")]
+    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     immutable_metadata: Option<Vec<u8>>,
 }
