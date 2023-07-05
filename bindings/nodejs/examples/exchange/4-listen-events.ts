@@ -9,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./exchange/4-listen-events.ts
 
-// This example listen to the NewOutput event.
+// This example listens to the NewOutput event.
 async function run() {
     try {
         if (!process.env.WALLET_DB_PATH) {
