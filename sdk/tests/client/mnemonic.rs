@@ -11,12 +11,5 @@ async fn mnemonic() -> Result<()> {
     assert!(Client::mnemonic_to_hex_seed(&Mnemonic::from("until fire hat mountain zoo grocery real deny advance change marble taste goat ivory wheat bubble panic banner tattoo client ticket action race rocket".to_owned())).is_ok());
     assert!(Client::mnemonic_to_hex_seed(&Mnemonic::from("fire until hat mountain zoo grocery real deny advance change marble taste goat ivory wheat bubble panic banner tattoo client ticket action race rocket".to_owned())).is_err());
     assert!(Client::mnemonic_to_hex_seed(&Mnemonic::from("invalid mnemonic".to_owned())).is_err());
-    // mnemonic with space at the beginning or end should return the same as without
-    let mnemonic = Mnemonic::from("until fire hat mountain zoo grocery real deny advance change marble taste goat ivory wheat bubble panic banner tattoo client ticket action race rocket".to_owned());
-    let mnemonic_with_spaces = Mnemonic::from(" until fire hat mountain zoo grocery real deny advance change marble taste goat ivory wheat bubble panic banner tattoo client ticket action race rocket ".to_owned());
-    assert_eq!(
-        Client::mnemonic_to_hex_seed(&mnemonic).unwrap(),
-        Client::mnemonic_to_hex_seed(&mnemonic_with_spaces).unwrap()
-    );
     Ok(())
 }

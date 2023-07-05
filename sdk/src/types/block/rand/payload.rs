@@ -1,6 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use super::signature::rand_signature;
 use crate::types::block::{
     payload::{
         milestone::{MilestoneEssence, MilestoneOptions, MilestonePayload},
@@ -9,14 +10,13 @@ use crate::types::block::{
         Payload,
     },
     rand::{
-        bytes::{rand_bytes, rand_bytes_array},
+        bytes::rand_bytes,
         input::rand_treasury_input,
         milestone::{rand_merkle_root, rand_milestone_id, rand_milestone_index},
         number::{rand_number, rand_number_range},
         output::rand_treasury_output,
         parents::rand_parents,
     },
-    signature::{Ed25519Signature, Signature},
 };
 
 /// Generates a random tagged data payload.
@@ -47,9 +47,7 @@ pub fn rand_milestone_payload(protocol_version: u8) -> MilestonePayload {
         MilestoneOptions::from_vec(Vec::new()).unwrap(),
     )
     .unwrap();
-    let signatures = [Signature::from(
-        Ed25519Signature::try_from_bytes(rand_bytes_array(), rand_bytes_array()).unwrap(),
-    )];
+    let signatures = [rand_signature()];
 
     MilestonePayload::new(essence, signatures).unwrap()
 }

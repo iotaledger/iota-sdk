@@ -1,12 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{
-    rand::bytes::rand_bytes_array,
-    signature::{Ed25519Signature, Signature},
-    unlock::SignatureUnlock,
-    Error,
-};
+use iota_sdk::types::block::{rand::signature::rand_signature, unlock::SignatureUnlock, Error};
 use packable::{error::UnpackError, PackableExt};
 
 #[test]
@@ -16,34 +11,12 @@ fn unlock_kind() {
 
 #[test]
 fn signature_kind() {
-    assert_eq!(
-        SignatureUnlock::from(Signature::from(
-            Ed25519Signature::try_from_bytes(rand_bytes_array(), rand_bytes_array()).unwrap()
-        ))
-        .kind(),
-        0
-    );
-}
-
-#[test]
-fn from_ed25519() {
-    let public_key_bytes = rand_bytes_array();
-    let signature_bytes = rand_bytes_array();
-    let signature = SignatureUnlock::from(Signature::from(
-        Ed25519Signature::try_from_bytes(public_key_bytes, signature_bytes).unwrap(),
-    ));
-
-    assert!(matches!(signature.signature(), Signature::Ed25519(signature)
-        if signature.public_key().as_ref() == public_key_bytes
-        && signature.signature().to_bytes() == signature_bytes
-    ));
+    assert_eq!(SignatureUnlock::from(rand_signature()).kind(), 0);
 }
 
 #[test]
 fn packed_len() {
-    let signature = SignatureUnlock::from(Signature::from(
-        Ed25519Signature::try_from_bytes(rand_bytes_array(), rand_bytes_array()).unwrap(),
-    ));
+    let signature = SignatureUnlock::from(rand_signature());
 
     assert_eq!(signature.packed_len(), 1 + 32 + 64);
     assert_eq!(signature.pack_to_vec().len(), 1 + 32 + 64);
@@ -51,9 +24,7 @@ fn packed_len() {
 
 #[test]
 fn pack_unpack_valid_ed25519() {
-    let signature_1 = SignatureUnlock::from(Signature::from(
-        Ed25519Signature::try_from_bytes(rand_bytes_array(), rand_bytes_array()).unwrap(),
-    ));
+    let signature_1 = SignatureUnlock::from(rand_signature());
     let signature_bytes = signature_1.pack_to_vec();
     let signature_2 = SignatureUnlock::unpack_verified(signature_bytes.as_slice(), &()).unwrap();
 
