@@ -39,7 +39,7 @@ async function run() {
             clientOptions: {
                 nodes: [process.env.NODE_URL],
             },
-            coinType: CoinType.Shimmer,
+            coinType: CoinType.IOTA,
             secretManager: {
                 stronghold: {
                     snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
