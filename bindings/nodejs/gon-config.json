@@ -1,6 +1,6 @@
 {
     "source": ["./build/Release/index.node"],
-    "bundle_id": "org.iota.cli-wallet",
+    "bundle_id": "org.iota.sdk-nodejs",
     "apple_id": {
         "password": "@env:AC_PASSWORD"
     },
