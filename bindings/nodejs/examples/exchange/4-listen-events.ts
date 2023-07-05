@@ -1,49 +1,51 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountManager } from '@iota/sdk';
+import { Wallet, Event, WalletEventType } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/check-balance.ts
+// yarn run-example ./exchange/4-listen-events.ts
 
 // This example listen to the NewOutput event.
 async function run() {
     try {
-        const manager = new AccountManager({
-            storagePath: './alice-database',
+        const wallet = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const callback = function (err, data) {
-            if (err) console.log("err:", err)
+        const callback = function (err: any, event: Event) {
+            console.log(
+                'AccountIndex:',
+                event.getAccountIndex())
+            console.log('Event:',
+                event.getEvent(),
+            );
 
-            const event = JSON.parse(data)
-            console.log("Event for account:", event.accountIndex)
-            console.log("data:", event.event)
-
-            // Exit after receiving an event
+            // Exit after receiving an event.
             process.exit(0);
-        }
+        };
 
-        // provide event type to filter only for events with this type
-        manager.listen(['NewOutput'], callback);
+        // Only interested in new outputs here.
+        await wallet.listen([WalletEventType.NewOutput], callback);
 
-        const account = await manager.getAccount('Alice');
+        const account = await wallet.getAccount('Alice');
 
-        // Use the Faucet to send testnet tokens to your address:
+        // Use the faucet to send testnet tokens to your address.
         console.log("Fill your address with the Faucet: https://faucet.testnet.shimmer.network/")
-        const addressObjects = await account.addresses();
-        console.log('Send funds to:', addressObjects[0].address);
 
-        // Sync every 5 seconds until the faucet transaction gets confirmed
+        const addresses = await account.addresses();
+        console.log('Send funds to:', addresses[0].address);
+
+        // Sync every 5 seconds until the faucet transaction gets confirmed.
         for (let i = 0; i < 100; i++) {
             await new Promise(resolve => setTimeout(resolve, 5000));
 
             // Sync to detect new outputs
-            // syncOnlyMostBasicOutputs if not interested in outputs that are timelocked, 
-            // have a storage deposit return, expiration or are nft/alias/foundry outputs
+            // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked, 
+            // have a storage deposit return, expiration or are nft/alias/foundry outputs.
             await account.sync({ syncOnlyMostBasicOutputs: true });
         }
 
