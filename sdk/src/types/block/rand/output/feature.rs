@@ -4,8 +4,14 @@
 use alloc::vec::Vec;
 
 use crate::types::block::{
-    output::feature::{Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-    rand::{address::rand_address, bytes::rand_bytes, number::rand_number_range},
+    output::feature::{
+        Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature,
+    },
+    rand::{
+        address::rand_address,
+        bytes::rand_bytes,
+        number::{rand_number, rand_number_range},
+    },
 };
 
 /// Generates a random [`SenderFeature`].
@@ -30,12 +36,18 @@ pub fn rand_tag_feature() -> TagFeature {
     TagFeature::new(bytes).unwrap()
 }
 
+/// Generates a random [`StakingFeature`].
+pub fn rand_staking_feature() -> StakingFeature {
+    StakingFeature::new(rand_number(), rand_number(), rand_number(), rand_number())
+}
+
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
     match *flag {
         FeatureFlags::SENDER => Feature::Sender(rand_sender_feature()),
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
+        FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
         _ => unreachable!(),
     }
 }
