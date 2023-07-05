@@ -16,8 +16,8 @@ export interface Address {
     used: boolean;
 }
 
-/** Address with a base token amount */
-export interface SendAmountParams {
+/** Address with a base coin amount */
+export interface SendParams {
     address: string;
     amount: string;
     returnAddress?: string;

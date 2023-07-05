@@ -314,11 +314,11 @@ class Account:
             }
         )
 
-    def prepare_send_amount(self, params, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
-        """Prepare send amount.
+    def prepare_send(self, params, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+        """Prepare to send base coins.
         """
         prepared = self._call_account_method(
-            'prepareSendAmount', {
+            'prepareSend', {
                 'params': params,
                 'options': options
             }
@@ -359,11 +359,11 @@ class Account:
             }
         )
 
-    def send_amount(self, params, options: Optional[TransactionOptions] = None) -> Transaction:
-        """Send amount.
+    def send(self, params, options: Optional[TransactionOptions] = None) -> Transaction:
+        """Send base coins.
         """
         return Transaction.from_dict(self._call_account_method(
-            'sendAmount', {
+            'send', {
                 'params': params,
                 'options': options
             }

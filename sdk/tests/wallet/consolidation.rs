@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{Result, SendAmountParams};
+use iota_sdk::wallet::{Result, SendParams};
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
@@ -19,8 +19,8 @@ async fn consolidation() -> Result<()> {
     // Send 10 outputs to account_1
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            vec![SendAmountParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
+        .send(
+            vec![SendParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
             None,
         )
         .await?;
