@@ -30,6 +30,11 @@ async function run() {
                 '.env MNEMONIC is undefined, see .env.example',
             );
         }
+        if (!process.env.WALLET_DB_PATH) {
+            throw new Error(
+                '.env WALLET_DB_PATH is undefined, see .env.example',
+            );
+        }
 
         const walletOptions: WalletOptions = {
             storagePath: process.env.WALLET_DB_PATH,
