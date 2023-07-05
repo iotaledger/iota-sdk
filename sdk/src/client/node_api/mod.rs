@@ -12,3 +12,4 @@ pub mod mqtt;
 #[cfg(feature = "participation")]
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
 pub mod participation;
+pub mod plugin;

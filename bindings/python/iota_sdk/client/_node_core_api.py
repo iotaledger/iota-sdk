@@ -164,3 +164,16 @@ class NodeCoreAPI():
         return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         }))
+
+    def call_plugin_route(self, base_plugin_path: str, method: str, endpoint: str, query_params: [str] = None, request: str = None):
+        """Extension method which provides request methods for plugins.
+        """
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'endpoint': endpoint,
+            'queryParams': query_params,
+            'request': request,
+        })

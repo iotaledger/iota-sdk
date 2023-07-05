@@ -15,7 +15,7 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Requirements
 
-- [Python 3.x](https://www.python.org)
+- [Python 3.10+](https://www.python.org)
 - [pip ^21.x](https://pypi.org/project/pip)
 - `Rust` and `Cargo` to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
