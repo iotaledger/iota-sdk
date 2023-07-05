@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get the account output by its account id
-    let account_id = AccountId::from_str(ACCOUNT_ID)?;
+    let account_id = ACCOUNT_ID.parse::<AccountId>()?;
     if let Some(account_output_data) = account.unspent_account_output(&account_id).await? {
         println!(
             "Account '{ACCOUNT_ID}' found in unspent output: '{}'",

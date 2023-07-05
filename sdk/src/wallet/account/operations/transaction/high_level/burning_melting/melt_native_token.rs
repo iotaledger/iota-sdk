@@ -105,7 +105,7 @@ where
                     }
                 }
                 // Not interested in these outputs here
-                Output::Basic(_) | Output::Nft(_) => {}
+                _ => {}
             }
 
             if existing_account_output_data.is_some() && existing_foundry_output.is_some() {

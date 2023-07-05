@@ -52,13 +52,12 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get the outputs by their id
-    let outputs_responses = client.get_outputs(&output_ids_response.items).await?;
+    let outputs = client.get_outputs(&output_ids_response.items).await?;
 
     // Calculate the total amount and native tokens
     let mut total_amount = 0;
     let mut total_native_tokens = NativeTokensBuilder::new();
-    for output_response in outputs_responses {
-        let output = output_response.output();
+    for output in outputs {
         if let Some(native_tokens) = output.native_tokens() {
             total_native_tokens.add_native_tokens(native_tokens.clone())?;
         }

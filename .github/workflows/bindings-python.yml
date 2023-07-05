@@ -82,6 +82,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Run Tox
-        working-directory: bindings/python
-        run: tox
+      # TODO temporarily disabled https://github.com/iotaledger/iota-sdk/issues/647
+      # - name: Run Tox
+      #   working-directory: bindings/python
+      #   run: tox

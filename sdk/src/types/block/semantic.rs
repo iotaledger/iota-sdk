@@ -201,25 +201,31 @@ pub fn semantic_validation(
             Output::Basic(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
-                output.native_tokens(),
+                Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Account(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
-                output.native_tokens(),
+                Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Foundry(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
-                output.native_tokens(),
+                Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Nft(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
-                output.native_tokens(),
+                Some(output.native_tokens()),
+                output.unlock_conditions(),
+            ),
+            Output::Delegation(output) => (
+                output.unlock(output_id, unlock, inputs, &mut context),
+                output.amount(),
+                None,
                 output.unlock_conditions(),
             ),
         };
@@ -250,12 +256,14 @@ pub fn semantic_validation(
             .checked_add(amount)
             .ok_or(Error::ConsumedAmountOverflow)?;
 
-        for native_token in consumed_native_tokens.iter() {
-            let native_token_amount = context.input_native_tokens.entry(*native_token.token_id()).or_default();
+        if let Some(consumed_native_tokens) = consumed_native_tokens {
+            for native_token in consumed_native_tokens.iter() {
+                let native_token_amount = context.input_native_tokens.entry(*native_token.token_id()).or_default();
 
-            *native_token_amount = native_token_amount
-                .checked_add(native_token.amount())
-                .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
+                *native_token_amount = native_token_amount
+                    .checked_add(native_token.amount())
+                    .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
+            }
         }
     }
 
@@ -271,14 +279,15 @@ pub fn semantic_validation(
                         .ok_or(Error::CreatedAmountOverflow)?;
                 }
 
-                (output.amount(), output.native_tokens(), output.features())
+                (output.amount(), Some(output.native_tokens()), Some(output.features()))
             }
-            Output::Account(output) => (output.amount(), output.native_tokens(), output.features()),
-            Output::Foundry(output) => (output.amount(), output.native_tokens(), output.features()),
-            Output::Nft(output) => (output.amount(), output.native_tokens(), output.features()),
+            Output::Account(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
+            Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
+            Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
+            Output::Delegation(output) => (output.amount(), None, None),
         };
 
-        if let Some(sender) = features.sender() {
+        if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {
                 return Ok(ConflictReason::UnverifiedSender);
             }
@@ -289,15 +298,17 @@ pub fn semantic_validation(
             .checked_add(amount)
             .ok_or(Error::CreatedAmountOverflow)?;
 
-        for native_token in created_native_tokens.iter() {
-            let native_token_amount = context
-                .output_native_tokens
-                .entry(*native_token.token_id())
-                .or_default();
+        if let Some(created_native_tokens) = created_native_tokens {
+            for native_token in created_native_tokens.iter() {
+                let native_token_amount = context
+                    .output_native_tokens
+                    .entry(*native_token.token_id())
+                    .or_default();
 
-            *native_token_amount = native_token_amount
-                .checked_add(native_token.amount())
-                .ok_or(Error::CreatedNativeTokensAmountOverflow)?;
+                *native_token_amount = native_token_amount
+                    .checked_add(native_token.amount())
+                    .ok_or(Error::CreatedNativeTokensAmountOverflow)?;
+            }
         }
     }
 
