@@ -14,7 +14,7 @@ pub use self::constants::{FAUCET_URL, NODE_LOCAL};
 
 /// Sets up a Client with node health ignored.
 pub async fn setup_client_with_node_health_ignored() -> Client {
-    Client::builder().with_node(NODE_LOCAL).unwrap().finish().await.unwrap()
+    Client::builder().with_node(NODE_LOCAL).unwrap().with_ignore_node_health().finish().await.unwrap()
 }
 
 /// Create a client with `DEFAULT_DEVNET_NODE_URL` and a random mnemonic, request funds from the faucet to the first
