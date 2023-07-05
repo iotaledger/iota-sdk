@@ -1,7 +1,6 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::signature::rand_signature;
 use crate::types::block::{
     payload::{
         milestone::{MilestoneEssence, MilestoneOptions, MilestonePayload},
@@ -16,6 +15,7 @@ use crate::types::block::{
         number::{rand_number, rand_number_range},
         output::rand_treasury_output,
         parents::rand_parents,
+        signature::rand_signature,
     },
 };
 
