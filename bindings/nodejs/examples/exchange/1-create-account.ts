@@ -59,7 +59,7 @@ async function run() {
 
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/alias/foundry outputs.
-        account.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true })
+        account.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
 
         console.log(account);
     } catch (error) {

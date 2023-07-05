@@ -22,6 +22,9 @@ async function run() {
                 '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
             );
         }
+        if (!process.env.EXPLORER_URL) {
+            throw new Error('.env EXPLORER_URL is undefined, see .env.example');
+        }
 
         const wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
@@ -50,7 +53,7 @@ async function run() {
         console.log(response);
 
         console.log(
-            `Check your block on https://explorer.shimmer.network/testnet/block/${response.blockId}`,
+            `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
         );
     } catch (error) {
         console.error(error);
