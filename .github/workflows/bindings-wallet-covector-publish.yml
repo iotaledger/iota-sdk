@@ -173,9 +173,10 @@ jobs:
         run: npm run prebuild-x64
         working-directory: sdk/src/wallet/bindings/nodejs
 
-      - name: Build Node.js prebuild (arm64)
-        run: npm run prebuild-arm64
-        working-directory: sdk/src/wallet/bindings/nodejs
+      # Temporarily disabled because it does not work like this https://github.com/iotaledger/iota-sdk/issues/97
+      # - name: Build Node.js prebuild (arm64)
+      #   run: npm run prebuild-arm64
+      #   working-directory: sdk/src/wallet/bindings/nodejs
 
       - name: Upload prebuild to GitHub release
         run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix wallet-nodejs-binding-v

@@ -113,10 +113,10 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to mint nfts.
-    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
-    /// RemainderValueStrategy or custom inputs.
-    /// Address needs to be Bech32 encoded
+    /// Mints NFTs.
+    ///
+    /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally. The options may define the
+    /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
@@ -149,8 +149,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
+    /// Prepares the transaction for
+    /// [Account::mint_nfts()](crate::account::Account::mint_nfts).
     pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
         params: I,

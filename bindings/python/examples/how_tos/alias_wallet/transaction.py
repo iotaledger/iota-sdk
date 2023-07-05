@@ -40,11 +40,10 @@ params = [{
 options = {
     'mandatoryInputs': [input],
 }
-transaction = account.send_amount(params, options)
-account.retry_transaction_until_included(
-    transaction['transactionId'], None, None)
+transaction = account.send(params, options)
+account.retry_transaction_until_included(transaction.transactionId, None, None)
 print(
-    f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction["transactionId"]}')
+    f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transactionId}')
 
 total_base_token_balance = account.sync(sync_options)['baseCoin']['total']
 print(f'Balance after sending funds from alias: {total_base_token_balance}')

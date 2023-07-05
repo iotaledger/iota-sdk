@@ -28,11 +28,11 @@ import type {
     __PrepareMintNativeTokenMethod__,
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
-    __PrepareSendAmountMethod__,
+    __PrepareSendMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
     __RetryTransactionUntilIncludedMethod__,
-    __SendAmountMethod__,
+    __SendMethod__,
     __PrepareSendNativeTokensMethod__,
     __PrepareSendNftMethod__,
     __SendOutputsMethod__,
@@ -113,11 +113,11 @@ export type __AccountMethod__ =
     | __PrepareMintNativeTokenMethod__
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
-    | __PrepareSendAmountMethod__
+    | __PrepareSendMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
     | __RetryTransactionUntilIncludedMethod__
-    | __SendAmountMethod__
+    | __SendMethod__
     | __PrepareSendNativeTokensMethod__
     | __PrepareSendNftMethod__
     | __SendOutputsMethod__

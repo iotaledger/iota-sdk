@@ -4,24 +4,23 @@ import os
 
 load_dotenv()
 
-# This example sends a transaction.
+# In this example we will destroy an alias output
 
 wallet = Wallet('./alice-database')
 
 account = wallet.get_account('Alice')
 
 # Sync account with the node
-response = account.sync()
+balance = account.sync()
+
+# We try to destroy the first alias in the account
+alias_id = balance['aliases'][0]
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-params = [{
-    "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-    "amount": "1000000",
-}]
-
-transaction = account.send(outputs)
+# Send transaction.
+transaction = account.prepare_destroy_alias(alias_id).send()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

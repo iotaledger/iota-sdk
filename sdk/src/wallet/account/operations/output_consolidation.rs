@@ -67,7 +67,7 @@ where
         })
     }
 
-    /// Consolidate basic outputs with only an [AddressUnlockCondition] from an account by sending them to an own
+    /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to an own
     /// address again if the output amount is >= the output_consolidation_threshold. When `force` is set to `true`, the
     /// threshold is ignored. Only consolidates the amount of outputs that fit into a single transaction.
     pub async fn consolidate_outputs(
@@ -89,8 +89,8 @@ where
         Ok(consolidation_tx)
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.consolidate_outputs()](crate::account::Account.consolidate_outputs)
+    /// Prepares the transaction for
+    /// [Account::consolidate_outputs()](crate::account::Account::consolidate_outputs).
     pub async fn prepare_consolidate_outputs(
         &self,
         force: bool,

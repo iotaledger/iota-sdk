@@ -333,7 +333,7 @@ pub enum Response {
     /// - [`PrepareMeltNativeToken`](crate::method::AccountMethod::PrepareMeltNativeToken)
     /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
     /// - [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
-    /// - [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
+    /// - [`PrepareSend`](crate::method::AccountMethod::PrepareSend),
     /// - [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
     /// - [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
@@ -365,7 +365,7 @@ pub enum Response {
     Balance(Balance),
     /// Response for:
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
-    /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)
+    /// - [`Send`](crate::method::AccountMethod::Send)
     /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::AccountMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
