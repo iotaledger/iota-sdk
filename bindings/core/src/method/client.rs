@@ -130,7 +130,7 @@ pub enum ClientMethod {
     CallPluginRoute {
         base_plugin_path: String,
         method: String,
-        method_path: String,
+        endpoint: String,
         query_params: Vec<String>,
         request_object: Option<String>,
     },

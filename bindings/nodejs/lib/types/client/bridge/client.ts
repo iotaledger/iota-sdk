@@ -437,7 +437,7 @@ export type __CallPluginRouteMethod__ = {
     data: {
         basePluginPath: string;
         method: 'GET' | 'POST';
-        methodPath: string;
+        endpoint: string;
         queryParams: string[];
         request?: string;
     };

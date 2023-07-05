@@ -15,7 +15,7 @@ impl ClientInner {
         &self,
         base_plugin_path: &str,
         method: &str,
-        method_path: &str,
+        endpoint: &str,
         query_params: Vec<String>,
         request_object: Option<String>,
     ) -> Result<T>
@@ -28,7 +28,7 @@ impl ClientInner {
         let req_method = reqwest::Method::from_str(&method);
 
         let node_manager = self.node_manager.read().await;
-        let path = format!("{}{}{}", base_plugin_path, method_path, query_params.join("&"));
+        let path = format!("{}{}{}", base_plugin_path, endpoint, query_params.join("&"));
         let timeout = self.get_timeout().await;
 
         match req_method {
