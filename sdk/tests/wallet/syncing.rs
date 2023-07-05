@@ -114,7 +114,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    let tx = account_0.send(outputs, None).await?;
+    let tx = account_0.send_outputs(outputs, None).await?;
     account_0
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;

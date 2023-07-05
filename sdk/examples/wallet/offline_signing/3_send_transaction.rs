@@ -8,8 +8,6 @@
 //! cargo run --release --all-features --example 3_send_transaction
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     client::{
         api::{SignedTransactionData, SignedTransactionDataDto},
@@ -18,10 +16,6 @@ use iota_sdk::{
     types::block::payload::transaction::TransactionId,
     wallet::{Account, Result},
     Wallet,
-};
-use tokio::{
-    fs::File,
-    io::{AsyncReadExt, BufReader},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -50,7 +44,9 @@ async fn main() -> Result<()> {
 }
 
 async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTransactionData> {
-    let mut file = BufReader::new(File::open(SIGNED_TRANSACTION_FILE_PATH).await?);
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::io::BufReader::new(tokio::fs::File::open(SIGNED_TRANSACTION_FILE_PATH).await?);
     let mut json = String::new();
     file.read_to_string(&mut json).await?;
 
@@ -65,7 +61,7 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -73,8 +69,8 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .retry_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

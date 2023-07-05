@@ -9,7 +9,6 @@ export * from './generate-addresses-options';
 export * from './ledger-nano-status';
 export * from './network';
 export * from './nodeInfo';
-export * from './prepared-create-token-transaction-data';
 export * from './prepared-transaction-data';
 export * from './query-parameters';
 export * from './range';

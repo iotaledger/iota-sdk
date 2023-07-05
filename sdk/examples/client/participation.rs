@@ -1,9 +1,17 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! This example shows how to participate in voting events.
 //!
-//! `cargo run --example participation --features=participation --release`
+//! Command to create an event:
+//! curl -X POST http://localhost:14265/api/participation/v1/admin/events -H 'Content-Type: application/json' -d '{"name":"Shimmer Proposal","milestoneIndexCommence":580,"milestoneIndexStart":600,"milestoneIndexEnd":700,"payload":{"type":0,"questions":[{"text":"Should we be on CMC rank #1 eoy?","answers":[{"value":1,"text":"Yes","additionalInfo":""},{"value":2,"text":"No","additionalInfo":""}],"additionalInfo":""}]},"additionalInfo":"Nothing needed here"}'
+//! Command to delete an event:
+//! curl -X DELETE http://localhost:14265/api/participation/v1/admin/events/0x30bec90738f04b72e44ca853f98d90d19fb1c6b06eebdae3cc744439cbcb7e68
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example participation
+//! ```
 
 use iota_sdk::{
     client::{
@@ -18,20 +26,14 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Command to create an event:
-    // curl -X POST http://localhost:14265/api/participation/v1/admin/events -H 'Content-Type: application/json' -d '{"name":"Shimmer Proposal","milestoneIndexCommence":580,"milestoneIndexStart":600,"milestoneIndexEnd":700,"payload":{"type":0,"questions":[{"text":"Should we be on CMC rank #1 eoy?","answers":[{"value":1,"text":"Yes","additionalInfo":""},{"value":2,"text":"No","additionalInfo":""}],"additionalInfo":""}]},"additionalInfo":"Nothing needed here"}'
-    // Command to delete an event:
-    // curl -X DELETE http://localhost:14265/api/participation/v1/admin/events/0x30bec90738f04b72e44ca853f98d90d19fb1c6b06eebdae3cc744439cbcb7e68
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
-
-    // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    // Create a node client.
+    let client = Client::builder()
+        .with_node(&std::env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     // Get the participation events.
     let events = client.events(None).await?;
@@ -52,7 +54,11 @@ async fn main() -> Result<()> {
         .await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
-    request_funds_from_faucet(&faucet_url, &address).await?;
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&faucet_url, &address).await?
+    );
+    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let address_participation = client.address_staking_status(address).await?;
     println!("{address_participation:#?}");
@@ -129,5 +135,6 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
+
     Ok(())
 }

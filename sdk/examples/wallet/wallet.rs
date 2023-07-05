@@ -9,14 +9,12 @@
 //! * print all addresses with funds in the account
 //! * make a coin transaction
 //!
-//! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//! Make sure there's no `STRONGHOLD_SNAPSHOT_PATH` file and no `WALLET_DB_PATH` folder yet!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example wallet
 //! ```
-
-use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
@@ -24,7 +22,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::payload::transaction::TransactionId,
-    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{Account, ClientOptions, Result, SendParams, Wallet},
 };
 
 // The number of addresses to generate in this account
@@ -53,8 +51,8 @@ async fn main() -> Result<()> {
     print_addresses_with_funds(&account).await?;
 
     println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let params = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let transaction = account.send(params, None).await?;
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     sync_print_balance(&account, false).await?;
@@ -64,12 +62,12 @@ async fn main() -> Result<()> {
 }
 
 async fn create_wallet() -> Result<Wallet> {
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -100,7 +98,7 @@ async fn generate_addresses(account: &Account, max: usize) -> Result<()> {
     if account.addresses().await?.len() < max {
         let num_addresses_to_generate = max - account.addresses().await?.len();
         println!("Generating {num_addresses_to_generate} addresses ...");
-        let now = Instant::now();
+        let now = tokio::time::Instant::now();
         account
             .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
             .await?;
@@ -120,7 +118,7 @@ async fn print_addresses(account: &Account) -> Result<()> {
 
 async fn sync_print_balance(account: &Account, full_report: bool) -> Result<()> {
     let alias = account.alias().await;
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     if full_report {
@@ -151,7 +149,7 @@ async fn print_addresses_with_funds(account: &Account) -> Result<()> {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -159,8 +157,8 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .retry_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

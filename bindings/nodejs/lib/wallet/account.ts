@@ -8,7 +8,7 @@ import {
     SyncOptions,
     AccountMeta,
     AccountAddress,
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
@@ -35,13 +35,9 @@ import {
     BuildNftOutputData,
     SignedTransactionEssence,
     PreparedTransaction,
-} from '../types/wallet';
-import {
-    INode,
-    Burn,
-    PreparedTransactionData,
     PreparedCreateNativeTokenTransactionData,
-} from '../client';
+} from '../types/wallet';
+import { INode, Burn, PreparedTransactionData } from '../client';
 import {
     AliasOutput,
     NftOutput,
@@ -879,20 +875,20 @@ export class Account {
     }
 
     /**
-     * Prepare a send amount transaction, useful for offline signing.
+     * Prepare to send base coins, useful for offline signing.
      * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The prepared transaction data.
      */
-    async prepareSendAmount(
-        params: SendAmountParams[],
+    async prepareSend(
+        params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareSendAmount',
+                name: 'prepareSend',
                 data: {
                     params,
                     options,
@@ -977,20 +973,20 @@ export class Account {
     }
 
     /**
-     * Send a transaction with amounts from input addresses.
+     * Send base coins with amounts from input addresses.
      * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendAmount(
-        params: SendAmountParams[],
+    async send(
+        params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendAmount',
+                name: 'send',
                 data: {
                     params,
                     options: transactionOptions,

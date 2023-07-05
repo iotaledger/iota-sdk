@@ -35,12 +35,12 @@ import type {
     __MintNativeTokenMethod__,
     __MintNftsMethod__,
     __PrepareOutputMethod__,
-    __PrepareSendAmountMethod__,
+    __PrepareSendMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
     __RequestFundsFromFaucetMethod__,
     __RetryTransactionUntilIncludedMethod__,
-    __SendAmountMethod__,
+    __SendMethod__,
     __SendNativeTokensMethod__,
     __SendNftMethod__,
     __SendOutputsMethod__,
@@ -131,12 +131,12 @@ export type __AccountMethod__ =
     | __MintNativeTokenMethod__
     | __MintNftsMethod__
     | __PrepareOutputMethod__
-    | __PrepareSendAmountMethod__
+    | __PrepareSendMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
     | __RequestFundsFromFaucetMethod__
     | __RetryTransactionUntilIncludedMethod__
-    | __SendAmountMethod__
+    | __SendMethod__
     | __SendNativeTokensMethod__
     | __SendNftMethod__
     | __SendOutputsMethod__

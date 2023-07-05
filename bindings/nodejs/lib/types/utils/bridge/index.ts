@@ -2,8 +2,12 @@ import type {
     __GenerateMnemonicMethod__,
     __MnemonicToHexSeedMethod__,
     __ComputeAliasIdMethod__,
+    __ComputeOutputIdMethod__,
+    __ComputeTokenIdMethod__,
     __ComputeNftIdMethod__,
     __ComputeFoundryIdMethod__,
+    __ComputeInputsCommitmentMethod__,
+    __ComputeStorageDepositMethod__,
     __ParseBech32AddressMethod__,
     __BlockIdMethod__,
     __MilestoneIdMethod__,
@@ -27,6 +31,10 @@ export type __UtilsMethods__ =
     | __ComputeAliasIdMethod__
     | __ComputeNftIdMethod__
     | __ComputeFoundryIdMethod__
+    | __ComputeOutputIdMethod__
+    | __ComputeTokenIdMethod__
+    | __ComputeInputsCommitmentMethod__
+    | __ComputeStorageDepositMethod__
     | __ParseBech32AddressMethod__
     | __BlockIdMethod__
     | __MilestoneIdMethod__

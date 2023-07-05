@@ -6,14 +6,12 @@
 //!
 //! `cargo run --release --all-features --example alias_wallet_transaction`
 
-use std::env::var;
-
 use iota_sdk::{
     client::node_api::indexer::query_parameters::QueryParameter,
     types::block::address::{AliasAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
-        Result, SendAmountParams,
+        Result, SendParams,
     },
     Wallet,
 };
@@ -33,11 +31,11 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Get the account
@@ -63,8 +61,8 @@ async fn main() -> Result<()> {
         .unwrap();
 
     let transaction = account
-        .send_amount(
-            SendAmountParams::new(
+        .send(
+            SendParams::new(
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
                 1_000_000,
             ),

@@ -8,8 +8,6 @@
 //! cargo run --release --all-features --example list_accounts
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{wallet::Result, Wallet};
 
 #[tokio::main]
@@ -18,7 +16,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
 

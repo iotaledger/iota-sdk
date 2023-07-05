@@ -26,4 +26,7 @@ pub enum Error {
     /// None of our nodes have remote Pow enabled
     #[error("No node available for remote Pow")]
     UnavailablePow,
+    /// We made a call to the node but the protocol was unsupported
+    #[error("Call to {0} is not supported on this node")]
+    NotSupported(String),
 }

@@ -1,14 +1,17 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 from iota_sdk import call_utils_method
-from iota_sdk.types.address import Ed25519Address
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
-from typing import Any, Dict
+from typing import Any, Dict, TYPE_CHECKING
 
+# Required to prevent circular import
+if TYPE_CHECKING:
+    from iota_sdk.types.block import Block
 
 class Utils():
 
@@ -95,29 +98,65 @@ class Utils():
         })
 
     @staticmethod
+    def compute_foundry_id(alias_id: str, serial_number: int, token_scheme_kind: int) -> HexStr:
+        """Computes the foundry id.
+        """
+        return _call_method('computeFoundryId', {
+            'aliasId': alias_id,
+            'serialNumber': serial_number,
+            'tokenSchemeKind': token_scheme_kind
+        })
+
+    @staticmethod
+    def compute_inputs_commitment(inputs) -> HexStr:
+        """Computes the input commitment from the output objects that are used as inputs to fund the transaction.
+        """
+        return _call_method('computeInputsCommitment', {
+            'inputs': inputs
+        })
+
+    @staticmethod
+    def compute_storage_deposit(output, rent) -> HexStr:
+        """Computes the required storage deposit of an output.
+        """
+        return _call_method('computeStorageDeposit', {
+            'inputs': inputs
+        })
+
+    @staticmethod
     def compute_nft_id(output_id: OutputId) -> HexStr:
         """Computes the NFT id for the given NFT output id.
         """
         return _call_method('computeNftId', {
             'outputId': output_id
         })
+        
+    @staticmethod
+    def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
+        """Computes the output id from transaction id and output index.
+        """
+        return OutputId.from_string(_call_method('computeOutputId', {
+            'transactionId': transaction_id,
+            'index': index,
+        }))
 
     @staticmethod
-    def compute_foundry_id(alias_address: str, serial_number: int, token_scheme_kind: int) -> HexStr:
-        """Computes the foundry id.
+    def compute_token_id(alias_id: HexStr, serial_number: int, token_scheme_kind: int) -> HexStr:
+        """Computes a token id from the alias id, serial number and token scheme type.
         """
-        return _call_method('computeNftId', {
-            'aliasAddress': alias_address,
+        return _call_method('computeTokenId', {
+            'aliasId': alias_id,
             'serialNumber': serial_number,
             'tokenSchemeKind': token_scheme_kind
         })
 
+
     @staticmethod
-    def block_id(block) -> HexStr:
+    def block_id(block: Block) -> HexStr:
         """ Returns a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block
+            'block': block.__dict__
         })
 
     @staticmethod
