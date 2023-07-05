@@ -112,17 +112,17 @@ jobs:
           directory: ${{ runner.temp }}/llvm
 
       - name: Set LIBCLANG_PATH (Windows)
-        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-2019'
+        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
 
       - name: Install gon (macOS)
+        if: ${{ startsWith(matrix.os, 'macos') }}
         # https://github.com/mitchellh/gon
         run: brew install mitchellh/gon/gon
-        if: ${{ startsWith(matrix.os, 'macos') }}
 
       - name: Set deployment target (macOS)
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
         if: matrix.os == 'macos-13'
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
 
       - name: Add aarch64 target (macOS)
         if: ${{ startsWith(matrix.os, 'macos') }}
@@ -138,8 +138,8 @@ jobs:
       #   run: rustup target add aarch64-pc-windows-msvc
 
       - name: Get current date
-        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
         if: matrix.os == 'macos-13' || ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: Get current date
         if: matrix.os == 'windows-2019'
