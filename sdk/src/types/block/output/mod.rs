@@ -3,6 +3,7 @@
 
 mod account_id;
 mod chain_id;
+mod delegation;
 mod foundry_id;
 mod inputs_commitment;
 mod metadata;
@@ -50,6 +51,7 @@ pub use self::{
     account_id::AccountId,
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
+    delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryOutput, FoundryOutputBuilder},
     foundry_id::FoundryId,
@@ -131,6 +133,8 @@ pub enum Output {
     Foundry(FoundryOutput),
     /// An NFT output.
     Nft(NftOutput),
+    /// A delegation output.
+    Delegation(DelegationOutput),
 }
 
 impl core::fmt::Debug for Output {
@@ -140,6 +144,7 @@ impl core::fmt::Debug for Output {
             Self::Account(output) => output.fmt(f),
             Self::Foundry(output) => output.fmt(f),
             Self::Nft(output) => output.fmt(f),
+            Self::Delegation(output) => output.fmt(f),
         }
     }
 }
@@ -155,6 +160,7 @@ impl Output {
             Self::Account(_) => AccountOutput::KIND,
             Self::Foundry(_) => FoundryOutput::KIND,
             Self::Nft(_) => NftOutput::KIND,
+            Self::Delegation(_) => DelegationOutput::KIND,
         }
     }
 
@@ -165,6 +171,7 @@ impl Output {
             Self::Account(output) => output.amount(),
             Self::Foundry(output) => output.amount(),
             Self::Nft(output) => output.amount(),
+            Self::Delegation(output) => output.amount(),
         }
     }
 
@@ -175,6 +182,7 @@ impl Output {
             Self::Account(output) => Some(output.native_tokens()),
             Self::Foundry(output) => Some(output.native_tokens()),
             Self::Nft(output) => Some(output.native_tokens()),
+            Self::Delegation(_) => None,
         }
     }
 
@@ -185,6 +193,7 @@ impl Output {
             Self::Account(output) => Some(output.unlock_conditions()),
             Self::Foundry(output) => Some(output.unlock_conditions()),
             Self::Nft(output) => Some(output.unlock_conditions()),
+            Self::Delegation(output) => Some(output.unlock_conditions()),
         }
     }
 
@@ -195,6 +204,7 @@ impl Output {
             Self::Account(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
+            Self::Delegation(_) => None,
         }
     }
 
@@ -205,6 +215,7 @@ impl Output {
             Self::Account(output) => Some(output.immutable_features()),
             Self::Foundry(output) => Some(output.immutable_features()),
             Self::Nft(output) => Some(output.immutable_features()),
+            Self::Delegation(output) => Some(output.immutable_features()),
         }
     }
 
@@ -215,6 +226,7 @@ impl Output {
             Self::Account(output) => Some(output.chain_id()),
             Self::Foundry(output) => Some(output.chain_id()),
             Self::Nft(output) => Some(output.chain_id()),
+            Self::Delegation(_) => None,
         }
     }
 
@@ -224,12 +236,12 @@ impl Output {
     }
 
     /// Gets the output as an actual [`BasicOutput`].
-    /// PANIC: do not call on a non-basic output.
+    /// NOTE: Will panic if the output is not a [`BasicOutput`].
     pub fn as_basic(&self) -> &BasicOutput {
         if let Self::Basic(output) = self {
             output
         } else {
-            panic!("as_basic called on a non-basic output");
+            panic!("invalid downcast of non-BasicOutput");
         }
     }
 
@@ -239,12 +251,12 @@ impl Output {
     }
 
     /// Gets the output as an actual [`AccountOutput`].
-    /// PANIC: do not call on a non-account output.
+    /// NOTE: Will panic if the output is not a [`AccountOutput`].
     pub fn as_account(&self) -> &AccountOutput {
         if let Self::Account(output) = self {
             output
         } else {
-            panic!("as_account called on a non-account output");
+            panic!("invalid downcast of non-AccountOutput");
         }
     }
 
@@ -254,12 +266,12 @@ impl Output {
     }
 
     /// Gets the output as an actual [`FoundryOutput`].
-    /// PANIC: do not call on a non-foundry output.
+    /// NOTE: Will panic if the output is not a [`FoundryOutput`].
     pub fn as_foundry(&self) -> &FoundryOutput {
         if let Self::Foundry(output) = self {
             output
         } else {
-            panic!("as_foundry called on a non-foundry output");
+            panic!("invalid downcast of non-FoundryOutput");
         }
     }
 
@@ -269,12 +281,27 @@ impl Output {
     }
 
     /// Gets the output as an actual [`NftOutput`].
-    /// PANIC: do not call on a non-nft output.
+    /// NOTE: Will panic if the output is not a [`NftOutput`].
     pub fn as_nft(&self) -> &NftOutput {
         if let Self::Nft(output) = self {
             output
         } else {
-            panic!("as_nft called on a non-nft output");
+            panic!("invalid downcast of non-NftOutput");
+        }
+    }
+
+    /// Checks whether the output is a [`DelegationOutput`].
+    pub fn is_delegation(&self) -> bool {
+        matches!(self, Self::Delegation(_))
+    }
+
+    /// Gets the output as an actual [`DelegationOutput`].
+    /// NOTE: Will panic if the output is not a [`DelegationOutput`].
+    pub fn as_delegation(&self) -> &DelegationOutput {
+        if let Self::Delegation(output) = self {
+            output
+        } else {
+            panic!("invalid downcast of non-DelegationOutput");
         }
     }
 
@@ -288,6 +315,12 @@ impl Output {
         account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
+            Self::Basic(output) => Ok((
+                *output
+                    .unlock_conditions()
+                    .locked_address(output.address(), current_time),
+                None,
+            )),
             Self::Account(output) => {
                 if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
                     // Account address is only unlocked if it's a state transition
@@ -299,19 +332,19 @@ impl Output {
                     Ok((*output.governor_address(), None))
                 }
             }
-            Self::Basic(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
-                None,
-            )),
+            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
                 *output
                     .unlock_conditions()
                     .locked_address(output.address(), current_time),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
-            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
+            Self::Delegation(output) => Ok((
+                *output
+                    .unlock_conditions()
+                    .locked_address(output.address(), current_time),
+                None,
+            )),
         }
     }
 
@@ -413,6 +446,10 @@ impl Packable for Output {
                 NftOutput::KIND.pack(packer)?;
                 output.pack(packer)
             }
+            Self::Delegation(output) => {
+                DelegationOutput::KIND.pack(packer)?;
+                output.pack(packer)
+            }
         }?;
 
         Ok(())
@@ -427,6 +464,7 @@ impl Packable for Output {
             AccountOutput::KIND => Self::from(AccountOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
         })
     }
@@ -478,6 +516,7 @@ pub mod dto {
     pub use super::{
         account::dto::AccountOutputDto,
         basic::dto::BasicOutputDto,
+        delegation::dto::DelegationOutputDto,
         foundry::dto::FoundryOutputDto,
         nft::dto::NftOutputDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
@@ -507,6 +546,7 @@ pub mod dto {
         Account(AccountOutputDto),
         Foundry(FoundryOutputDto),
         Nft(NftOutputDto),
+        Delegation(DelegationOutputDto),
     }
 
     impl From<&Output> for OutputDto {
@@ -516,6 +556,7 @@ pub mod dto {
                 Output::Account(o) => Self::Account(o.into()),
                 Output::Foundry(o) => Self::Foundry(o.into()),
                 Output::Nft(o) => Self::Nft(o.into()),
+                Output::Delegation(o) => Self::Delegation(o.into()),
             }
         }
     }
@@ -530,6 +571,9 @@ pub mod dto {
                 OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto_with_params_inner(o, params)?),
                 OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_with_params_inner(o, params)?),
                 OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_with_params_inner(o, params)?),
+                OutputDto::Delegation(o) => {
+                    Self::Delegation(DelegationOutput::try_from_dto_with_params_inner(o, params)?)
+                }
             })
         }
     }
@@ -559,6 +603,11 @@ pub mod dto {
                         NftOutputDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT output: {e}")))?,
                     ),
+                    DelegationOutput::KIND => {
+                        Self::Delegation(DelegationOutputDto::deserialize(value).map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize delegation output: {e}"))
+                        })?)
+                    }
                     _ => return Err(serde::de::Error::custom("invalid output type")),
                 },
             )
@@ -577,6 +626,7 @@ pub mod dto {
                 T3(&'a AccountOutputDto),
                 T4(&'a FoundryOutputDto),
                 T5(&'a NftOutputDto),
+                T6(&'a DelegationOutputDto),
             }
             #[derive(Serialize)]
             struct TypedOutput<'a> {
@@ -595,6 +645,9 @@ pub mod dto {
                 },
                 Self::Nft(o) => TypedOutput {
                     output: OutputDto_::T5(o),
+                },
+                Self::Delegation(o) => TypedOutput {
+                    output: OutputDto_::T6(o),
                 },
             };
             output.serialize(serializer)
