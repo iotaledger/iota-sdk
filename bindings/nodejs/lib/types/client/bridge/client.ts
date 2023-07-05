@@ -431,3 +431,14 @@ export type __RequestFundsFromFaucetMethod__ = {
         address: string;
     };
 };
+
+export type __CallPluginRouteMethod__ = {
+    name: 'callPluginRoute';
+    data: {
+        basePluginPath: string;
+        method: 'GET' | 'POST';
+        endpoint: string;
+        queryParams: string[];
+        request?: string;
+    };
+};
