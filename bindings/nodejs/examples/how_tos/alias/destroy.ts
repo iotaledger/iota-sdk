@@ -1,20 +1,25 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedWallet } from './common';
+import { Wallet, initLogger } from '@iota/sdk';
 
-// In this example we will try to destroy the first alias there is in the account. This is only possible if possible
-// foundry outputs have circulating supply of 0.
-//
-// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-wallet` example!
-//
-// Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/16-destroy-alias.ts
+// This example uses secrets in environment variables for simplicity which should not be done in production.
+require('dotenv').config({ path: '.env' });
+
+// Run with command:
+// yarn run-example ./how_tos/alias/destroy.ts
+
+// In this example we destroy alias.
 async function run() {
+    initLogger();
+    if (!process.env.FAUCET_URL) {
+        throw new Error('.env FAUCET_URL is undefined, see .env.example');
+    }
     try {
         // Create the wallet
-        const wallet = await getUnlockedWallet();
+        const wallet = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,
+        });
 
         // Get the account we generated with `01-create-wallet`
         const account = await wallet.getAccount('Alice');
