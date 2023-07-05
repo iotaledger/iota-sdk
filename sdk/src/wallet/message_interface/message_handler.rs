@@ -756,10 +756,10 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::PrepareSendAmount { params, options } => {
+            AccountMethod::PrepareSend { params, options } => {
                 convert_async_panics(|| async {
                     let data = account
-                        .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
@@ -795,10 +795,10 @@ impl WalletMessageHandler {
                 .await
             }
             AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
-            AccountMethod::SendAmount { params, options } => {
+            AccountMethod::Send { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -846,7 +846,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let token_supply = account.client().get_token_supply().await?;
                     let transaction = account
-                        .send(
+                        .send_outputs(
                             outputs
                                 .into_iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))

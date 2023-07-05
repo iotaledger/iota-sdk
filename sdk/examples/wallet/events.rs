@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
         .finish_output(account.client().get_token_supply().await?)?];
 
-    let transaction = account.send(outputs, None).await?;
+    let transaction = account.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

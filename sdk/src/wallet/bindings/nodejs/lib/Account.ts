@@ -8,7 +8,7 @@ import type {
     SyncOptions,
     AccountMeta,
     Address,
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
@@ -867,20 +867,20 @@ export class Account {
     }
 
     /**
-     * Prepare a send amount transaction, useful for offline signing.
+     * Prepare a send transaction, useful for offline signing.
      * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The prepared transaction data.
      */
-    async prepareSendAmount(
-        params: SendAmountParams[],
+    async prepareSend(
+        params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareSendAmount',
+                name: 'prepareSend',
                 data: {
                     params,
                     options,
@@ -976,14 +976,14 @@ export class Account {
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendAmount(
-        params: SendAmountParams[],
+    async send(
+        params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendAmount',
+                name: 'send',
                 data: {
                     params,
                     options: transactionOptions,

@@ -11,7 +11,7 @@ use iota_sdk::{
     types::block::address::{AliasAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
-        Result, SendAmountParams,
+        Result, SendParams,
     },
     Wallet,
 };
@@ -61,8 +61,8 @@ async fn main() -> Result<()> {
         .unwrap();
 
     let transaction = account
-        .send_amount(
-            SendAmountParams::new(
+        .send(
+            SendParams::new(
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
                 1_000_000,
             ),

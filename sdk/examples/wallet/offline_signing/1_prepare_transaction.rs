@@ -14,7 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::SecretManager,
     },
-    wallet::{account::types::AccountAddress, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{account::types::AccountAddress, ClientOptions, Result, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let params = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
 
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file().await?;
@@ -57,9 +57,9 @@ async fn main() -> Result<()> {
     // Sync the account to get the outputs for the addresses
     account.sync(None).await?;
 
-    let prepared_transaction = account.prepare_send_amount(outputs.clone(), None).await?;
+    let prepared_transaction = account.prepare_send(params.clone(), None).await?;
 
-    println!("Prepared transaction sending {outputs:?}");
+    println!("Prepared transaction sending {params:?}");
 
     write_transaction_to_file(prepared_transaction).await?;
 

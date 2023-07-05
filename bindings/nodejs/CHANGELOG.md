@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `Account::prepareMintNativeToken` to `prepareCreateNativeToken`, `Account::prepareIncreaseNativeTokenSupply` to `prepareMintNativeToken`, `Account::prepareDecreaseNativeTokenSupply` to `prepareMeltNativeToken`;
 - Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 - Rename `MintTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding `Data` types);
+- Rename `SendAmountParams` to `SendParams`;
+- Rename `Account::sendAmount` to `send`, `Account::prepareSendAmount` to `prepareSend`;
 
 ### Fixed
 

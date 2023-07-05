@@ -116,6 +116,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Ed25519Signature::new` renamed to `try_from_bytes` and returns a Result;
 - `Ed25519Signature::new`, `public_key`, `signature` now use concrete types;
 - `Ed25519Signature::verify` is no longer fallable;
+- Rename `SendAmountParams` to `SendParams`;
+- Rename `Account::send` to `send_outputs`, `Account::send_amount` to `send`, `Account::prepare_send_amount` to `prepare_send`;
 
 ### Removed
 
