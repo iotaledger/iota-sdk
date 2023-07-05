@@ -4,24 +4,20 @@ import os
 
 load_dotenv()
 
-# This example sends a transaction.
+# In this example we will create an alias ouput
 
 wallet = Wallet('./alice-database')
 
 account = wallet.get_account('Alice')
 
 # Sync account with the node
-response = account.sync()
+account.sync()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")    
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-params = [{
-    "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-    "amount": "1000000",
-}]
-
-transaction = account.send(outputs)
+# Send transaction.
+transaction = account.prepare_create_alias_output(None, None).send()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

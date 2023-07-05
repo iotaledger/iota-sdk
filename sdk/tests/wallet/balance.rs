@@ -113,7 +113,7 @@ async fn balance_expiration() -> Result<()> {
         .finish_output(token_supply)?];
 
     let balance_before_tx = account_0.balance().await?;
-    let tx = account_0.send(outputs, None).await?;
+    let tx = account_0.send_outputs(outputs, None).await?;
     let balance_after_tx = account_0.balance().await?;
     // Total doesn't change before syncing after tx got confirmed
     assert_eq!(
@@ -160,7 +160,7 @@ async fn balance_expiration() -> Result<()> {
             *account_1.addresses().await?[0].address().as_ref(),
         )])
         .finish_output(token_supply)?];
-    let _tx = account_2.send(outputs, None).await?;
+    let _tx = account_2.send_outputs(outputs, None).await?;
 
     tear_down(storage_path)
 }
