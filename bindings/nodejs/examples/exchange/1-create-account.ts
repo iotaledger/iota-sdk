@@ -7,7 +7,7 @@ import { Wallet, WalletOptions, CoinType } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./exchange/1-create-account.ts 
+// yarn run-example ./exchange/1-create-account.ts
 
 // This example creates a new database and account.
 async function run() {
@@ -26,9 +26,7 @@ async function run() {
             );
         }
         if (!process.env.MNEMONIC) {
-            throw new Error(
-                '.env MNEMONIC is undefined, see .env.example',
-            );
+            throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
         if (!process.env.WALLET_DB_PATH) {
             throw new Error(
@@ -58,10 +56,9 @@ async function run() {
         await wallet.storeMnemonic(process.env.MNEMONIC);
 
         const account = await wallet.createAccount({
-            alias: 'Alice'
+            alias: 'Alice',
         });
         console.log('Account created:', account);
-
     } catch (error) {
         console.log('Error: ', error);
     }
