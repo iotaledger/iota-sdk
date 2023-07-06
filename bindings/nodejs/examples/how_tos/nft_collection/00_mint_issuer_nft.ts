@@ -24,6 +24,9 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
+        // To sign a transaction we need to unlock stronghold.
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+
         // Get the account we generated with `01-create-wallet`
         const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
@@ -53,10 +56,10 @@ async function run() {
         essence.outputs.forEach((output, outputIndex) => {
             if (output instanceof NftOutput) {
                 const nftOutput = output as NftOutput;
-                if (nftOutput.getNftId() == "") {
+                if (nftOutput.getNftId() === "0x0000000000000000000000000000000000000000000000000000000000000000") {
                     const outputId = Utils.computeOutputId(transaction.transactionId, outputIndex);
-                    const nftId: NftId = outputId;
-                    console.log(`New minted NFT id: {nft_id}`);
+                    const nftId: NftId = Utils.computeNftId(outputId);
+                    console.log(`New minted NFT id: ${nftId}`);
                 }
             }
         });

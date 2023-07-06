@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNftParams, NftId, Utils, Wallet } from '@iota/sdk';
+import { initLogger, MintNftParams, NftId, utf8ToHex, Utils, Wallet } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // The NFT collection size
@@ -18,33 +18,39 @@ const NUM_NFTS_MINTED_PER_TRANSACTION = 50;
 // yarn run-example ./how_tos/nfts/01_mint_collection_nft.ts
 async function run() {
     try {
+        initLogger();
         if (!process.env.STRONGHOLD_PASSWORD) {
             throw new Error(
                 '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
             );
         }
-        let issuerNftId: NftId = "";
-        // "missing example argument: ISSUER_NFT_ID"
 
         // Create the wallet
         const wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `01-create-wallet`
+        // To sign a transaction we need to unlock stronghold.
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+
+        // Get the account we generated with `how_tos/accounts_and_addresses/create-account`
         const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
+        // Get the id we generated with `00_mint_issuer_nft`
+        let issuerNftId: NftId = process.argv[2];
+
         const bech32Hrp = await (await wallet.getClient()).getBech32Hrp();
+        const issuer = Utils.nftIdToBech32(issuerNftId, bech32Hrp);
         
         const nftMintParams = [];
         // Create the metadata with another index for each
         for (let index = 0; index < NFT_COLLECTION_SIZE; index++) {
             const params: MintNftParams = {
-                immutableMetadata: getImmutableMetadata(index, issuerNftId),
+                immutableMetadata: utf8ToHex(getImmutableMetadata(index, issuerNftId)),
                 // The NFT address from the NFT we minted in mint_issuer_nft example
-                issuer: Utils.nftIdToBech32(issuerNftId, bech32Hrp),
+                issuer,
             };
             nftMintParams.push(params);
         }
@@ -53,6 +59,7 @@ async function run() {
             const chunk = nftMintParams.slice(i, i + NUM_NFTS_MINTED_PER_TRANSACTION);
 
             console.log(`Minting ${chunk.length} NFTs...`);
+            console.log(chunk);
             const prepared = await account.prepareMintNfts(chunk);
             const transaction = await prepared.send();
             

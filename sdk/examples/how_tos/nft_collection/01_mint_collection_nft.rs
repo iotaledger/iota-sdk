@@ -34,9 +34,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let issuer_nft_id = std::env::args()
-        .nth(1)
-        .expect("missing example argument: ISSUER_NFT_ID")
+    let issuer_nft_id = "0x62cfd771c1a704a458833c06e4fa557a877ee54c78801bfa0e3b253223431d65"
         .parse::<NftId>()?;
 
     let wallet = Wallet::builder()
@@ -54,13 +52,16 @@ async fn main() -> Result<()> {
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
+    let issuer = Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id));
+    println!("{}", &issuer);
+
     // Create the metadata with another index for each
     let nft_mint_params = (0..NFT_COLLECTION_SIZE)
         .map(|index| {
             MintNftParams::new()
                 .with_immutable_metadata(get_immutable_metadata(index, issuer_nft_id).as_bytes().to_vec())
                 // The NFT address from the NFT we minted in mint_issuer_nft example
-                .with_issuer(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id)))
+                .with_issuer(issuer)
         })
         .collect::<Vec<_>>();
 
