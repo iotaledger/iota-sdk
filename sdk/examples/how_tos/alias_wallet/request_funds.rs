@@ -33,19 +33,15 @@ async fn main() -> Result<()> {
     let account = wallet.get_account("Alice").await?;
     let balance = account.sync(None).await?;
 
-    // this is the fix:
-    let account_address = account.addresses().await?[0].clone();
-
     let total_base_token_balance = balance.base_coin().total();
     println!("Balance before requesting funds on alias address: {total_base_token_balance:#?}");
 
-    // ! TOFIX: alias doesn't exists
-    // let alias_id = balance.aliases().first().unwrap();
-    // println!("Alias Id: {alias_id}");
+    let alias_id = balance.aliases().first().unwrap();
+    println!("Alias Id: {alias_id}");
 
     // Get alias address
-    // let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
-    let faucet_response = request_funds_from_faucet(&faucet_url, &account_address.into_bech32()).await?;
+    let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let faucet_response = request_funds_from_faucet(&faucet_url, &alias_address).await?;
 
     println!("{faucet_response}");
 
