@@ -34,7 +34,9 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let issuer_nft_id = "0x62cfd771c1a704a458833c06e4fa557a877ee54c78801bfa0e3b253223431d65"
+    let issuer_nft_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: ISSUER_NFT_ID")
         .parse::<NftId>()?;
 
     let wallet = Wallet::builder()
