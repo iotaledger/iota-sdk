@@ -11,7 +11,6 @@ from typing import List, Optional
 from dacite import from_dict
 
 
-
 class Range:
     def __init__(self, start: int, end: int):
         self.start = start
@@ -50,30 +49,27 @@ class HighLevelAPI():
     def get_outputs(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
         """
-        result =  self._call_method('getOutputs', {
+        outputs = self._call_method('getOutputs', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
-        outputs = [from_dict(OutputWithMetadata, o) for o in result]
-        return outputs
+        return [from_dict(OutputWithMetadata, o) for o in outputs]
 
     def get_outputs_ignore_errors(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Try to get OutputResponse from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
-        result =  self._call_method('getOutputsIgnoreErrors', {
+        outputs = self._call_method('getOutputsIgnoreErrors', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
-        outputs = [from_dict(OutputWithMetadata, o) for o in result]
-        return outputs
+        return [from_dict(OutputWithMetadata, o) for o in outputs]
 
     def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.
         """
-        result = self._call_method('findBlocks', {
+        blocks = self._call_method('findBlocks', {
             'blockIds': block_ids
         })
-        blocks = [Block.from_dict(block) for block in result]
-        return blocks
+        return [Block.from_dict(block) for block in blocks]
 
     def retry(self, block_id: HexStr) -> List[HexStr | Block]:
         """Retries (promotes or reattaches) a block for provided block id. Block should only be
