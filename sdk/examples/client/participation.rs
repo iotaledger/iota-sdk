@@ -3,7 +3,7 @@
 
 //! This example shows how to participate in voting events.
 //!
-//! Command to create an event, when you your node is located on the same machine:
+//! Command to create an event, when your node is located on the same machine:
 //! curl -X POST http://localhost:14265/api/participation/v1/admin/events -H 'Content-Type: application/json' -d '{"name":"Shimmer Proposal","milestoneIndexCommence":580,"milestoneIndexStart":600,"milestoneIndexEnd":700,"payload":{"type":0,"questions":[{"text":"Should we be on CMC rank #1 eoy?","answers":[{"value":1,"text":"Yes","additionalInfo":""},{"value":2,"text":"No","additionalInfo":""}],"additionalInfo":""}]},"additionalInfo":"Nothing needed here"}'
 //! Command to delete an event:
 //! curl -X DELETE http://localhost:14265/api/participation/v1/admin/events/<RETURNED_EVENT_ID>
