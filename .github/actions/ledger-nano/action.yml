@@ -6,15 +6,15 @@ runs:
     - name: Checkout ledger shimmer app files
       uses: actions/checkout@v3
       with:
-        repository: iotaledger/ledger-shimmer-app
-        path: ledger-shimmer-app
+        repository: iotaledger/ledger-iota-app
+        path: ledger-iota-app
 
     - name: Update submodules
       shell: bash
-      run: git submodule init && git submodule update --recursive
-      working-directory: ledger-shimmer-app
+      run: git submodule update --init --recursive
+      working-directory: ledger-iota-app
         
     - name: Run the simulator
       shell: bash
-      run: ./build.sh -s
-      working-directory: ledger-shimmer-app
+      run: ./build.sh -s -v shimmer
+      working-directory: ledger-iota-app
