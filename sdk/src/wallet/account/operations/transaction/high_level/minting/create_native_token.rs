@@ -24,7 +24,7 @@ use crate::{
 
 /// Address and foundry data for `create_native_token()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default, rename_all = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenParams {
     /// The alias id which should be used to create the foundry.
     pub alias_id: Option<AliasId>,
@@ -33,7 +33,7 @@ pub struct CreateNativeTokenParams {
     /// Maximum supply
     pub maximum_supply: U256,
     /// Foundry metadata
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
