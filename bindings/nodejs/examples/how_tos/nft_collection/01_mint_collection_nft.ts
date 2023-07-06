@@ -97,6 +97,7 @@ async function run() {
 }
 
 function getImmutableMetadata(index: number, issuerNftId: NftId) {
+    // Note: we use parse and stringify to remove all unnecessary whitespace
     return JSON.stringify(
         JSON.parse(`{
         "standard":"IRC27",
