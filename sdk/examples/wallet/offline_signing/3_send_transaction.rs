@@ -39,7 +39,6 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .finish()
         .await?;
-    println!("Wallet created");
 
     // Create a new account
     let account = wallet.get_account("Alice").await?;
