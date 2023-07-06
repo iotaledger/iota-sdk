@@ -12,5 +12,5 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 # Get an outputs by its id
-output = client.get_output('0x1e857d380f813d8035e487b6dfd2ff4740b6775273ba1b576f01381ba2a1a44c0000')
-print(json.dumps(output, indent=4))
+output_metadata = client.get_output('0x022aefa73dff09b35b21ab5493412b0d354ad07a970a12b71e8087c6f3a7b8660000')
+print(json.dumps(output_metadata.as_dict(), indent=4))

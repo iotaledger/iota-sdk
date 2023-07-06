@@ -3,30 +3,49 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from iota_sdk.types.common import HexStr
-
-# TODO: https://github.com/iotaledger/iota-sdk/issues/129
-# @dataclass
-# class Output():
-#     def __init__(self, type, sender=None, issuer=None, data=None, tag=None):
-#         """Initialize an output
-
-#         Parameters
-#         ----------
-#         type : OutputType
-#             The type of output
-#         """
-#         self.type = type
+from iota_sdk.types.feature import Feature
+from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.token_scheme import TokenScheme
+from iota_sdk.types.unlock_condition import UnlockCondition
 
 
-#     @classmethod
-#     def from_dict(cls, output_dict: Dict) -> Output:
-#         obj = cls.__new__(cls)
-#         super(Output, obj).__init__()
-#         for k, v in output_dict.items():
-#             setattr(obj, k, v)
-#         return obj
+@dataclass
+class Output():
+    type: int
+    amount: str
+    unlockConditions: List[UnlockCondition]
+    aliasId: Optional[HexStr] = None
+    nftId: Optional[HexStr] = None
+    stateIndex: Optional[int] = None
+    stateMetadata: Optional[HexStr] = None
+    foundryCounter: Optional[int] = None
+    features: Optional[List[Feature]] = None
+    nativeTokens: Optional[List[NativeToken]] = None
+    immutableFeatures: Optional[List[Feature]] = None
+    serialNumber: Optional[int] = None
+    tokenScheme: Optional[TokenScheme] = None
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v != None}
+
+        config['unlockConditions'] = list(map(
+            lambda x: x.as_dict(), config['unlockConditions']))
+        if 'nativeTokens' in config:
+            config['nativeTokens'] = list(map(
+                lambda x: x.__dict__, config['nativeTokens']))
+        if 'features' in config:
+            config['features'] = list(map(
+                lambda x: x.as_dict(), config['features']))
+        if 'immutableFeatures' in config:
+            config['immutableFeatures'] = list(map(
+                lambda x: x.as_dict(), config['immutableFeatures']))
+        if 'tokenScheme' in config:
+            config['tokenScheme'] = config['tokenScheme'].__dict__
+
+        return config
+
 
 @dataclass
 class OutputMetadata:
@@ -59,7 +78,7 @@ class OutputWithMetadata:
     """
 
     metadata: OutputMetadata
-    output: Any  # TODO: Output https://github.com/iotaledger/iota-sdk/issues/129
+    output: Output
 
     @classmethod
     def from_dict(cls, dict: Dict) -> OutputWithMetadata:
@@ -68,3 +87,11 @@ class OutputWithMetadata:
         for k, v in dict.items():
             setattr(obj, k, v)
         return obj
+
+    def as_dict(self):
+        config = dict()
+
+        config['metadata'] = self.metadata.__dict__
+        config['output'] = self.output.as_dict()
+
+        return config

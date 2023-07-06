@@ -4,9 +4,12 @@
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.common import CoinType
 from typing import List, Optional
+from dacite import from_dict
+
 
 
 class Range:
@@ -44,20 +47,24 @@ class GenerateAddressesOptions():
 
 class HighLevelAPI():
 
-    def get_outputs(self, output_ids: List[OutputId]):
+    def get_outputs(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
         """
-        return self._call_method('getOutputs', {
-            'outputIds': output_ids
+        result =  self._call_method('getOutputs', {
+            'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
+        outputs = [from_dict(OutputWithMetadata, o) for o in result]
+        return outputs
 
-    def get_outputs_ignore_errors(self, output_ids: List[OutputId]):
+    def get_outputs_ignore_errors(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Try to get OutputResponse from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
-        return self._call_method('getOutputsIgnoreErrors', {
-            'outputIds': output_ids
+        result =  self._call_method('getOutputsIgnoreErrors', {
+            'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
+        outputs = [from_dict(OutputWithMetadata, o) for o in result]
+        return outputs
 
     def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.
