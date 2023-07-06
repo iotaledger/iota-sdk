@@ -2,8 +2,12 @@ import type {
     __GenerateMnemonicMethod__,
     __MnemonicToHexSeedMethod__,
     __ComputeAliasIdMethod__,
+    __ComputeOutputIdMethod__,
+    __ComputeTokenIdMethod__,
     __ComputeNftIdMethod__,
     __ComputeFoundryIdMethod__,
+    __ComputeInputsCommitmentMethod__,
+    __ComputeStorageDepositMethod__,
     __ParseBech32AddressMethod__,
     __BlockIdMethod__,
     __MilestoneIdMethod__,
@@ -16,6 +20,7 @@ import type {
     __IsAddressValidMethod__,
     __HashTransactionEssenceMethod__,
     __VerifyEd25519SignatureMethod__,
+    __VerifySecp256k1EcdsaSignatureMethod__,
     __VerifyMnemonicMethod__,
     __FaucetMethod__,
 } from './utils';
@@ -26,6 +31,10 @@ export type __UtilsMethods__ =
     | __ComputeAliasIdMethod__
     | __ComputeNftIdMethod__
     | __ComputeFoundryIdMethod__
+    | __ComputeOutputIdMethod__
+    | __ComputeTokenIdMethod__
+    | __ComputeInputsCommitmentMethod__
+    | __ComputeStorageDepositMethod__
     | __ParseBech32AddressMethod__
     | __BlockIdMethod__
     | __MilestoneIdMethod__
@@ -38,5 +47,6 @@ export type __UtilsMethods__ =
     | __IsAddressValidMethod__
     | __HashTransactionEssenceMethod__
     | __VerifyEd25519SignatureMethod__
+    | __VerifySecp256k1EcdsaSignatureMethod__
     | __VerifyMnemonicMethod__
     | __FaucetMethod__;

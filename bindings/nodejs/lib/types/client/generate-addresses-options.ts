@@ -1,6 +1,6 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import type { CoinType } from '../../client';
+import type { CoinType } from './constants';
 import type { IRange } from './range';
 
 /**
@@ -10,10 +10,6 @@ export interface IGenerateAddressesOptions {
     coinType?: CoinType;
     accountIndex?: number;
     range?: IRange;
-    /**
-     * Internal addresses
-     */
-    internal?: boolean;
     /**
      * Bech32 human readable part
      */
@@ -26,7 +22,11 @@ export interface IGenerateAddressesOptions {
  */
 export interface IGenerateAddressOptions {
     /**
+     * Internal addresses
+     */
+    internal?: boolean;
+    /**
      * Display the address on ledger devices.
      */
-    ledgerNanoPrompt: boolean;
+    ledgerNanoPrompt?: boolean;
 }

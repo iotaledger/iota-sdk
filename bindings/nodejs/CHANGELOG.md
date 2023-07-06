@@ -19,12 +19,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.1 - YYYY-MM-DD
+## 1.0.0-rc.2 - 2023-07-05
+
+### Added
+
+- `callPluginRoute` to Client to fetch data from custom node plugins;
+- `computeTokenId `, `computeOutputId`, `computeInputsCommitment` and `computeStorageDeposit` to Utils;
+- Type alias for Ids which were previously just `HexEncodedString`;
+- List of `ConfictReason` explanations matching the enum;
+- `units-helper` class for IOTA units conversion;
+- `Client::destroy` to close an open handle;
+
+### Changed
+
+- Rename `Account::prepareMintNativeToken` to `prepareCreateNativeToken`, `Account::prepareIncreaseNativeTokenSupply` to `prepareMintNativeToken`, `Account::prepareDecreaseNativeTokenSupply` to `prepareMeltNativeToken`;
+- Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
+- Rename `MintTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding `Data` types);
+- Rename `SendAmountParams` to `SendParams`;
+- Rename `Account::sendAmount` to `send`, `Account::prepareSendAmount` to `prepareSend`;
+- Rename `Response::MilestoneRaw` to `Raw`;
+
+### Fixed
+
+- Moved `internal` field from `IGenerateAddressesOptions` to `IGenerateAddressOptions`;
+- Error handling in `Client`, `SecretManager` and `Wallet` constructors;
+- Deadlock in .sync() with incoming transactions;
+- Renamed `Output.getNntId` to `Output.getNftId`;
+
+## 1.0.0-rc.1 - 2023-06-19
+
+### Added
+
+- `Utils::verifySecp256k1EcdsaSignature`;
 
 ### Changed
 
 - `Account::getOutputsWithAdditionalUnlockConditions` renamed to `claimableOutputs`;
 - Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
+
+### Removed
+
+- `Utils::verifyEd25519Signature`'s `address` parameter;
+
+### Fixed
+
+- `UTXOInput` constructs with type the proper `InputType`;
 
 ## 1.0.0-rc.0 - 2023-06-15
 

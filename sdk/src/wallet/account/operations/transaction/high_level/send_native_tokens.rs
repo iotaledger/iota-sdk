@@ -86,14 +86,13 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to send native tokens in basic outputs with a [StorageDepositReturnUnlockCondition] and
-    /// [ExpirationUnlockCondition], so the storage deposit gets back to the sender and also that the sender gets access
-    /// to the output again after a defined time (default 1 day),
-    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
-    /// RemainderValueStrategy or custom inputs.
-    /// Address needs to be Bech32 encoded
+    /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
+    /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access
+    /// to the output again after a predefined time (default 1 day).
+    /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally. The options may define the
+    /// remainder value strategy or custom inputs. Note that the address needs to be bech32-encoded.
     /// ```ignore
-    /// let outputs = [SendNativeTokensParams {
+    /// let params = [SendNativeTokensParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     native_tokens: vec![(
     ///         TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
@@ -102,7 +101,7 @@ where
     ///     ..Default::default()
     /// }];
     ///
-    /// let tx = account.send_native_tokens(outputs, None).await?;
+    /// let tx = account.send_native_tokens(params, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
@@ -122,8 +121,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
+    /// Prepares the transaction for
+    /// [Account::send_native_tokens()](crate::account::Account::send_native_tokens).
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
         params: I,

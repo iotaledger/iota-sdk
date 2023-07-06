@@ -25,7 +25,7 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
+            operations::transaction::high_level::minting::create_native_token::CreateNativeTokenTransactionDto,
             types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
             OutputDataDto,
         },
@@ -75,7 +75,7 @@ pub enum Response {
     /// [`UnspentOutputs`](crate::wallet::message_interface::AccountMethod::UnspentOutputs)
     OutputsData(Vec<OutputDataDto>),
     /// Response for
-    /// [`PrepareSendAmount`](crate::wallet::message_interface::AccountMethod::PrepareSendAmount),
+    /// [`PrepareSend`](crate::wallet::message_interface::AccountMethod::PrepareSend),
     /// [`PrepareTransaction`](crate::wallet::message_interface::AccountMethod::PrepareTransaction)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
@@ -116,9 +116,8 @@ pub enum Response {
     /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
     /// [`CreateAliasOutput`](crate::wallet::message_interface::AccountMethod::CreateAliasOutput)
-    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
     /// [`MintNfts`](crate::wallet::message_interface::AccountMethod::MintNfts),
-    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
+    /// [`Send`](crate::wallet::message_interface::AccountMethod::Send),
     /// [`SendNativeTokens`](crate::wallet::message_interface::AccountMethod::SendNativeTokens),
     /// [`SendNft`](crate::wallet::message_interface::AccountMethod::SendNft),
     /// [`SendOutputs`](crate::wallet::message_interface::AccountMethod::SendOutputs)
@@ -129,11 +128,13 @@ pub enum Response {
     /// [`DecreaseVotingPower`](crate::wallet::message_interface::AccountMethod::DecreaseVotingPower)
     SentTransaction(TransactionDto),
     /// Response for
-    /// [`MintNativeToken`](crate::wallet::message_interface::AccountMethod::MintNativeToken),
-    MintTokenTransaction(MintTokenTransactionDto),
+    /// [`CreateNativeToken`](crate::wallet::message_interface::AccountMethod::CreateNativeToken),
+    CreateNativeTokenTransaction(CreateNativeTokenTransactionDto),
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
-    StrongholdPasswordIsAvailable(bool),
+    /// [`VerifyEd25519Signature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEd25519Signature)
+    /// [`VerifySecp256k1EcdsaSignature`](crate::wallet::message_interface::account_method::AccountMethod::VerifySecp256k1EcdsaSignature)
+    Bool(bool),
     /// An error occurred.
     Error(Error),
     /// A panic occurred.
@@ -227,11 +228,11 @@ impl Debug for Response {
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::MintTokenTransaction(mint_transaction) => {
-                write!(f, "MintTokenTransaction({mint_transaction:?})")
+            Self::CreateNativeTokenTransaction(create_transaction) => {
+                write!(f, "CreateNativeTokenTransaction({create_transaction:?})")
             }
-            Self::StrongholdPasswordIsAvailable(is_available) => {
-                write!(f, "StrongholdPasswordIsAvailable({is_available:?})")
+            Self::Bool(b) => {
+                write!(f, "Bool({b})")
             }
             Self::Error(error) => write!(f, "Error({error:?})"),
             Self::Panic(panic_msg) => write!(f, "Panic({panic_msg:?})"),

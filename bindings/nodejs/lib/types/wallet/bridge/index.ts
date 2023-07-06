@@ -8,7 +8,6 @@ import type {
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAliasOutputMethod__,
-    __PrepareDecreaseNativeTokenSupplyMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateEd25519AddressesMethod__,
     __GetBalanceMethod__,
@@ -24,15 +23,16 @@ import type {
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
     __MinimumRequiredStorageDepositMethod__,
-    __PrepareIncreaseNativeTokenSupplyMethod__,
+    __PrepareCreateNativeTokenMethod__,
+    __PrepareMeltNativeTokenMethod__,
     __PrepareMintNativeTokenMethod__,
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
-    __PrepareSendAmountMethod__,
+    __PrepareSendMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
     __RetryTransactionUntilIncludedMethod__,
-    __SendAmountMethod__,
+    __SendMethod__,
     __PrepareSendNativeTokensMethod__,
     __PrepareSendNftMethod__,
     __SendOutputsMethod__,
@@ -107,17 +107,17 @@ export type __AccountMethod__ =
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__
-    | __PrepareDecreaseNativeTokenSupplyMethod__
     | __MinimumRequiredStorageDepositMethod__
-    | __PrepareIncreaseNativeTokenSupplyMethod__
+    | __PrepareCreateNativeTokenMethod__
+    | __PrepareMeltNativeTokenMethod__
     | __PrepareMintNativeTokenMethod__
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
-    | __PrepareSendAmountMethod__
+    | __PrepareSendMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
     | __RetryTransactionUntilIncludedMethod__
-    | __SendAmountMethod__
+    | __SendMethod__
     | __PrepareSendNativeTokensMethod__
     | __PrepareSendNftMethod__
     | __SendOutputsMethod__

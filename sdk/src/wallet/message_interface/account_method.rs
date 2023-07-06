@@ -24,6 +24,7 @@ use crate::{
             AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
+        signature::dto::Ed25519SignatureDto,
     },
     wallet::{
         account::{
@@ -33,7 +34,7 @@ use crate::{
                 transaction::{
                     high_level::{
                         create_alias::CreateAliasParams,
-                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
+                        minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
                     TransactionOptionsDto,
@@ -41,7 +42,7 @@ use crate::{
             },
             FilterOptions,
         },
-        SendAmountParams, SendNativeTokensParams, SendNftParams,
+        SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -152,7 +153,7 @@ pub enum AccountMethod {
         alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
-    /// Function to destroy a foundry output with a circulating supply of 0.
+    /// Destroy a foundry output with a circulating supply of 0.
     /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -171,6 +172,22 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
+    /// Verify an ed25519 signature against a message.
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// Verify a Secp256k1Ecdsa signature against a message.
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    #[serde(rename_all = "camelCase")]
+    VerifySecp256k1EcdsaSignature {
+        public_key: String,
+        signature: String,
+        message: String,
+    },
     /// Signs a message with an Secp256k1Ecdsa private key.
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
@@ -221,11 +238,11 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     PendingTransactions,
-    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// Melt native tokens. This happens with the foundry output which minted them, by increasing its
     /// `melted_tokens` field.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    DecreaseNativeTokenSupply {
+    MeltNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
@@ -236,21 +253,22 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit { output: OutputDto },
-    /// Mint more native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Mint additional native tokens.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    IncreaseNativeTokenSupply {
+    MintNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
-    /// Mint native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Create a native token.
+    /// Expected response:
+    /// [`CreateNativeTokenTransaction`](crate::wallet::message_interface::Response::CreateNativeTokenTransaction)
     #[serde(rename_all = "camelCase")]
-    MintNativeToken {
-        params: MintNativeTokenParams,
+    CreateNativeToken {
+        params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.
@@ -276,11 +294,11 @@ pub enum AccountMethod {
         outputs: Vec<OutputDto>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Prepare send amount.
+    /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareSendAmount {
-        params: Vec<SendAmountParams>,
+    PrepareSend {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -302,11 +320,11 @@ pub enum AccountMethod {
         /// Sync options
         options: Option<SyncOptions>,
     },
-    /// Send amount.
+    /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    SendAmount {
-        params: Vec<SendAmountParams>,
+    Send {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.

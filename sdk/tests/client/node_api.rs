@@ -6,7 +6,7 @@
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client,
+        request_funds_from_faucet, secret::SecretManager, Client, NodeInfoWrapper,
     },
     types::block::{
         address::ToBech32Ext,
@@ -245,16 +245,7 @@ async fn test_get_milestone_by_id() {
     let node_info = client.get_info().await.unwrap();
 
     let r = client
-        .get_milestone_by_id(
-            &node_info
-                .node_info
-                .status
-                .latest_milestone
-                .milestone_id
-                .unwrap()
-                .parse()
-                .unwrap(),
-        )
+        .get_milestone_by_id(&node_info.node_info.status.latest_milestone.milestone_id.unwrap())
         .await
         .unwrap();
 
@@ -284,16 +275,7 @@ async fn test_get_utxo_changes_by_id() {
     let node_info = client.get_info().await.unwrap();
 
     let r = client
-        .get_utxo_changes_by_id(
-            &node_info
-                .node_info
-                .status
-                .latest_milestone
-                .milestone_id
-                .unwrap()
-                .parse()
-                .unwrap(),
-        )
+        .get_utxo_changes_by_id(&node_info.node_info.status.latest_milestone.milestone_id.unwrap())
         .await
         .unwrap();
 
@@ -419,4 +401,21 @@ async fn test_mqtt() {
         }
     }
     client.subscriber().disconnect().await.unwrap();
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_call_plugin_route() {
+    let c = setup_client_with_node_health_ignored().await;
+
+    // we call the "custom" plugin "node info"
+    let plugin_res: NodeInfoWrapper = c
+        .call_plugin_route("api/core/v2/", "GET", "info", vec![], None)
+        .await
+        .unwrap();
+
+    let info = c.get_info().await.unwrap();
+
+    // Just check name as info can change between 2 calls
+    assert_eq!(plugin_res.node_info.name, info.node_info.name);
 }

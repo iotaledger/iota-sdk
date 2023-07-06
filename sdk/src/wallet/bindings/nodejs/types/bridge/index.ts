@@ -9,12 +9,13 @@ import type {
     __ClaimOutputsMethod__,
     __ConsolidateOutputsMethod__,
     __CreateAliasOutputMethod__,
-    __DecreaseNativeTokenSupplyMethod__,
     __DestroyAliasMethod__,
     __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateEd25519AddressesMethod__,
     __GenerateEvmAddressesMethod__,
+    __VerifyEd25519SignatureMethod__,
+    __VerifySecp256k1EcdsaSignatureMethod__,
     __SignSecp256k1EcdsaMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
@@ -29,16 +30,17 @@ import type {
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
     __MinimumRequiredStorageDepositMethod__,
-    __IncreaseNativeTokenSupplyMethod__,
+    __CreateNativeTokenMethod__,
+    __MeltNativeTokenMethod__,
     __MintNativeTokenMethod__,
     __MintNftsMethod__,
     __PrepareOutputMethod__,
-    __PrepareSendAmountMethod__,
+    __PrepareSendMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
     __RequestFundsFromFaucetMethod__,
     __RetryTransactionUntilIncludedMethod__,
-    __SendAmountMethod__,
+    __SendMethod__,
     __SendNativeTokensMethod__,
     __SendNftMethod__,
     __SendOutputsMethod__,
@@ -103,6 +105,8 @@ export type __AccountMethod__ =
     | __DestroyFoundryMethod__
     | __GenerateEd25519AddressesMethod__
     | __GenerateEvmAddressesMethod__
+    | __VerifyEd25519SignatureMethod__
+    | __VerifySecp256k1EcdsaSignatureMethod__
     | __SignSecp256k1EcdsaMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
@@ -121,18 +125,18 @@ export type __AccountMethod__ =
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__
-    | __DecreaseNativeTokenSupplyMethod__
     | __MinimumRequiredStorageDepositMethod__
-    | __IncreaseNativeTokenSupplyMethod__
+    | __CreateNativeTokenMethod__
+    | __MeltNativeTokenMethod__
     | __MintNativeTokenMethod__
     | __MintNftsMethod__
     | __PrepareOutputMethod__
-    | __PrepareSendAmountMethod__
+    | __PrepareSendMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
     | __RequestFundsFromFaucetMethod__
     | __RetryTransactionUntilIncludedMethod__
-    | __SendAmountMethod__
+    | __SendMethod__
     | __SendNativeTokensMethod__
     | __SendNftMethod__
     | __SendOutputsMethod__

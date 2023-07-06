@@ -63,6 +63,10 @@ export class Client {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
+    async destroy() {
+        return this.methodHandler.destroy();
+    }
+
     /**
      * Returns the node information together with the url of the used node
      * @returns { Promise<INodeInfoWrapper> }.
@@ -138,7 +142,9 @@ export class Client {
                 options,
             },
         });
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -304,8 +310,9 @@ export class Client {
                 payload,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -794,8 +801,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -816,8 +824,13 @@ export class Client {
                 maxAttempts,
             },
         });
+        const parsed = JSON.parse(response) as Response<[BlockId, Block][]>;
+        const arr: [BlockId, Block][] = [];
+        parsed.payload.forEach((payload) => {
+            arr.push([payload[0], plainToInstance(Block, payload[1])]);
+        });
 
-        return JSON.parse(response).payload;
+        return arr;
     }
 
     /**
@@ -850,8 +863,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -864,8 +878,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -879,8 +894,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
     /**
      * Promote a block without checking if it should be promoted
@@ -892,8 +908,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -997,6 +1014,36 @@ export class Client {
         const response = await this.methodHandler.callMethod({
             name: 'requestFundsFromFaucet',
             data: { url, address },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Extension method which provides request methods for plugins.
+     * @param basePluginPath The base path for the plugin eg indexer/v1/ .
+     * @param method The http method.
+     * @param endpoint The path for the plugin request.
+     * @param queryParams Additional query params for the request.
+     * @param request The request object.
+     * @returns The response json.
+     */
+    async callPluginRoute(
+        basePluginPath: string,
+        method: 'GET' | 'POST',
+        endpoint: string,
+        queryParams?: string[],
+        request?: string,
+    ): Promise<string> {
+        const response = await this.methodHandler.callMethod({
+            name: 'callPluginRoute',
+            data: {
+                basePluginPath,
+                method,
+                endpoint,
+                queryParams: queryParams ?? [],
+                request,
+            },
         });
 
         return JSON.parse(response).payload;

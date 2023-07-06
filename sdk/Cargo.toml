@@ -44,7 +44,7 @@ heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
 # iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
-iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", branch = "2.0", default-features = false, optional = true }
+iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", rev = "9df6d19de325481771d69b47534d151e03eae623", default-features = false, optional = true }
 log = { version = "0.4.18", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
 once_cell = { version = "1.17.2", default-features = false, optional = true }
@@ -76,7 +76,7 @@ iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync", "fs" ] }
+tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
@@ -92,7 +92,7 @@ rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
-stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
@@ -103,7 +103,7 @@ wallet = [ "client" ]
 [[example]]
 name = "sign_and_verify_ed25519"
 path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "verify_ed25519_signature"
@@ -114,6 +114,7 @@ path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 [[example]]
 name = "create_mnemonic"
 path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "create_account"
@@ -150,6 +151,11 @@ name = "list_outputs"
 path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+[[example]]
+name = "consolidate_outputs"
+path = "examples/how_tos/accounts_and_addresses/consolidate_outputs.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Simple Transaction Examples
 
 [[example]]
@@ -179,15 +185,86 @@ name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# Native Tokens Examples
+
+[[example]]
+name = "create_native_token"
+path = "examples/how_tos/native_tokens/create.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "destroy_foundry"
+path = "examples/how_tos/native_tokens/destroy_foundry.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "burn_native_token"
+path = "examples/how_tos/native_tokens/burn.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "melt_native_token"
+path = "examples/how_tos/native_tokens/melt.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "mint_native_token"
+path = "examples/how_tos/native_tokens/mint.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "send_native_tokens"
+path = "examples/how_tos/native_tokens/send.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+# Alias wallet example
+
+[[example]]
+name = "alias_wallet_request_funds"
+path = "examples/how_tos/alias_wallet/request_funds.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "alias_wallet_transaction"
+path = "examples/how_tos/alias_wallet/transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "create_alias"
+path = "examples/how_tos/alias/create.rs"
+required-features = [ "wallet", "stronghold" ]
+
+[[example]]
+name = "destroy_alias"
+path = "examples/how_tos/alias/destroy.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Outputs
 
 [[example]]
 name = "output_unlock_conditions"
 path = "examples/how_tos/outputs/unlock_conditions.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "output_features"
 path = "examples/how_tos/outputs/features.rs"
+required-features = [ "client" ]
+
+# Client Examples
+
+[[example]]
+name = "get_health"
+path = "examples/how_tos/client/get_health.rs"
+
+[[example]]
+name = "get_info"
+path = "examples/how_tos/client/get_info.rs"
+required-features = [ "serde" ]
+
+[[example]]
+name = "get_outputs"
+path = "examples/how_tos/client/get_outputs.rs"
 
 # Block examples
 
@@ -231,21 +308,28 @@ name = "transaction"
 path = "examples/client/block/transaction.rs"
 required-features = [ "client" ]
 
-# Node API core examples
+# High Level examples
 
 [[example]]
-name = "node_api_core_get_health"
-path = "examples/client/node_api_core/00_get_health.rs"
+name = "address_consolidation"
+path = "examples/client/high_level/consolidation.rs"
 required-features = [ "client" ]
+
+[[example]]
+name = "inputs_from_transaction_id"
+path = "examples/client/high_level/inputs_from_transaction_id.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "search_address"
+path = "examples/client/high_level/search_address.rs"
+required-features = [ "client" ]
+
+# Node API core examples
 
 [[example]]
 name = "node_api_core_get_routes"
 path = "examples/client/node_api_core/01_get_routes.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "node_api_core_get_info"
-path = "examples/client/node_api_core/02_get_info.rs"
 required-features = [ "client" ]
 
 [[example]]
@@ -351,11 +435,6 @@ required-features = [ "client" ]
 # Node API indexer examples
 
 [[example]]
-name = "node_api_indexer_get_basic_outputs"
-path = "examples/client/node_api_indexer/00_get_basic_outputs.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "node_api_indexer_get_alias_output"
 path = "examples/client/node_api_indexer/01_get_alias_output.rs"
 required-features = [ "client" ]
@@ -393,14 +472,34 @@ required-features = [ "client" ]
 #######
 
 [[example]]
-name = "generate_addresses"
+name = "01_generate_addresses"
 path = "examples/client/01_generate_addresses.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "02_address_balance"
+path = "examples/client/02_address_balance.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "03_simple_block"
+path = "examples/client/03_simple_block.rs"
 required-features = [ "client" ]
 
 [[example]]
 name = "07_mqtt"
 path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
+
+[[example]]
+name = "client_config"
+path = "examples/client/client_config.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "custom_remainder_address"
+path = "examples/client/custom_remainder_address.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "get_block"
@@ -416,6 +515,11 @@ required-features = [ "client", "ledger_nano" ]
 name = "ledger_nano_transaction"
 path = "examples/client/ledger_nano_transaction.rs"
 required-features = [ "client", "ledger_nano" ]
+
+[[example]]
+name = "client_logger"
+path = "examples/client/logger.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "stronghold"
@@ -512,6 +616,26 @@ name = "participation"
 path = "examples/client/participation.rs"
 required-features = [ "client", "participation" ]
 
+[[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "client_split_funds"
+path = "examples/client/split_funds.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
+required-features = [ "client" ]
+
 ### Wallet
 
 [[example]]
@@ -550,74 +674,34 @@ path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
-name = "send_native_tokens"
-path = "examples/wallet/07_send_native_tokens.rs"
+name = "mint_nft"
+path = "examples/how_tos/nfts/mint_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "send_nft"
-path = "examples/wallet/08_send_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "mint_native_token"
-path = "examples/wallet/09_mint_native_token.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "mint_nft"
-path = "examples/wallet/10_mint_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "decrease_native_token_supply"
-path = "examples/wallet/11_decrease_native_token_supply.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "increase_native_token_supply"
-path = "examples/wallet/12_increase_native_token_supply.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "burn_native_token"
-path = "examples/wallet/13_burn_native_token.rs"
+path = "examples/how_tos/nfts/send_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "burn_nft"
-path = "examples/wallet/14_burn_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "destroy_foundry"
-path = "examples/wallet/15_destroy_foundry.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "create_alias"
-path = "examples/wallet/create_alias.rs"
-required-features = [ "stronghold" ]
-
-[[example]]
-name = "destroy_alias"
-path = "examples/wallet/16_destroy_alias.rs"
+path = "examples/how_tos/nfts/burn_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "check_unlock_conditions"
 path = "examples/wallet/17_check_unlock_conditions.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "accounts"
 path = "examples/wallet/accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "events"
@@ -640,14 +724,9 @@ path = "examples/wallet/logger.rs"
 required-features = [ "wallet" ]
 
 [[example]]
-name = "output_consolidation"
-path = "examples/wallet/output_consolidation.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "spammer"
@@ -657,7 +736,7 @@ required-features = [ "wallet" ]
 [[example]]
 name = "split_funds"
 path = "examples/wallet/split_funds.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "storage"
@@ -672,7 +751,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "migrate_stronghold_snapshot_v2_to_v3"

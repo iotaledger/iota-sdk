@@ -15,7 +15,7 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Requirements
 
-- [Python 3.x](https://www.python.org)
+- [Python 3.10+](https://www.python.org)
 - [pip ^21.x](https://pypi.org/project/pip)
 - `Rust` and `Cargo` to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
@@ -107,10 +107,16 @@ python3 examples/client/00_get_info.py
 
 ## API Reference
 
-You can generate the Python API reference with the following command from this directory:
+To generate the Python API reference you need to first install the needed dependencies with the following command:
 
 ```bash
-pip install pydoc-markdown && pydoc-markdown
+pip install -r requirements.txt
+```
+
+and afterwards you can generate them with:
+
+```bash
+pydoc-markdown
 ```
 
 ## Learn More

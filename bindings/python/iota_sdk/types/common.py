@@ -58,9 +58,9 @@ class Node():
         return config
 
 
-class SendAmountParams():
+class SendParams():
     def __init__(self, address, amount):
-        """Initialise SendAmountParams
+        """Initialize SendParams
 
         Parameters
         ----------

@@ -6,10 +6,10 @@ use std::sync::{
     Arc,
 };
 #[cfg(feature = "storage")]
-use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
+use std::{collections::HashSet, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tokio::sync::RwLock;
 
 use super::operations::storage::SaveLoadWallet;
@@ -20,10 +20,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
     account::AccountDetails,
-    storage::{
-        constants::default_storage_path,
-        manager::{ManagerStorage, StorageManager},
-    },
+    storage::{StorageManager, StorageOptions},
 };
 use crate::{
     client::secret::{SecretManage, SecretManager},
@@ -53,28 +50,6 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg(feature = "storage")]
-#[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
-pub(crate) struct StorageOptions {
-    pub(crate) storage_path: PathBuf,
-    pub(crate) storage_file_name: Option<String>,
-    pub(crate) storage_encryption_key: Option<[u8; 32]>,
-    pub(crate) manager_store: ManagerStorage,
-}
-
-#[cfg(feature = "storage")]
-impl Default for StorageOptions {
-    fn default() -> Self {
-        Self {
-            storage_path: default_storage_path().into(),
-            storage_file_name: None,
-            storage_encryption_key: None,
-            manager_store: ManagerStorage::default(),
-        }
-    }
-}
-
 impl<S: 'static + SecretManage> WalletBuilder<S>
 where
     crate::wallet::Error: From<S::Error>,
@@ -99,6 +74,14 @@ where
         self
     }
 
+    /// Set the storage options to be used.
+    #[cfg(feature = "storage")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
+    pub fn with_storage_options(mut self, storage_options: impl Into<Option<StorageOptions>>) -> Self {
+        self.storage_options = storage_options.into();
+        self
+    }
+
     /// Set the secret_manager to be used.
     pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<S>>) -> Self {
         self.secret_manager = secret_manager.into().map(|sm| Arc::new(RwLock::new(sm)));
@@ -117,7 +100,7 @@ where
     #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
     pub fn with_storage_path(mut self, path: &str) -> Self {
         self.storage_options = Some(StorageOptions {
-            storage_path: path.into(),
+            path: path.into(),
             ..Default::default()
         });
         self
@@ -138,7 +121,7 @@ where
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
-        if !storage_options.storage_path.is_dir() {
+        if !storage_options.path.is_dir() {
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
             }
@@ -149,14 +132,15 @@ where
                 return Err(crate::wallet::Error::MissingParameter("secret_manager"));
             }
         }
+
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
         let storage =
-            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.storage_path.clone())?;
+            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
         #[cfg(all(not(feature = "rocksdb"), feature = "storage"))]
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = StorageManager::new(storage, None).await?;
+        let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
 
         #[cfg(feature = "storage")]
         let read_manager_builder = Self::load(&storage_manager).await?;

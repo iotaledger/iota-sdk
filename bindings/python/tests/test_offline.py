@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex
+from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex
 import json
 import unittest
 
@@ -45,29 +45,11 @@ def test_sign_verify_ed25519():
     )
     assert signature['signature'] == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
 
-    bech32_address = client.hex_public_key_to_bech32_address(
-        signature['publicKey'],
-        'iota',
-    )
-    assert bech32_address == 'iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg'
-
-    pub_key_hash = Utils.bech32_to_hex(bech32_address)
-    assert pub_key_hash == '0x50a35a5ad39c899c2a42261f0687522474683e2f214bb32a5c38d10603574358'
-
     valid_signature = Utils.verify_ed25519_signature(
         signature,
         message,
-        {'type': 0, 'pubKeyHash': pub_key_hash},
     )
     assert valid_signature
-
-    valid_signature = Utils.verify_ed25519_signature(
-        signature,
-        message,
-        {'type': 0, 'pubKeyHash': '0x0000000000000000000000000000000000000000000000000000000000000000'},
-    )
-    # false, because the pubKeyHash is null
-    assert not valid_signature
 
 
 class TestTypes(unittest.TestCase):
@@ -113,3 +95,8 @@ def test_hex_utf8():
     hex_data = '0x446f6e27742070616e696321'
     assert utf8_to_hex(utf8_data) == hex_data
     assert hex_to_utf8(hex_data) == utf8_data
+
+def test_block():
+    block_dict = {"protocolVersion":2,"parents":["0x28dbf8f5005c0de388cbbf23d14645a579fc0cb8278ad9cdc5a4252c7e8f0ed3","0x440dbc33bf05c334c6d49f06514526d7f3e3c758028a2e87636e19f886290900","0xd76cdb7acf228ecdad590a42b91acc077c1518c1a271411229e33e050fc19b44","0xecef38d3af7e63da78a5e70128efe371f2191088b31879f7b0e81da657fa21c6"],"payload":{"type":5,"tag":"0x68656c6c6f","data":"0x68656c6c6f"},"nonce":"6917529027641139843"}
+    block = Block.from_dict(block_dict)
+    assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"

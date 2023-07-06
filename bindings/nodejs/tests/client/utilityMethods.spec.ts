@@ -54,10 +54,7 @@ describe('Client utility methods', () => {
         const hexPublicKey =
             '0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a';
 
-        const address = Utils.hexPublicKeyToBech32Address(
-            hexPublicKey,
-            'rms',
-        );
+        const address = Utils.hexPublicKeyToBech32Address(hexPublicKey, 'rms');
 
         expect(address).toBeValidAddress();
     });
@@ -97,13 +94,13 @@ describe('Client utility methods', () => {
     });
 
     it('compute foundry id', async () => {
-        const aliasAddress =
+        const aliasId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
         const serialNumber = 0;
         const tokenSchemeKind = 0;
 
         const foundryId = Utils.computeFoundryId(
-            aliasAddress,
+            aliasId,
             serialNumber,
             tokenSchemeKind,
         );
@@ -126,18 +123,7 @@ describe('Client utility methods', () => {
             [44, 4218, 0, 0, 0],
         );
 
-        const bech32Address = Utils.hexPublicKeyToBech32Address(
-            signature.publicKey,
-            'rms',
-        );
-
-        const pubKeyHash = Utils.bech32ToHex(bech32Address);
-
-        const validSignature = Utils.verifyEd25519Signature(
-            signature,
-            message,
-            new Ed25519Address(pubKeyHash),
-        );
+        const validSignature = Utils.verifyEd25519Signature(signature, message);
         expect(validSignature).toBeTruthy();
     });
 });

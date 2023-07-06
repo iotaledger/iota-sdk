@@ -23,10 +23,10 @@ fn stringified_error() {
         "{\"type\":\"timeNotSynced\",\"error\":\"local time 0 doesn't match the time of the latest milestone timestamp: 10000\"}"
     );
 
-    let error = Error::InvalidBIP32ChainData;
+    let error = Error::PlaceholderSecretManager;
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"invalidBIP32ChainData\",\"error\":\"invalid BIP32 chain data\"}"
+        "{\"type\":\"placeholderSecretManager\",\"error\":\"placeholderSecretManager can't be used for address generation or signing\"}"
     );
 
     let error = Error::InputSelection(IsaError::InsufficientAmount {

@@ -3,12 +3,14 @@
 
 use std::{fs, io, path::Path};
 
-use iota_sdk::{client::stronghold::StrongholdAdapter, wallet::Result, Wallet};
+#[cfg(feature = "stronghold")]
+use iota_sdk::client::stronghold::StrongholdAdapter;
+use iota_sdk::{wallet::Result, Wallet};
 
 use crate::wallet::common::{setup, tear_down};
 
 // Db created with wallet.rs commit 8dd389ddeed0d95bb493c38f376b41a6a9127148
-#[cfg(all(feature = "stronghold", feature = "rocksdb"))]
+#[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn check_existing_db() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -86,7 +88,7 @@ async fn check_existing_db() -> Result<()> {
 }
 
 // Db created with wallet.rs commit 2dd9974c1bc05c2b0b7d6f0ee100deb2da60d071
-#[cfg(all(feature = "ledger_nano", feature = "rocksdb"))]
+#[cfg(feature = "ledger_nano")]
 #[tokio::test]
 async fn check_existing_db_1() -> Result<()> {
     let storage_path = "check_existing_1_db_test";
@@ -135,7 +137,7 @@ async fn check_existing_db_1() -> Result<()> {
 }
 
 // Db created with wallet.rs commit b5132eb545cd0a2043640677bca335efee4029b8
-#[cfg(all(feature = "stronghold", feature = "rocksdb"))]
+#[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn check_existing_db_2() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();

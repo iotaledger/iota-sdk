@@ -31,12 +31,13 @@ use crate::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
+        signature::Ed25519Signature,
         ConvertTo, Error,
     },
     wallet::{
         account::{
             operations::transaction::{
-                high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
+                high_level::minting::create_native_token::CreateNativeTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
@@ -182,7 +183,7 @@ impl WalletMessageHandler {
             Message::IsStrongholdPasswordAvailable => {
                 convert_async_panics(|| async {
                     let is_available = self.wallet.is_stronghold_password_available().await?;
-                    Ok(Response::StrongholdPasswordIsAvailable(is_available))
+                    Ok(Response::Bool(is_available))
                 })
                 .await
             }
@@ -576,6 +577,24 @@ impl WalletMessageHandler {
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
+            AccountMethod::VerifyEd25519Signature { signature, message } => {
+                let signature = Ed25519Signature::try_from(signature)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                Ok(Response::Bool(signature.verify(&message)?))
+            }
+            AccountMethod::VerifySecp256k1EcdsaSignature {
+                public_key,
+                signature,
+                message,
+            } => {
+                use crypto::signatures::secp256k1_ecdsa;
+                let public_key = prefix_hex::decode(public_key).map_err(|_| Error::InvalidField("publicKey"))?;
+                let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)?;
+                let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
+                let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                Ok(Response::Bool(public_key.verify(&signature, &message)))
+            }
             AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
@@ -652,14 +671,25 @@ impl WalletMessageHandler {
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
-            AccountMethod::DecreaseNativeTokenSupply {
+            AccountMethod::CreateNativeToken { params, options } => {
+                convert_async_panics(|| async {
+                    let transaction = account
+                        .create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .await?;
+                    Ok(Response::CreateNativeTokenTransaction(
+                        CreateNativeTokenTransactionDto::from(&transaction),
+                    ))
+                })
+                .await
+            }
+            AccountMethod::MeltNativeToken {
                 token_id,
                 melt_amount,
                 options,
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .decrease_native_token_supply(
+                        .melt_native_token(
                             token_id,
                             U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
@@ -669,33 +699,20 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::IncreaseNativeTokenSupply {
+            AccountMethod::MintNativeToken {
                 token_id,
                 mint_amount,
                 options,
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .increase_native_token_supply(
+                        .mint_native_token(
                             token_id,
                             U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
-                        &transaction,
-                    )))
-                })
-                .await
-            }
-            AccountMethod::MintNativeToken { params, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                        .await?;
-                    Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
-                        &transaction,
-                    )))
+                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }
@@ -737,10 +754,10 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::PrepareSendAmount { params, options } => {
+            AccountMethod::PrepareSend { params, options } => {
                 convert_async_panics(|| async {
                     let data = account
-                        .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
@@ -776,10 +793,10 @@ impl WalletMessageHandler {
                 .await
             }
             AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
-            AccountMethod::SendAmount { params, options } => {
+            AccountMethod::Send { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -827,7 +844,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let token_supply = account.client().get_token_supply().await?;
                     let transaction = account
-                        .send(
+                        .send_outputs(
                             outputs
                                 .into_iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))

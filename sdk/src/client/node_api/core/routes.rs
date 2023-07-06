@@ -3,8 +3,6 @@
 
 //! Node core API routes.
 
-use std::str::FromStr;
-
 use packable::PackableExt;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -17,14 +15,13 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-            PeerResponse, ReceiptResponse, ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
-            TreasuryResponse, UtxoChangesResponse,
+            BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, ReceiptResponse,
+            ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
-                milestone::{MilestoneId, MilestonePayload},
+                milestone::{dto::MilestonePayloadDto, MilestoneId, MilestonePayload},
                 transaction::TransactionId,
             },
             Block, BlockDto, BlockId,
@@ -36,7 +33,7 @@ use crate::{
 pub(crate) static INFO_PATH: &str = "api/core/v2/info";
 
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct NodeInfoWrapper {
     /// The returned node info
@@ -102,17 +99,14 @@ impl ClientInner {
     pub async fn get_tips(&self) -> Result<Vec<BlockId>> {
         let path = "api/core/v2/tips";
 
-        let resp = self
+        let response = self
             .node_manager
             .read()
             .await
             .get_request::<TipsResponse>(path, None, self.get_timeout().await, false, false)
             .await?;
 
-        resp.tips
-            .iter()
-            .map(|tip| BlockId::from_str(tip).map_err(Error::Block))
-            .collect::<Result<Vec<_>>>()
+        Ok(response.tips)
     }
 
     // Blocks routes.
@@ -130,7 +124,7 @@ impl ClientInner {
         let block_dto = BlockDto::from(block);
 
         // fallback to local PoW if remote PoW fails
-        let resp = match self
+        let response = match self
             .node_manager
             .read()
             .await
@@ -169,7 +163,7 @@ impl ClientInner {
             Err(e) => return Err(e),
         };
 
-        Ok(BlockId::from_str(&resp.block_id)?)
+        Ok(response.block_id)
     }
 
     /// Returns the BlockId of the submitted block.
@@ -184,7 +178,7 @@ impl ClientInner {
         };
 
         // fallback to local Pow if remote Pow fails
-        let resp = match self
+        let response = match self
             .node_manager
             .read()
             .await
@@ -221,7 +215,7 @@ impl ClientInner {
             Err(e) => return Err(e),
         };
 
-        Ok(BlockId::from_str(&resp.block_id)?)
+        Ok(response.block_id)
     }
 
     /// Finds a block by its BlockId. This method returns the given block object.
@@ -229,17 +223,14 @@ impl ClientInner {
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<BlockResponse>(path, None, self.get_timeout().await, false, true)
+            .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match resp {
-            BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
-            BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?)
     }
 
     /// Finds a block by its BlockId. This method returns the given block raw data.
@@ -301,14 +292,17 @@ impl ClientInner {
 
     /// Get the metadata for a given `OutputId` (TransactionId + output_index).
     /// GET /api/core/v2/outputs/{outputId}/metadata
-    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
+    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
-        self.node_manager
+        let metadata = self
+            .node_manager
             .read()
             .await
             .get_request::<OutputMetadataDto>(path, None, self.get_timeout().await, false, true)
-            .await
+            .await?;
+
+        Ok(OutputMetadata::try_from(metadata)?)
     }
 
     /// Gets all stored receipts.
@@ -359,17 +353,14 @@ impl ClientInner {
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<BlockResponse>(path, None, self.get_timeout().await, true, true)
+            .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
             .await?;
 
-        match resp {
-            BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
-            BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?)
     }
 
     /// Returns the block, as raw bytes, that was included in the ledger for a given TransactionId.
@@ -403,20 +394,17 @@ impl ClientInner {
     pub async fn get_milestone_by_id(&self, milestone_id: &MilestoneId) -> Result<MilestonePayload> {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<MilestoneResponse>(path, None, self.get_timeout().await, false, true)
+            .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match resp {
-            MilestoneResponse::Json(dto) => Ok(MilestonePayload::try_from_dto(
-                dto,
-                &self.get_protocol_parameters().await?,
-            )?),
-            MilestoneResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(MilestonePayload::try_from_dto(
+            dto,
+            &self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Gets the milestone by the given milestone id.
@@ -448,20 +436,17 @@ impl ClientInner {
     pub async fn get_milestone_by_index(&self, index: u32) -> Result<MilestonePayload> {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
-        let resp = self
+        let dto = self
             .node_manager
             .read()
             .await
-            .get_request::<MilestoneResponse>(path, None, self.get_timeout().await, false, true)
+            .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        match resp {
-            MilestoneResponse::Json(dto) => Ok(MilestonePayload::try_from_dto(
-                dto,
-                &self.get_protocol_parameters().await?,
-            )?),
-            MilestoneResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
-        }
+        Ok(MilestonePayload::try_from_dto(
+            dto,
+            &self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Gets the milestone by the given milestone index.

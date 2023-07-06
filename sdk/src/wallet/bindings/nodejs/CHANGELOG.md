@@ -1,5 +1,20 @@
 # Changelog
 
+## \[2.0.3-rc.39]
+
+- [`f331200a`](https://github.com/iotaledger/iota-sdk/commit/f331200aaf3f71816c067be2fe2b4fcf3e2ff48f)([#633](https://github.com/iotaledger/iota-sdk/pull/633)) Fix folder name in CI.
+
+## \[2.0.3-rc.38]
+
+- [`95359a93`](https://github.com/iotaledger/iota-sdk/commit/95359a93180c96a31b71b0cefcb587494a85eca4)([#629](https://github.com/iotaledger/iota-sdk/pull/629)) Fix windows arm64 prebuild.
+
+## \[2.0.3-rc.37]
+
+- [`d90db186`](https://github.com/iotaledger/iota-sdk/commit/d90db186e670d63ab22b4bf2ecc573d52c4e6177)([#613](https://github.com/iotaledger/iota-sdk/pull/613)) Rename `Account::getOutputsWithAdditionalUnlockConditions` to `claimableOutputs`.
+- [`a454328b`](https://github.com/iotaledger/iota-sdk/commit/a454328b6a4ade6b8247ae7ed1c92f64e22befe3)([#574](https://github.com/iotaledger/iota-sdk/pull/574)) Manually download windows arm64 build.
+- [`17097e33`](https://github.com/iotaledger/iota-sdk/commit/17097e33b4abc3f1c04325365da718378a223076)([#610](https://github.com/iotaledger/iota-sdk/pull/610)) Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`.
+- [`c4231e55`](https://github.com/iotaledger/iota-sdk/commit/c4231e5559b44add98659aac3de3f2f53786a569)([#595](https://github.com/iotaledger/iota-sdk/pull/595)) Add `Account::verifyEd25519Signature` and `verifySecp256k1EcdsaSignature` methods. Add `Secp256k1EcdsaSignature` to types.
+
 ## \[2.0.3-rc.36]
 
 - [`43fed82c`](https://github.com/iotaledger/iota-sdk/commit/43fed82ce5d11fc6da0003565c44f10843165a32)([#498](https://github.com/iotaledger/iota-sdk/pull/498)) Rename `AccountBalance` to `Balance`.

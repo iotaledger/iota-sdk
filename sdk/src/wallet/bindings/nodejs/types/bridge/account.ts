@@ -5,7 +5,7 @@ import type {
 } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     GenerateAddressOptions,
@@ -24,7 +24,7 @@ import type { SignedTransactionEssence } from '../signedTransactionEssence';
 import type { PreparedTransactionData } from '../preparedTransactionData';
 import type {
     AliasOutputParams,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     TransactionOptions,
     MintNftParams,
 } from '../transactionOptions';
@@ -33,6 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import { Ed25519Signature } from '../secretManager';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -94,8 +95,8 @@ export type __CreateAliasOutputMethod__ = {
     };
 };
 
-export type __DecreaseNativeTokenSupplyMethod__ = {
-    name: 'decreaseNativeTokenSupply';
+export type __MeltNativeTokenMethod__ = {
+    name: 'meltNativeToken';
     data: {
         tokenId: string;
         meltAmount: HexEncodedAmount;
@@ -138,6 +139,23 @@ export type __GenerateEvmAddressesMethod__ = {
     name: 'generateEvmAddresses';
     data: {
         options: GenerateAddressesOptions;
+    };
+};
+
+export type __VerifyEd25519SignatureMethod__ = {
+    name: 'verifyEd25519Signature';
+    data: {
+        signature: Ed25519Signature;
+        message: HexEncodedString;
+    };
+};
+
+export type __VerifySecp256k1EcdsaSignatureMethod__ = {
+    name: 'verifySecp256k1EcdsaSignature';
+    data: {
+        publicKey: HexEncodedString;
+        signature: HexEncodedString;
+        message: HexEncodedString;
     };
 };
 
@@ -229,8 +247,8 @@ export type __MinimumRequiredStorageDepositMethod__ = {
     };
 };
 
-export type __IncreaseNativeTokenSupplyMethod__ = {
-    name: 'increaseNativeTokenSupply';
+export type __MintNativeTokenMethod__ = {
+    name: 'mintNativeToken';
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
@@ -238,10 +256,10 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     };
 };
 
-export type __MintNativeTokenMethod__ = {
-    name: 'mintNativeToken';
+export type __CreateNativeTokenMethod__ = {
+    name: 'createNativeToken';
     data: {
-        params: MintNativeTokenParams;
+        params: CreateNativeTokenParams;
         options?: TransactionOptions;
     };
 };
@@ -262,10 +280,10 @@ export type __PrepareOutputMethod__ = {
     };
 };
 
-export type __PrepareSendAmountMethod__ = {
-    name: 'prepareSendAmount';
+export type __PrepareSendMethod__ = {
+    name: 'prepareSend';
     data: {
-        params: SendAmountParams[];
+        params: SendParams[];
         options?: TransactionOptions;
     };
 };
@@ -302,10 +320,10 @@ export type __RetryTransactionUntilIncludedMethod__ = {
     };
 };
 
-export type __SendAmountMethod__ = {
-    name: 'sendAmount';
+export type __SendMethod__ = {
+    name: 'send';
     data: {
-        params: SendAmountParams[];
+        params: SendParams[];
         options?: TransactionOptions;
     };
 };

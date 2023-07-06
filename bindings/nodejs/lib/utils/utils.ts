@@ -6,7 +6,6 @@ import { callUtilsMethod } from '../bindings';
 import {
     Address,
     Ed25519Address,
-    BlockId,
     HexEncodedString,
     Block,
     Ed25519Signature,
@@ -16,7 +15,13 @@ import {
     MilestoneId,
     TransactionPayload,
     TransactionId,
+    TokenSchemeType,
+    Output,
+    IRent,
+    HexEncodedAmount,
+    OutputId,
 } from '../types';
+import { AliasId, BlockId, FoundryId, TokenId } from '../types/block/id';
 
 /** Utils class for utils. */
 export class Utils {
@@ -44,11 +49,29 @@ export class Utils {
     /**
      * Computes the alias id for the given alias output id.
      */
-    static computeAliasId(outputId: string): string {
+    static computeAliasId(outputId: string): AliasId {
         return callUtilsMethod({
             name: 'computeAliasId',
             data: {
                 outputId,
+            },
+        });
+    }
+
+    /**
+     * Computes the foundry id.
+     */
+    static computeFoundryId(
+        aliasId: AliasId,
+        serialNumber: number,
+        tokenSchemeKind: number,
+    ): FoundryId {
+        return callUtilsMethod({
+            name: 'computeFoundryId',
+            data: {
+                aliasId,
+                serialNumber,
+                tokenSchemeKind,
             },
         });
     }
@@ -66,19 +89,72 @@ export class Utils {
     }
 
     /**
-     * Computes the foundry id.
+     * Computes the inputCommitment from the output objects that are used as inputs to fund the transaction.
+     * @param inputs The output objects used as inputs for the transaction.
+     * @returns The inputs commitment.
      */
-    static computeFoundryId(
-        aliasAddress: string,
-        serialNumber: number,
-        tokenSchemeKind: number,
-    ): string {
+    static computeInputsCommitment(inputs: Output[]): HexEncodedString {
         return callUtilsMethod({
-            name: 'computeFoundryId',
+            name: 'computeInputsCommitment',
             data: {
-                aliasAddress,
+                inputs,
+            },
+        });
+    }
+
+    /**
+     * Computes the output ID from transaction id and output index.
+     * @param transactionId The id of the transaction.
+     * @param outputIndex The index of the output.
+     * @returns The output id.
+     */
+    static computeOutputId(id: TransactionId, index: number): OutputId {
+        return callUtilsMethod({
+            name: 'computeOutputId',
+            data: {
+                id,
+                index,
+            },
+        });
+    }
+
+    /**
+     * Computes the required storage deposit of an output.
+     * @param output The output.
+     * @param rentStructure Rent cost of objects which take node resources.
+     * @returns The required storage deposit.
+     */
+    static computeStorageDeposit(
+        output: Output,
+        rentStructure: IRent,
+    ): HexEncodedAmount {
+        return callUtilsMethod({
+            name: 'computeStorageDeposit',
+            data: {
+                output,
+                rentStructure,
+            },
+        });
+    }
+
+    /**
+     * Computes a tokenId from the aliasId, serial number and token scheme type.
+     * @param aliasId The alias that controls the foundry.
+     * @param serialNumber The serial number of the foundry.
+     * @param tokenSchemeType The tokenSchemeType of the foundry.
+     * @returns The tokenId.
+     */
+    static computeTokenId(
+        aliasId: AliasId,
+        serialNumber: number,
+        tokenSchemeType: TokenSchemeType,
+    ): TokenId {
+        return callUtilsMethod({
+            name: 'computeTokenId',
+            data: {
+                aliasId,
                 serialNumber,
-                tokenSchemeKind,
+                tokenSchemeType,
             },
         });
     }
@@ -124,6 +200,8 @@ export class Utils {
 
     /**
      * Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
+     * @param payload The transaction payload.
+     * @returns The transaction id.
      */
     static transactionId(payload: TransactionPayload): TransactionId {
         return callUtilsMethod({
@@ -225,22 +303,39 @@ export class Utils {
     }
 
     /**
-     * Verifies the Ed25519Signature for a message against an Ed25519Address.
+     * Verifies an ed25519 signature against a message.
      */
     static verifyEd25519Signature(
         signature: Ed25519Signature,
         message: HexEncodedString,
-        address: Ed25519Address,
     ): boolean {
         return callUtilsMethod({
             name: 'verifyEd25519Signature',
             data: {
                 signature,
                 message,
-                address,
             },
         });
     }
+
+    /**
+     * Verifies a Secp256k1Ecdsa signature against a message.
+     */
+    static verifySecp256k1EcdsaSignature(
+        publicKey: HexEncodedString,
+        signature: HexEncodedString,
+        message: HexEncodedString,
+    ): boolean {
+        return callUtilsMethod({
+            name: 'verifySecp256k1EcdsaSignature',
+            data: {
+                publicKey,
+                signature,
+                message,
+            },
+        });
+    }
+
     /**
      * Verify if a mnemonic is a valid BIP39 mnemonic.
      */

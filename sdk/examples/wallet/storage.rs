@@ -8,8 +8,6 @@
 //! cargo run --release --all-features --example storage
 //! ```
 
-use std::{env::var, time::Instant};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -27,13 +25,13 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -83,7 +81,7 @@ async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<Acc
 
 async fn sync_print_balance(account: &Account) -> Result<()> {
     let alias = account.alias().await;
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     println!("{alias}'s balance:\n{:#?}", balance.base_coin());

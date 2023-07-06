@@ -14,7 +14,10 @@ use iota_sdk_bindings_core::{
 use neon::prelude::*;
 use tokio::sync::RwLock;
 
-use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
+use crate::{
+    client::{ClientMethodHandler, ClientMethodHandlerWrapper},
+    secret_manager::SecretManagerMethodHandler,
+};
 
 // Wrapper so we can destroy the WalletMethodHandler
 pub type WalletMethodHandlerWrapperInner = Arc<RwLock<Option<WalletMethodHandler>>>;
@@ -33,9 +36,7 @@ impl WalletMethodHandler {
     fn new(channel: Channel, options: String) -> Result<Self> {
         let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
 
-        let wallet = crate::RUNTIME
-            .block_on(async move { wallet_options.build().await })
-            .expect("error initializing wallet");
+        let wallet = crate::RUNTIME.block_on(async move { wallet_options.build().await })?;
 
         Ok(Self { channel, wallet })
     }
@@ -189,7 +190,11 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
         if let Some(method_handler) = &*method_handler.read().await {
             let client_method_handler =
                 ClientMethodHandler::new_with_client(channel.clone(), method_handler.wallet.client().clone());
-            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_method_handler)));
+            deferred.settle_with(&channel, move |mut cx| {
+                Ok(cx.boxed(ClientMethodHandlerWrapper(Arc::new(RwLock::new(Some(
+                    client_method_handler,
+                ))))))
+            });
         } else {
             deferred.settle_with(&channel, move |mut cx| {
                 cx.error(

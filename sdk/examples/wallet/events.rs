@@ -9,8 +9,6 @@
 //! cargo run --release --all-features --example events
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -33,14 +31,14 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -69,7 +67,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
         .finish_output(account.client().get_token_supply().await?)?];
 
-    let transaction = account.send(outputs, None).await?;
+    let transaction = account.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
@@ -77,8 +75,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
