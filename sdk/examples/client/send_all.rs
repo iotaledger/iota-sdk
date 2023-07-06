@@ -20,8 +20,8 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
-    // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic `NON_SECURE_USE_DEVELOPMENT_MNEMONIC_1`
-    // must contain non-zero balance.
+    // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic
+    // `NON_SECURE_USE_DEVELOPMENT_MNEMONIC_1` must contain non-zero balance.
     dotenvy::dotenv().ok();
 
     // Create a node client.
