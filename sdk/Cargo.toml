@@ -472,11 +472,6 @@ path = "examples/client/02_address_balance.rs"
 required-features = [ "client" ]
 
 [[example]]
-name = "03_simple_block"
-path = "examples/client/03_simple_block.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "07_mqtt"
 path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
