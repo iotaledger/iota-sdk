@@ -213,9 +213,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::Output(OutputDto::from(&output))
         }
-        AccountMethod::PrepareSendAmount { params, options } => {
+        AccountMethod::PrepareSend { params, options } => {
             let data = account
-                .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
@@ -275,16 +275,16 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::BlockId(block_id)
         }
-        AccountMethod::SendAmount { params, options } => {
+        AccountMethod::Send { params, options } => {
             let transaction = account
-                .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendOutputs { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
             let transaction = account
-                .send(
+                .send_outputs(
                     outputs
                         .into_iter()
                         .map(|o| Ok(Output::try_from_dto(o, token_supply)?))

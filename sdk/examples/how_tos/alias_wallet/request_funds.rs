@@ -6,8 +6,6 @@
 //!
 //! `cargo run --release --all-features --example alias_wallet_request_funds`
 
-use std::env::var;
-
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::address::{AliasAddress, ToBech32Ext},
@@ -23,11 +21,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let faucet_url = var("FAUCET_URL").unwrap();
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create the wallet
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
 

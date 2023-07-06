@@ -1,12 +1,15 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/foundry/{foundryId}`.
+//! Gets the foundry output from the corresponding foundry id by querying the
+//! `api/indexer/v1/outputs/foundry/{foundryId}` node endpoint.
 //!
-//! `cargo run --example node_api_indexer_get_foundry_output --release -- [NODE URL] [FOUNDRY ID]`
-
-use std::str::FromStr;
+//! Make sure that the node has the indexer plugin enabled.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_indexer_get_foundry_output <FOUNDRY ID> [NODE URL]
+//! ```
 
 use iota_sdk::{
     client::{Client, Result},
@@ -15,26 +18,24 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
 
-    // Create a client with that node.
-    let client = Client::builder()
-        // The node needs to have the indexer plugin enabled.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    // Create a node client.
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the foundry ID from command line argument or use a default one.
-    let foundry_id = FoundryId::from_str(&std::env::args().nth(2).unwrap_or_else(|| {
-        String::from("0x08db4db7643d768139d6f8ac3f9c9b7a82a245b619fa9f7c18fcd8f0f67e57abc20100000000")
-    }))?;
+    // Take the foundry id from the command line, or panic.
+    let foundry_id = std::env::args()
+        .nth(1)
+        .expect("missing example argument: FOUNDRY ID")
+        .parse::<FoundryId>()?;
 
-    // Get the output ID by the foundry ID.
+    // Get the output ID by providing the corresponding foundry ID.
     let output_id = client.foundry_output_id(foundry_id).await?;
 
     println!("Foundry output ID: {output_id}");

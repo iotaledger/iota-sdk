@@ -38,7 +38,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to create an alias output.
+    /// Creates an alias output.
     /// ```ignore
     /// let params = CreateAliasParams {
     ///     address: None,
@@ -65,8 +65,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.create_alias_output()](crate::account::Account.create_alias_output)
+    /// Prepares the transaction for
+    /// [Account::create_alias_output()](crate::account::Account::create_alias_output).
     pub async fn prepare_create_alias_output(
         &self,
         params: Option<CreateAliasParams>,
@@ -121,7 +121,7 @@ where
         self.prepare_transaction(outputs, options).await
     }
 
-    /// Get an existing alias output
+    /// Gets an existing alias output.
     pub(crate) async fn get_alias_output(&self, alias_id: Option<AliasId>) -> Option<(AliasId, OutputData)> {
         log::debug!("[get_alias_output]");
         self.details()

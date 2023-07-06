@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send a block without a payload.
-//! 
-//! `cargo run --example 03_simple_block --release`
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 03_simple_block
+//! ```
 
 use iota_sdk::client::{Client, Result};
 
@@ -12,12 +15,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-
+    // Create a node client.
     let client = Client::builder()
-        .with_node(&node_url)?
-        .with_pow_worker_count(1)
-        .finish()?;
+        .with_node(&std::env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let block = client.block().finish().await?;
 
@@ -26,5 +28,6 @@ async fn main() -> Result<()> {
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
+
     Ok(())
 }

@@ -6,8 +6,6 @@
 //!
 //! `cargo run --release --all-features --example advanced_transaction`
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-
 use iota_sdk::{
     types::block::{
         address::Bech32Address,
@@ -40,8 +38,8 @@ async fn main() -> Result<()> {
             .await?;
 
         // Create an ouput with amount 1_000_000 and a timelock of 1 hour
-        let in_an_hour = (SystemTime::now() + Duration::from_secs(3600))
-            .duration_since(UNIX_EPOCH)
+        let in_an_hour = (std::time::SystemTime::now() + std::time::Duration::from_secs(3600))
+            .duration_since(std::time::UNIX_EPOCH)
             .expect("clock went backwards")
             .as_secs()
             .try_into()
@@ -53,7 +51,7 @@ async fn main() -> Result<()> {
             .add_unlock_condition(TimelockUnlockCondition::new(in_an_hour)?)
             .finish_output(account.client().get_token_supply().await?)?;
 
-        let transaction = account.send(vec![basic_output], None).await?;
+        let transaction = account.send_outputs(vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included

@@ -5,8 +5,12 @@
 pub mod adapter;
 /// Storage constants.
 pub mod constants;
+/// Storage kind.
+mod kind;
 /// Storage manager.
-pub mod manager;
+mod manager;
+/// Storage options.
+mod options;
 /// Storage functions related to participation.
 #[cfg(feature = "participation")]
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
@@ -14,14 +18,17 @@ mod participation;
 
 use async_trait::async_trait;
 use crypto::ciphers::chacha;
+use zeroize::Zeroizing;
 
 use self::adapter::DynStorageAdapter;
+pub(crate) use self::manager::StorageManager;
+pub use self::{kind::StorageKind, options::StorageOptions};
 use crate::client::storage::StorageAdapter;
 
 #[derive(Debug)]
 pub struct Storage {
     inner: Box<dyn DynStorageAdapter>,
-    encryption_key: Option<[u8; 32]>,
+    encryption_key: Option<Zeroizing<[u8; 32]>>,
 }
 
 #[async_trait]
@@ -32,7 +39,7 @@ impl StorageAdapter for Storage {
         match self.inner.as_ref().get_bytes(key).await? {
             Some(record) => {
                 if let Some(encryption_key) = &self.encryption_key {
-                    return Ok(Some(chacha::aead_decrypt(encryption_key, &record)?));
+                    return Ok(Some(chacha::aead_decrypt(encryption_key.as_ref(), &record)?));
                 }
 
                 Ok(Some(record))
@@ -43,7 +50,7 @@ impl StorageAdapter for Storage {
 
     async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), Self::Error> {
         if let Some(encryption_key) = &self.encryption_key {
-            let encrypted_bytes = chacha::aead_encrypt(encryption_key, record)?;
+            let encrypted_bytes = chacha::aead_encrypt(encryption_key.as_ref(), record)?;
             self.inner.as_ref().set_bytes(key, &encrypted_bytes).await?
         } else {
             self.inner.as_ref().set_bytes(key, record).await?
@@ -108,7 +115,7 @@ mod tests {
         let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
         let storage = Storage {
             inner: Box::<Memory>::default(),
-            encryption_key: Some(encryption_key),
+            encryption_key: Some(Zeroizing::new(encryption_key)),
         };
 
         let rec = Record {

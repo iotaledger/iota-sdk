@@ -106,6 +106,111 @@ impl UnlockCondition {
             Self::ImmutableAliasAddress(_) => UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS,
         }
     }
+
+    /// Checks whether the unlock condition is an [`AddressUnlockCondition`].
+    pub fn is_address(&self) -> bool {
+        matches!(self, Self::Address(_))
+    }
+
+    /// Gets the unlock condition as an actual [`AddressUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not an [`AddressUnlockCondition`].
+    pub fn as_address(&self) -> &AddressUnlockCondition {
+        if let Self::Address(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-AddressUnlockCondition");
+        }
+    }
+
+    /// Checks whether the unlock condition is a [`StorageDepositReturnUnlockCondition`].
+    pub fn is_storage_deposit_return(&self) -> bool {
+        matches!(self, Self::StorageDepositReturn(_))
+    }
+
+    /// Gets the unlock condition as an actual [`StorageDepositReturnUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not a [`StorageDepositReturnUnlockCondition`].
+    pub fn as_storage_deposit_return(&self) -> &StorageDepositReturnUnlockCondition {
+        if let Self::StorageDepositReturn(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-StorageDepositReturnUnlockCondition");
+        }
+    }
+
+    /// Checks whether the unlock condition is a [`TimelockUnlockCondition`].
+    pub fn is_timelock(&self) -> bool {
+        matches!(self, Self::Timelock(_))
+    }
+
+    /// Gets the unlock condition as an actual [`TimelockUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not a [`TimelockUnlockCondition`].
+    pub fn as_timelock(&self) -> &TimelockUnlockCondition {
+        if let Self::Timelock(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-TimelockUnlockCondition");
+        }
+    }
+
+    /// Checks whether the unlock condition is an [`ExpirationUnlockCondition`].
+    pub fn is_expiration(&self) -> bool {
+        matches!(self, Self::Expiration(_))
+    }
+
+    /// Gets the unlock condition as an actual [`ExpirationUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not an [`ExpirationUnlockCondition`].
+    pub fn as_expiration(&self) -> &ExpirationUnlockCondition {
+        if let Self::Expiration(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-ExpirationUnlockCondition");
+        }
+    }
+
+    /// Checks whether the unlock condition is a [`StateControllerAddressUnlockCondition`].
+    pub fn is_state_controller_address(&self) -> bool {
+        matches!(self, Self::StateControllerAddress(_))
+    }
+
+    /// Gets the unlock condition as an actual [`StateControllerAddressUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not a [`StateControllerAddressUnlockCondition`].
+    pub fn as_state_controller_address(&self) -> &StateControllerAddressUnlockCondition {
+        if let Self::StateControllerAddress(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-StateControllerAddressUnlockCondition");
+        }
+    }
+
+    /// Checks whether the unlock condition is a [`GovernorAddressUnlockCondition`].
+    pub fn is_governor_address(&self) -> bool {
+        matches!(self, Self::GovernorAddress(_))
+    }
+
+    /// Gets the unlock condition as an actual [`GovernorAddressUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not a [`GovernorAddressUnlockCondition`].
+    pub fn as_governor_address(&self) -> &GovernorAddressUnlockCondition {
+        if let Self::GovernorAddress(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-GovernorAddressUnlockCondition");
+        }
+    }
+
+    /// Checks whether the unlock condition is an [`ImmutableAliasAddressUnlockCondition`].
+    pub fn is_immutable_alias_address(&self) -> bool {
+        matches!(self, Self::ImmutableAliasAddress(_))
+    }
+
+    /// Gets the unlock condition as an actual [`ImmutableAliasAddressUnlockCondition`].
+    /// NOTE: Will panic if the unlock condition is not an [`ImmutableAliasAddressUnlockCondition`].
+    pub fn as_immutable_alias_address(&self) -> &ImmutableAliasAddressUnlockCondition {
+        if let Self::ImmutableAliasAddress(unlock_condition) = self {
+            unlock_condition
+        } else {
+            panic!("invalid downcast of non-ImmutableAliasAddressUnlockCondition");
+        }
+    }
 }
 
 create_bitflags!(
@@ -272,78 +377,49 @@ impl UnlockConditions {
     /// Gets a reference to an [`AddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn address(&self) -> Option<&AddressUnlockCondition> {
-        if let Some(UnlockCondition::Address(address)) = self.get(AddressUnlockCondition::KIND) {
-            Some(address)
-        } else {
-            None
-        }
+        self.get(AddressUnlockCondition::KIND).map(UnlockCondition::as_address)
     }
 
     /// Gets a reference to a [`StorageDepositReturnUnlockCondition`], if any.
     #[inline(always)]
     pub fn storage_deposit_return(&self) -> Option<&StorageDepositReturnUnlockCondition> {
-        if let Some(UnlockCondition::StorageDepositReturn(storage_deposit_return)) =
-            self.get(StorageDepositReturnUnlockCondition::KIND)
-        {
-            Some(storage_deposit_return)
-        } else {
-            None
-        }
+        self.get(StorageDepositReturnUnlockCondition::KIND)
+            .map(UnlockCondition::as_storage_deposit_return)
     }
 
     /// Gets a reference to a [`TimelockUnlockCondition`], if any.
     #[inline(always)]
     pub fn timelock(&self) -> Option<&TimelockUnlockCondition> {
-        if let Some(UnlockCondition::Timelock(timelock)) = self.get(TimelockUnlockCondition::KIND) {
-            Some(timelock)
-        } else {
-            None
-        }
+        self.get(TimelockUnlockCondition::KIND)
+            .map(UnlockCondition::as_timelock)
     }
 
     /// Gets a reference to an [`ExpirationUnlockCondition`], if any.
     #[inline(always)]
     pub fn expiration(&self) -> Option<&ExpirationUnlockCondition> {
-        if let Some(UnlockCondition::Expiration(expiration)) = self.get(ExpirationUnlockCondition::KIND) {
-            Some(expiration)
-        } else {
-            None
-        }
+        self.get(ExpirationUnlockCondition::KIND)
+            .map(UnlockCondition::as_expiration)
     }
 
     /// Gets a reference to a [`StateControllerAddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn state_controller_address(&self) -> Option<&StateControllerAddressUnlockCondition> {
-        if let Some(UnlockCondition::StateControllerAddress(state_controller_address)) =
-            self.get(StateControllerAddressUnlockCondition::KIND)
-        {
-            Some(state_controller_address)
-        } else {
-            None
-        }
+        self.get(StateControllerAddressUnlockCondition::KIND)
+            .map(UnlockCondition::as_state_controller_address)
     }
 
     /// Gets a reference to a [`GovernorAddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn governor_address(&self) -> Option<&GovernorAddressUnlockCondition> {
-        if let Some(UnlockCondition::GovernorAddress(governor_address)) = self.get(GovernorAddressUnlockCondition::KIND)
-        {
-            Some(governor_address)
-        } else {
-            None
-        }
+        self.get(GovernorAddressUnlockCondition::KIND)
+            .map(UnlockCondition::as_governor_address)
     }
 
     /// Gets a reference to an [`ImmutableAliasAddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn immutable_alias_address(&self) -> Option<&ImmutableAliasAddressUnlockCondition> {
-        if let Some(UnlockCondition::ImmutableAliasAddress(immutable_alias_address)) =
-            self.get(ImmutableAliasAddressUnlockCondition::KIND)
-        {
-            Some(immutable_alias_address)
-        } else {
-            None
-        }
+        self.get(ImmutableAliasAddressUnlockCondition::KIND)
+            .map(UnlockCondition::as_immutable_alias_address)
     }
 
     /// Returns the address to be unlocked.

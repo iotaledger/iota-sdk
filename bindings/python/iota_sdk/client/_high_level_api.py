@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
+from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.common import CoinType
@@ -58,31 +59,42 @@ class HighLevelAPI():
             'outputIds': output_ids
         })
 
-    def find_blocks(self, block_ids: List[HexStr]):
+    def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.
         """
-        return self._call_method('findBlocks', {
+        result = self._call_method('findBlocks', {
             'blockIds': block_ids
         })
+        blocks = [Block.from_dict(block) for block in result]
+        return blocks
 
-    def retry(self, block_id: HexStr):
+    def retry(self, block_id: HexStr) -> List[HexStr | Block]:
         """Retries (promotes or reattaches) a block for provided block id. Block should only be
            retried only if they are valid and haven't been confirmed for a while.
         """
-        return self._call_method('retry', {'blockId': block_id})
+        result = self._call_method('retry', {'blockId': block_id})
+        result[1] = Block.from_dict(result[1])
+        return result
 
-    def retry_until_included(self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None):
+    def retry_until_included(self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None) -> List[List[HexStr | Block]]:
         """Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
            milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
            position and additional reattached blocks.
         """
-        return self._call_method('retryUntilIncluded', {
+        result = self._call_method('retryUntilIncluded', {
             'blockId': block_id,
             'interval': interval,
             'maxAttempts': max_attempts
         })
 
-    def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions):
+        def block_class(block_id_and_block):
+            block_id_and_block[1] = Block.from_dict(block_id_and_block[1])
+            return block_id_and_block
+        blockIdsAndBlocks = [block_class(block_id_and_block)
+                             for block_id_and_block in result]
+        return blockIdsAndBlocks
+
+    def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions) -> str:
         """Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
            Returns the address to which the funds got consolidated, if any were available.
         """
@@ -108,32 +120,40 @@ class HighLevelAPI():
             'addresses': addresses
         })
 
-    def reattach(self, block_id: HexStr):
+    def reattach(self, block_id: HexStr) -> List[HexStr | Block]:
         """Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
            confirmed for a while.
         """
-        return self._call_method('reattach', {
+        result = self._call_method('reattach', {
             'blockId': block_id
         })
+        result[1] = Block.from_dict(result[1])
+        return result
 
-    def reattach_unchecked(self, block_id: HexStr):
+    def reattach_unchecked(self, block_id: HexStr) -> List[HexStr | Block]:
         """Reattach a block without checking if it should be reattached.
         """
-        return self._call_method('reattachUnchecked', {
+        result = self._call_method('reattachUnchecked', {
             'blockId': block_id
         })
+        result[1] = Block.from_dict(result[1])
+        return result
 
-    def promote(self, block_id: HexStr):
+    def promote(self, block_id: HexStr) -> List[HexStr | Block]:
         """Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
            method should error out and should not allow unnecessary promotions.
         """
-        return self._call_method('promote', {
+        result = self._call_method('promote', {
             'blockId': block_id
         })
+        result[1] = Block.from_dict(result[1])
+        return result
 
-    def promote_unchecked(self, block_id: HexStr):
+    def promote_unchecked(self, block_id: HexStr) -> List[HexStr | Block]:
         """Promote a block without checking if it should be promoted.
         """
-        return self._call_method('promoteUnchecked', {
+        result = self._call_method('promoteUnchecked', {
             'blockId': block_id
         })
+        result[1] = Block.from_dict(result[1])
+        return result

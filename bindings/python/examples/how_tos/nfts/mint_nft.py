@@ -23,4 +23,4 @@ outputs = [{
 }]
 
 transaction = account.prepare_mint_nfts(outputs).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

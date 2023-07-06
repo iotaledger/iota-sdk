@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SendAmountParams } from '@iota/sdk';
+import { SendParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from './common';
 
@@ -13,7 +13,7 @@ const RECV_ADDRESS =
 
 // In this example we will send an amount below the minimum storage deposit.
 //
-// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
@@ -32,11 +32,11 @@ async function run() {
         console.log(
             `Sending '${SEND_MICRO_AMOUNT}' coin(s) to '${RECV_ADDRESS}'...`,
         );
-        const outputs: SendAmountParams[] = [
+        const params: SendParams[] = [
             { address: RECV_ADDRESS, amount: SEND_MICRO_AMOUNT },
         ];
 
-        const transaction = await account.sendAmount(outputs, {
+        const transaction = await account.send(params, {
             allowMicroAmount: true,
         });
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -47,7 +47,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
     } catch (error) {
         console.log('Error: ', error);
