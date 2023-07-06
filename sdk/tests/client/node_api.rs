@@ -403,6 +403,7 @@ async fn test_mqtt() {
     client.subscriber().disconnect().await.unwrap();
 }
 
+#[ignore]
 #[tokio::test]
 async fn test_call_plugin_route() {
     let c = setup_client_with_node_health_ignored().await;

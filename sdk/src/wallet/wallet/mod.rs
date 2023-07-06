@@ -12,8 +12,6 @@ use std::sync::{
 use crypto::keys::bip39::{Mnemonic, MnemonicRef};
 use tokio::sync::RwLock;
 
-#[cfg(feature = "storage")]
-use self::builder::StorageOptions;
 pub use self::builder::WalletBuilder;
 #[cfg(feature = "events")]
 use crate::wallet::events::{
@@ -21,7 +19,7 @@ use crate::wallet::events::{
     EventEmitter,
 };
 #[cfg(feature = "storage")]
-use crate::wallet::storage::manager::StorageManager;
+use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::{
         secret::{SecretManage, SecretManager},
