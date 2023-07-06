@@ -11,6 +11,7 @@
 use iota_sdk::{
     client::{
         api::{SignedTransactionData, SignedTransactionDataDto},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
         Client,
     },
     types::block::payload::transaction::TransactionId,
@@ -20,14 +21,25 @@ use iota_sdk::{
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";
+const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(STRONGHOLD_SNAPSHOT_PATH)?;
+
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)
+        .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .finish()
         .await?;
+    println!("Wallet created");
 
     // Create a new account
     let account = wallet.get_account("Alice").await?;
