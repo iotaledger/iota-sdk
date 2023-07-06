@@ -55,7 +55,6 @@ async fn main() -> Result<()> {
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
     let issuer = Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id));
-    println!("{}", &issuer);
 
     // Create the metadata with another index for each
     let nft_mint_params = (0..NFT_COLLECTION_SIZE)

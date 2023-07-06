@@ -1,7 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNftParams, NftId, NftOutput, RegularTransactionEssence, TransactionPayload, utf8ToHex, Utils, Wallet } from '@iota/sdk';
+import {
+    MintNftParams,
+    NftId,
+    NftOutput,
+    RegularTransactionEssence,
+    TransactionPayload,
+    utf8ToHex,
+    Utils,
+    Wallet,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // In this example we will mint the issuer NFT for the NFT collection.
@@ -38,7 +47,9 @@ async function run() {
         // Issue the minting transaction and wait for its inclusion
         console.log(`Sending NFT minting transaction...`);
         const params: MintNftParams = {
-            immutableMetadata: utf8ToHex("This NFT will be the issuer from the awesome NFT collection"),
+            immutableMetadata: utf8ToHex(
+                'This NFT will be the issuer from the awesome NFT collection',
+            ),
         };
         const prepared = await account.prepareMintNfts([params]);
 
@@ -52,12 +63,20 @@ async function run() {
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        const essence: RegularTransactionEssence = (transaction.payload as TransactionPayload).essence as RegularTransactionEssence;
+        const essence: RegularTransactionEssence = (
+            transaction.payload as TransactionPayload
+        ).essence as RegularTransactionEssence;
         essence.outputs.forEach((output, outputIndex) => {
             if (output instanceof NftOutput) {
                 const nftOutput = output as NftOutput;
-                if (nftOutput.getNftId() === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-                    const outputId = Utils.computeOutputId(transaction.transactionId, outputIndex);
+                if (
+                    nftOutput.getNftId() ===
+                    '0x0000000000000000000000000000000000000000000000000000000000000000'
+                ) {
+                    const outputId = Utils.computeOutputId(
+                        transaction.transactionId,
+                        outputIndex,
+                    );
                     const nftId: NftId = Utils.computeNftId(outputId);
                     console.log(`New minted NFT id: ${nftId}`);
                 }
