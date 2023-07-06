@@ -38,6 +38,9 @@ async function run() {
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
+        await account.sync();
+        console.log(`Account synced!`);
+
         // Get the id we generated with `00_mint_issuer_nft`
         let issuerNftId: NftId = process.argv[2];
 
@@ -59,7 +62,6 @@ async function run() {
             const chunk = nftMintParams.slice(i, i + NUM_NFTS_MINTED_PER_TRANSACTION);
 
             console.log(`Minting ${chunk.length} NFTs...`);
-            console.log(chunk);
             const prepared = await account.prepareMintNfts(chunk);
             const transaction = await prepared.send();
             
@@ -87,7 +89,7 @@ async function run() {
 }
 
 function getImmutableMetadata(index: number, issuerNftId: NftId) {
-    return `{
+    return JSON.stringify(JSON.parse(`{
         "standard":"IRC27",
         "version":"v1.0",
         "type":"video/mp4",
@@ -97,7 +99,7 @@ function getImmutableMetadata(index: number, issuerNftId: NftId) {
         "issuerName":"IOTA Foundation",
         "collectionId":"${issuerNftId}",
         "collectionName":"Shimmer OG"
-    }`;
+    }`));
 }
 
 run();
