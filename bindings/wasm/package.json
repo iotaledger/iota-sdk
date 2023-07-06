@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk-wasm",
-    "version": "0.1.0",
+    "version": "1.0.0-rc.0",
     "description": "WebAssembly bindings for the IOTA SDK library",
     "repository": {
         "type": "git",
@@ -33,7 +33,6 @@
         "test2": "npm run bundle:nodejs && wasm-opt -O node/wasm/iota_sdk_wasm_bg.wasm -o node/wasm/iota_sdk_wasm_bg.wasm"
     },
     "dependencies": {
-        "@iota/types": "^1.0.0-beta.11",
         "class-transformer": "^0.5.1",
         "node-fetch": "^2.6.7",
         "reflect-metadata": "^0.1.13",
