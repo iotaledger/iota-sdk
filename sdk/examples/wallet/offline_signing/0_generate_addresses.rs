@@ -8,12 +8,12 @@
 //! cargo run --release --all-features --example 0_generate_addresses
 //! ```
 
-use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
+    crypto::keys::bip39::Mnemonic,
     wallet::{Account, ClientOptions, Result, Wallet},
 };
 

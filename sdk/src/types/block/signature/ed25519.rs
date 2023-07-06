@@ -159,10 +159,10 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
-            Ok(Self::try_from_bytes(
+            Self::try_from_bytes(
                 prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
-            )?)
+            )
         }
     }
 }

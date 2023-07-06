@@ -8,12 +8,14 @@
 //! cargo run --release --all-features --example client_stronghold
 //! ```
 
-use crypto::keys::bip39::Mnemonic;
-use iota_sdk::client::{
-    api::GetAddressesOptions,
-    constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    Result,
+use iota_sdk::{
+    client::{
+        api::GetAddressesOptions,
+        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        Result,
+    },
+    crypto::keys::bip39::Mnemonic,
 };
 
 #[tokio::main]

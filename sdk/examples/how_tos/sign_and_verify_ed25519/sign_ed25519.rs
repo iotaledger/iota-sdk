@@ -8,13 +8,13 @@
 //! cargo run --release --all-features --example sign_ed25519
 //! ```
 
-use crypto::keys::{bip39::Mnemonic, slip10::Segment};
 use iota_sdk::{
     client::{
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
         hex_public_key_to_bech32_address,
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
+    crypto::keys::{bip39::Mnemonic, slip10::Segment},
     wallet::Result,
 };
 
