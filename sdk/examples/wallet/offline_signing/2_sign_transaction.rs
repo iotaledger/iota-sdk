@@ -50,6 +50,8 @@ async fn main() -> Result<()> {
         inputs_data: prepared_transaction_data.inputs_data,
     };
 
+    println!("Signed transaction.");
+
     write_signed_transaction_to_file(&signed_transaction_data).await?;
 
     Ok(())
