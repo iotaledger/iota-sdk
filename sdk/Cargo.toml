@@ -53,7 +53,6 @@ regex = { version = "1.8.3", default-features = false, features = [ "unicode-per
 reqwest = { version = "0.11.18", default-features = false, features = [ "json" ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [ "lz4" ], optional = true }
 rumqttc = { version = "0.21.0", default-features = false, features = [ "websocket" ], optional = true }
-serde-big-array = { version = "0.5.1", default-features = false, optional = true }
 serde_repr = { version = "0.1.12", default-features = false, optional = true }
 thiserror = { version = "1.0.40", default-features = false, optional = true }
 time = { version = "0.3.21", default-features = false, features = [ "serde", "macros" ], optional = true }
@@ -89,7 +88,7 @@ participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
-serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
+serde = [ "serde_repr", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]

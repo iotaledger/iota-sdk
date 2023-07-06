@@ -1677,7 +1677,6 @@ dependencies = [
  "rocksdb",
  "rumqttc",
  "serde",
- "serde-big-array",
  "serde_json",
  "serde_repr",
  "thiserror",
@@ -2970,15 +2969,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d01b7404f9d441d3ad40e6a636a7782c377d2abdbe4fa2440e2edcc2f4f10db8"
 dependencies = [
  "serde_derive",
-]
-
-[[package]]
-name = "serde-big-array"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11fc7cc2c76d73e0f27ee52abbd64eec84d46f370c88371120433196934e4b7f"
-dependencies = [
- "serde",
 ]
 
 [[package]]
