@@ -47,7 +47,7 @@ class GenerateAddressesOptions():
 class HighLevelAPI():
 
     def get_outputs(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
-        """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
+        """Fetch OutputWithMetadata from provided OutputIds (requests are sent in parallel).
         """
         outputs = self._call_method('getOutputs', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
@@ -55,7 +55,7 @@ class HighLevelAPI():
         return [from_dict(OutputWithMetadata, o) for o in outputs]
 
     def get_outputs_ignore_errors(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
-        """Try to get OutputResponse from provided OutputIds.
+        """Try to get OutputWithMetadata from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
         outputs = self._call_method('getOutputsIgnoreErrors', {

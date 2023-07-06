@@ -3,12 +3,21 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, List
+from enum import IntEnum
+from typing import Dict, Optional, List
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import TokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
+
+
+class OutputType(IntEnum):
+    Treasury = 2
+    Basic = 3
+    Alias = 4
+    Foundry = 5
+    Nft = 6
 
 
 @dataclass
