@@ -24,13 +24,13 @@ pub struct CreateAliasParams {
     /// address of the account
     pub address: Option<Bech32Address>,
     /// Immutable alias metadata
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     pub state_metadata: Option<Vec<u8>>,
 }
 
