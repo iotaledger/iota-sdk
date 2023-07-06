@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Wallet } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // In this example we will burn an existing nft output.
 //

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SendNftParams, Wallet } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // The address to send the NFT to
 const RECV_ADDRESS =

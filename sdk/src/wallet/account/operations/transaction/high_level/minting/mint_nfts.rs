@@ -23,7 +23,7 @@ use crate::{
 
 /// Address and NFT for `send_nft()`.
 #[derive(Debug, Clone, Serialize, Deserialize, Default, Getters)]
-#[serde(rename_all = "camelCase")]
+#[serde(default, rename_all = "camelCase")]
 pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -34,12 +34,10 @@ pub struct MintNftParams {
     sender: Option<Bech32Address>,
     /// NFT metadata feature.
     #[getset(get = "pub")]
-    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     metadata: Option<Vec<u8>>,
     /// NFT tag feature.
     #[getset(get = "pub")]
-    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     tag: Option<Vec<u8>>,
     /// NFT issuer feature.
@@ -47,7 +45,6 @@ pub struct MintNftParams {
     issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     #[getset(get = "pub")]
-    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     immutable_metadata: Option<Vec<u8>>,
 }

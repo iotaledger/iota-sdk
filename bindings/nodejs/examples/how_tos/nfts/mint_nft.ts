@@ -11,6 +11,7 @@ import {
     Utils,
     Wallet,
 } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // The owner address of the first NFT we'll mint
 const NFT1_OWNER_ADDRESS =

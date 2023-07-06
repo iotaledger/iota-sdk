@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MintNftParams, NftId, NftOutput, RegularTransactionEssence, TransactionPayload, utf8ToHex, Utils, Wallet } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // In this example we will mint the issuer NFT for the NFT collection.
 //
@@ -48,13 +49,13 @@ async function run() {
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        const essence: RegularTransactionEssence = (transaction.payload as TransactionPayload).essence;
-        essence.outputs.forEach(output: Output => {
+        const essence: RegularTransactionEssence = (transaction.payload as TransactionPayload).essence as RegularTransactionEssence;
+        essence.outputs.forEach((output, outputIndex) => {
             if (output instanceof NftOutput) {
                 const nftOutput = output as NftOutput;
-                if nftOutput.getNnftId().isNull() {
-                    const outputId = await Utils.computeOutputId(transaction.transactionId, outputIndex);
-                    const nftId: NftId = outputId);
+                if (nftOutput.getNftId() == "") {
+                    const outputId = Utils.computeOutputId(transaction.transactionId, outputIndex);
+                    const nftId: NftId = outputId;
                     console.log(`New minted NFT id: {nft_id}`);
                 }
             }

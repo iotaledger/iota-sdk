@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNftParams, NftAddress, NftId, Utils, Wallet } from '@iota/sdk';
+import { MintNftParams, NftId, Utils, Wallet } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // The NFT collection size
 const NFT_COLLECTION_SIZE = 10000;

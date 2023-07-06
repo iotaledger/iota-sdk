@@ -18,21 +18,18 @@ use crate::{
 
 /// Params `create_alias_output()`
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(default, rename_all = "camelCase")]
 pub struct CreateAliasParams {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<Bech32Address>,
     /// Immutable alias metadata
-    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
-    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
-    #[serde(default)]
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub state_metadata: Option<Vec<u8>>,
 }
