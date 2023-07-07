@@ -51,7 +51,9 @@ async function run() {
         const wallet = new Wallet(walletOptions);
 
         // Mnemonic only needs to be set the first time.
-        await wallet.storeMnemonic(process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1);
+        await wallet.storeMnemonic(
+            process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
+        );
 
         const account = await wallet.createAccount({
             alias: 'Alice',
