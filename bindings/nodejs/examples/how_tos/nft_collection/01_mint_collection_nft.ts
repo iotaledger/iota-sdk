@@ -67,7 +67,11 @@ async function run() {
                 i + NUM_NFTS_MINTED_PER_TRANSACTION,
             );
 
-            console.log(`Minting ${chunk.length} NFTs...`);
+            console.log(
+                `Minting ${chunk.length} NFTs... (${
+                    i + chunk.length
+                }/${NFT_COLLECTION_SIZE})`,
+            );
             const prepared = await account.prepareMintNfts(chunk);
             const transaction = await prepared.send();
 
