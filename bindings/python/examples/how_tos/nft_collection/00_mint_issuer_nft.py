@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will mint the issuer NFT for the NFT collection.
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
@@ -16,7 +16,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 account = wallet.get_account('Alice')
 
 # Sync account with the node
-response = account.sync()
+account.sync()
 
 # Issue the minting transaction and wait for its inclusion
 print('Sending NFT minting transaction...')
