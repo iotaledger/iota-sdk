@@ -18,7 +18,7 @@ if len(sys.argv) < 2:
 
 issuer_nft_id = sys.argv[1]
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
@@ -28,7 +28,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 account = wallet.get_account('Alice')
 
 # Sync account with the node
-response = account.sync()
+account.sync()
 
 bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
@@ -57,7 +57,7 @@ while nft_mint_params:
     chunk, nft_mint_params = nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION], nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:]
     print(f'Minting {len(chunk)} NFTs...')
     prepared = account.prepare_mint_nfts(chunk)
-    transaction = account.send(prepared)
+    transaction = prepared.send()
     
     # Wait for transaction to get included
     block_id = account.retry_transaction_until_included(transaction.transactionId)

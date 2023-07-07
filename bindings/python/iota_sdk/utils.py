@@ -120,7 +120,8 @@ class Utils():
         """Computes the required storage deposit of an output.
         """
         return _call_method('computeStorageDeposit', {
-            'inputs': inputs
+            'output': output,
+            'rent': rent
         })
 
     @staticmethod
