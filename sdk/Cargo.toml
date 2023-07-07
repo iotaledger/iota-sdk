@@ -185,7 +185,7 @@ name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
-# NFT Examples
+# NFT Collection Examples
 
 [[example]]
 name = "mint_issuer_nft"

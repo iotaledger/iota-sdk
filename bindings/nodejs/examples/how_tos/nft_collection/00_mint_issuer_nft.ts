@@ -37,9 +37,7 @@ async function run() {
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         await account.sync();
         console.log(`Account synced!`);
@@ -69,6 +67,8 @@ async function run() {
         essence.outputs.forEach((output, outputIndex) => {
             if (output instanceof NftOutput) {
                 const nftOutput = output as NftOutput;
+
+                // New minted NFT id is empty in the output
                 if (
                     nftOutput.getNftId() ===
                     '0x0000000000000000000000000000000000000000000000000000000000000000'

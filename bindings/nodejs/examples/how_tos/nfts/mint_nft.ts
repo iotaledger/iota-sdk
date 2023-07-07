@@ -44,9 +44,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         // We send from the first address in the account.
         const senderAddress = (await account.addresses())[0].address;

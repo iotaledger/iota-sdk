@@ -5,7 +5,7 @@ import { MintNftParams, NftId, utf8ToHex, Utils, Wallet } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // The NFT collection size
-const NFT_COLLECTION_SIZE = 10000;
+const NFT_COLLECTION_SIZE = 150;
 // Mint NFTs in chunks since the transaction size is limited
 const NUM_NFTS_MINTED_PER_TRANSACTION = 50;
 
@@ -33,9 +33,7 @@ async function run() {
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         // Get the account we generated with `how_tos/accounts_and_addresses/create-account`
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         await account.sync();
         console.log(`Account synced!`);
