@@ -18,8 +18,8 @@ async fn send_amount() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send(
-            [SendParams::new(*account_1.addresses().await?[0].address(), amount)?],
+        .send_with_params(
+            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
             None,
         )
         .await?;
@@ -47,11 +47,11 @@ async fn send_amount_127_outputs() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send(
+        .send_with_params(
             vec![
                 SendParams::new(
-                    *account_1.addresses().await?[0].address(),
                     amount,
+                    *account_1.addresses().await?[0].address(),
                 )?;
                 // Only 127, because we need one remainder
                 127
@@ -84,8 +84,8 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send 10 outputs to account_1
     let amount = 1_000_000;
     let tx = account_0
-        .send(
-            vec![SendParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
+        .send_with_params(
+            vec![SendParams::new(amount, *account_1.addresses().await?[0].address())?; 10],
             None,
         )
         .await?;
@@ -100,8 +100,8 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send back with custom provided input
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
-        .send(
-            [SendParams::new(*account_0.addresses().await?[0].address(), amount)?],
+        .send_with_params(
+            [SendParams::new(amount, *account_0.addresses().await?[0].address())?],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()
@@ -170,8 +170,8 @@ async fn send_with_note() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send(
-            [SendParams::new(*account_1.addresses().await?[0].address(), amount)?],
+        .send_with_params(
+            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
             Some(TransactionOptions {
                 note: Some(String::from("send_with_note")),
                 ..Default::default()

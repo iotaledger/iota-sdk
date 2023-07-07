@@ -16,8 +16,10 @@ mod storage_stub {
             ClientBuilder,
         },
         wallet::{
-            storage::constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
-            wallet::builder::StorageOptions,
+            storage::{
+                constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
+                StorageOptions,
+            },
             WalletBuilder,
         },
     };

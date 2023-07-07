@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UnlockCondition::{is_address, is_storage_deposit_return, is_timelock, is_expiration, is_state_controller_address, is_governor_address, is_immutable_alias_address}`;
 - `UnlockCondition::{as_address, as_storage_deposit_return, as_timelock, as_expiration, as_state_controller_address, as_governor_address, as_immutable_alias_address}`;
 - `ClientInner::call_plugin_route` to Client to fetch data from custom node plugins;
+- `WalletBuilder::with_storage_options` method, allowing storage encryption;
+- `StorageOptions::{new, with_encryption_key}` methods and getters;
 
 ### Changed
 
@@ -115,6 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
 - Rename `SendAmountParams` to `SendParams`;
 - Rename `Account::send` to `send_outputs`, `Account::send_amount` to `send`, `Account::prepare_send_amount` to `prepare_send`;
+- Made `ManagerStorage` public and renamed it to `StorageKind`;
+- Made `StorageOptions` public;
 
 ### Removed
 
