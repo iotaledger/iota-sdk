@@ -24,7 +24,7 @@ foundry_id = balance['foundries'][0]
 
 # Send transaction.
 transaction = account.prepare_destroy_foundry(foundry_id).send()
-print(f'Transaction sent: {transaction["transactionId"]}')
+print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
 blockId = account.retry_transaction_until_included(transaction.transactionId)

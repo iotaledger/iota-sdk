@@ -128,7 +128,7 @@ class Utils():
         """Computes the NFT id for the given NFT output id.
         """
         return _call_method('computeNftId', {
-            'outputId': output_id
+            'outputId': repr(output_id)
         })
         
     @staticmethod
@@ -136,7 +136,7 @@ class Utils():
         """Computes the output id from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {
-            'transactionId': transaction_id,
+            'id': transaction_id,
             'index': index,
         }))
 

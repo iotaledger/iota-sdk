@@ -28,7 +28,7 @@ mint_amount = 10
 
 # Prepare and send transaction.
 transaction = account.prepare_mint_native_token(token_id, mint_amount).send()
-print(f'Transaction sent: {transaction["transactionId"]}')
+print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
 blockId = account.retry_transaction_until_included(transaction['transactionId'])

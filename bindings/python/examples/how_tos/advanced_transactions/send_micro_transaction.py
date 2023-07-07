@@ -24,9 +24,9 @@ params = [{
 }]
 
 transaction = account.send(params, {"allowMicroAmount": True})
-print(f'Transaction sent: {transaction["transactionId"]}')
+print(f'Transaction sent: {transaction.transactionId}')
 
-block_id = account.retry_transaction_until_included(transaction["transactionId"])
+block_id = account.retry_transaction_until_included(transaction.transactionId)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
