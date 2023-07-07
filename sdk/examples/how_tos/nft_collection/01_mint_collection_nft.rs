@@ -54,13 +54,15 @@ async fn main() -> Result<()> {
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
+    let issuer = Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id));
+
     // Create the metadata with another index for each
     let nft_mint_params = (0..NFT_COLLECTION_SIZE)
         .map(|index| {
             MintNftParams::new()
                 .with_immutable_metadata(get_immutable_metadata(index, issuer_nft_id).as_bytes().to_vec())
                 // The NFT address from the NFT we minted in mint_issuer_nft example
-                .with_issuer(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id)))
+                .with_issuer(issuer)
         })
         .collect::<Vec<_>>();
 
