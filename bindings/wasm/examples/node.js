@@ -1,13 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+require('dotenv').config();
 const console = require('console');
 const fs = require('fs');
 const { Wallet, CoinType, initLogger } = require('../node/lib');
 
 async function run() {
     try {
-        fs.rmdirSync('./alice-database', { recursive: true });
+        fs.rmdirSync(`${process.env.WALLET_DB_PATH}`, { recursive: true });
     } catch (e) {
         // ignore it
     }
@@ -20,7 +21,7 @@ async function run() {
     });
 
     const wallet = new Wallet({
-        storagePath: './alice-database',
+        storagePath: `${process.env.WALLET_DB_PATH}`,
         coinType: CoinType.Shimmer,
         clientOptions: {
             nodes: ['https://api.testnet.shimmer.network'],
