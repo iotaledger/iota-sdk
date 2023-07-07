@@ -151,6 +151,65 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
+async fn sync_incoming_transactions() -> Result<()> {
+    let storage_path = "test-storage/sync_incoming_transactions";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
+
+    let account_1_address = *account_1.addresses().await?[0].address().as_ref();
+
+    let token_supply = account_0.client().get_token_supply().await?;
+
+    let outputs = [
+        BasicOutputBuilder::new_with_amount(750_000)
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
+            .finish_output(token_supply)?,
+        BasicOutputBuilder::new_with_amount(250_000)
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
+            .finish_output(token_supply)?,
+    ];
+
+    let tx = account_0.send_outputs(outputs, None).await?;
+    account_0
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    let balance = account_1
+        .sync(Some(SyncOptions {
+            sync_incoming_transactions: true,
+            ..Default::default()
+        }))
+        .await?;
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.nfts().len(), 0);
+    assert_eq!(balance.aliases().len(), 0);
+    assert_eq!(balance.base_coin().available(), 1_000_000);
+    let unspent_outputs = account_1.unspent_outputs(None).await?;
+    assert_eq!(unspent_outputs.len(), 2);
+    unspent_outputs.into_iter().for_each(|output_data| {
+        assert!(output_data.output.is_basic());
+        assert_eq!(output_data.output.unlock_conditions().unwrap().len(), 1);
+        assert_eq!(
+            *output_data
+                .output
+                .unlock_conditions()
+                .unwrap()
+                .address()
+                .unwrap()
+                .address(),
+            account_1_address
+        );
+    });
+
+    tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
 #[cfg(feature = "storage")]
 async fn background_syncing() -> Result<()> {
     let storage_path = "test-storage/background_syncing";
