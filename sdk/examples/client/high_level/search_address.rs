@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will try to find the index and address type of an address.
+//! In this example we will try to find the index and type (public or internal) of an address.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
