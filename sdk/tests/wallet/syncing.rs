@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    types::block::output::{
-        unlock_condition::{
-            AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-            StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
+    types::block::{
+        output::{
+            unlock_condition::{
+                AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
+                StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
+            },
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
         },
-        AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
+        payload::transaction::TransactionEssence,
     },
     wallet::{account::SyncOptions, Result},
 };
@@ -178,32 +181,19 @@ async fn sync_incoming_transactions() -> Result<()> {
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = account_1
+    account_1
         .sync(Some(SyncOptions {
             sync_incoming_transactions: true,
             ..Default::default()
         }))
         .await?;
-    assert_eq!(balance.potentially_locked_outputs().len(), 0);
-    assert_eq!(balance.nfts().len(), 0);
-    assert_eq!(balance.aliases().len(), 0);
-    assert_eq!(balance.base_coin().available(), 1_000_000);
-    let unspent_outputs = account_1.unspent_outputs(None).await?;
-    assert_eq!(unspent_outputs.len(), 2);
-    unspent_outputs.into_iter().for_each(|output_data| {
-        assert!(output_data.output.is_basic());
-        assert_eq!(output_data.output.unlock_conditions().unwrap().len(), 1);
-        assert_eq!(
-            *output_data
-                .output
-                .unlock_conditions()
-                .unwrap()
-                .address()
-                .unwrap()
-                .address(),
-            account_1_address
-        );
-    });
+    let incoming_transactions = account_1.incoming_transactions().await;
+    assert_eq!(incoming_transactions.len(), 1);
+    let incoming_tx = account_1.get_incoming_transaction(&tx.transaction_id).await.unwrap();
+    assert_eq!(incoming_tx.inputs.len(), 1);
+    let TransactionEssence::Regular(essence) = incoming_tx.payload.essence();
+    // 2 created outputs plus remainder
+    assert_eq!(essence.outputs().len(), 3);
 
     tear_down(storage_path)
 }
