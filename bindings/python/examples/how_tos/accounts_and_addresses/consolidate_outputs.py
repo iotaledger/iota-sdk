@@ -11,7 +11,7 @@ load_dotenv()
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception('.env STRONGHOLD_PASSWORD is undefined, see .env.example')
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 
 account = wallet.get_account('Alice')

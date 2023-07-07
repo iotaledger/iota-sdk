@@ -29,7 +29,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 secret_manager = StrongholdSecretManager("wallet.stronghold", os.environ["STRONGHOLD_PASSWORD"])
 
-wallet = Wallet('./alice-database', client_options,
+wallet = Wallet(os.environ['WALLET_DB_PATH'], client_options,
                     coin_type, secret_manager)
 
 if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
