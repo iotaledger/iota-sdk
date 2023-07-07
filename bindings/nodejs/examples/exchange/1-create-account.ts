@@ -31,7 +31,7 @@ async function run() {
             );
         }
         if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
+            throw new Error('.env mnemonic is undefined, see .env.example');
         }
 
         const walletOptions: WalletOptions = {
