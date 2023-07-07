@@ -19,9 +19,9 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 secret_manager = StrongholdSecretManager(
-    "wallet.stronghold", os.environ['STRONGHOLD_PASSWORD'])
+    os.environ['STRONGHOLD_SNAPSHOT_PATH'], os.environ['STRONGHOLD_PASSWORD'])
 
-wallet = Wallet('./alice-database', client_options, coin_type, secret_manager)
+wallet = Wallet(os.environ['WALLET_DB_PATH'], client_options, coin_type, secret_manager)
 
 if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
     raise Exception(".env mnemonic is undefined, see .env.example")

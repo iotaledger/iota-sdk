@@ -185,6 +185,18 @@ name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# NFT Collection Examples
+
+[[example]]
+name = "mint_issuer_nft"
+path = "examples/how_tos/nft_collection/00_mint_issuer_nft.rs"
+required-features = [ "wallet", "storage", "stronghold" ]
+
+[[example]]
+name = "mint_collection_nft"
+path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Native Tokens Examples
 
 [[example]]
@@ -637,16 +649,6 @@ required-features = [ "client" ]
 name = "wallet_getting_started"
 path = "examples/wallet/getting_started.rs"
 required-features = [ "stronghold" ]
-
-[[example]]
-name = "mint_issuer_nft"
-path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
-required-features = [ "wallet", "storage", "stronghold" ]
-
-[[example]]
-name = "mint_collection_nft"
-path = "examples/wallet/nft_collection/01_mint_collection_nft.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "0_generate_addresses"
