@@ -8,7 +8,7 @@ const { AccountManager, CoinType } = require('@iota/wallet');
 async function run() {
     try {
         const accountManagerOptions = {
-            storagePath: `${process.env.WALLET_DB_PATH}`,
+            storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
@@ -17,8 +17,8 @@ async function run() {
             coinType: CoinType.Shimmer,
             secretManager: {
                 Stronghold: {
-                    snapshotPath: `${process.env.STRONGHOLD_SNAPSHOT_PATH}`,
-                    password: `${process.env.STRONGHOLD_PASSWORD}`,
+                    snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+                    password: process.env.STRONGHOLD_PASSWORD,
                 },
             },
         };
@@ -26,7 +26,7 @@ async function run() {
         const manager = new AccountManager(accountManagerOptions);
 
         // Mnemonic only needs to be set the first time
-        await manager.storeMnemonic(process.env.MNEMONIC);
+        await manager.storeMnemonic(process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1);
 
         const account = await manager.createAccount({
             alias: 'Alice'

@@ -30,7 +30,7 @@ async function run() {
                 '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
             );
         }
-        if (!process.env.MNEMONIC) {
+        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
             throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
 
@@ -43,7 +43,7 @@ async function run() {
             secretManager: {
                 stronghold: {
                     snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
-                    password: `${process.env.STRONGHOLD_PASSWORD}`,
+                    password: process.env.STRONGHOLD_PASSWORD,
                 },
             },
         };
@@ -51,7 +51,7 @@ async function run() {
         const wallet = new Wallet(walletOptions);
 
         // Mnemonic only needs to be set the first time.
-        await wallet.storeMnemonic(process.env.MNEMONIC);
+        await wallet.storeMnemonic(process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1);
 
         const account = await wallet.createAccount({
             alias: 'Alice',

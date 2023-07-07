@@ -26,7 +26,7 @@ async function run() {
 
 async function createAccountManager() {
     const accountManagerOptions = {
-        storagePath: `${process.env.WALLET_DB_PATH}`,
+        storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
             nodes: [process.env.NODE_URL],
             localPow: true,
@@ -34,14 +34,14 @@ async function createAccountManager() {
         coinType: CoinType.Shimmer,
         secretManager: {
             Stronghold: {
-                snapshotPath: `${process.env.STRONGHOLD_SNAPSHOT_PATH}`,
-                password: `${process.env.STRONGHOLD_PASSWORD}`,
+                snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+                password: process.env.STRONGHOLD_PASSWORD,
             },
         },
     };
 
     const manager = new AccountManager(accountManagerOptions);
-    await manager.storeMnemonic(process.env.MNEMONIC);
+    await manager.storeMnemonic(process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1);
     return manager;
 }
 
