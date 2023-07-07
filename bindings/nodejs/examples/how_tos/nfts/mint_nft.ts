@@ -11,6 +11,7 @@ import {
     Utils,
     Wallet,
 } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // The owner address of the first NFT we'll mint
 const NFT1_OWNER_ADDRESS =
@@ -43,7 +44,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount(process.env.ACCOUNT_ALIAS_1);
+        const account = await wallet.getAccount('Alice');
 
         // We send from the first address in the account.
         const senderAddress = (await account.addresses())[0].address;
