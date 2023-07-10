@@ -16,7 +16,7 @@ async function run() {
         });
 
         const manager = new AccountManager({
-            storagePath: `${process.env.WALLET_DB_PATH}`,
+            storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },

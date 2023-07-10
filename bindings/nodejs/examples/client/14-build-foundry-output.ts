@@ -25,8 +25,8 @@ async function run() {
     });
 
     try {
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
+        if (!process.env.MNEMONIC) {
+            throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
 
         const aliasId =

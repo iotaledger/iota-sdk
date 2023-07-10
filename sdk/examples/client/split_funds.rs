@@ -14,7 +14,7 @@ use iota_sdk::client::{api::GetAddressesOptions, request_funds_from_faucet, secr
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic
-    // `NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1` must contain non-zero balance.
+    // `MNEMONIC` must contain non-zero balance.
     dotenvy::dotenv().ok();
 
     // Create a node client.
@@ -23,8 +23,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))

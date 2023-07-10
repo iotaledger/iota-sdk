@@ -47,8 +47,7 @@ async fn main() -> Result<()> {
         println!("{event_status:#?}");
     }
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
@@ -97,8 +96,7 @@ async fn main() -> Result<()> {
 }
 
 async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<()> {
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;

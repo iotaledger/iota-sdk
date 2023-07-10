@@ -27,9 +27,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        await wallet.setStrongholdPassword(
-            `${process.env.STRONGHOLD_PASSWORD}`,
-        );
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         const account = await wallet.getAccount('Alice');
 

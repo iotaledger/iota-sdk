@@ -43,7 +43,7 @@ async function run() {
             secretManager: {
                 stronghold: {
                     snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
-                    password: `${process.env.STRONGHOLD_PASSWORD}`,
+                    password: process.env.STRONGHOLD_PASSWORD,
                 },
             },
         };

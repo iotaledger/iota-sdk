@@ -8,7 +8,7 @@ const { AccountManager, CoinType } = require('@iota/wallet');
 async function run() {
     try {
         const accountManagerOptions = {
-            storagePath: `${process.env.WALLET_DB_PATH}`,
+            storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
@@ -17,8 +17,8 @@ async function run() {
             coinType: CoinType.Shimmer,
             secretManager: {
                 Stronghold: {
-                    snapshotPath: `${process.env.STRONGHOLD_SNAPSHOT_PATH}`,
-                    password: `${process.env.STRONGHOLD_PASSWORD}`,
+                    snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+                    password: process.env.STRONGHOLD_PASSWORD,
                 },
             },
         };

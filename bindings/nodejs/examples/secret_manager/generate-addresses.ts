@@ -12,11 +12,11 @@ async function run() {
     initLogger();
 
     try {
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
+        if (!process.env.MNEMONIC) {
+            throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
         const mnemonicSecretManager = {
-            mnemonic: process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
+            mnemonic: process.env.MNEMONIC,
         };
 
         const secretManager = new SecretManager(mnemonicSecretManager);
