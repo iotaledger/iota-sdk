@@ -19,11 +19,17 @@ wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
 
 account = wallet.get_account('Alice')
 
+received_event = False
+
 
 def callback(event):
     event_dict = json.loads(event)
     print('AccountIndex:', event_dict["accountIndex"])
     print('Event:', event_dict["event"])
+
+    # Exit after receiving an event.
+    global received_event
+    received_event = True
 
 
 # Only interested in new outputs here.
@@ -38,7 +44,9 @@ addresses = account.addresses()
 print('Send funds to:', addresses[0]["address"])
 
 # Sync every 5 seconds until the faucet transaction gets confirmed.
-for _ in range(20):
+for _ in range(100):
+    if received_event:
+        exit()
     time.sleep(5)
 
     # Sync to detect new outputs
