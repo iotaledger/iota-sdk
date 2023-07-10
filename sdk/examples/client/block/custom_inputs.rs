@@ -62,7 +62,6 @@ async fn main() -> Result<()> {
         .block()
         .with_secret_manager(&secret_manager)
         .with_input(UtxoInput::from(output_ids_response.items[0]))?
-        //.with_input_range(20..25)
         .with_output(recv_address, amount)
         .await?
         .finish()

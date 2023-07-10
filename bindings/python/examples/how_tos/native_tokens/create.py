@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will create native tokens
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -22,7 +22,7 @@ balance = account.sync()
 if not balance["aliases"]:
     # If we don't have an alias, we need to create one
     transaction = account.prepare_create_alias_output(None, None).send()
-    print(f'Transaction sent: {transaction["transactionId"]}')
+    print(f'Transaction sent: {transaction.transactionId}')
 
     # Wait for transaction to get included
     blockId = account.retry_transaction_until_included(transaction.transactionId)

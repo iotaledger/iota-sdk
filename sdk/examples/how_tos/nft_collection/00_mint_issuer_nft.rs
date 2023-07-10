@@ -6,6 +6,9 @@
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
+//! Make sure that Account Alice already has some funds by running the
+//! `./how_tos/simple_transaction/request_funds.rs` example!
+//!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example mint_issuer_nft
@@ -43,7 +46,8 @@ async fn main() -> Result<()> {
     println!("Sending NFT minting transaction...");
     let nft_mint_params = [MintNftParams::new()
         .with_immutable_metadata(b"This NFT will be the issuer from the awesome NFT collection".to_vec())];
-    let transaction = account.mint_nfts(nft_mint_params, None).await?;
+    let transaction = dbg!(account.mint_nfts(nft_mint_params, None).await)?;
+
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     let TransactionEssence::Regular(essence) = transaction.payload.essence();
@@ -53,7 +57,7 @@ async fn main() -> Result<()> {
             if nft_output.nft_id().is_null() {
                 let output_id = OutputId::new(transaction.transaction_id, output_index as u16)?;
                 let nft_id = NftId::from(&output_id);
-                println!("New minted NFT id: {nft_id}");
+                println!("New minted issuer NFT id: {nft_id}");
             }
         }
     }

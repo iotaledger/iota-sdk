@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will destroy a foundry
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -24,7 +24,7 @@ foundry_id = balance['foundries'][0]
 
 # Send transaction.
 transaction = account.prepare_destroy_foundry(foundry_id).send()
-print(f'Transaction sent: {transaction["transactionId"]}')
+print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
 blockId = account.retry_transaction_until_included(transaction.transactionId)

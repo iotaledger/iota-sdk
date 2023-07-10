@@ -9,7 +9,7 @@ load_dotenv()
 # Replace with your own values.
 ALIAS_ID = "0x982667c59ade8ab8a99188f4de38c68b97fc2ca7ba28a1e9d8d683996247e152"
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 

@@ -8,7 +8,7 @@ load_dotenv()
 
 sync_options = SyncOptions(alias=AliasSyncOptions(basic_outputs=True))
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 

@@ -10,7 +10,7 @@ load_dotenv()
 FAUCET_URL = os.environ.get(
     'FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 balance = account.sync(None)

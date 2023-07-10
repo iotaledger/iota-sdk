@@ -4,9 +4,11 @@
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.common import CoinType
 from typing import List, Optional
+from dacite import from_dict
 
 
 class Range:
@@ -44,29 +46,30 @@ class GenerateAddressesOptions():
 
 class HighLevelAPI():
 
-    def get_outputs(self, output_ids: List[OutputId]):
-        """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
+    def get_outputs(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
+        """Fetch OutputWithMetadata from provided OutputIds (requests are sent in parallel).
         """
-        return self._call_method('getOutputs', {
-            'outputIds': output_ids
+        outputs = self._call_method('getOutputs', {
+            'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
+        return [from_dict(OutputWithMetadata, o) for o in outputs]
 
-    def get_outputs_ignore_errors(self, output_ids: List[OutputId]):
-        """Try to get OutputResponse from provided OutputIds.
+    def get_outputs_ignore_errors(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
+        """Try to get OutputWithMetadata from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
-        return self._call_method('getOutputsIgnoreErrors', {
-            'outputIds': output_ids
+        outputs = self._call_method('getOutputsIgnoreErrors', {
+            'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
+        return [from_dict(OutputWithMetadata, o) for o in outputs]
 
     def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.
         """
-        result = self._call_method('findBlocks', {
+        blocks = self._call_method('findBlocks', {
             'blockIds': block_ids
         })
-        blocks = [Block.from_dict(block) for block in result]
-        return blocks
+        return [Block.from_dict(block) for block in blocks]
 
     def retry(self, block_id: HexStr) -> List[HexStr | Block]:
         """Retries (promotes or reattaches) a block for provided block id. Block should only be

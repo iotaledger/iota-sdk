@@ -2,42 +2,26 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.types.common import HexStr
-from enum import Enum
+from dataclasses import dataclass
+from enum import IntEnum
+from typing import Optional
 
 
-class AddressType(Enum):
+class AddressType(IntEnum):
     ED25519 = 0
     ALIAS = 8
     NFT = 16
 
 
+@dataclass
 class Address():
-    def __init__(self, type: AddressType, address_or_id: HexStr):
-        """Initialize an Address
-
-        Parameters
-        ----------
-        type : AddressType
-            The type of the Address
-        address_or_id : string
-            The address to use. Can either be an hex encoded ED25519 address or NFT/Alias id
-        """
-        self.type = type
-        self.address_or_id = address_or_id
+    type: int
+    pubKeyHash: Optional[HexStr] = None
+    aliasId: Optional[HexStr] = None
+    nftId: Optional[HexStr] = None
 
     def as_dict(self):
-        config = dict(self.__dict__)
-
-        config['type'] = config['type'].value
-
-        if self.type == AddressType.ED25519:
-            config['pubKeyHash'] = config.pop('address_or_id')
-        elif self.type == AddressType.ALIAS:
-            config['aliasId'] = config.pop('address_or_id')
-        elif self.type == AddressType.NFT:
-            config['nftId'] = config.pop('address_or_id')
-
-        return config
+        return {k: v for k, v in self.__dict__.items() if v != None}
 
 
 class Ed25519Address(Address):
@@ -49,7 +33,7 @@ class Ed25519Address(Address):
         address : string
             The hex encoded address to use.
         """
-        super().__init__(AddressType.ED25519, address)
+        super().__init__(AddressType.ED25519, pubKeyHash=address)
 
 
 class AliasAddress(Address):
@@ -61,7 +45,7 @@ class AliasAddress(Address):
         address_or_id : string
             The hex encoded address to use.
         """
-        super().__init__(AddressType.ALIAS, address_or_id)
+        super().__init__(AddressType.ALIAS, aliasId=address_or_id)
 
 
 class NFTAddress(Address):
@@ -73,4 +57,4 @@ class NFTAddress(Address):
         address_or_id : string
             The hex encoded address to use.
         """
-        super().__init__(AddressType.NFT, address_or_id)
+        super().__init__(AddressType.NFT, nftId=address_or_id)

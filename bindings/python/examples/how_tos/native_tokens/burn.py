@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will burn native tokens
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -26,7 +26,7 @@ burn_amount = 1
 
 # Send transaction.
 transaction = account.prepare_burn_native_token(token["tokenId"], burn_amount).send()
-print(f'Transaction sent: {transaction["transactionId"]}')
+print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
 blockId = account.retry_transaction_until_included(transaction['transactionId'])

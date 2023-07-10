@@ -80,9 +80,9 @@ metadata = client.get_block_metadata(block_id)
 
 # Get the whole block
 block = client.get_block_data(block_id)
-payload_out = block['payload']
-tag_hex_out = block['payload']['tag']
-message_hex_out = block['payload']['data']
+payload_out = block.payload
+tag_hex_out = block.payload['tag']
+message_hex_out = block.payload['data']
 
 # Unpackage the payload (from hex to text)
 message_out = hex_to_utf8(message_hex_out)

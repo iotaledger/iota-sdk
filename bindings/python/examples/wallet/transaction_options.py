@@ -6,7 +6,7 @@ load_dotenv()
 
 # This example sends a transaction with a tagged data payload.
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
