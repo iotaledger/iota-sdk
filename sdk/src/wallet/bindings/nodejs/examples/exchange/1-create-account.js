@@ -26,7 +26,7 @@ async function run() {
         const manager = new AccountManager(accountManagerOptions);
 
         // Mnemonic only needs to be set the first time
-        await manager.storeMnemonic(process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1);
+        await manager.storeMnemonic(process.env.MNEMONIC);
 
         const account = await manager.createAccount({
             alias: 'Alice'

@@ -30,8 +30,8 @@ async function run() {
                 '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
             );
         }
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
+        if (!process.env.MNEMONIC) {
+            throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
 
         const walletOptions: WalletOptions = {
@@ -52,7 +52,7 @@ async function run() {
 
         // Mnemonic only needs to be set the first time.
         await wallet.storeMnemonic(
-            process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
+            process.env.MNEMONIC,
         );
 
         const account = await wallet.createAccount({

@@ -30,10 +30,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager_1 =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
-    let secret_manager_2 =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_2").unwrap())?;
+    let secret_manager_1 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+    let secret_manager_2 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC_2").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 

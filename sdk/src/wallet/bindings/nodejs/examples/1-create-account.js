@@ -41,7 +41,7 @@ async function createAccountManager() {
     };
 
     const manager = new AccountManager(accountManagerOptions);
-    await manager.storeMnemonic(process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1);
+    await manager.storeMnemonic(process.env.MNEMONIC);
     return manager;
 }
 

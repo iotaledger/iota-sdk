@@ -24,12 +24,12 @@ secret_manager = StrongholdSecretManager(
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'], client_options, coin_type, secret_manager)
 
-if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
-    raise Exception(".env mnemonic is undefined, see .env.example")
+if 'MNEMONIC' not in os.environ:
+    raise Exception(".env MNEMONIC is undefined, see .env.example")
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be done once
 wallet.store_mnemonic(
-    os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
+    os.environ['MNEMONIC'])
 
 account = wallet.create_account('Alice')
 print("Account created: ", account['alias'])

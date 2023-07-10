@@ -21,9 +21,9 @@ async function getUnlockedWallet() {
             '.env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example',
         );
     }
-    if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
+    if (!process.env.MNEMONIC) {
         throw new Error(
-            '.env NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1 is undefined, see .env.example',
+            '.env MNEMONIC is undefined, see .env.example',
         );
     }
     if (!process.env.WALLET_DB_PATH) {

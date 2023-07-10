@@ -25,9 +25,9 @@ async function run() {
             '.env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example',
         );
     }
-    if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
+    if (!process.env.MNEMONIC) {
         throw new Error(
-            '.env NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1 is undefined, see .env.example',
+            '.env MNEMONIC is undefined, see .env.example',
         );
     }
     if (!process.env.WALLET_DB_PATH) {
@@ -54,7 +54,7 @@ async function run() {
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
         await wallet.storeMnemonic(
-            process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
+            process.env.MNEMONIC,
         );
 
         // Create a new account

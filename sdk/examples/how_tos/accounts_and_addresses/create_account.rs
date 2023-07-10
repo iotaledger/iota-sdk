@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
         .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic = std::env::var("MNEMONIC").unwrap();
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
