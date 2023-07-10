@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     // wait so the faucet can send the funds
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let mut block_builder = client.block().with_secret_manager(&secret_manager);
+    let mut block_builder = client.build_block().with_secret_manager(&secret_manager);
     // Insert the output address and amount to spent. The amount cannot be zero.
     for _ in 0..100 {
         block_builder = block_builder.with_output(address, 1_000_000).await?;

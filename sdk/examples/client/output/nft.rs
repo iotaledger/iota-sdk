@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -97,7 +97,7 @@ async fn main() -> Result<()> {
     let output_with_meta = client.get_output(&output_ids_response.items[0]).await?;
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
@@ -128,7 +128,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(nft_output_id.into())?
         .with_outputs(outputs)?

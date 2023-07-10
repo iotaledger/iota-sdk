@@ -82,7 +82,7 @@ async fn main() -> Result<()> {
     let new_output = basic_output_builder.finish_output(token_supply)?;
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager_1)
         .with_outputs([new_output])?
         .finish()

@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .unwrap_or(first_address);
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         // Insert the output address and amount to spent. The amount cannot be zero.
         .with_output(recv_address, amount)

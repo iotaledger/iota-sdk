@@ -26,7 +26,7 @@ async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     client
-        .block()
+        .build_block()
         .with_tag(b"Hello".to_vec())
         .with_data(b"Tangle".to_vec())
         .finish()
@@ -77,7 +77,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     }
 
     let block_id = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_output_hex(
             // Send funds back to the sender.

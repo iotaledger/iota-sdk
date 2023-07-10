@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     let outputs = [alias_output_builder.clone().finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(alias_output_id.into())?
         .with_outputs(outputs)?

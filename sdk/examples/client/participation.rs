@@ -110,7 +110,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
         .finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .with_tag(PARTICIPATION_TAG.as_bytes().to_vec())

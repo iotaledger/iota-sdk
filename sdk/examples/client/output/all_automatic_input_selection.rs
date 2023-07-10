@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -129,7 +129,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -192,7 +192,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()

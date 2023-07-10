@@ -175,7 +175,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             options,
         } => {
             // Prepare transaction
-            let mut block_builder = client.block();
+            let mut block_builder = client.build_block();
 
             let secret_manager = match secret_manager {
                 Some(secret_manager) => Some(secret_manager.try_into()?),
@@ -229,7 +229,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             options,
         } => {
-            let mut block_builder = client.block();
+            let mut block_builder = client.build_block();
 
             let secret_manager = match secret_manager {
                 Some(secret_manager) => Some(secret_manager.try_into()?),
@@ -252,7 +252,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             prepared_transaction_data,
         } => {
-            let mut block_builder = client.block();
+            let mut block_builder = client.build_block();
 
             let secret_manager = secret_manager.try_into()?;
 
@@ -267,7 +267,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             ))
         }
         ClientMethod::PostBlockPayload { payload } => {
-            let block_builder = client.block();
+            let block_builder = client.build_block();
 
             let block = block_builder
                 .finish_block(Some(Payload::try_from_dto(
