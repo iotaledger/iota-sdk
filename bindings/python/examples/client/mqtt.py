@@ -20,6 +20,7 @@ def callback(event):
     received_events += 1
 
 
+# Topics can be found here https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/iotaledger/tips/main/tips/TIP-0028/event-api.yml
 client.listen(["blocks"], callback)
 
 # Exit after 10 received events
