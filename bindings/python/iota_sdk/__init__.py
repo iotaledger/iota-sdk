@@ -18,6 +18,7 @@ from .types.feature import *
 from .types.native_token import *
 from .types.node_info import *
 from .types.output import *
+from .types.output_data import *
 from .types.output_id import *
 from .types.payload import *
 from .types.token_scheme import *

@@ -3,10 +3,11 @@
 
 from iota_sdk import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.signature import Ed25519Signature
 from json import dumps, loads
 import humps
 from typing import List, Optional
-
+from dacite import from_dict
 
 class LedgerNanoSecretManager(dict):
     """Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator.
@@ -216,13 +217,13 @@ class SecretManager():
             'mnemonic': mnemonic
         })
 
-    def sign_ed25519(self, message: HexStr, chain: List[int]):
+    def sign_ed25519(self, message: HexStr, chain: List[int]) -> Ed25519Signature:
         """Signs a message with an Ed25519 private key.
         """
-        return self._call_method('signEd25519', {
+        return from_dict(Ed25519Signature, self._call_method('signEd25519', {
             'message': message,
             'chain': chain,
-        })
+        }))
 
     def sign_secp256k1_ecdsa(self, message: HexStr, chain: List[int]):
         """Signs a message with an Secp256k1Ecdsa private key.

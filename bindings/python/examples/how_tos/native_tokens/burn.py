@@ -29,7 +29,7 @@ transaction = account.prepare_burn_native_token(token["tokenId"], burn_amount).s
 print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
-blockId = account.retry_transaction_until_included(transaction['transactionId'])
+blockId = account.retry_transaction_until_included(transaction.transactionId)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 balance = account.sync()

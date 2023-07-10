@@ -36,8 +36,8 @@ bip32_chain = [
 message = utf8_to_hex(FOUNDRY_METADATA)
 ed25519_signature = secret_manager.sign_ed25519(message, bip32_chain)
 print(
-    f'Public key: {ed25519_signature["publicKey"]}\nSignature: {ed25519_signature["signature"]}')
+    f'Public key: {ed25519_signature.publicKey}\nSignature: {ed25519_signature.signature}')
 
 bech32_address = Utils.hex_public_key_to_bech32_address(
-    ed25519_signature["publicKey"], "rms")
+    ed25519_signature.publicKey, "rms")
 print(f'Address: {bech32_address}')
