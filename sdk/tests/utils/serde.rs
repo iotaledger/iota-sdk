@@ -15,6 +15,20 @@ pub struct SerdeStringTest {
     pub block_id: BlockId,
 }
 
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct SerdeOptionStringTest {
+    #[serde(with = "iota_sdk::utils::serde::option_string")]
+    pub block_id: Option<BlockId>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct SerdeOptionPrefixHexVecTest {
+    #[serde(default, with = "iota_sdk::utils::serde::option_prefix_hex_vec")]
+    pub metadata: Option<Vec<u8>>,
+}
+
 #[test]
 fn serde_string() {
     let block_id = BlockId::from_str(BLOCK_ID).unwrap();
@@ -24,4 +38,44 @@ fn serde_string() {
 
     assert_eq!(test_1, test_2);
     assert!(str.contains(BLOCK_ID));
+}
+
+#[test]
+fn serde_option_string() {
+    let block_id = BlockId::from_str(BLOCK_ID).unwrap();
+    let test_1 = SerdeOptionStringTest {
+        block_id: Some(block_id),
+    };
+    let str = serde_json::to_string(&test_1).unwrap();
+    let test_2 = serde_json::from_str(&str).unwrap();
+
+    assert_eq!(test_1, test_2);
+    assert!(str.contains(BLOCK_ID));
+
+    let test_1 = SerdeOptionStringTest { block_id: None };
+    let str = serde_json::to_string(&test_1).unwrap();
+    let test_2 = serde_json::from_str(&str).unwrap();
+
+    assert_eq!(test_1, test_2);
+    assert!(str.contains("null"));
+}
+
+#[test]
+fn serde_option_prefix_hex_vec() {
+    let metadata = prefix_hex::decode(BLOCK_ID).unwrap();
+    let test_1 = SerdeOptionPrefixHexVecTest {
+        metadata: Some(metadata),
+    };
+    let str = serde_json::to_string(&test_1).unwrap();
+    let test_2 = serde_json::from_str(&str).unwrap();
+
+    assert_eq!(test_1, test_2);
+    assert!(str.contains(BLOCK_ID));
+
+    let test_1 = SerdeOptionPrefixHexVecTest { metadata: None };
+    let str = serde_json::to_string(&test_1).unwrap();
+    let test_2 = serde_json::from_str(&str).unwrap();
+
+    assert_eq!(test_1, test_2);
+    assert!(str.contains("null"));
 }
