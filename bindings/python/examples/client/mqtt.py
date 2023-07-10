@@ -10,11 +10,19 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 # Create a Client instance
 client = Client(nodes=[node_url])
 
+received_events = 0
+
+
 def callback(event):
     event_dict = json.loads(event)
     print(event_dict)
+    global received_events
+    received_events += 1
+
 
 client.listen(["blocks"], callback)
 
-import time
-time.sleep(10)
+# Exit after 10 received events
+while True:
+    if received_events > 10:
+        exit()
