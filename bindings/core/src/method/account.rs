@@ -156,7 +156,8 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to create a native token.
-    /// Expected response: [`PreparedCreateNativeTokenTransaction`](crate::Response::PreparedCreateNativeTokenTransaction)
+    /// Expected response:
+    /// [`PreparedCreateNativeTokenTransaction`](crate::Response::PreparedCreateNativeTokenTransaction)
     PrepareCreateNativeToken {
         params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
