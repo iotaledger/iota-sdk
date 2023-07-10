@@ -12,7 +12,7 @@ account = wallet.get_account('Alice')
 
 # Sync account with the node
 balance = account.sync()
-print(f'Foundries before destroying: {len(balance["foundries"])}')
+print(f'Foundries before destroying: {len(balance.foundries)}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
@@ -20,7 +20,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # We try to destroy the first foundry in the account
-foundry_id = balance['foundries'][0]
+foundry_id = balance.foundries[0]
 
 # Send transaction.
 transaction = account.prepare_destroy_foundry(foundry_id).send()
@@ -31,4 +31,4 @@ blockId = account.retry_transaction_until_included(transaction.transactionId)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 balance = account.sync()
-print(f'Foundries after destroying: {len(balance["foundries"])}')
+print(f'Foundries after destroying: {len(balance.foundries)}')

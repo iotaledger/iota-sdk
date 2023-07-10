@@ -11,6 +11,7 @@ from .wallet.sync_options import AccountSyncOptions, AliasSyncOptions, NftSyncOp
 from .secret_manager.secret_manager import *
 from .prefix_hex import *
 from .types.address import *
+from .types.balance import *
 from .types.block import *
 from .types.burn import *
 from .types.common import *

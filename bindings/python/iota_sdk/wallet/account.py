@@ -4,6 +4,7 @@
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
+from iota_sdk.types.balance import Balance
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
@@ -13,7 +14,6 @@ from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from typing import List, Optional
 from dacite import from_dict
-
 
 class Account:
     def __init__(self, account_id: str | int, handle):
@@ -293,12 +293,12 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def get_balance(self):
+    def get_balance(self) -> Balance:
         """Get account balance information.
         """
-        return self._call_account_method(
+        return from_dict(Balance, self._call_account_method(
             'getBalance'
-        )
+        ))
 
     def prepare_output(self, output_options, transaction_options: Optional[TransactionOptions] = None):
         """Prepare an output for sending
@@ -349,16 +349,16 @@ class Account:
             }
         )
 
-    def sync(self, options: Optional[SyncOptions] = None):
+    def sync(self, options: Optional[SyncOptions] = None) -> Balance:
         """Sync the account by fetching new information from the nodes.
            Will also retry pending transactions and consolidate outputs if necessary.
            A custom default can be set using set_default_sync_options
         """
-        return self._call_account_method(
+        return from_dict(Balance, self._call_account_method(
             'sync', {
                 'options': options,
             }
-        )
+        ))
 
     def send(self, params, options: Optional[TransactionOptions] = None) -> Transaction:
         """Send base coins.
