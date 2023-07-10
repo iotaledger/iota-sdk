@@ -20,6 +20,7 @@ from datetime import timedelta
 from typing import Any, Dict, List, Optional
 from dacite import from_dict
 
+
 class ClientError(Exception):
     """client error"""
     pass
@@ -384,7 +385,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              inputs: Optional[List[Dict[str, Any]]] = None,
                              output: Optional[Dict[str, Any]] = None,
                              outputs: Optional[List[Any]] = None,
-                             tag: Optional[HexStr] = None) -> List[HexStr|Block]:
+                             tag: Optional[HexStr] = None) -> List[HexStr | Block]:
         """Build and post a block.
 
         Parameters
@@ -509,7 +510,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def submit_payload(self, payload) -> List[HexStr|Block]:
+    def submit_payload(self, payload) -> List[HexStr | Block]:
         """Submit a payload in a block.
         """
         result = self._call_method('postBlockPayload', {
@@ -522,3 +523,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Listen to MQTT events.
         """
         listen_mqtt(self.handle, topics, handler)
+
+    def clear_listeners(self, topics: List[str]):
+        """Listen to MQTT events.
+        """
+        return self._call_method('clearListeners', {
+            'topics': topics
+        })

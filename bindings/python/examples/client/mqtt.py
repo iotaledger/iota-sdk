@@ -26,4 +26,5 @@ client.listen(["blocks"], callback)
 # Exit after 10 received events
 while True:
     if received_events > 10:
+        client.clear_listeners(["blocks"])
         exit()
