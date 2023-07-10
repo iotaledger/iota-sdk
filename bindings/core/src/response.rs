@@ -208,7 +208,7 @@ pub enum Response {
     /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
     MilestoneId(MilestoneId),
     /// Response for:
-    /// - [`TokenId`](crate::method::UtilsMethod::TokenId)
+    /// - [`ComputeTokenId`](crate::method::UtilsMethod::ComputeTokenId)
     TokenId(TokenId),
     /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)

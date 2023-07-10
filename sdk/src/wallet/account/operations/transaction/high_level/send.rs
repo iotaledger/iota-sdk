@@ -85,7 +85,7 @@ where
 {
     /// Sends a certain amount of base coins to a single address.
     ///
-    /// Calls [Account::send_with_params()](crate::account::Account::send_with_params) internally.
+    /// Calls [Account::send_with_params()](crate::wallet::Account::send_with_params) internally.
     /// The options may define the remainder value strategy or custom inputs.
     /// The provided Addresses provided with [`SendParams`] need to be bech32-encoded.
     pub async fn send(
@@ -100,7 +100,7 @@ where
 
     /// Sends a certain amount of base coins with full customizability of the transaction.
     ///
-    /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally.
+    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally.
     /// The options may define the remainder value strategy or custom inputs.
     /// Addresses provided with [`SendParams`] need to be bech32-encoded.
     /// ```ignore
@@ -130,7 +130,7 @@ where
     }
 
     /// Prepares the transaction for
-    /// [Account::send()](crate::account::Account::send).
+    /// [Account::send()](crate::wallet::Account::send).
     pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,

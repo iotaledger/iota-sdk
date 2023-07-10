@@ -231,7 +231,7 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<String>, Error> {
     Ok(mnemonics)
 }
 
-/// Converts a unix timestamp in milliseconds to a DateTime<Utc>
+/// Converts a unix timestamp in milliseconds to a `DateTime<Utc>`
 pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     let millis = ts_millis % 1000;
     let secs = (ts_millis - millis) / 1000;
