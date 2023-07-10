@@ -525,7 +525,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         listen_mqtt(self.handle, topics, handler)
 
     def clear_mqtt_listeners(self, topics: List[str]):
-        """Removes all listeners for the provided topics.
+        """Removes all listeners for the provided MQTT topics.
         """
         return self._call_method('clearListeners', {
             'topics': topics
