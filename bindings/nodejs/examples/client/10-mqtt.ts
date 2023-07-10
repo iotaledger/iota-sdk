@@ -56,11 +56,11 @@ async function run() {
         }
     };
 
-    await client.listen(topics, callback);
+    await client.listenMqtt(topics, callback);
 
     // Clear listener after 10 seconds
     setTimeout(async () => {
-        await client.clearListeners(topics);
+        await client.clearMqttListeners(topics);
         console.log('Listener cleared');
         // Exit the process
         setTimeout(async () => process.exit(0), 2000);
