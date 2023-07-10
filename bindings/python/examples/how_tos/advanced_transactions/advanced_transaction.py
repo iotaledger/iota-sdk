@@ -33,9 +33,9 @@ basic_output = Client().build_basic_output(
 )
 
 transaction = account.send_outputs([basic_output])
-print(f'Transaction sent: {transaction["transactionId"]}')
+print(f'Transaction sent: {transaction.transactionId}')
 
-block_id = account.retry_transaction_until_included(transaction["transactionId"])
+block_id = account.retry_transaction_until_included(transaction.transactionId)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

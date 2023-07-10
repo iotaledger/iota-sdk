@@ -66,8 +66,13 @@ async fn main() -> Result<()> {
         })
         .collect::<Vec<_>>();
 
-    for nft_mint_params in nft_mint_params.chunks(NUM_NFTS_MINTED_PER_TRANSACTION) {
-        println!("Minting {} NFTs...", nft_mint_params.len());
+    for (index, nft_mint_params) in nft_mint_params.chunks(NUM_NFTS_MINTED_PER_TRANSACTION).enumerate() {
+        println!(
+            "Minting {} NFTs... ({}/{})",
+            nft_mint_params.len(),
+            index * NUM_NFTS_MINTED_PER_TRANSACTION + nft_mint_params.len(),
+            NFT_COLLECTION_SIZE
+        );
         let transaction = account.mint_nfts(nft_mint_params.to_vec(), None).await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 

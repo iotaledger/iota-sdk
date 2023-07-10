@@ -22,7 +22,7 @@ balance = account.sync()
 if not balance["aliases"]:
     # If we don't have an alias, we need to create one
     transaction = account.prepare_create_alias_output(None, None).send()
-    print(f'Transaction sent: {transaction["transactionId"]}')
+    print(f'Transaction sent: {transaction.transactionId}')
 
     # Wait for transaction to get included
     blockId = account.retry_transaction_until_included(transaction.transactionId)
