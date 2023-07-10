@@ -7,10 +7,10 @@ from iota_sdk import Wallet, StrongholdSecretManager, SyncOptions, CoinType
 from dotenv import load_dotenv
 import os
 
+# This example creates a new database and account.
+
 # This example uses secrets in environment variables for simplicity which should not be done in production.
 load_dotenv()
-
-# This example creates a new database and account.
 
 if 'WALLET_DB_PATH' not in os.environ:
     raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
@@ -41,7 +41,7 @@ wallet.store_mnemonic(
 created_account = wallet.create_account('Alice')
 account = wallet.get_account('Alice')
 
-# Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
+# Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/alias/foundry outputs.
 account.set_default_sync_options(
     SyncOptions(sync_only_most_basic_outputs=True))

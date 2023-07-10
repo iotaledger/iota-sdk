@@ -1,15 +1,15 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+// This example sends tokens to an address.
+// Run with command:
+// yarn run-example ./exchange/5-send-amount.ts
+
 import { Wallet } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-// Run with command:
-// yarn run-example ./exchange/5-send-amount.ts
-
-// This example sends tokens to an address.
 async function run() {
     try {
         if (!process.env.WALLET_DB_PATH) {

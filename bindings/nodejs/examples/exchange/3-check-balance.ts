@@ -1,15 +1,15 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+// This example gets the balance of an account.
+// Run with command:
+// yarn run-example ./exchange/3-check-balance.ts
+
 import { Wallet } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-// Run with command:
-// yarn run-example ./exchange/3-check-balance.ts
-
-// This example gets the balance of an account.
 async function run() {
     try {
         if (!process.env.WALLET_DB_PATH) {

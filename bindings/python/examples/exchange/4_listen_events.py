@@ -1,6 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+# This example listens to the NewOutput event.
+
 from iota_sdk import Wallet, SyncOptions
 from dotenv import load_dotenv
 import json
@@ -9,8 +11,6 @@ import time
 
 # This example uses secrets in environment variables for simplicity which should not be done in production.
 load_dotenv()
-
-# This example listens to the NewOutput event.
 
 if 'WALLET_DB_PATH' not in os.environ:
     raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
@@ -42,6 +42,6 @@ for _ in range(20):
     time.sleep(5)
 
     # Sync to detect new outputs
-    # Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
+    # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
     # have a storage deposit return , expiration or are nft/alias/foundry outputs.
     account.sync(SyncOptions(sync_only_most_basic_outputs=True))

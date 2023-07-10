@@ -1,14 +1,14 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+# This example sends tokens to an address.
+
 from iota_sdk import Wallet, SyncOptions
 from dotenv import load_dotenv
 import os
 
 # This example uses secrets in environment variables for simplicity which should not be done in production.
 load_dotenv()
-
-# This example sends tokens to an address.
 
 if 'WALLET_DB_PATH' not in os.environ:
     raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
@@ -24,7 +24,7 @@ account = wallet.get_account('Alice')
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
+# Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/alias/foundry outputs.
 balance = account.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
