@@ -8,11 +8,11 @@ const { AccountManager } = require('@iota/wallet');
 async function run() {
     try {
         const manager = new AccountManager({
-            storagePath: `${process.env.WALLET_DB_PATH}`,
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
         await manager.setStrongholdPassword(
-            `${process.env.STRONGHOLD_PASSWORD}`,
+            process.env.STRONGHOLD_PASSWORD,
         );
 
         const account = await manager.getAccount('Alice');
