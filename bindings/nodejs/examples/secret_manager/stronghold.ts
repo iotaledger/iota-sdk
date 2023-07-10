@@ -30,9 +30,7 @@ async function run() {
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-        await strongholdSecretManager.storeMnemonic(
-            process.env.MNEMONIC,
-        );
+        await strongholdSecretManager.storeMnemonic(process.env.MNEMONIC);
 
         const address = await strongholdSecretManager.generateEd25519Addresses({
             accountIndex: 0,

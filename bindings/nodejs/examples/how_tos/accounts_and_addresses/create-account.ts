@@ -26,9 +26,7 @@ async function run() {
         );
     }
     if (!process.env.MNEMONIC) {
-        throw new Error(
-            '.env MNEMONIC is undefined, see .env.example',
-        );
+        throw new Error('.env MNEMONIC is undefined, see .env.example');
     }
     if (!process.env.WALLET_DB_PATH) {
         throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
@@ -53,9 +51,7 @@ async function run() {
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-        await wallet.storeMnemonic(
-            process.env.MNEMONIC,
-        );
+        await wallet.storeMnemonic(process.env.MNEMONIC);
 
         // Create a new account
         const account = await wallet.createAccount({

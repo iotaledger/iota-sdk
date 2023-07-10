@@ -22,9 +22,7 @@ async function getUnlockedWallet() {
         );
     }
     if (!process.env.MNEMONIC) {
-        throw new Error(
-            '.env MNEMONIC is undefined, see .env.example',
-        );
+        throw new Error('.env MNEMONIC is undefined, see .env.example');
     }
     if (!process.env.WALLET_DB_PATH) {
         throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
