@@ -17,7 +17,6 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 if 'EXPLORER_URL' not in os.environ:
     raise Exception(".env EXPLORER_URL is undefined, see .env.example")
 
-
 wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
 
 account = wallet.get_account('Alice')

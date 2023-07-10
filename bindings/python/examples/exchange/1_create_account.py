@@ -1,13 +1,11 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# This example generates a new random mnemonic.
+# This example creates a new database and account.
 
 from iota_sdk import Wallet, StrongholdSecretManager, SyncOptions, CoinType
 from dotenv import load_dotenv
 import os
-
-# This example creates a new database and account.
 
 # This example uses secrets in environment variables for simplicity which should not be done in production.
 load_dotenv()
