@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import iota_sdk
-from iota_sdk import call_client_method
+from iota_sdk import call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
@@ -517,3 +517,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         })
         result[1] = Block.from_dict(result[1])
         return result
+
+    def listen(self, topics: List[str], handler):
+        """Listen to MQTT events.
+        """
+        listen_mqtt(self.handle, topics, handler)
