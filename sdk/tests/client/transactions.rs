@@ -104,7 +104,7 @@ async fn custom_input() -> Result<()> {
         ])
         .await?;
 
-    // Use not the first one, because the client could also always just do that when selecting inputs automatically
+    // The first output would be picked when using automatic input selection, so use the second one instead
     let input_id = output_ids_response.items[1];
 
     let input_amount = client.get_output(&input_id).await?.output().amount();
