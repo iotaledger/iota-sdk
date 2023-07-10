@@ -32,9 +32,9 @@ for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data['address']['pubKeyHash'], 'rms'),
-            output_data['output']['amount'],
-            output_data['output'].get('nativeTokens'),
+            Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
+            output_data.output.amount,
+            output_data.output.nativeTokens
         )
     )
 
@@ -43,11 +43,11 @@ print('Sending consolidation transaction...')
 # Consolidate unspent outputs and print the consolidation transaction ID
 # Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
 transaction = account.prepare_consolidate_outputs(True, None).send()
-print('Transaction sent: {}'.format(transaction['transactionId']))
+print('Transaction sent: ', transaction.transactionId)
 
 # Wait for the consolidation transaction to get confirmed
-block_id = account.retry_transaction_until_included(transaction['transactionId'])
-    
+block_id = account.retry_transaction_until_included(transaction.transactionId)
+
 print(
     'Transaction included: {}/block/{}'.format(
         os.environ['EXPLORER_URL'],
@@ -66,8 +66,8 @@ for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data['address']['pubKeyHash'], 'rms'),
-            output_data['output']['amount'],
-            output_data['output'].get('nativeTokens'),
+            Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
+            output_data.output.amount,
+            output_data.output.nativeTokens
         )
     )
