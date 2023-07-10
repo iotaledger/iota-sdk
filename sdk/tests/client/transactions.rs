@@ -88,7 +88,7 @@ async fn custom_input() -> Result<()> {
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(token_supply)?;
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(vec![output; 10])?
         .finish()
@@ -115,7 +115,7 @@ async fn custom_input() -> Result<()> {
 
     let utxo_input = UtxoInput::from(input_id);
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs([output.clone()])?
         .with_input(utxo_input)?
