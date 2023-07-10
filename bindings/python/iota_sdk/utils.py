@@ -94,7 +94,7 @@ class Utils():
         """Computes the alias id for the given alias output id.
         """
         return _call_method('computeAliasId', {
-            'outputId': output_id
+            'outputId': repr(output_id)
         })
 
     @staticmethod

@@ -232,14 +232,14 @@ class Wallet():
             'stopBackgroundSync',
         )
 
-    def listen(self, handler, events: Optional[List[str]] = None):
+    def listen(self, handler, events: Optional[List[int]] = None):
         """Listen to wallet events, empty array or None will listen to all events
            The default value for events is None
         """
         events_array = [] if events is None else events
         listen_wallet(self.handle, events_array, handler)
 
-    def clear_listeners(self, events: Optional[List[str]] = None):
+    def clear_listeners(self, events: Optional[List[int]] = None):
         """Remove wallet event listeners, empty array or None will remove all listeners
            The default value for events is None
         """
