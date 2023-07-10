@@ -519,13 +519,13 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         result[1] = Block.from_dict(result[1])
         return result
 
-    def listen(self, topics: List[str], handler):
+    def listen_mqtt(self, topics: List[str], handler):
         """Listen to MQTT events.
         """
         listen_mqtt(self.handle, topics, handler)
 
-    def clear_listeners(self, topics: List[str]):
-        """Listen to MQTT events.
+    def clear_mqtt_listeners(self, topics: List[str]):
+        """Removes all listeners for the provided topics.
         """
         return self._call_method('clearListeners', {
             'topics': topics

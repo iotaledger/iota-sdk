@@ -21,10 +21,10 @@ def callback(event):
 
 
 # Topics can be found here https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/iotaledger/tips/main/tips/TIP-0028/event-api.yml
-client.listen(["blocks"], callback)
+client.listen_mqtt(["blocks"], callback)
 
 # Exit after 10 received events
 while True:
     if received_events > 10:
-        client.clear_listeners(["blocks"])
+        client.clear_mqtt_listeners(["blocks"])
         exit()
