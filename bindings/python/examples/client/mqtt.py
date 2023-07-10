@@ -31,4 +31,3 @@ client.listen_mqtt(["blocks"], callback)
 # Exit after 10 received events
 received_10_events.wait()
 client.clear_mqtt_listeners(["blocks"])
-exit()
