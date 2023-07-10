@@ -19,10 +19,10 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 balance = account.sync(sync_options)
 
-total_base_token_balance = balance['baseCoin']['total']
+total_base_token_balance = balance.baseCoin.total
 print(f'Balance before sending funds from alias: {total_base_token_balance}')
 
-alias_id = balance['aliases'][0]
+alias_id = balance.aliases[0]
 print(f'Alias Id: {alias_id}')
 
 # Get alias address
@@ -45,5 +45,5 @@ account.retry_transaction_until_included(transaction.transactionId, None, None)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transactionId}')
 
-total_base_token_balance = account.sync(sync_options)['baseCoin']['total']
+total_base_token_balance = account.sync(sync_options).baseCoin.total
 print(f'Balance after sending funds from alias: {total_base_token_balance}')
