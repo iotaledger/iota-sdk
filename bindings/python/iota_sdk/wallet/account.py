@@ -7,10 +7,12 @@ from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from typing import List, Optional
+from dacite import from_dict
 
 
 class Account:
@@ -66,7 +68,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_native_token(NativeToken(token_id, burn_amount)).as_dict(),
+                'burn': Burn().add_native_token(NativeToken(token_id, hex(burn_amount))).as_dict(),
                 'options': options
             },
         )
@@ -116,7 +118,6 @@ class Account:
                               options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
         """Destroy an alias output.
         """
-
         prepared = self._call_account_method(
             'prepareBurn', {
                 'burn': Burn().add_alias(alias_id).as_dict(),
@@ -157,14 +158,14 @@ class Account:
             }
         )
 
-    def get_output(self, output_id: OutputId):
+    def get_output(self, output_id: OutputId) -> OutputData:
         """Get output.
         """
-        return self._call_account_method(
+        return from_dict(OutputData, self._call_account_method(
             'getOutput', {
                 'outputId': output_id
             }
-        )
+        ))
 
     def get_transaction(self, transaction_id: HexStr) -> Transaction:
         """Get transaction.
@@ -189,23 +190,25 @@ class Account:
             'addressesWithUnspentOutputs'
         )
 
-    def outputs(self, filter_options=None):
+    def outputs(self, filter_options=None) -> List[OutputData]:
         """Returns all outputs of the account.
         """
-        return self._call_account_method(
+        outputs = self._call_account_method(
             'outputs', {
                 'filterOptions': filter_options
             }
         )
+        return [from_dict(OutputData, o) for o in outputs]
 
-    def unspent_outputs(self, filter_options=None):
+    def unspent_outputs(self, filter_options=None) -> List[OutputData]:
         """Returns all unspent outputs of the account.
         """
-        return self._call_account_method(
+        outputs = self._call_account_method(
             'unspentOutputs', {
                 'filterOptions': filter_options
             }
         )
+        return [from_dict(OutputData, o) for o in outputs]
 
     def incoming_transactions(self) -> List[Transaction]:
         """Returns all incoming transactions of the account.
@@ -213,7 +216,6 @@ class Account:
         transactions = self._call_account_method(
             'incomingTransactions'
         )
-
         return [Transaction.from_dict(tx) for tx in transactions]
 
     def transactions(self) -> List[Transaction]:
@@ -222,7 +224,6 @@ class Account:
         transactions = self._call_account_method(
             'transactions'
         )
-
         return [Transaction.from_dict(tx) for tx in transactions]
 
     def pending_transactions(self):

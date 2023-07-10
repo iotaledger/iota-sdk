@@ -43,7 +43,7 @@ def test_sign_verify_ed25519():
         # HD-Wallet type, IOTA coin type, first account, public, first address
         [44, 4218, 0, 0, 0],
     )
-    assert signature['signature'] == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
+    assert signature.signature == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
 
     valid_signature = Utils.verify_ed25519_signature(
         signature,
