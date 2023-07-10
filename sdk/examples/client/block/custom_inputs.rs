@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
         .unwrap_or(first_address);
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(UtxoInput::from(output_ids_response.items[0]))?
         .with_output(recv_address, amount)

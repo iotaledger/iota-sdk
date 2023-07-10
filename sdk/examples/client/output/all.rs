@@ -84,7 +84,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -137,7 +137,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(nft_output_id.into())?
         .with_input(alias_output_id.into())?
@@ -215,7 +215,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(output_ids_response.items[0].into())?
         .with_input(nft_output_id.into())?

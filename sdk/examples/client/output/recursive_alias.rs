@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?; 3];
 
     let block_1 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -111,7 +111,7 @@ async fn main() -> Result<()> {
     ];
 
     let block_2 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -136,7 +136,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block_3 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -161,7 +161,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block_3 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()

@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
     println!("{output_ids_response:#?}");
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_output(receiver_address, amount)
         .await?

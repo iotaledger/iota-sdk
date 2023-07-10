@@ -30,7 +30,7 @@ async fn send_basic_output() -> Result<()> {
         .finish_output(token_supply)?;
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs([output.clone()])?
         .finish()
