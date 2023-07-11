@@ -222,7 +222,7 @@ class SecretManager():
         """
         return from_dict(Ed25519Signature, self._call_method('signEd25519', {
             'message': message,
-            'chain': chain,
+            'chain': chain.__dict__,
         }))
 
     def sign_secp256k1_ecdsa(self, message: HexStr, chain: Bip44):
@@ -230,7 +230,7 @@ class SecretManager():
         """
         return self._call_method('signSecp256k1Ecdsa', {
             'message': message,
-            'chain': chain,
+            'chain': chain.__dict__,
         })
 
     def sign_transaction(self, prepared_transaction_data):
@@ -245,5 +245,5 @@ class SecretManager():
         """
         return self._call_method('signatureUnlock', {
             'transactionEssenceHash': transaction_essence_hash,
-            'chain': chain
+            'chain': chain.__dict__,
         })
