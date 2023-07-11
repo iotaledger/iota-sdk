@@ -5,7 +5,7 @@ import os
 load_dotenv()
 
 # In this example we will burn an NFT
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")

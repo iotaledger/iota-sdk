@@ -4,7 +4,7 @@
 from iota_sdk.types.common import HexStr
 
 
-class OutputId():
+class OutputId(dict):
     def __init__(self, transaction_id: HexStr, output_index: int):
         """Initialize OutputId
         """

@@ -27,10 +27,10 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
 
     let micro_amount = 1;
     let tx = accounts[1]
-        .send(
+        .send_with_params(
             [
-                SendParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
-                SendParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
+                SendParams::new(micro_amount, *accounts[0].addresses().await?[0].address())?,
+                SendParams::new(micro_amount, *accounts[0].addresses().await?[0].address())?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -77,10 +77,10 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
 
     let amount = 10;
     let tx = accounts[1]
-        .send(
+        .send_with_params(
             [
-                SendParams::new(*accounts[0].addresses().await?[0].address(), amount)?,
-                SendParams::new(*accounts[0].addresses().await?[0].address(), 0)?,
+                SendParams::new(amount, *accounts[0].addresses().await?[0].address())?,
+                SendParams::new(0, *accounts[0].addresses().await?[0].address())?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -519,10 +519,10 @@ async fn claim_basic_micro_output_error() -> Result<()> {
 
     let micro_amount = 1;
     let tx = account_0
-        .send(
+        .send_with_params(
             [SendParams::new(
-                *account_1.addresses().await?[0].address(),
                 micro_amount,
+                *account_1.addresses().await?[0].address(),
             )?],
             TransactionOptions {
                 allow_micro_amount: true,

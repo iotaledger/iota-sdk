@@ -9,10 +9,10 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 # Create a Client instance
 client = Client(nodes=[node_url])
 
-if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
-    raise Exception(".env mnemonic is undefined, see .env.example")
+if 'MNEMONIC' not in os.environ:
+    raise Exception(".env MNEMONIC is undefined, see .env.example")
 
-secret_manager = MnemonicSecretManager(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
+secret_manager = MnemonicSecretManager(os.environ['MNEMONIC'])
 
 nft_output = client.build_nft_output(
     unlock_conditions=[

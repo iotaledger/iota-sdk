@@ -32,8 +32,7 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     // Get the first address of the seed
     let first_address = secret_manager
@@ -59,10 +58,9 @@ async fn main() -> Result<()> {
         .unwrap_or(first_address);
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(UtxoInput::from(output_ids_response.items[0]))?
-        //.with_input_range(20..25)
         .with_output(recv_address, amount)
         .await?
         .finish()

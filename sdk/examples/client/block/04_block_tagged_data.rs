@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with tag and data.
     let block = client
-        .block()
+        .build_block()
         .with_tag(tag.as_bytes().to_vec())
         .with_data(data.as_bytes().to_vec())
         .finish()

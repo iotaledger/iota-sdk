@@ -6,7 +6,7 @@ load_dotenv()
 
 # This example sends a transaction.
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -23,5 +23,5 @@ params = [{
     "amount": "1000000",
 }]
 
-transaction = account.send(outputs)
+transaction = account.send(params)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

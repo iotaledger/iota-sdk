@@ -1,15 +1,15 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+// This example listens to the NewOutput event.
+// Run with command:
+// yarn run-example ./exchange/4-listen-events.ts
+
 import { Wallet, Event, WalletEventType } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-// Run with command:
-// yarn run-example ./exchange/4-listen-events.ts
-
-// This example listens to the NewOutput event.
 async function run() {
     try {
         if (!process.env.WALLET_DB_PATH) {

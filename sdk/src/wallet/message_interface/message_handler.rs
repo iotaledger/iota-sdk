@@ -798,7 +798,7 @@ impl WalletMessageHandler {
             AccountMethod::Send { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .send_with_params(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })

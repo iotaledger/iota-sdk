@@ -985,7 +985,7 @@ export class Client {
     /**
      * Listen to MQTT topics.
      */
-    async listen(
+    async listenMqtt(
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
@@ -995,7 +995,7 @@ export class Client {
     /**
      * Stop listening for provided MQTT topics.
      */
-    async clearListeners(topics: string[]): Promise<void> {
+    async clearMqttListeners(topics: string[]): Promise<void> {
         await this.methodHandler.callMethod({
             name: 'clearListeners',
             data: {

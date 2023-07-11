@@ -277,7 +277,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::Send { params, options } => {
             let transaction = account
-                .send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .send_with_params(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }

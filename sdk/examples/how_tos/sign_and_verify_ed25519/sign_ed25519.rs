@@ -34,9 +34,7 @@ async fn main() -> Result<()> {
         .build("sign_ed25519.stronghold")?;
 
     stronghold
-        .store_mnemonic(Mnemonic::from(
-            std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap(),
-        ))
+        .store_mnemonic(Mnemonic::from(std::env::var("MNEMONIC").unwrap()))
         .await?;
 
     let bip32_chain = [

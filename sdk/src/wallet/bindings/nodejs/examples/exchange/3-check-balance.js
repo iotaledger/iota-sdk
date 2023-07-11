@@ -8,7 +8,7 @@ const { AccountManager } = require('@iota/wallet');
 async function run() {
     try {
         const manager = new AccountManager({
-            storagePath: './alice-database',
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
         const account = await manager.getAccount('Alice');

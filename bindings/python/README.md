@@ -81,7 +81,7 @@ wallet_options = {
 
 secret_manager = StrongholdSecretManager("wallet.stronghold", "some_hopefully_secure_password")
 
-wallet = Wallet('./alice-database', wallet_options, coin_type=CoinType.SHIMMER, secret_manager)
+wallet = Wallet('./alice-walletdb', wallet_options, coin_type=CoinType.SHIMMER, secret_manager)
 
 # Store the mnemonic in the Stronghold snapshot. This only needs to be done once
 account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import iota_sdk
-from iota_sdk import call_client_method
+from iota_sdk import call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
@@ -11,12 +11,14 @@ from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.output import Output
 from iota_sdk.types.token_scheme import TokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
 from json import dumps, loads
 import humps
 from datetime import timedelta
 from typing import Any, Dict, List, Optional
+from dacite import from_dict
 
 
 class ClientError(Exception):
@@ -204,7 +206,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self._call_method('buildAliasOutput', {
+        return from_dict(Output, self._call_method('buildAliasOutput', {
             'aliasId': alias_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -214,7 +216,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'foundryCounter': foundry_counter,
             'features': features,
             'immutableFeatures': immutable_features
-        })
+        }))
 
     def build_basic_output(self,
                            unlock_conditions: List[UnlockCondition],
@@ -252,12 +254,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self._call_method('buildBasicOutput', {
+        return from_dict(Output, self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'nativeTokens': native_tokens,
             'features': features,
-        })
+        }))
 
     def build_foundry_output(self,
                              serial_number: int,
@@ -291,13 +293,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         Output as dict
         """
 
-        token_scheme = humps.camelize(token_scheme.as_dict())
-
         unlock_conditions = [unlock_condition.as_dict()
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict()
+            native_tokens = [native_token.__dict__
                              for native_token in native_tokens]
 
         if features:
@@ -309,15 +309,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self._call_method('buildFoundryOutput', {
+        return from_dict(Output, self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
-            'tokenScheme': token_scheme,
+            'tokenScheme': token_scheme.as_dict(),
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features
-        })
+        }))
 
     def build_nft_output(self,
                          nft_id: HexStr,
@@ -364,14 +364,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self._call_method('buildNftOutput', {
+        return from_dict(Output, self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features
-        })
+        }))
 
     def build_and_post_block(self,
                              secret_manager=None,
@@ -385,7 +385,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              inputs: Optional[List[Dict[str, Any]]] = None,
                              output: Optional[Dict[str, Any]] = None,
                              outputs: Optional[List[Any]] = None,
-                             tag: Optional[HexStr] = None) -> List[HexStr|Block]:
+                             tag: Optional[HexStr] = None) -> List[HexStr | Block]:
         """Build and post a block.
 
         Parameters
@@ -510,7 +510,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def submit_payload(self, payload) -> List[HexStr|Block]:
+    def submit_payload(self, payload) -> List[HexStr | Block]:
         """Submit a payload in a block.
         """
         result = self._call_method('postBlockPayload', {
@@ -518,3 +518,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         })
         result[1] = Block.from_dict(result[1])
         return result
+
+    def listen_mqtt(self, topics: List[str], handler):
+        """Listen to MQTT events.
+        """
+        listen_mqtt(self.handle, topics, handler)
+
+    def clear_mqtt_listeners(self, topics: List[str]):
+        """Removes all listeners for the provided MQTT topics.
+        """
+        return self._call_method('clearListeners', {
+            'topics': topics
+        })
