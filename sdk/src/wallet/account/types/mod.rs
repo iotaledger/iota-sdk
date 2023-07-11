@@ -65,7 +65,7 @@ impl OutputData {
                 .required_and_unlocked_address(current_time, &self.output_id, alias_transition)?;
 
         let chain = if unlock_address == self.address {
-            self.chain.clone()
+            self.chain
         } else if let Address::Ed25519(_) = unlock_address {
             if let Some(address) = account
                 .addresses_with_unspent_outputs

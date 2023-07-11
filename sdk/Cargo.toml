@@ -25,7 +25,7 @@ derive_more = { version = "0.99.17", default-features = false, features = [ "fro
 getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
 hex = { version = "0.4.3", default-features = false }
-iota-crypto = { version = "0.22.1", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding", "bip44" ] }
+iota-crypto = { version = "0.22.1", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
@@ -94,7 +94,7 @@ storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "de
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
-client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
+client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/keccak", "iota-crypto/bip44" ]
 wallet = [ "client" ]
 
 # Ed25519 Examples
