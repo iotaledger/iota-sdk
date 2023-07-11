@@ -119,8 +119,9 @@ where
                 // After we checked all our reattached blocks, check if the transaction got reattached in another block
                 // and confirmed
                 if conflicting {
-                    let included_block = self.client().get_included_block(transaction_id).await?;
-                    return Ok(included_block.id());
+                    if let Ok(included_block) = self.client().get_included_block(transaction_id).await {
+                        return Ok(included_block.id());
+                    }
                 }
             }
             Err(crate::client::Error::TangleInclusion(block_id.to_string()).into())
