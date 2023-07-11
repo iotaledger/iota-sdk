@@ -119,8 +119,12 @@ describe('Client utility methods', () => {
         const message = '0x494f5441';
         const signature = await new SecretManager(secretManager).signEd25519(
             message,
-            // HD-Wallet type, IOTA coin type, first account, public, first address
-            [44, 4218, 0, 0, 0],
+            {
+                coinType: 4218,
+                account: 0,
+                change: 0,
+                addressIndex: 0,
+            },
         );
 
         const validSignature = Utils.verifyEd25519Signature(signature, message);
