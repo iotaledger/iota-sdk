@@ -1,4 +1,9 @@
-from iota_sdk import Client, init_logger
+# Copyright 2023 IOTA Stiftung
+# SPDX-License-Identifier: Apache-2.0
+
+# This example shows how to listen to MQTT events of a node.
+
+from iota_sdk import Client
 from dotenv import load_dotenv
 import os
 import threading
