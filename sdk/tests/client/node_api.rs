@@ -287,13 +287,17 @@ async fn test_get_milestone_by_id_raw() {
         .unwrap();
 
     let milestone = client.get_milestone_by_id(&latest_milestone_id).await.unwrap();
-    let milestone_raw = MilestonePayload::unpack_verified(
+    let milestone_raw = Payload::unpack_verified(
         client.get_milestone_by_id_raw(&latest_milestone_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
     .unwrap();
 
-    assert_eq!(milestone, milestone_raw);
+    if let Payload::Milestone(milestone_raw) = milestone_raw {
+        assert_eq!(milestone, *milestone_raw);
+    } else {
+        panic!("expected a milestone payload")
+    }
 }
 
 #[ignore]
@@ -319,13 +323,17 @@ async fn test_get_milestone_by_index_raw() {
     let milestone_index = client.get_info().await.unwrap().node_info.status.latest_milestone.index;
 
     let milestone = client.get_milestone_by_index(milestone_index).await.unwrap();
-    let milestone_raw = MilestonePayload::unpack_verified(
+    let milestone_raw = Payload::unpack_verified(
         client.get_milestone_by_index_raw(milestone_index).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
     .unwrap();
 
-    assert_eq!(milestone, milestone_raw);
+    if let Payload::Milestone(milestone_raw) = milestone_raw {
+        assert_eq!(milestone, *milestone_raw);
+    } else {
+        panic!("expected a milestone payload")
+    }
 }
 
 #[ignore]
