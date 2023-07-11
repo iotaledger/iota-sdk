@@ -12,7 +12,7 @@ class Ed25519Signature():
 
 @dataclass
 class Bip44():
-    coinType: int = 0,
-    account: int = 0,
-    change: int = 0,
-    addressIndex: int = 0,
+    coinType: int = 0
+    account: int = 0
+    change: int = 0
+    addressIndex: int = 0
