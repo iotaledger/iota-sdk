@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, Error as ClientError},
     types::{
         api::core::response::LedgerInclusionState,
         block::{
@@ -10,7 +10,10 @@ use crate::{
             Block, BlockId,
         },
     },
-    wallet::account::{types::InclusionState, Account},
+    wallet::{
+        account::{types::InclusionState, Account},
+        Error,
+    },
 };
 
 const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
@@ -18,7 +21,7 @@ const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
 impl<S: 'static + SecretManage> Account<S>
 where
-    crate::wallet::Error: From<S::Error>,
+    Error: From<S::Error>,
 {
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). This function is re-exported from the client library and default interval is as defined there.
@@ -49,15 +52,13 @@ where
 
         if let Some(transaction) = transaction {
             if transaction.inclusion_state == InclusionState::Confirmed {
-                return transaction
-                    .block_id
-                    .ok_or(crate::wallet::Error::MissingParameter("block id"));
+                return transaction.block_id.ok_or(Error::MissingParameter("block id"));
             }
 
             if transaction.inclusion_state == InclusionState::Conflicting
                 || transaction.inclusion_state == InclusionState::UnknownPruned
             {
-                return Err(crate::client::Error::TangleInclusion(format!(
+                return Err(ClientError::TangleInclusion(format!(
                     "transaction id: {} inclusion state: {:?}",
                     transaction_id, transaction.inclusion_state
                 ))
@@ -120,12 +121,9 @@ where
                 // and confirmed
                 if conflicting {
                     let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
-                        if matches!(
-                            e,
-                            crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))
-                        ) {
+                        if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
                             // If no block was found with this transaction id, then it can't get included
-                            crate::client::Error::TangleInclusion(block_id.to_string())
+                            ClientError::TangleInclusion(block_id.to_string())
                         } else {
                             e
                         }
@@ -133,9 +131,9 @@ where
                     return Ok(included_block.id());
                 }
             }
-            Err(crate::client::Error::TangleInclusion(block_id.to_string()).into())
+            Err(ClientError::TangleInclusion(block_id.to_string()).into())
         } else {
-            Err(crate::wallet::Error::TransactionNotFound(*transaction_id))
+            Err(Error::TransactionNotFound(*transaction_id))
         }
     }
 }
