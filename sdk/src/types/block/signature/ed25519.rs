@@ -130,6 +130,8 @@ impl Packable for Ed25519Signature {
 
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
