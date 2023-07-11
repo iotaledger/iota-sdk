@@ -5,7 +5,7 @@ import type { AccountAddress, AddressWithUnspentOutputs } from './address';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
-import { HexEncodedAmount, HexEncodedString } from '../utils';
+import { HexEncodedString } from '../utils';
 
 /**
  * Account identifier
@@ -56,8 +56,8 @@ export interface RequiredStorageDeposit {
 export interface NativeTokenBalance {
     tokenId: HexEncodedString;
     metadata?: string;
-    total: HexEncodedAmount;
-    available: HexEncodedAmount;
+    total: BigInt;
+    available: BigInt;
 }
 
 /** Sync options for an account */

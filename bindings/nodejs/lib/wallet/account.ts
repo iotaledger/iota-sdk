@@ -49,6 +49,7 @@ import {
     PreparedCreateNativeTokenTransaction,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
+import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
 
 /** The Account class. */
 export class Account {
@@ -164,7 +165,7 @@ export class Account {
      */
     async prepareBurnNativeToken(
         tokenId: string,
-        burnAmount: HexEncodedAmount,
+        burnAmount: BigInt,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -173,7 +174,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: new Map([[tokenId, burnAmount]]),
+                        nativeTokens: new Map([[tokenId, bigIntToHex(burnAmount)]]),
                     },
                     options: transactionOptions,
                 },
@@ -448,8 +449,16 @@ export class Account {
                 name: 'getBalance',
             },
         );
-
-        return JSON.parse(response).payload;
+        const payload = JSON.parse(response).payload;
+        for (let i = 0; i < payload.nativeTokens.length; i++) {
+            if (payload.nativeTokens[i].total) {
+                payload.nativeTokens[i].total = hexToBigInt(payload.nativeTokens[i].total);
+            }
+            if (payload.nativeTokens[i].available) {
+                payload.nativeTokens[i].available = hexToBigInt(payload.nativeTokens[i].available);
+            }
+        }
+        return payload;
     }
 
     /**
@@ -736,7 +745,7 @@ export class Account {
      */
     async prepareMintNativeToken(
         tokenId: string,
-        mintAmount: HexEncodedAmount,
+        mintAmount: BigInt,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -745,7 +754,7 @@ export class Account {
                 name: 'prepareMintNativeToken',
                 data: {
                     tokenId,
-                    mintAmount,
+                    mintAmount: bigIntToHex(mintAmount),
                     options: transactionOptions,
                 },
             },
@@ -1175,7 +1184,16 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        const payload = JSON.parse(response).payload;
+        for (let i = 0; i < payload.nativeTokens.length; i++) {
+            if (payload.nativeTokens[i].total) {
+                payload.nativeTokens[i].total = hexToBigInt(payload.nativeTokens[i].total);
+            }
+            if (payload.nativeTokens[i].available) {
+                payload.nativeTokens[i].available = hexToBigInt(payload.nativeTokens[i].available);
+            }
+        }
+        return payload;
     }
 
     async prepareVote(
