@@ -348,6 +348,14 @@ impl StrongholdAdapter {
         input: Slip10DeriveInput,
         output: Location,
     ) -> Result<(), Error> {
+        let chain = match curve {
+            Curve::Ed25519 => chain
+                .to_chain::<ed25519::SecretKey>()
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            Curve::Secp256k1 => chain.to_chain::<secp256k1_ecdsa::SecretKey>().to_vec(),
+        };
         if let Err(err) = self
             .stronghold
             .lock()
@@ -355,7 +363,7 @@ impl StrongholdAdapter {
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .execute_procedure(procedures::Slip10Derive {
                 curve,
-                chain: <[u32; 5]>::from(&chain).to_vec(),
+                chain,
                 input,
                 output,
             })
