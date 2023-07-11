@@ -3,7 +3,7 @@
 
 # This example listens to the NewOutput event.
 
-from iota_sdk import Wallet, SyncOptions
+from iota_sdk import Wallet, SyncOptions, WalletEventType
 from dotenv import load_dotenv
 import json
 import os
@@ -33,7 +33,7 @@ def callback(event):
 
 
 # Only interested in new outputs here.
-wallet.listen(callback, [2])
+wallet.listen(callback, [WalletEventType.NewOutput])
 
 account = wallet.get_account('Alice')
 

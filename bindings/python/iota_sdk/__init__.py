@@ -15,6 +15,7 @@ from .types.balance import *
 from .types.block import *
 from .types.burn import *
 from .types.common import *
+from .types.event import *
 from .types.feature import *
 from .types.native_token import *
 from .types.node_info import *
