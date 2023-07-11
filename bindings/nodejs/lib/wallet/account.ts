@@ -312,7 +312,7 @@ export class Account {
      */
     async prepareMeltNativeToken(
         tokenId: string,
-        meltAmount: HexEncodedAmount,
+        meltAmount: BigInt,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -321,7 +321,7 @@ export class Account {
                 name: 'prepareMeltNativeToken',
                 data: {
                     tokenId,
-                    meltAmount,
+                    meltAmount: bigIntToHex(meltAmount),
                     options: transactionOptions,
                 },
             },
