@@ -3,10 +3,10 @@
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::Segment;
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
+        constants::SHIMMER_COIN_TYPE,
         secret::types::{InputSigningData, InputSigningDataDto},
     },
     types::block::{
@@ -21,7 +21,7 @@ use iota_sdk::{
 fn input_signing_data_conversion() {
     let protocol_parameters = protocol_parameters();
 
-    let bip32_chain = [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0];
+    let bip44_chain = Bip44::new().with_coin_type(SHIMMER_COIN_TYPE);
 
     let output = BasicOutput::build_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -43,11 +43,11 @@ fn input_signing_data_conversion() {
             0,
             0,
         ),
-        chain: Some(bip32_chain.into_iter().map(Segment::harden).collect()),
+        chain: Some(bip44_chain),
     };
 
     let input_signing_data_dto = InputSigningDataDto::from(&input_signing_data);
-    assert_eq!(input_signing_data_dto.chain.as_deref(), Some(&bip32_chain[..]));
+    assert_eq!(input_signing_data_dto.chain.as_ref(), Some(&bip44_chain));
 
     let restored_input_signing_data =
         InputSigningData::try_from_dto(input_signing_data_dto.clone(), protocol_parameters.token_supply()).unwrap();
@@ -61,13 +61,10 @@ fn input_signing_data_conversion() {
 
     let restored_input_signing_data_dto =
         serde_json::from_str::<InputSigningDataDto>(input_signing_data_dto_str).unwrap();
-    assert_eq!(restored_input_signing_data_dto.chain.as_deref(), Some(&bip32_chain[..]));
+    assert_eq!(restored_input_signing_data_dto.chain.as_ref(), Some(&bip44_chain));
 
     let restored_input_signing_data =
         InputSigningData::try_from_dto(restored_input_signing_data_dto, protocol_parameters.token_supply()).unwrap();
     assert!(restored_input_signing_data.output.is_basic());
-    assert_eq!(
-        restored_input_signing_data.chain,
-        Some(bip32_chain.into_iter().map(Segment::harden).collect())
-    );
+    assert_eq!(restored_input_signing_data.chain, Some(bip44_chain));
 }

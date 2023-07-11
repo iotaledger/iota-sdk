@@ -21,7 +21,7 @@ use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
-    keys::{bip39::Mnemonic, slip10::Segment},
+    keys::{bip39::Mnemonic, bip44::Bip44},
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -80,25 +80,17 @@ pub trait SecretManage: Send + Sync {
     ) -> Result<Vec<EvmAddress>, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Ed25519.
-    async fn sign_ed25519(
-        &self,
-        msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<Ed25519Signature, Self::Error>;
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Secp256k1.
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error>;
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(
-        &self,
-        essence_hash: &[u8; 32],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<Unlock, Self::Error> {
+    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
         Ok(Unlock::Signature(SignatureUnlock::new(Signature::from(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
@@ -313,11 +305,7 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_ed25519(
-        &self,
-        msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> crate::client::Result<Ed25519Signature> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> crate::client::Result<Ed25519Signature> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
@@ -331,8 +319,8 @@ impl SecretManage for SecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
@@ -476,7 +464,7 @@ where
                     Err(InputSelectionError::MissingInputWithEd25519Address)?;
                 }
 
-                let chain = input.chain.as_ref().ok_or(Error::MissingBip32Chain)?;
+                let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
                 let block = secret_manager.signature_unlock(&hashed_essence, chain).await?;
                 blocks.push(block);

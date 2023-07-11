@@ -595,7 +595,7 @@ impl WalletMessageHandler {
                 let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
                 let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
-                Ok(Response::Bool(public_key.verify(&signature, &message)))
+                Ok(Response::Bool(public_key.verify_keccak256(&signature, &message)))
             }
             AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
@@ -604,7 +604,7 @@ impl WalletMessageHandler {
                     .secret_manager
                     .read()
                     .await
-                    .sign_secp256k1_ecdsa(&msg, &chain)
+                    .sign_secp256k1_ecdsa(&msg, chain)
                     .await?;
                 Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),

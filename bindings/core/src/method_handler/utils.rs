@@ -102,7 +102,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let signature = prefix_hex::decode(signature)?;
             let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(public_key.verify(&signature, &message))
+            Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
     };
     Ok(response)

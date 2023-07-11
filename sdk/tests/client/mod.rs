@@ -22,7 +22,7 @@ use std::{
     str::FromStr,
 };
 
-use crypto::keys::slip10::Hardened;
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
@@ -72,7 +72,7 @@ enum Build<'a> {
         Option<(&'a str, u64)>,
         Option<u32>,
         Option<(&'a str, u32)>,
-        Option<Vec<Hardened>>,
+        Option<Bip44>,
     ),
     Nft(
         u64,
@@ -83,7 +83,7 @@ enum Build<'a> {
         Option<&'a str>,
         Option<(&'a str, u64)>,
         Option<(&'a str, u32)>,
-        Option<Vec<Hardened>>,
+        Option<Bip44>,
     ),
     Alias(
         u64,
@@ -94,7 +94,7 @@ enum Build<'a> {
         Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
         Option<&'a str>,
-        Option<Vec<Hardened>>,
+        Option<Bip44>,
     ),
     Foundry(u64, AliasId, u32, SimpleTokenScheme, Option<Vec<(&'a str, u64)>>),
 }
@@ -237,7 +237,7 @@ fn build_foundry_output(
     builder.finish_output(TOKEN_SUPPLY).unwrap()
 }
 
-fn build_output_inner(build: Build) -> (Output, Option<Vec<Hardened>>) {
+fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
     match build {
         Build::Basic(amount, bech32_address, native_tokens, bech32_sender, sdruc, timelock, expiration, chain) => (
             build_basic_output(

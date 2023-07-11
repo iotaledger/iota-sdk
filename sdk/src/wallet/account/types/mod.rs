@@ -9,7 +9,7 @@ pub mod participation;
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::{Hardened, Segment};
+use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Deserializer, Serialize};
 
 pub use self::{
@@ -17,7 +17,7 @@ pub use self::{
     balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
 };
 use crate::{
-    client::{constants::HD_WALLET_TYPE, secret::types::InputSigningData},
+    client::secret::types::InputSigningData,
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -50,7 +50,7 @@ pub struct OutputData {
     pub network_id: u64,
     pub remainder: bool,
     // bip32 path
-    pub chain: Option<Vec<Hardened>>,
+    pub chain: Option<Bip44>,
 }
 
 impl OutputData {
@@ -73,16 +73,11 @@ impl OutputData {
                 .find(|a| a.address.inner == unlock_address)
             {
                 Some(
-                    [
-                        HD_WALLET_TYPE,
-                        account.coin_type,
-                        account.index,
-                        address.internal as u32,
-                        address.key_index,
-                    ]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
+                    Bip44::new()
+                        .with_coin_type(account.coin_type)
+                        .with_account(account.index)
+                        .with_change(address.internal as _)
+                        .with_address_index(address.key_index),
                 )
             } else {
                 return Ok(None);
@@ -119,7 +114,7 @@ pub struct OutputDataDto {
     /// Remainder
     pub remainder: bool,
     /// Bip32 path
-    pub chain: Option<Vec<u32>>,
+    pub chain: Option<Bip44>,
 }
 
 impl From<&OutputData> for OutputDataDto {
@@ -132,10 +127,7 @@ impl From<&OutputData> for OutputDataDto {
             address: AddressDto::from(&value.address),
             network_id: value.network_id.to_string(),
             remainder: value.remainder,
-            chain: value
-                .chain
-                .as_ref()
-                .map(|c| c.iter().copied().map(Into::into).collect()),
+            chain: value.chain,
         }
     }
 }

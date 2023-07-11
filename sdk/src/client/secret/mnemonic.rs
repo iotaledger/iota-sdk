@@ -8,10 +8,7 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::{
-        bip39::Mnemonic,
-        slip10::{Seed, Segment},
-    },
+    keys::{bip39::Mnemonic, bip44::Bip44, slip10::Seed},
     signatures::{
         ed25519,
         secp256k1_ecdsa::{self, EvmAddress},
@@ -21,7 +18,7 @@ use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{api::PreparedTransactionData, constants::HD_WALLET_TYPE, Client, Error},
+    client::{api::PreparedTransactionData, Client, Error},
     types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
 };
 
@@ -51,13 +48,14 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(address_indexes
             .map(|address_index| {
-                let chain = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]
-                    .into_iter()
-                    .map(Segment::harden);
+                let chain = Bip44::new()
+                    .with_coin_type(coin_type)
+                    .with_account(account_index)
+                    .with_change(internal as _)
+                    .with_address_index(address_index);
 
-                let public_key = self
-                    .0
-                    .derive::<ed25519::SecretKey, _>(chain)
+                let public_key = chain
+                    .derive(&self.0.to_master_key::<ed25519::SecretKey>())
                     .secret_key()
                     .public_key()
                     .to_bytes();
@@ -83,32 +81,25 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(address_indexes
             .map(|address_index| {
-                let chain = [HD_WALLET_TYPE, coin_type, account_index]
-                    .into_iter()
-                    .map(|s| s.harden().into())
-                    .chain([internal as u32, address_index]);
+                let chain = Bip44::new()
+                    .with_coin_type(coin_type)
+                    .with_account(account_index)
+                    .with_change(internal as _)
+                    .with_address_index(address_index);
 
-                let public_key = self
-                    .0
-                    .derive::<secp256k1_ecdsa::SecretKey, _>(chain)
+                let public_key = chain
+                    .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
                     .secret_key()
                     .public_key();
 
-                crate::client::Result::Ok(public_key.to_evm_address())
+                crate::client::Result::Ok(public_key.evm_address())
             })
             .collect::<Result<_, _>>()?)
     }
 
-    async fn sign_ed25519(
-        &self,
-        msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let private_key = self
-            .0
-            .derive::<ed25519::SecretKey, _>(chain.iter().copied().map(Segment::harden))
-            .secret_key();
+        let private_key = chain.derive(&self.0.to_master_key::<ed25519::SecretKey>()).secret_key();
         let public_key = private_key.public_key();
         let signature = private_key.sign(msg);
 
@@ -118,15 +109,14 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         // Get the private and public key for this secp256k1_ecdsa key
-        let private_key = self
-            .0
-            .derive::<secp256k1_ecdsa::SecretKey, _>(chain.iter().copied().map(Into::<u32>::into))
+        let private_key = chain
+            .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
             .secret_key();
         let public_key = private_key.public_key();
-        let signature = private_key.sign(msg);
+        let signature = private_key.try_sign_keccak256(msg)?;
 
         Ok((public_key, signature))
     }

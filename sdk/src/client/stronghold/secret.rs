@@ -8,7 +8,7 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::{bip39::Mnemonic, slip10::Segment},
+    keys::{bip39::Mnemonic, bip44::Bip44, slip10::Segment},
     signatures::{
         ed25519,
         secp256k1_ecdsa::{self, EvmAddress},
@@ -28,7 +28,6 @@ use super::{
 use crate::{
     client::{
         api::PreparedTransactionData,
-        constants::HD_WALLET_TYPE,
         secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
         stronghold::Error,
     },
@@ -63,20 +62,27 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let bip_path = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
-            let chain = bip_path.into_iter().map(Segment::harden).collect::<Vec<_>>();
+            let chain = Bip44::new()
+                .with_coin_type(coin_type)
+                .with_account(account_index)
+                .with_change(internal as _)
+                .with_address_index(address_index);
 
             let derive_location = Location::generic(
                 SECRET_VAULT_PATH,
                 [
                     DERIVE_OUTPUT_RECORD_PATH,
-                    &chain.iter().flat_map(|seg| seg.ser32()).collect::<Vec<u8>>(),
+                    &chain
+                        .to_chain::<ed25519::SecretKey>()
+                        .into_iter()
+                        .flat_map(|seg| seg.ser32())
+                        .collect::<Vec<u8>>(),
                 ]
                 .concat(),
             );
 
             // Derive a SLIP-10 private key in the vault.
-            self.slip10_derive(Curve::Ed25519, &chain, seed_location.clone(), derive_location.clone())
+            self.slip10_derive(Curve::Ed25519, chain, seed_location.clone(), derive_location.clone())
                 .await?;
 
             // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -129,23 +135,27 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let chain = [HD_WALLET_TYPE, coin_type, account_index]
-                .into_iter()
-                .map(|s| s.harden().into())
-                .chain([internal as u32, address_index])
-                .collect::<Vec<_>>();
+            let chain = Bip44::new()
+                .with_coin_type(coin_type)
+                .with_account(account_index)
+                .with_change(internal as _)
+                .with_address_index(address_index);
 
             let derive_location = Location::generic(
                 SECRET_VAULT_PATH,
                 [
                     DERIVE_OUTPUT_RECORD_PATH,
-                    &chain.iter().flat_map(|seg| seg.ser32()).collect::<Vec<u8>>(),
+                    &chain
+                        .to_chain::<secp256k1_ecdsa::SecretKey>()
+                        .into_iter()
+                        .flat_map(|seg| seg.ser32())
+                        .collect::<Vec<u8>>(),
                 ]
                 .concat(),
             );
 
             // Derive a SLIP-10 private key in the vault.
-            self.slip10_derive(Curve::Secp256k1, &chain, seed_location.clone(), derive_location.clone())
+            self.slip10_derive(Curve::Secp256k1, chain, seed_location.clone(), derive_location.clone())
                 .await?;
 
             // Get the Secp256k1 public key from the derived SLIP-10 private key in the vault.
@@ -162,17 +172,13 @@ impl SecretManage for StrongholdAdapter {
                 .map_err(Error::from)?;
 
             // Collect it.
-            addresses.push(public_key.to_evm_address());
+            addresses.push(public_key.evm_address());
         }
 
         Ok(addresses)
     }
 
-    async fn sign_ed25519(
-        &self,
-        msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -189,7 +195,11 @@ impl SecretManage for StrongholdAdapter {
             SECRET_VAULT_PATH,
             [
                 DERIVE_OUTPUT_RECORD_PATH,
-                &chain.iter().flat_map(|seg| seg.ser32()).collect::<Vec<u8>>(),
+                &chain
+                    .to_chain::<ed25519::SecretKey>()
+                    .into_iter()
+                    .flat_map(|seg| seg.ser32())
+                    .collect::<Vec<u8>>(),
             ]
             .concat(),
         );
@@ -218,8 +228,8 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -236,7 +246,11 @@ impl SecretManage for StrongholdAdapter {
             SECRET_VAULT_PATH,
             [
                 DERIVE_OUTPUT_RECORD_PATH,
-                &chain.iter().flat_map(|seg| seg.ser32()).collect::<Vec<u8>>(),
+                &chain
+                    .to_chain::<secp256k1_ecdsa::SecretKey>()
+                    .into_iter()
+                    .flat_map(|seg| seg.ser32())
+                    .collect::<Vec<u8>>(),
             ]
             .concat(),
         );
@@ -330,7 +344,7 @@ impl StrongholdAdapter {
     async fn slip10_derive(
         &self,
         curve: Curve,
-        chain: &[impl Segment + Send + Sync],
+        chain: Bip44,
         input: Slip10DeriveInput,
         output: Location,
     ) -> Result<(), Error> {
@@ -341,7 +355,7 @@ impl StrongholdAdapter {
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .execute_procedure(procedures::Slip10Derive {
                 curve,
-                chain: chain.iter().copied().map(Into::into).collect(),
+                chain: <[u32; 5]>::from(&chain).to_vec(),
                 input,
                 output,
             })
@@ -402,8 +416,8 @@ impl StrongholdAdapter {
         &self,
         private_key: Location,
         msg: &[u8],
-    ) -> Result<secp256k1_ecdsa::Signature, Error> {
-        Ok(secp256k1_ecdsa::Signature::try_from_bytes(
+    ) -> Result<secp256k1_ecdsa::RecoverableSignature, Error> {
+        Ok(secp256k1_ecdsa::RecoverableSignature::try_from_bytes(
             &self
                 .stronghold
                 .lock()
@@ -412,6 +426,7 @@ impl StrongholdAdapter {
                 .execute_procedure(procedures::Secp256k1EcdsaSign {
                     private_key,
                     msg: msg.to_vec(),
+                    flavor: procedures::Secp256k1EcdsaFlavor::Keccak256,
                 })?,
         )?)
     }

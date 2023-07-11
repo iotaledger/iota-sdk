@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "participation")]
@@ -193,7 +194,7 @@ pub enum AccountMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
-        chain: Vec<u32>,
+        chain: Bip44,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)

@@ -8,13 +8,14 @@
 //! cargo run --release --all-features --example sign_ed25519
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
+        constants::SHIMMER_COIN_TYPE,
         hex_public_key_to_bech32_address,
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    crypto::keys::{bip39::Mnemonic, slip10::Segment},
+    crypto::keys::bip39::Mnemonic,
     wallet::Result,
 };
 
@@ -37,20 +38,15 @@ async fn main() -> Result<()> {
         .store_mnemonic(Mnemonic::from(std::env::var("MNEMONIC").unwrap()))
         .await?;
 
-    let bip32_chain = [
-        HD_WALLET_TYPE,
-        SHIMMER_COIN_TYPE,
-        ACCOUNT_INDEX,
-        INTERNAL_ADDRESS as u32,
-        ADDRESS_INDEX,
-    ]
-    .into_iter()
-    .map(Segment::harden)
-    .collect::<Vec<_>>();
+    let bip44_chain = Bip44::new()
+        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_account(ACCOUNT_INDEX)
+        .with_change(INTERNAL_ADDRESS as _)
+        .with_address_index(ADDRESS_INDEX);
 
     let message = FOUNDRY_METADATA.as_bytes();
     let signature = SecretManager::Stronghold(stronghold)
-        .sign_ed25519(message, &bip32_chain)
+        .sign_ed25519(message, bip44_chain)
         .await?;
     println!(
         "Public key: {}\nSignature: {}",

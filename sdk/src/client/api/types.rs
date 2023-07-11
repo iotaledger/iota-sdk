@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::{Hardened, Segment};
+use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -169,7 +169,7 @@ pub struct RemainderData {
     /// The remainder output
     pub output: Output,
     /// The chain derived from seed, for the remainder addresses
-    pub chain: Option<Vec<Hardened>>,
+    pub chain: Option<Bip44>,
     /// The remainder address
     pub address: Address,
 }
@@ -180,7 +180,7 @@ pub struct RemainderDataDto {
     /// The remainder output
     pub output: OutputDto,
     /// The chain derived from seed, for the remainder addresses
-    pub chain: Option<Vec<u32>>,
+    pub chain: Option<Bip44>,
     /// The remainder address
     pub address: AddressDto,
 }
@@ -189,7 +189,7 @@ impl RemainderData {
     pub(crate) fn try_from_dto(remainder: RemainderDataDto, token_supply: u64) -> crate::client::Result<Self> {
         Ok(Self {
             output: Output::try_from_dto(remainder.output, token_supply)?,
-            chain: remainder.chain.map(|c| c.into_iter().map(Segment::harden).collect()),
+            chain: remainder.chain,
             address: Address::try_from(remainder.address)?,
         })
     }
@@ -197,7 +197,7 @@ impl RemainderData {
     pub(crate) fn try_from_dto_unverified(remainder: RemainderDataDto) -> crate::client::Result<Self> {
         Ok(Self {
             output: Output::try_from_dto_unverified(remainder.output)?,
-            chain: remainder.chain.map(|c| c.into_iter().map(Segment::harden).collect()),
+            chain: remainder.chain,
             address: Address::try_from(remainder.address)?,
         })
     }
@@ -207,10 +207,7 @@ impl From<&RemainderData> for RemainderDataDto {
     fn from(remainder: &RemainderData) -> Self {
         Self {
             output: OutputDto::from(&remainder.output),
-            chain: remainder
-                .chain
-                .as_ref()
-                .map(|c| c.iter().copied().map(Into::into).collect()),
+            chain: remainder.chain,
             address: AddressDto::from(&remainder.address),
         }
     }

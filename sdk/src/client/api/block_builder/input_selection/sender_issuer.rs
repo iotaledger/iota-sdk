@@ -5,7 +5,7 @@
 
 use std::collections::HashSet;
 
-use crypto::keys::slip10::Segment;
+use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
@@ -16,7 +16,6 @@ use crate::{
             },
             ClientBlockBuilder,
         },
-        constants::HD_WALLET_TYPE,
         secret::types::InputSigningData,
         Error, Result,
     },
@@ -72,16 +71,11 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: Some(
-                                    [
-                                        HD_WALLET_TYPE,
-                                        self.coin_type,
-                                        self.account_index,
-                                        internal as u32,
-                                        address_index,
-                                    ]
-                                    .into_iter()
-                                    .map(Segment::harden)
-                                    .collect(),
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(self.account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index),
                                 ),
                             });
                             found_output = true;
@@ -136,16 +130,11 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    [
-                                        HD_WALLET_TYPE,
-                                        self.coin_type,
-                                        self.account_index,
-                                        internal as u32,
-                                        address_index,
-                                    ]
-                                    .into_iter()
-                                    .map(Segment::harden)
-                                    .collect()
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(self.account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index)
                                 }),
                             });
                         }
@@ -196,16 +185,11 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    [
-                                        HD_WALLET_TYPE,
-                                        self.coin_type,
-                                        self.account_index,
-                                        internal as u32,
-                                        address_index,
-                                    ]
-                                    .into_iter()
-                                    .map(Segment::harden)
-                                    .collect()
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(self.account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index)
                                 }),
                             });
                         }

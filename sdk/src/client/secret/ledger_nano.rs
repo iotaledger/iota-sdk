@@ -9,7 +9,7 @@ use std::{collections::HashMap, ops::Range};
 
 use async_trait::async_trait;
 use crypto::{
-    keys::slip10::Segment,
+    keys::{bip44::Bip44, slip10::Segment},
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
@@ -173,24 +173,18 @@ impl SecretManage for LedgerSecretManager {
     }
 
     /// Ledger only allows signing messages of 32 bytes, anything else is unsupported and will result in an error.
-    async fn sign_ed25519(
-        &self,
-        msg: &[u8],
-        chain: &[impl Segment + Send + Sync],
-    ) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
         if msg.len() != 32 {
             return Err(Error::UnsupportedOperation.into());
         }
 
         let msg = msg.to_vec();
 
-        let bip32_chain = chain.iter().copied().map(Into::<u32>::into).collect::<Vec<_>>();
-
-        let coin_type = bip32_chain[1].unharden().into();
-        let account_index = bip32_chain[2].harden().into();
+        let coin_type = chain.coin_type;
+        let account_index = chain.account.harden().into();
         let bip32_index = LedgerBIP32Index {
-            bip32_change: bip32_chain[3].harden().into(),
-            bip32_index: bip32_chain[4].harden().into(),
+            bip32_change: chain.change.harden().into(),
+            bip32_index: chain.address_index.harden().into(),
         };
 
         // Lock the mutex to prevent multiple simultaneous requests to a ledger.
@@ -226,8 +220,8 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         _msg: &[u8],
-        _chain: &[impl Segment + Send + Sync],
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        _chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         Err(Error::UnsupportedOperation.into())
     }
 
@@ -243,23 +237,20 @@ impl SecretManage for LedgerSecretManager {
         let input_len = prepared_transaction.inputs_data.len();
 
         for input in &prepared_transaction.inputs_data {
-            let bip32_indices = match &input.chain {
-                Some(chain) => chain.iter().copied().map(Into::<u32>::into).collect::<Vec<_>>(),
-                None => return Err(Error::MissingBip32Chain)?,
-            };
+            let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
             // coin_type and account_index should be the same in each output
-            if (coin_type.is_some() && coin_type != Some(bip32_indices[1]))
-                || (account_index.is_some() && account_index != Some(bip32_indices[2]))
+            if (coin_type.is_some() && coin_type != Some(chain.coin_type))
+                || (account_index.is_some() && account_index != Some(chain.account))
             {
                 return Err(Error::Bip32ChainMismatch.into());
             }
 
-            coin_type = Some(bip32_indices[1]);
-            account_index = Some(bip32_indices[2]);
+            coin_type = Some(chain.coin_type);
+            account_index = Some(chain.account);
             input_bip32_indices.push(LedgerBIP32Index {
-                bip32_change: bip32_indices[3].harden().into(),
-                bip32_index: bip32_indices[4].harden().into(),
+                bip32_change: chain.change.harden().into(),
+                bip32_index: chain.address_index.harden().into(),
             });
         }
 
@@ -267,7 +258,7 @@ impl SecretManage for LedgerSecretManager {
             return Err(Error::NoAvailableInputsProvided)?;
         }
 
-        let coin_type = coin_type.unwrap().unharden().into();
+        let coin_type = coin_type.unwrap();
         let bip32_account = account_index.unwrap().harden().into();
 
         // pack essence and hash into vec
@@ -294,15 +285,12 @@ impl SecretManage for LedgerSecretManager {
             let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
                 match &prepared_transaction.remainder {
                     Some(a) => {
-                        let remainder_bip32_indices = match &a.chain {
-                            Some(chain) => chain.iter().copied().map(Into::<u32>::into).collect::<Vec<_>>(),
-                            None => return Err(Error::MissingBip32Chain.into()),
-                        };
+                        let chain = a.chain.ok_or(Error::MissingBip32Chain)?;
                         (
                             Some(&a.address),
                             LedgerBIP32Index {
-                                bip32_change: remainder_bip32_indices[3].harden().into(),
-                                bip32_index: remainder_bip32_indices[4].harden().into(),
+                                bip32_change: chain.change.harden().into(),
+                                bip32_index: chain.address_index.harden().into(),
                             },
                         )
                     }

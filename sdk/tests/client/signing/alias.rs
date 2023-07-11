@@ -3,14 +3,14 @@
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::Segment;
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
             transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
-        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{SecretManage, SecretManager},
         Client, Result,
     },
@@ -67,12 +67,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(
-            [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
-                .into_iter()
-                .map(Segment::harden)
-                .collect(),
-        ),
+        Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
     )]);
 
     let outputs = build_outputs([Alias(
@@ -163,12 +158,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(
-            [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1]
-                .into_iter()
-                .map(Segment::harden)
-                .collect(),
-        ),
+        Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
     )]);
 
     let outputs = build_outputs([Alias(
@@ -261,12 +251,7 @@ async fn alias_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,

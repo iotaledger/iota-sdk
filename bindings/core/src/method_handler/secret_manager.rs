@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::Segment;
 use iota_sdk::{
     client::{
         api::PreparedTransactionData,
@@ -52,24 +51,19 @@ pub(crate) async fn call_secret_manager_method_internal(
         } => {
             let transaction_essence_hash: [u8; 32] = prefix_hex::decode(transaction_essence_hash)?;
             let unlock: Unlock = secret_manager
-                .signature_unlock(
-                    &transaction_essence_hash,
-                    &chain.into_iter().map(Segment::harden).collect::<Vec<_>>(),
-                )
+                .signature_unlock(&transaction_essence_hash, chain)
                 .await?;
 
             Response::SignatureUnlock((&unlock).into())
         }
         SecretManagerMethod::SignEd25519 { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let signature = secret_manager
-                .sign_ed25519(&msg, &chain.into_iter().map(Segment::harden).collect::<Vec<_>>())
-                .await?;
+            let signature = secret_manager.sign_ed25519(&msg, chain).await?;
             Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }
         SecretManagerMethod::SignSecp256k1Ecdsa { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let (public_key, signature) = secret_manager.sign_secp256k1_ecdsa(&msg, &chain).await?;
+            let (public_key, signature) = secret_manager.sign_secp256k1_ecdsa(&msg, chain).await?;
             Response::Secp256k1EcdsaSignature {
                 public_key: prefix_hex::encode(public_key.to_bytes()),
                 signature: prefix_hex::encode(signature.to_bytes()),

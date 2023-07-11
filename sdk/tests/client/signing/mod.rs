@@ -7,14 +7,14 @@ mod nft;
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::Segment;
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
             input_selection::InputSelection, transaction::validate_transaction_payload_length, verify_semantic,
             GetAddressesOptions, PreparedTransactionData,
         },
-        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{SecretManage, SecretManager},
         Result,
     },
@@ -93,12 +93,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,
@@ -168,12 +163,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,
@@ -183,12 +173,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(1)),
         ),
         Basic(
             1_000_000,
@@ -198,12 +183,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 2]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(2)),
         ),
         Basic(
             1_000_000,
@@ -213,12 +193,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 2]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(2)),
         ),
         Nft(
             1_000_000,
@@ -229,12 +204,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,
@@ -276,12 +246,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((&nft_3_bech32_address.to_string(), 150)),
-            Some(
-                [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0]
-                    .into_iter()
-                    .map(Segment::harden)
-                    .collect(),
-            ),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,
