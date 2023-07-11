@@ -100,7 +100,7 @@ pub enum Response {
     /// [`GenerateEvmAddresses`](crate::wallet::message_interface::AccountMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
     /// Response for:
-    /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
+    /// - [`SignSecp256k1Ecdsa`](crate::wallet::message_interface::AccountMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
     Secp256k1EcdsaSignature { public_key: String, signature: String },
     /// Response for

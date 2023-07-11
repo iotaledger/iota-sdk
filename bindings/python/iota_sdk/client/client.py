@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import iota_sdk
-from iota_sdk import call_client_method
+from iota_sdk import call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
@@ -19,6 +19,7 @@ import humps
 from datetime import timedelta
 from typing import Any, Dict, List, Optional
 from dacite import from_dict
+
 
 class ClientError(Exception):
     """client error"""
@@ -384,7 +385,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              inputs: Optional[List[Dict[str, Any]]] = None,
                              output: Optional[Dict[str, Any]] = None,
                              outputs: Optional[List[Any]] = None,
-                             tag: Optional[HexStr] = None) -> List[HexStr|Block]:
+                             tag: Optional[HexStr] = None) -> List[HexStr | Block]:
         """Build and post a block.
 
         Parameters
@@ -509,7 +510,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def submit_payload(self, payload) -> List[HexStr|Block]:
+    def submit_payload(self, payload) -> List[HexStr | Block]:
         """Submit a payload in a block.
         """
         result = self._call_method('postBlockPayload', {
@@ -517,3 +518,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         })
         result[1] = Block.from_dict(result[1])
         return result
+
+    def listen_mqtt(self, topics: List[str], handler):
+        """Listen to MQTT events.
+        """
+        listen_mqtt(self.handle, topics, handler)
+
+    def clear_mqtt_listeners(self, topics: List[str]):
+        """Removes all listeners for the provided MQTT topics.
+        """
+        return self._call_method('clearListeners', {
+            'topics': topics
+        })

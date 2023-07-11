@@ -27,8 +27,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     // Here all funds will be send to the address with the lowest index in the range
     let address = client

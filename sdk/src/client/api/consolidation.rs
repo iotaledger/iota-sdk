@@ -64,7 +64,7 @@ impl Client {
                 self.bech32_hrp_matches(consolidation_address.hrp()).await?;
 
                 for chunk in outputs_chunks {
-                    let mut block_builder = self.block().with_secret_manager(secret_manager);
+                    let mut block_builder = self.build_block().with_secret_manager(secret_manager);
                     let mut total_amount = 0;
                     let mut total_native_tokens = NativeTokensBuilder::new();
 

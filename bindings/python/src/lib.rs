@@ -76,6 +76,7 @@ fn iota_sdk(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
     m.add_function(wrap_pyfunction!(create_client, m)?).unwrap();
     m.add_function(wrap_pyfunction!(call_client_method, m)?).unwrap();
+    m.add_function(wrap_pyfunction!(listen_mqtt, m)?).unwrap();
 
     m.add_function(wrap_pyfunction!(create_secret_manager, m)?).unwrap();
     m.add_function(wrap_pyfunction!(call_secret_manager_method, m)?)

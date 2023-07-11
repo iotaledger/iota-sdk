@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
 
     println!("Sending {AMOUNT} to {recv_address}");
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_output(recv_address, AMOUNT)
         .await?

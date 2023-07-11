@@ -66,7 +66,7 @@ where
     }
 
     /// Prepares the transaction for
-    /// [Account::create_alias_output()](crate::account::Account::create_alias_output).
+    /// [Account::create_alias_output()](crate::wallet::Account::create_alias_output).
     pub async fn prepare_create_alias_output(
         &self,
         params: Option<CreateAliasParams>,

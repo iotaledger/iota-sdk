@@ -4,10 +4,13 @@
 from __future__ import annotations
 from iota_sdk import call_utils_method
 from iota_sdk.types.signature import Ed25519Signature
+from iota_sdk.types.address import Address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.output import Output
 from json import dumps, loads
-from typing import Any, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
+from dacite import from_dict
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -60,12 +63,12 @@ class Utils():
         })
 
     @staticmethod
-    def parse_bech32_address(address: str) -> Dict[str, Any]:
+    def parse_bech32_address(address: str) -> Address:
         """Returns a valid Address parsed from a String.
         """
-        return _call_method('parseBech32Address', {
+        return from_dict(Address, _call_method('parseBech32Address', {
             'address': address
-        })
+        }))
 
     @staticmethod
     def is_address_valid(address: str) -> bool:
@@ -82,7 +85,7 @@ class Utils():
         return _call_method('generateMnemonic')
 
     @staticmethod
-    def mnemonic_to_hex_seed(mnemonic: HexStr) -> HexStr:
+    def mnemonic_to_hex_seed(mnemonic: str) -> HexStr:
         """Returns a hex encoded seed for a mnemonic.
         """
         return _call_method('mnemonicToHexSeed', {
@@ -94,11 +97,11 @@ class Utils():
         """Computes the alias id for the given alias output id.
         """
         return _call_method('computeAliasId', {
-            'outputId': output_id
+            'outputId': repr(output_id)
         })
 
     @staticmethod
-    def compute_foundry_id(alias_id: str, serial_number: int, token_scheme_kind: int) -> HexStr:
+    def compute_foundry_id(alias_id: HexStr, serial_number: int, token_scheme_kind: int) -> HexStr:
         """Computes the foundry id.
         """
         return _call_method('computeFoundryId', {
@@ -108,11 +111,11 @@ class Utils():
         })
 
     @staticmethod
-    def compute_inputs_commitment(inputs) -> HexStr:
+    def compute_inputs_commitment(inputs: List[Output]) -> HexStr:
         """Computes the input commitment from the output objects that are used as inputs to fund the transaction.
         """
         return _call_method('computeInputsCommitment', {
-            'inputs': inputs
+            'inputs': [i.as_dict() for i in inputs]
         })
 
     @staticmethod
@@ -131,7 +134,7 @@ class Utils():
         return _call_method('computeNftId', {
             'outputId': repr(output_id)
         })
-        
+
     @staticmethod
     def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
         """Computes the output id from transaction id and output index.
@@ -150,7 +153,6 @@ class Utils():
             'serialNumber': serial_number,
             'tokenSchemeKind': token_scheme_kind
         })
-
 
     @staticmethod
     def block_id(block: Block) -> HexStr:
@@ -173,7 +175,7 @@ class Utils():
         """Verifies an ed25519 signature against a message.
         """
         return _call_method('verifyEd25519Signature', {
-            'signature': signature,
+            'signature': signature.__dict__,
             'message': message,
         })
 

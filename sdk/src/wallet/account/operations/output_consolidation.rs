@@ -90,7 +90,7 @@ where
     }
 
     /// Prepares the transaction for
-    /// [Account::consolidate_outputs()](crate::account::Account::consolidate_outputs).
+    /// [Account::consolidate_outputs()](crate::wallet::Account::consolidate_outputs).
     pub async fn prepare_consolidate_outputs(
         &self,
         force: bool,

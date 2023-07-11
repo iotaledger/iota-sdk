@@ -4,12 +4,12 @@ import os
 
 load_dotenv()
 
-if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
-    raise Exception(".env mnemonic is undefined, see .env.example")
+if 'MNEMONIC' not in os.environ:
+    raise Exception(".env MNEMONIC is undefined, see .env.example")
 
 # In this example we will create addresses from a mnemonic
 
-secret_manager = SecretManager(MnemonicSecretManager(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1']))
+secret_manager = SecretManager(MnemonicSecretManager(os.environ['MNEMONIC']))
 
 # Generate public address with default account index and range.
 addresses = secret_manager.generate_ed25519_addresses()

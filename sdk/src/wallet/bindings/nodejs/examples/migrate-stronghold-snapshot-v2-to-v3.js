@@ -11,7 +11,7 @@ const v3Path = './v3.stronghold';
 
 async function run() {
     var accountManagerOptions = {
-        storagePath: `${process.env.WALLET_DB_PATH}`,
+        storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
             nodes: [process.env.NODE_URL],
             localPow: true,
@@ -42,7 +42,7 @@ async function run() {
     );
 
     accountManagerOptions = {
-        storagePath: `${process.env.WALLET_DB_PATH}`,
+        storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
             nodes: [process.env.NODE_URL],
             localPow: true,

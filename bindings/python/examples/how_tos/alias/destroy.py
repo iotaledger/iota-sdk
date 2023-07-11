@@ -14,7 +14,7 @@ account = wallet.get_account('Alice')
 balance = account.sync()
 
 # We try to destroy the first alias in the account
-alias_id = balance['aliases'][0]
+alias_id = balance.aliases[0]
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")

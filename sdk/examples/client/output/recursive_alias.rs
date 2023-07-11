@@ -34,8 +34,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
@@ -63,7 +62,7 @@ async fn main() -> Result<()> {
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?; 3];
 
     let block_1 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -111,7 +110,7 @@ async fn main() -> Result<()> {
     ];
 
     let block_2 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -136,7 +135,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block_3 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -161,7 +160,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block_3 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()

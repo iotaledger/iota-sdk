@@ -30,8 +30,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(
@@ -62,7 +61,7 @@ async fn main() -> Result<()> {
     println!("{output_ids_response:#?}");
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_output(receiver_address, amount)
         .await?
