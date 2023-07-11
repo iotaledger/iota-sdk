@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HexEncodedAmount } from '../../utils';
+import { bigIntToHex, hexToBigInt } from '../../utils/hex-encoding';
 
 enum TokenSchemeType {
     Simple = 0,
@@ -31,35 +32,35 @@ class SimpleTokenScheme extends TokenScheme {
     private maximumSupply: HexEncodedAmount;
 
     constructor(
-        mintedTokens: HexEncodedAmount,
-        meltedTokens: HexEncodedAmount,
-        maximumSupply: HexEncodedAmount,
+        mintedTokens: BigInt,
+        meltedTokens: BigInt,
+        maximumSupply: BigInt,
     ) {
         super(TokenSchemeType.Simple);
-        this.mintedTokens = mintedTokens;
-        this.meltedTokens = meltedTokens;
-        this.maximumSupply = maximumSupply;
+        this.mintedTokens = bigIntToHex(mintedTokens);
+        this.meltedTokens = bigIntToHex(meltedTokens);
+        this.maximumSupply = bigIntToHex(maximumSupply);
     }
 
     /**
      * Amount of tokens minted.
      */
-    getMintedTokens(): HexEncodedAmount {
-        return this.mintedTokens;
+    getMintedTokens(): BigInt {
+        return hexToBigInt(this.mintedTokens);
     }
 
     /**
      * Amount of tokens melted.
      */
-    getMeltedTokens(): HexEncodedAmount {
-        return this.meltedTokens;
+    getMeltedTokens(): BigInt {
+        return hexToBigInt(this.meltedTokens);
     }
 
     /**
      * Maximum supply of tokens controlled.
      */
-    getMaximumSupply(): HexEncodedAmount {
-        return this.maximumSupply;
+    getMaximumSupply(): BigInt {
+        return hexToBigInt(this.maximumSupply);
     }
 }
 

@@ -3,7 +3,6 @@
 
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
-import { HexEncodedAmount } from '../utils/hex-encoded-types';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {

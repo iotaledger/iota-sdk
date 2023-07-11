@@ -42,7 +42,6 @@ import {
     AliasOutput,
     NftOutput,
     Output,
-    HexEncodedAmount,
     BasicOutput,
     FoundryOutput,
     Response,
