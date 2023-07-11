@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { HexEncodedString } from '../../utils/hex-encoded-types';
+import type { HexEncodedString } from '../../utils/hex-encoding';
 /**
  * Details of an output.
  */

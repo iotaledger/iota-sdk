@@ -4,7 +4,7 @@
 import type {
     HexEncodedAmount,
     HexEncodedString,
-} from '../utils/hex-encoded-types';
+} from '../utils/hex-encoding';
 /**
  * Native token.
  */
