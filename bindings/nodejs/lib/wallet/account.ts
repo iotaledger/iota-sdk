@@ -780,12 +780,16 @@ export class Account {
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedCreateNativeTokenTransaction> {
+        let tokenParams: any = params;
+        tokenParams.circulatingSupply = bigIntToHex(params.circulatingSupply);
+        tokenParams.maximumSupply = bigIntToHex(params.maximumSupply);
+
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'prepareCreateNativeToken',
                 data: {
-                    params: params,
+                    params: tokenParams,
                     options: transactionOptions,
                 },
             },

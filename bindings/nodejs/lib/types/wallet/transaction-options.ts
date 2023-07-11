@@ -46,9 +46,9 @@ export type CustomAddress = {
 export interface CreateNativeTokenParams {
     aliasId?: string;
     /** Hex encoded number */
-    circulatingSupply: HexEncodedAmount;
+    circulatingSupply: BigInt;
     /** Hex encoded number */
-    maximumSupply: HexEncodedAmount;
+    maximumSupply: BigInt;
     /** Hex encoded bytes */
     foundryMetadata?: string;
 }
