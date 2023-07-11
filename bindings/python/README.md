@@ -110,13 +110,13 @@ python3 examples/client/00_get_info.py
 To generate the Python API reference you need to first install the needed dependencies with the following command:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 and afterwards you can generate them with:
 
 ```bash
-pydoc-markdown
+PYTHONPATH=. pydoc-markdown
 ```
 
 ## Learn More
