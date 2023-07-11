@@ -11,7 +11,7 @@ use iota_sdk::{
     types::block::{
         address::ToBech32Ext,
         output::{Output, OutputId},
-        payload::{milestone::MilestonePayload, transaction::TransactionId, Payload},
+        payload::{transaction::TransactionId, Payload},
         Block, BlockId,
     },
 };
