@@ -1777,7 +1777,8 @@ dependencies = [
 [[package]]
 name = "iota_stronghold"
 version = "2.0.0-rc.1"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#423164347697203a1f81f4f289723c4ee191d1ed"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec36553cbc1499de54e3c6c6cc8f7f88108a6eb360ded33d97cd207a1b27859d"
 dependencies = [
  "bincode",
  "hkdf",
@@ -3149,7 +3150,8 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#423164347697203a1f81f4f289723c4ee191d1ed"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2835db23c4724c05a2f85b81c4681f4aa8ea158edc8a7f4ad791c916fb766c2e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3159,7 +3161,8 @@ dependencies = [
 [[package]]
 name = "stronghold-runtime"
 version = "2.0.0-rc.1"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#423164347697203a1f81f4f289723c4ee191d1ed"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51ded9181ba64ef82d0c417cd10779e76900e057f19e135659652f3d5b5d84b6"
 dependencies = [
  "dirs",
  "iota-crypto",
@@ -3177,7 +3180,8 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#423164347697203a1f81f4f289723c4ee191d1ed"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8300214898af5e153e7f66e49dbd1c6a21585f2d592d9f24f58b969792475ed6"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -3186,7 +3190,8 @@ dependencies = [
 [[package]]
 name = "stronghold_engine"
 version = "2.0.0-rc.1"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#423164347697203a1f81f4f289723c4ee191d1ed"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e502cccc6c0db434c651accc23c8cd643fc5e930e5effdf9cafac0ea79b037cd"
 dependencies = [
  "anyhow",
  "dirs-next",
