@@ -124,6 +124,7 @@ where
                             e,
                             crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))
                         ) {
+                            // If no block was found with this transaction id, then it can't get included
                             crate::client::Error::TangleInclusion(block_id.to_string())
                         } else {
                             e
