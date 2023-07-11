@@ -273,15 +273,6 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def minimum_required_storage_deposit(self, output) -> int:
-        """Minimum required storage deposit.
-        """
-        return int(self._call_account_method(
-            'minimumRequiredStorageDeposit', {
-                'output': output
-            }
-        ))
-
     def prepare_mint_nfts(self, params, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
         """Mint nfts.
         """

@@ -22,7 +22,6 @@ import type {
     __IncomingTransactionsMethod__,
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
-    __MinimumRequiredStorageDepositMethod__,
     __PrepareCreateNativeTokenMethod__,
     __PrepareMeltNativeTokenMethod__,
     __PrepareMintNativeTokenMethod__,
@@ -107,7 +106,6 @@ export type __AccountMethod__ =
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__
-    | __MinimumRequiredStorageDepositMethod__
     | __PrepareCreateNativeTokenMethod__
     | __PrepareMeltNativeTokenMethod__
     | __PrepareMintNativeTokenMethod__

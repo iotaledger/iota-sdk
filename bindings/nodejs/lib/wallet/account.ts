@@ -727,24 +727,6 @@ export class Account {
     }
 
     /**
-     * Calculate the minimum required storage deposit for an output.
-     * @param output output to calculate the deposit amount for.
-     * @returns The amount.
-     */
-    async minimumRequiredStorageDeposit(output: Output): Promise<string> {
-        const response = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'minimumRequiredStorageDeposit',
-                data: {
-                    output,
-                },
-            },
-        );
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Mint additional native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
