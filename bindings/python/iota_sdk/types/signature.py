@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 from iota_sdk.types.common import HexStr
+from iota_sdk import CoinType
 
 @dataclass
 class Ed25519Signature():
@@ -12,7 +13,7 @@ class Ed25519Signature():
 
 @dataclass
 class Bip44():
-    coinType: int = 0
+    coinType: int = CoinType.IOTA
     account: int = 0
     change: int = 0
     addressIndex: int = 0
