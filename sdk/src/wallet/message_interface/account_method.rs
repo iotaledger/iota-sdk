@@ -194,6 +194,7 @@ pub enum AccountMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
+        #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
@@ -450,4 +451,13 @@ pub enum AccountMethod {
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
     RequestFundsFromFaucet { url: String, address: Bech32Address },
+}
+
+#[derive(Default, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase", remote = "Bip44")]
+pub struct Bip44Def {
+    coin_type: u32,
+    account: u32,
+    change: u32,
+    address_index: u32,
 }

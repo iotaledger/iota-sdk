@@ -80,8 +80,8 @@ export interface Ed25519Signature {
 }
 
 export interface Bip44 {
-    coinType: number;
-    account: number;
-    change: number;
-    addressIndex: number;
+    coinType?: number;
+    account?: number;
+    change?: number;
+    addressIndex?: number;
 }

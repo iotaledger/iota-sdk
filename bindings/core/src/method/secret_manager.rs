@@ -32,6 +32,7 @@ pub enum SecretManagerMethod {
         /// Transaction Essence Hash
         transaction_essence_hash: String,
         /// Chain to sign the essence hash with
+        #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
     /// Signs a message with an Ed25519 private key.
@@ -39,6 +40,7 @@ pub enum SecretManagerMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the essence hash with
+        #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
     /// Signs a message with an Secp256k1Ecdsa private key.
@@ -46,6 +48,7 @@ pub enum SecretManagerMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
+        #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
     /// Sign a transaction
@@ -62,4 +65,13 @@ pub enum SecretManagerMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
+}
+
+#[derive(Default, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase", remote = "Bip44")]
+pub struct Bip44Def {
+    coin_type: u32,
+    account: u32,
+    change: u32,
+    address_index: u32,
 }
