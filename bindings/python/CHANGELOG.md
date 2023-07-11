@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.1 - 2023-07-DD
+
+### Changed
+
+- Moved `minimum_required_storage_deposit()` from `Account` to `Client`;
+
 ## 1.0.0-rc.0 - 2023-07-11
 
 Initial release of the Python SDK bindings.
