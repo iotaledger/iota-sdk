@@ -1,8 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
-use iota_sdk::client::api::{GetAddressesOptions, PreparedTransactionDataDto};
+use iota_sdk::client::{
+    api::{GetAddressesOptions, PreparedTransactionDataDto},
+    constants::IOTA_COIN_TYPE,
+};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
@@ -31,21 +35,24 @@ pub enum SecretManagerMethod {
         /// Transaction Essence Hash
         transaction_essence_hash: String,
         /// Chain to sign the essence hash with
-        chain: Vec<u32>,
+        #[serde(with = "Bip44Def")]
+        chain: Bip44,
     },
     /// Signs a message with an Ed25519 private key.
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the essence hash with
-        chain: Vec<u32>,
+        #[serde(with = "Bip44Def")]
+        chain: Bip44,
     },
     /// Signs a message with an Secp256k1Ecdsa private key.
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
-        chain: Vec<u32>,
+        #[serde(with = "Bip44Def")]
+        chain: Bip44,
     },
     /// Sign a transaction
     #[serde(rename_all = "camelCase")]
@@ -61,4 +68,24 @@ pub enum SecretManagerMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase", remote = "Bip44")]
+pub struct Bip44Def {
+    coin_type: u32,
+    account: u32,
+    change: u32,
+    address_index: u32,
+}
+
+impl Default for Bip44Def {
+    fn default() -> Self {
+        Self {
+            coin_type: IOTA_COIN_TYPE,
+            account: 0,
+            change: 0,
+            address_index: 0,
+        }
+    }
 }

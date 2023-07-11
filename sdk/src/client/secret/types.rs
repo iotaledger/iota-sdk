@@ -3,7 +3,7 @@
 
 //! Miscellaneous types for secret managers.
 
-use crypto::keys::slip10::{Chain, Segment};
+use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -159,7 +159,7 @@ pub struct InputSigningData {
     /// The output metadata
     pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
-    pub chain: Option<Chain>,
+    pub chain: Option<Bip44>,
 }
 
 impl InputSigningData {
@@ -178,7 +178,7 @@ pub struct InputSigningDataDto {
     /// The output metadata
     pub output_metadata: OutputMetadataDto,
     /// The chain derived from seed, only for ed25519 addresses
-    pub chain: Option<Vec<u32>>,
+    pub chain: Option<Bip44>,
 }
 
 #[allow(missing_docs)]
@@ -187,7 +187,7 @@ impl InputSigningData {
         Ok(Self {
             output: Output::try_from_dto(input.output, token_supply)?,
             output_metadata: OutputMetadata::try_from(input.output_metadata)?,
-            chain: input.chain.map(Chain::from_u32_hardened),
+            chain: input.chain,
         })
     }
 
@@ -195,7 +195,7 @@ impl InputSigningData {
         Ok(Self {
             output: Output::try_from_dto_unverified(input.output)?,
             output_metadata: OutputMetadata::try_from(input.output_metadata)?,
-            chain: input.chain.map(Chain::from_u32_hardened),
+            chain: input.chain,
         })
     }
 }
@@ -205,14 +205,7 @@ impl From<&InputSigningData> for InputSigningDataDto {
         Self {
             output: OutputDto::from(&input.output),
             output_metadata: OutputMetadataDto::from(&input.output_metadata),
-            chain: input.chain.as_ref().map(|chain| {
-                chain
-                    .segments()
-                    .iter()
-                    // TODO: get the value direct when https://github.com/iotaledger/crypto.rs/issues/192 is done
-                    .map(|seg| u32::from_be_bytes(seg.bs()) & !Segment::HARDEN_MASK)
-                    .collect::<Vec<u32>>()
-            }),
+            chain: input.chain,
         }
     }
 }

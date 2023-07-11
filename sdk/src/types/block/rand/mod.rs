@@ -27,6 +27,8 @@ pub mod parents;
 pub mod payload;
 /// Module providing random receipt generation utilities.
 pub mod receipt;
+/// Module providing random signature generation utilities.
+pub mod signature;
 /// Module providing random string generation utilities.
 pub mod string;
 /// Module providing random transaction generation utilities.

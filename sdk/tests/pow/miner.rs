@@ -61,5 +61,5 @@ fn miner_cancel() {
     cancel.trigger();
 
     assert!(now.elapsed().as_secs() < 2);
-    assert!(matches!(handle.join().unwrap(), None));
+    assert!(handle.join().unwrap().is_none());
 }

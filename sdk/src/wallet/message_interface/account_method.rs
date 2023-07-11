@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "participation")]
@@ -13,6 +14,7 @@ use crate::{
 use crate::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionDataDto, SignedTransactionDataDto},
+        constants::IOTA_COIN_TYPE,
         secret::GenerateAddressOptions,
     },
     types::block::{
@@ -193,7 +195,8 @@ pub enum AccountMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
-        chain: Vec<u32>,
+        #[serde(with = "Bip44Def")]
+        chain: Bip44,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)
@@ -449,4 +452,24 @@ pub enum AccountMethod {
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
     RequestFundsFromFaucet { url: String, address: Bech32Address },
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase", remote = "Bip44")]
+pub struct Bip44Def {
+    coin_type: u32,
+    account: u32,
+    change: u32,
+    address_index: u32,
+}
+
+impl Default for Bip44Def {
+    fn default() -> Self {
+        Self {
+            coin_type: IOTA_COIN_TYPE,
+            account: 0,
+            change: 0,
+            address_index: 0,
+        }
+    }
 }

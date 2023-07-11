@@ -15,6 +15,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
+    crypto::keys::bip39::Mnemonic,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -29,7 +30,7 @@ async fn main() -> Result<()> {
         .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = std::env::var("MNEMONIC").unwrap();
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;

@@ -8,13 +8,14 @@
 //! cargo run --release --all-features --example sign_ed25519
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
+        constants::SHIMMER_COIN_TYPE,
         hex_public_key_to_bech32_address,
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    crypto::keys::slip10::Chain,
+    crypto::keys::bip39::Mnemonic,
     wallet::Result,
 };
 
@@ -33,28 +34,28 @@ async fn main() -> Result<()> {
         .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("sign_ed25519.stronghold")?;
 
-    stronghold.store_mnemonic(std::env::var("MNEMONIC").unwrap()).await?;
+    stronghold
+        .store_mnemonic(Mnemonic::from(std::env::var("MNEMONIC").unwrap()))
+        .await?;
 
-    let bip32_chain = Chain::from_u32_hardened([
-        HD_WALLET_TYPE,
-        SHIMMER_COIN_TYPE,
-        ACCOUNT_INDEX,
-        INTERNAL_ADDRESS as u32,
-        ADDRESS_INDEX,
-    ]);
+    let bip44_chain = Bip44::new()
+        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_account(ACCOUNT_INDEX)
+        .with_change(INTERNAL_ADDRESS as _)
+        .with_address_index(ADDRESS_INDEX);
 
     let message = FOUNDRY_METADATA.as_bytes();
     let signature = SecretManager::Stronghold(stronghold)
-        .sign_ed25519(message, &bip32_chain)
+        .sign_ed25519(message, bip44_chain)
         .await?;
     println!(
         "Public key: {}\nSignature: {}",
-        prefix_hex::encode(signature.public_key()),
-        prefix_hex::encode(signature.signature()),
+        prefix_hex::encode(signature.public_key().as_ref()),
+        prefix_hex::encode(signature.signature().to_bytes()),
     );
 
     // Hash the public key to get the address
-    let bech32_address = hex_public_key_to_bech32_address(&prefix_hex::encode(signature.public_key()), "rms")?;
+    let bech32_address = hex_public_key_to_bech32_address(&prefix_hex::encode(signature.public_key().as_ref()), "rms")?;
     println!("Address: {bech32_address}");
 
     Ok(())

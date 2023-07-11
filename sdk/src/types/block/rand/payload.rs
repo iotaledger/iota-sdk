@@ -9,14 +9,14 @@ use crate::types::block::{
         Payload,
     },
     rand::{
-        bytes::{rand_bytes, rand_bytes_array},
+        bytes::rand_bytes,
         input::rand_treasury_input,
         milestone::{rand_merkle_root, rand_milestone_id, rand_milestone_index},
         number::{rand_number, rand_number_range},
         output::rand_treasury_output,
         parents::rand_parents,
+        signature::rand_signature,
     },
-    signature::{Ed25519Signature, Signature},
 };
 
 /// Generates a random tagged data payload.
@@ -47,10 +47,7 @@ pub fn rand_milestone_payload(protocol_version: u8) -> MilestonePayload {
         MilestoneOptions::from_vec(Vec::new()).unwrap(),
     )
     .unwrap();
-    let signatures = [Signature::from(Ed25519Signature::new(
-        rand_bytes_array(),
-        rand_bytes_array(),
-    ))];
+    let signatures = [rand_signature()];
 
     MilestonePayload::new(essence, signatures).unwrap()
 }

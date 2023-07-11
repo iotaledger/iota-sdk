@@ -18,10 +18,12 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
-    IBip32Chain,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
-import { SecretManagerType } from '../types/secret_manager/secret-manager';
+import {
+    Bip44,
+    SecretManagerType,
+} from '../types/secret_manager/secret-manager';
 import {
     AliasOutput,
     BasicOutput,
@@ -286,7 +288,7 @@ export class Client {
     async signatureUnlock(
         secretManager: SecretManagerType,
         transactionEssenceHash: HexEncodedString,
-        chain: IBip32Chain,
+        chain: Bip44,
     ): Promise<UnlockCondition> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',

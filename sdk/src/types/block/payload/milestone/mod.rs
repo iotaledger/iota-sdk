@@ -14,7 +14,7 @@ pub mod option;
 use alloc::{string::String, vec::Vec};
 use core::{fmt::Debug, ops::RangeInclusive};
 
-use crypto::{signatures::ed25519, Error as CryptoError};
+use crypto::Error as CryptoError;
 use iterator_sorted::is_unique_sorted;
 pub(crate) use option::{MilestoneOptionCount, ReceiptFundsCount};
 use packable::{bounded::BoundedU8, prefix::VecPrefix, Packable};
@@ -123,18 +123,14 @@ impl MilestonePayload {
 
             if !applicable_public_keys.contains(&hex::encode(signature.public_key())) {
                 return Err(MilestoneValidationError::UnapplicablePublicKey(prefix_hex::encode(
-                    *signature.public_key(),
+                    signature.public_key().as_ref(),
                 )));
             }
 
-            let ed25519_public_key = ed25519::PublicKey::try_from_bytes(*signature.public_key())
-                .map_err(MilestoneValidationError::Crypto)?;
-            let ed25519_signature = ed25519::Signature::from_bytes(*signature.signature());
-
-            if !ed25519_public_key.verify(&ed25519_signature, &essence_hash) {
+            if !signature.verify(&essence_hash) {
                 return Err(MilestoneValidationError::InvalidSignature(
                     index,
-                    prefix_hex::encode(signature.public_key()),
+                    prefix_hex::encode(signature.public_key().as_ref()),
                 ));
             }
         }

@@ -78,3 +78,10 @@ export interface Ed25519Signature {
      */
     signature: HexEncodedString;
 }
+
+export interface Bip44 {
+    coinType?: number;
+    account?: number;
+    change?: number;
+    addressIndex?: number;
+}

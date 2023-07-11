@@ -3,6 +3,7 @@
 
 use std::path::PathBuf;
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
@@ -33,7 +34,7 @@ async fn backup_and_restore() -> Result<()> {
         .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore/1.stronghold")?;
 
-    stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
@@ -209,7 +210,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_different_coin_type/1.stronghold")?;
 
-    stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
@@ -293,7 +294,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_same_coin_type/1.stronghold")?;
 
-    stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
@@ -375,7 +376,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_different_coin_type_dont_ignore/1.stronghold")?;
 
-    stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
@@ -462,7 +463,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
         .password(stronghold_password.clone())
         .build("test-storage/backup_and_restore_bech32_hrp_mismatch/1.stronghold")?;
 
-    stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
