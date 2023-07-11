@@ -7,7 +7,7 @@ import type {
 } from '../../secret_manager/secret-manager';
 import type { IGenerateAddressesOptions } from '../generate-addresses-options';
 import type { IBuildBlockOptions } from '../build-block-options';
-import type { Block, BlockId, Payload } from '../../block';
+import type { Block, BlockId, Output, Payload } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AliasQueryParameter,
@@ -423,6 +423,13 @@ export interface __ClearListenersMethod__ {
         topics: string[];
     };
 }
+
+export type __MinimumRequiredStorageDepositMethod__ = {
+    name: 'minimumRequiredStorageDeposit';
+    data: {
+        output: Output;
+    };
+};
 
 export type __RequestFundsFromFaucetMethod__ = {
     name: 'requestFundsFromFaucet';

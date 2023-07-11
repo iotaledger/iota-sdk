@@ -10,7 +10,7 @@ use iota_sdk::{
         SignedTransactionDataDto,
     },
     types::block::{
-        output::{dto::OutputDto, Output, Rent},
+        output::{dto::OutputDto, Output},
         Error,
     },
     wallet::account::{
@@ -102,14 +102,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::IncomingTransactions => {
             let transactions = account.incoming_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
-        }
-        AccountMethod::MinimumRequiredStorageDeposit { output } => {
-            let output = Output::try_from_dto(output, account.client().get_token_supply().await?)?;
-            let rent_structure = account.client().get_rent_structure().await?;
-
-            let minimum_storage_deposit = output.rent_cost(&rent_structure);
-
-            Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }
         AccountMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;

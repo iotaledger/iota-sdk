@@ -1007,6 +1007,21 @@ export class Client {
     }
 
     /**
+     * Calculate the minimum required storage deposit for an output.
+     * @param output output to calculate the deposit amount for.
+     * @returns The amount.
+     */
+    async minimumRequiredStorageDeposit(output: Output): Promise<number> {
+        const response = await this.methodHandler.callMethod({
+            name: 'minimumRequiredStorageDeposit',
+            data: {
+                output,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Request funds from a faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
      */
     async requestFundsFromFaucet(

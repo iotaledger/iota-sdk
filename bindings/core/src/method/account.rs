@@ -120,10 +120,6 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
-    /// Calculate the minimum required storage deposit for an output.
-    /// Expected response:
-    /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
     /// Returns all outputs of the account
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
