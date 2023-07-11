@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
-from iota_sdk.types.common import HexStr
-from iota_sdk import CoinType
+from iota_sdk.types.common import HexStr, CoinType
 
 @dataclass
 class Ed25519Signature():
