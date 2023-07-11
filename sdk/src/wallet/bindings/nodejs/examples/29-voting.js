@@ -3,7 +3,7 @@
  */
 const getUnlockedManager = require('./account-manager');
 
-// TODO: replace this with own event
+// replace this with own event
 const EVENT_ID = '0x7ba318a26a1f639389a3428f159f40aebbcc776a4f8ca17de4fa45221ac79fbd'
 
 async function waitAndSync(account) {

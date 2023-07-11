@@ -19,9 +19,9 @@ async function run() {
 
         // Send the full NFT output to the specified address
         const response = await account.sendNft([{
-            //TODO: Replace with the address of your choice!
+            // Replace with the address of your choice!
             address: 'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
-            //TODO: Replace with an NFT id from your account, you can mint one with `25-mint-nft.js`.
+            // Replace with an NFT id from your account, you can mint one with `25-mint-nft.js`.
             nftId: '0x09aa7871e126cc41f1f3784a479a5dd5f23e4dd8b97e932a001e77a11ad42f0c',
         }]);
 
