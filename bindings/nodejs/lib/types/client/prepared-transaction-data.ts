@@ -72,8 +72,3 @@ export class Remainder {
     })
     address!: Address;
 }
-
-/**
- * BIP 32 chain.
- */
-export type IBip32Chain = number[];

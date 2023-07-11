@@ -1,4 +1,4 @@
-from iota_sdk import Client, StrongholdSecretManager, SecretManager, HD_WALLET_TYPE, CoinType, Utils, utf8_to_hex
+from iota_sdk import Client, StrongholdSecretManager, SecretManager, Bip44, CoinType, Utils, utf8_to_hex
 from dotenv import load_dotenv
 import os
 
@@ -25,16 +25,15 @@ secret_manager = SecretManager(StrongholdSecretManager(
 secret_manager.store_mnemonic(
     os.environ['MNEMONIC'])
 
-bip32_chain = [
-    HD_WALLET_TYPE,
+bip44_chain = Bip44(
     CoinType.SHIMMER,
     ACCOUNT_INDEX,
     1 if INTERNAL_ADDRESS else 0,
     ADDRESS_INDEX,
-]
+)
 
 message = utf8_to_hex(FOUNDRY_METADATA)
-ed25519_signature = secret_manager.sign_ed25519(message, bip32_chain)
+ed25519_signature = secret_manager.sign_ed25519(message, bip44_chain)
 print(
     f'Public key: {ed25519_signature.publicKey}\nSignature: {ed25519_signature.signature}')
 

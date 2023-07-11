@@ -9,3 +9,10 @@ class Ed25519Signature():
     publicKey: HexStr
     signature: HexStr
     type: int = 0
+
+@dataclass
+class Bip44():
+    coinType: int = 0,
+    account: int = 0,
+    change: int = 0,
+    addressIndex: int = 0,

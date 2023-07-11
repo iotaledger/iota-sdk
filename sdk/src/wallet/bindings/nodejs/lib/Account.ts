@@ -35,6 +35,7 @@ import type {
     GenerateAddressesOptions,
     Secp256k1EcdsaSignature,
     Ed25519Signature,
+    Bip44,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -441,7 +442,7 @@ export class Account {
      */
     async signSecp256k1Ecdsa(
         message: HexEncodedString,
-        chain: number[],
+        chain: Bip44,
     ): Promise<Secp256k1EcdsaSignature> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
