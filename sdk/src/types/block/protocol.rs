@@ -11,30 +11,22 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct ProtocolParameters {
     // The version of the protocol running.
-    #[cfg_attr(feature = "serde", serde(alias = "protocolVersion"))]
     protocol_version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
-    #[cfg_attr(feature = "serde", serde(alias = "networkName"))]
     network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
-    #[cfg_attr(feature = "serde", serde(alias = "bech32Hrp"))]
     bech32_hrp: Hrp,
     // The minimum pow score of the network.
-    #[cfg_attr(feature = "serde", serde(alias = "minPowScore"))]
     min_pow_score: u32,
     // The below max depth parameter of the network.
-    #[cfg_attr(feature = "serde", serde(alias = "belowMaxDepth"))]
     below_max_depth: u8,
     // The rent structure used by given node/network.
-    #[cfg_attr(feature = "serde", serde(alias = "rentStructure"))]
     rent_structure: RentStructure,
     // TokenSupply defines the current token supply on the network.
-    #[cfg_attr(feature = "serde", serde(alias = "tokenSupply"))]
     token_supply: u64,
 }
 
@@ -179,6 +171,26 @@ pub mod dto {
                     .parse()
                     .map_err(|_| Error::InvalidField("token_supply"))?,
             )
+        }
+    }
+
+    impl From<&ProtocolParameters> for ProtocolParametersDto {
+        fn from(value: &ProtocolParameters) -> Self {
+            Self {
+                protocol_version: value.protocol_version,
+                network_name: value.network_name.to_string(),
+                bech32_hrp: value.bech32_hrp,
+                min_pow_score: value.min_pow_score,
+                below_max_depth: value.below_max_depth,
+                rent_structure: value.rent_structure,
+                token_supply: value.token_supply.to_string(),
+            }
+        }
+    }
+
+    impl Default for ProtocolParametersDto {
+        fn default() -> Self {
+            Self::from(&ProtocolParameters::default())
         }
     }
 }

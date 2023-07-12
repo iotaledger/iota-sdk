@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{Client, ClientBuilder};
+use iota_sdk::client::{builder::dto::ClientBuilderDto, Client};
 
 #[tokio::test]
 async fn invalid_url() {
@@ -68,7 +68,7 @@ async fn client_builder() {
         "powWorkerCount":null
     }"#;
 
-    let _client_builder = serde_json::from_str::<ClientBuilder>(client_builder_json).unwrap();
+    let _client_builder = serde_json::from_str::<ClientBuilderDto>(client_builder_json).unwrap();
 
     // With protocol_version instead of protocolVersion
     let client_builder_json = r#"{
@@ -122,5 +122,5 @@ async fn client_builder() {
         "powWorkerCount":null
     }"#;
 
-    let _client_builder = serde_json::from_str::<ClientBuilder>(client_builder_json).unwrap();
+    let _client_builder = serde_json::from_str::<ClientBuilderDto>(client_builder_json).unwrap();
 }

@@ -9,7 +9,6 @@ use std::sync::{
 use std::{collections::HashSet, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
-use serde::Serialize;
 use tokio::sync::RwLock;
 
 use super::operations::storage::SaveLoadWallet;
@@ -28,13 +27,12 @@ use crate::{
 };
 
 /// Builder for the wallet.
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
     pub(crate) client_options: Option<ClientOptions>,
     pub(crate) coin_type: Option<u32>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: Option<StorageOptions>,
-    #[serde(skip)]
     pub(crate) secret_manager: Option<Arc<RwLock<S>>>,
 }
 
@@ -280,4 +278,47 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
         })
     }
     Ok(())
+}
+
+pub mod dto {
+    use serde::{Deserialize, Serialize};
+
+    use super::*;
+    use crate::{
+        client::{builder::dto::ClientBuilderDto, secret::SecretManage},
+        wallet::storage::StorageOptions,
+    };
+
+    #[derive(Debug, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct WalletBuilderDto {
+        pub(crate) client_options: Option<ClientBuilderDto>,
+        pub(crate) coin_type: Option<u32>,
+        #[cfg(feature = "storage")]
+        pub(crate) storage_options: Option<StorageOptions>,
+    }
+
+    impl<S: SecretManage> From<&WalletBuilder<S>> for WalletBuilderDto {
+        fn from(value: &WalletBuilder<S>) -> Self {
+            Self {
+                client_options: value.client_options.as_ref().map(Into::into),
+                coin_type: value.coin_type,
+                storage_options: value.storage_options.clone(),
+            }
+        }
+    }
+
+    impl WalletBuilderDto {
+        pub(crate) fn into_builder<S: SecretManage>(
+            self,
+            secret_manager: Option<S>,
+        ) -> crate::wallet::Result<WalletBuilder<S>> {
+            Ok(WalletBuilder {
+                client_options: self.client_options.map(TryInto::try_into).transpose()?,
+                coin_type: self.coin_type,
+                storage_options: self.storage_options,
+                secret_manager: secret_manager.map(|s| Arc::new(RwLock::new(s))),
+            })
+        }
+    }
 }

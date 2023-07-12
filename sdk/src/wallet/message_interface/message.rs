@@ -11,12 +11,9 @@ use super::account_method::AccountMethod;
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
-    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
+    client::{builder::dto::ClientBuilderDto, node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     types::block::address::{Bech32Address, Hrp},
-    wallet::{
-        account::{operations::syncing::SyncOptions, types::AccountIdentifier},
-        ClientOptions,
-    },
+    wallet::account::{operations::syncing::SyncOptions, types::AccountIdentifier},
     Url,
 };
 
@@ -135,7 +132,7 @@ pub enum Message {
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[serde(rename_all = "camelCase")]
-    SetClientOptions { client_options: Box<ClientOptions> },
+    SetClientOptions { client_options: Box<ClientBuilderDto> },
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]

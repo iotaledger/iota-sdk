@@ -247,7 +247,7 @@ impl WalletMessageHandler {
             }),
             Message::SetClientOptions { client_options } => {
                 convert_async_panics(|| async {
-                    self.wallet.set_client_options(*client_options).await?;
+                    self.wallet.set_client_options((*client_options).try_into()?).await?;
                     Ok(Response::Ok(()))
                 })
                 .await

@@ -9,25 +9,6 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
-fn rename_keys(json: &mut serde_json::Value) {
-    match json {
-        serde_json::Value::Array(a) => a.iter_mut().for_each(rename_keys),
-        serde_json::Value::Object(o) => {
-            let mut replace = serde_json::Map::with_capacity(o.len());
-            o.retain(|k, v| {
-                rename_keys(v);
-                replace.insert(
-                    heck::ToLowerCamelCase::to_lower_camel_case(k.as_str()),
-                    std::mem::replace(v, serde_json::Value::Null),
-                );
-                true
-            });
-            *o = replace;
-        }
-        _ => (),
-    }
-}
-
 fn migrate_native_token(output: &mut serde_json::Value) {
     let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
 
@@ -189,7 +170,7 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
     }
 }
 
-mod types {
+pub(super) mod types {
     use core::{marker::PhantomData, str::FromStr};
 
     use serde::{Deserialize, Serialize};

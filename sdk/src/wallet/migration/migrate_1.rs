@@ -49,8 +49,6 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
                 {
                     migrate_account(&mut account)?;
 
-                    println!("{account:#}");
-
                     storage
                         .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
                         .await?;

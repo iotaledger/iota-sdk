@@ -14,15 +14,19 @@ pub use self::{
     account_method::AccountMethod, message::Message, message_handler::WalletMessageHandler, response::Response,
 };
 use crate::{
-    client::secret::{SecretManager, SecretManagerDto},
-    wallet::{ClientOptions, Wallet},
+    client::{
+        builder::dto::ClientBuilderDto,
+        secret::{SecretManager, SecretManagerDto},
+        ClientBuilder,
+    },
+    wallet::Wallet,
 };
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ManagerOptions {
     pub storage_path: Option<String>,
-    pub client_options: Option<ClientOptions>,
+    pub client_options: Option<ClientBuilderDto>,
     pub coin_type: Option<u32>,
     #[serde(serialize_with = "secret_manager_serialize")]
     pub secret_manager: Option<SecretManagerDto>,
@@ -77,7 +81,7 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
         }
 
         if let Some(client_options) = options.client_options {
-            builder = builder.with_client_options(client_options);
+            builder = builder.with_client_options(ClientBuilder::try_from(client_options)?);
         }
 
         if let Some(coin_type) = options.coin_type {

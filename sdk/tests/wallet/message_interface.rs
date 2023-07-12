@@ -6,7 +6,7 @@ use std::sync::{atomic::Ordering, Arc};
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::WalletEvent;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions, ClientBuilder},
+    client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions},
     types::block::{
         address::{Address, Bech32Address, Hrp},
         output::{dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
@@ -32,7 +32,7 @@ async fn message_interface_validate_mnemonic() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
@@ -87,7 +87,7 @@ async fn message_interface_create_account() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
@@ -135,7 +135,7 @@ async fn message_interface_events() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
@@ -222,7 +222,7 @@ async fn message_interface_emit_event() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
@@ -290,7 +290,7 @@ async fn message_interface_stronghold() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(&secret_manager).unwrap()),
     };
@@ -337,7 +337,7 @@ async fn address_conversion_methods() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
@@ -387,7 +387,7 @@ async fn message_interface_address_generation() -> Result<()> {
     let options = ManagerOptions {
         #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        client_options: Some(serde_json::from_str(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };

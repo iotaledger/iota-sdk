@@ -8,12 +8,9 @@ use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
-    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
+    client::{builder::dto::ClientBuilderDto, node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     types::block::address::Hrp,
-    wallet::{
-        account::{types::AccountIdentifier, SyncOptions},
-        ClientOptions,
-    },
+    wallet::account::{types::AccountIdentifier, SyncOptions},
     Url,
 };
 use serde::{Deserialize, Serialize};
@@ -136,7 +133,7 @@ pub enum WalletMethod {
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]
-    SetClientOptions { client_options: Box<ClientOptions> },
+    SetClientOptions { client_options: Box<ClientBuilderDto> },
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]
