@@ -782,7 +782,9 @@ export class Account {
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedCreateNativeTokenTransaction> {
         const adjustedParams: any = params;
-        adjustedParams.circulatingSupply = bigIntToHex(params.circulatingSupply);
+        adjustedParams.circulatingSupply = bigIntToHex(
+            params.circulatingSupply,
+        );
         adjustedParams.maximumSupply = bigIntToHex(params.maximumSupply);
 
         const response = await this.methodHandler.callAccountMethod(
@@ -1007,7 +1009,9 @@ export class Account {
         const adjustedParams: any = params;
         for (let i = 0; i < adjustedParams.length; i++) {
             for (let j = 0; j < adjustedParams[i].nativeTokens.length; j++) {
-                adjustedParams[i].nativeTokens[j][1] = bigIntToHex(adjustedParams[i].nativeTokens[j][1])
+                adjustedParams[i].nativeTokens[j][1] = bigIntToHex(
+                    adjustedParams[i].nativeTokens[j][1],
+                );
             }
         }
 

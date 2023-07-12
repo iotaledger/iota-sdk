@@ -15,7 +15,6 @@ import {
     TokenSchemeType,
     Output,
     IRent,
-    HexEncodedAmount,
     OutputId,
     hexToBigInt,
 } from '../types';
@@ -122,10 +121,7 @@ export class Utils {
      * @param rentStructure Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(
-        output: Output,
-        rentStructure: IRent,
-    ): bigint {
+    static computeStorageDeposit(output: Output, rentStructure: IRent): bigint {
         const depositHex = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {

@@ -58,9 +58,9 @@ async function run() {
                     .getNativeTokens()
                     ?.forEach(
                         (token) =>
-                        (totalNativeTokens[token.id] =
-                            (totalNativeTokens[token.id] || BigInt(0)) +
-                            token.amount),
+                            (totalNativeTokens[token.id] =
+                                (totalNativeTokens[token.id] || BigInt(0)) +
+                                token.amount),
                     );
             }
 

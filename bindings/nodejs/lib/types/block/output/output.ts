@@ -33,7 +33,7 @@ abstract class Output /*implements ICommonOutput*/ {
 
     constructor(type: OutputType, amount: bigint | string) {
         this.type = type;
-        if (typeof amount == "bigint") {
+        if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);
         }
         this.amount = amount as string;
