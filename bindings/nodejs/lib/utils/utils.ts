@@ -169,9 +169,7 @@ export class Utils {
                 address,
             },
         });
-
-        const parsed = JSON.parse(addr) as Response<Ed25519Address>;
-        return plainToInstance(Ed25519Address, parsed.payload);
+        return Address.parse(addr);
     }
 
     /**
