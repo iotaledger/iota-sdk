@@ -264,7 +264,7 @@ async fn two_signature_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(1)),
         ),
     ]);
 
