@@ -16,7 +16,7 @@ use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
-    wallet::{wallet::Wallet, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 use serde::Deserialize;
 

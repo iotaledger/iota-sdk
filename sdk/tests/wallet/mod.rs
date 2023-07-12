@@ -11,6 +11,7 @@ mod burn_outputs;
 mod claim_outputs;
 mod common;
 mod consolidation;
+mod core;
 mod error;
 #[cfg(feature = "events")]
 mod events;
@@ -22,8 +23,6 @@ mod native_tokens;
 mod output_preparation;
 mod syncing;
 mod transactions;
-#[allow(clippy::module_inception)]
-mod wallet;
 #[cfg(not(target_os = "windows"))]
 #[cfg(feature = "rocksdb")]
 mod wallet_storage;

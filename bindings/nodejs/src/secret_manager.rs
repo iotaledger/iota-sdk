@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
+use std::{ops::Deref, sync::Arc};
 
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
@@ -74,7 +74,7 @@ pub fn create_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<Secr
 pub fn call_secret_manager_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let method = cx.argument::<JsString>(0)?;
     let method = method.value(&mut cx);
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<Arc<SecretManagerMethodHandler>>>(1)?);
+    let method_handler = Arc::clone(cx.argument::<JsBox<Arc<SecretManagerMethodHandler>>>(1)?.deref());
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
     crate::RUNTIME.spawn(async move {
