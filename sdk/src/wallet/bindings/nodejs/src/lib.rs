@@ -1,9 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// Increased limit required specifically for the send_message method
-#![recursion_limit = "256"]
-
 pub mod message_handler;
 pub use message_handler::*;
 use neon::prelude::*;
