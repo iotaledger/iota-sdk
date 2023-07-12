@@ -130,21 +130,21 @@ fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
     }
 }
 
-// // helper function to get the output id for the first foundry output
-// fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
-//     match payload {
-//         Payload::Transaction(tx_payload) => {
-//             let TransactionEssence::Regular(regular) = tx_payload.essence();
-//             for (index, output) in regular.outputs().iter().enumerate() {
-//                 if let Output::Foundry(_foundry_output) = output {
-//                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
-//                 }
-//             }
-//             panic!("No foundry output in transaction essence")
-//         }
-//         _ => panic!("No tx payload"),
-//     }
-// }
+// helper function to get the output id for the first foundry output
+fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
+    match payload {
+        Payload::Transaction(tx_payload) => {
+            let TransactionEssence::Regular(regular) = tx_payload.essence();
+            for (index, output) in regular.outputs().iter().enumerate() {
+                if let Output::Foundry(_foundry_output) = output {
+                    return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+                }
+            }
+            panic!("No foundry output in transaction essence")
+        }
+        _ => panic!("No tx payload"),
+    }
+}
 
 // helper function to get the output id for the first NFT output
 fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
