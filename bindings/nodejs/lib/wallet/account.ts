@@ -173,7 +173,9 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: new Map([[tokenId, bigIntToHex(burnAmount)]]),
+                        nativeTokens: new Map([
+                            [tokenId, bigIntToHex(burnAmount)],
+                        ]),
                     },
                     options: transactionOptions,
                 },
@@ -451,10 +453,14 @@ export class Account {
         const payload = JSON.parse(response).payload;
         for (let i = 0; i < payload.nativeTokens.length; i++) {
             if (payload.nativeTokens[i].total) {
-                payload.nativeTokens[i].total = hexToBigInt(payload.nativeTokens[i].total);
+                payload.nativeTokens[i].total = hexToBigInt(
+                    payload.nativeTokens[i].total,
+                );
             }
             if (payload.nativeTokens[i].available) {
-                payload.nativeTokens[i].available = hexToBigInt(payload.nativeTokens[i].available);
+                payload.nativeTokens[i].available = hexToBigInt(
+                    payload.nativeTokens[i].available,
+                );
             }
         }
         return payload;
@@ -1190,10 +1196,14 @@ export class Account {
         const payload = JSON.parse(response).payload;
         for (let i = 0; i < payload.nativeTokens.length; i++) {
             if (payload.nativeTokens[i].total) {
-                payload.nativeTokens[i].total = hexToBigInt(payload.nativeTokens[i].total);
+                payload.nativeTokens[i].total = hexToBigInt(
+                    payload.nativeTokens[i].total,
+                );
             }
             if (payload.nativeTokens[i].available) {
-                payload.nativeTokens[i].available = hexToBigInt(payload.nativeTokens[i].available);
+                payload.nativeTokens[i].available = hexToBigInt(
+                    payload.nativeTokens[i].available,
+                );
             }
         }
         return payload;
