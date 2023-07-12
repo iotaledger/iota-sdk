@@ -62,6 +62,9 @@ jobs:
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
 
+      - name: Start ledger nano
+        uses: "./.github/actions/ledger-nano"
+
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
