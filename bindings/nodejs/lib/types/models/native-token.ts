@@ -13,5 +13,5 @@ export interface INativeToken {
     /**
      * Amount of native tokens of the given Token ID.
      */
-    amount: HexEncodedAmount;
+    amount: bigint;
 }

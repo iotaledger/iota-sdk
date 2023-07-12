@@ -85,7 +85,7 @@ describe.skip('Output builder methods', () => {
             nativeTokens: [
                 {
                     id: '0x081e6439529b020328c08224b43172f282cb16649d50c891fa156365323667e47a0100000000',
-                    amount: '0x32',
+                    amount: BigInt(50),
                 },
             ],
             // 10 hex encoded
