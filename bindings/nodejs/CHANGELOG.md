@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Rename `Client::listen` to `listenMqtt`, `Client::clearListeners` to `clearMqttListeners`;
 - Moved `minimumRequiredStorageDeposit()` from `Account` to `Client`;
+- Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput `;
 
 ## 1.0.0-rc.2 - 2023-07-05
 
