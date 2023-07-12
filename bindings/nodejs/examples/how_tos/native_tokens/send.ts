@@ -5,8 +5,8 @@ import { SendNativeTokensParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The native token amount to send, `10` hex encoded
-const SEND_NATIVE_TOKEN_AMOUNT = '0xA';
+// The native token amount to send.
+const SEND_NATIVE_TOKEN_AMOUNT = BigInt(10);
 // The address to send the tokens to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';

@@ -1,8 +1,6 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedAmount } from '../utils';
-
 /** An Address of the Account */
 export interface AccountAddress {
     address: string;
@@ -30,7 +28,7 @@ export interface AddressWithUnspentOutputs {
 /** Address with native tokens */
 export interface SendNativeTokensParams {
     address: string;
-    nativeTokens: [string, HexEncodedAmount][];
+    nativeTokens: [string, bigint][];
     returnAddress?: string;
     expiration?: number;
 }
