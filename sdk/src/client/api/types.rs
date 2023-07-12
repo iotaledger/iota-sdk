@@ -19,7 +19,7 @@ use crate::{
         protocol::ProtocolParameters,
         Error,
     },
-    utils::serde::option_bip44,
+    utils::serde::bip44::option_bip44,
 };
 
 /// Helper struct for offline signing

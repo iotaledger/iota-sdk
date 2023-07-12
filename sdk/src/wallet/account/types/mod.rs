@@ -30,7 +30,7 @@ use crate::{
             BlockId,
         },
     },
-    utils::serde::option_bip44,
+    utils::serde::bip44::option_bip44,
     wallet::account::AccountDetails,
 };
 

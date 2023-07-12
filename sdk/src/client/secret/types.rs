@@ -15,7 +15,7 @@ use crate::{
             Output, OutputId, OutputMetadata,
         },
     },
-    utils::serde::option_bip44,
+    utils::serde::bip44::option_bip44,
 };
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings

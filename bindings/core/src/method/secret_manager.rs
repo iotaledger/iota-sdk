@@ -5,7 +5,7 @@ use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
     client::api::{GetAddressesOptions, PreparedTransactionDataDto},
-    utils::serde::Bip44Def,
+    utils::serde::bip44::Bip44Def,
 };
 use serde::{Deserialize, Serialize};
 

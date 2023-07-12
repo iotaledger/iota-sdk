@@ -27,7 +27,7 @@ use crate::{
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
     },
-    utils::serde::Bip44Def,
+    utils::serde::bip44::Bip44Def,
     wallet::{
         account::{
             operations::{
