@@ -2,17 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod core;
+mod indexer;
 #[cfg(feature = "mqtt")]
 mod mqtt;
 
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager,
+        request_funds_from_faucet, secret::SecretManager, Result,
     },
     types::block::{
         address::ToBech32Ext,
-        payload::{transaction::TransactionId, Payload},
+        output::{Output, OutputId},
+        payload::{
+            transaction::{TransactionEssence, TransactionId},
+            Payload,
+        },
         BlockId,
     },
 };
@@ -108,3 +113,51 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
 
     (block_id, transaction_id)
 }
+
+// helper function to get the output id for the first alias output
+fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
+    match payload {
+        Payload::Transaction(tx_payload) => {
+            let TransactionEssence::Regular(regular) = tx_payload.essence();
+            for (index, output) in regular.outputs().iter().enumerate() {
+                if let Output::Alias(_alias_output) = output {
+                    return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+                }
+            }
+            panic!("No alias output in transaction essence")
+        }
+        _ => panic!("No tx payload"),
+    }
+}
+
+// // helper function to get the output id for the first foundry output
+// fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
+//     match payload {
+//         Payload::Transaction(tx_payload) => {
+//             let TransactionEssence::Regular(regular) = tx_payload.essence();
+//             for (index, output) in regular.outputs().iter().enumerate() {
+//                 if let Output::Foundry(_foundry_output) = output {
+//                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+//                 }
+//             }
+//             panic!("No foundry output in transaction essence")
+//         }
+//         _ => panic!("No tx payload"),
+//     }
+// }
+
+// // helper function to get the output id for the first NFT output
+// fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
+//     match payload {
+//         Payload::Transaction(tx_payload) => {
+//             let TransactionEssence::Regular(regular) = tx_payload.essence();
+//             for (index, output) in regular.outputs().iter().enumerate() {
+//                 if let Output::Nft(_nft_output) = output {
+//                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
+//                 }
+//             }
+//             panic!("No nft output in transaction essence")
+//         }
+//         _ => panic!("No tx payload"),
+//     }
+// }
