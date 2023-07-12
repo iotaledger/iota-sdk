@@ -45,7 +45,7 @@ class Account:
 
     def get_metadata(self) -> AccountMetadata:
         """
-        A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and aliases.
+        Get the accounts metadata.
         """
         return AccountMetadata(self.meta["alias"], self.meta["coinType"], self.meta["index"])
 
