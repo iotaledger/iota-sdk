@@ -148,7 +148,7 @@ jobs:
         id: tagname
         run: |
           cd bindings/python
-          tagName="iota-sdk-python-$(cargo read-manifest | jq -r '.version')"
+          tagName="iota-sdk-python-v$(cargo read-manifest | jq -r '.version')"
           echo $tagName
           echo "TAG_NAME=$tagName" >> $GITHUB_OUTPUT
 
