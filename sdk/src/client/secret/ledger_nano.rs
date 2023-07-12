@@ -108,6 +108,8 @@ impl From<APIError> for Error {
 pub struct LedgerSecretManager {
     /// Specifies if a real Ledger hardware is used or only a simulator is used.
     pub is_simulator: bool,
+    /// Specifies whether the wallet should be in non-interactive mode.
+    pub non_interactive: bool,
     /// Mutex to prevent multiple simultaneous requests to a ledger.
     pub mutex: Mutex<()>,
 }
@@ -151,6 +153,9 @@ impl SecretManage for LedgerSecretManager {
 
         // get ledger
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        ledger
+            .set_non_interactive_mode(self.non_interactive)
+            .map_err(Error::from)?;
 
         let addresses = ledger
             .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
@@ -197,6 +202,9 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, account_index, self.is_simulator).map_err(Error::from)?;
+        ledger
+            .set_non_interactive_mode(self.non_interactive)
+            .map_err(Error::from)?;
 
         log::debug!("[LEDGER] prepare_blind_signing");
         log::debug!("[LEDGER] {:?} {:?}", bip32_index, msg);
@@ -285,6 +293,9 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        ledger
+            .set_non_interactive_mode(self.non_interactive)
+            .map_err(Error::from)?;
         let blind_signing = needs_blind_signing(prepared_transaction, ledger.get_buffer_size());
 
         // if essence + bip32 input indices are larger than the buffer size or the essence contains
@@ -465,6 +476,7 @@ impl LedgerSecretManager {
     pub fn new(is_simulator: bool) -> Self {
         Self {
             is_simulator,
+            non_interactive: false,
             mutex: Mutex::new(()),
         }
     }
@@ -611,7 +623,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "requires ledger nano instance"]
     async fn ed25519_address() {
-        let secret_manager = LedgerSecretManager::new(true);
+        let mut secret_manager = LedgerSecretManager::new(true);
+        secret_manager.non_interactive = true;
 
         let addresses = SecretManager::LedgerNano(secret_manager)
             .generate_ed25519_addresses(
