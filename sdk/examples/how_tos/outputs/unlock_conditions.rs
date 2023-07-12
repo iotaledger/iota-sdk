@@ -23,7 +23,6 @@ use iota_sdk::{
         },
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -41,7 +40,7 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
     let alias_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
 
-    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(U256::from(50), U256::from(0), U256::from(100))?);
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(address));

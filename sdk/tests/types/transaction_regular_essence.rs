@@ -451,8 +451,7 @@ fn duplicate_output_foundry() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let alias_id = AliasId::from(bytes);
-    let token_scheme =
-        TokenScheme::Simple(SimpleTokenScheme::new(U256::from(70u8), U256::from(0u8), U256::from(100u8)).unwrap());
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100).unwrap());
     let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
     let token_id = TokenId::from(foundry_id);
     let foundry = FoundryOutput::build_with_amount(1_000_000, 1, token_scheme)

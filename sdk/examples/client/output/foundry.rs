@@ -92,11 +92,7 @@ async fn main() -> Result<()> {
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let alias_id = AliasId::from(&alias_output_id);
-    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(
-        U256::from(70u8),
-        U256::from(0u8),
-        U256::from(100u8),
-    )?);
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100)?);
     let foundry_id = FoundryId::build(
         &AliasAddress::from(AliasId::from(&alias_output_id)),
         1,
@@ -135,16 +131,9 @@ async fn main() -> Result<()> {
     // melt 20 native token
     //////////////////////////////////
 
-    let foundry_output_builder = FoundryOutputBuilder::new_with_amount(
-        1_000_000,
-        1,
-        TokenScheme::Simple(SimpleTokenScheme::new(
-            U256::from(70u8),
-            U256::from(20u8),
-            U256::from(100u8),
-        )?),
-    )
-    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
+    let foundry_output_builder =
+        FoundryOutputBuilder::new_with_amount(1_000_000, 1, TokenScheme::Simple(SimpleTokenScheme::new(70, 20, 100)?))
+            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;

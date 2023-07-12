@@ -15,7 +15,6 @@ use iota_sdk::{
         },
     },
 };
-use primitive_types::U256;
 
 use super::{get_alias_output_id, get_foundry_output_id, get_nft_output_id};
 use crate::client::common::create_client_and_secret_manager_with_funds;
@@ -129,7 +128,7 @@ async fn get_foundry_output_id_test() -> Result<()> {
     let foundry_output = FoundryOutputBuilder::new_with_minimum_storage_deposit(
         *protocol_parameters.rent_structure(),
         alias_output_0.as_alias().foundry_counter() + 1,
-        TokenScheme::Simple(SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(500))?),
+        TokenScheme::Simple(SimpleTokenScheme::new(100, 0, 500)?),
     )
     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
     .finish_output(protocol_parameters.token_supply())?;
