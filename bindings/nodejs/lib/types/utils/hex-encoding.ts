@@ -10,10 +10,16 @@ export declare type HexEncodedString = string;
  */
 export declare type HexEncodedAmount = string;
 
+/**
+ * Converts `bigint` value to hexadecimal string representation prefixed with "0x".
+ */
 export function bigIntToHex(value: bigint): string {
     return '0x' + value.toString(16);
 }
 
+/**
+ * Converts hex encoded string to `bigint` value.
+ */
 export function hexToBigInt(
     value: HexEncodedAmount | HexEncodedString,
 ): bigint {

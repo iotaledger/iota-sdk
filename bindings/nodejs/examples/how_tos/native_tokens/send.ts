@@ -51,7 +51,7 @@ async function run() {
                     `Couldn't find native token '${tokenId}' in the account`,
                 );
             }
-            console.log(`Balance before sending:`, token.available);
+            console.log(`Balance before sending:`, token.available.toString());
 
             const transaction = await account
                 .prepareSendNativeTokens(outputs)
@@ -77,7 +77,7 @@ async function run() {
                     `Couldn't find native token '${tokenId}' in the account`,
                 );
             }
-            console.log(`Balance after sending:`, token.available);
+            console.log(`Balance after sending:`, token.available.toString());
         }
     } catch (error) {
         console.log('Error: ', error);
