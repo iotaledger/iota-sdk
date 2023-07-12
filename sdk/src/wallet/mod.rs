@@ -32,7 +32,6 @@ pub mod storage;
 /// The module for spawning tasks on a thread
 pub(crate) mod task;
 
-pub(crate) use self::core::operations;
 pub use self::{
     account::{
         operations::transaction::high_level::{

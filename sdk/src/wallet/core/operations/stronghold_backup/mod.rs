@@ -181,7 +181,7 @@ impl Wallet {
         // store new data
         #[cfg(feature = "storage")]
         {
-            use crate::wallet::operations::storage::SaveLoadWallet;
+            use crate::wallet::core::operations::storage::SaveLoadWallet;
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
@@ -344,7 +344,7 @@ impl Wallet<StrongholdSecretManager> {
         // store new data
         #[cfg(feature = "storage")]
         {
-            use crate::wallet::operations::storage::SaveLoadWallet;
+            use crate::wallet::core::operations::storage::SaveLoadWallet;
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
