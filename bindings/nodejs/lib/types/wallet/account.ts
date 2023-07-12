@@ -56,8 +56,8 @@ export interface RequiredStorageDeposit {
 export interface NativeTokenBalance {
     tokenId: HexEncodedString;
     metadata?: string;
-    total: BigInt;
-    available: BigInt;
+    total: bigint;
+    available: bigint;
 }
 
 /** Sync options for an account */

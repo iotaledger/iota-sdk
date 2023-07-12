@@ -10,7 +10,7 @@ export declare type HexEncodedString = string;
  */
 export declare type HexEncodedAmount = string;
 
-export function bigIntToHex(value: BigInt): string {
+export function bigIntToHex(value: bigint): string {
     return '0x' + value.toString(16);
 }
 

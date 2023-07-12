@@ -164,7 +164,7 @@ export class Account {
      */
     async prepareBurnNativeToken(
         tokenId: string,
-        burnAmount: BigInt,
+        burnAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -311,7 +311,7 @@ export class Account {
      */
     async prepareMeltNativeToken(
         tokenId: string,
-        meltAmount: BigInt,
+        meltAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -744,7 +744,7 @@ export class Account {
      */
     async prepareMintNativeToken(
         tokenId: string,
-        mintAmount: BigInt,
+        mintAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -779,7 +779,7 @@ export class Account {
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedCreateNativeTokenTransaction> {
-        let tokenParams: any = params;
+        const tokenParams: any = params;
         tokenParams.circulatingSupply = bigIntToHex(params.circulatingSupply);
         tokenParams.maximumSupply = bigIntToHex(params.maximumSupply);
 

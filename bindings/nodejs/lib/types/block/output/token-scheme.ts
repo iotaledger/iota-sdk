@@ -32,9 +32,9 @@ class SimpleTokenScheme extends TokenScheme {
     private maximumSupply: HexEncodedAmount;
 
     constructor(
-        mintedTokens: BigInt,
-        meltedTokens: BigInt,
-        maximumSupply: BigInt,
+        mintedTokens: bigint,
+        meltedTokens: bigint,
+        maximumSupply: bigint,
     ) {
         super(TokenSchemeType.Simple);
         this.mintedTokens = bigIntToHex(mintedTokens);
@@ -45,21 +45,21 @@ class SimpleTokenScheme extends TokenScheme {
     /**
      * Amount of tokens minted.
      */
-    getMintedTokens(): BigInt {
+    getMintedTokens(): bigint {
         return hexToBigInt(this.mintedTokens);
     }
 
     /**
      * Amount of tokens melted.
      */
-    getMeltedTokens(): BigInt {
+    getMeltedTokens(): bigint {
         return hexToBigInt(this.meltedTokens);
     }
 
     /**
      * Maximum supply of tokens controlled.
      */
-    getMaximumSupply(): BigInt {
+    getMaximumSupply(): bigint {
         return hexToBigInt(this.maximumSupply);
     }
 }
