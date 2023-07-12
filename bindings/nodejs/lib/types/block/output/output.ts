@@ -224,7 +224,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 /**
  * NFT output.
  */
-class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
+class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
     constructor(
