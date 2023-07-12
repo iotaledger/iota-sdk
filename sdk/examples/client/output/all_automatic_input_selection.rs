@@ -25,7 +25,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -120,7 +119,7 @@ async fn main() -> Result<()> {
         foundry_output_builder
             .clone()
             // Mint native tokens
-            .add_native_token(NativeToken::new(token_id, U256::from(50))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
         nft_output_builder
             .clone()
@@ -160,7 +159,7 @@ async fn main() -> Result<()> {
         // with native token
         basic_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
         // with most simple output
         basic_output_builder.clone().finish_output(token_supply)?,

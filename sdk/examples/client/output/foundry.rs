@@ -30,7 +30,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -108,7 +107,7 @@ async fn main() -> Result<()> {
             .with_foundry_counter(1)
             .finish_output(token_supply)?,
         FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
-            .add_native_token(NativeToken::new(token_id, U256::from(70u8))?)
+            .add_native_token(NativeToken::new(token_id, 70)?)
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
             .finish_output(token_supply)?,
     ];
@@ -147,7 +146,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         foundry_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
     ];
 
@@ -188,7 +187,7 @@ async fn main() -> Result<()> {
         foundry_output_builder.finish_output(token_supply)?,
         basic_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
     ];
 
@@ -223,7 +222,7 @@ async fn main() -> Result<()> {
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
     let outputs = [basic_output_builder
         .clone()
-        .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+        .add_native_token(NativeToken::new(token_id, 50)?)
         .finish_output(token_supply)?];
 
     let block = client
@@ -248,7 +247,7 @@ async fn main() -> Result<()> {
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
     let outputs = [basic_output_builder
-        .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
+        .add_native_token(NativeToken::new(token_id, 30)?)
         .finish_output(token_supply)?];
 
     let block = client
