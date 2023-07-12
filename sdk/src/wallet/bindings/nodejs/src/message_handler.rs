@@ -112,7 +112,7 @@ pub fn message_handler_new(mut cx: FunctionContext) -> JsResult<JsBox<MessageHan
 pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let message = cx.argument::<JsString>(0)?;
     let message = message.value(&mut cx);
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<MessageHandlerWrapper>>(1)?.0);
+    let message_handler = Arc::clone(&cx.argument::<JsBox<MessageHandlerWrapper>>(1)?.0);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
     crate::RUNTIME.spawn(async move {
@@ -155,7 +155,7 @@ pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<MessageHandlerWrapper>>(2)?.0);
+    let message_handler = Arc::clone(&cx.argument::<JsBox<MessageHandlerWrapper>>(2)?.0);
 
     crate::RUNTIME.spawn(async move {
         if let Some(message_handler) = &*message_handler.read().await {
@@ -175,7 +175,7 @@ pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 pub fn destroy(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<MessageHandlerWrapper>>(0)?.0);
+    let message_handler = Arc::clone(&cx.argument::<JsBox<MessageHandlerWrapper>>(0)?.0);
     let channel = cx.channel();
     let (deferred, promise) = cx.promise();
     crate::RUNTIME.spawn(async move {

@@ -7,7 +7,6 @@
 #![deny(clippy::nursery, rust_2018_idioms, warnings)]
 #![allow(
     clippy::redundant_pub_crate,
-    clippy::module_name_repetitions,
     clippy::missing_const_for_fn,
     clippy::significant_drop_in_scrutinee,
     clippy::significant_drop_tightening

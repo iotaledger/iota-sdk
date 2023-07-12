@@ -37,9 +37,8 @@ macro_rules! lazy_static {
 
 pub mod api;
 pub mod builder;
-#[allow(clippy::module_inception)]
-pub mod client;
 pub mod constants;
+pub mod core;
 pub mod error;
 pub mod node_api;
 pub mod node_manager;
@@ -54,7 +53,7 @@ pub mod utils;
 pub use self::node_api::mqtt;
 pub use self::{
     builder::{ClientBuilder, NetworkInfo, NetworkInfoDto},
-    client::*,
+    core::*,
     error::*,
     node_api::core::routes::NodeInfoWrapper,
     utils::*,
