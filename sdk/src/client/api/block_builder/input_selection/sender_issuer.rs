@@ -209,7 +209,7 @@ impl<'a> ClientBlockBuilder<'a> {
         let utxo_chain_inputs = self
             .get_utxo_chains_inputs(required_inputs.iter().map(|i| &i.output))
             .await?;
-        required_inputs.extend(utxo_chain_inputs.into_iter());
+        required_inputs.extend(utxo_chain_inputs);
 
         Ok(required_inputs)
     }

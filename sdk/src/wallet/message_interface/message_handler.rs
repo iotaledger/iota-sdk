@@ -391,6 +391,7 @@ impl WalletMessageHandler {
         response
     }
 
+    #[allow(clippy::large_stack_frames)] // Temporarily allowed as this module will soon be removed.
     async fn call_account_method(&self, account_id: &AccountIdentifier, method: AccountMethod) -> Result<Response> {
         let account = self.wallet.get_account(account_id.clone()).await?;
 

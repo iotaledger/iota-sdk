@@ -145,7 +145,7 @@ where
         let mut output_ids = HashSet::new();
         for res in results {
             let found_output_ids = res?;
-            output_ids.extend(found_output_ids.into_iter());
+            output_ids.extend(found_output_ids);
         }
 
         Ok(output_ids.into_iter().collect())
@@ -216,7 +216,7 @@ where
                 } else {
                     // outputs we had before, but now not anymore, got spent or are alias/nft/foundries that don't get
                     // synced anymore because of other sync options
-                    spent_or_not_anymore_synced_outputs.extend(address.output_ids.into_iter());
+                    spent_or_not_anymore_synced_outputs.extend(address.output_ids);
                 }
             }
         }
