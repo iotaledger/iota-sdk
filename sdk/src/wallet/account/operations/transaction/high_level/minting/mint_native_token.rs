@@ -47,7 +47,7 @@ where
     }
 
     /// Prepares the transaction for
-    /// [Account::mint_native_token()](crate::account::Account::mint_native_token).
+    /// [Account::mint_native_token()](crate::wallet::Account::mint_native_token).
     pub async fn prepare_mint_native_token(
         &self,
         token_id: TokenId,

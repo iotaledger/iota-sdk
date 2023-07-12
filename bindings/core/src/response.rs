@@ -208,7 +208,7 @@ pub enum Response {
     /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
     MilestoneId(MilestoneId),
     /// Response for:
-    /// - [`TokenId`](crate::method::UtilsMethod::TokenId)
+    /// - [`ComputeTokenId`](crate::method::UtilsMethod::ComputeTokenId)
     TokenId(TokenId),
     /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
@@ -311,7 +311,7 @@ pub enum Response {
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for:
-    /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
+    /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
     /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for:

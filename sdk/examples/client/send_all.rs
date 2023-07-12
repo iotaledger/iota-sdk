@@ -20,8 +20,8 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
-    // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
-    // balance.
+    // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic
+    // `NON_SECURE_USE_DEVELOPMENT_MNEMONIC_1` must contain non-zero balance.
     dotenvy::dotenv().ok();
 
     // Create a node client.
@@ -30,10 +30,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager_1 =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
-    let secret_manager_2 =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_2").unwrap())?;
+    let secret_manager_1 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+    let secret_manager_2 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC_2").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -84,7 +82,7 @@ async fn main() -> Result<()> {
     let new_output = basic_output_builder.finish_output(token_supply)?;
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager_1)
         .with_outputs([new_output])?
         .finish()

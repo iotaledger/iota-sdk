@@ -641,11 +641,11 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let params = [SendParams::new(address, amount)?
+    let params = [SendParams::new(amount, address)?
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
         .with_expiration(expiration)];
     let transaction = account
-        .send(
+        .send_with_params(
             params,
             TransactionOptions {
                 allow_micro_amount,

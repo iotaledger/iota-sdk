@@ -130,7 +130,7 @@ mod tests {
     use super::*;
     use crate::{
         client::secret::SecretManager,
-        wallet::{storage::adapter::memory::Memory, wallet::operations::storage::SaveLoadWallet, WalletBuilder},
+        wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
     };
 
     #[tokio::test]

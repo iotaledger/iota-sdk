@@ -6,7 +6,7 @@ use std::pin::Pin;
 use futures::Future;
 use iota_sdk::{
     client::{secret::SecretManager, Client},
-    wallet::wallet::Wallet,
+    wallet::Wallet,
 };
 use tokio::sync::RwLock;
 

@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::TransactionOptions, Result, SendParams},
+    wallet::{account::TransactionOptions, Result},
     Wallet,
 };
 
@@ -43,11 +43,10 @@ async fn main() -> Result<()> {
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let params = [SendParams::new(RECV_ADDRESS, SEND_MICRO_AMOUNT)?];
-
     let transaction = account
         .send(
-            params,
+            SEND_MICRO_AMOUNT,
+            RECV_ADDRESS,
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()

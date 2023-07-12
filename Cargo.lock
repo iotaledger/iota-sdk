@@ -908,6 +908,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "either"
+version = "1.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fcaabb2fef8c910e7f4c7ce9f67a1283a1715879a7c230ca9d6d1ae31f16d91"
+
+[[package]]
 name = "elliptic-curve"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1621,6 +1627,7 @@ dependencies = [
  "iota-sdk",
  "iota_stronghold",
  "iterator-sorted",
+ "itertools",
  "lazy_static",
  "log",
  "num_cpus",
@@ -1680,7 +1687,7 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk-python"
-version = "0.1.0"
+version = "1.0.0-rc.0"
 dependencies = [
  "futures",
  "iota-sdk-bindings-core",
@@ -1759,6 +1766,15 @@ name = "iterator-sorted"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d101775d2bc8f99f4ac18bf29b9ed70c0dd138b9a1e88d7b80179470cbbe8bd2"
+
+[[package]]
+name = "itertools"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
+]
 
 [[package]]
 name = "itoa"

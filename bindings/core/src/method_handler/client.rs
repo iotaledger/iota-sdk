@@ -12,7 +12,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
+                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent, RentStructure,
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
@@ -175,7 +175,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             options,
         } => {
             // Prepare transaction
-            let mut block_builder = client.block();
+            let mut block_builder = client.build_block();
 
             let secret_manager = match secret_manager {
                 Some(secret_manager) => Some(secret_manager.try_into()?),
@@ -229,7 +229,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             options,
         } => {
-            let mut block_builder = client.block();
+            let mut block_builder = client.build_block();
 
             let secret_manager = match secret_manager {
                 Some(secret_manager) => Some(secret_manager.try_into()?),
@@ -252,7 +252,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             prepared_transaction_data,
         } => {
-            let mut block_builder = client.block();
+            let mut block_builder = client.build_block();
 
             let secret_manager = secret_manager.try_into()?;
 
@@ -267,7 +267,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             ))
         }
         ClientMethod::PostBlockPayload { payload } => {
-            let block_builder = client.block();
+            let block_builder = client.build_block();
 
             let block = block_builder
                 .finish_block(Some(Payload::try_from_dto(
@@ -455,6 +455,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
+        }
+        ClientMethod::MinimumRequiredStorageDeposit { output } => {
+            let output = Output::try_from_dto(output, client.get_token_supply().await?)?;
+            let rent_structure = client.get_rent_structure().await?;
+
+            let minimum_storage_deposit = output.rent_cost(&rent_structure);
+
+            Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)

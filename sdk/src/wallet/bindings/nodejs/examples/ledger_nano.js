@@ -16,7 +16,7 @@ async function run() {
         });
 
         const manager = new AccountManager({
-            storagePath: './alice-database',
+            storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },

@@ -57,8 +57,8 @@ impl Client {
         self.get_outputs(&input_ids).await
     }
 
-    /// A generic send function for easily sending transaction or tagged data blocks.
-    pub fn block(&self) -> ClientBlockBuilder<'_> {
+    /// Get a builder that can be used to construct a block in parts.
+    pub fn build_block(&self) -> ClientBlockBuilder<'_> {
         ClientBlockBuilder::new(self)
     }
 

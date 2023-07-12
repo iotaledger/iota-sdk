@@ -179,13 +179,6 @@ export type __UnspentOutputsMethod__ = {
     };
 };
 
-export type __MinimumRequiredStorageDepositMethod__ = {
-    name: 'minimumRequiredStorageDeposit';
-    data: {
-        output: Output;
-    };
-};
-
 export type __PrepareMintNativeTokenMethod__ = {
     name: 'prepareMintNativeToken';
     data: {

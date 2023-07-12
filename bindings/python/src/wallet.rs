@@ -8,7 +8,7 @@ use iota_sdk_bindings_core::{
     iota_sdk::wallet::{events::types::WalletEventType, Wallet as RustWallet},
     Response, WalletMethod, WalletOptions,
 };
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::PyTuple};
 use tokio::sync::RwLock;
 
 use crate::{
@@ -58,11 +58,11 @@ pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
 
 /// Listen to wallet events.
 #[pyfunction]
-pub fn listen_wallet(wallet: &Wallet, events: Vec<String>, handler: PyObject) {
+pub fn listen_wallet(wallet: &Wallet, events: Vec<u8>, handler: PyObject) {
     let mut rust_events = Vec::with_capacity(events.len());
 
     for event in events {
-        let event = match serde_json::from_str::<WalletEventType>(&event) {
+        let event = match WalletEventType::try_from(event) {
             Ok(event) => event,
             Err(e) => {
                 panic!("Wrong event to listen! {e:?}");
@@ -78,9 +78,11 @@ pub fn listen_wallet(wallet: &Wallet, events: Vec<String>, handler: PyObject) {
             .await
             .as_ref()
             .expect("wallet got destroyed")
-            .listen(rust_events, move |_| {
+            .listen(rust_events, move |event| {
+                let event_string = serde_json::to_string(&event).expect("json to string error");
                 Python::with_gil(|py| {
-                    handler.call0(py).unwrap();
+                    let args = PyTuple::new(py, &[event_string]);
+                    handler.call1(py, args).expect("failed to call python callback");
                 });
             })
             .await;

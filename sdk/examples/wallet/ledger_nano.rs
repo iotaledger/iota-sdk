@@ -19,7 +19,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
-    wallet::{ClientOptions, Result, SendParams, Wallet},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 // The account alias used in this example
@@ -72,8 +72,7 @@ async fn main() -> Result<()> {
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
     println!("Sending the coin-transfer transaction...");
-    let params = [SendParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send(params, None).await?;
+    let transaction = account.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

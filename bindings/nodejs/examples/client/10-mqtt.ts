@@ -28,7 +28,7 @@ async function run() {
     });
 
     // Array of topics to subscribe to
-    // Topics can be found here https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/iotaledger/tips/stardust-event-api/tips/TIP-0028/event-api.yml
+    // Topics can be found here https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/iotaledger/tips/main/tips/TIP-0028/event-api.yml
     const topics = ['blocks'];
 
     const callback = function (error: Error, data: string) {
@@ -56,11 +56,11 @@ async function run() {
         }
     };
 
-    await client.listen(topics, callback);
+    await client.listenMqtt(topics, callback);
 
     // Clear listener after 10 seconds
     setTimeout(async () => {
-        await client.clearListeners(topics);
+        await client.clearMqttListeners(topics);
         console.log('Listener cleared');
         // Exit the process
         setTimeout(async () => process.exit(0), 2000);

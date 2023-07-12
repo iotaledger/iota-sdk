@@ -15,7 +15,8 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Generates a client.log file with logs for debugging
+    // Generates a client.log file with logs for debugging.
+    // We exclude logs from h2, hyper and rustls to reduce the noise.
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
         .name("client.log")
         .target_exclusions(&["h2", "hyper", "rustls"])

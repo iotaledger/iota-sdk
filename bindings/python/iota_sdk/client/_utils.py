@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.output import Output
 from typing import Optional
 
 
@@ -38,6 +39,15 @@ class ClientUtils():
             'hex': hex,
             'bech32Hrp': bech32_hrp
         })
+
+    def minimum_required_storage_deposit(self, output: Output) -> int:
+        """Minimum required storage deposit.
+        """
+        return int(self._call_method(
+            'minimumRequiredStorageDeposit', {
+                'output': output.as_dict()
+            }
+        ))
 
     def request_funds_from_faucet(self, url: str, address: str) -> str:
         """Requests funds from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.

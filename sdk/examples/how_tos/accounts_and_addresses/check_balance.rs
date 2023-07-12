@@ -35,7 +35,5 @@ async fn main() -> Result<()> {
         println!(" - {prepended}{}", address.address());
     }
 
-    // TODO: print addresses with balance
-
     Ok(())
 }

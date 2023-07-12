@@ -27,6 +27,7 @@ hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash"
 hex = { version = "0.4.3", default-features = false }
 iota-crypto = { version = "0.20.1", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
+itertools = { version = "0.11.0", default-features = false, features = [ "use_alloc" ] }
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
 primitive-types = { version = "0.12.1", default-features = false }
@@ -90,7 +91,7 @@ pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
-std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
+std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std", "itertools/use_std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
@@ -184,6 +185,18 @@ required-features = [ "rocksdb", "stronghold" ]
 name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
+
+# NFT Collection Examples
+
+[[example]]
+name = "mint_issuer_nft"
+path = "examples/how_tos/nft_collection/00_mint_issuer_nft.rs"
+required-features = [ "wallet", "storage", "stronghold" ]
+
+[[example]]
+name = "mint_collection_nft"
+path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
+required-features = [ "wallet", "stronghold" ]
 
 # Native Tokens Examples
 
@@ -482,11 +495,6 @@ path = "examples/client/02_address_balance.rs"
 required-features = [ "client" ]
 
 [[example]]
-name = "03_simple_block"
-path = "examples/client/03_simple_block.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "07_mqtt"
 path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
@@ -642,16 +650,6 @@ required-features = [ "client" ]
 name = "wallet_getting_started"
 path = "examples/wallet/getting_started.rs"
 required-features = [ "stronghold" ]
-
-[[example]]
-name = "mint_issuer_nft"
-path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
-required-features = [ "wallet", "storage", "stronghold" ]
-
-[[example]]
-name = "mint_collection_nft"
-path = "examples/wallet/nft_collection/01_mint_collection_nft.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "0_generate_addresses"

@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will create an alias output
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 

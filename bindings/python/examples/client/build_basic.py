@@ -24,7 +24,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))
 
 # Output with metadata feature block
 basic_output = client.build_basic_output(
@@ -36,7 +36,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))
 
 # Output with storage deposit return
 basic_output = client.build_basic_output(
@@ -49,7 +49,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))
 
 # Output with expiration
 basic_output = client.build_basic_output(
@@ -62,7 +62,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))
 
 # Output with timelock
 basic_output = client.build_basic_output(
@@ -72,7 +72,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))
 
 # Output with tag feature
 basic_output = client.build_basic_output(
@@ -84,7 +84,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))
 
 # Output with sender feature
 basic_output = client.build_basic_output(
@@ -96,4 +96,4 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output, indent=4))
+print(json.dumps(basic_output.as_dict(), indent=4))

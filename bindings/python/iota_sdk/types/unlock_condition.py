@@ -1,10 +1,13 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from enum import Enum
+from iota_sdk.types.address import Address
+from enum import IntEnum
+from typing import Optional
+from dataclasses import dataclass
 
 
-class UnlockConditionType(Enum):
+class UnlockConditionType(IntEnum):
     Address = 0
     StorageDepositReturn = 1
     Timelock = 2
@@ -14,43 +17,22 @@ class UnlockConditionType(Enum):
     ImmutableAliasAddress = 6
 
 
+@dataclass
 class UnlockCondition():
-    def __init__(self, type=None, address=None, amount=None, unix_time=None, return_address=None):
-        """Initialize an UnlockCondition
-
-        Parameters
-        ----------
-        type : UnlockConditionType
-            The type of unlock condition
-        address : Address
-            Address for unlock condition
-        amount : int
-            Amount for storage deposit unlock condition
-        unix_time : int
-            Unix timestamp for timelock and expiration unlock condition
-        return_address : Address
-            Return address for expiration and storage deposit unlock condition
-        """
-        self.type = type
-        self.address = address
-        self.amount = amount
-        self.unixTime = unix_time
-        self.returnAddress = return_address
+    type: int
+    amount: Optional[str] = None
+    address: Optional[Address] = None
+    unixTime: Optional[int] = None
+    returnAddress: Optional[Address] = None
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v != None}
-
-        if 'type' in config:
-            config['type'] = config['type'].value
 
         if 'address' in config:
             config['address'] = config['address'].as_dict()
 
         if 'returnAddress' in config:
             config['returnAddress'] = config['returnAddress'].as_dict()
-
-        if 'amount' in config:
-            config['amount'] = str(config['amount'])
 
         return config
 
@@ -79,7 +61,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
             Return address
         """
         super().__init__(type=UnlockConditionType.StorageDepositReturn,
-                         amount=amount, return_address=return_address)
+                         amount=str(amount), returnAddress=return_address)
 
 
 class TimelockUnlockCondition(UnlockCondition):
@@ -91,7 +73,7 @@ class TimelockUnlockCondition(UnlockCondition):
         unix_time : int
             Unix timestamp at which to unlock output
         """
-        super().__init__(type=UnlockConditionType.Timelock, unix_time=unix_time)
+        super().__init__(type=UnlockConditionType.Timelock, unixTime=unix_time)
 
 
 class ExpirationUnlockCondition(UnlockCondition):
@@ -106,7 +88,7 @@ class ExpirationUnlockCondition(UnlockCondition):
             Return address
         """
         super().__init__(type=UnlockConditionType.Expiration,
-                         unix_time=unix_time, return_address=return_address)
+                         unixTime=unix_time, returnAddress=return_address)
 
 
 class StateControllerAddressUnlockCondition(UnlockCondition):

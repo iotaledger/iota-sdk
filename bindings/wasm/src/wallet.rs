@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{cell::RefCell, rc::Rc};
+use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_wallet_method,
@@ -11,7 +11,10 @@ use iota_sdk_bindings_core::{
     },
     Response, WalletMethod, WalletOptions,
 };
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::{
+    mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
+    Mutex,
+};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
@@ -19,7 +22,7 @@ use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHand
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
 pub struct WalletMethodHandler {
-    wallet: Rc<RefCell<Option<Wallet>>>,
+    wallet: Arc<Mutex<Option<Wallet>>>,
 }
 
 /// Creates a method handler with the given options.
@@ -35,19 +38,19 @@ pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
         .map_err(|e| e.to_string())?;
 
     Ok(WalletMethodHandler {
-        wallet: Rc::new(RefCell::new(Some(wallet_method_handler))),
+        wallet: Arc::new(Mutex::new(Some(wallet_method_handler))),
     })
 }
 
 #[wasm_bindgen(js_name = destroyWallet)]
 pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsValue> {
-    *method_handler.wallet.borrow_mut() = None;
+    *method_handler.wallet.lock().await = None;
     Ok(())
 }
 
 #[wasm_bindgen(js_name = getClientFromWallet)]
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.borrow_mut();
+    let wallet = method_handler.wallet.lock().await;
 
     let client = wallet
         .as_ref()
@@ -60,7 +63,7 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
 
 #[wasm_bindgen(js_name = getSecretManagerFromWallet)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.borrow_mut();
+    let wallet = method_handler.wallet.lock().await;
 
     let secret_manager = wallet
         .as_ref()
@@ -75,9 +78,8 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
 ///
 /// Returns an error if the response itself is an error or panic.
 #[wasm_bindgen(js_name = callWalletMethodAsync)]
-#[allow(non_snake_case, clippy::await_holding_refcell_ref)]
 pub async fn call_wallet_method_async(method: String, method_handler: &WalletMethodHandler) -> Result<String, JsValue> {
-    let wallet = method_handler.wallet.borrow_mut();
+    let wallet = method_handler.wallet.lock().await;
     let method: WalletMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 
     let response = call_wallet_method(wallet.as_ref().expect("wallet got destroyed"), method).await;
@@ -97,7 +99,6 @@ pub async fn call_wallet_method_async(method: String, method_handler: &WalletMet
 /// * `callback`: A JavaScript function that will be called when a wallet event occurs.
 /// * `method_handler`: This is the same method handler that we used in the previous section.
 #[wasm_bindgen(js_name = listenWalletAsync)]
-#[allow(clippy::await_holding_refcell_ref)]
 pub async fn listen_wallet(
     vec: js_sys::Array,
     callback: js_sys::Function,
@@ -115,7 +116,8 @@ pub async fn listen_wallet(
     let (tx, mut rx): (UnboundedSender<Event>, UnboundedReceiver<Event>) = unbounded_channel();
     method_handler
         .wallet
-        .borrow()
+        .lock()
+        .await
         .as_ref()
         .expect("wallet not initialised")
         .listen(event_types, move |wallet_event| {

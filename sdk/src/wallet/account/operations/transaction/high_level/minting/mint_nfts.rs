@@ -34,18 +34,18 @@ pub struct MintNftParams {
     sender: Option<Bech32Address>,
     /// NFT metadata feature.
     #[getset(get = "pub")]
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     metadata: Option<Vec<u8>>,
     /// NFT tag feature.
     #[getset(get = "pub")]
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     tag: Option<Vec<u8>>,
     /// NFT issuer feature.
     #[getset(get = "pub")]
     issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     #[getset(get = "pub")]
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     immutable_metadata: Option<Vec<u8>>,
 }
 
@@ -115,7 +115,7 @@ where
 {
     /// Mints NFTs.
     ///
-    /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally. The options may define the
+    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the
     /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
@@ -150,7 +150,7 @@ where
     }
 
     /// Prepares the transaction for
-    /// [Account::mint_nfts()](crate::account::Account::mint_nfts).
+    /// [Account::mint_nfts()](crate::wallet::Account::mint_nfts).
     pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
         params: I,

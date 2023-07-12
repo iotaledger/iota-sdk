@@ -985,7 +985,7 @@ export class Client {
     /**
      * Listen to MQTT topics.
      */
-    async listen(
+    async listenMqtt(
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
@@ -995,13 +995,28 @@ export class Client {
     /**
      * Stop listening for provided MQTT topics.
      */
-    async clearListeners(topics: string[]): Promise<void> {
+    async clearMqttListeners(topics: string[]): Promise<void> {
         await this.methodHandler.callMethod({
             name: 'clearListeners',
             data: {
                 topics,
             },
         });
+    }
+
+    /**
+     * Calculate the minimum required storage deposit for an output.
+     * @param output output to calculate the deposit amount for.
+     * @returns The amount.
+     */
+    async minimumRequiredStorageDeposit(output: Output): Promise<number> {
+        const response = await this.methodHandler.callMethod({
+            name: 'minimumRequiredStorageDeposit',
+            data: {
+                output,
+            },
+        });
+        return JSON.parse(response).payload;
     }
 
     /**

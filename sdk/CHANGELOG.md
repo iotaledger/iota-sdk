@@ -119,6 +119,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `Account::send` to `send_outputs`, `Account::send_amount` to `send`, `Account::prepare_send_amount` to `prepare_send`;
 - Made `ManagerStorage` public and renamed it to `StorageKind`;
 - Made `StorageOptions` public;
+- Renamed `Client::block` to `build_block`;
+- Renamed "inception" modules to `core` (ex. `wallet::wallet` -> `wallet::core`);
 
 ### Removed
 

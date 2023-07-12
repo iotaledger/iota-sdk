@@ -21,25 +21,23 @@ async function getUnlockedWallet() {
             '.env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example',
         );
     }
-    if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-        throw new Error(
-            '.env NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1 is undefined, see .env.example',
-        );
+    if (!process.env.MNEMONIC) {
+        throw new Error('.env MNEMONIC is undefined, see .env.example');
     }
     if (!process.env.WALLET_DB_PATH) {
         throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
     }
 
     const walletOptions: WalletOptions = {
-        storagePath: `${process.env.WALLET_DB_PATH}`,
+        storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
             nodes: [process.env.NODE_URL],
         },
         coinType: CoinType.Shimmer,
         secretManager: {
             stronghold: {
-                snapshotPath: `${process.env.STRONGHOLD_SNAPSHOT_PATH}`,
-                password: `${process.env.STRONGHOLD_PASSWORD}`,
+                snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+                password: process.env.STRONGHOLD_PASSWORD,
             },
         },
     };

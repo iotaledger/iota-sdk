@@ -89,7 +89,7 @@ where
     /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
     /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access
     /// to the output again after a predefined time (default 1 day).
-    /// Calls [Account::send_outputs()](crate::account::Account::send_outputs) internally. The options may define the
+    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the
     /// remainder value strategy or custom inputs. Note that the address needs to be bech32-encoded.
     /// ```ignore
     /// let params = [SendNativeTokensParams {
@@ -122,7 +122,7 @@ where
     }
 
     /// Prepares the transaction for
-    /// [Account::send_native_tokens()](crate::account::Account::send_native_tokens).
+    /// [Account::send_native_tokens()](crate::wallet::Account::send_native_tokens).
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
         params: I,

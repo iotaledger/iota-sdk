@@ -3,10 +3,10 @@
 
 //! This example shows how to participate in voting events.
 //!
-//! Command to create an event:
+//! Command to create an event, when your node is located on the same machine:
 //! curl -X POST http://localhost:14265/api/participation/v1/admin/events -H 'Content-Type: application/json' -d '{"name":"Shimmer Proposal","milestoneIndexCommence":580,"milestoneIndexStart":600,"milestoneIndexEnd":700,"payload":{"type":0,"questions":[{"text":"Should we be on CMC rank #1 eoy?","answers":[{"value":1,"text":"Yes","additionalInfo":""},{"value":2,"text":"No","additionalInfo":""}],"additionalInfo":""}]},"additionalInfo":"Nothing needed here"}'
 //! Command to delete an event:
-//! curl -X DELETE http://localhost:14265/api/participation/v1/admin/events/0x30bec90738f04b72e44ca853f98d90d19fb1c6b06eebdae3cc744439cbcb7e68
+//! curl -X DELETE http://localhost:14265/api/participation/v1/admin/events/<RETURNED_EVENT_ID>
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -47,8 +47,7 @@ async fn main() -> Result<()> {
         println!("{event_status:#?}");
     }
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
@@ -97,8 +96,7 @@ async fn main() -> Result<()> {
 }
 
 async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<()> {
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;
@@ -112,7 +110,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
         .finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .with_tag(PARTICIPATION_TAG.as_bytes().to_vec())

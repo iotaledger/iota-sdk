@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.1.0 - 2023-XX-XX
+## 1.0.0-rc.1 - 2023-07-DD
 
-Initial release of the Python bindings.
+### Added
+
+- `Account::get_metadata()`;
+
+### Changed
+
+- Moved `minimum_required_storage_deposit()` from `Account` to `Client`;
+- `Wallet::create_account()` returns `Account` now;
+
+## 1.0.0-rc.0 - 2023-07-11
+
+Initial release of the Python SDK bindings.

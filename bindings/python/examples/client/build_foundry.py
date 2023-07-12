@@ -13,7 +13,7 @@ client = Client(nodes=[node_url])
 # Configure foundry output
 # TODO: replace with your own values
 serial_number = 1
-token_scheme = TokenScheme(0, 32, 64)
+token_scheme = TokenScheme(32, 0, 64)
 unlock_conditions = [
     ImmutableAliasAddressUnlockCondition(
         AliasAddress('0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa')
@@ -28,5 +28,5 @@ output = client.build_foundry_output(
 )
 
 # Print the output
-print(json.dumps(output, indent=4))
+print(json.dumps(output.as_dict(), indent=4))
 

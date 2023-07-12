@@ -180,7 +180,7 @@ where
                     .get_outputs_from_address_output_ids(addresses_with_output_ids)
                     .await?;
                 addresses_with_unspent_outputs = addresses_with_unspent_outputs_inner;
-                outputs_data.extend(outputs_data_inner.clone().into_iter());
+                outputs_data.extend(outputs_data_inner.clone());
                 outputs_data_inner
             } else {
                 let bech32_hrp = self.client().get_bech32_hrp().await?;
@@ -203,7 +203,7 @@ where
                         .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
                         .await?;
 
-                    outputs_data.extend(outputs_data_inner.clone().into_iter());
+                    outputs_data.extend(outputs_data_inner.clone());
                     new_outputs_data.extend(outputs_data_inner);
                 }
                 new_outputs_data

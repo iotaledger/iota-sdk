@@ -24,8 +24,7 @@ async fn main() -> Result<()> {
 
     // Create a wallet
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())

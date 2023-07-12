@@ -10,11 +10,12 @@ use iota_sdk::{
     },
     types::block::{
         address::ToBech32Ext,
-        output::OutputId,
+        output::{Output, OutputId},
         payload::{transaction::TransactionId, Payload},
-        BlockId,
+        Block, BlockId,
     },
 };
+use packable::PackableExt;
 
 use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL, NODE_LOCAL};
 
@@ -26,7 +27,7 @@ async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     client
-        .block()
+        .build_block()
         .with_tag(b"Hello".to_vec())
         .with_data(b"Tangle".to_vec())
         .finish()
@@ -77,7 +78,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     }
 
     let block_id = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_output_hex(
             // Send funds back to the sender.
@@ -231,6 +232,24 @@ async fn test_get_output() {
 
 #[ignore]
 #[tokio::test]
+async fn test_get_output_raw() {
+    let (_block_id, transaction_id) = setup_transaction_block().await;
+    let output_id = OutputId::new(transaction_id, 0).unwrap();
+
+    let client = setup_client_with_node_health_ignored().await;
+
+    let output = client.get_output(&output_id).await.unwrap().into_output();
+    let output_raw = Output::unpack_verified(
+        client.get_output_raw(&output_id).await.unwrap(),
+        &client.get_protocol_parameters().await.unwrap(),
+    )
+    .unwrap();
+
+    assert_eq!(output, output_raw);
+}
+
+#[ignore]
+#[tokio::test]
 async fn test_get_peers() {
     let r = setup_client_with_node_health_ignored().await.get_peers().await.unwrap();
 
@@ -254,6 +273,35 @@ async fn test_get_milestone_by_id() {
 
 #[ignore]
 #[tokio::test]
+async fn test_get_milestone_by_id_raw() {
+    let client = setup_client_with_node_health_ignored().await;
+
+    let latest_milestone_id = client
+        .get_info()
+        .await
+        .unwrap()
+        .node_info
+        .status
+        .latest_milestone
+        .milestone_id
+        .unwrap();
+
+    let milestone = client.get_milestone_by_id(&latest_milestone_id).await.unwrap();
+    let milestone_raw = Payload::unpack_verified(
+        client.get_milestone_by_id_raw(&latest_milestone_id).await.unwrap(),
+        &client.get_protocol_parameters().await.unwrap(),
+    )
+    .unwrap();
+
+    if let Payload::Milestone(milestone_raw) = milestone_raw {
+        assert_eq!(milestone, *milestone_raw);
+    } else {
+        panic!("expected a milestone payload")
+    }
+}
+
+#[ignore]
+#[tokio::test]
 async fn test_get_milestone_by_index() {
     let client = setup_client_with_node_health_ignored().await;
 
@@ -265,6 +313,27 @@ async fn test_get_milestone_by_index() {
         .unwrap();
 
     println!("{r:#?}");
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_get_milestone_by_index_raw() {
+    let client = setup_client_with_node_health_ignored().await;
+
+    let milestone_index = client.get_info().await.unwrap().node_info.status.latest_milestone.index;
+
+    let milestone = client.get_milestone_by_index(milestone_index).await.unwrap();
+    let milestone_raw = Payload::unpack_verified(
+        client.get_milestone_by_index_raw(milestone_index).await.unwrap(),
+        &client.get_protocol_parameters().await.unwrap(),
+    )
+    .unwrap();
+
+    if let Payload::Milestone(milestone_raw) = milestone_raw {
+        assert_eq!(milestone, *milestone_raw);
+    } else {
+        panic!("expected a milestone payload")
+    }
 }
 
 #[ignore]
@@ -345,6 +414,23 @@ async fn test_get_included_block() {
         .unwrap();
 
     println!("{r:#?}");
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_get_included_block_raw() {
+    let (_block_id, transaction_id) = setup_transaction_block().await;
+
+    let client = setup_client_with_node_health_ignored().await;
+
+    let block = client.get_included_block(&transaction_id).await.unwrap();
+    let block_raw = Block::unpack_verified(
+        client.get_included_block_raw(&transaction_id).await.unwrap(),
+        &client.get_protocol_parameters().await.unwrap(),
+    )
+    .unwrap();
+
+    assert_eq!(block, block_raw);
 }
 
 #[ignore]

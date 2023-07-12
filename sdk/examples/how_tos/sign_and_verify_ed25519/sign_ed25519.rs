@@ -33,9 +33,7 @@ async fn main() -> Result<()> {
         .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("sign_ed25519.stronghold")?;
 
-    stronghold
-        .store_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())
-        .await?;
+    stronghold.store_mnemonic(std::env::var("MNEMONIC").unwrap()).await?;
 
     let bip32_chain = Chain::from_u32_hardened([
         HD_WALLET_TYPE,
