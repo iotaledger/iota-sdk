@@ -36,12 +36,11 @@ wallet = Wallet(os.environ.get('WALLET_DB_PATH'),
 wallet.store_mnemonic(
     os.environ['MNEMONIC'])
 
-created_account = wallet.create_account('Alice')
-account = wallet.get_account('Alice')
+account = wallet.create_account('Alice')
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/alias/foundry outputs.
 account.set_default_sync_options(
     SyncOptions(sync_only_most_basic_outputs=True))
 
-print(created_account)
+print(account.get_metadata())

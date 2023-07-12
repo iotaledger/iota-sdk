@@ -24,7 +24,6 @@ pub fn rand_nft_address() -> NftAddress {
 
 /// Generates a random address.
 pub fn rand_address() -> Address {
-    #[allow(clippy::modulo_one)]
     match rand_number::<u64>() % 3 {
         0 => rand_ed25519_address().into(),
         1 => rand_alias_address().into(),

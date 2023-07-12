@@ -136,13 +136,12 @@ impl NativeTokensBuilder {
     }
 }
 
-#[allow(clippy::fallible_impl_from)]
 impl From<NativeTokens> for NativeTokensBuilder {
     fn from(native_tokens: NativeTokens) -> Self {
         let mut builder = Self::new();
-
-        // PANIC: safe as `native_tokens` was already built and then valid.
-        builder.add_native_tokens(native_tokens).unwrap();
+        for native_token in native_tokens {
+            *builder.0.entry(*native_token.token_id()).or_default() += native_token.amount();
+        }
         builder
     }
 }

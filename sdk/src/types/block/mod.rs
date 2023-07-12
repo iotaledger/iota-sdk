@@ -12,8 +12,7 @@ mod error;
 /// A module that provides types and syntactic validations of addresses.
 pub mod address;
 /// A module that provides types and syntactic validations of blocks.
-#[allow(clippy::module_inception)]
-pub mod block;
+pub mod core;
 /// A module that contains helper functions and types.
 pub mod helper;
 /// A module that provides types and syntactic validations of inputs.
@@ -41,9 +40,9 @@ pub(crate) use r#macro::string_serde_impl;
 pub(crate) use r#macro::{create_bitflags, impl_id};
 
 pub use self::{
-    block::{dto::BlockDto, Block, BlockBuilder},
     block_id::BlockId,
     convert::ConvertTo,
+    core::{dto::BlockDto, Block, BlockBuilder},
     error::Error,
 };
 

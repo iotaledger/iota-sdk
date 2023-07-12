@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#![allow(clippy::redundant_pub_crate, dead_code)]
-
 mod constants;
 
 use crypto::keys::bip39::Mnemonic;

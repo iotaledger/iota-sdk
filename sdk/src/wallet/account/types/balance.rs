@@ -51,9 +51,9 @@ impl std::ops::AddAssign for Balance {
             }
         }
 
-        self.nfts.extend(rhs.nfts.into_iter());
-        self.aliases.extend(rhs.aliases.into_iter());
-        self.foundries.extend(rhs.foundries.into_iter());
+        self.nfts.extend(rhs.nfts);
+        self.aliases.extend(rhs.aliases);
+        self.foundries.extend(rhs.foundries);
     }
 }
 

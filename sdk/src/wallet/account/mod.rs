@@ -53,7 +53,7 @@ pub use self::{
     },
     types::OutputDataDto,
 };
-use super::wallet::WalletInner;
+use super::core::WalletInner;
 use crate::{
     client::{
         secret::{SecretManage, SecretManager},
