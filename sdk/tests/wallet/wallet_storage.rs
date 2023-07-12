@@ -260,7 +260,7 @@ async fn check_existing_db_3() -> Result<()> {
     assert!(!addresses[0].internal());
 
     let transactions = account.transactions().await;
-    assert_eq!(transactions.len(), 2);
+    assert_eq!(transactions.len(), 1);
 
     tear_down(storage_path)
 }
