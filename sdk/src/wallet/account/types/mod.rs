@@ -30,6 +30,7 @@ use crate::{
             BlockId,
         },
     },
+    utils::serde::option_bip44,
     wallet::account::AccountDetails,
 };
 
@@ -49,7 +50,8 @@ pub struct OutputData {
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
-    // bip32 path
+    // bip44 path
+    #[serde(with = "option_bip44")]
     pub chain: Option<Bip44>,
 }
 

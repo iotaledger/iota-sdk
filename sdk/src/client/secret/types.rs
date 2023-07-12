@@ -15,6 +15,7 @@ use crate::{
             Output, OutputId, OutputMetadata,
         },
     },
+    utils::serde::option_bip44,
 };
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
@@ -178,6 +179,7 @@ pub struct InputSigningDataDto {
     /// The output metadata
     pub output_metadata: OutputMetadataDto,
     /// The chain derived from seed, only for ed25519 addresses
+    #[serde(with = "option_bip44")]
     pub chain: Option<Bip44>,
 }
 

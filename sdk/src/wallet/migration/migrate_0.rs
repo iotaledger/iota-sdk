@@ -4,8 +4,6 @@
 use core::str::FromStr;
 use std::collections::HashMap;
 
-use serde::de::DeserializeOwned;
-
 use super::*;
 use crate::wallet::Error;
 
@@ -189,20 +187,6 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
         storage.delete("backup_schema_version").await.ok();
         Ok(())
     }
-}
-
-trait Convert {
-    type New: Serialize + DeserializeOwned;
-    type Old: DeserializeOwned;
-
-    fn check(value: &mut serde_json::Value) -> crate::wallet::Result<()> {
-        if serde_json::from_value::<Self::New>(value.clone()).is_err() {
-            *value = serde_json::to_value(Self::convert(serde_json::from_value::<Self::Old>(value.clone())?)?)?;
-        }
-        Ok(())
-    }
-
-    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New>;
 }
 
 mod types {

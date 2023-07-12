@@ -19,6 +19,7 @@ use crate::{
         protocol::ProtocolParameters,
         Error,
     },
+    utils::serde::option_bip44,
 };
 
 /// Helper struct for offline signing
@@ -180,6 +181,7 @@ pub struct RemainderDataDto {
     /// The remainder output
     pub output: OutputDto,
     /// The chain derived from seed, for the remainder addresses
+    #[serde(with = "option_bip44")]
     pub chain: Option<Bip44>,
     /// The remainder address
     pub address: AddressDto,

@@ -3,9 +3,9 @@
 
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
-use iota_sdk::client::{
-    api::{GetAddressesOptions, PreparedTransactionDataDto},
-    constants::IOTA_COIN_TYPE,
+use iota_sdk::{
+    client::api::{GetAddressesOptions, PreparedTransactionDataDto},
+    utils::serde::Bip44Def,
 };
 use serde::{Deserialize, Serialize};
 
@@ -68,20 +68,6 @@ pub enum SecretManagerMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
-}
-
-#[derive(Default, Serialize, Deserialize)]
-#[serde(default, rename_all = "camelCase", remote = "Bip44")]
-pub struct Bip44Def {
-    #[serde(default = "default_coin_type")]
-    coin_type: u32,
-    account: u32,
-    change: u32,
-    address_index: u32,
-}
-
-const fn default_coin_type() -> u32 {
-    IOTA_COIN_TYPE
 }
 
 #[cfg(test)]

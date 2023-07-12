@@ -14,7 +14,6 @@ use crate::{
 use crate::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionDataDto, SignedTransactionDataDto},
-        constants::IOTA_COIN_TYPE,
         secret::GenerateAddressOptions,
     },
     types::block::{
@@ -28,6 +27,7 @@ use crate::{
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
     },
+    utils::serde::Bip44Def,
     wallet::{
         account::{
             operations::{
@@ -452,20 +452,6 @@ pub enum AccountMethod {
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
     RequestFundsFromFaucet { url: String, address: Bech32Address },
-}
-
-#[derive(Default, Serialize, Deserialize)]
-#[serde(default, rename_all = "camelCase", remote = "Bip44")]
-pub struct Bip44Def {
-    #[serde(default = "default_coin_type")]
-    coin_type: u32,
-    account: u32,
-    change: u32,
-    address_index: u32,
-}
-
-const fn default_coin_type() -> u32 {
-    IOTA_COIN_TYPE
 }
 
 #[cfg(test)]
