@@ -139,6 +139,7 @@ impl<'a> ClientBlockBuilder<'a> {
             available_input_addresses.extend(internal.iter().map(|bech32_address| bech32_address.inner));
 
             // Have public and internal addresses with the index ascending ordered.
+            #[allow(clippy::tuple_array_conversions)]
             let public_and_internal_addresses = public
                 .iter()
                 .map(|a| (a, false))
