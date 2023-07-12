@@ -3,7 +3,6 @@
 
 // Increased limit required specifically for call_method
 #![recursion_limit = "256"]
-#![allow(clippy::needless_borrow)]
 
 mod client;
 mod secret_manager;
