@@ -6,7 +6,7 @@ from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, P
 from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.balance import Balance
 from iota_sdk.types.burn import Burn
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import CoinType, HexStr
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
@@ -14,28 +14,25 @@ from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from typing import List, Optional
 from dacite import from_dict
+from dataclasses import dataclass
+
+@dataclass
+class AccountMetadata:
+    alias: str
+    coinType: int
+    index: int
 
 class Account:
-    def __init__(self, account_id: str | int, handle):
-        self.account_id = account_id
+    def __init__(self, meta: dict, handle):
+        self.meta = meta
         self.handle = handle
-
-    @_call_method_routine
-    def __str__(self):
-        message = {
-            'name': 'getAccount',
-            'data': {
-                'accountId': self.account_id,
-            }
-        }
-        return message
 
     @_call_method_routine
     def _call_account_method(self, method, data=None):
         message = {
             'name': 'callAccountMethod',
             'data': {
-                'accountId': self.account_id,
+                'accountId': self.meta["index"],
                 'method': {
                     'name': method,
                 }
@@ -45,6 +42,12 @@ class Account:
             message['data']['method']['data'] = data
 
         return message
+
+    def get_metadata(self) -> AccountMetadata:
+        """
+        A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and aliases.
+        """
+        return AccountMetadata(self.meta["alias"], self.meta["coinType"], self.meta["index"])
 
     def prepare_burn(self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
         """
