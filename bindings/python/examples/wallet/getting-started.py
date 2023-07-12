@@ -41,8 +41,8 @@ mnemonic = Utils.generate_mnemonic()
 wallet.store_mnemonic(mnemonic)
 
 # Create an account.
-wallet.create_account(ACCOUNT_ALIAS)
+account = wallet.create_account(ACCOUNT_ALIAS)
 
 # Get the first address and print it.
-address = wallet.get_account(ACCOUNT_ALIAS).addresses()[0]
-print(f'Address:\n{address["address"]}\n')
+address = account.addresses()[0]
+print(f'Address:\n{address["address"]}')

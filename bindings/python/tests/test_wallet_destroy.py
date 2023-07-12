@@ -21,9 +21,7 @@ class WalletDestroy(unittest.TestCase):
         wallet = Wallet(db_path,
                         client_options, CoinType.IOTA, secret_manager)
 
-        wallet.create_account('Alice')
-
-        account = wallet.get_account('Alice')
+        account = wallet.create_account('Alice')
 
         addresses = account.addresses()
         assert 'smr1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4sp36wye' == addresses[

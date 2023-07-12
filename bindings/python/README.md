@@ -88,7 +88,7 @@ account = wallet.store_mnemonic("flame fever pig forward exact dash body idea li
           "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
 
 account = wallet.create_account('Alice')
-print(account)
+print(account.get_metadata())
 ```
 
 ## Examples
