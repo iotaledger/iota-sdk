@@ -454,22 +454,43 @@ pub enum AccountMethod {
     RequestFundsFromFaucet { url: String, address: Bech32Address },
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase", remote = "Bip44")]
 pub struct Bip44Def {
+    #[serde(default = "default_coin_type")]
     coin_type: u32,
     account: u32,
     change: u32,
     address_index: u32,
 }
 
-impl Default for Bip44Def {
-    fn default() -> Self {
-        Self {
-            coin_type: IOTA_COIN_TYPE,
-            account: 0,
-            change: 0,
-            address_index: 0,
-        }
+const fn default_coin_type() -> u32 {
+    IOTA_COIN_TYPE
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn bip44_deserialization() {
+        let sign_secp256k1_ecdsa_method: super::AccountMethod = serde_json::from_str(
+            r#"{"name": "signSecp256k1Ecdsa", "data": {"message": "0xFFFFFFFF", "chain": {"account": 2, "addressIndex": 1}}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            serde_json::to_value(&sign_secp256k1_ecdsa_method).unwrap(),
+            serde_json::json!({
+                "name": "signSecp256k1Ecdsa",
+                "data": {
+                    "message": "0xFFFFFFFF",
+                    "chain": {
+                        "coinType": 4218,
+                        "account": 2,
+                        "change": 0,
+                        "addressIndex": 1
+                    }
+                }
+            })
+        );
     }
 }

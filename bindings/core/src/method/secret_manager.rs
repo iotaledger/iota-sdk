@@ -70,22 +70,85 @@ pub enum SecretManagerMethod {
     },
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase", remote = "Bip44")]
 pub struct Bip44Def {
+    #[serde(default = "default_coin_type")]
     coin_type: u32,
     account: u32,
     change: u32,
     address_index: u32,
 }
 
-impl Default for Bip44Def {
-    fn default() -> Self {
-        Self {
-            coin_type: IOTA_COIN_TYPE,
-            account: 0,
-            change: 0,
-            address_index: 0,
-        }
+const fn default_coin_type() -> u32 {
+    IOTA_COIN_TYPE
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn bip44_deserialization() {
+        let signature_unlock_method: super::SecretManagerMethod = serde_json::from_str(
+            r#"{"name": "signatureUnlock", "data": {"transactionEssenceHash": "txhash", "chain": {"addressIndex": 1}}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            serde_json::to_value(&signature_unlock_method).unwrap(),
+            serde_json::json!({
+                "name": "signatureUnlock",
+                "data": {
+                    "transactionEssenceHash": "txhash",
+                    "chain": {
+                        "coinType": 4218,
+                        "account": 0,
+                        "change": 0,
+                        "addressIndex": 1
+                    }
+                }
+            })
+        );
+
+        let sign_ed25519_method: super::SecretManagerMethod = serde_json::from_str(
+            r#"{"name": "signEd25519", "data": {"message": "0xFFFFFFFF", "chain": {"coinType": 60, "change": 1}}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            serde_json::to_value(&sign_ed25519_method).unwrap(),
+            serde_json::json!({
+                "name": "signEd25519",
+                "data": {
+                    "message": "0xFFFFFFFF",
+                    "chain": {
+                        "coinType": 60,
+                        "account": 0,
+                        "change": 1,
+                        "addressIndex": 0
+                    }
+                }
+            })
+        );
+
+        let sign_secp256k1_ecdsa_method: super::SecretManagerMethod = serde_json::from_str(
+            r#"{"name": "signSecp256k1Ecdsa", "data": {"message": "0xFFFFFFFF", "chain": {"account": 2, "addressIndex": 1}}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            serde_json::to_value(&sign_secp256k1_ecdsa_method).unwrap(),
+            serde_json::json!({
+                "name": "signSecp256k1Ecdsa",
+                "data": {
+                    "message": "0xFFFFFFFF",
+                    "chain": {
+                        "coinType": 4218,
+                        "account": 2,
+                        "change": 0,
+                        "addressIndex": 1
+                    }
+                }
+            })
+        );
     }
 }
