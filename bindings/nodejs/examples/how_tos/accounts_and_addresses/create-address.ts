@@ -29,7 +29,7 @@ async function run() {
         const accountAddress = (await account.generateEd25519Addresses(1))[0];
         const address = Utils.parseBech32Address(accountAddress.address);
 
-        console.log(`Generated address:`, address);
+        console.log(`Generated address:`, address.toString());
     } catch (error) {
         console.error('Error: ', error);
     }
