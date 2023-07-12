@@ -50,9 +50,7 @@ async fn create_and_mint_native_token() -> Result<()> {
         U256::from(50)
     );
 
-    let tx = account
-        .mint_native_token(create_tx.token_id, U256::from(50), None)
-        .await?;
+    let tx = account.mint_native_token(create_tx.token_id, 50, None).await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
