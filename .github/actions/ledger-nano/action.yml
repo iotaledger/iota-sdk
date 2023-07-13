@@ -17,5 +17,5 @@ runs:
         
     - name: Run the simulator
       shell: bash
-      run: ./build.sh -s -v shimmer
+      run: ./build.sh -s -v shimmer -g
       working-directory: ledger-iota-app
