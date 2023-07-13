@@ -43,4 +43,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --profile ci --target=wasm32-unknown-unknown --manifest-path sdk/Cargo.toml --no-default-features --features client,tls,events,storage,message_interface,participation,wallet
+          args: --profile ci --target=wasm32-unknown-unknown --manifest-path sdk/Cargo.toml --no-default-features --features client,tls,events,storage,participation,wallet

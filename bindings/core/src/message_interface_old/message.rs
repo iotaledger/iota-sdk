@@ -5,20 +5,20 @@ use std::fmt::{Debug, Formatter, Result};
 #[cfg(feature = "stronghold")]
 use std::path::PathBuf;
 
-use serde::{Deserialize, Serialize};
-
-use super::account_method::AccountMethod;
 #[cfg(feature = "events")]
-use crate::wallet::events::types::{WalletEvent, WalletEventType};
-use crate::{
+use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
+use iota_sdk::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     types::block::address::{Bech32Address, Hrp},
     wallet::{
-        account::{operations::syncing::SyncOptions, types::AccountIdentifier},
+        account::{types::AccountIdentifier, SyncOptions},
         ClientOptions,
     },
     Url,
 };
+use serde::{Deserialize, Serialize};
+
+use super::account_method::AccountMethod;
 
 /// The messages that can be sent to the actor.
 #[derive(Clone, Serialize, Deserialize)]

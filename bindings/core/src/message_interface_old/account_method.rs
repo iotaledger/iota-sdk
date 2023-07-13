@@ -1,16 +1,14 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use serde::{Deserialize, Serialize};
-
 #[cfg(feature = "participation")]
-use crate::wallet::account::types::participation::ParticipationEventRegistrationOptions;
+use iota_sdk::wallet::account::types::participation::ParticipationEventRegistrationOptions;
 #[cfg(feature = "participation")]
-use crate::{
+use iota_sdk::{
     client::node_manager::node::Node,
     types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
 };
-use crate::{
+use iota_sdk::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
@@ -28,24 +26,14 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::{
-                output_claiming::OutputsToClaim,
-                syncing::SyncOptions,
-                transaction::{
-                    high_level::{
-                        create_alias::CreateAliasParams,
-                        minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
-                    },
-                    prepare_output::OutputParams,
-                    TransactionOptionsDto,
-                },
-            },
-            FilterOptions,
+            CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
+            SyncOptions, TransactionOptionsDto,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
 };
+use serde::{Deserialize, Serialize};
 
 /// Each public account method.
 #[derive(Clone, Debug, Serialize, Deserialize)]

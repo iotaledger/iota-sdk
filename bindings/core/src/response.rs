@@ -39,12 +39,9 @@ use iota_sdk::{
             BlockDto, BlockId,
         },
     },
-    wallet::{
-        account::{
-            types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
-            PreparedCreateNativeTokenTransactionDto,
-        },
-        message_interface::dtos::AccountDetailsDto,
+    wallet::account::{
+        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
+        AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
 use serde::Serialize;
