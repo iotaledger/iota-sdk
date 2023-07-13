@@ -33,7 +33,7 @@ async function run() {
             '0xff311f59790ccb85343a36fbac2f06d233734794404142b308c13f2c616935b5';
 
         const foundryOutput = await client.buildFoundryOutput({
-            serialNumber: 0,
+            serialNumber: 1,
             tokenScheme: new SimpleTokenScheme(
                 BigInt(10),
                 BigInt(0),
