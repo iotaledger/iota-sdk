@@ -395,10 +395,12 @@ pub mod dto {
         fn try_from(value: ClientBuilderDto) -> core::result::Result<Self, Self::Error> {
             Ok(Self {
                 node_manager_builder: value.node_manager_builder,
+                #[cfg(feature = "mqtt")]
                 broker_options: value.broker_options,
                 network_info: value.network_info.try_into()?,
                 api_timeout: value.api_timeout,
                 remote_pow_timeout: value.remote_pow_timeout,
+                #[cfg(not(target_family = "wasm"))]
                 pow_worker_count: value.pow_worker_count,
             })
         }
@@ -408,10 +410,12 @@ pub mod dto {
         fn from(value: &ClientBuilder) -> Self {
             Self {
                 node_manager_builder: value.node_manager_builder.clone(),
+                #[cfg(feature = "mqtt")]
                 broker_options: value.broker_options,
                 network_info: (&value.network_info).into(),
                 api_timeout: value.api_timeout,
                 remote_pow_timeout: value.remote_pow_timeout,
+                #[cfg(not(target_family = "wasm"))]
                 pow_worker_count: value.pow_worker_count,
             }
         }

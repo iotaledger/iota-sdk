@@ -303,6 +303,7 @@ pub mod dto {
             Self {
                 client_options: value.client_options.as_ref().map(Into::into),
                 coin_type: value.coin_type,
+                #[cfg(feature = "storage")]
                 storage_options: value.storage_options.clone(),
             }
         }
@@ -316,6 +317,7 @@ pub mod dto {
             Ok(WalletBuilder {
                 client_options: self.client_options.map(TryInto::try_into).transpose()?,
                 coin_type: self.coin_type,
+                #[cfg(feature = "storage")]
                 storage_options: self.storage_options,
                 secret_manager: secret_manager.map(|s| Arc::new(RwLock::new(s))),
             })
