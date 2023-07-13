@@ -39,7 +39,6 @@ use iota_sdk::{
         Result, Wallet,
     },
 };
-use primitive_types::U256;
 use zeroize::Zeroize;
 
 use crate::message_interface_old::{account_method::AccountMethod, message::Message, response::Response};
@@ -685,7 +684,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .melt_native_token(
                             token_id,
-                            U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
+                            melt_amount,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -702,7 +701,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .mint_native_token(
                             token_id,
-                            U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
+                            mint_amount,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

@@ -19,7 +19,6 @@ use iota_sdk::{
         rand::{block::rand_block_id, output::rand_output_id},
     },
 };
-use primitive_types::U256;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
@@ -46,7 +45,7 @@ fn missing_input_alias_for_foundry() {
         1_000_000,
         alias_id_2,
         1,
-        SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(0, 0, 10).unwrap(),
         None,
     )]);
 
@@ -84,7 +83,7 @@ fn existing_input_alias_for_foundry_alias() {
         1_000_000,
         alias_id_2,
         1,
-        SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(0, 0, 10).unwrap(),
         None,
     )]);
 
@@ -132,7 +131,7 @@ fn minted_native_tokens_in_new_remainder() {
         1_000_000,
         alias_id_2,
         1,
-        SimpleTokenScheme::new(U256::from(10), U256::from(0), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(10, 0, 10).unwrap(),
         None,
     )]);
 
@@ -156,7 +155,7 @@ fn minted_native_tokens_in_new_remainder() {
         }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the minted native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount(), U256::from(10));
+            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 10);
         }
     });
 }
@@ -187,7 +186,7 @@ fn minted_native_tokens_in_provided_output() {
             1_000_000,
             alias_id_2,
             1,
-            SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
+            SimpleTokenScheme::new(100, 0, 100).unwrap(),
             None,
         ),
         Basic(
@@ -229,7 +228,7 @@ fn melt_native_tokens() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(10, 0, 10).unwrap(),
             Some(vec![(
                 "0x0811111111111111111111111111111111111111111111111111111111111111110100000000",
                 10,
@@ -256,7 +255,7 @@ fn melt_native_tokens() {
         alias_id_1,
         1,
         // Melt 5 native tokens
-        SimpleTokenScheme::new(U256::from(10), U256::from(5), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(10, 5, 10).unwrap(),
         None,
     )]);
 
@@ -280,7 +279,7 @@ fn melt_native_tokens() {
         }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount(), U256::from(5));
+            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 5);
         }
     });
 }
@@ -302,13 +301,7 @@ fn destroy_foundry_with_alias_state_transition() {
             None,
             None,
         ),
-        Foundry(
-            52_800,
-            alias_id_2,
-            1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
-            None,
-        ),
+        Foundry(52_800, alias_id_2, 1, SimpleTokenScheme::new(10, 10, 10).unwrap(), None),
     ]);
     let alias_output = AliasOutputBuilder::from(inputs[0].output.as_alias())
         .with_amount(103_100)
@@ -354,7 +347,7 @@ fn destroy_foundry_with_alias_governance_transition() {
             1_000_000,
             alias_id_2,
             1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(10, 10, 10).unwrap(),
             None,
         ),
     ]);
@@ -396,7 +389,7 @@ fn destroy_foundry_with_alias_burn() {
             1_000_000,
             alias_id_2,
             1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(10, 10, 10).unwrap(),
             None,
         ),
     ]);
@@ -451,7 +444,7 @@ fn prefer_basic_to_foundry() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(10, 10, 10).unwrap(),
             None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -492,7 +485,7 @@ fn simple_foundry_transition_basic_not_needed() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(10, 10, 10).unwrap(),
             None,
         ),
     ]);
@@ -517,7 +510,7 @@ fn simple_foundry_transition_basic_not_needed() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(10, 10, 10).unwrap(),
         None,
     )]);
 
@@ -567,7 +560,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
             2_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(10, 10, 10).unwrap(),
             None,
         ),
     ]);
@@ -591,7 +584,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(10, 10, 10).unwrap(),
         None,
     )]);
 
@@ -650,7 +643,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //     inputs.extend(build_input_signing_data_foundry_outputs([(
 //         alias_id_1,
 //         2_000_000,
-//         SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
+//         SimpleTokenScheme::new(10, 10, 10).unwrap(),
 //         None,
 //     )]));
 //     inputs.extend(build_inputs([(
@@ -718,7 +711,7 @@ fn mint_and_burn_at_the_same_time() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(200)).unwrap(),
+        SimpleTokenScheme::new(100, 0, 200).unwrap(),
         Some(vec![(&token_id.to_string(), 100)]),
     )]);
     let alias_output = AliasOutputBuilder::new_with_amount(2_000_000, alias_id_1)
@@ -742,7 +735,7 @@ fn mint_and_burn_at_the_same_time() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(120), U256::from(0), U256::from(200)).unwrap(),
+        SimpleTokenScheme::new(120, 0, 200).unwrap(),
         Some(vec![(&token_id.to_string(), 110)]),
     )]);
 
@@ -774,7 +767,7 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(200)).unwrap(),
+            SimpleTokenScheme::new(100, 0, 200).unwrap(),
             Some(vec![(&token_id.to_string(), 100)]),
         ),
     ]);
@@ -848,7 +841,7 @@ fn create_native_token_but_burn_alias() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(100)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 100).unwrap(),
             None,
         ),
     ]);
@@ -856,7 +849,7 @@ fn create_native_token_but_burn_alias() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
+        SimpleTokenScheme::new(100, 0, 100).unwrap(),
         Some(vec![(&token_id.to_string(), 100)]),
     )]);
 
@@ -898,7 +891,7 @@ fn melted_tokens_not_provided() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
+            SimpleTokenScheme::new(100, 0, 100).unwrap(),
             None,
         ),
     ]);
@@ -906,7 +899,7 @@ fn melted_tokens_not_provided() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(100), U256::from(100), U256::from(100)).unwrap(),
+        SimpleTokenScheme::new(100, 100, 100).unwrap(),
         None,
     )]);
 
@@ -924,7 +917,7 @@ fn melted_tokens_not_provided() {
         token_id,
             found,
             required,
-        }) if token_id == token_id_1 && found == U256::from(0) && required == U256::from(100)));
+        }) if token_id == token_id_1 && found.as_u32() == 0 && required.as_u32() == 100));
 }
 
 #[test]
@@ -950,7 +943,7 @@ fn burned_tokens_not_provided() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
+            SimpleTokenScheme::new(100, 0, 100).unwrap(),
             None,
         ),
     ]);
@@ -958,7 +951,7 @@ fn burned_tokens_not_provided() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
+        SimpleTokenScheme::new(100, 0, 100).unwrap(),
         None,
     )]);
 
@@ -977,7 +970,7 @@ fn burned_tokens_not_provided() {
         token_id,
             found,
             required,
-        }) if token_id == token_id_1 && found == U256::from(0) && required == U256::from(100)));
+        }) if token_id == token_id_1 && found.as_u32() == 0 && required.as_u32() == 100));
 }
 
 #[test]
@@ -989,7 +982,7 @@ fn foundry_in_outputs_and_required() {
         1_000_000,
         alias_id_2,
         1,
-        SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(0, 0, 10).unwrap(),
         None,
     )]);
     let alias_output = AliasOutputBuilder::new_with_amount(1_251_500, alias_id_2)
@@ -1012,7 +1005,7 @@ fn foundry_in_outputs_and_required() {
         1_000_000,
         alias_id_2,
         1,
-        SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(0, 0, 10).unwrap(),
         None,
     )]);
 
