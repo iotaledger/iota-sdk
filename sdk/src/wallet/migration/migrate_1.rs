@@ -82,18 +82,6 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
     Ok(())
 }
 
-fn migrate_storage_options(storage_options: &mut serde_json::Value) -> Result<()> {
-    if !storage_options.is_null() && storage_options.get("storage_file_name").is_some() {
-        *storage_options = serde_json::json!({
-            "path": storage_options["storage_path"],
-            "encryptionKey": storage_options["storage_encryption_key"],
-            "kind": storage_options["manager_store"]
-        });
-    }
-
-    Ok(())
-}
-
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 1;
@@ -126,7 +114,9 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
             migrate_client_options(&mut wallet["client_options"])?;
-            migrate_storage_options(&mut wallet["storage_options"])?;
+            if let Some(storage_options) = wallet.get_mut("storage_options") {
+                ConvertStorageOptions::check(storage_options)?;
+            }
 
             storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
         }
@@ -271,6 +261,22 @@ mod types {
         pub inner: String,
         bounded: PhantomData<B>,
     }
+
+    #[derive(Deserialize)]
+    pub struct OldStorageOptions {
+        pub storage_path: serde_json::Value,
+        pub storage_file_name: serde_json::Value,
+        pub storage_encryption_key: serde_json::Value,
+        pub manager_store: serde_json::Value,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct NewStorageOptions {
+        pub path: serde_json::Value,
+        pub encryption_key: serde_json::Value,
+        pub kind: serde_json::Value,
+    }
 }
 
 struct ConvertSegment;
@@ -290,5 +296,19 @@ impl Convert for ConvertHrp {
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(Self::New::from_str_unchecked(&old.inner))
+    }
+}
+
+struct ConvertStorageOptions;
+impl Convert for ConvertStorageOptions {
+    type New = Option<types::NewStorageOptions>;
+    type Old = Option<types::OldStorageOptions>;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(old.map(|old| types::NewStorageOptions {
+            path: old.storage_path,
+            encryption_key: old.storage_encryption_key,
+            kind: old.manager_store,
+        }))
     }
 }
