@@ -19,7 +19,7 @@
 use iota_sdk::{
     types::block::output::{NativeToken, TokenId},
     wallet::Result,
-    Wallet,
+    Wallet, U256,
 };
 
 // The minimum available native token amount to search for in the account
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
         .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
 
     if let Some(native_token_balance) = balance.native_tokens().iter().find(|native_token| {
-        native_token.token_id() == &token_id && native_token.available().as_u64() >= MIN_AVAILABLE_AMOUNT
+        native_token.token_id() == &token_id && native_token.available() >= U256::from(MIN_AVAILABLE_AMOUNT)
     }) {
         println!("Balance before burning: {native_token_balance:#?}");
 
