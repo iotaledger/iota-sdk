@@ -7,4 +7,3 @@ wallet.log
 build/
 prebuilds/
 out/
-yarn.lock

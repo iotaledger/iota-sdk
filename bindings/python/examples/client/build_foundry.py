@@ -11,7 +11,7 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 # Configure foundry output
-# TODO: replace with your own values
+# Replace with your own values
 serial_number = 1
 token_scheme = TokenScheme(32, 0, 64)
 unlock_conditions = [

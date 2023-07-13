@@ -9,15 +9,11 @@ use iota_sdk::{
         input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
         SignedTransactionDataDto,
     },
-    types::block::{
-        output::{dto::OutputDto, Output},
-        Error,
-    },
+    types::block::output::{dto::OutputDto, Output},
     wallet::account::{
         types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions,
     },
 };
-use primitive_types::U256;
 
 use crate::{method::AccountMethod, Response, Result};
 
@@ -143,7 +139,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_melt_native_token(
                     token_id,
-                    U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
+                    melt_amount,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -166,7 +162,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_mint_native_token(
                     token_id,
-                    U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
+                    mint_amount,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

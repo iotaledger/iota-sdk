@@ -30,7 +30,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -92,11 +91,7 @@ async fn main() -> Result<()> {
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let alias_id = AliasId::from(&alias_output_id);
-    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(
-        U256::from(70u8),
-        U256::from(0u8),
-        U256::from(100u8),
-    )?);
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100)?);
     let foundry_id = FoundryId::build(
         &AliasAddress::from(AliasId::from(&alias_output_id)),
         1,
@@ -112,7 +107,7 @@ async fn main() -> Result<()> {
             .with_foundry_counter(1)
             .finish_output(token_supply)?,
         FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
-            .add_native_token(NativeToken::new(token_id, U256::from(70u8))?)
+            .add_native_token(NativeToken::new(token_id, 70)?)
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
             .finish_output(token_supply)?,
     ];
@@ -135,16 +130,9 @@ async fn main() -> Result<()> {
     // melt 20 native token
     //////////////////////////////////
 
-    let foundry_output_builder = FoundryOutputBuilder::new_with_amount(
-        1_000_000,
-        1,
-        TokenScheme::Simple(SimpleTokenScheme::new(
-            U256::from(70u8),
-            U256::from(20u8),
-            U256::from(100u8),
-        )?),
-    )
-    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
+    let foundry_output_builder =
+        FoundryOutputBuilder::new_with_amount(1_000_000, 1, TokenScheme::Simple(SimpleTokenScheme::new(70, 20, 100)?))
+            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
@@ -158,7 +146,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         foundry_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
     ];
 
@@ -199,7 +187,7 @@ async fn main() -> Result<()> {
         foundry_output_builder.finish_output(token_supply)?,
         basic_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
     ];
 
@@ -234,7 +222,7 @@ async fn main() -> Result<()> {
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
     let outputs = [basic_output_builder
         .clone()
-        .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+        .add_native_token(NativeToken::new(token_id, 50)?)
         .finish_output(token_supply)?];
 
     let block = client
@@ -259,7 +247,7 @@ async fn main() -> Result<()> {
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
     let outputs = [basic_output_builder
-        .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
+        .add_native_token(NativeToken::new(token_id, 30)?)
         .finish_output(token_supply)?];
 
     let block = client

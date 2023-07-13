@@ -12,7 +12,6 @@ use std::{
 use backtrace::Backtrace;
 use crypto::keys::bip39::Mnemonic;
 use futures::{Future, FutureExt};
-use primitive_types::U256;
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{Event, WalletEventType};
@@ -694,7 +693,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .melt_native_token(
                             token_id,
-                            U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
+                            melt_amount,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -711,7 +710,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .mint_native_token(
                             token_id,
-                            U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
+                            mint_amount,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

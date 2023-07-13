@@ -65,19 +65,13 @@ async fn main() -> Result<()> {
         // tokens
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(
-                TokenId::new(token_id),
-                primitive_types::U256::from(10),
-            )?)
+            .add_native_token(NativeToken::new(TokenId::new(token_id), 10)?)
             .finish_output(token_supply)?,
         // With StorageDepositReturnUnlockCondition, the receiver can consume the output to get the native tokens, but
         // he needs to send the amount back
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(
-                TokenId::new(token_id),
-                primitive_types::U256::from(10),
-            )?)
+            .add_native_token(NativeToken::new(TokenId::new(token_id), 10)?)
             // Return the full amount.
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 sender_address,
