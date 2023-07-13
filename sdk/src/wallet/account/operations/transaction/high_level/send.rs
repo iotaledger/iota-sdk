@@ -12,7 +12,7 @@ use crate::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDeposit,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
         ConvertTo,
     },
@@ -184,7 +184,7 @@ where
                 });
 
                 // Since it does need a storage deposit, calculate how much that should be
-                let storage_deposit_amount = MinimumStorageDeposit::new(rent_structure, token_supply)
+                let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
                     .with_storage_deposit_return()?
                     .with_expiration()?
                     .finish()?;

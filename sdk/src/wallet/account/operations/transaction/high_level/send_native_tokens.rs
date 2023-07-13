@@ -13,7 +13,7 @@ use crate::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDeposit, NativeToken, NativeTokens, TokenId,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
         ConvertTo,
     },
@@ -170,7 +170,7 @@ where
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
-            let storage_deposit_amount = MinimumStorageDeposit::new(rent_structure, token_supply)
+            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
                 .with_native_tokens(native_tokens.clone())
                 .with_storage_deposit_return()?
                 .with_expiration()?

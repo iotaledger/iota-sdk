@@ -149,13 +149,13 @@ impl<T: Rent, const N: usize> Rent for [T; N] {
     }
 }
 
-pub struct MinimumStorageDeposit {
+pub struct MinimumStorageDepositBasicOutput {
     config: RentStructure,
     token_supply: u64,
     builder: BasicOutputBuilder,
 }
 
-impl MinimumStorageDeposit {
+impl MinimumStorageDepositBasicOutput {
     pub fn new(config: RentStructure, token_supply: u64) -> Self {
         Self {
             config,
