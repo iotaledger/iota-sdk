@@ -105,7 +105,6 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
             this.amount = amount.toString(10);
         } else {
             this.amount = amount;
-
         }
         this.returnAddress = returnAddress;
     }

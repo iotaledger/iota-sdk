@@ -1,8 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedAmount } from '../../utils';
-import { bigIntToHex, hexToBigInt } from '../../utils/hex-encoding';
+import { hexToBigInt } from '../../utils/hex-encoding';
 
 enum TokenSchemeType {
     Simple = 0,
@@ -42,7 +41,7 @@ class SimpleTokenScheme extends TokenScheme {
         } else if (mintedTokens) {
             this.mintedTokens = hexToBigInt(mintedTokens);
         } else {
-            this.mintedTokens = BigInt(0)
+            this.mintedTokens = BigInt(0);
         }
 
         if (typeof meltedTokens === 'bigint') {
@@ -50,7 +49,7 @@ class SimpleTokenScheme extends TokenScheme {
         } else if (meltedTokens) {
             this.meltedTokens = hexToBigInt(meltedTokens);
         } else {
-            this.meltedTokens = BigInt(0)
+            this.meltedTokens = BigInt(0);
         }
 
         if (typeof maximumSupply === 'bigint') {
@@ -58,7 +57,7 @@ class SimpleTokenScheme extends TokenScheme {
         } else if (maximumSupply) {
             this.maximumSupply = hexToBigInt(maximumSupply);
         } else {
-            this.maximumSupply = BigInt(0)
+            this.maximumSupply = BigInt(0);
         }
     }
 

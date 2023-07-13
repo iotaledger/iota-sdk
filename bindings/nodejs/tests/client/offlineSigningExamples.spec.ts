@@ -23,7 +23,7 @@ import * as sigUnlockPreparedTx from '../fixtures/sigUnlockPreparedTx.json';
 describe('Offline signing examples', () => {
     let onlineClient: Client;
     let offlineClient: Client;
-    
+
     const secretManager = {
         mnemonic:
             'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
@@ -65,7 +65,7 @@ describe('Offline signing examples', () => {
     it.skip('prepares and signs a transaction', async () => {
         const address =
             'rms1qqv5avetndkxzgr3jtrswdtz5ze6mag20s0jdqvzk4fwezve8q9vkpnqlqe';
-        const amount = 1000000;
+        const amount = BigInt(1000000);
 
         const inputs = await onlineClient.findInputs(addresses, amount);
 
@@ -73,7 +73,7 @@ describe('Offline signing examples', () => {
             undefined,
             {
                 inputs,
-                output: { address, amount: amount.toString() },
+                output: { address, amount: amount },
             },
         );
 

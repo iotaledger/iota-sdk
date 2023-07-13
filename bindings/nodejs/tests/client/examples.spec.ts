@@ -179,7 +179,7 @@ describe.skip('Main examples', () => {
         const blockIdAndBlock = await client.buildAndPostBlock(secretManager, {
             output: {
                 address: addresses[0],
-                amount: '1000000',
+                amount: BigInt(1000000),
             },
         });
 

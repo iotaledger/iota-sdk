@@ -173,9 +173,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: new Map([
-                            [tokenId, burnAmount],
-                        ]),
+                        nativeTokens: new Map([[tokenId, burnAmount]]),
                     },
                     options: transactionOptions,
                 },
