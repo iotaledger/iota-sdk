@@ -637,8 +637,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
+            addresses[0].to_bech32_unchecked("atoi").to_string(),
+            "atoi1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mru50gvd8"
         );
     }
 }
