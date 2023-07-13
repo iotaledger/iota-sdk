@@ -77,6 +77,8 @@ fn transaction() {
 #[test]
 fn milestone() {
     let protocol_parameters = protocol_parameters();
+    let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
+    let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
     let payload: Payload = MilestonePayload::new(
         MilestoneEssence::new(
             MilestoneIndex(0),
@@ -91,7 +93,7 @@ fn milestone() {
         )
         .unwrap(),
         vec![Signature::from(
-            Ed25519Signature::try_from_bytes([0; 32], [0; 64]).unwrap(),
+            Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap(),
         )],
     )
     .unwrap()
