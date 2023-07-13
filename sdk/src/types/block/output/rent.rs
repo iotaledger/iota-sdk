@@ -173,21 +173,22 @@ impl MinimumStorageDeposit {
         self
     }
 
-    pub fn with_storage_deposit_return(mut self, return_address: Address) -> Result<Self, Error> {
+    pub fn with_storage_deposit_return(mut self) -> Result<Self, Error> {
         self.builder = self
             .builder
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                return_address,
+                Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
                 Output::AMOUNT_MIN,
                 self.token_supply,
             )?);
         Ok(self)
     }
 
-    pub fn with_expiration(mut self, return_address: Address) -> Result<Self, Error> {
-        self.builder = self
-            .builder
-            .add_unlock_condition(ExpirationUnlockCondition::new(return_address, 1)?);
+    pub fn with_expiration(mut self) -> Result<Self, Error> {
+        self.builder = self.builder.add_unlock_condition(ExpirationUnlockCondition::new(
+            Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+            1,
+        )?);
         Ok(self)
     }
 

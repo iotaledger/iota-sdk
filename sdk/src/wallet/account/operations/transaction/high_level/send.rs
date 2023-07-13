@@ -185,8 +185,8 @@ where
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let storage_deposit_amount = MinimumStorageDeposit::new(rent_structure, token_supply)
-                    .with_storage_deposit_return(*return_address.inner())?
-                    .with_expiration(*return_address.inner())?
+                    .with_storage_deposit_return()?
+                    .with_expiration()?
                     .finish()?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
