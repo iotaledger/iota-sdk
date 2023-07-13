@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Moved `minimum_required_storage_deposit()` from `Account` to `Client`;
 - `Wallet::create_account()` returns `Account` now;
+- `SecretManagerMethod::SignEd25519`, `SignSecp256k1Ecdsa`, and `SignatureUnlock` now accept Bip44 type chains;
 
 ## 1.0.0-rc.0 - 2023-07-11
 
