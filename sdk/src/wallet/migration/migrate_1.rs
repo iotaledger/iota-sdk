@@ -97,7 +97,7 @@ fn migrate_storage_options(storage_options: &mut serde_json::Value) -> Result<()
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 1;
-    const SDK_VERSION: &'static str = "0.5.0";
+    const SDK_VERSION: &'static str = "0.4.0";
     const DATE: time::Date = time::macros::date!(2023 - 07 - 13);
 }
 
