@@ -209,13 +209,13 @@ export class Client {
      */
     async findInputs(
         addresses: string[],
-        amount: number,
+        amount: bigint,
     ): Promise<UTXOInput[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findInputs',
             data: {
                 addresses,
-                amount,
+                amount: Number(amount),
             },
         });
 

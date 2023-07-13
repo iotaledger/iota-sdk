@@ -174,7 +174,7 @@ export class Account {
                 data: {
                     burn: {
                         nativeTokens: new Map([
-                            [tokenId, bigIntToHex(burnAmount)],
+                            [tokenId, burnAmount],
                         ]),
                     },
                     options: transactionOptions,
@@ -1006,21 +1006,12 @@ export class Account {
         params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
-        const adjustedParams: any = params;
-        for (let i = 0; i < adjustedParams.length; i++) {
-            for (let j = 0; j < adjustedParams[i].nativeTokens.length; j++) {
-                adjustedParams[i].nativeTokens[j][1] = bigIntToHex(
-                    adjustedParams[i].nativeTokens[j][1],
-                );
-            }
-        }
-
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'prepareSendNativeTokens',
                 data: {
-                    params: adjustedParams,
+                    params,
                     options: transactionOptions,
                 },
             },

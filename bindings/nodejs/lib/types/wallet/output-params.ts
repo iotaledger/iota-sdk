@@ -7,7 +7,7 @@ import { HexEncodedString } from '../utils/hex-encoding';
 /** Options for the creation of an output */
 export interface OutputParams {
     recipientAddress: string;
-    amount: string;
+    amount: bigint;
     assets?: Assets;
     features?: Features;
     unlocks?: Unlocks;

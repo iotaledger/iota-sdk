@@ -27,9 +27,9 @@ abstract class TokenScheme {
  * Simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: HexEncodedAmount;
-    private meltedTokens: HexEncodedAmount;
-    private maximumSupply: HexEncodedAmount;
+    private mintedTokens: bigint;
+    private meltedTokens: bigint;
+    private maximumSupply: bigint;
 
     constructor(
         mintedTokens: bigint,
@@ -38,21 +38,21 @@ class SimpleTokenScheme extends TokenScheme {
     ) {
         super(TokenSchemeType.Simple);
         if (typeof mintedTokens === 'bigint') {
-            this.mintedTokens = bigIntToHex(mintedTokens);
-        } else {
             this.mintedTokens = mintedTokens;
+        } else {
+            this.mintedTokens = hexToBigInt(mintedTokens);
         }
 
         if (typeof meltedTokens === 'bigint') {
-            this.meltedTokens = bigIntToHex(meltedTokens);
-        } else {
             this.meltedTokens = meltedTokens;
+        } else {
+            this.meltedTokens = hexToBigInt(meltedTokens);
         }
 
         if (typeof maximumSupply === 'bigint') {
-            this.maximumSupply = bigIntToHex(maximumSupply);
-        } else {
             this.maximumSupply = maximumSupply;
+        } else {
+            this.maximumSupply = hexToBigInt(maximumSupply);
         }
     }
 
@@ -60,21 +60,21 @@ class SimpleTokenScheme extends TokenScheme {
      * Amount of tokens minted.
      */
     getMintedTokens(): bigint {
-        return hexToBigInt(this.mintedTokens);
+        return this.mintedTokens;
     }
 
     /**
      * Amount of tokens melted.
      */
     getMeltedTokens(): bigint {
-        return hexToBigInt(this.meltedTokens);
+        return this.meltedTokens;
     }
 
     /**
      * Maximum supply of tokens controlled.
      */
     getMaximumSupply(): bigint {
-        return hexToBigInt(this.maximumSupply);
+        return this.maximumSupply;
     }
 }
 
