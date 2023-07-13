@@ -6,14 +6,13 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
-fn migrate_native_token(output: &mut serde_json::Value) {
+fn migrate_native_tokens(output: &mut serde_json::Value) -> Result<()> {
     let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
 
     for native_token in native_tokens.iter_mut() {
-        if let Some(id) = native_token.get("token_id") {
-            *native_token = serde_json::json!({ "amount": native_token["amount"], "id": id});
-        }
+        ConvertNativeToken::check(native_token)?;
     }
+    Ok(())
 }
 
 fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
@@ -28,7 +27,7 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
             }
         }
 
-        migrate_native_token(&mut output_data["output"]["data"]);
+        migrate_native_tokens(&mut output_data["output"]["data"])?;
     }
 
     for output_data in account["unspentOutputs"]
@@ -42,7 +41,7 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
             }
         }
 
-        migrate_native_token(&mut output_data["output"]["data"]);
+        migrate_native_tokens(&mut output_data["output"]["data"])?;
     }
 
     for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
@@ -50,7 +49,7 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
             .as_array_mut()
             .unwrap();
         for output in outputs {
-            migrate_native_token(&mut output["data"]);
+            migrate_native_tokens(&mut output["data"])?;
         }
     }
 
@@ -59,13 +58,13 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
             .as_array_mut()
             .unwrap();
         for output in outputs {
-            migrate_native_token(&mut output["data"]);
+            migrate_native_tokens(&mut output["data"])?;
         }
     }
 
     if let Some(native_token_foundries) = account.get_mut("nativeTokenFoundries") {
         for (_key, foundry) in native_token_foundries.as_object_mut().unwrap() {
-            migrate_native_token(foundry);
+            migrate_native_tokens(foundry)?;
         }
     }
 
@@ -277,6 +276,18 @@ mod types {
         pub encryption_key: serde_json::Value,
         pub kind: serde_json::Value,
     }
+
+    #[derive(Deserialize)]
+    pub struct OldNativeToken {
+        pub token_id: serde_json::Value,
+        pub amount: serde_json::Value,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct NewNativeToken {
+        pub id: serde_json::Value,
+        pub amount: serde_json::Value,
+    }
 }
 
 struct ConvertSegment;
@@ -310,5 +321,18 @@ impl Convert for ConvertStorageOptions {
             encryption_key: old.storage_encryption_key,
             kind: old.manager_store,
         }))
+    }
+}
+
+struct ConvertNativeToken;
+impl Convert for ConvertNativeToken {
+    type New = types::NewNativeToken;
+    type Old = types::OldNativeToken;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(Self::New {
+            id: old.token_id,
+            amount: old.amount,
+        })
     }
 }
