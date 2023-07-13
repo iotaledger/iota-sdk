@@ -26,7 +26,12 @@ pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
         Ok(self
             .get_bytes(key)
             .await?
-            .map(|b| serde_json::from_slice(&b))
+            .map(|b| {
+                // Safe because serde_json always serializes valid UTF-8
+                let s = unsafe { String::from_utf8_unchecked(b) };
+                log::trace!("StorageAdapter::get {s:?}");
+                serde_json::from_str(&s)
+            })
             .transpose()?)
     }
 

@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientInner::call_plugin_route` to Client to fetch data from custom node plugins;
 - `WalletBuilder::with_storage_options` method, allowing storage encryption;
 - `StorageOptions::{new, with_encryption_key}` methods and getters;
+- `MinimumStorageDepositBasicOutput`;
 
 ### Changed
 

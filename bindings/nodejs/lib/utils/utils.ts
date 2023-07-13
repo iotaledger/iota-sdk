@@ -1,16 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { plainToInstance } from 'class-transformer';
 import { callUtilsMethod } from '../bindings';
 import {
     Address,
-    Ed25519Address,
     HexEncodedString,
     Block,
     Ed25519Signature,
     TransactionEssence,
-    Response,
     MilestonePayload,
     MilestoneId,
     TransactionPayload,
@@ -169,9 +166,7 @@ export class Utils {
                 address,
             },
         });
-
-        const parsed = JSON.parse(addr) as Response<Ed25519Address>;
-        return plainToInstance(Ed25519Address, parsed.payload);
+        return Address.parse(addr);
     }
 
     /**

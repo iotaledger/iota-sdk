@@ -793,7 +793,7 @@ mod tests {
 
         let mut builder = FoundryOutput::build_with_amount(0, 234, rand_token_scheme())
             .with_serial_number(85)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .with_unlock_conditions([alias_1])
             .add_feature(metadata_1.clone())
             .replace_feature(metadata_2.clone())
@@ -868,7 +868,7 @@ mod tests {
         };
 
         let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
             .add_immutable_feature(rand_metadata_feature())
             .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
@@ -879,7 +879,7 @@ mod tests {
             123,
             rand_token_scheme(),
         )
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
         .add_immutable_feature(rand_metadata_feature())
         .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));

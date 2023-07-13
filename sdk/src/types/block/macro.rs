@@ -155,8 +155,7 @@ macro_rules! create_bitflags {
             #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
             $vis struct $Name: $TagType {
                 $(
-                    // TODO: Regression in v2, may be fixed soon <https://github.com/bitflags/bitflags/issues/320>.
-                    // #[doc = concat!("Signals the presence of a [`", stringify!($TypeName), "`].")]
+                    #[doc = concat!("Signals the presence of a [`", stringify!($TypeName), "`].")]
                     const $FlagName = 1 << $TypeName::KIND;
                 )*
             }
