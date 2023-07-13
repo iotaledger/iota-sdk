@@ -113,7 +113,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
         // Make sure the amount of native tokens are of bigint type.
         for (let i = 0; i < this.nativeTokens.length; i++) {
             const token = this.nativeTokens[i];
-            if (typeof token.amount === "string") {
+            if (typeof token.amount === 'string') {
                 this.nativeTokens[i].amount = hexToBigInt(token.amount);
             }
         }

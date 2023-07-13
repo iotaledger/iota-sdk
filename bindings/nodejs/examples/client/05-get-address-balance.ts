@@ -54,15 +54,12 @@ async function run() {
         for (const outputResponse of addressOutputs) {
             const output = outputResponse['output'];
             if (output instanceof CommonOutput) {
-                (output as CommonOutput)
-                    .getNativeTokens()
-                    ?.forEach(
-                        (token) => {
-                            console.log(typeof token.amount);
-                            (totalNativeTokens[token.id] =
-                                (totalNativeTokens[token.id] || BigInt(0)) + token.amount);
-                        }
-                    );
+                (output as CommonOutput).getNativeTokens()?.forEach((token) => {
+                    console.log(typeof token.amount);
+                    totalNativeTokens[token.id] =
+                        (totalNativeTokens[token.id] || BigInt(0)) +
+                        token.amount;
+                });
             }
 
             totalAmount += output.getAmount();

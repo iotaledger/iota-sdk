@@ -37,22 +37,22 @@ class SimpleTokenScheme extends TokenScheme {
         maximumSupply: bigint,
     ) {
         super(TokenSchemeType.Simple);
-        if (typeof mintedTokens === "bigint") {
+        if (typeof mintedTokens === 'bigint') {
             this.mintedTokens = bigIntToHex(mintedTokens);
         } else {
             this.mintedTokens = mintedTokens;
         }
 
-        if (typeof meltedTokens === "bigint") {
+        if (typeof meltedTokens === 'bigint') {
             this.meltedTokens = bigIntToHex(meltedTokens);
         } else {
             this.meltedTokens = meltedTokens;
         }
 
-        if (typeof maximumSupply === "bigint") {
+        if (typeof maximumSupply === 'bigint') {
             this.maximumSupply = bigIntToHex(maximumSupply);
         } else {
-            this.maximumSupply = maximumSupply
+            this.maximumSupply = maximumSupply;
         }
     }
 
