@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { plainToInstance } from 'class-transformer';
 import { HexEncodedString } from '../utils';
 import { AliasId, NftId } from './id';
 
@@ -24,6 +25,20 @@ abstract class Address {
     }
 
     abstract toString(): string;
+
+    public static parse(data: any): Address {
+        if (data.type == AddressType.Ed25519) {
+            return plainToInstance(
+                Ed25519Address,
+                data,
+            ) as any as Ed25519Address;
+        } else if (data.type == AddressType.Alias) {
+            return plainToInstance(AliasAddress, data) as any as AliasAddress;
+        } else if (data.type == AddressType.Nft) {
+            return plainToInstance(NftAddress, data) as any as NftAddress;
+        }
+        throw new Error('Invalid JSON');
+    }
 }
 /**
  * Ed25519 Address.
