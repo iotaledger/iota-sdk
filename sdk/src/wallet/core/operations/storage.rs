@@ -76,8 +76,9 @@ mod storage_stub {
             storage: &impl StorageAdapter<Error = crate::wallet::Error>,
         ) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
-            if let Some(data) = storage.get::<WalletData>(WALLET_INDEXATION_KEY).await? {
-                log::debug!("get_wallet_data {data:?}");
+            if let Some(data) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
+                log::debug!("get_wallet_data {data}");
+                let data = serde_json::from_value::<WalletData>(data)?;
 
                 let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
                 log::debug!("get_secret_manager {secret_manager_dto:?}");

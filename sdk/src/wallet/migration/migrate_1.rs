@@ -83,7 +83,7 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
 }
 
 fn migrate_storage_options(storage_options: &mut serde_json::Value) -> Result<()> {
-    if !storage_options.is_null() {
+    if !storage_options.is_null() && storage_options.get("storage_file_name").is_some() {
         *storage_options = serde_json::json!({
             "path": storage_options["storage_path"],
             "encryptionKey": storage_options["storage_encryption_key"],
