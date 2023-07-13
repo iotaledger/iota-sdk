@@ -40,7 +40,6 @@ use iota_sdk::{
         rand::{block::rand_block_id, transaction::rand_transaction_id},
     },
 };
-use primitive_types::U256;
 
 const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
 const ALIAS_ID_0: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -115,7 +114,7 @@ fn build_basic_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -157,7 +156,7 @@ fn build_nft_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -201,7 +200,7 @@ fn build_alias_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -230,7 +229,7 @@ fn build_foundry_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -380,9 +379,7 @@ fn is_remainder_or_return(
             let native_tokens = NativeTokens::from_set(
                 native_tokens
                     .into_iter()
-                    .map(|(token_id, amount)| {
-                        NativeToken::new(TokenId::from_str(token_id).unwrap(), U256::from(amount)).unwrap()
-                    })
+                    .map(|(token_id, amount)| NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap())
                     .collect::<BTreeSet<_>>(),
             )
             .unwrap();

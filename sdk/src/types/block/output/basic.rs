@@ -471,7 +471,7 @@ mod tests {
         let sender_2 = rand_sender_feature();
 
         let mut builder = BasicOutput::build_with_amount(0)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address_1)
             .add_feature(sender_1)
             .replace_feature(sender_2);
@@ -553,13 +553,13 @@ mod tests {
         };
 
         let builder = BasicOutput::build_with_amount(100)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
         let builder = BasicOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);

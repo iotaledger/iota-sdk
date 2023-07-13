@@ -14,7 +14,6 @@ use iota_sdk::{
         protocol::protocol_parameters,
     },
 };
-use primitive_types::U256;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
@@ -598,7 +597,7 @@ fn burn_foundry_present() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
         Alias(
@@ -679,7 +678,7 @@ fn burn_foundry_absent() {
         1_000_000,
         alias_id_1,
         1,
-        SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+        SimpleTokenScheme::new(0, 0, 10).unwrap(),
         None,
     )])[0]
         .output
@@ -736,14 +735,14 @@ fn burn_foundries_present() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
         Foundry(
             1_000_000,
             alias_id_1,
             2,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
         Alias(
@@ -816,7 +815,7 @@ fn burn_foundry_in_outputs() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -826,7 +825,7 @@ fn burn_foundry_in_outputs() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -896,7 +895,7 @@ fn burn_foundry_and_its_alias() {
             1_000_000,
             alias_id_1,
             1,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
         Alias(

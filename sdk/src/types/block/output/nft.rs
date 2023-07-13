@@ -656,7 +656,7 @@ mod tests {
         let issuer_2 = rand_issuer_feature();
 
         let mut builder = NftOutput::build_with_amount(0, NftId::null())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address_1)
             .add_feature(sender_1)
             .replace_feature(sender_2)
@@ -741,7 +741,7 @@ mod tests {
         };
 
         let builder = NftOutput::build_with_amount(100, NftId::null())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(rand_address_unlock_condition())
             .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
             .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
@@ -749,7 +749,7 @@ mod tests {
 
         let builder =
             NftOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), NftId::null())
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(rand_address_unlock_condition())
                 .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
                 .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
