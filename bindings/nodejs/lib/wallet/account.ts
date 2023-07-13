@@ -857,7 +857,7 @@ export class Account {
         transactionOptions?: TransactionOptions,
     ): Promise<Output> {
         if (typeof params.amount === 'bigint') {
-            params.amount = params.amount.toString(10)
+            params.amount = params.amount.toString(10);
         }
 
         const response = await this.methodHandler.callAccountMethod(
@@ -887,7 +887,7 @@ export class Account {
     ): Promise<PreparedTransaction> {
         for (let i = 0; i < params.length; i++) {
             if (typeof params[i].amount === 'bigint') {
-                params[i].amount = params[i].amount.toString(10)
+                params[i].amount = params[i].amount.toString(10);
             }
         }
         const response = await this.methodHandler.callAccountMethod(
@@ -990,7 +990,7 @@ export class Account {
     ): Promise<Transaction> {
         for (let i = 0; i < params.length; i++) {
             if (typeof params[i].amount === 'bigint') {
-                params[i].amount = params[i].amount.toString(10)
+                params[i].amount = params[i].amount.toString(10);
             }
         }
         const response = await this.methodHandler.callAccountMethod(
