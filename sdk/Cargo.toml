@@ -94,7 +94,7 @@ storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "de
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
-client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/keccak", "iota-crypto/bip44" ]
+client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/keccak", "iota-crypto/bip44", "iota-crypto/random" ]
 wallet = [ "client" ]
 
 # Ed25519 Examples

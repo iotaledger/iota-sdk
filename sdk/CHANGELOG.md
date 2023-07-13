@@ -121,7 +121,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Ed25519Signature::new`, `public_key`, `signature` now use concrete types;
 - `Ed25519Signature::verify` is no longer fallable;
 - `Mnemonic` type used over Strings where possible;
-- `AccountMethod::SignSecp256k1Ecdsa` now accepts Bip44 type;
 - `SecretManage::sign_ed25519`, `sign_secp256k1_ecdsa`, and `signature_unlock` now accept Bip44 type chains;
 - Rename `SendAmountParams` to `SendParams`;
 - Rename `Account::send` to `send_outputs`, `Account::send_amount` to `send`, `Account::prepare_send_amount` to `prepare_send`;
