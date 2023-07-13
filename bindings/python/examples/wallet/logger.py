@@ -39,4 +39,4 @@ if 'MNEMONIC' not in os.environ:
 account = wallet.store_mnemonic(os.environ["MNEMONIC"])
 
 account = wallet.create_account('Alice')
-print(json.dumps(account, indent=4))
+print(account.get_metadata())

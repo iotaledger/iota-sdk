@@ -6,6 +6,7 @@
 use std::collections::HashSet;
 
 use crypto::keys::slip10::Chain;
+use itertools::Itertools;
 
 use crate::{
     client::{
@@ -142,8 +143,7 @@ impl<'a> ClientBlockBuilder<'a> {
             let public_and_internal_addresses = public
                 .iter()
                 .map(|a| (a, false))
-                .zip(internal.iter().map(|a| (a, true)))
-                .flat_map(|(a, b)| [a, b]);
+                .interleave(internal.iter().map(|a| (a, true)));
 
             // For each address, get the address outputs.
             let mut address_index = gap_index;

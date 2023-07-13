@@ -1,10 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// Increased limit required specifically for call_method
-#![recursion_limit = "256"]
-#![allow(clippy::needless_borrow)]
-
 mod client;
 mod secret_manager;
 mod wallet;

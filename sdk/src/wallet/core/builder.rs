@@ -24,7 +24,7 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    wallet::{wallet::WalletInner, Account, ClientOptions, Wallet},
+    wallet::{core::WalletInner, Account, ClientOptions, Wallet},
 };
 
 /// Builder for the wallet.

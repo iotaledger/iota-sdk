@@ -52,7 +52,7 @@ where
             for res in results {
                 let (address, outputs): (AddressWithUnspentOutputs, Vec<OutputData>) = res?;
                 addresses_with_outputs.push(address);
-                outputs_data.extend(outputs.into_iter());
+                outputs_data.extend(outputs);
             }
         }
         log::debug!(
