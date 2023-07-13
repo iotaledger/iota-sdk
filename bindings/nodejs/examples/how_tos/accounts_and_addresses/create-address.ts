@@ -26,10 +26,8 @@ async function run() {
         // To create an address we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        const accountAddress = (await account.generateEd25519Addresses(1))[0];
-        const address = Utils.parseBech32Address(accountAddress.address);
-
-        console.log(`Generated address:`, address.toString());
+        const address = (await account.generateEd25519Addresses(1))[0];
+        console.log(`Generated address:`, address.address);
     } catch (error) {
         console.error('Error: ', error);
     }
