@@ -13,17 +13,13 @@ use crate::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
-            BasicOutputBuilder, NativeToken, TokenId,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
         ConvertTo,
     },
     wallet::{
         account::{
-            constants::DEFAULT_EXPIRATION_TIME,
-            operations::transaction::{
-                high_level::minimum_storage_deposit::minimum_storage_deposit_basic_native_tokens, Transaction,
-            },
-            Account, TransactionOptions,
+            constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
         },
         Error, Result,
     },
@@ -162,16 +158,23 @@ where
                 .transpose()?
                 .unwrap_or(default_return_address.address);
 
+            let native_tokens = NativeTokens::from_vec(
+                native_tokens
+                    .into_iter()
+                    .map(|(id, amount)| {
+                        NativeToken::new(id, amount).map_err(|e| crate::wallet::Error::Client(Box::new(e.into())))
+                    })
+                    .collect::<Result<Vec<NativeToken>>>()?,
+            )?;
+
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
-            let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
-                &rent_structure,
-                address.inner(),
-                return_address.inner(),
-                Some(native_tokens.clone()),
-                token_supply,
-            )?;
+            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                .with_native_tokens(native_tokens.clone())
+                .with_storage_deposit_return()?
+                .with_expiration()?
+                .finish()?;
 
             let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
                 local_time + expiration_time
@@ -179,15 +182,7 @@ where
 
             outputs.push(
                 BasicOutputBuilder::new_with_amount(storage_deposit_amount)
-                    .with_native_tokens(
-                        native_tokens
-                            .into_iter()
-                            .map(|(id, amount)| {
-                                NativeToken::new(id, amount)
-                                    .map_err(|e| crate::wallet::Error::Client(Box::new(e.into())))
-                            })
-                            .collect::<Result<Vec<NativeToken>>>()?,
-                    )
+                    .with_native_tokens(native_tokens)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
                     .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are

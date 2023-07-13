@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
+    client::secret::SecretManage,
     types::block::{
         address::{Address, Bech32Address},
         output::{
@@ -15,7 +15,8 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutput, NftOutputBuilder,
+            Output, Rent,
         },
         Error,
     },
@@ -115,7 +116,7 @@ where
 
                     // Calculate the minimum storage deposit to be returned
                     let min_storage_deposit_return_amount =
-                        minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
+                        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
                     second_output_builder =
                         second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
@@ -135,7 +136,7 @@ where
                         let balance_minus_output = balance.base_coin.available - first_output.amount();
                         // Calculate the amount for a basic output
                         let minimum_required_storage_deposit =
-                            minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
+                            MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
                         if balance_minus_output < minimum_required_storage_deposit {
                             second_output_builder =
@@ -156,7 +157,8 @@ where
         // amounts if needed
         if second_output.amount() < required_storage_deposit {
             let mut new_sdr_amount = required_storage_deposit - params.amount;
-            let minimum_storage_deposit = minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
+            let minimum_storage_deposit =
+                MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
             let mut final_output_amount = required_storage_deposit;
             if required_storage_deposit < params.amount + minimum_storage_deposit {
                 // return amount must be >= minimum_storage_deposit
@@ -288,7 +290,7 @@ where
 
                     // Calculate the amount to be returned
                     let min_storage_deposit_return_amount =
-                        minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
+                        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
                     second_output_builder =
                         second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
@@ -308,7 +310,7 @@ where
                         let balance_minus_output = balance.base_coin.available - first_output.amount();
                         // Calculate the amount for a basic output
                         let minimum_required_storage_deposit =
-                            minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
+                            MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
                         if balance_minus_output < minimum_required_storage_deposit {
                             second_output_builder =
@@ -329,7 +331,8 @@ where
         // amounts if needed
         if second_output.amount() < required_storage_deposit {
             let mut new_sdr_amount = required_storage_deposit - params.amount;
-            let minimum_storage_deposit = minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
+            let minimum_storage_deposit =
+                MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
             let mut final_output_amount = required_storage_deposit;
             if required_storage_deposit < params.amount + minimum_storage_deposit {
                 // return amount must be >= minimum_storage_deposit
