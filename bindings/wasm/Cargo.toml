@@ -17,7 +17,7 @@ crate-type = [ "cdylib" ]
 doc = false
 
 [dependencies]
-iota-sdk-bindings-core = { path = "../core", default-features = false, features = [ "events", "storage", "crypto_rand" ] }
+iota-sdk-bindings-core = { path = "../core", default-features = false, features = [ "events", "storage" ] }
 
 console_error_panic_hook = { version = "0.1.7", default-features = false }
 js-sys = { version = "0.3.63", default-features = false, features = [] }
