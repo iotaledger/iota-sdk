@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, initLogger, Utils } from '@iota/sdk';
+import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -27,6 +27,7 @@ async function run() {
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         const address = (await account.generateEd25519Addresses(1))[0];
+
         console.log(`Generated address:`, address.address);
     } catch (error) {
         console.error('Error: ', error);
