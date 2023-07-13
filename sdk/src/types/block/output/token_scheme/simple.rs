@@ -29,7 +29,15 @@ impl SimpleTokenScheme {
 
     /// Creates a new [`SimpleTokenScheme`].
     #[inline(always)]
-    pub fn new(minted_tokens: U256, melted_tokens: U256, maximum_supply: U256) -> Result<Self, Error> {
+    pub fn new(
+        minted_tokens: impl Into<U256>,
+        melted_tokens: impl Into<U256>,
+        maximum_supply: impl Into<U256>,
+    ) -> Result<Self, Error> {
+        let minted_tokens = minted_tokens.into();
+        let melted_tokens = melted_tokens.into();
+        let maximum_supply = maximum_supply.into();
+
         verify_supply(&minted_tokens, &melted_tokens, &maximum_supply)?;
 
         Ok(Self {

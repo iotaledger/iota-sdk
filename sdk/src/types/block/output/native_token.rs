@@ -30,7 +30,9 @@ pub struct NativeToken {
 impl NativeToken {
     /// Creates a new [`NativeToken`].
     #[inline(always)]
-    pub fn new(token_id: TokenId, amount: U256) -> Result<Self, Error> {
+    pub fn new(token_id: TokenId, amount: impl Into<U256>) -> Result<Self, Error> {
+        let amount = amount.into();
+
         verify_amount::<true>(&amount, &())?;
 
         Ok(Self { token_id, amount })

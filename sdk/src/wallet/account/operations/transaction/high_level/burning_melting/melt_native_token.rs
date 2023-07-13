@@ -26,7 +26,7 @@ where
     pub async fn melt_native_token(
         &self,
         token_id: TokenId,
-        melt_amount: U256,
+        melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
@@ -42,7 +42,7 @@ where
     pub async fn prepare_melt_native_token(
         &self,
         token_id: TokenId,
-        melt_amount: U256,
+        melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_melt_native_token");

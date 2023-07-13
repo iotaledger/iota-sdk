@@ -16,7 +16,7 @@
 //! cargo run --release --all-features --example melt_native_token [TOKEN_ID]
 //! ```
 
-use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
 
 // The amount of native tokens to melt
 const MELT_AMOUNT: u64 = 10;
@@ -59,8 +59,8 @@ async fn main() -> Result<()> {
         .await?;
 
     // Melt some of the circulating supply
-    let melt_amount = U256::from(MELT_AMOUNT);
-    let transaction = account.melt_native_token(token_id, melt_amount, None).await?;
+
+    let transaction = account.melt_native_token(token_id, MELT_AMOUNT, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

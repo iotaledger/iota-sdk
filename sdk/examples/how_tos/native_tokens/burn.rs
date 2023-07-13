@@ -59,8 +59,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Burn a native token
-        let burn_amount = U256::from(BURN_AMOUNT);
-        let transaction = account.burn(NativeToken::new(token_id, burn_amount)?, None).await?;
+        let transaction = account.burn(NativeToken::new(token_id, BURN_AMOUNT)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account

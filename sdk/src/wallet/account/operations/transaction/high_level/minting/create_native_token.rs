@@ -164,7 +164,7 @@ where
                         alias_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
-                            U256::from(0u8),
+                            0,
                             params.maximum_supply,
                         )?),
                     )

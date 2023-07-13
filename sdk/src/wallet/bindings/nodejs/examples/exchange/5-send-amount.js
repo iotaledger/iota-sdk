@@ -18,7 +18,7 @@ async function run() {
 
         const response = await account.sendAmount([
             {
-                //TODO: Replace with the address of your choice!
+                // Replace with the address of your choice!
                 address: 'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
                 amount: '1000000',
             },

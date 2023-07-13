@@ -937,7 +937,7 @@ mod tests {
         let issuer_2 = rand_issuer_feature();
 
         let mut builder = AliasOutput::build_with_amount(0, alias_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(gov_address_1)
             .add_unlock_condition(state_address_1)
             .add_feature(sender_1)
@@ -1050,7 +1050,7 @@ mod tests {
         };
 
         let builder = AliasOutput::build_with_amount(100, alias_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(gov_address)
             .add_unlock_condition(state_address)
             .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
@@ -1058,7 +1058,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder = AliasOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(gov_address)
             .add_unlock_condition(state_address)
             .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
