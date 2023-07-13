@@ -173,6 +173,7 @@ where
             let storage_deposit_amount = MinimumStorageDeposit::new(rent_structure, token_supply)
                 .with_native_tokens(native_tokens.clone())
                 .with_storage_deposit_return(*return_address.inner())?
+                .with_expiration(*return_address.inner())?
                 .finish()?;
 
             let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {

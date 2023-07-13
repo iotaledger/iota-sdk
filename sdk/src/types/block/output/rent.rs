@@ -180,7 +180,13 @@ impl MinimumStorageDeposit {
                 return_address,
                 Output::AMOUNT_MIN,
                 self.token_supply,
-            )?)
+            )?);
+        Ok(self)
+    }
+
+    pub fn with_expiration(mut self, return_address: Address) -> Result<Self, Error> {
+        self.builder = self
+            .builder
             .add_unlock_condition(ExpirationUnlockCondition::new(return_address, 1)?);
         Ok(self)
     }
