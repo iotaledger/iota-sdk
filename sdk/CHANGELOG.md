@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `WalletBuilder::with_storage_options` method, allowing storage encryption;
 - `StorageOptions::{new, with_encryption_key}` methods and getters;
 - `MinimumStorageDepositBasicOutput`;
+- `LedgerSecretManager::non_interactive` field;
 
 ### Changed
 
