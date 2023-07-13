@@ -55,7 +55,6 @@ async function run() {
             const output = outputResponse['output'];
             if (output instanceof CommonOutput) {
                 (output as CommonOutput).getNativeTokens()?.forEach((token) => {
-                    console.log(typeof token.amount);
                     totalNativeTokens[token.id] =
                         (totalNativeTokens[token.id] || BigInt(0)) +
                         token.amount;

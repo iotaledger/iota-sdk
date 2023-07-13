@@ -137,6 +137,12 @@ export class Client {
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
     ): Promise<[BlockId, Block]> {
+        if (options && options.output && typeof options.output.amount === 'bigint') {
+            options.output.amount = options.output.amount.toString(10)
+        }
+        if (options && options.outputHex && typeof options.outputHex.amount === 'bigint') {
+            options.outputHex.amount = options.outputHex.amount.toString(10)
+        }
         const response = await this.methodHandler.callMethod({
             name: 'buildAndPostBlock',
             data: {

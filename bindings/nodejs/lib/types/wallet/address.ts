@@ -12,7 +12,7 @@ export interface AccountAddress {
 /** Address with a base token amount */
 export interface SendParams {
     address: string;
-    amount: bigint;
+    amount: bigint | string;
     returnAddress?: string;
     expiration?: number;
 }
