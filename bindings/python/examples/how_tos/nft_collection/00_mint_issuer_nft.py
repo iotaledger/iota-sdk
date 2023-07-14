@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, Utils, utf8_to_hex
+from iota_sdk import Wallet, Utils, utf8_to_hex, MintNftParams
 from dotenv import load_dotenv
 import os
 
@@ -20,9 +20,11 @@ account.sync()
 
 # Issue the minting transaction and wait for its inclusion
 print('Sending NFT minting transaction...')
-params = {
-    "immutableMetadata": utf8_to_hex("This NFT will be the issuer from the awesome NFT collection"),
-}
+params = MintNftParams(
+    immutableMetadata=utf8_to_hex(
+        "This NFT will be the issuer from the awesome NFT collection"),
+)
+
 
 prepared = account.prepare_mint_nfts([params])
 transaction = prepared.send()
@@ -38,6 +40,7 @@ essence = transaction.payload["essence"]
 for outputIndex, output in enumerate(essence["outputs"]):
     # New minted NFT id is empty in the output
     if output["type"] == 6 and output["nftId"] == '0x0000000000000000000000000000000000000000000000000000000000000000':
-        outputId = Utils.compute_output_id(transaction.transactionId, outputIndex)
+        outputId = Utils.compute_output_id(
+            transaction.transactionId, outputIndex)
         nftId = Utils.compute_nft_id(outputId)
         print(f'New minted NFT id: {nftId}')

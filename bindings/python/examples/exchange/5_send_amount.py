@@ -3,7 +3,7 @@
 
 # This example sends tokens to an address.
 
-from iota_sdk import Wallet, SyncOptions
+from iota_sdk import Wallet, SendParams, SyncOptions
 from dotenv import load_dotenv
 import os
 
@@ -28,10 +28,10 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 balance = account.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
-transaction = account.send([{
-    "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-    "amount": "1000000",
-}])
+transaction = account.send([SendParams(
+    "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+    1000000,
+)])
 print(transaction)
 print(
     f'Check your block on: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
