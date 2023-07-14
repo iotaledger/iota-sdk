@@ -69,7 +69,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: nextest
-          args: run --tests --all-features --no-fail-fast --run-ignored ignored-only --cargo-profile ci --retries 2
+          args: run --tests --all-features --no-fail-fast --run-ignored ignored-only --cargo-profile ci --retries 2 -p iota-sdk -p iota-sdk-bindings-core
 
       - name: Tear down private tangle
         if: always()

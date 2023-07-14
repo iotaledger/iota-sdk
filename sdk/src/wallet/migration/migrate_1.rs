@@ -68,7 +68,6 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
 
             storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
         }
-        storage.delete("backup_schema_version").await.ok();
         Ok(())
     }
 }

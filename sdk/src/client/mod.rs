@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! A general purpose IOTA client library for interaction with the IOTA network (Tangle)
+//! A general purpose IOTA client for interaction with the IOTA network (Tangle)
 //!
 //! High-level functions are accessible via the [`Client`][client::Client].
 //!

@@ -1,5 +1,17 @@
 # Changelog
 
+## \[2.0.3-rc.40]
+
+- [`7746abaa`](https://github.com/iotaledger/iota-sdk/commit/7746abaa0c2cd63567d4cb4ba6ca9addb62aa5db)([#653](https://github.com/iotaledger/iota-sdk/pull/653)) Rename `Account::mintNativeToken` to `createNativeToken`, `Account::increaseNativeTokenSupply` to `mintNativeToken`, `Account::decreaseNativeTokenSupply` to `meltNativeToken`;
+  Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
+  Rename `MintTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding `Data` types);
+- [`55e18a18`](https://github.com/iotaledger/iota-sdk/commit/55e18a181794da1ebf6de444b5d62bbdc210eee9)([#718](https://github.com/iotaledger/iota-sdk/pull/718)) Rename `SendAmountParams` to `SendParams`;
+  Rename `Account::sendAmount` to `send`, `Account::prepareSendAmount` to `prepareSend`;
+- [`1c2941d1`](https://github.com/iotaledger/iota-sdk/commit/1c2941d13abb93985bb5b2b5e6a069ec370acb09)([#715](https://github.com/iotaledger/iota-sdk/pull/715)) `Account::signSecp256k1Ecdsa` now accepts newly added Bip44 type.
+- [`e0d4c38f`](https://github.com/iotaledger/iota-sdk/commit/e0d4c38f422fd8b94b5eee325dfce13863eaaa5b)([#689](https://github.com/iotaledger/iota-sdk/pull/689)) Removed old `GenerateAddressesOptions::internal` field since it got moved to `GenerateAddressOptions`;
+  Made `GenerateAddressOptions` fields optional;
+- [`774b4087`](https://github.com/iotaledger/iota-sdk/commit/774b4087312c9f8bf6522fb3dfd3e9cb032b88b5)([#321](https://github.com/iotaledger/iota-sdk/pull/321)) Fixed deadlock in .sync() with incoming transactions;
+
 ## \[2.0.3-rc.39]
 
 - [`f331200a`](https://github.com/iotaledger/iota-sdk/commit/f331200aaf3f71816c067be2fe2b4fcf3e2ff48f)([#633](https://github.com/iotaledger/iota-sdk/pull/633)) Fix folder name in CI.
