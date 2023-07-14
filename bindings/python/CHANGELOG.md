@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Account::get_metadata()`;
+- `Bip44` type;
 
 ### Changed
 
