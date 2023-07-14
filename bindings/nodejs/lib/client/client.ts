@@ -947,7 +947,7 @@ export class Client {
         params: BasicOutputBuilderParams,
     ): Promise<BasicOutput> {
         if (params.amount && typeof params.amount === 'bigint') {
-            params.amount = params.amount.toString(10)
+            params.amount = params.amount.toString(10);
         }
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
@@ -965,7 +965,7 @@ export class Client {
         params: AliasOutputBuilderParams,
     ): Promise<AliasOutput> {
         if (params.amount && typeof params.amount === 'bigint') {
-            params.amount = params.amount.toString(10)
+            params.amount = params.amount.toString(10);
         }
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
@@ -983,7 +983,7 @@ export class Client {
         params: FoundryOutputBuilderParams,
     ): Promise<FoundryOutput> {
         if (params.amount && typeof params.amount === 'bigint') {
-            params.amount = params.amount.toString(10)
+            params.amount = params.amount.toString(10);
         }
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
@@ -999,7 +999,7 @@ export class Client {
      */
     async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
         if (params.amount && typeof params.amount === 'bigint') {
-            params.amount = params.amount.toString(10)
+            params.amount = params.amount.toString(10);
         }
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
