@@ -3,17 +3,9 @@
 
 use std::fmt::{Debug, Formatter, Result};
 
-use serde::Serialize;
-#[cfg(feature = "participation")]
-use {
-    crate::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
-    crate::wallet::account::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes},
-    std::collections::HashMap,
-};
-
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::LedgerNanoStatus;
-use crate::{
+use iota_sdk::client::secret::LedgerNanoStatus;
+use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         NodeInfoWrapper,
@@ -25,13 +17,18 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::create_native_token::CreateNativeTokenTransactionDto,
-            types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
-            OutputDataDto,
+            types::{AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
+            AccountDetailsDto, CreateNativeTokenTransactionDto, OutputDataDto,
         },
-        message_interface::dtos::AccountDetailsDto,
         Error,
     },
+};
+use serde::Serialize;
+#[cfg(feature = "participation")]
+use {
+    iota_sdk::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
+    iota_sdk::wallet::account::{AccountParticipationOverview, ParticipationEventWithNodes},
+    std::collections::HashMap,
 };
 
 /// The response message.

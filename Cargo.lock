@@ -1606,7 +1606,6 @@ version = "0.4.0"
 dependencies = [
  "anymap",
  "async-trait",
- "backtrace",
  "bech32 0.9.1",
  "bitflags 2.3.3",
  "bytemuck",
@@ -1718,7 +1717,7 @@ dependencies = [
 name = "iota-wallet-nodejs"
 version = "0.2.0"
 dependencies = [
- "iota-sdk",
+ "iota-sdk-bindings-core",
  "log",
  "neon",
  "once_cell",
