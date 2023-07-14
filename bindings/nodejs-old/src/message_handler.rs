@@ -3,15 +3,17 @@
 
 use std::sync::Arc;
 
-use iota_sdk::{
-    client::stronghold::StrongholdAdapter,
-    wallet::{
-        events::types::{Event, WalletEventType},
-        message_interface::{
-            create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
-            WalletMessageHandler,
+use iota_sdk_bindings_core::{
+    iota_sdk::{
+        client::stronghold::StrongholdAdapter,
+        wallet::{
+            events::types::{Event, WalletEventType},
+            Result,
         },
-        Result,
+    },
+    message_interface_old::{
+        create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
+        WalletMessageHandler,
     },
 };
 use neon::prelude::*;

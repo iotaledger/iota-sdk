@@ -63,8 +63,7 @@ impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
 }
 
 /// The result of preparing a transaction to create a native token
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,

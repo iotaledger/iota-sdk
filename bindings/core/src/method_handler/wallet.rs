@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use iota_sdk::{
     types::block::address::ToBech32Ext,
-    wallet::{message_interface::dtos::AccountDetailsDto, Wallet},
+    wallet::{account::AccountDetailsDto, Wallet},
 };
 
 use super::account::call_account_method_internal;

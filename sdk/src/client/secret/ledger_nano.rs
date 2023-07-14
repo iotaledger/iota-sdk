@@ -13,8 +13,8 @@ use crypto::{
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
-    get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
-    TransportTypes,
+    api::errors::APIError, get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index,
+    Packable as LedgerNanoPackable, TransportTypes,
 };
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
@@ -90,15 +90,14 @@ impl From<crate::types::block::Error> for Error {
 // LedgerDeviceNotFound: No usable Ledger device was found
 // LedgerMiscError: Everything else.
 // LedgerEssenceTooLarge: Essence with bip32 input indices need more space then the internal buffer is big
-#[cfg(feature = "ledger_nano")]
-impl From<iota_ledger_nano::api::errors::APIError> for Error {
-    fn from(error: iota_ledger_nano::api::errors::APIError) -> Self {
+impl From<APIError> for Error {
+    fn from(error: APIError) -> Self {
         log::info!("ledger error: {}", error);
         match error {
-            iota_ledger_nano::api::errors::APIError::ConditionsOfUseNotSatisfied => Self::DeniedByUser,
-            iota_ledger_nano::api::errors::APIError::EssenceTooLarge => Self::EssenceTooLarge,
-            iota_ledger_nano::api::errors::APIError::SecurityStatusNotSatisfied => Self::DongleLocked,
-            iota_ledger_nano::api::errors::APIError::TransportError => Self::DeviceNotFound,
+            APIError::ConditionsOfUseNotSatisfied => Self::DeniedByUser,
+            APIError::EssenceTooLarge => Self::EssenceTooLarge,
+            APIError::SecurityStatusNotSatisfied => Self::DongleLocked,
+            APIError::TransportError => Self::DeviceNotFound,
             _ => Self::MiscError,
         }
     }
@@ -109,6 +108,8 @@ impl From<iota_ledger_nano::api::errors::APIError> for Error {
 pub struct LedgerSecretManager {
     /// Specifies if a real Ledger hardware is used or only a simulator is used.
     pub is_simulator: bool,
+    /// Specifies whether the wallet should be in non-interactive mode.
+    pub non_interactive: bool,
     /// Mutex to prevent multiple simultaneous requests to a ledger.
     pub mutex: Mutex<()>,
 }
@@ -152,6 +153,9 @@ impl SecretManage for LedgerSecretManager {
 
         // get ledger
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        ledger
+            .set_non_interactive_mode(self.non_interactive)
+            .map_err(Error::from)?;
 
         let addresses = ledger
             .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
@@ -191,6 +195,9 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, account_index, self.is_simulator).map_err(Error::from)?;
+        ledger
+            .set_non_interactive_mode(self.non_interactive)
+            .map_err(Error::from)?;
 
         log::debug!("[LEDGER] prepare_blind_signing");
         log::debug!("[LEDGER] {:?} {:?}", bip32_index, msg);
@@ -254,12 +261,9 @@ impl SecretManage for LedgerSecretManager {
             });
         }
 
-        if coin_type.is_none() || account_index.is_none() {
-            return Err(Error::NoAvailableInputsProvided)?;
-        }
+        let (coin_type, account_index) = coin_type.zip(account_index).ok_or(Error::NoAvailableInputsProvided)?;
 
-        let coin_type = coin_type.unwrap();
-        let bip32_account = account_index.unwrap().harden().into();
+        let bip32_account = account_index.harden().into();
 
         // pack essence and hash into vec
         let essence_bytes = prepared_transaction.essence.pack_to_vec();
@@ -269,6 +273,9 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        ledger
+            .set_non_interactive_mode(self.non_interactive)
+            .map_err(Error::from)?;
         let blind_signing = needs_blind_signing(prepared_transaction, ledger.get_buffer_size());
 
         // if essence + bip32 input indices are larger than the buffer size or the essence contains
@@ -439,6 +446,7 @@ impl LedgerSecretManager {
     pub fn new(is_simulator: bool) -> Self {
         Self {
             is_simulator,
+            non_interactive: false,
             mutex: Mutex::new(()),
         }
     }
@@ -572,4 +580,35 @@ fn merge_unlocks(
         };
     }
     Ok(merged_unlocks)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        client::{api::GetAddressesOptions, constants::IOTA_COIN_TYPE, secret::SecretManager},
+        types::block::address::ToBech32Ext,
+    };
+
+    #[tokio::test]
+    #[ignore = "requires ledger nano instance"]
+    async fn ed25519_address() {
+        let mut secret_manager = LedgerSecretManager::new(true);
+        secret_manager.non_interactive = true;
+
+        let addresses = SecretManager::LedgerNano(secret_manager)
+            .generate_ed25519_addresses(
+                GetAddressesOptions::default()
+                    .with_coin_type(IOTA_COIN_TYPE)
+                    .with_account_index(0)
+                    .with_range(0..1),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            addresses[0].to_bech32_unchecked("atoi").to_string(),
+            "atoi1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mru50gvd8"
+        );
+    }
 }

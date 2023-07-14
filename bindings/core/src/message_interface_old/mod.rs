@@ -2,31 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account_method;
-pub mod dtos;
 mod message;
 mod message_handler;
 mod response;
 
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
+use iota_sdk::{
+    client::secret::{SecretManager, SecretManagerDto},
+    wallet::{ClientOptions, ClientOptionsDto, Wallet},
+};
 use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{
     account_method::AccountMethod, message::Message, message_handler::WalletMessageHandler, response::Response,
-};
-use crate::{
-    client::{
-        builder::dto::ClientBuilderDto,
-        secret::{SecretManager, SecretManagerDto},
-        ClientBuilder,
-    },
-    wallet::Wallet,
 };
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ManagerOptions {
     pub storage_path: Option<String>,
-    pub client_options: Option<ClientBuilderDto>,
+    pub client_options: Option<ClientOptionsDto>,
     pub coin_type: Option<u32>,
     #[serde(serialize_with = "secret_manager_serialize")]
     pub secret_manager: Option<SecretManagerDto>,
@@ -63,7 +58,7 @@ pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
     logger_init(config)
 }
 
-pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::wallet::Result<WalletMessageHandler> {
+pub async fn create_message_handler(options: Option<ManagerOptions>) -> iota_sdk::wallet::Result<WalletMessageHandler> {
     log::debug!(
         "create_message_handler with options: {}",
         serde_json::to_string(&options)?,
@@ -81,7 +76,7 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
         }
 
         if let Some(client_options) = options.client_options {
-            builder = builder.with_client_options(ClientBuilder::try_from(client_options)?);
+            builder = builder.with_client_options(ClientOptions::try_from(client_options)?);
         }
 
         if let Some(coin_type) = options.coin_type {

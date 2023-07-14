@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, utf8_to_hex
+from iota_sdk import Wallet, utf8_to_hex, CreateNativeTokenParams
 from dotenv import load_dotenv
 import os
 
@@ -25,7 +25,8 @@ if not balance.aliases:
     print(f'Transaction sent: {transaction.transactionId}')
 
     # Wait for transaction to get included
-    blockId = account.retry_transaction_until_included(transaction.transactionId)
+    blockId = account.retry_transaction_until_included(
+        transaction.transactionId)
     print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
     account.sync()
@@ -33,11 +34,11 @@ if not balance.aliases:
 
 print('Preparing transaction to create native token...')
 
-params = {
-    "circulatingSupply": hex(100),
-    "maximumSupply": hex(100),
-    "foundryMetadata": utf8_to_hex('Hello, World!'),
-}
+params = CreateNativeTokenParams(
+    100,
+    100,
+    utf8_to_hex('Hello, World!'),
+)
 
 prepared_transaction = account.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
