@@ -3,6 +3,7 @@
 
 //! Utility functions for IOTA
 
+use core::borrow::Borrow;
 use std::collections::HashMap;
 
 use crypto::{
@@ -61,20 +62,23 @@ pub fn generate_mnemonic() -> Result<Mnemonic> {
 }
 
 /// Returns a hex encoded seed for a mnemonic.
-pub fn mnemonic_to_hex_seed(mnemonic: &MnemonicRef) -> Result<String> {
+pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String> {
     Ok(prefix_hex::encode(mnemonic_to_seed(mnemonic)?.as_ref()))
 }
 
 /// Returns a seed for a mnemonic.
-pub fn mnemonic_to_seed(mnemonic: &MnemonicRef) -> Result<Seed> {
+pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
     // first we check if the mnemonic is valid to give meaningful errors
-    verify_mnemonic(mnemonic)?;
-    Ok(crypto::keys::bip39::mnemonic_to_seed(mnemonic, &Passphrase::default()))
+    verify_mnemonic(mnemonic.borrow())?;
+    Ok(crypto::keys::bip39::mnemonic_to_seed(
+        mnemonic.borrow(),
+        &Passphrase::default(),
+    ))
 }
 
 /// Verifies that a &str is a valid mnemonic.
-pub fn verify_mnemonic(mnemonic: &MnemonicRef) -> Result<()> {
-    crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
+pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<()> {
+    crypto::keys::bip39::wordlist::verify(mnemonic.borrow(), &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
     Ok(())
 }
@@ -159,12 +163,12 @@ impl Client {
     }
 
     /// Returns a seed for a mnemonic.
-    pub fn mnemonic_to_seed(mnemonic: &MnemonicRef) -> Result<Seed> {
+    pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
         mnemonic_to_seed(mnemonic)
     }
 
     /// Returns a hex encoded seed for a mnemonic.
-    pub fn mnemonic_to_hex_seed(mnemonic: &MnemonicRef) -> Result<String> {
+    pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String> {
         mnemonic_to_hex_seed(mnemonic)
     }
 

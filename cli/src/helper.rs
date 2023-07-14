@@ -169,7 +169,7 @@ pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
                 .with_prompt("Enter your mnemonic")
                 .interact_text()?,
         );
-        if verify_mnemonic(&input).is_err() {
+        if verify_mnemonic(&*input).is_err() {
             println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
         } else {
             return Ok(input);
@@ -223,7 +223,7 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<Mnemonic>, Error> {
         // we allow surrounding whitespace in the file
         let trimmed = Mnemonic::from(line.trim().to_owned());
         line.zeroize();
-        if verify_mnemonic(&trimmed).is_ok() {
+        if verify_mnemonic(&*trimmed).is_ok() {
             mnemonics.push(trimmed);
         } else {
             return Err(Error::Miscellaneous(format!(

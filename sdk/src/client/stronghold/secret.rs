@@ -3,12 +3,17 @@
 
 //! The [SecretManage] implementation for [StrongholdAdapter].
 
+use core::borrow::Borrow;
 use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::{bip39::Mnemonic, bip44::Bip44, slip10::Segment},
+    keys::{
+        bip39::{Mnemonic, MnemonicRef},
+        bip44::Bip44,
+        slip10::Segment,
+    },
     signatures::{
         ed25519,
         secp256k1_ecdsa::{self, EvmAddress},
@@ -19,7 +24,6 @@ use iota_stronghold::{
     procedures::{self, Curve, KeyType, Slip10DeriveInput},
     Location,
 };
-use zeroize::Zeroize;
 
 use super::{
     common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
@@ -455,7 +459,7 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&self, mut mnemonic: Mnemonic) -> Result<(), Error> {
+    pub async fn store_mnemonic(&self, mnemonic: impl Borrow<MnemonicRef> + Send) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::KeyCleared);
@@ -465,8 +469,7 @@ impl StrongholdAdapter {
         let output = Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH);
 
         // Trim the mnemonic, in case it hasn't been, as otherwise the restored seed would be wrong.
-        let trimmed_mnemonic = Mnemonic::from(mnemonic.trim().to_owned());
-        mnemonic.zeroize();
+        let trimmed_mnemonic = Mnemonic::from(mnemonic.borrow().trim().to_owned());
 
         // Check if the mnemonic is valid.
         crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)

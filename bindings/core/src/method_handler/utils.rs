@@ -32,7 +32,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.to_string()),
         UtilsMethod::MnemonicToHexSeed { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);
-            Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?)
+            Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(mnemonic)?)
         }
         UtilsMethod::BlockId { block } => {
             let block = Block::try_from_dto_unverified(block)?;
@@ -82,7 +82,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);
-            verify_mnemonic(&mnemonic)?;
+            verify_mnemonic(mnemonic)?;
             Response::Ok
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {

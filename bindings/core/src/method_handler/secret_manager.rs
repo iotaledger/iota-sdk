@@ -71,7 +71,7 @@ pub(crate) async fn call_secret_manager_method_internal(
         }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
-            let mnemonic = mnemonic.into();
+            let mnemonic = crypto::keys::bip39::Mnemonic::from(mnemonic);
             if let SecretManager::Stronghold(secret_manager) = &*secret_manager {
                 secret_manager.store_mnemonic(mnemonic).await?;
                 Response::Ok
