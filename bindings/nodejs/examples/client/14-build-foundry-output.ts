@@ -39,7 +39,7 @@ async function run() {
                 BigInt(0),
                 BigInt(10),
             ),
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [
                 new ImmutableAliasAddressUnlockCondition(
                     new AliasAddress(aliasId),
