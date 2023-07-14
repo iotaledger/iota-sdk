@@ -15,6 +15,14 @@ async function run() {
     if (!process.env.FAUCET_URL) {
         throw new Error('.env FAUCET_URL is undefined, see .env.example');
     }
+    if (!process.env.WALLET_DB_PATH) {
+        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    }
+    if (!process.env.STRONGHOLD_PASSWORD) {
+        throw new Error(
+            '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+        );
+    }
     try {
         // Create the wallet
         const wallet = new Wallet({
@@ -35,6 +43,10 @@ async function run() {
         const aliasId = balance.aliases[0];
 
         console.log(`Aliases BEFORE destroying:\n`, balance.aliases);
+
+        // To sign a transaction we need to unlock stronghold.
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+
         console.log('Sending the destroy-alias transaction...');
 
         // Destroy an alias
