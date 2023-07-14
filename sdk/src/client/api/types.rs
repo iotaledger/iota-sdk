@@ -23,8 +23,7 @@ use crate::{
 };
 
 /// Helper struct for offline signing
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PreparedTransactionData {
     /// Transaction essence
     pub essence: TransactionEssence,
@@ -165,7 +164,7 @@ impl SignedTransactionData {
 }
 
 /// Data for a remainder output, used for ledger nano
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RemainderData {
     /// The remainder output
     pub output: Output,

@@ -254,12 +254,9 @@ impl SecretManage for LedgerSecretManager {
             });
         }
 
-        if coin_type.is_none() || account_index.is_none() {
-            return Err(Error::NoAvailableInputsProvided)?;
-        }
+        let (coin_type, account_index) = coin_type.zip(account_index).ok_or(Error::NoAvailableInputsProvided)?;
 
-        let coin_type = coin_type.unwrap();
-        let bip32_account = account_index.unwrap().harden().into();
+        let bip32_account = account_index.harden().into();
 
         // pack essence and hash into vec
         let essence_bytes = prepared_transaction.essence.pack_to_vec();
