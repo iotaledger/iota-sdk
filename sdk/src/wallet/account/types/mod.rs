@@ -194,6 +194,7 @@ pub struct TransactionDto {
     /// The transaction payload
     pub payload: TransactionPayloadDto,
     /// BlockId when it got sent to the Tangle
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<BlockId>,
     /// Inclusion state of the transaction
     pub inclusion_state: InclusionState,
@@ -204,6 +205,7 @@ pub struct TransactionDto {
     pub network_id: String,
     /// If the transaction was created by the wallet or if it was sent by someone else and is incoming
     pub incoming: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
     pub inputs: Vec<OutputWithMetadataResponse>,
 }

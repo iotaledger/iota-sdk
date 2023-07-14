@@ -78,7 +78,7 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
     Ok(())
 }
 
-mod types {
+pub(super) mod types {
     use serde::{Deserialize, Serialize};
 
     pub const HARDEN_MASK: u32 = 1 << 31;

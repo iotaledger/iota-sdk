@@ -149,50 +149,12 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
 }
 
 pub(super) mod types {
-    use core::{marker::PhantomData, str::FromStr};
+    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
+    use super::migrate_0::types::string_serde_impl;
     use crate::types::block::Error;
-
-    macro_rules! string_serde_impl {
-        ($type:ty) => {
-            impl serde::Serialize for $type {
-                fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-                    use alloc::string::ToString;
-
-                    s.serialize_str(&self.to_string())
-                }
-            }
-
-            impl<'de> serde::Deserialize<'de> for $type {
-                fn deserialize<D>(deserializer: D) -> Result<$type, D::Error>
-                where
-                    D: serde::Deserializer<'de>,
-                {
-                    struct StringVisitor;
-
-                    impl<'de> serde::de::Visitor<'de> for StringVisitor {
-                        type Value = $type;
-
-                        fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                            formatter.write_str("a string representing the value")
-                        }
-
-                        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-                        where
-                            E: serde::de::Error,
-                        {
-                            let value = core::str::FromStr::from_str(v).map_err(serde::de::Error::custom)?;
-                            Ok(value)
-                        }
-                    }
-
-                    deserializer.deserialize_str(StringVisitor)
-                }
-            }
-        };
-    }
 
     #[derive(Deserialize)]
     #[allow(non_camel_case_types)]
@@ -256,9 +218,8 @@ pub(super) mod types {
 
     #[derive(Serialize, Deserialize)]
     #[repr(transparent)]
-    pub struct StringPrefix<B> {
+    pub struct StringPrefix {
         pub inner: String,
-        bounded: PhantomData<B>,
     }
 
     #[derive(Deserialize)]
@@ -303,7 +264,7 @@ impl Convert for ConvertSegment {
 struct ConvertHrp;
 impl Convert for ConvertHrp {
     type New = types::Hrp;
-    type Old = types::StringPrefix<u8>;
+    type Old = types::StringPrefix;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(Self::New::from_str_unchecked(&old.inner))

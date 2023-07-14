@@ -158,8 +158,8 @@ trait Convert {
     type Old: DeserializeOwned;
 
     fn check(value: &mut serde_json::Value) -> crate::wallet::Result<()> {
-        if serde_json::from_value::<Self::New>(value.clone()).is_err() {
-            *value = serde_json::to_value(Self::convert(serde_json::from_value::<Self::Old>(value.clone())?)?)?;
+        if Self::New::deserialize(&*value).is_err() {
+            *value = serde_json::to_value(Self::convert(Self::Old::deserialize(&*value).unwrap())?)?;
         }
         Ok(())
     }
