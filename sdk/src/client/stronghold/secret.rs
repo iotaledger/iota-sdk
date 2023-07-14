@@ -459,7 +459,7 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&self, mnemonic: impl Borrow<MnemonicRef>) -> Result<(), Error> {
+    pub async fn store_mnemonic(&self, mnemonic: impl Borrow<MnemonicRef> + Send) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::KeyCleared);
