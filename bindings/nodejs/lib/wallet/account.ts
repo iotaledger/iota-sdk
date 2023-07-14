@@ -449,6 +449,14 @@ export class Account {
             },
         );
         const payload = JSON.parse(response).payload;
+        return this.adjustBalancePayload(payload);
+    }
+
+    /**
+     * Converts hex encoded or decimal strings of amounts to `bigint`
+     * for the balance payload.
+     */
+    private adjustBalancePayload(payload: any): Balance {
         for (let i = 0; i < payload.nativeTokens.length; i++) {
             payload.nativeTokens[i].total = hexToBigInt(
                 payload.nativeTokens[i].total,
@@ -457,6 +465,22 @@ export class Account {
                 payload.nativeTokens[i].available,
             );
         }
+        payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
+        payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
+
+        payload.requiredStorageDeposit.alias = hexToBigInt(
+            payload.requiredStorageDeposit.alias,
+        );
+        payload.requiredStorageDeposit.basic = hexToBigInt(
+            payload.requiredStorageDeposit.basic,
+        );
+        payload.requiredStorageDeposit.foundry = hexToBigInt(
+            payload.requiredStorageDeposit.foundry,
+        );
+        payload.requiredStorageDeposit.nft = hexToBigInt(
+            payload.requiredStorageDeposit.nft,
+        );
+
         return payload;
     }
 
@@ -1204,15 +1228,7 @@ export class Account {
             },
         );
         const payload = JSON.parse(response).payload;
-        for (let i = 0; i < payload.nativeTokens.length; i++) {
-            payload.nativeTokens[i].total = hexToBigInt(
-                payload.nativeTokens[i].total,
-            );
-            payload.nativeTokens[i].available = hexToBigInt(
-                payload.nativeTokens[i].available,
-            );
-        }
-        return payload;
+        return this.adjustBalancePayload(payload);
     }
 
     async prepareVote(

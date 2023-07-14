@@ -37,19 +37,19 @@ export interface Balance {
 /** The balance of the base coin */
 export interface BaseCoinBalance {
     /** The total amount of the outputs */
-    total: string;
+    total: bigint;
     /** The amount of the outputs that aren't used in a transaction */
-    available: string;
+    available: bigint;
     /** Voting power */
     votingPower: string;
 }
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
-    alias: string;
-    basic: string;
-    foundry: string;
-    nft: string;
+    alias: bigint;
+    basic: bigint;
+    foundry: bigint;
+    nft: bigint;
 }
 
 /** The balance of a native token */
