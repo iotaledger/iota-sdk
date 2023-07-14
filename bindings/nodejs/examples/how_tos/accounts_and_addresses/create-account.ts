@@ -11,7 +11,11 @@ require('dotenv').config({ path: '.env' });
 
 // This example creates a new database and account
 async function run() {
-    initLogger();
+    initLogger({
+        colorEnabled: true,
+        name: './iota-sdk.log',
+        levelFilter: 'trace',
+    });
     if (!process.env.NODE_URL) {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
