@@ -22,8 +22,7 @@ secret_manager = SecretManager(StrongholdSecretManager(
 
 # Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
 # The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-secret_manager.store_mnemonic(
-    os.environ['MNEMONIC'])
+secret_manager.store_mnemonic(os.environ['MNEMONIC'])
 
 bip32_chain = [
     HD_WALLET_TYPE | HARDEN_MASK,

@@ -58,9 +58,9 @@ class Node():
         return config
 
 
-class SendParams():
-    def __init__(self, address, amount):
-        """Initialize SendParams
+class AddressAndAmount():
+    def __init__(self, address: str, amount: int):
+        """Initialize AddressAndAmount for options in Client::build_and_post_block()
 
         Parameters
         ----------
