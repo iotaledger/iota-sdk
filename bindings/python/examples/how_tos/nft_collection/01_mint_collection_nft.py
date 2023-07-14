@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, Utils, utf8_to_hex
+from iota_sdk import Wallet, Utils, utf8_to_hex, MintNftParams
 from dotenv import load_dotenv
 import os
 import sys
@@ -13,8 +13,8 @@ NUM_NFTS_MINTED_PER_TRANSACTION = 50
 
 # In this example we will mint some collection NFTs with issuer feature.
 
-if len(sys.argv) < 2: 
-     raise Exception("missing example argument: ISSUER_NFT_ID")
+if len(sys.argv) < 2:
+    raise Exception("missing example argument: ISSUER_NFT_ID")
 
 issuer_nft_id = sys.argv[1]
 
@@ -33,6 +33,7 @@ account.sync()
 bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
 
+
 def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
     data = {
         "standard": "IRC27",
@@ -47,20 +48,24 @@ def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
     }
     return json.dumps(data, separators=(',', ':'))
 
+
 # Create the metadata with another index for each
-nft_mint_params = list(map(lambda index: {
-    "immutableMetadata": utf8_to_hex(get_immutable_metadata(index, issuer_nft_id)),
-    "issuer": issuer
-}, range(NFT_COLLECTION_SIZE)))
+nft_mint_params = list(map(lambda index: MintNftParams(
+    immutableMetadata=utf8_to_hex(
+        get_immutable_metadata(index, issuer_nft_id)),
+    issuer=issuer
+), range(NFT_COLLECTION_SIZE)))
 
 while nft_mint_params:
     chunk, nft_mint_params = nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION], nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:]
-    print(f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})')
+    print(
+        f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})')
     prepared = account.prepare_mint_nfts(chunk)
     transaction = prepared.send()
-    
+
     # Wait for transaction to get included
-    block_id = account.retry_transaction_until_included(transaction.transactionId)
+    block_id = account.retry_transaction_until_included(
+        transaction.transactionId)
 
     print(
         f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
