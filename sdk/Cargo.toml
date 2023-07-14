@@ -25,7 +25,7 @@ derive_more = { version = "0.99.17", default-features = false, features = [ "fro
 getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
 hex = { version = "0.4.3", default-features = false }
-iota-crypto = { version = "0.20.1", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
+iota-crypto = { version = "0.22.1", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
 itertools = { version = "0.11.0", default-features = false, features = [ "use_alloc" ] }
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
@@ -43,8 +43,7 @@ futures = { version = "0.3.28", default-features = false, features = [ "thread-p
 heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-# iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
-iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", rev = "9df6d19de325481771d69b47534d151e03eae623", default-features = false, optional = true }
+iota_stronghold = { version = "2.0.0-rc.1", default-features = false, optional = true }
 log = { version = "0.4.18", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
 once_cell = { version = "1.17.2", default-features = false, optional = true }
@@ -53,7 +52,6 @@ regex = { version = "1.8.3", default-features = false, features = [ "unicode-per
 reqwest = { version = "0.11.18", default-features = false, features = [ "json" ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [ "lz4" ], optional = true }
 rumqttc = { version = "0.21.0", default-features = false, features = [ "websocket" ], optional = true }
-serde-big-array = { version = "0.5.1", default-features = false, optional = true }
 serde_repr = { version = "0.1.12", default-features = false, optional = true }
 thiserror = { version = "1.0.40", default-features = false, optional = true }
 time = { version = "0.3.21", default-features = false, features = [ "serde", "macros" ], optional = true }
@@ -88,13 +86,13 @@ participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
-serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
+serde = [ "serde_repr", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std", "itertools/use_std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
-client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
+client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/keccak", "iota-crypto/bip44", "iota-crypto/random" ]
 wallet = [ "client" ]
 
 # Ed25519 Examples

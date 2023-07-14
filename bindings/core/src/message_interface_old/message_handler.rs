@@ -10,7 +10,7 @@ use std::{
 };
 
 use backtrace::Backtrace;
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip39::Mnemonic;
 use futures::{Future, FutureExt};
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{Event, WalletEventType};
@@ -39,7 +39,6 @@ use iota_sdk::{
         Result, Wallet,
     },
 };
-use zeroize::Zeroize;
 
 use crate::message_interface_old::{account_method::AccountMethod, message::Message, response::Response};
 
@@ -230,12 +229,14 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            Message::GenerateMnemonic => {
-                convert_panics(|| self.wallet.generate_mnemonic().map(Response::GeneratedMnemonic))
-            }
-            Message::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
+            Message::GenerateMnemonic => convert_panics(|| {
+                self.wallet
+                    .generate_mnemonic()
+                    .map(|m| Response::GeneratedMnemonic(m.as_ref().to_owned()))
+            }),
+            Message::VerifyMnemonic { mnemonic } => convert_panics(|| {
+                let mnemonic = Mnemonic::from(mnemonic);
                 self.wallet.verify_mnemonic(&mnemonic)?;
-                mnemonic.zeroize();
                 Ok(Response::Ok(()))
             }),
             Message::SetClientOptions { client_options } => {
@@ -307,6 +308,7 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::StoreMnemonic { mnemonic } => {
+                let mnemonic = mnemonic.into();
                 convert_async_panics(|| async {
                     self.wallet.store_mnemonic(mnemonic).await?;
                     Ok(Response::Ok(()))
@@ -574,7 +576,7 @@ impl WalletMessageHandler {
             AccountMethod::VerifyEd25519Signature { signature, message } => {
                 let signature = Ed25519Signature::try_from(signature)?;
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
-                Ok(Response::Bool(signature.verify(&message)?))
+                Ok(Response::Bool(signature.verify(&message)))
             }
             AccountMethod::VerifySecp256k1EcdsaSignature {
                 public_key,
@@ -587,7 +589,7 @@ impl WalletMessageHandler {
                 let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
                 let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
-                Ok(Response::Bool(public_key.verify(&signature, &message)))
+                Ok(Response::Bool(public_key.verify_keccak256(&signature, &message)))
             }
             AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
@@ -595,7 +597,7 @@ impl WalletMessageHandler {
                     .get_secret_manager()
                     .read()
                     .await
-                    .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
+                    .sign_secp256k1_ecdsa(&msg, chain)
                     .await?;
                 Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),

@@ -6,9 +6,9 @@ import type {
     IGenerateAddressesOptions,
     PreparedTransactionData,
     LedgerNanoStatus,
-    IBip32Chain,
 } from '../types/client';
 import {
+    Bip44,
     Secp256k1EcdsaSignature,
     SecretManagerType,
 } from '../types/secret_manager';
@@ -85,7 +85,7 @@ export class SecretManager {
      */
     async signatureUnlock(
         transactionEssenceHash: HexEncodedString,
-        chain: IBip32Chain,
+        chain: Bip44,
     ): Promise<Unlock> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
@@ -103,7 +103,7 @@ export class SecretManager {
      */
     async signEd25519(
         message: HexEncodedString,
-        chain: IBip32Chain,
+        chain: Bip44,
     ): Promise<Ed25519Signature> {
         const response = await this.methodHandler.callMethod({
             name: 'signEd25519',
@@ -120,7 +120,7 @@ export class SecretManager {
      */
     async signSecp256k1Ecdsa(
         message: HexEncodedString,
-        chain: IBip32Chain,
+        chain: Bip44,
     ): Promise<Secp256k1EcdsaSignature> {
         const response = await this.methodHandler.callMethod({
             name: 'signSecp256k1Ecdsa',

@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
 #[cfg(feature = "participation")]
 use iota_sdk::wallet::account::types::participation::ParticipationEventRegistrationOptions;
 #[cfg(feature = "participation")]
@@ -24,6 +25,7 @@ use iota_sdk::{
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
     },
+    utils::serde::bip44::Bip44Def,
     wallet::{
         account::{
             CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
@@ -181,7 +183,8 @@ pub enum AccountMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
-        chain: Vec<u32>,
+        #[serde(with = "Bip44Def")]
+        chain: Bip44,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)
@@ -437,4 +440,31 @@ pub enum AccountMethod {
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
     RequestFundsFromFaucet { url: String, address: Bech32Address },
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn bip44_deserialization() {
+        let sign_secp256k1_ecdsa_method: super::AccountMethod = serde_json::from_str(
+            r#"{"name": "signSecp256k1Ecdsa", "data": {"message": "0xFFFFFFFF", "chain": {"account": 2, "addressIndex": 1}}}"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            serde_json::to_value(&sign_secp256k1_ecdsa_method).unwrap(),
+            serde_json::json!({
+                "name": "signSecp256k1Ecdsa",
+                "data": {
+                    "message": "0xFFFFFFFF",
+                    "chain": {
+                        "coinType": 4218,
+                        "account": 2,
+                        "change": 0,
+                        "addressIndex": 1
+                    }
+                }
+            })
+        );
+    }
 }

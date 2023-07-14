@@ -24,12 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Account::get_metadata()`;
+- `Bip44` type;
 - `SendParams, SendNativeTokensParams, SendNftParams, CreateNativeTokenParams, MintNftParams, CreateAliasOutputParams`;
 
 ### Changed
 
 - Moved `minimum_required_storage_deposit()` from `Account` to `Client`;
 - `Wallet::create_account()` returns `Account` now;
+- `SecretManager::{sign_ed25519, sign_secp256k1_ecdsa, signature_unlock}` now accept `Bip44` type chains;
 - Renamed `SendParams` to `AddressAndAmount`;
 - `Account::prepare_create_alias_output()` now accepts `CreateAliasOutputParams`;
 - `Account::prepare_create_native_token()` now accepts `CreateNativeTokenParams`;

@@ -117,6 +117,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `Account::prepare_mint_native_token` to `prepare_create_native_token`, `Account::prepare_increase_native_token_supply` to `prepare_mint_native_token`, `Account::prepare_decrease_native_token_supply` to `prepare_melt_native_token`;
 - Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
 - Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
+- `Signature::Ed25519` now holds a boxed type;
+- `Ed25519Signature::new` renamed to `try_from_bytes` and returns a Result;
+- `Ed25519Signature::new`, `public_key`, `signature` now use concrete types;
+- `Ed25519Signature::verify` is no longer fallable;
+- `Mnemonic` type used over Strings where possible;
+- `SecretManage::sign_ed25519`, `sign_secp256k1_ecdsa`, and `signature_unlock` now accept Bip44 type chains;
 - Rename `SendAmountParams` to `SendParams`;
 - Rename `Account::send` to `send_outputs`, `Account::send_amount` to `send`, `Account::prepare_send_amount` to `prepare_send`;
 - Made `ManagerStorage` public and renamed it to `StorageKind`;
@@ -149,6 +155,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `client::Error::InvalidBIP32ChainData`;
 - `BlockResponse`, `OutputResponse` and `MilestoneResponse`;
 - `ClientError::UnexpectedApiResponse`;
+- `HD_WALLET_TYPE` constant;
 
 ### Fixed
 

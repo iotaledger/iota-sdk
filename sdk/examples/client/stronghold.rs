@@ -8,11 +8,14 @@
 //! cargo run --release --all-features --example client_stronghold
 //! ```
 
-use iota_sdk::client::{
-    api::GetAddressesOptions,
-    constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    Result,
+use iota_sdk::{
+    client::{
+        api::GetAddressesOptions,
+        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        Result,
+    },
+    crypto::keys::bip39::Mnemonic,
 };
 
 #[tokio::main]
@@ -24,7 +27,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let mnemonic = std::env::var("MNEMONIC").unwrap();
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
 
     // The mnemonic only needs to be stored the first time
     stronghold_secret_manager.store_mnemonic(mnemonic).await?;

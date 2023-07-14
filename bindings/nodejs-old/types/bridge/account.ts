@@ -33,7 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Ed25519Signature } from '../secretManager';
+import { Bip44, Ed25519Signature } from '../secretManager';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -163,7 +163,7 @@ export type __SignSecp256k1EcdsaMethod__ = {
     name: 'signSecp256k1Ecdsa';
     data: {
         message: HexEncodedString;
-        chain: number[];
+        chain: Bip44;
     };
 };
 

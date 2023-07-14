@@ -593,10 +593,10 @@ fn serialize() {
             .unwrap(),
     );
 
-    let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
-    let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
-    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
+    let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
+    let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
+    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
