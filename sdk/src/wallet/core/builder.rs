@@ -146,17 +146,15 @@ where
         let read_manager_builder: Option<Self> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
-        let new_provided_client_options = if self.client_options.is_none() {
-            let loaded_client_options = read_manager_builder
-                .as_ref()
-                .and_then(|data| data.client_options.clone())
-                .ok_or(crate::wallet::Error::MissingParameter("client_options"))?;
-
-            // Update self so it gets used and stored again
-            self.client_options.replace(loaded_client_options);
-            false
-        } else {
-            true
+        let (client_options, new_provided_client_options) = match self.client_options.as_mut() {
+            Some(opts) => (opts, true),
+            None => {
+                let loaded_client_options = read_manager_builder
+                    .as_ref()
+                    .and_then(|data| data.client_options.clone())
+                    .ok_or(crate::wallet::Error::MissingParameter("client_options"))?;
+                (self.client_options.get_or_insert(loaded_client_options), false)
+            }
         };
 
         if self.secret_manager.is_none() {
@@ -177,7 +175,10 @@ where
         ))?;
 
         #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.get_accounts().await?;
+        // Safe to unwrap as the client options are explicitly set above
+        let mut accounts = storage_manager
+            .get_accounts(&client_options.network_info.protocol_parameters)
+            .await?;
         // Check against potential account coin type before saving the wallet data
         #[cfg(feature = "storage")]
         if let Some(account) = accounts.first() {
@@ -265,7 +266,7 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
         for transaction_id in account.pending_transactions() {
             if let Some(tx) = account.transactions().get(transaction_id) {
                 for input in &tx.inputs {
-                    used_inputs.insert(input.metadata.output_id()?);
+                    used_inputs.insert(*input.metadata.output_id());
                 }
             }
         }

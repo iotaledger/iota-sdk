@@ -6,8 +6,9 @@ use zeroize::Zeroizing;
 
 use crate::{
     client::storage::StorageAdapter,
+    types::block::protocol::ProtocolParameters,
     wallet::{
-        account::{AccountDetails, SyncOptions},
+        account::{AccountDetails, AccountDetailsDto, SyncOptions},
         migration::migrate,
         storage::{constants::*, DynStorageAdapter, Storage},
     },
@@ -55,7 +56,10 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
+    pub async fn get_accounts(
+        &mut self,
+        protocol_parameters: &ProtocolParameters,
+    ) -> crate::wallet::Result<Vec<AccountDetails>> {
         if let Some(account_indexes) = self.get(ACCOUNTS_INDEXATION_KEY).await? {
             if self.account_indexes.is_empty() {
                 self.account_indexes = account_indexes;
@@ -68,8 +72,9 @@ impl StorageManager {
             .filter_map(|account_index| async {
                 let account_index = *account_index;
                 let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}");
-                self.get(&key).await.transpose()
+                self.get::<AccountDetailsDto>(&key).await.transpose()
             })
+            .map(|res| AccountDetails::try_from_dto(res?, protocol_parameters))
             .try_collect::<Vec<_>>()
             .await
     }
@@ -81,8 +86,11 @@ impl StorageManager {
         }
 
         self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await?;
-        self.set(&format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()), account)
-            .await
+        self.set(
+            &format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()),
+            &AccountDetailsDto::from(account),
+        )
+        .await
     }
 
     pub async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {
@@ -156,18 +164,31 @@ mod tests {
 
     #[tokio::test]
     async fn save_remove_account() {
+        let protocol_parameters = ProtocolParameters::default();
         let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+        assert!(
+            storage_manager
+                .get_accounts(&protocol_parameters)
+                .await
+                .unwrap()
+                .is_empty()
+        );
 
         let account_details = AccountDetails::mock();
 
         storage_manager.save_account(&account_details).await.unwrap();
-        let accounts = storage_manager.get_accounts().await.unwrap();
+        let accounts = storage_manager.get_accounts(&protocol_parameters).await.unwrap();
         assert_eq!(accounts.len(), 1);
         assert_eq!(accounts[0].alias(), "Alice");
 
         storage_manager.remove_account(0).await.unwrap();
-        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+        assert!(
+            storage_manager
+                .get_accounts(&protocol_parameters)
+                .await
+                .unwrap()
+                .is_empty()
+        );
     }
 
     #[tokio::test]

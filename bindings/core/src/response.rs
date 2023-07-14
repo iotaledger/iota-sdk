@@ -24,10 +24,7 @@ use iota_sdk::{
         block::{
             address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                AliasId, FoundryId, NftId, OutputId, TokenId,
-            },
+            output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
                 milestone::MilestoneId,
@@ -140,7 +137,7 @@ pub enum Response {
     OutputWithMetadataResponse(OutputWithMetadataResponse),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
-    OutputMetadata(OutputMetadataDto),
+    OutputMetadata(OutputMetadata),
     /// Response for:
     /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)

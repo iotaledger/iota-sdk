@@ -20,10 +20,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                Output,
-            },
+            output::{dto::OutputDto, Output},
             payload::transaction::TransactionPayload,
             semantic::ConflictReason,
         },
@@ -174,7 +171,7 @@ where
             .inputs_data
             .into_iter()
             .map(|input| OutputWithMetadataResponse {
-                metadata: OutputMetadataDto::from(&input.output_metadata),
+                metadata: input.output_metadata,
                 output: OutputDto::from(&input.output),
             })
             .collect();

@@ -9,7 +9,7 @@ use crate::{
         stronghold::StrongholdAdapter,
     },
     wallet::{
-        account::AccountDetails,
+        account::{AccountDetails, AccountDetailsDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
         ClientOptions, Wallet,
     },
@@ -41,7 +41,9 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
         let mut serialized_accounts = Vec::new();
         for account in self.accounts.read().await.iter() {
-            serialized_accounts.push(serde_json::to_value(&*account.details().await)?);
+            serialized_accounts.push(serde_json::to_value(&AccountDetailsDto::from(
+                &*account.details().await,
+            ))?);
         }
 
         stronghold.set(ACCOUNTS_KEY, &serialized_accounts).await?;
@@ -64,7 +66,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     let client_options = stronghold
         .get::<ClientBuilderDto>(CLIENT_OPTIONS_KEY)
         .await?
-        .map(TryInto::try_into)
+        .map(ClientOptions::try_from)
         .transpose()?;
 
     // Get coin_type
@@ -85,7 +87,20 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
 
     // Get accounts
-    let restored_accounts = stronghold.get(ACCOUNTS_KEY).await?;
+    let restored_accounts = if let Some(opts) = &client_options {
+        stronghold
+            .get::<Vec<AccountDetailsDto>>(ACCOUNTS_KEY)
+            .await?
+            .map(|v| {
+                v.into_iter()
+                    .map(|dto| AccountDetails::try_from_dto(dto, &opts.network_info.protocol_parameters))
+                    .collect::<Result<Vec<_>, _>>()
+            })
+            .transpose()?
+    } else {
+        // TODO: Should we use `try_from_dto_unverified` here?
+        None
+    };
 
     Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
 }

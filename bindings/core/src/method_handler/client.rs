@@ -11,7 +11,7 @@ use iota_sdk::{
         block::{
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto},
+                dto::{OutputBuilderAmountDto, OutputDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent, RentStructure,
             },
             payload::{
@@ -312,7 +312,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(OutputWithMetadataResponse::from)?,
         ),
         ClientMethod::GetOutputMetadata { output_id } => {
-            Response::OutputMetadata(OutputMetadataDto::from(&client.get_output_metadata(&output_id).await?))
+            Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
         ClientMethod::GetMilestoneById { milestone_id } => Response::Milestone(MilestonePayloadDto::from(
             &client.get_milestone_by_id(&milestone_id).await?,
