@@ -12,10 +12,9 @@ use std::{
 use backtrace::Backtrace;
 use crypto::keys::bip39::Mnemonic;
 use futures::{Future, FutureExt};
-
 #[cfg(feature = "events")]
-use crate::wallet::events::types::{Event, WalletEventType};
-use crate::{
+use iota_sdk::wallet::events::types::{Event, WalletEventType};
+use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
@@ -34,18 +33,14 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::{
-                high_level::minting::create_native_token::CreateNativeTokenTransactionDto, TransactionOptions,
-            },
             types::{AccountIdentifier, TransactionDto},
-            OutputDataDto,
-        },
-        message_interface::{
-            account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
+            AccountDetailsDto, CreateNativeTokenTransactionDto, OutputDataDto, TransactionOptions,
         },
         Result, Wallet,
     },
 };
+
+use crate::message_interface_old::{account_method::AccountMethod, message::Message, response::Response};
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
     let msg = panic.downcast_ref::<String>().map_or_else(
@@ -571,8 +566,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::GenerateEvmAddresses { options } => {
                 let addresses = account
-                    .wallet
-                    .secret_manager
+                    .get_secret_manager()
                     .read()
                     .await
                     .generate_evm_addresses(options)
@@ -581,7 +575,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::VerifyEd25519Signature { signature, message } => {
                 let signature = Ed25519Signature::try_from(signature)?;
-                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
                 Ok(Response::Bool(signature.verify(&message)))
             }
             AccountMethod::VerifySecp256k1EcdsaSignature {
@@ -594,14 +588,13 @@ impl WalletMessageHandler {
                 let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)?;
                 let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
                 let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
-                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
                 Ok(Response::Bool(public_key.verify_keccak256(&signature, &message)))
             }
             AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
-                let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                let msg: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
                 let (public_key, signature) = account
-                    .wallet
-                    .secret_manager
+                    .get_secret_manager()
                     .read()
                     .await
                     .sign_secp256k1_ecdsa(&msg, chain)
@@ -850,7 +843,7 @@ impl WalletMessageHandler {
                             outputs
                                 .into_iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
-                                .collect::<crate::wallet::Result<Vec<_>>>()?,
+                                .collect::<iota_sdk::wallet::Result<Vec<_>>>()?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -925,7 +918,8 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .increase_voting_power(
-                            u64::from_str(&amount).map_err(|_| crate::client::Error::InvalidAmount(amount.clone()))?,
+                            u64::from_str(&amount)
+                                .map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
@@ -937,7 +931,8 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .decrease_voting_power(
-                            u64::from_str(&amount).map_err(|_| crate::client::Error::InvalidAmount(amount.clone()))?,
+                            u64::from_str(&amount)
+                                .map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))

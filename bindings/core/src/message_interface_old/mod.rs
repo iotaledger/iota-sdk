@@ -2,20 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account_method;
-pub mod dtos;
 mod message;
 mod message_handler;
 mod response;
 
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
+use iota_sdk::{
+    client::secret::{SecretManager, SecretManagerDto},
+    wallet::{ClientOptions, Wallet},
+};
 use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{
     account_method::AccountMethod, message::Message, message_handler::WalletMessageHandler, response::Response,
-};
-use crate::{
-    client::secret::{SecretManager, SecretManagerDto},
-    wallet::{ClientOptions, Wallet},
 };
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -59,7 +58,7 @@ pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
     logger_init(config)
 }
 
-pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::wallet::Result<WalletMessageHandler> {
+pub async fn create_message_handler(options: Option<ManagerOptions>) -> iota_sdk::wallet::Result<WalletMessageHandler> {
     log::debug!(
         "create_message_handler with options: {}",
         serde_json::to_string(&options)?,

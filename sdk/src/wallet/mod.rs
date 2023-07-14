@@ -8,11 +8,6 @@
 pub mod account;
 /// The core module.
 pub mod core;
-/// The message passing interface for the library. A different way to call the wallet functions, useful for bindings to
-/// other languages.
-#[cfg(feature = "message_interface")]
-#[cfg_attr(docsrs, doc(cfg(feature = "message_interface")))]
-pub mod message_interface;
 #[cfg(any(feature = "stronghold", feature = "storage"))]
 pub(crate) mod migration;
 
