@@ -1,5 +1,5 @@
-name: 'ledger-nano-setup'
-description: 'Setup a simulated ledger nano instance'
+name: "ledger-nano-setup"
+description: "Setup a simulated ledger nano instance"
 runs:
   using: "composite"
   steps:
@@ -7,14 +7,14 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: iotaledger/ledger-iota-app
-        ref: fix/build-without-it-flag
+        ref: develop
         path: ledger-iota-app
 
     - name: Update submodules
       shell: bash
       run: git submodule update --init --recursive
       working-directory: ledger-iota-app
-        
+
     - name: Run the simulator
       shell: bash
       run: ./build.sh -s -v shimmer -b
