@@ -32,7 +32,7 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
 impl MigrationData for Migrate {
     const ID: usize = 2;
     const SDK_VERSION: &'static str = "0.4.0";
-    const DATE: time::Date = time::macros::date!(2023 - 07 - 13);
+    const DATE: time::Date = time::macros::date!(2023 - 07 - 14);
 }
 
 #[async_trait]
