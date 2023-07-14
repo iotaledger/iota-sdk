@@ -142,7 +142,7 @@ impl MnemonicSecretManager {
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
     pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(&mnemonic.into())?.into()))
+        Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?.into()))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
