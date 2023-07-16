@@ -9,6 +9,8 @@ import humps
 
 
 class NodeIndexerAPI():
+    """Node indexer API.
+    """
 
     @dataclass
     class QueryParameters:

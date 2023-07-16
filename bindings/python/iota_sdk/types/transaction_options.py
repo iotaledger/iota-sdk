@@ -9,6 +9,8 @@ from typing import Optional, List
 
 
 class RemainderValueStrategyCustomAddress:
+    """Custom Address remainder value strategy.
+    """
     def __init__(self,
                  address: str,
                  key_index: int,
@@ -24,6 +26,12 @@ class RemainderValueStrategyCustomAddress:
 
 
 class RemainderValueStrategy(Enum):
+    """Remainder value stragegy options.
+
+    Attributes:
+        ChangeAddress: Changes the address
+        ReuseAddress: Reuses the address
+    """
     ChangeAddress = None,
     ReuseAddress = None,
 
@@ -32,6 +40,17 @@ class RemainderValueStrategy(Enum):
 
 
 class TransactionOptions():
+    """Transaction options.
+
+    Attributes:
+        remainder_value_strategy (RemainderValueStrategy | RemainderValueStrategyCustomAddress, optional): the remainder value strategy
+        tagged_data_payload (TaggedDataPayload, optional): a tagged data payload
+        custom_inputs (List[OutputId], optional): an array of custom inputs
+        mandatory_inputs (List[OutputId], optional): an array of mandatory inputs
+        burn (Burn, optional): some assets to burn in the transaction
+        note (str, optional): a note with the transaction
+        allow_micro_amount (bool, optional): whether micro amounts should be allowed in this transaction
+    """
     def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
                  tagged_data_payload: Optional[TaggedDataPayload] = None,
                  custom_inputs: Optional[List[OutputId]] = None,
@@ -40,6 +59,15 @@ class TransactionOptions():
                  note: Optional[str] = None,
                  allow_micro_amount: Optional[bool] = None):
         """Initialize TransactionOptions
+
+        Args:
+            remainder_value_strategy (RemainderValueStrategy | RemainderValueStrategyCustomAddress, optional): the remainder value strategy
+            tagged_data_payload (TaggedDataPayload, optional): a tagged data payload
+            custom_inputs (List[OutputId], optional): an array of custom inputs
+            mandatory_inputs (List[OutputId], optional): an array of mandatory inputs
+            burn (Burn, optional): some assets to burn in the transaction
+            note (str, optional): a note with the transaction
+            allow_micro_amount (bool, optional): whether micro amounts should be allowed in this transaction
         """
         self.remainder_value_strategy = remainder_value_strategy
         self.tagged_data_payload = tagged_data_payload

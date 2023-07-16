@@ -13,6 +13,15 @@ from iota_sdk.types.unlock_condition import UnlockCondition
 
 
 class OutputType(IntEnum):
+    """Output type.
+
+    Attributes:
+        Treasury (2): Treasury outpu.
+        Basic (3): Basic output
+        Alias (4): Alias output
+        Foundry (5): Foundry output
+        Nft (6): NFT output
+    """
     Treasury = 2
     Basic = 3
     Alias = 4
@@ -22,6 +31,37 @@ class OutputType(IntEnum):
 
 @dataclass
 class Output():
+    """Output.
+
+    **Attributes**
+    type : int
+        Output type
+    amount : str
+        Output amount as string
+    unlockConditions : List[UnlockCondition]
+        Unlock conditions
+    aliasId : HexStr, optional
+        Alias ID
+    nftId : HexStr, optional
+        NFT ID
+    stateIndex : int, optional
+        State index
+    stateMetadata : HexStr, optional
+        State metadata
+    foundryCounter : int, optional
+        Foundry counter
+    features : List[Feature], optional
+        Features
+    nativeTokens : List[NativeToken], optional
+        Native tokens
+    immutableFeatures : List[Feature], optional
+        Immutable features
+    serialNumber : int, optional 
+        Serial number
+    tokenScheme : TokenScheme, optional
+        Token scheme
+    """
+
     type: int
     amount: str
     unlockConditions: List[UnlockCondition]
@@ -59,6 +99,18 @@ class Output():
 @dataclass
 class OutputMetadata:
     """Metadata about an output.
+
+    Attributes:
+        blockId (HexStr): the corresponding block ID in which the output appeared
+        transactionId (HexStr): the transaction ID where that output was created
+        outputIndex (int): the index of the output within the corresponding transaction
+        isSpent (bool): whether the output is spent
+        milestoneIndexBooked (int): the milestone index where that output was created
+        milestoneTimestampBooked (int): the milestone timestamp where that output was created
+        ledgerIndex (int): the ledger index at which the output appeared
+        milestoneIndexSpent (int, optional): the milestone index spent where that output was spent
+        milestoneTimestampSpent (int, optional): the milestone timestamp spent where that output was spent
+        transactionIdSpent (HexStr, optional): the transaction ID that spent the output
     """
 
     blockId: HexStr
@@ -84,6 +136,10 @@ class OutputMetadata:
 @dataclass
 class OutputWithMetadata:
     """An output with its metadata.
+
+    Attributes:
+        metadata (OutputMetadata): metadata about the output
+        output (Output): the output itself
     """
 
     metadata: OutputMetadata

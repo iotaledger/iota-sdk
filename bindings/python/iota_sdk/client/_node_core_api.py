@@ -12,6 +12,8 @@ from dacite import from_dict
 
 
 class NodeCoreAPI():
+    """Node core API.
+    """
 
     def get_health(self, url: str):
         """ Get node health.

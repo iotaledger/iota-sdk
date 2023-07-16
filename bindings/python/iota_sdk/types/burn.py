@@ -12,16 +12,11 @@ from iota_sdk.types.common import HexStr
 class Burn:
     """A DTO for [`Burn`]
 
-    Parameters:
-    -----------
-    aliases: Optional[List[str]]
-        The aliases (hex encoded) to burn
-    nfts: Optional[List[str]]
-        The NFTs (hex encoded) to burn
-    foundries: Optional[List[str]]
-        The foundries (hex encoded) to burn
-    nativeTokens: Optional[List[NativeToken]]
-        The native tokens to burn
+    Attributes:
+        aliases (Optional[List[str]]): The aliases (hex encoded) to burn
+        nfts (Optional[List[str]]): The NFTs (hex encoded) to burn
+        foundries (Optional[List[str]]): The foundries (hex encoded) to burn
+        nativeTokens (Optional[List[NativeToken]]): The native tokens to burn
     """
 
     aliases: Optional[List[HexStr]] = None

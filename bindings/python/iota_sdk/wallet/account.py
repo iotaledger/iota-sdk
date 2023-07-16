@@ -30,7 +30,19 @@ class AccountMetadata:
 
 
 class Account:
+    """Represents an account.
+
+    Attributes:
+        account_id (str | int): The account id.
+        handle: The account handle.
+    """
     def __init__(self, meta: dict, handle):
+        """Initializes an account.
+
+        Args:
+            meta: The account data.
+            handle: The account handle.
+        """
         self.meta = meta
         self.handle = handle
 

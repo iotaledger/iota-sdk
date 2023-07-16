@@ -25,7 +25,7 @@ use crate::{
     types::block::{address::Hrp, output::RentStructure, protocol::ProtocolParameters},
 };
 
-/// An instance of the client using HORNET or Bee URI
+/// An IOTA node client.
 #[derive(Clone)]
 pub struct Client {
     pub(crate) inner: Arc<ClientInner>,

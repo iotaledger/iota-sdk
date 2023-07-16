@@ -11,30 +11,43 @@ from dacite import from_dict
 
 
 class LedgerNanoSecretManager(dict):
-    """Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator.
+    """Secret manager that uses a Ledger Nano hardware wallet or a Speculos simulator.
     """
 
     def __init__(self, is_simulator):
-        """Initialize a ledger nano secret manager.
+        """Initialize a Ledger Nano secret manager.
+
+        Args:
+            is_simulator (bool): whether this is a simulated Ledger Nano device
         """
 
         dict.__init__(self, ledgerNano=is_simulator)
 
 
 class MnemonicSecretManager(dict):
-    """Secret manager that uses a mnemonic in plain memory. It's not recommended for production use. Use LedgerNano or Stronghold instead.
+    """Secret manager that uses a mnemonic held in memory.
+    This is not recommended in production. Use LedgerNano or Stronghold instead.
     """
 
     def __init__(self, mnemonic):
         """Initialize a mnemonic secret manager.
+
+        Args:
+            mnemonic (str): mnemonic to use
         """
 
         dict.__init__(self, mnemonic=mnemonic)
 
 
 class SeedSecretManager(dict):
+    """Secret manager that uses a seed.
+    """
+
     def __init__(self, seed):
         """Initialize a seed secret manager.
+
+        Args:
+            seed (str): seed to use
         """
 
         dict.__init__(self, hexSeed=seed)
@@ -46,6 +59,10 @@ class StrongholdSecretManager(dict):
 
     def __init__(self, snapshot_path, password):
         """Initialize a stronghold secret manager.
+
+        Args:
+            snapshot_path (str): path to the Stronghold snapshot file.
+            password (str): password to unlock the Stronghold snapshot file.
         """
 
         dict.__init__(self, stronghold=StrongholdSecretManager.Inner(
@@ -57,13 +74,20 @@ class StrongholdSecretManager(dict):
 
 
 class SecretManagerError(Exception):
-    """secret manager error"""
+    """Secret manager error.
+    """
     pass
 
 
 class SecretManager():
-    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                 SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+        """Initialize a secret manager.
+
+        Args:
+            secret_manager (LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager): a supported secret manager
+            secret_manager_handle (SecretManager): a handle to the secret manager
+        """
+
         if secret_manager_handle is None:
             self.handle = create_secret_manager(dumps(secret_manager))
         else:
@@ -103,26 +127,17 @@ class SecretManager():
                                    ledger_nano_prompt: Optional[bool] = None) -> List[str]:
         """Generate ed25519 addresses.
 
-        Parameters
-        ----------
-        account_index : int
-            Account index.
-        start : int
-            Start index of generated addresses
-        end : int
-            End index of generated addresses
-        internal : bool
-            Internal addresses
-        coin_type : int
-            Coin type. The CoinType enum can be used
-        bech32_hrp : string
-            Bech32 human readable part.
-        ledger_nano_prompt : bool
-            Display the address on ledger devices.
+        Args:
+            account_index (int, optional): Account index
+            start (int, optional): start index of generated addresses
+            end (int, optional): end index of generated addresses
+            internal (bool, optional): internal addresses
+            coin_type (int, optional): the coin type enum can be used
+            bech32_hrp (string, optional): bech32 human readable part
+            ledger_nano_prompt (bool, optional): display the address on ledger devices
 
-        Returns
-        -------
-        Addresses as array of strings.
+        Returns:
+            addresses as array of strings
         """
         options = dict(locals())
         del options['self']
@@ -164,24 +179,16 @@ class SecretManager():
                                ledger_nano_prompt: Optional[bool] = None):
         """Generate EVM addresses.
 
-        Parameters
-        ----------
-        account_index : int
-            Account index.
-        start : int
-            Start index of generated addresses
-        end : int
-            End index of generated addresses
-        internal : bool
-            Internal addresses
-        coin_type : int
-            Coin type. The CoinType enum can be used
-        ledger_nano_prompt : bool
-            Display the address on ledger devices.
+        Args:
+            account_index (int, optional): account index
+            start (int, optional): start index of generated addresses
+            end (int, optional): end index of generated addresses
+            internal (bool, optional): internal addresses
+            coin_type (int, optional): the coin type enum can be used
+            ledger_nano_prompt (bool, optional): display the address on ledger devices
 
-        Returns
-        -------
-        Addresses as array of strings.
+        Returns:
+            Addresses as array of strings.
         """
         options = dict(locals())
         del options['self']
@@ -209,12 +216,15 @@ class SecretManager():
         })
 
     def get_ledger_nano_status(self):
-        """Returns the Ledger Status.
+        """Return the Ledger Status.
         """
         return self._call_method('getLedgerNanoStatus')
 
     def store_mnemonic(self, mnemonic: str):
         """Store a mnemonic in the Stronghold vault.
+
+        Args:
+            mnemonic (str): mnemonic to store
         """
         return self._call_method('storeMnemonic', {
             'mnemonic': mnemonic
@@ -222,6 +232,10 @@ class SecretManager():
 
     def sign_ed25519(self, message: HexStr, chain: Bip44) -> Ed25519Signature:
         """Signs a message with an Ed25519 private key.
+
+        Args:
+            message (HexStr): message to sign
+            chain (List[int]): chain to sign with
         """
         return from_dict(Ed25519Signature, self._call_method('signEd25519', {
             'message': message,
@@ -230,6 +244,10 @@ class SecretManager():
 
     def sign_secp256k1_ecdsa(self, message: HexStr, chain: Bip44):
         """Signs a message with an Secp256k1Ecdsa private key.
+
+        Args:
+            message (HexStr): message to sign
+            chain (List[int]): chain to sign with
         """
         return self._call_method('signSecp256k1Ecdsa', {
             'message': message,
@@ -238,6 +256,9 @@ class SecretManager():
 
     def sign_transaction(self, prepared_transaction_data):
         """Sign a transaction.
+
+        Args:
+            prepare_transaction_data: the prepared transaction data to sign
         """
         return self._call_method('signTransaction', {
             'preparedTransactionData': prepared_transaction_data
@@ -245,6 +266,10 @@ class SecretManager():
 
     def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):
         """Sign a transaction essence hash.
+
+        Args:
+            transaction_essence_hash (HexStr): transaction essence hash to sign
+            chain (List[int]): chain to sign with
         """
         return self._call_method('signatureUnlock', {
             'transactionEssenceHash': transaction_essence_hash,

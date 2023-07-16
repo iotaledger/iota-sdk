@@ -45,6 +45,8 @@ class GenerateAddressesOptions():
 
 
 class HighLevelAPI():
+    """High level API.
+    """
 
     def get_outputs(
             self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:

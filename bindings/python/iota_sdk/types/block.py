@@ -13,6 +13,12 @@ from enum import Enum
 @dataclass
 class Block:
     """Represent the object that nodes gossip around the network.
+
+    Attributes:
+        protocolVersion (int): The protocol version at which this block was issued.
+        parents (List[HexStr]): The parents of this block.
+        nonce (int): The nonce of this block.
+        payload (Payload): The optional payload of this block.
     """
 
     protocolVersion: int
@@ -33,12 +39,37 @@ class Block:
 
 
 class LedgerInclusionState(str, Enum):
+    """Represents whether a block is included in the ledger.
+
+    Attributes:
+        noTransaction ('noTransaction'): The block does not contain a transaction.
+        included ('included'): The block contains an included transaction.
+        conflicting ('conflicting'): The block contains a conflicting transaction.
+    """
     noTransaction = 'noTransaction'
     included = 'included'
     conflicting = 'conflicting'
 
 
 class ConflictReason(Enum):
+    """Represents the possible reasons for a conflicting transaction.
+
+    Attributes:
+        none (0): The transaction does not conflict with the ledger.
+        inputUTXOAlreadySpent (1): The input UTXO is already spent.
+        inputUTXOAlreadySpentInThisMilestone (2): The input UTXO is already spent in this milestone.
+        inputUTXONotFound (3): The input UTXO was not found.
+        inputOutputSumMismatch (4): The sum of input and output amounts is not equal.
+        invalidSignature (5): The signature is invalid.
+        invalidTimelock (6): The timelock is invalid.
+        invalidNativeTokens (7): The native tokens are invalid.
+        returnAmountMismatch (8): The return amount is invalid.
+        invalidInputUnlock (9): Not all inputs can be unlocked.
+        invalidInputsCommitment (10): The inputs commitment hash is invalid.
+        invalidSender (11): The sender is invalid.
+        invalidChainState (12): The chain state is invalid.
+        semanticValidationFailed (255): The semantic validation failed.
+    """
     none = 0,
     inputUTXOAlreadySpent = 1,
     inputUTXOAlreadySpentInThisMilestone = 2,
@@ -58,8 +89,18 @@ class ConflictReason(Enum):
 @dataclass
 class BlockMetadata:
     """Block Metadata.
-    """
 
+    Attributes:
+        blockId (HexStr): The id of the block.
+        parents (List[HexStr]): The parents of the block.
+        isSolid (bool): Whether the block is solid.
+        referencedByMilestoneIndex (int): The milestone index referencing the block.
+        milestoneIndex (int): The milestone index if the block contains a milestone payload.
+        ledgerInclusionState (LedgerInclusionState): The ledger inclusion state of the block.
+        conflictReason (ConflictReason): The optional conflict reason of the block.
+        shouldPromote (bool): Whether the block should be promoted.
+        shouldReattach (bool): Whether the block should be reattached.
+    """
     blockId: HexStr
     parents: List[HexStr]
     isSolid: bool

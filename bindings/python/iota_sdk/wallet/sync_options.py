@@ -2,14 +2,19 @@ from typing import List, Optional
 
 
 class AccountSyncOptions():
-    """Sync options for Ed25519 addresses from the account
+    """Sync options for Ed25519 addresses from the account.
+
+    Attributes:
+        basic_outputs (bool, optional): whether to sync basic outputs
+        nft_outputs (bool, optional): whether to sync NFT outputs
+        alias_outputs (bool, optional): whether to sync alias outputs
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
                  alias_outputs: Optional[bool] = None):
-        """Initialize AccountSyncOptions
+        """Initialize AccountSyncOptions.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
@@ -17,7 +22,13 @@ class AccountSyncOptions():
 
 
 class AliasSyncOptions():
-    """Sync options for addresses from alias outputs
+    """Sync options for addresses from alias outputs.
+
+    Attributes:
+        basic_outputs (bool, optional): whether to sync basic outputs
+        nft_outputs (bool, optional): whether to sync NFT outputs
+        alias_outputs (bool, optional): whether to sync alias outputs
+        foundry_outputs (bool, optional): whether to sync foundry outputs
     """
 
     def __init__(self,
@@ -25,7 +36,7 @@ class AliasSyncOptions():
                  nft_outputs: Optional[bool] = None,
                  alias_outputs: Optional[bool] = None,
                  foundry_outputs: Optional[bool] = None):
-        """Initialize AliasSyncOptions
+        """Initialize AliasSyncOptions.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
@@ -34,14 +45,19 @@ class AliasSyncOptions():
 
 
 class NftSyncOptions():
-    """Sync options for addresses from NFT outputs
+    """Sync options for addresses from NFT outputs.
+
+    Attributes:
+        basic_outputs (bool, optional): whether to sync basic outputs
+        nft_outputs (bool, optional): whether to sync NFT outputs
+        alias_outputs (bool, optional): whether to sync alias outputs
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
                  alias_outputs: Optional[bool] = None):
-        """Initialize NftSyncOptions
+        """Initialize NftSyncOptions.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
@@ -49,7 +65,32 @@ class NftSyncOptions():
 
 
 class SyncOptions():
-    """The synchronization options
+    """The synchronization options.
+
+    **Attributes**
+    --------------
+    addresses : List[str], optional)
+        list of addresses to sync
+    address_start_index : int, optional
+        starting index for addresses
+    address_start_index_internal : int, optional
+        starting index for internal addresses
+    force_syncing : bool, optional
+        whether to force syncing
+    sync_incoming_transactions : bool, optional
+        whether to sync incoming transactions
+    sync_pending_transactions : bool, optional
+        whether to sync pending transactions
+    account : AccountSyncOptions, optional
+        account sync options
+    alias : AliasSyncOptions, optional
+        alias sync options
+    nft : NftSyncOptions, optional
+        NFT sync options
+    sync_only_most_basic_outputs : bool, optional
+        whether to sync only most basic outputs
+    sync_native_token_foundries : bool, optional
+        whether to sync native token foundries
     """
 
     def __init__(self,
@@ -64,7 +105,7 @@ class SyncOptions():
                  nft: Optional[NftSyncOptions] = None,
                  sync_only_most_basic_outputs: Optional[bool] = None,
                  sync_native_token_foundries: Optional[bool] = None):
-        """Initialize SyncOptions
+        """Initialize SyncOptions.
         """
         self.addresses = addresses
         self.addressStartIndex = address_start_index

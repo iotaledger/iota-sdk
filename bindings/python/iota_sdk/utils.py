@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 
 class Utils():
+    """Collection of static utility methods.
+    """
 
     @staticmethod
     def bech32_to_hex(bech32: str) -> HexStr:
