@@ -123,7 +123,7 @@ impl Address {
     pub fn unlock(
         &self,
         unlock: &Unlock,
-        inputs: &[(OutputId, &Output)],
+        inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         match (self, unlock) {

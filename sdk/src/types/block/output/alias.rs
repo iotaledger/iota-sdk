@@ -464,7 +464,7 @@ impl AliasOutput {
         &self,
         output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(OutputId, &Output)],
+        inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         let alias_id = if self.alias_id().is_null() {
