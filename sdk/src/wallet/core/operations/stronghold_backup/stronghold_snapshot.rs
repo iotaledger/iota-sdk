@@ -92,7 +92,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
         .await?
         .map(|v| {
             v.into_iter()
-                .map(|dto| AccountDetails::try_from_dto_unverified(dto))
+                .map(AccountDetails::try_from_dto_unverified)
                 .collect::<Result<Vec<_>, _>>()
         })
         .transpose()?;
