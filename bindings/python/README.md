@@ -78,9 +78,9 @@ print(f'{node_info}')
 ## Wallet Usage
 
 The following example will create a
-new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/) [Account](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/account/)
+new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/account/)
 that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[StrongholdSecretManager](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
+[`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
 to safely store a mnemonic, and then print the account's information.
 
 ```python

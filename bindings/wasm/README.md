@@ -146,9 +146,9 @@ run().then(() => process.exit());
 ## Wallet Usage
 
 The following example will create a
-new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/) [Account](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Account/)
+new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Account/)
 that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[StrongholdSecretManager](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
+[`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
 by calling
 the [`Wallet.createAccount(data)`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/#createaccount)
 function.

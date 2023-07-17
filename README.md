@@ -145,9 +145,9 @@ async fn main() -> Result<()> {
 ## Wallet Usage
 
 The following example will create a
-new [`Wallet`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/index.html) [Account](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/account/struct.Account.html)
+new [`Wallet`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/index.html) [`Account`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/account/struct.Account.html)
 that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[StrongholdSecretManager](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
+[`StrongholdSecretManager`](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
 to store a mnemonic.
 
 ```rust
