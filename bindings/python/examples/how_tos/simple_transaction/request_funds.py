@@ -12,7 +12,7 @@ wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
-address = account.addresses()[0]['address']
+address = account.addresses()[0].address
 print(address)
 
 response = wallet.get_client().request_funds_from_faucet(FAUCET_URL, address=address)
