@@ -9,7 +9,7 @@ use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManager},
         Error as ClientError,
     },
     types::block::address::ToBech32Ext,
@@ -111,6 +111,23 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     let wallet = wallet_builder.finish().await?;
 
     let address = wallet.generate_ed25519_address(0, 0, None).await?;
+
+    assert_eq!(
+        address.to_bech32_unchecked("smr"),
+        // Address generated with bip32 path: [44, 4218, 0, 0, 0]
+        "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
+    );
+
+    let address = wallet
+        .generate_ed25519_address(
+            0,
+            0,
+            Some(GenerateAddressOptions {
+                ledger_nano_prompt: true,
+                ..Default::default()
+            }),
+        )
+        .await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
