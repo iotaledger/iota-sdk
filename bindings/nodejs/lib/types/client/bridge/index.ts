@@ -65,7 +65,9 @@ import type {
     __BuildNftOutputMethod__,
     __ClearListenersMethod__,
     __SignatureUnlockMethod__,
+    __MinimumRequiredStorageDepositMethod__,
     __RequestFundsFromFaucetMethod__,
+    __CallPluginRouteMethod__,
 } from './client';
 
 export type __ClientMethods__ =
@@ -132,4 +134,6 @@ export type __ClientMethods__ =
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __ClearListenersMethod__
-    | __RequestFundsFromFaucetMethod__;
+    | __MinimumRequiredStorageDepositMethod__
+    | __RequestFundsFromFaucetMethod__
+    | __CallPluginRouteMethod__;

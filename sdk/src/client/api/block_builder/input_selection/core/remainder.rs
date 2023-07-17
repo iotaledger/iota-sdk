@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip44::Bip44;
 
 use super::{
     requirement::{
@@ -21,7 +21,7 @@ use crate::{
 
 impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
-    fn get_remainder_address(&self) -> Option<(Address, Option<Chain>)> {
+    fn get_remainder_address(&self) -> Option<(Address, Option<Bip44>)> {
         if self.remainder_address.is_some() {
             return self.remainder_address.map(|address| (address, None));
         }
@@ -41,7 +41,7 @@ impl InputSelection {
                 .0;
 
             if required_address.is_ed25519() {
-                return Some((required_address, input.chain.clone()));
+                return Some((required_address, input.chain));
             }
         }
 

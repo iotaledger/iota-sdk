@@ -33,8 +33,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
-    let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
@@ -67,7 +66,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
         .finish_output(account.client().get_token_supply().await?)?];
 
-    let transaction = account.send(outputs, None).await?;
+    let transaction = account.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

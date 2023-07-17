@@ -11,10 +11,7 @@
 //! cargo run --release --all-features --example simple_transaction
 //! ```
 
-use iota_sdk::{
-    wallet::{Result, SendAmountParams},
-    Wallet,
-};
+use iota_sdk::{wallet::Result, Wallet};
 
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
@@ -41,8 +38,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let transaction = account.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
 
     // Wait for transaction to get included
     let block_id = account

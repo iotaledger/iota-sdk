@@ -33,7 +33,7 @@ pub struct CreateNativeTokenParams {
     /// Maximum supply
     pub maximum_supply: U256,
     /// Foundry metadata
-    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
@@ -63,8 +63,7 @@ impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
 }
 
 /// The result of preparing a transaction to create a native token
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,
@@ -91,10 +90,10 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to create a new foundry output with minted native tokens.
-    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
-    /// RemainderValueStrategy or custom inputs.
-    /// Address needs to be Bech32 encoded
+    /// Creates a new foundry output with minted native tokens.
+    ///
+    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally, the options may define the
+    /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
     ///     alias_id: None,
@@ -125,8 +124,8 @@ where
             })
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.create_native_token()](crate::account::Account.create_native_token)
+    /// Prepares the transaction for
+    /// [Account::create_native_token()](crate::wallet::Account::create_native_token).
     pub async fn prepare_create_native_token(
         &self,
         params: CreateNativeTokenParams,
@@ -164,7 +163,7 @@ where
                         alias_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
-                            U256::from(0u8),
+                            0,
                             params.maximum_supply,
                         )?),
                     )

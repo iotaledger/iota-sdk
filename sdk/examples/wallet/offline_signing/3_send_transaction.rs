@@ -11,6 +11,7 @@
 use iota_sdk::{
     client::{
         api::{SignedTransactionData, SignedTransactionDataDto},
+        secret::SecretManager,
         Client,
     },
     types::block::payload::transaction::TransactionId,
@@ -23,9 +24,13 @@ const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/ex
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)
+        .with_secret_manager(SecretManager::Placeholder)
         .finish()
         .await?;
 

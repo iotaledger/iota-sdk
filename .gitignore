@@ -11,16 +11,10 @@
 
 # Storages/databases
 /storage
-alice-database
 test-storage
 wallet/test-storage
-**/walletdb
-offline_walletdb
-online_walletdb
-/pingdb
-/pongdb
+**/*walletdb
 backup
-example-walletdb
 
 # JSON files
 address.json

@@ -37,8 +37,6 @@ pub const SHIMMER_BECH32_HRP: Hrp = Hrp::from_str_unchecked("smr");
 /// Bech32 hrp for the Shimmer testnet <https://github.com/satoshilabs/slips/blob/master/slip-0173.md>
 pub const SHIMMER_TESTNET_BECH32_HRP: Hrp = Hrp::from_str_unchecked("rms");
 
-/// BIP-0044 defines a logical hierarchy for deterministic wallets
-pub const HD_WALLET_TYPE: u32 = 44;
 /// IOTA coin type <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>
 pub const IOTA_COIN_TYPE: u32 = 4218;
 /// Shimmer coin type <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>

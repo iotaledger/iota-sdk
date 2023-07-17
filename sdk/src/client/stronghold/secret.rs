@@ -3,19 +3,27 @@
 
 //! The [SecretManage] implementation for [StrongholdAdapter].
 
+use core::borrow::Borrow;
 use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    signatures::secp256k1_ecdsa::{self, EvmAddress},
+    keys::{
+        bip39::{Mnemonic, MnemonicRef},
+        bip44::Bip44,
+        slip10::Segment,
+    },
+    signatures::{
+        ed25519,
+        secp256k1_ecdsa::{self, EvmAddress},
+    },
 };
 use instant::Duration;
 use iota_stronghold::{
-    procedures::{self, Chain, Curve, KeyType, Slip10DeriveInput},
+    procedures::{self, Curve, KeyType, Slip10DeriveInput},
     Location,
 };
-use zeroize::Zeroize;
 
 use super::{
     common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
@@ -24,7 +32,6 @@ use super::{
 use crate::{
     client::{
         api::PreparedTransactionData,
-        constants::HD_WALLET_TYPE,
         secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
         stronghold::Error,
     },
@@ -59,14 +66,21 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let bip_path = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
-            let chain = Chain::from_u32_hardened(bip_path);
+            let chain = Bip44::new()
+                .with_coin_type(coin_type)
+                .with_account(account_index)
+                .with_change(internal as _)
+                .with_address_index(address_index);
 
             let derive_location = Location::generic(
                 SECRET_VAULT_PATH,
                 [
                     DERIVE_OUTPUT_RECORD_PATH,
-                    &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                    &chain
+                        .to_chain::<ed25519::SecretKey>()
+                        .into_iter()
+                        .flat_map(|seg| seg.ser32())
+                        .collect::<Vec<u8>>(),
                 ]
                 .concat(),
             );
@@ -125,14 +139,21 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
-                .join(Chain::from_u32([internal as u32, address_index]));
+            let chain = Bip44::new()
+                .with_coin_type(coin_type)
+                .with_account(account_index)
+                .with_change(internal as _)
+                .with_address_index(address_index);
 
             let derive_location = Location::generic(
                 SECRET_VAULT_PATH,
                 [
                     DERIVE_OUTPUT_RECORD_PATH,
-                    &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                    &chain
+                        .to_chain::<secp256k1_ecdsa::SecretKey>()
+                        .into_iter()
+                        .flat_map(|seg| seg.ser32())
+                        .collect::<Vec<u8>>(),
                 ]
                 .concat(),
             );
@@ -155,13 +176,13 @@ impl SecretManage for StrongholdAdapter {
                 .map_err(Error::from)?;
 
             // Collect it.
-            addresses.push(public_key.to_evm_address());
+            addresses.push(public_key.evm_address());
         }
 
         Ok(addresses)
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -178,13 +199,17 @@ impl SecretManage for StrongholdAdapter {
             SECRET_VAULT_PATH,
             [
                 DERIVE_OUTPUT_RECORD_PATH,
-                &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                &chain
+                    .to_chain::<ed25519::SecretKey>()
+                    .into_iter()
+                    .flat_map(|seg| seg.ser32())
+                    .collect::<Vec<u8>>(),
             ]
             .concat(),
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(Curve::Ed25519, chain.clone(), seed_location, derive_location.clone())
+        self.slip10_derive(Curve::Ed25519, chain, seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -207,8 +232,8 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -225,13 +250,17 @@ impl SecretManage for StrongholdAdapter {
             SECRET_VAULT_PATH,
             [
                 DERIVE_OUTPUT_RECORD_PATH,
-                &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                &chain
+                    .to_chain::<secp256k1_ecdsa::SecretKey>()
+                    .into_iter()
+                    .flat_map(|seg| seg.ser32())
+                    .collect::<Vec<u8>>(),
             ]
             .concat(),
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(Curve::Secp256k1, chain.clone(), seed_location, derive_location.clone())
+        self.slip10_derive(Curve::Secp256k1, chain, seed_location, derive_location.clone())
             .await?;
 
         // Get the public key from the derived SLIP-10 private key in the vault.
@@ -296,14 +325,19 @@ impl SecretManagerConfig for StrongholdAdapter {
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
     /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
-    async fn bip39_recover(&self, mnemonic: String, passphrase: Option<String>, output: Location) -> Result<(), Error> {
+    async fn bip39_recover(
+        &self,
+        mnemonic: Mnemonic,
+        passphrase: Option<String>,
+        output: Location,
+    ) -> Result<(), Error> {
         self.stronghold
             .lock()
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .execute_procedure(procedures::BIP39Recover {
                 mnemonic,
-                passphrase,
+                passphrase: passphrase.map(Into::into).unwrap_or_default(),
                 output,
             })?;
 
@@ -314,10 +348,18 @@ impl StrongholdAdapter {
     async fn slip10_derive(
         &self,
         curve: Curve,
-        chain: Chain,
+        chain: Bip44,
         input: Slip10DeriveInput,
         output: Location,
     ) -> Result<(), Error> {
+        let chain = match curve {
+            Curve::Ed25519 => chain
+                .to_chain::<ed25519::SecretKey>()
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            Curve::Secp256k1 => chain.to_chain::<secp256k1_ecdsa::SecretKey>().to_vec(),
+        };
         if let Err(err) = self
             .stronghold
             .lock()
@@ -351,31 +393,33 @@ impl StrongholdAdapter {
 
     /// Execute [Procedure::PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10
     /// private key located in `private_key`.
-    async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32], Error> {
-        Ok(self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::PublicKey {
-                ty: KeyType::Ed25519,
-                private_key,
-            })?
-            .try_into()
-            .unwrap())
+    async fn ed25519_public_key(&self, private_key: Location) -> Result<ed25519::PublicKey, Error> {
+        Ok(ed25519::PublicKey::try_from_bytes(
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .execute_procedure(procedures::PublicKey {
+                    ty: KeyType::Ed25519,
+                    private_key,
+                })?
+                .try_into()
+                .unwrap(),
+        )?)
     }
 
     /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
-    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64], Error> {
-        Ok(self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::Ed25519Sign {
-                private_key,
-                msg: msg.to_vec(),
-            })?)
+    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<ed25519::Signature, Error> {
+        Ok(ed25519::Signature::from_bytes(
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .execute_procedure(procedures::Ed25519Sign {
+                    private_key,
+                    msg: msg.to_vec(),
+                })?,
+        ))
     }
 
     /// Execute [Procedure::Secp256k1EcdsaSign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold
@@ -384,8 +428,8 @@ impl StrongholdAdapter {
         &self,
         private_key: Location,
         msg: &[u8],
-    ) -> Result<secp256k1_ecdsa::Signature, Error> {
-        Ok(secp256k1_ecdsa::Signature::try_from_bytes(
+    ) -> Result<secp256k1_ecdsa::RecoverableSignature, Error> {
+        Ok(secp256k1_ecdsa::RecoverableSignature::try_from_bytes(
             &self
                 .stronghold
                 .lock()
@@ -394,6 +438,7 @@ impl StrongholdAdapter {
                 .execute_procedure(procedures::Secp256k1EcdsaSign {
                     private_key,
                     msg: msg.to_vec(),
+                    flavor: procedures::Secp256k1EcdsaFlavor::Keccak256,
                 })?,
         )?)
     }
@@ -414,7 +459,7 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&self, mut mnemonic: String) -> Result<(), Error> {
+    pub async fn store_mnemonic(&self, mnemonic: impl Borrow<MnemonicRef> + Send) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::KeyCleared);
@@ -424,8 +469,7 @@ impl StrongholdAdapter {
         let output = Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH);
 
         // Trim the mnemonic, in case it hasn't been, as otherwise the restored seed would be wrong.
-        let trimmed_mnemonic = mnemonic.trim().to_string();
-        mnemonic.zeroize();
+        let trimmed_mnemonic = Mnemonic::from(mnemonic.borrow().trim().to_owned());
 
         // Check if the mnemonic is valid.
         crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
@@ -467,8 +511,8 @@ mod tests {
         let stronghold_path = "test_ed25519_address_generation.stronghold";
         // Remove potential old stronghold file
         std::fs::remove_file(stronghold_path).ok();
-        let mnemonic = String::from(
-            "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
+        let mnemonic = Mnemonic::from(
+            "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned(),
         );
         let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap".to_owned())
@@ -499,8 +543,8 @@ mod tests {
         let stronghold_path = "test_evm_address_generation.stronghold";
         // Remove potential old stronghold file
         std::fs::remove_file(stronghold_path).ok();
-        let mnemonic = String::from(
-            "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
+        let mnemonic = Mnemonic::from(
+            "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river".to_owned(),
         );
         let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap".to_owned())
@@ -531,8 +575,8 @@ mod tests {
         let stronghold_path = "test_key_cleared.stronghold";
         // Remove potential old stronghold file
         std::fs::remove_file(stronghold_path).ok();
-        let mnemonic = String::from(
-            "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
+        let mnemonic = Mnemonic::from(
+            "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned(),
         );
         let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap".to_owned())

@@ -1,4 +1,4 @@
-from iota_sdk import Wallet
+from iota_sdk import Wallet, SendParams
 from dotenv import load_dotenv
 import os
 
@@ -6,7 +6,7 @@ load_dotenv()
 
 # This example sends a transaction.
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -18,10 +18,10 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-outputs = [{
-    "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-    "amount": "1000000",
-}]
+params = [SendParams(
+    address="rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+    amount=1000000,
+)]
 
-transaction = account.send_amount(outputs)
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+transaction = account.send(params)
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

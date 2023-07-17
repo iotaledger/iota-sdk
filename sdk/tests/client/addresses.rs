@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip39::Mnemonic;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
@@ -199,7 +200,7 @@ async fn address_generation() {
                 .unwrap();
 
             stronghold_secret_manager
-                .store_mnemonic(address.mnemonic.clone())
+                .store_mnemonic(Mnemonic::from(address.mnemonic.as_str()))
                 .await
                 .unwrap();
 

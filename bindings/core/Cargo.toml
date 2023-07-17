@@ -9,21 +9,21 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-iota-sdk = { path = "../../sdk", default-features = false, features = [ "wallet", "tls", "message_interface" ] }
+iota-sdk = { path = "../../sdk", default-features = false, features = [ "wallet", "tls" ] }
 
-backtrace = { version = "0.3.67", default-features = false }
+backtrace = { version = "0.3.68", default-features = false, features = [ "std" ] }
 derivative = { version = "2.2.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 futures =  { version = "0.3.28", default-features = false }
-iota-crypto = { version = "0.20.1", default-features = false, features = [ "slip10" ] }
-log = { version = "0.4.18", default-features = false }
+iota-crypto = { version = "0.22.2", default-features = false, features = [ "slip10" ] }
+log = { version = "0.4.19", default-features = false }
 packable = { version = "0.8.1", default-features = false }
 prefix-hex = { version = "0.7.0", default-features = false }
 primitive-types = { version = "0.12.1", default-features = false }
-serde = { version = "1.0.163", default-features = false }
-serde_json = { version = "1.0.96", default-features = false }
-thiserror = { version = "1.0.40", default-features = false }
-tokio = { version = "1.28.2", default-features = false }
+serde = { version = "1.0.171", default-features = false }
+serde_json = { version = "1.0.102", default-features = false }
+thiserror = { version = "1.0.43", default-features = false }
+tokio = { version = "1.29.1", default-features = false }
 zeroize = { version = "1.6.0", default-features = false }
 
 [features]

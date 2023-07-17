@@ -32,8 +32,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
-    let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
@@ -78,7 +77,7 @@ async fn main() -> Result<()> {
             SEND_AMOUNT,
             outputs_per_transaction.len()
         );
-        let transaction = account.send(outputs_per_transaction, None).await?;
+        let transaction = account.send_outputs(outputs_per_transaction, None).await?;
         println!(
             "Transaction sent: {}/transaction/{}",
             std::env::var("EXPLORER_URL").unwrap(),

@@ -3,7 +3,6 @@
 
 import {
     CoinType,
-    HD_WALLET_TYPE,
     initLogger,
     SecretManager,
     utf8ToHex,
@@ -36,8 +35,8 @@ async function run() {
                 '.env stronghold password is undefined, see .env.example',
             );
         }
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
+        if (!process.env.MNEMONIC) {
+            throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
         const secretManager = new SecretManager({
             stronghold: {
@@ -49,21 +48,18 @@ async function run() {
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-        await secretManager.storeMnemonic(
-            process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
-        );
+        await secretManager.storeMnemonic(process.env.MNEMONIC);
 
-        const bip32Chain = [
-            HD_WALLET_TYPE,
-            CoinType.Shimmer,
-            ACCOUNT_INDEX,
-            INTERNAL_ADDRESS ? 1 : 0,
-            ADDRESS_INDEX,
-        ];
+        const bip44Chain = {
+            coinType: CoinType.Shimmer,
+            account: ACCOUNT_INDEX,
+            change: INTERNAL_ADDRESS ? 1 : 0,
+            addressIndex: ADDRESS_INDEX,
+        };
         const message = utf8ToHex(JSON.stringify(FOUNDRY_METADATA));
         const ed25519Signature = await secretManager.signEd25519(
             message,
-            bip32Chain,
+            bip44Chain,
         );
         console.log(
             `Public key: ${ed25519Signature.publicKey}\nSignature: ${ed25519Signature.signature}`,

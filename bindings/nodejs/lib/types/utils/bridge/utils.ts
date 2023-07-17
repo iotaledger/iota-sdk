@@ -5,7 +5,12 @@ import {
     TransactionEssence,
     MilestonePayload,
     TransactionPayload,
+    TransactionId,
+    TokenSchemeType,
+    Output,
+    IRent,
 } from '../../';
+import { AliasId } from '../../block/id';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -25,6 +30,22 @@ export interface __ComputeAliasIdMethod__ {
     };
 }
 
+export interface __ComputeFoundryIdMethod__ {
+    name: 'computeFoundryId';
+    data: {
+        aliasId: AliasId;
+        serialNumber: number;
+        tokenSchemeKind: number;
+    };
+}
+
+export interface __ComputeInputsCommitmentMethod__ {
+    name: 'computeInputsCommitment';
+    data: {
+        inputs: Output[];
+    };
+}
+
 export interface __ComputeNftIdMethod__ {
     name: 'computeNftId';
     data: {
@@ -32,12 +53,28 @@ export interface __ComputeNftIdMethod__ {
     };
 }
 
-export interface __ComputeFoundryIdMethod__ {
-    name: 'computeFoundryId';
+export interface __ComputeOutputIdMethod__ {
+    name: 'computeOutputId';
     data: {
-        aliasAddress: string;
+        id: TransactionId;
+        index: number;
+    };
+}
+
+export interface __ComputeStorageDepositMethod__ {
+    name: 'computeStorageDeposit';
+    data: {
+        output: Output;
+        rentStructure: IRent;
+    };
+}
+
+export interface __ComputeTokenIdMethod__ {
+    name: 'computeTokenId';
+    data: {
+        aliasId: AliasId;
         serialNumber: number;
-        tokenSchemeKind: number;
+        tokenSchemeType: TokenSchemeType;
     };
 }
 

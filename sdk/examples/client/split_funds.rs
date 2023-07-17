@@ -13,8 +13,8 @@ use iota_sdk::client::{api::GetAddressesOptions, request_funds_from_faucet, secr
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
-    // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
-    // balance.
+    // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic
+    // `MNEMONIC` must contain non-zero balance.
     dotenvy::dotenv().ok();
 
     // Create a node client.
@@ -23,8 +23,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
@@ -36,7 +35,7 @@ async fn main() -> Result<()> {
     // wait so the faucet can send the funds
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let mut block_builder = client.block().with_secret_manager(&secret_manager);
+    let mut block_builder = client.build_block().with_secret_manager(&secret_manager);
     // Insert the output address and amount to spent. The amount cannot be zero.
     for _ in 0..100 {
         block_builder = block_builder.with_output(address, 1_000_000).await?;

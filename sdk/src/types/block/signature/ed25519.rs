@@ -7,16 +7,21 @@ use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     signatures::ed25519::{PublicKey, Signature},
 };
+use packable::{
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
+    unpacker::Unpacker,
+    Packable,
+};
 
 use crate::types::block::{address::Ed25519Address, Error};
 
 /// An Ed25519 signature.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ed25519Signature {
-    public_key: [u8; Self::PUBLIC_KEY_LENGTH],
-    #[cfg_attr(feature = "serde", serde(with = "serde_big_array::BigArray"))]
-    signature: [u8; Self::SIGNATURE_LENGTH],
+    public_key: PublicKey,
+    signature: Signature,
 }
 
 impl Ed25519Signature {
@@ -28,22 +33,33 @@ impl Ed25519Signature {
     pub const SIGNATURE_LENGTH: usize = Signature::LENGTH;
 
     /// Creates a new [`Ed25519Signature`].
-    pub fn new(public_key: [u8; Self::PUBLIC_KEY_LENGTH], signature: [u8; Self::SIGNATURE_LENGTH]) -> Self {
+    pub fn new(public_key: PublicKey, signature: Signature) -> Self {
         Self { public_key, signature }
     }
 
+    /// Creates a new [`Ed25519Signature`] from bytes.
+    pub fn try_from_bytes(
+        public_key: [u8; Self::PUBLIC_KEY_LENGTH],
+        signature: [u8; Self::SIGNATURE_LENGTH],
+    ) -> Result<Self, Error> {
+        Ok(Self::new(
+            PublicKey::try_from_bytes(public_key)?,
+            Signature::from_bytes(signature),
+        ))
+    }
+
     /// Returns the public key of an [`Ed25519Signature`].
-    pub fn public_key(&self) -> &[u8; Self::PUBLIC_KEY_LENGTH] {
+    pub fn public_key(&self) -> &PublicKey {
         &self.public_key
     }
 
     /// Return the actual signature of an [`Ed25519Signature`].
-    pub fn signature(&self) -> &[u8; Self::SIGNATURE_LENGTH] {
+    pub fn signature(&self) -> &Signature {
         &self.signature
     }
 
-    pub fn verify(&self, message: &[u8]) -> Result<bool, Error> {
-        Ok(PublicKey::try_from_bytes(self.public_key)?.verify(&Signature::from_bytes(self.signature), message))
+    pub fn verify(&self, message: &[u8]) -> bool {
+        self.public_key.verify(&self.signature, message)
     }
 
     /// Verifies the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
@@ -57,7 +73,7 @@ impl Ed25519Signature {
             });
         }
 
-        if !PublicKey::try_from_bytes(self.public_key)?.verify(&Signature::from_bytes(self.signature), message) {
+        if !self.verify(message) {
             return Err(Error::InvalidSignature);
         }
 
@@ -77,9 +93,38 @@ impl fmt::Debug for Ed25519Signature {
         }
 
         f.debug_struct("Ed25519Signature")
-            .field("public_key", &UnquotedStr(&prefix_hex::encode(self.public_key)))
-            .field("signature", &UnquotedStr(&prefix_hex::encode(self.signature)))
+            .field(
+                "public_key",
+                &UnquotedStr(&prefix_hex::encode(self.public_key.as_slice())),
+            )
+            .field(
+                "signature",
+                &UnquotedStr(&prefix_hex::encode(self.signature.to_bytes())),
+            )
             .finish()
+    }
+}
+
+impl Packable for Ed25519Signature {
+    type UnpackError = Error;
+    type UnpackVisitor = ();
+
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.public_key.to_bytes().pack(packer)?;
+        self.signature.to_bytes().pack(packer)?;
+
+        Ok(())
+    }
+
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        Self::try_from_bytes(public_key, signature)
+            .map_err(UnpackError::Packable)
+            .coerce()
     }
 }
 
@@ -106,8 +151,8 @@ pub mod dto {
         fn from(value: &Ed25519Signature) -> Self {
             Self {
                 kind: Ed25519Signature::KIND,
-                public_key: prefix_hex::encode(value.public_key),
-                signature: prefix_hex::encode(value.signature),
+                public_key: prefix_hex::encode(value.public_key.as_slice()),
+                signature: prefix_hex::encode(value.signature.to_bytes()),
             }
         }
     }
@@ -116,10 +161,10 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::try_from_bytes(
                 prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
-            ))
+            )
         }
     }
 }

@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! A general purpose IOTA client library for interaction with the IOTA network (Tangle)
+//! A general purpose IOTA client for interaction with the IOTA network (Tangle)
 //!
 //! High-level functions are accessible via the [`Client`][client::Client].
 //!
@@ -37,9 +37,8 @@ macro_rules! lazy_static {
 
 pub mod api;
 pub mod builder;
-#[allow(clippy::module_inception)]
-pub mod client;
 pub mod constants;
+pub mod core;
 pub mod error;
 pub mod node_api;
 pub mod node_manager;
@@ -54,7 +53,7 @@ pub mod utils;
 pub use self::node_api::mqtt;
 pub use self::{
     builder::{ClientBuilder, NetworkInfo, NetworkInfoDto},
-    client::*,
+    core::*,
     error::*,
     node_api::core::routes::NodeInfoWrapper,
     utils::*,

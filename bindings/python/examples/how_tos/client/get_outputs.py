@@ -23,5 +23,5 @@ print('First output of query:')
 print(f'ID: {output_ids_response.items[0]}')
 
 # Get the outputs by their id
-outputs = client.get_outputs(output_ids_response.items)
-print(f'{json.dumps(outputs[0], indent=4)}')
+outputs_with_metadata = client.get_outputs(output_ids_response.items)
+print(f'{json.dumps(outputs_with_metadata[0].as_dict(), indent=4)}')

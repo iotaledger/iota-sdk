@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will send an amount below the minimum storage deposit
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -18,15 +18,15 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-outputs = [{
+params = [{
     "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     "amount": "1",
 }]
 
-transaction = account.send_amount(outputs, {"allowMicroAmount": True})
-print(f'Transaction sent: {transaction["transactionId"]}')
+transaction = account.send(params, {"allowMicroAmount": True})
+print(f'Transaction sent: {transaction.transactionId}')
 
-block_id = account.retry_transaction_until_included(transaction["transactionId"])
+block_id = account.retry_transaction_until_included(transaction.transactionId)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

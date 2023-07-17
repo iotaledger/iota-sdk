@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
-    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
 };
 
 // The account alias used in this example.
@@ -38,8 +38,7 @@ async fn main() -> Result<()> {
 
     // Restore wallet from a mnemonic phrase.
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
@@ -72,7 +71,7 @@ async fn main() -> Result<()> {
         println!("Creating unspent outputs...");
 
         let transaction = account
-            .send_amount(vec![SendAmountParams::new(recv_address, SEND_AMOUNT)?; 127], None)
+            .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address)?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
@@ -93,8 +92,10 @@ async fn main() -> Result<()> {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = tokio::time::Instant::now();
-                let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT).map_err(|err| (n, err))?];
-                let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
+                let transaction = account_clone
+                    .send(SEND_AMOUNT, recv_address, None)
+                    .await
+                    .map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();
 
                 println!(

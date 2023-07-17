@@ -31,8 +31,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -66,19 +65,13 @@ async fn main() -> Result<()> {
         // tokens
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(
-                TokenId::new(token_id),
-                primitive_types::U256::from(10),
-            )?)
+            .add_native_token(NativeToken::new(TokenId::new(token_id), 10)?)
             .finish_output(token_supply)?,
         // With StorageDepositReturnUnlockCondition, the receiver can consume the output to get the native tokens, but
         // he needs to send the amount back
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(
-                TokenId::new(token_id),
-                primitive_types::U256::from(10),
-            )?)
+            .add_native_token(NativeToken::new(TokenId::new(token_id), 10)?)
             // Return the full amount.
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 sender_address,
@@ -92,7 +85,7 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()

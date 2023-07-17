@@ -99,7 +99,7 @@ pub fn create_wallet(mut cx: FunctionContext) -> JsResult<JsBox<WalletMethodHand
 pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let method = cx.argument::<JsString>(0)?;
     let method = method.value(&mut cx);
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(1)?.0);
+    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(1)?.0);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
     let (sender, receiver) = std::sync::mpsc::channel();
@@ -151,7 +151,7 @@ pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(2)?.0);
+    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(2)?.0);
 
     crate::RUNTIME.spawn(async move {
         if let Some(method_handler) = &*method_handler.read().await {
@@ -171,7 +171,7 @@ pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 pub fn destroy_wallet(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
     let channel = cx.channel();
     let (deferred, promise) = cx.promise();
     crate::RUNTIME.spawn(async move {
@@ -182,7 +182,7 @@ pub fn destroy_wallet(mut cx: FunctionContext) -> JsResult<JsPromise> {
 }
 
 pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
     let channel = cx.channel();
 
     let (deferred, promise) = cx.promise();
@@ -209,7 +209,7 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
 }
 
 pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
     let channel = cx.channel();
 
     let (deferred, promise) = cx.promise();

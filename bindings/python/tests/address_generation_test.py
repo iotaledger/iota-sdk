@@ -20,9 +20,7 @@ def test_address_generation_iota():
     wallet = Wallet(db_path,
                     client_options, CoinType.IOTA, secret_manager)
 
-    wallet.create_account('Alice')
-
-    account = wallet.get_account('Alice')
+    account = wallet.create_account('Alice')
 
     addresses = account.addresses()
 

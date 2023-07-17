@@ -4,6 +4,7 @@
 from iota_sdk.types.block import Block, BlockMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
+from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import MilestonePayload
 from typing import List
@@ -76,19 +77,19 @@ class NodeCoreAPI():
             'blockBytes': block_bytes
         })
 
-    def get_output(self, output_id: OutputId):
+    def get_output(self, output_id: OutputId) -> OutputWithMetadata:
         """Get output.
         """
-        return self._call_method('getOutput', {
+        return from_dict(OutputWithMetadata, self._call_method('getOutput', {
             'outputId': output_id
-        })
+        }))
 
-    def get_output_metadata(self, output_id: OutputId):
+    def get_output_metadata(self, output_id: OutputId) -> OutputMetadata:
         """Get output metadata.
         """
-        return self._call_method('getOutputMetadata', {
+        return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
             'outputId': output_id
-        })
+        }))
 
     def get_milestone_by_id(self, milestone_id: HexStr) -> MilestonePayload:
         """Get the milestone by the given milestone id.
@@ -164,3 +165,16 @@ class NodeCoreAPI():
         return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         }))
+
+    def call_plugin_route(self, base_plugin_path: str, method: str, endpoint: str, query_params: [str] = None, request: str = None):
+        """Extension method which provides request methods for plugins.
+        """
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'endpoint': endpoint,
+            'queryParams': query_params,
+            'request': request,
+        })

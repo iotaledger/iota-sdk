@@ -47,6 +47,7 @@ export type NftQueryParameter =
     | ExpiresBefore
     | ExpiresAfter
     | ExpirationReturnAddress
+    | Issuer
     | Sender
     | Tag
     | CommonQueryParameters;

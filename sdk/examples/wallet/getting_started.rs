@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     // INFO: It is best practice to back up the mnemonic somewhere secure
     let mnemonic = wallet.generate_mnemonic()?;
     wallet.store_mnemonic(mnemonic.clone()).await?;
-    println!("Created a wallet from the mnemonic:\n'{mnemonic}'");
+    println!("Created a wallet from the mnemonic:\n'{}'", mnemonic.as_ref());
 
     // Create an account
     let alias = "Alice";

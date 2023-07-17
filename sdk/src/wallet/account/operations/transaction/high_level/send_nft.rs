@@ -43,20 +43,21 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to send native tokens in basic outputs with a
-    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
-    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so the
-    /// storage deposit gets back to the sender and also that the sender gets access to the output again after a
-    /// defined time (default 1 day), Calls [Account.send()](crate::wallet::account::Account.send)
-    /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
-    /// required nft inputs. Address needs to be Bech32 encoded
+    /// Sends native tokens in basic outputs with a
+    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and an
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so that
+    /// the storage deposit is returned to the sender and the sender gets access to the output again after a
+    /// predefined time (default 1 day).
+    /// Calls [Account::send_outputs()](crate::wallet::account::Account::send_outputs) internally. The options may
+    /// define the remainder value strategy. Note that custom inputs will be replaced with the required nft inputs
+    /// and addresses need to be bech32-encoded.
     /// ```ignore
-    /// let outputs = [SendNftParams::new(
+    /// let params = [SendNftParams::new(
     ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     ///     "0xe645042a8a082957cb4bec4927936699ee8e56048834b090379da64213ce231b",
     /// )?];
     ///
-    /// let transaction = account.send_nft(outputs, None).await?;
+    /// let transaction = account.send_nft(params, None).await?;
     ///
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
@@ -78,8 +79,8 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.send_nft()](crate::account::Account.send_nft)
+    /// Prepares the transaction for
+    /// [Account::send_nft()](crate::wallet::Account::send_nft).
     pub async fn prepare_send_nft<I: IntoIterator<Item = SendNftParams> + Send>(
         &self,
         params: I,

@@ -39,7 +39,7 @@ async fn consolidate_outputs() -> Result<()> {
     // First split funds to multiple addresses
     let token_supply = client.get_token_supply().await?;
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs([
             BasicOutputBuilder::new_with_amount(1_000_000)

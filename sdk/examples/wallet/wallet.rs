@@ -22,7 +22,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::payload::transaction::TransactionId,
-    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{Account, ClientOptions, Result, Wallet},
 };
 
 // The number of addresses to generate in this account
@@ -51,8 +51,7 @@ async fn main() -> Result<()> {
     print_addresses_with_funds(&account).await?;
 
     println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let transaction = account.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     sync_print_balance(&account, false).await?;
@@ -63,8 +62,7 @@ async fn main() -> Result<()> {
 
 async fn create_wallet() -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())

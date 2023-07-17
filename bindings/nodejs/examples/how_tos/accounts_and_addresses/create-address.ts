@@ -10,13 +10,15 @@ require('dotenv').config({ path: '.env' });
 // This example creates an address
 async function run() {
     initLogger();
+    if (!process.env.WALLET_DB_PATH) {
+        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    }
+    if (!process.env.STRONGHOLD_PASSWORD) {
+        throw new Error(
+            '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+        );
+    }
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
-        }
-
         const wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
         });

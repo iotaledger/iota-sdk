@@ -474,7 +474,6 @@ impl StrongholdAdapter {
     }
 
     /// Load Stronghold from a snapshot at `snapshot_path`, if it hasn't been loaded yet.
-    #[allow(clippy::significant_drop_tightening)]
     pub async fn read_stronghold_snapshot(&self) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
@@ -499,7 +498,6 @@ impl StrongholdAdapter {
     /// It doesn't unload the snapshot; see also [`unload_stronghold_snapshot()`].
     ///
     /// [`unload_stronghold_snapshot()`]: Self::unload_stronghold_snapshot()
-    #[allow(clippy::significant_drop_tightening)]
     pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
@@ -582,15 +580,15 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(10)).await;
 
         // Setting a password would spawn a task to automatically clear the key.
-        assert!(matches!(*adapter.key_provider.lock().await, Some(_)));
+        assert!(adapter.key_provider.lock().await.is_some());
         assert_eq!(adapter.get_timeout(), Some(timeout));
-        assert!(matches!(*adapter.timeout_task.lock().await, Some(_)));
+        assert!(adapter.timeout_task.lock().await.is_some());
 
         // After the timeout, the key should be purged.
         tokio::time::sleep(Duration::from_millis(200)).await;
-        assert!(matches!(*adapter.key_provider.lock().await, None));
+        assert!(adapter.key_provider.lock().await.is_none());
         assert_eq!(adapter.get_timeout(), Some(timeout));
-        assert!(matches!(*adapter.timeout_task.lock().await, None));
+        assert!(adapter.timeout_task.lock().await.is_none());
 
         // Set the key again, but this time we manually purge the key.
         let timeout = None;
@@ -599,15 +597,15 @@ mod tests {
         assert!(adapter.set_password("password".to_owned()).await.is_err());
 
         adapter.clear_key().await;
-        assert!(matches!(*adapter.key_provider.lock().await, None));
+        assert!(adapter.key_provider.lock().await.is_none());
         assert_eq!(adapter.get_timeout(), timeout);
-        assert!(matches!(*adapter.timeout_task.lock().await, None));
+        assert!(adapter.timeout_task.lock().await.is_none());
 
         // Even if we attempt to restart the task, it won't.
         adapter.restart_key_clearing_task().await;
-        assert!(matches!(*adapter.key_provider.lock().await, None));
+        assert!(adapter.key_provider.lock().await.is_none());
         assert_eq!(adapter.get_timeout(), timeout);
-        assert!(matches!(*adapter.timeout_task.lock().await, None));
+        assert!(adapter.timeout_task.lock().await.is_none());
 
         fs::remove_file(stronghold_path).unwrap();
     }

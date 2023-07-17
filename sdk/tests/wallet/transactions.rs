@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendAmountParams, SendNftParams};
+use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendNftParams, SendParams};
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
@@ -18,11 +18,8 @@ async fn send_amount() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            [SendAmountParams::new(
-                *account_1.addresses().await?[0].address(),
-                amount,
-            )?],
+        .send_with_params(
+            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
             None,
         )
         .await?;
@@ -50,11 +47,11 @@ async fn send_amount_127_outputs() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
+        .send_with_params(
             vec![
-SendAmountParams::new(
-                    *account_1.addresses().await?[0].address(),
+                SendParams::new(
                     amount,
+                    *account_1.addresses().await?[0].address(),
                 )?;
                 // Only 127, because we need one remainder
                 127
@@ -87,8 +84,8 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send 10 outputs to account_1
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            vec![SendAmountParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
+        .send_with_params(
+            vec![SendParams::new(amount, *account_1.addresses().await?[0].address())?; 10],
             None,
         )
         .await?;
@@ -103,11 +100,8 @@ async fn send_amount_custom_input() -> Result<()> {
     // Send back with custom provided input
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
-        .send_amount(
-            [SendAmountParams::new(
-                *account_0.addresses().await?[0].address(),
-                amount,
-            )?],
+        .send_with_params(
+            [SendParams::new(amount, *account_0.addresses().await?[0].address())?],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()
@@ -176,11 +170,8 @@ async fn send_with_note() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_amount(
-            [SendAmountParams::new(
-                *account_1.addresses().await?[0].address(),
-                amount,
-            )?],
+        .send_with_params(
+            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
             Some(TransactionOptions {
                 note: Some(String::from("send_with_note")),
                 ..Default::default()
@@ -191,4 +182,76 @@ async fn send_with_note() -> Result<()> {
     assert_eq!(tx.note, Some(String::from("send_with_note")));
 
     tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
+async fn conflicting_transaction() -> Result<()> {
+    let storage_path_0 = "test-storage/conflicting_transaction_0";
+    let storage_path_1 = "test-storage/conflicting_transaction_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
+
+    let mnemonic = iota_sdk::client::utils::generate_mnemonic()?;
+    // Create two wallets with the same mnemonic
+    let wallet_0 = make_wallet(storage_path_0, Some(mnemonic.clone()), None).await?;
+    let wallet_0_account = &create_accounts_with_funds(&wallet_0, 1).await?[0];
+    let wallet_1 = make_wallet(storage_path_1, Some(mnemonic), None).await?;
+    let wallet_1_account = wallet_1.create_account().finish().await?;
+
+    // Balance should be equal
+    assert_eq!(wallet_0_account.sync(None).await?, wallet_1_account.sync(None).await?);
+
+    // Send transaction with each account and without syncing again
+    let tx = wallet_0_account
+        .send_with_params(
+            [SendParams::new(
+                1_000_000,
+                *wallet_0_account.addresses().await?[0].address(),
+            )?],
+            None,
+        )
+        .await?;
+    wallet_0_account
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+    // Second transaction will be conflicting
+    let tx = wallet_1_account
+        .send_with_params(
+            [SendParams::new(
+                // Something in the transaction must be different than in the first one, otherwise it will be the same
+                // one
+                2_000_000,
+                *wallet_0_account.addresses().await?[0].address(),
+            )?],
+            None,
+        )
+        .await?;
+    // Should return an error since the tx is conflicting
+    match wallet_1_account
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await
+        .unwrap_err()
+    {
+        iota_sdk::wallet::Error::Client(client_error) => {
+            let iota_sdk::client::Error::TangleInclusion(_) = *client_error else {
+                panic!("Expected TangleInclusion error");
+            };
+        }
+        _ => panic!("Expected TangleInclusion error"),
+    }
+
+    // After syncing the balance is still equal
+    assert_eq!(wallet_0_account.sync(None).await?, wallet_1_account.sync(None).await?);
+
+    let conflicting_tx = wallet_1_account.get_transaction(&tx.transaction_id).await.unwrap();
+    assert_eq!(
+        conflicting_tx.inclusion_state,
+        iota_sdk::wallet::account::types::InclusionState::Conflicting
+    );
+    // The conflicting tx is also removed from the pending txs
+    assert!(wallet_1_account.pending_transactions().await.is_empty());
+
+    tear_down(storage_path_0).ok();
+    tear_down(storage_path_1)
 }

@@ -18,10 +18,12 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
-    IBip32Chain,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
-import { SecretManagerType } from '../types/secret_manager/secret-manager';
+import {
+    Bip44,
+    SecretManagerType,
+} from '../types/secret_manager/secret-manager';
 import {
     AliasOutput,
     BasicOutput,
@@ -142,7 +144,9 @@ export class Client {
                 options,
             },
         });
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -284,7 +288,7 @@ export class Client {
     async signatureUnlock(
         secretManager: SecretManagerType,
         transactionEssenceHash: HexEncodedString,
-        chain: IBip32Chain,
+        chain: Bip44,
     ): Promise<UnlockCondition> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
@@ -308,8 +312,9 @@ export class Client {
                 payload,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -798,8 +803,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -820,8 +826,13 @@ export class Client {
                 maxAttempts,
             },
         });
+        const parsed = JSON.parse(response) as Response<[BlockId, Block][]>;
+        const arr: [BlockId, Block][] = [];
+        parsed.payload.forEach((payload) => {
+            arr.push([payload[0], plainToInstance(Block, payload[1])]);
+        });
 
-        return JSON.parse(response).payload;
+        return arr;
     }
 
     /**
@@ -854,8 +865,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -868,8 +880,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -883,8 +896,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
     /**
      * Promote a block without checking if it should be promoted
@@ -896,8 +910,9 @@ export class Client {
                 blockId,
             },
         });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
+        const block = plainToInstance(Block, parsed.payload[1]);
+        return [parsed.payload[0], block];
     }
 
     /**
@@ -972,7 +987,7 @@ export class Client {
     /**
      * Listen to MQTT topics.
      */
-    async listen(
+    async listenMqtt(
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
@@ -982,13 +997,28 @@ export class Client {
     /**
      * Stop listening for provided MQTT topics.
      */
-    async clearListeners(topics: string[]): Promise<void> {
+    async clearMqttListeners(topics: string[]): Promise<void> {
         await this.methodHandler.callMethod({
             name: 'clearListeners',
             data: {
                 topics,
             },
         });
+    }
+
+    /**
+     * Calculate the minimum required storage deposit for an output.
+     * @param output output to calculate the deposit amount for.
+     * @returns The amount.
+     */
+    async minimumRequiredStorageDeposit(output: Output): Promise<number> {
+        const response = await this.methodHandler.callMethod({
+            name: 'minimumRequiredStorageDeposit',
+            data: {
+                output,
+            },
+        });
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -1001,6 +1031,36 @@ export class Client {
         const response = await this.methodHandler.callMethod({
             name: 'requestFundsFromFaucet',
             data: { url, address },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Extension method which provides request methods for plugins.
+     * @param basePluginPath The base path for the plugin eg indexer/v1/ .
+     * @param method The http method.
+     * @param endpoint The path for the plugin request.
+     * @param queryParams Additional query params for the request.
+     * @param request The request object.
+     * @returns The response json.
+     */
+    async callPluginRoute(
+        basePluginPath: string,
+        method: 'GET' | 'POST',
+        endpoint: string,
+        queryParams?: string[],
+        request?: string,
+    ): Promise<string> {
+        const response = await this.methodHandler.callMethod({
+            name: 'callPluginRoute',
+            data: {
+                basePluginPath,
+                method,
+                endpoint,
+                queryParams: queryParams ?? [],
+                request,
+            },
         });
 
         return JSON.parse(response).payload;

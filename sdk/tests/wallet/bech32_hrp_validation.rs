@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::Error as ClientError,
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{account::OutputParams, Error, Result, SendAmountParams},
+    wallet::{account::OutputParams, Error, Result, SendParams},
 };
 
 use crate::wallet::common::{make_wallet, setup, tear_down};
@@ -20,10 +20,10 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let account = wallet.create_account().finish().await?;
 
     let error = account
-        .send_amount(
-            [SendAmountParams::new(
-                Bech32Address::try_new("wronghrp", account.addresses().await?[0].address())?,
+        .send_with_params(
+            [SendParams::new(
                 1_000_000,
+                Bech32Address::try_new("wronghrp", account.addresses().await?[0].address())?,
             )?],
             None,
         )

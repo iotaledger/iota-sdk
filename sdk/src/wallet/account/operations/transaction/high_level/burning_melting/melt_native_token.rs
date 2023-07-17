@@ -18,13 +18,15 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// Melts native tokens.
+    ///
+    /// This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field. This should be preferred over burning, because after burning, the foundry can never be
     /// destroyed anymore.
     pub async fn melt_native_token(
         &self,
         token_id: TokenId,
-        melt_amount: U256,
+        melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
@@ -35,12 +37,12 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.melt_native_token()](crate::account::Account.melt_native_token)
+    /// Prepares the transaction for
+    /// [Account::melt_native_token()](crate::wallet::Account::melt_native_token).
     pub async fn prepare_melt_native_token(
         &self,
         token_id: TokenId,
-        melt_amount: U256,
+        melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_melt_native_token");

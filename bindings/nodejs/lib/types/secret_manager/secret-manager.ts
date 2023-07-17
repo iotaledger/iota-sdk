@@ -47,3 +47,10 @@ export interface Secp256k1EcdsaSignature {
      */
     signature: HexEncodedString;
 }
+
+export interface Bip44 {
+    coinType?: number;
+    account?: number;
+    change?: number;
+    addressIndex?: number;
+}

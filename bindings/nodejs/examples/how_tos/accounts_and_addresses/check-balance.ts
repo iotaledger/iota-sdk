@@ -12,6 +12,9 @@ require('dotenv').config({ path: '.env' });
 // This example syncs the account and prints the balance
 async function run() {
     initLogger();
+    if (!process.env.WALLET_DB_PATH) {
+        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    }
     try {
         const wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
