@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use futures::{StreamExt, TryStreamExt};
-use serde::{Deserialize, Serialize};
+use zeroize::Zeroizing;
 
 use crate::{
     client::storage::StorageAdapter,
@@ -12,30 +12,6 @@ use crate::{
         storage::{constants::*, DynStorageAdapter, Storage},
     },
 };
-
-/// The storage used by the manager.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) enum ManagerStorage {
-    /// RocksDB storage.
-    #[cfg(feature = "rocksdb")]
-    Rocksdb,
-    /// Storage backed by a Map in memory.
-    Memory,
-    /// Wasm storage.
-    #[cfg(target_family = "wasm")]
-    Wasm,
-}
-
-impl Default for ManagerStorage {
-    fn default() -> Self {
-        #[cfg(feature = "rocksdb")]
-        return Self::Rocksdb;
-        #[cfg(target_family = "wasm")]
-        return Self::Wasm;
-        #[cfg(not(any(feature = "rocksdb", target_family = "wasm")))]
-        Self::Memory
-    }
-}
 
 /// Storage manager
 #[derive(Debug)]
@@ -48,7 +24,7 @@ pub(crate) struct StorageManager {
 impl StorageManager {
     pub(crate) async fn new(
         storage: impl DynStorageAdapter + 'static,
-        encryption_key: impl Into<Option<[u8; 32]>> + Send,
+        encryption_key: impl Into<Option<Zeroizing<[u8; 32]>>> + Send,
     ) -> crate::wallet::Result<Self> {
         let storage = Storage {
             inner: Box::new(storage) as _,
@@ -149,10 +125,12 @@ impl StorageAdapter for StorageManager {
 
 #[cfg(test)]
 mod tests {
+    use serde::{Deserialize, Serialize};
+
     use super::*;
     use crate::{
         client::secret::SecretManager,
-        wallet::{storage::adapter::memory::Memory, wallet::operations::storage::SaveLoadWallet, WalletBuilder},
+        wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
     };
 
     #[tokio::test]

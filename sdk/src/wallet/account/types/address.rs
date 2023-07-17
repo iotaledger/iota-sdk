@@ -6,7 +6,10 @@ use std::hash::Hash;
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{address::Bech32Address, output::OutputId};
+use crate::types::{
+    self,
+    block::{address::Bech32Address, output::OutputId, ConvertTo},
+};
 
 /// An account address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
@@ -28,6 +31,16 @@ pub struct AccountAddress {
 
 impl AccountAddress {
     pub fn into_bech32(self) -> Bech32Address {
+        self.address
+    }
+}
+
+impl ConvertTo<Bech32Address> for AccountAddress {
+    fn convert(self) -> Result<Bech32Address, types::block::Error> {
+        Ok(self.address)
+    }
+
+    fn convert_unchecked(self) -> Bech32Address {
         self.address
     }
 }

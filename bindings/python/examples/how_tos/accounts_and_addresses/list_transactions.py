@@ -1,10 +1,13 @@
 from iota_sdk import Wallet
-
-import json
+from dotenv import load_dotenv
+import os
 
 # In this example we will list transactions
 
-wallet = Wallet('./alice-database')
+# This example uses secrets in environment variables for simplicity which should not be done in production.
+load_dotenv()
+
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 account.sync({ 'syncIncomingTransactions': True })
@@ -13,11 +16,11 @@ account.sync({ 'syncIncomingTransactions': True })
 transactions = account.transactions()
 print('Sent transactions:')
 for transaction in transactions:
-    print(transaction['transactionId'])
+    print(transaction.transactionId)
 
 
 # Incoming transactions
 incoming_transactions = account.incoming_transactions()
 print('Received transactions:')
 for transaction in incoming_transactions:
-    print(transaction['transactionId'])
+    print(transaction.transactionId)

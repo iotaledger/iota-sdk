@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { plainToInstance } from 'class-transformer';
 import { HexEncodedString } from '../utils';
+import { AliasId, NftId } from './id';
 
 enum AddressType {
     Ed25519 = 0,
@@ -23,6 +25,20 @@ abstract class Address {
     }
 
     abstract toString(): string;
+
+    public static parse(data: any): Address {
+        if (data.type == AddressType.Ed25519) {
+            return plainToInstance(
+                Ed25519Address,
+                data,
+            ) as any as Ed25519Address;
+        } else if (data.type == AddressType.Alias) {
+            return plainToInstance(AliasAddress, data) as any as AliasAddress;
+        } else if (data.type == AddressType.Nft) {
+            return plainToInstance(NftAddress, data) as any as NftAddress;
+        }
+        throw new Error('Invalid JSON');
+    }
 }
 /**
  * Ed25519 Address.
@@ -47,15 +63,15 @@ class Ed25519Address extends Address {
 }
 
 class AliasAddress extends Address {
-    private aliasId: HexEncodedString;
-    constructor(address: HexEncodedString) {
+    private aliasId: AliasId;
+    constructor(address: AliasId) {
         super(AddressType.Alias);
         this.aliasId = address;
     }
     /**
      * The alias id.
      */
-    getAliasId(): HexEncodedString {
+    getAliasId(): AliasId {
         return this.aliasId;
     }
 
@@ -67,15 +83,15 @@ class AliasAddress extends Address {
  * NFT address.
  */
 class NftAddress extends Address {
-    private nftId: HexEncodedString;
-    constructor(address: HexEncodedString) {
+    private nftId: NftId;
+    constructor(address: NftId) {
         super(AddressType.Nft);
         this.nftId = address;
     }
     /**
      * The NFT Id.
      */
-    getNftId(): HexEncodedString {
+    getNftId(): NftId {
         return this.nftId;
     }
 

@@ -1,4 +1,4 @@
-from iota_sdk import Utils, utf8_to_hex
+from iota_sdk import Ed25519Signature, Utils, utf8_to_hex
 
 # In this example we will verify an Ed25519 signature.
 
@@ -8,7 +8,7 @@ ED25519_SIGNATURE = "0x5437ee671f182507103c6ae2f6649083475019f2cc372e674be164577
 
 message = utf8_to_hex(FOUNDRY_METADATA)
 validSignature = Utils.verify_ed25519_signature(
-    {"type": 0, "publicKey": PUBLIC_KEY, "signature": ED25519_SIGNATURE},
+    Ed25519Signature(PUBLIC_KEY, ED25519_SIGNATURE),
     message,
 )
 print(f'Valid signature: {validSignature}')

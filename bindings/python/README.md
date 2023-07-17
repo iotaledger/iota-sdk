@@ -15,7 +15,7 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Requirements
 
-- [Python 3.x](https://www.python.org)
+- [Python 3.10+](https://www.python.org)
 - [pip ^21.x](https://pypi.org/project/pip)
 - `Rust` and `Cargo` to compile the binding. Install
   them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
@@ -94,14 +94,14 @@ wallet_options = {
 
 secret_manager = StrongholdSecretManager("wallet.stronghold", "some_hopefully_secure_password")
 
-wallet = Wallet('./alice-database', wallet_options, coin_type=CoinType.SHIMMER, secret_manager)
+wallet = Wallet('./alice-walletdb', wallet_options, coin_type=CoinType.SHIMMER, secret_manager)
 
 # Store the mnemonic in the Stronghold snapshot. This only needs to be done once
 account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +
           "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
 
 account = wallet.create_account('Alice')
-print(account)
+print(account.get_metadata())
 ```
 
 ## Examples
@@ -123,6 +123,7 @@ python3 examples/client/00_get_info.py
 
 You can find the API reference for the Python bindings in the
 [IOTA Wiki](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/).
+
 
 ## Learn More
 

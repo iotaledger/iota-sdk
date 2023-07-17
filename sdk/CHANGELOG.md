@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.4.0 - 2023-xx-xx
+## 0.4.0 - 2023-07-14
 
 ### Added
 
@@ -40,6 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 - `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
+- Support for `LedgerSecretManager::sign_ed25519`;
+- `UnlockCondition::{is_address, is_storage_deposit_return, is_timelock, is_expiration, is_state_controller_address, is_governor_address, is_immutable_alias_address}`;
+- `UnlockCondition::{as_address, as_storage_deposit_return, as_timelock, as_expiration, as_state_controller_address, as_governor_address, as_immutable_alias_address}`;
+- `ClientInner::call_plugin_route` to Client to fetch data from custom node plugins;
+- `WalletBuilder::with_storage_options` method, allowing storage encryption;
+- `StorageOptions::{new, with_encryption_key}` methods and getters;
+- `MinimumStorageDepositBasicOutput`;
+- `LedgerSecretManager::non_interactive` field;
 
 ### Changed
 
@@ -105,6 +113,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use concrete ID types instead of String in HTTP responses;
 - `Client::get_outputs_metadata_ignore_errors` returns `OutputMetadata` instead of DTO;
 - `ClientInner::get_output_metadata` returns `OutputMetadata` instead of DTO;
+- Rename `Account::mint_native_token` to `create_native_token`, `Account::increase_native_token_supply` to `mint_native_token`, `Account::decrease_native_token_supply` to `melt_native_token`;
+- Rename `Account::prepare_mint_native_token` to `prepare_create_native_token`, `Account::prepare_increase_native_token_supply` to `prepare_mint_native_token`, `Account::prepare_decrease_native_token_supply` to `prepare_melt_native_token`;
+- Rename `MintNativeTokenParams` to `CreateNativeTokenParams`;
+- Rename `MintNativeTokenTransaction` to `CreateNativeTokenTransaction` and `PreparedMintNativeTokenTransaction` to `PreparedCreateNativeTokenTransaction` (including their corresponding DTOs);
+- `Signature::Ed25519` now holds a boxed type;
+- `Ed25519Signature::new` renamed to `try_from_bytes` and returns a Result;
+- `Ed25519Signature::new`, `public_key`, `signature` now use concrete types;
+- `Ed25519Signature::verify` is no longer fallable;
+- `Mnemonic` type used over Strings where possible;
+- `SecretManage::sign_ed25519`, `sign_secp256k1_ecdsa`, and `signature_unlock` now accept Bip44 type chains;
+- Rename `SendAmountParams` to `SendParams`;
+- Rename `Account::send` to `send_outputs`, `Account::send_amount` to `send`, `Account::prepare_send_amount` to `prepare_send`;
+- Made `ManagerStorage` public and renamed it to `StorageKind`;
+- Made `StorageOptions` public;
+- Renamed `Client::block` to `build_block`;
+- Renamed "inception" modules to `core` (ex. `wallet::wallet` -> `wallet::core`);
 
 ### Removed
 
@@ -131,6 +155,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `client::Error::InvalidBIP32ChainData`;
 - `BlockResponse`, `OutputResponse` and `MilestoneResponse`;
 - `ClientError::UnexpectedApiResponse`;
+- `HD_WALLET_TYPE` constant;
 
 ### Fixed
 

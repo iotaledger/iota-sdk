@@ -73,6 +73,7 @@ fn debug() {
         "Ed25519Address(0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655)"
     );
 }
+
 #[test]
 fn bech32() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
@@ -151,7 +152,7 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        Ed25519Address::unpack_verified(packed_address.as_slice(), &()).unwrap()
     );
 
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
@@ -159,6 +160,6 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        Address::unpack_verified(packed_address.as_slice(), &()).unwrap()
     );
 }

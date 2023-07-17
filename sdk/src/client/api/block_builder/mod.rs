@@ -203,9 +203,8 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Set a custom remainder address
-    pub fn with_custom_remainder_address(mut self, address: &str) -> Result<Self> {
-        let address = Address::try_from_bech32(address)?;
-        self.custom_remainder_address.replace(address);
+    pub fn with_custom_remainder_address(mut self, address: impl ConvertTo<Bech32Address>) -> Result<Self> {
+        self.custom_remainder_address.replace(address.convert()?.into());
         Ok(self)
     }
 
@@ -309,7 +308,7 @@ impl<'a> ClientBlockBuilder<'a> {
         Ok(self)
     }
 
-    /// Consume the builder and get the API result
+    /// Consume the builder, post the block to the node and get the API result
     pub async fn finish(self) -> Result<Block> {
         // tagged_data payload requires an tagged_data tag
         if self.data.is_some() && self.tag.is_none() {

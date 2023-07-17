@@ -3,15 +3,13 @@
 
 //! In this example we sync the account and get the balance.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example check_balance
 //! ```
-
-use std::env::var;
 
 use iota_sdk::{wallet::Result, Wallet};
 
@@ -21,7 +19,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -31,13 +29,11 @@ async fn main() -> Result<()> {
     println!("{balance:#?}");
 
     println!("ADDRESSES:");
-    let explorer_url = var("EXPLORER_URL").ok();
+    let explorer_url = std::env::var("EXPLORER_URL").ok();
     let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
     for address in account.addresses().await? {
         println!(" - {prepended}{}", address.address());
     }
-
-    // TODO: print addresses with balance
 
     Ok(())
 }

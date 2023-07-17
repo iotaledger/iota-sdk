@@ -7,7 +7,7 @@ load_dotenv()
 
 # In this example we will prepare an output with an address and expiration unlock condition and send it
 
-wallet = Wallet("./alice-database")
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account("Alice")
 
@@ -32,4 +32,4 @@ print(f"Output: {json.dumps(output, indent=4)}")
 account.sync()
 
 transaction = account.send_outputs([output])
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

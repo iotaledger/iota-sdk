@@ -42,4 +42,4 @@ nft_output = client.build_nft_output(
 )
 
 # Print the output
-print(json.dumps(nft_output, indent=4))
+print(json.dumps(nft_output.as_dict(), indent=4))

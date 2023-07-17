@@ -3,12 +3,11 @@
 
 //! input selection for utxo chains
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
         api::{block_builder::ClientBlockBuilder, search_address},
-        constants::HD_WALLET_TYPE,
         secret::types::InputSigningData,
         Client, Result,
     },
@@ -190,13 +189,11 @@ impl<'a> ClientBlockBuilder<'a> {
                 output: output_with_meta.output,
                 output_metadata: output_with_meta.metadata,
                 chain: address_index_internal.map(|(address_index, internal)| {
-                    Chain::from_u32_hardened([
-                        HD_WALLET_TYPE,
-                        self.coin_type,
-                        self.account_index,
-                        internal as u32,
-                        address_index,
-                    ])
+                    Bip44::new()
+                        .with_coin_type(self.coin_type)
+                        .with_account(self.account_index)
+                        .with_change(internal as _)
+                        .with_address_index(address_index)
                 }),
             });
         }

@@ -4,9 +4,8 @@
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Dict, Optional
 import humps
-import json
 
 
 class NodeIndexerAPI():
@@ -40,11 +39,12 @@ class NodeIndexerAPI():
         def as_dict(self):
             return humps.camelize([{k: v} for k, v in self.__dict__.items() if v != None])
 
-    @dataclass
     class OutputIdsResponse:
-        ledgerIndex: int
-        cursor: Optional[str]
-        items: List[OutputId]
+        def __init__(self, dict: Dict):
+            self.ledgerIndex = dict["ledgerIndex"]
+            self.cursor = dict["cursor"]
+            self.items = [OutputId.from_string(
+                output_id) for output_id in dict["items"]]
 
     def basic_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch basic output IDs.
@@ -55,7 +55,7 @@ class NodeIndexerAPI():
         response = self._call_method('basicOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response['ledgerIndex'], response['cursor'], response['items'])
+        return self.OutputIdsResponse(response)
 
     def alias_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch alias output IDs.
@@ -66,14 +66,14 @@ class NodeIndexerAPI():
         response = self._call_method('aliasOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response['ledgerIndex'], response['cursor'], response['items'])
+        return self.OutputIdsResponse(response)
 
     def alias_output_id(self, alias_id: HexStr) -> OutputId:
         """Fetch alias output ID.
         """
-        return self._call_method('aliasOutputId', {
+        return OutputId.from_string(self._call_method('aliasOutputId', {
             'aliasId': alias_id
-        })
+        }))
 
     def nft_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch NFT output IDs.
@@ -84,14 +84,14 @@ class NodeIndexerAPI():
         response = self._call_method('nftOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response['ledgerIndex'], response['cursor'], response['items'])
+        return self.OutputIdsResponse(response)
 
     def nft_output_id(self, nft_id: HexStr) -> OutputId:
         """Fetch NFT output ID.
         """
-        return self._call_method('nftOutputId', {
+        return OutputId.from_string(self._call_method('nftOutputId', {
             'nftId': nft_id
-        })
+        }))
 
     def foundry_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch foundry Output IDs.
@@ -102,11 +102,11 @@ class NodeIndexerAPI():
         response = self._call_method('foundryOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response['ledgerIndex'], response['cursor'], response['items'])
+        return self.OutputIdsResponse(response)
 
     def foundry_output_id(self, foundry_id: HexStr) -> OutputId:
         """Fetch foundry Output ID.
         """
-        return self._call_method('foundryOutputId', {
+        return OutputId.from_string(self._call_method('foundryOutputId', {
             'foundryId': foundry_id
-        })
+        }))

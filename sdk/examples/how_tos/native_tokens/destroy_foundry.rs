@@ -4,15 +4,13 @@
 //! In this example we will try to destroy the first foundry there is in the account. This is only possible if its
 //! circulating supply is 0 and no native tokens were burned.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example destroy_foundry
 //! ```
-
-use std::env::var;
 
 use iota_sdk::{wallet::Result, Wallet};
 
@@ -22,7 +20,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let alias = "Alice";
@@ -38,7 +36,7 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let transaction = account.burn(*foundry_id, None).await?;
@@ -47,7 +45,11 @@ async fn main() -> Result<()> {
         let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
 
         let foundry_count = balance.foundries().len();
         println!("Foundries after destroying: {foundry_count}");

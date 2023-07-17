@@ -8,14 +8,14 @@ import {
     SyncOptions,
     AccountMeta,
     AccountAddress,
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     MintNftParams,
     OutputData,
     OutputParams,
@@ -35,13 +35,9 @@ import {
     BuildNftOutputData,
     SignedTransactionEssence,
     PreparedTransaction,
+    PreparedCreateNativeTokenTransactionData,
 } from '../types/wallet';
-import {
-    INode,
-    Burn,
-    PreparedTransactionData,
-    PreparedMintTokenTransactionData,
-} from '../client';
+import { INode, Burn, PreparedTransactionData } from '../client';
 import {
     AliasOutput,
     NftOutput,
@@ -50,7 +46,7 @@ import {
     BasicOutput,
     FoundryOutput,
     Response,
-    PreparedMintTokenTransaction,
+    PreparedCreateNativeTokenTransaction,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 
@@ -313,7 +309,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async prepareDecreaseNativeTokenSupply(
+    async prepareMeltNativeToken(
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -321,7 +317,7 @@ export class Account {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareDecreaseNativeTokenSupply',
+                name: 'prepareMeltNativeToken',
                 data: {
                     tokenId,
                     meltAmount,
@@ -731,40 +727,22 @@ export class Account {
     }
 
     /**
-     * Calculate the minimum required storage deposit for an output.
-     * @param output output to calculate the deposit amount for.
-     * @returns The amount.
-     */
-    async minimumRequiredStorageDeposit(output: Output): Promise<string> {
-        const response = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'minimumRequiredStorageDeposit',
-                data: {
-                    output,
-                },
-            },
-        );
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Mint more native tokens.
+     * Mint additional native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction and the token ID.
+     * @returns The minting transaction.
      */
-    async prepareIncreaseNativeTokenSupply(
+    async prepareMintNativeToken(
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransaction> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareIncreaseNativeTokenSupply',
+                name: 'prepareMintNativeToken',
                 data: {
                     tokenId,
                     mintAmount,
@@ -775,28 +753,28 @@ export class Account {
 
         const parsed = JSON.parse(
             response,
-        ) as Response<PreparedMintTokenTransactionData>;
-        return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
 
     /**
-     * Mint native tokens.
-     * @param params The options for minting tokens.
+     * Create a native token.
+     * @param params The options for creating a native token.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction and the token ID.
+     * @returns The creating transaction and the token ID.
      */
-    async prepareMintNativeToken(
-        params: MintNativeTokenParams,
+    async prepareCreateNativeToken(
+        params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransaction> {
+    ): Promise<PreparedCreateNativeTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareMintNativeToken',
+                name: 'prepareCreateNativeToken',
                 data: {
                     params: params,
                     options: transactionOptions,
@@ -806,9 +784,12 @@ export class Account {
 
         const parsed = JSON.parse(
             response,
-        ) as Response<PreparedMintTokenTransactionData>;
-        return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
+        ) as Response<PreparedCreateNativeTokenTransactionData>;
+        return new PreparedCreateNativeTokenTransaction(
+            plainToInstance(
+                PreparedCreateNativeTokenTransactionData,
+                parsed.payload,
+            ),
             this,
         );
     }
@@ -876,20 +857,20 @@ export class Account {
     }
 
     /**
-     * Prepare a send amount transaction, useful for offline signing.
+     * Prepare to send base coins, useful for offline signing.
      * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The prepared transaction data.
      */
-    async prepareSendAmount(
-        params: SendAmountParams[],
+    async prepareSend(
+        params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareSendAmount',
+                name: 'prepareSend',
                 data: {
                     params,
                     options,
@@ -974,20 +955,20 @@ export class Account {
     }
 
     /**
-     * Send a transaction with amounts from input addresses.
+     * Send base coins with amounts from input addresses.
      * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendAmount(
-        params: SendAmountParams[],
+    async send(
+        params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendAmount',
+                name: 'send',
                 data: {
                     params,
                     options: transactionOptions,

@@ -12,7 +12,7 @@ on:
       - "!**/tests/**" # Exclude all tests
       - "!cli/**" # Exclude CLI
       - "!**/bindings/**" # Exclude all bindings
-      - "sdk/src/wallet/bindings/nodejs/**"
+      - "bindings/nodejs-old/**"
       - ".github/workflows/bindings-wallet-nodejs.yml"
       - ".patches/*"
   pull_request:
@@ -26,7 +26,7 @@ on:
       - "!**/tests/**" # Exclude all tests
       - "!cli/**" # Exclude CLI
       - "!**/bindings/**" # Exclude all bindings
-      - "sdk/src/wallet/bindings/nodejs/**"
+      - "bindings/nodejs-old/**"
       - ".github/workflows/bindings-wallet-nodejs.yml"
       - ".patches/*"
   schedule:
@@ -67,14 +67,14 @@ jobs:
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
-          cache-root: sdk/src/wallet/bindings/nodejs
+          cache-root: bindings/nodejs-old
 
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-          cache-dependency-path: sdk/src/wallet/bindings/nodejs/package-lock.json
+          cache-dependency-path: bindings/nodejs-old/package-lock.json
 
       # This step is required for bindgen to work on Windows.
       - name: Set Up Clang/LLVM (Windows)
@@ -99,8 +99,8 @@ jobs:
 
       - name: Build nodejs binding
         run: npm ci --build-from-source
-        working-directory: sdk/src/wallet/bindings/nodejs
+        working-directory: bindings/nodejs-old
 
       - name: Run npm test
         run: npm test
-        working-directory: sdk/src/wallet/bindings/nodejs
+        working-directory: bindings/nodejs-old

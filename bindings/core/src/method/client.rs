@@ -17,8 +17,10 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AliasId,
-            FoundryId, NativeToken, NftId, OutputId,
+            dto::{OutputDto, TokenSchemeDto},
+            feature::dto::FeatureDto,
+            unlock_condition::dto::UnlockConditionDto,
+            AliasId, FoundryId, NativeToken, NftId, OutputId,
         },
         payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
         BlockDto, BlockId,
@@ -125,6 +127,15 @@ pub enum ClientMethod {
     /// Returns the unhealthy nodes.
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes,
+    /// Extension method which provides request methods for plugins.
+    #[serde(rename_all = "camelCase")]
+    CallPluginRoute {
+        base_plugin_path: String,
+        method: String,
+        endpoint: String,
+        query_params: Vec<String>,
+        request_object: Option<String>,
+    },
     /// Prepare a transaction for signing
     #[serde(rename_all = "camelCase")]
     PrepareTransaction {
@@ -441,6 +452,10 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
+    /// Calculate the minimum required storage deposit for an output.
+    /// Expected response:
+    /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
+    MinimumRequiredStorageDeposit { output: OutputDto },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL

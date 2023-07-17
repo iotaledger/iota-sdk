@@ -3,10 +3,11 @@
 
 from iota_sdk import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.signature import Ed25519Signature, Bip44
 from json import dumps, loads
 import humps
 from typing import List, Optional
-
+from dacite import from_dict
 
 class LedgerNanoSecretManager(dict):
     """Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator.
@@ -60,7 +61,7 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager=None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
         if secret_manager_handle is None:
             self.handle = create_secret_manager(dumps(secret_manager))
         else:
@@ -97,7 +98,7 @@ class SecretManager():
                            internal: Optional[bool] = None,
                            coin_type: Optional[int] = None,
                            bech32_hrp: Optional[str] = None,
-                           ledger_nano_prompt: Optional[bool] = None):
+                           ledger_nano_prompt: Optional[bool] = None) -> List[str]:
         """Generate ed25519 addresses.
 
         Parameters
@@ -216,20 +217,20 @@ class SecretManager():
             'mnemonic': mnemonic
         })
 
-    def sign_ed25519(self, message: HexStr, chain: List[int]):
+    def sign_ed25519(self, message: HexStr, chain: Bip44) -> Ed25519Signature:
         """Signs a message with an Ed25519 private key.
         """
-        return self._call_method('signEd25519', {
+        return from_dict(Ed25519Signature, self._call_method('signEd25519', {
             'message': message,
-            'chain': chain,
-        })
+            'chain': chain.__dict__,
+        }))
 
-    def sign_secp256k1_ecdsa(self, message: HexStr, chain: List[int]):
+    def sign_secp256k1_ecdsa(self, message: HexStr, chain: Bip44):
         """Signs a message with an Secp256k1Ecdsa private key.
         """
         return self._call_method('signSecp256k1Ecdsa', {
             'message': message,
-            'chain': chain,
+            'chain': chain.__dict__,
         })
 
     def sign_transaction(self, prepared_transaction_data):
@@ -239,10 +240,10 @@ class SecretManager():
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def signature_unlock(self, transaction_essence_hash: HexStr, chain: List[int]):
+    def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):
         """Sign a transaction essence hash.
         """
         return self._call_method('signatureUnlock', {
             'transactionEssenceHash': transaction_essence_hash,
-            'chain': chain
+            'chain': chain.__dict__,
         })

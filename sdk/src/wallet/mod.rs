@@ -6,16 +6,10 @@
 /// [`Account`]: crate::wallet::Account
 /// The account module. Interaction with an Account happens via an [`Account`].
 pub mod account;
-/// The message passing interface for the library. A different way to call the wallet functions, useful for bindings to
-/// other languages.
-#[cfg(feature = "message_interface")]
-#[cfg_attr(docsrs, doc(cfg(feature = "message_interface")))]
-pub mod message_interface;
+/// The core module.
+pub mod core;
 #[cfg(any(feature = "stronghold", feature = "storage"))]
 pub(crate) mod migration;
-/// The wallet module.
-#[allow(clippy::module_inception)]
-pub mod wallet;
 
 /// The ClientOptions to build the iota_client for interactions with the IOTA Tangle.
 pub use crate::client::ClientBuilder as ClientOptions;
@@ -36,15 +30,15 @@ pub(crate) mod task;
 pub use self::{
     account::{
         operations::transaction::high_level::{
-            minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
-            send_amount::SendAmountParams,
+            minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
+            send::SendParams,
             send_native_tokens::SendNativeTokensParams,
             send_nft::SendNftParams,
         },
         Account,
     },
+    core::{Wallet, WalletBuilder},
     error::Error,
-    wallet::{Wallet, WalletBuilder},
 };
 
 /// The wallet Result type.

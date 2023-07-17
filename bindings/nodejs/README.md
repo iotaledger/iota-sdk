@@ -155,15 +155,19 @@ In the project directory, you can run the following:
 
 Installs the project, including running `npm run build`.
 
-### `npm build` or `yarn build`
+### `npm run build` or `yarn build`
 
 Builds the Node addon (`index.node`) from source.
 
-### `npm test` or `yarn test`
+### `npm run test` or `yarn test`
 
 Runs the unit tests by calling `cargo test`. You can learn more
 about [adding tests to your Rust code](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) from
 the [Rust book](https://doc.rust-lang.org/book/).
+
+### `npm run create-api-docs` or `yarn create-api-docs`
+
+This is mainly just used to create the API docs in the [Wiki](https://github.com/iota-wiki/iota-wiki). Executed locally it will generate a `docs` folder in the current working directory with the API docs.
 
 ## Important Files and Directories
 

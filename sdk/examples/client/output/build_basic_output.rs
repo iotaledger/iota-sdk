@@ -3,7 +3,10 @@
 
 //! In this example we will build basic outputs with different feature blocks.
 //!
-//! `cargo run --example build_basic_output --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example build_basic_output [ADDRESS]
+//! ```
 
 use iota_sdk::{
     client::{Client, Result},
@@ -20,19 +23,25 @@ use iota_sdk::{
     },
 };
 
+const METADATA: &str = "Hello, World!";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-
-    // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    // Create a node client.
+    let client = Client::builder()
+        .with_node(&std::env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
+    let address = std::env::args()
+        .nth(1)
+        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+    let address = Address::try_from_bech32(address)?;
 
     let basic_output_builder =
         BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
@@ -43,14 +52,14 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new("Hello, World!")?)
+            .add_feature(MetadataFeature::new(METADATA)?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder
             .clone()
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 address,
-                1000000,
+                1_000_000,
                 token_supply,
             )?)
             .finish_output(token_supply)?,
@@ -67,7 +76,7 @@ async fn main() -> Result<()> {
         // with tag feature
         basic_output_builder
             .clone()
-            .add_feature(TagFeature::new("Hello, World!")?)
+            .add_feature(TagFeature::new(METADATA)?)
             .finish_output(token_supply)?,
         // with sender feature
         basic_output_builder

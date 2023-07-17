@@ -5,7 +5,7 @@ ci-check-python = "check --manifest-path bindings/python/Cargo.toml --all-target
 ci-check-wasm = "check --manifest-path bindings/wasm/Cargo.toml --target wasm32-unknown-unknown --lib"
 ci-check-nostd = "check --no-default-features -F serde -p iota-sdk --target riscv64gc-unknown-none-elf"
 
-ci-test = "nextest run --all-features --no-fail-fast --cargo-profile ci --test-threads num-cpus --retries 2"
+ci-test = "nextest run --all-features --no-fail-fast --cargo-profile ci --test-threads num-cpus --retries 2 -p iota-sdk -p iota-sdk-bindings-core"
 
 ci-clippy = "clippy --all-targets --all-features -- -D warnings"
 

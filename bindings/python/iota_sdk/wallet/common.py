@@ -35,8 +35,9 @@ def _call_method_routine(func):
                 return obj
         message = func(*args, **kwargs)
 
-        message = dumps(list(message.values()), cls=MyEncoder)
-        deserialized = json.loads(message)
+        for k, v in message.items():
+            if not isinstance(v, str):
+                message[k] = json.loads(dumps(v, cls=MyEncoder))
 
         def remove_none(obj):
             if isinstance(obj, (list, tuple, set)):
@@ -46,9 +47,8 @@ def _call_method_routine(func):
                                  for k, v in obj.items() if k is not None and v is not None)
             else:
                 return obj
-        deserialized_null_filtered = remove_none(deserialized)
-
-        message = dumps(humps.camelize(deserialized_null_filtered))
+        message_null_filtered = remove_none(message)
+        message = dumps(humps.camelize(message_null_filtered))
         # Send message to the Rust library
         response = call_wallet_method(args[0].handle, message)
 

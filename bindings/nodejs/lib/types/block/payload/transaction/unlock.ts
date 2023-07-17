@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Ed25519Signature } from '../../..';
+import { Ed25519Signature } from '../../signature';
 
 /**
  * All of the unlock types.

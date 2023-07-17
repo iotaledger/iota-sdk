@@ -3,7 +3,10 @@
 
 //! In this example we will create a foundry output.
 //!
-//! `cargo run --example foundry --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example foundry
+//! ```
 
 use iota_sdk::{
     client::{
@@ -27,7 +30,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -36,23 +38,25 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
+    // Create a node client.
+    let client = Client::builder()
+        .with_node(&std::env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
-    // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
-
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
-    println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
-    tokio::time::sleep(std::time::Duration::from_secs(20)).await;
+
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address).await?,
+    );
+    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     //////////////////////////////////
     // create new alias output
@@ -68,13 +72,17 @@ async fn main() -> Result<()> {
     let outputs = [alias_output_builder.clone().finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
         .await?;
 
-    println!("Block with new alias output sent: {explorer_url}/block/{}", block.id());
+    println!(
+        "Block with new alias output sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////////////////////
@@ -83,11 +91,7 @@ async fn main() -> Result<()> {
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let alias_id = AliasId::from(&alias_output_id);
-    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(
-        U256::from(70u8),
-        U256::from(0u8),
-        U256::from(100u8),
-    )?);
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100)?);
     let foundry_id = FoundryId::build(
         &AliasAddress::from(AliasId::from(&alias_output_id)),
         1,
@@ -103,35 +107,32 @@ async fn main() -> Result<()> {
             .with_foundry_counter(1)
             .finish_output(token_supply)?,
         FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
-            .add_native_token(NativeToken::new(token_id, U256::from(70u8))?)
+            .add_native_token(NativeToken::new(token_id, 70)?)
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
             .finish_output(token_supply)?,
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(alias_output_id.into())?
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!("Block with foundry output sent: {explorer_url}/block/{}", block.id());
+    println!(
+        "Block with foundry output sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
     // melt 20 native token
     //////////////////////////////////
 
-    let foundry_output_builder = FoundryOutputBuilder::new_with_amount(
-        1_000_000,
-        1,
-        TokenScheme::Simple(SimpleTokenScheme::new(
-            U256::from(70u8),
-            U256::from(20u8),
-            U256::from(100u8),
-        )?),
-    )
-    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
+    let foundry_output_builder =
+        FoundryOutputBuilder::new_with_amount(1_000_000, 1, TokenScheme::Simple(SimpleTokenScheme::new(70, 20, 100)?))
+            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
@@ -145,22 +146,25 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         foundry_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(alias_output_id.into())?
         .with_input(foundry_output_id.into())?
         .with_outputs(outputs)?
         .finish()
         .await?;
+
     println!(
-        "Block with native tokens burnt sent: {explorer_url}/block/{}",
+        "Block with native tokens burnt sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
+
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -183,7 +187,7 @@ async fn main() -> Result<()> {
         foundry_output_builder.finish_output(token_supply)?,
         basic_output_builder
             .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+            .add_native_token(NativeToken::new(token_id, 50)?)
             .finish_output(token_supply)?,
     ];
 
@@ -195,7 +199,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(output_ids_response.items[0].into())?
         .with_input(alias_output_id.into())?
@@ -203,7 +207,12 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!("Block with native tokens sent: {explorer_url}/block/{}", block.id());
+    println!(
+        "Block with native tokens sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
+
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -213,20 +222,23 @@ async fn main() -> Result<()> {
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
     let outputs = [basic_output_builder
         .clone()
-        .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+        .add_native_token(NativeToken::new(token_id, 50)?)
         .finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_input(basic_output_id.into())?
         .with_outputs(outputs)?
         .finish()
         .await?;
+
     println!(
-        "Second block with native tokens sent: {explorer_url}/block/{}",
+        "Second block with native tokens sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
+
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -235,21 +247,24 @@ async fn main() -> Result<()> {
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
     let outputs = [basic_output_builder
-        .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
+        .add_native_token(NativeToken::new(token_id, 30)?)
         .finish_output(token_supply)?];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_burn(Burn::new().add_native_token(token_id, 20))
         .with_input(basic_output_id.into())?
         .with_outputs(outputs)?
         .finish()
         .await?;
+
     println!(
-        "Third block with native tokens burned sent: {explorer_url}/block/{}",
+        "Third block with native tokens burned sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
+
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     Ok(())

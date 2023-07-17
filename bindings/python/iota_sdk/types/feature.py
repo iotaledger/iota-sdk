@@ -1,51 +1,55 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.address import Address
 from iota_sdk.types.common import HexStr
-from enum import Enum
+from dataclasses import dataclass
+from enum import IntEnum
+from typing import Optional
 
-class FeatureType(Enum):
+
+class FeatureType(IntEnum):
     Sender = 0
     Issuer = 1
     Metadata = 2
     Tag = 3
 
-
+@dataclass
 class Feature():
-    def __init__(self, type, sender=None, issuer=None, data=None, tag=None):
-        """Initialize a feature
+    """Initialize a feature
 
-        Parameters
-        ----------
-        type : FeatureType
-            The type of feature
-        sender : Address
-            Sender address
-        issuer : Address
-            Issuer Address
-        data : string
-            Hex encoded metadata
-        tag : string
-            Hex encoded tag used to index the output
-        """
-        self.type = type
-        self.sender = sender
-        self.issuer = issuer
-        self.data = data
-        self.tag = tag
+    Parameters
+    ----------
+    type : FeatureType
+        The type of feature
+    address : Address
+        Issuer or Sender address
+    data : HexStr
+        Hex encoded metadata
+    tag : HexStr
+        Hex encoded tag used to index the output
+    """
+    type: int
+    address: Optional[Address] = None
+    data: Optional[HexStr] = None
+    tag: Optional[HexStr] = None
 
+    def into(self):
+        match FeatureType(self.type):
+            case FeatureType.Sender:
+                return SenderFeature(self.address)
+            case FeatureType.Issuer:
+                return IssuerFeature(self.address)
+            case FeatureType.Metadata:
+                return MetadataFeature(self.data)
+            case FeatureType.Metadata:
+                return TagFeature(self.tag)
+        
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
-
-        config['type'] = config['type'].value
-
-        if 'sender' in config:
-            config['address'] = config.pop('sender').as_dict()
-
-        if 'issuer' in config:
-            config['address'] = config.pop('issuer').as_dict()
-
-        return config
+        res = {k: v for k, v in self.__dict__.items() if v != None}
+        if 'address' in res:
+            res['address'] = res['address'].as_dict()
+        return res
 
 
 class SenderFeature(Feature):
@@ -57,7 +61,7 @@ class SenderFeature(Feature):
         sender : Address
             Sender address
         """
-        super().__init__(FeatureType.Sender, sender=sender)
+        super().__init__(int(FeatureType.Sender), address=sender)
 
 
 class IssuerFeature(Feature):
@@ -69,7 +73,7 @@ class IssuerFeature(Feature):
         issuer : Address
             Issuer address
         """
-        super().__init__(FeatureType.Issuer, issuer=issuer)
+        super().__init__(int(FeatureType.Issuer), address=issuer)
 
 
 class MetadataFeature(Feature):
@@ -81,7 +85,7 @@ class MetadataFeature(Feature):
         data : HexStr
             Hex encoded metadata
         """
-        super().__init__(FeatureType.Metadata, data=data)
+        super().__init__(int(FeatureType.Metadata), data=data)
 
 
 class TagFeature(Feature):
@@ -93,4 +97,4 @@ class TagFeature(Feature):
         tag : HexStr
             Hex encoded tag used to index the output
         """
-        super().__init__(FeatureType.Tag, tag=tag)
+        super().__init__(int(FeatureType.Tag), tag=tag)
