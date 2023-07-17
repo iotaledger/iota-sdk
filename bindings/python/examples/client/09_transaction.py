@@ -9,11 +9,12 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 # Create a Client instance
 client = Client(nodes=[node_url])
 
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
+if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
+    raise Exception(
+        ".env NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1 is undefined, see .env.example")
 
 secret_manager = MnemonicSecretManager(
-    os.environ['MNEMONIC'])
+    os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 address_and_amount = AddressAndAmount(
     'rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46',
