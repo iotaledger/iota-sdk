@@ -205,6 +205,8 @@ class Account:
                 'filterOptions': filter_options
             }
         )
+        # this is something wrong:
+        print(outputs)
         return [from_dict(OutputData, o) for o in outputs]
 
     def unspent_outputs(self, filter_options=None) -> List[OutputData]:

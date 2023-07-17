@@ -1,7 +1,6 @@
 from dataclasses import asdict
 from iota_sdk import Client, utf8_to_hex, hex_to_utf8
 from dotenv import load_dotenv
-from pprint import pprint
 import json
 import os
 
