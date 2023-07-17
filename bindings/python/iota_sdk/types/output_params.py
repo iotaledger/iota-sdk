@@ -44,7 +44,7 @@ class ReturnStrategy(str, Enum):
 
 @dataclass
 class StorageDeposit():
-    """Unlocks for OutputParams.
+    """Storage deposit options for OutputParams.
     """
     returnStrategy: Optional[ReturnStrategy] = None
     useExcessIfLow: Optional[bool] = None
