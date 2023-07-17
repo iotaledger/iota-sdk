@@ -83,9 +83,10 @@ class Wallet():
     def get_accounts(self):
         """Get accounts
         """
-        return self._call_method(
+        accounts_data =  self._call_method(
             'getAccounts',
         )
+        return [Account(account_data, self.handle) for account_data in accounts_data]
 
     def backup(self, destination: str, password: str):
         """Backup storage.
@@ -150,22 +151,6 @@ class Wallet():
             'restoreBackup', {
                 'source': source,
                 'password': password
-            }
-        )
-
-    def generate_mnemonic(self) -> str:
-        """Generates a new mnemonic.
-        """
-        return self._call_method(
-            'generateMnemonic'
-        )
-
-    def verify_mnemonic(self, mnemonic: str):
-        """Checks if the given mnemonic is valid.
-        """
-        return self._call_method(
-            'verifyMnemonic', {
-                'mnemonic': mnemonic
             }
         )
 

@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::get_metadata()`;
 - `Bip44` type;
 - `SendParams, SendNativeTokensParams, SendNftParams, CreateNativeTokenParams, MintNftParams, CreateAliasOutputParams`;
+- `AccountAddress, AddressWithUnspentOutputs`;
 
 ### Changed
 
@@ -42,6 +43,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::prepare_send_native_tokens()` now accepts `SendNativeTokensParams`;
 - `Account::prepare_send_nft()` now accepts `SendNftParams`;
 - `Account::send_outputs()` now accepts `Output`;
+- `Account::{generate_ed25519_addresses(), addresses()}` return now `AccountAddress`;
+- `Account::addresses_with_unspent_outputs()` returns now `AddressWithUnspentOutputs`;
+- `Account::prepare_output()` returns now `Output`;
+- `Wallet::get_accounts()` returns now `List[Account]`;
+- `OutputData.chain` is now `Optional[Bip44]`;
+
+### Fixed
+
+- Serialization for wallet methods;
 
 ## 1.0.0-rc.0 - 2023-07-11
 
