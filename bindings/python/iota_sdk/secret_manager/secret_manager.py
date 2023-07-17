@@ -98,7 +98,7 @@ class SecretManager():
                            internal: Optional[bool] = None,
                            coin_type: Optional[int] = None,
                            bech32_hrp: Optional[str] = None,
-                           ledger_nano_prompt: Optional[bool] = None):
+                           ledger_nano_prompt: Optional[bool] = None) -> List[str]:
         """Generate ed25519 addresses.
 
         Parameters

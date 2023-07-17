@@ -45,4 +45,4 @@ account = wallet.create_account(ACCOUNT_ALIAS)
 
 # Get the first address and print it.
 address = account.addresses()[0]
-print(f'Address:\n{address["address"]}')
+print(f'Address:\n{address.address}')
