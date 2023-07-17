@@ -81,44 +81,6 @@ class Payload():
 
         return config
 
-
-@dataclass
-class MilestonePayload(Payload):
-    """A milestone payload.
-
-    Attributes:
-        index: The index of corresponding milestone.
-        timestamp: The timestamp of the corresponding milestone.
-        protocolVersion: The current protocol version.
-        previousMilestoneId: The ID of the previous milestone.
-        parents: The parents of the milestone.
-        inclusionMerkleRoot: The merkle root of all blocks included in the milestone cone.
-        appliedMerkleRoot: The merkle root of all applied transactions in the milestone cone.
-        signatures: The signatures that verify the milestone.
-        options: The milestone options (e.g. receipt milestone option).
-        metadata: Some hex encoded milestone metadata.
-    """
-    index: int
-    timestamp: int
-    protocolVersion: int
-    previousMilestoneId: HexStr
-    parents: List[HexStr]
-    inclusionMerkleRoot: HexStr
-    appliedMerkleRoot: HexStr
-    signatures: List[Ed25519Signature]
-    options: Optional[List[Any]] = None
-    metadata: Optional[HexStr] = None
-    type: int = field(
-        default_factory=lambda: int(
-            PayloadType.Milestone),
-        init=False)
-
-    @classmethod
-    def from_dict(cls, milestone_dict) -> MilestonePayload:
-        return from_dict(MilestonePayload, milestone_dict)
-
-
-@dataclass
 class TaggedDataPayload(Payload):
     """A tagged data payload.
 
