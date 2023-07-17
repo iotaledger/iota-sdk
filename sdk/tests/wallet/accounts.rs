@@ -164,14 +164,14 @@ async fn account_creation_stronghold() -> Result<()> {
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node("http://localhost:14265")?;
-    let mnemonic = "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak";
+    let mnemonic = crypto::keys::bip39::Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned());
 
     // Create directory before, because stronghold would panic otherwise
     std::fs::create_dir_all(storage_path).ok();
     let stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password".to_owned())
         .build("test-storage/account_creation_stronghold/test.stronghold")?;
-    stronghold_secret_manager.store_mnemonic(mnemonic.to_string()).await?;
+    stronghold_secret_manager.store_mnemonic(mnemonic).await?;
     let secret_manager = SecretManager::Stronghold(stronghold_secret_manager);
 
     #[allow(unused_mut)]

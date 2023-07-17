@@ -11,19 +11,16 @@ mod burn_outputs;
 mod claim_outputs;
 mod common;
 mod consolidation;
+mod core;
 mod error;
 #[cfg(feature = "events")]
 mod events;
-#[cfg(feature = "message_interface")]
-mod message_interface;
 #[cfg(feature = "stronghold")]
 mod migrate_stronghold_snapshot_v2_to_v3;
 mod native_tokens;
 mod output_preparation;
 mod syncing;
 mod transactions;
-#[allow(clippy::module_inception)]
-mod wallet;
 #[cfg(not(target_os = "windows"))]
 #[cfg(feature = "rocksdb")]
 mod wallet_storage;

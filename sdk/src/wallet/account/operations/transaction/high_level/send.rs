@@ -12,17 +12,13 @@ use crate::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
-            BasicOutputBuilder,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
         ConvertTo,
     },
     wallet::{
         account::{
-            constants::DEFAULT_EXPIRATION_TIME,
-            operations::transaction::{
-                high_level::minimum_storage_deposit::minimum_storage_deposit_basic_native_tokens, Transaction,
-            },
-            Account, TransactionOptions,
+            constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
         },
         Error,
     },
@@ -188,13 +184,10 @@ where
                 });
 
                 // Since it does need a storage deposit, calculate how much that should be
-                let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
-                    &rent_structure,
-                    address.inner(),
-                    return_address.inner(),
-                    None,
-                    token_supply,
-                )?;
+                let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                    .with_storage_deposit_return()?
+                    .with_expiration()?
+                    .finish()?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
                     return Err(Error::InsufficientFunds {

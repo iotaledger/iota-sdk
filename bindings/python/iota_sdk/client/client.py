@@ -8,7 +8,7 @@ from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.types.block import Block
-from iota_sdk.types.common import HexStr, Node
+from iota_sdk.types.common import HexStr, Node, AddressAndAmount
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output import Output
@@ -383,7 +383,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              input_range_start: Optional[int] = None,
                              input_range_end: Optional[int] = None,
                              inputs: Optional[List[Dict[str, Any]]] = None,
-                             output: Optional[Dict[str, Any]] = None,
+                             output: Optional[AddressAndAmount] = None,
                              outputs: Optional[List[Any]] = None,
                              tag: Optional[HexStr] = None) -> List[HexStr | Block]:
         """Build and post a block.
@@ -406,7 +406,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             End of the input range
         inputs : Array of Inputs
             Inputs to use
-        output : Any # TODO: https://github.com/iotaledger/iota-sdk/issues/129
+        output : AddressAndAmount
             Address and amount to send to
         outputs : Array of Outputs
             Outputs to use

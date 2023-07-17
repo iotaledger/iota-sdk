@@ -3,7 +3,6 @@
 
 pub(crate) mod burning_melting;
 pub(crate) mod create_alias;
-pub(crate) mod minimum_storage_deposit;
 pub(crate) mod minting;
 pub(crate) mod send;
 pub(crate) mod send_native_tokens;

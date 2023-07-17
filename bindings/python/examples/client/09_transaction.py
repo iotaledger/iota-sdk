@@ -1,4 +1,4 @@
-from iota_sdk import Client, MnemonicSecretManager, SendParams
+from iota_sdk import Client, MnemonicSecretManager, AddressAndAmount
 from dotenv import load_dotenv
 import os
 
@@ -15,11 +15,11 @@ if 'MNEMONIC' not in os.environ:
 secret_manager = MnemonicSecretManager(
     os.environ['MNEMONIC'])
 
-params = SendParams(
-    address='rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46',
-    amount=1000000,
+address_and_amount = AddressAndAmount(
+    'rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46',
+    1000000,
 )
 
 # Create and post a block with a transaction
-block = client.build_and_post_block(secret_manager, output=params)
+block = client.build_and_post_block(secret_manager, output=address_and_amount)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block[0]}')

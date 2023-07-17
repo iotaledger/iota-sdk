@@ -63,8 +63,7 @@ impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
 }
 
 /// The result of preparing a transaction to create a native token
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,
@@ -164,7 +163,7 @@ where
                         alias_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
-                            U256::from(0u8),
+                            0,
                             params.maximum_supply,
                         )?),
                     )

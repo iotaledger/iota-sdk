@@ -474,7 +474,6 @@ impl StrongholdAdapter {
     }
 
     /// Load Stronghold from a snapshot at `snapshot_path`, if it hasn't been loaded yet.
-    #[allow(clippy::significant_drop_tightening)]
     pub async fn read_stronghold_snapshot(&self) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
@@ -499,7 +498,6 @@ impl StrongholdAdapter {
     /// It doesn't unload the snapshot; see also [`unload_stronghold_snapshot()`].
     ///
     /// [`unload_stronghold_snapshot()`]: Self::unload_stronghold_snapshot()
-    #[allow(clippy::significant_drop_tightening)]
     pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;

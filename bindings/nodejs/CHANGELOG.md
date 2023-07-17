@@ -25,10 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Rename `Client::listen` to `listenMqtt`, `Client::clearListeners` to `clearMqttListeners`;
 - Moved `minimumRequiredStorageDeposit()` from `Account` to `Client`;
+- `SecretManagerMethod::SignEd25519`, `SignSecp256k1Ecdsa`, and `SignatureUnlock` now accept newly added `Bip44` type chains;
 
 ### Fixed
 
-- Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput `;
+- Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput`;
+- `Utils::parseBech32Address` now converts the string into a proper `Address`;
 
 ## 1.0.0-rc.2 - 2023-07-05
 

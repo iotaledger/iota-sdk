@@ -10,7 +10,15 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{output::OutputId, payload::milestone::MilestoneIndex, BlockId, Error};
+use crate::types::block::{
+    address::{Address, Ed25519Address},
+    output::{
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
+        BasicOutputBuilder, NativeTokens, Output, OutputId,
+    },
+    payload::milestone::MilestoneIndex,
+    BlockId, Error,
+};
 
 const DEFAULT_BYTE_COST: u32 = 100;
 const DEFAULT_BYTE_COST_FACTOR_KEY: u8 = 10;
@@ -138,5 +146,53 @@ pub trait Rent {
 impl<T: Rent, const N: usize> Rent for [T; N] {
     fn weighted_bytes(&self, config: &RentStructure) -> u64 {
         self.iter().map(|elem| elem.weighted_bytes(config)).sum()
+    }
+}
+
+pub struct MinimumStorageDepositBasicOutput {
+    config: RentStructure,
+    token_supply: u64,
+    builder: BasicOutputBuilder,
+}
+
+impl MinimumStorageDepositBasicOutput {
+    pub fn new(config: RentStructure, token_supply: u64) -> Self {
+        Self {
+            config,
+            token_supply,
+            builder: BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN).add_unlock_condition(
+                AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH]))),
+            ),
+        }
+    }
+
+    pub fn with_native_tokens(mut self, native_tokens: impl Into<Option<NativeTokens>>) -> Self {
+        if let Some(native_tokens) = native_tokens.into() {
+            self.builder = self.builder.with_native_tokens(native_tokens);
+        }
+        self
+    }
+
+    pub fn with_storage_deposit_return(mut self) -> Result<Self, Error> {
+        self.builder = self
+            .builder
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+                Output::AMOUNT_MIN,
+                self.token_supply,
+            )?);
+        Ok(self)
+    }
+
+    pub fn with_expiration(mut self) -> Result<Self, Error> {
+        self.builder = self.builder.add_unlock_condition(ExpirationUnlockCondition::new(
+            Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+            1,
+        )?);
+        Ok(self)
+    }
+
+    pub fn finish(self) -> Result<u64, Error> {
+        Ok(self.builder.finish_output(self.token_supply)?.rent_cost(&self.config))
     }
 }

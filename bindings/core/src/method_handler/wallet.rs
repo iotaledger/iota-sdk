@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use iota_sdk::{
     types::block::address::ToBech32Ext,
-    wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet},
+    wallet::{account::AccountDetailsDto, Wallet},
 };
 
 use super::account::call_account_method_internal;
@@ -162,7 +162,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::StoreMnemonic { mnemonic } => {
-            wallet.store_mnemonic(mnemonic).await?;
+            wallet.store_mnemonic(mnemonic.into()).await?;
             Response::Ok
         }
         WalletMethod::StartBackgroundSync {

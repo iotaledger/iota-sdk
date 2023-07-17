@@ -14,4 +14,4 @@ account = wallet.get_account('Alice')
 addresses = account.addresses()
 
 for address in addresses:
-    print(address['address'])
+    print(address.address)

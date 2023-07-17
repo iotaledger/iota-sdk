@@ -10,8 +10,8 @@ use iota_sdk::types::block::{
         milestone::{rand_merkle_root, rand_milestone_id, rand_milestone_index},
         number::rand_number,
         parents::rand_parents,
+        signature::rand_signature,
     },
-    signature::{Ed25519Signature, Signature},
     Error,
 };
 use packable::{bounded::TryIntoBoundedU8Error, PackableExt};
@@ -37,7 +37,7 @@ fn new_valid() {
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
-            vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))]
+            [rand_signature()]
         )
         .is_ok()
     );
@@ -59,7 +59,7 @@ fn new_invalid_no_signature() {
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
-            vec![]
+            []
         ),
         Err(Error::MilestoneInvalidSignatureCount(TryIntoBoundedU8Error::Invalid(0)))
     ));
@@ -81,7 +81,7 @@ fn new_invalid_too_many_signatures() {
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
-            vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64])); 300]
+            vec![rand_signature(); 300]
         ),
         Err(Error::MilestoneInvalidSignatureCount(TryIntoBoundedU8Error::Truncated(
             300
@@ -104,10 +104,7 @@ fn packed_len() {
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
-        vec![
-            Signature::from(Ed25519Signature::new([0; 32], [0; 64])),
-            Signature::from(Ed25519Signature::new([1; 32], [1; 64])),
-        ],
+        [rand_signature(), rand_signature()],
     )
     .unwrap();
 
@@ -131,7 +128,7 @@ fn pack_unpack_valid() {
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
-        vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))],
+        [rand_signature()],
     )
     .unwrap();
 
@@ -158,7 +155,7 @@ fn getters() {
         MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();
-    let signatures = vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))];
+    let signatures = [rand_signature()];
     let milestone = MilestonePayload::new(essence.clone(), signatures.clone()).unwrap();
 
     assert_eq!(essence, *milestone.essence());

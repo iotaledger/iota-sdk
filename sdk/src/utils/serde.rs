@@ -78,3 +78,50 @@ pub mod option_prefix_hex_vec {
             .transpose()
     }
 }
+
+#[cfg(feature = "client")]
+pub mod bip44 {
+    use crypto::keys::bip44::Bip44;
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Default, Serialize, Deserialize)]
+    #[serde(default, rename_all = "camelCase", remote = "Bip44")]
+    pub struct Bip44Def {
+        #[serde(default = "default_coin_type")]
+        coin_type: u32,
+        account: u32,
+        change: u32,
+        address_index: u32,
+    }
+
+    const fn default_coin_type() -> u32 {
+        crate::client::constants::IOTA_COIN_TYPE
+    }
+
+    pub mod option_bip44 {
+        use serde::{Deserializer, Serializer};
+
+        use super::{Bip44Def, *};
+
+        pub fn serialize<S>(value: &Option<Bip44>, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            #[derive(Serialize)]
+            struct Helper<'a>(#[serde(with = "Bip44Def")] &'a Bip44);
+
+            value.as_ref().map(Helper).serialize(serializer)
+        }
+
+        pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Bip44>, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            #[derive(Deserialize)]
+            struct Helper(#[serde(with = "Bip44Def")] Bip44);
+
+            let helper = Option::deserialize(deserializer)?;
+            Ok(helper.map(|Helper(external)| external))
+        }
+    }
+}

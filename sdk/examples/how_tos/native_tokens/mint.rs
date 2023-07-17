@@ -16,7 +16,7 @@
 //! cargo run --release --all-features --example mint_native_token [TOKEN_ID]
 //! ```
 
-use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
 
 // The amount of native tokens to mint
 const MINT_AMOUNT: u64 = 10;
@@ -59,8 +59,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Mint some more native tokens
-    let mint_amount = U256::from(MINT_AMOUNT);
-    let transaction = account.mint_native_token(token_id, mint_amount, None).await?;
+    let transaction = account.mint_native_token(token_id, MINT_AMOUNT, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

@@ -1,10 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#![allow(clippy::redundant_pub_crate, dead_code)]
-
 mod constants;
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::client::{
     api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
     request_funds_from_faucet, secret::SecretManager, Client, Result,
@@ -25,7 +24,9 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 
 /// Create a client with `DEFAULT_DEVNET_NODE_URL` and a random mnemonic, request funds from the faucet to the first
 /// address and wait until they arrived.
-pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<String>) -> Result<(Client, SecretManager)> {
+pub async fn create_client_and_secret_manager_with_funds(
+    mnemonic: Option<Mnemonic>,
+) -> Result<(Client, SecretManager)> {
     let client = Client::builder().with_node(NODE_LOCAL)?.finish().await?;
 
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic().unwrap()))?;

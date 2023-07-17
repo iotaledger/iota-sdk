@@ -4,41 +4,10 @@
 use core::str::FromStr;
 use std::collections::HashMap;
 
-use serde::de::DeserializeOwned;
-
 use super::*;
 use crate::wallet::Error;
 
 pub struct Migrate;
-
-fn rename_keys(json: &mut serde_json::Value) {
-    match json {
-        serde_json::Value::Array(a) => a.iter_mut().for_each(rename_keys),
-        serde_json::Value::Object(o) => {
-            let mut replace = serde_json::Map::with_capacity(o.len());
-            o.retain(|k, v| {
-                rename_keys(v);
-                replace.insert(
-                    heck::ToLowerCamelCase::to_lower_camel_case(k.as_str()),
-                    std::mem::replace(v, serde_json::Value::Null),
-                );
-                true
-            });
-            *o = replace;
-        }
-        _ => (),
-    }
-}
-
-fn migrate_native_token(output: &mut serde_json::Value) {
-    let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
-
-    for native_token in native_tokens.iter_mut() {
-        if let Some(id) = native_token.get("token_id") {
-            *native_token = serde_json::json!({ "amount": native_token["amount"], "id": id});
-        }
-    }
-}
 
 fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
     for output_data in account["outputs"]
@@ -47,14 +16,6 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
         .values_mut()
     {
         ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-
-        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-            for segment in chain {
-                ConvertSegment::check(segment)?;
-            }
-        }
-
-        migrate_native_token(&mut output_data["output"]["data"]);
     }
 
     for output_data in account["unspentOutputs"]
@@ -63,65 +24,9 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
         .values_mut()
     {
         ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-
-        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-            for segment in chain {
-                ConvertSegment::check(segment)?;
-            }
-        }
-
-        migrate_native_token(&mut output_data["output"]["data"]);
-    }
-
-    for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
-        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-            .as_array_mut()
-            .unwrap();
-        for output in outputs {
-            migrate_native_token(&mut output["data"]);
-        }
     }
 
     ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
-
-    for (_key, transaction) in account["incomingTransactions"].as_object_mut().unwrap() {
-        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-            .as_array_mut()
-            .unwrap();
-        for output in outputs {
-            migrate_native_token(&mut output["data"]);
-        }
-    }
-
-    if let Some(native_token_foundries) = account.get_mut("nativeTokenFoundries") {
-        for (_key, foundry) in native_token_foundries.as_object_mut().unwrap() {
-            migrate_native_token(foundry);
-        }
-    }
-
-    Ok(())
-}
-
-fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> {
-    let protocol_parameters = &mut client_options["protocolParameters"];
-
-    ConvertHrp::check(&mut protocol_parameters["bech32_hrp"])?;
-
-    // TODO this is temporary to merge https://github.com/iotaledger/iota-sdk/pull/570.
-    // We actually need to migrate the whole protocol_parameters, including this.
-    rename_keys(&mut protocol_parameters["rent_structure"]);
-
-    Ok(())
-}
-
-fn migrate_storage_options(storage_options: &mut serde_json::Value) -> Result<()> {
-    if !storage_options.is_null() {
-        *storage_options = serde_json::json!({
-            "path": storage_options["storage_path"],
-            "encryptionKey": storage_options["storage_encryption_key"],
-            "kind": storage_options["manager_store"]
-        });
-    }
 
     Ok(())
 }
@@ -137,9 +42,7 @@ impl MigrationData for Migrate {
 #[cfg(feature = "storage")]
 impl Migration<crate::wallet::storage::Storage> for Migrate {
     async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
-        use crate::wallet::storage::constants::{
-            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
-        };
+        use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
@@ -156,12 +59,6 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
             }
         }
 
-        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-            migrate_client_options(&mut wallet["client_options"])?;
-            migrate_storage_options(&mut wallet["storage_options"])?;
-
-            storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
-        }
         Ok(())
     }
 }
@@ -172,7 +69,7 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
     async fn migrate(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
             client::storage::StorageAdapter,
-            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
+            wallet::core::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
         };
 
         if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
@@ -181,32 +78,13 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
             }
             storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
-        if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
-            migrate_client_options(&mut client_options)?;
-
-            storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
-        }
         storage.delete("backup_schema_version").await.ok();
         Ok(())
     }
 }
 
-trait Convert {
-    type New: Serialize + DeserializeOwned;
-    type Old: DeserializeOwned;
-
-    fn check(value: &mut serde_json::Value) -> crate::wallet::Result<()> {
-        if serde_json::from_value::<Self::New>(value.clone()).is_err() {
-            *value = serde_json::to_value(Self::convert(serde_json::from_value::<Self::Old>(value.clone())?)?)?;
-        }
-        Ok(())
-    }
-
-    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New>;
-}
-
 mod types {
-    use core::{marker::PhantomData, str::FromStr};
+    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
@@ -401,73 +279,6 @@ mod types {
         Conflicting,
         UnknownPruned,
     }
-
-    #[derive(Deserialize)]
-    #[allow(non_camel_case_types)]
-    pub struct Crypto_0_18_0_Segment {
-        pub bs: [u8; 4],
-        pub hardened: bool,
-    }
-
-    pub struct Hrp {
-        inner: [u8; 83],
-        len: u8,
-    }
-
-    impl Hrp {
-        /// Convert a string to an Hrp without checking validity.
-        pub const fn from_str_unchecked(hrp: &str) -> Self {
-            let len = hrp.len();
-            let mut bytes = [0; 83];
-            let hrp = hrp.as_bytes();
-            let mut i = 0;
-            while i < len {
-                bytes[i] = hrp[i];
-                i += 1;
-            }
-            Self {
-                inner: bytes,
-                len: len as _,
-            }
-        }
-    }
-
-    impl FromStr for Hrp {
-        type Err = Error;
-
-        fn from_str(hrp: &str) -> Result<Self, Self::Err> {
-            let len = hrp.len();
-            if hrp.is_ascii() && len <= 83 {
-                let mut bytes = [0; 83];
-                bytes[..len].copy_from_slice(hrp.as_bytes());
-                Ok(Self {
-                    inner: bytes,
-                    len: len as _,
-                })
-            } else {
-                Err(Error::InvalidBech32Hrp(hrp.to_string()))
-            }
-        }
-    }
-
-    impl core::fmt::Display for Hrp {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let hrp_str = self.inner[..self.len as usize]
-                .iter()
-                .map(|b| *b as char)
-                .collect::<String>();
-            f.write_str(&hrp_str)
-        }
-    }
-
-    string_serde_impl!(Hrp);
-
-    #[derive(Serialize, Deserialize)]
-    #[repr(transparent)]
-    pub struct StringPrefix<B> {
-        pub inner: String,
-        bounded: PhantomData<B>,
-    }
 }
 
 struct ConvertIncomingTransactions;
@@ -525,25 +336,5 @@ impl Convert for ConvertOutputMetadata {
             milestone_timestamp_booked: old.milestone_timestamp_booked,
             ledger_index: old.ledger_index,
         })
-    }
-}
-
-struct ConvertSegment;
-impl Convert for ConvertSegment {
-    type New = u32;
-    type Old = types::Crypto_0_18_0_Segment;
-
-    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-        Ok(u32::from_be_bytes(old.bs))
-    }
-}
-
-struct ConvertHrp;
-impl Convert for ConvertHrp {
-    type New = types::Hrp;
-    type Old = types::StringPrefix<u8>;
-
-    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-        Ok(Self::New::from_str_unchecked(&old.inner))
     }
 }
