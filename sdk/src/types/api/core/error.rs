@@ -3,7 +3,7 @@
 
 use crate::types::block::Error as BlockError;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     InvalidField(&'static str),
     Block(BlockError),
