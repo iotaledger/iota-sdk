@@ -74,7 +74,7 @@ impl<'a> ClientBlockBuilder<'a> {
             essence = essence.with_payload(tagged_data_payload);
         }
 
-        let regular_essence = essence.finish(&self.client.get_protocol_parameters().await?)?;
+        let regular_essence = essence.finish_with_params(self.client.get_protocol_parameters().await?)?;
 
         validate_regular_transaction_essence_length(&regular_essence)?;
 

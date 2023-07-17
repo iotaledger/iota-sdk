@@ -22,14 +22,17 @@ use iota_sdk::{
         secret::SecretManage,
         utils, Client, NodeInfoWrapper,
     },
-    types::block::{
-        address::{Hrp, ToBech32Ext},
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+    types::{
+        block::{
+            address::{Hrp, ToBech32Ext},
+            output::{
+                dto::{OutputBuilderAmountDto, OutputDto},
+                AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+            },
+            signature::Ed25519Signature,
+            ConvertTo, Error,
         },
-        signature::Ed25519Signature,
-        ConvertTo, Error,
+        TryFromDto,
     },
     wallet::{
         account::{
@@ -713,7 +716,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::MinimumRequiredStorageDeposit { output } => {
                 convert_async_panics(|| async {
-                    let output = Output::try_from_dto(output, account.client().get_token_supply().await?)?;
+                    let output = Output::try_from_dto_with_params(output, account.client().get_token_supply().await?)?;
                     let rent_structure = account.client().get_rent_structure().await?;
 
                     let minimum_storage_deposit = output.rent_cost(&rent_structure);
@@ -765,7 +768,7 @@ impl WalletMessageHandler {
                         .prepare_transaction(
                             outputs
                                 .into_iter()
-                                .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
+                                .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
                                 .collect::<Result<Vec<Output>>>()?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
@@ -842,7 +845,7 @@ impl WalletMessageHandler {
                         .send_outputs(
                             outputs
                                 .into_iter()
-                                .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
+                                .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
                                 .collect::<iota_sdk::wallet::Result<Vec<_>>>()?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
@@ -856,9 +859,9 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     let signed_transaction_data = account
-                        .sign_transaction_essence(&PreparedTransactionData::try_from_dto(
+                        .sign_transaction_essence(&PreparedTransactionData::try_from_dto_with_params(
                             prepared_transaction_data,
-                            &account.client().get_protocol_parameters().await?,
+                            account.client().get_protocol_parameters().await?,
                         )?)
                         .await?;
                     Ok(Response::SignedTransactionData(SignedTransactionDataDto::from(
@@ -871,9 +874,9 @@ impl WalletMessageHandler {
                 signed_transaction_data,
             } => {
                 convert_async_panics(|| async {
-                    let signed_transaction_data = SignedTransactionData::try_from_dto(
+                    let signed_transaction_data = SignedTransactionData::try_from_dto_with_params(
                         signed_transaction_data,
-                        &account.client().get_protocol_parameters().await?,
+                        account.client().get_protocol_parameters().await?,
                     )?;
                     let transaction = account
                         .submit_and_store_transaction(signed_transaction_data, None)

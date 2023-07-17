@@ -380,7 +380,7 @@ async fn all_combined() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .finish(&protocol_parameters)?,
+        .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {

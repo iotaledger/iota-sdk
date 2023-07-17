@@ -582,14 +582,14 @@ fn serialize() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.clone())
             .unwrap(),
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
-            .finish(&protocol_parameters)
+            .finish_with_params(protocol_parameters)
             .unwrap(),
     );
 

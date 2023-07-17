@@ -14,11 +14,14 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::VecPrefix, Packable, PackableExt};
 
 pub use self::{migrated_funds_entry::MigratedFundsEntry, tail_transaction_hash::TailTransactionHash};
-use crate::types::block::{
-    output::OUTPUT_COUNT_RANGE,
-    payload::{milestone::MilestoneIndex, Payload, TreasuryTransactionPayload},
-    protocol::ProtocolParameters,
-    Error,
+use crate::types::{
+    block::{
+        output::OUTPUT_COUNT_RANGE,
+        payload::{milestone::MilestoneIndex, Payload, TreasuryTransactionPayload},
+        protocol::ProtocolParameters,
+        Error,
+    },
+    ValidationParams,
 };
 
 const MIGRATED_FUNDS_ENTRY_RANGE: RangeInclusive<u16> = OUTPUT_COUNT_RANGE;
@@ -155,9 +158,12 @@ pub mod dto {
 
     pub use super::migrated_funds_entry::dto::MigratedFundsEntryDto;
     use super::*;
-    use crate::types::block::{
-        payload::dto::{PayloadDto, TreasuryTransactionPayloadDto},
-        Error,
+    use crate::types::{
+        block::{
+            payload::dto::{PayloadDto, TreasuryTransactionPayloadDto},
+            Error,
+        },
+        TryFromDto,
     };
 
     ///
@@ -187,42 +193,43 @@ pub mod dto {
         }
     }
 
-    impl ReceiptMilestoneOption {
-        pub fn try_from_dto(value: ReceiptMilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
-            Self::new(
-                MilestoneIndex(value.migrated_at),
-                value.last,
-                value
+    impl TryFromDto for ReceiptMilestoneOption {
+        type Dto = ReceiptMilestoneOptionDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(if let Some(token_supply) = params.token_supply() {
+                Self::new(
+                    MilestoneIndex(dto.migrated_at),
+                    dto.last,
+                    dto.funds
+                        .into_iter()
+                        .map(|f| TryFromDto::try_from_dto_with_params(f, &params))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    if let PayloadDto::TreasuryTransaction(transaction) = dto.transaction {
+                        TreasuryTransactionPayload::try_from_dto_with_params(*transaction, &params)?
+                    } else {
+                        return Err(Error::InvalidField("transaction"));
+                    },
+                    token_supply,
+                )?
+            } else {
+                let funds = dto
                     .funds
                     .into_iter()
-                    .map(|f| MigratedFundsEntry::try_from_dto(f, token_supply))
-                    .collect::<Result<Vec<_>, _>>()?,
-                if let PayloadDto::TreasuryTransaction(transaction) = value.transaction {
-                    TreasuryTransactionPayload::try_from_dto(*transaction, token_supply)?
-                } else {
-                    return Err(Error::InvalidField("transaction"));
-                },
-                token_supply,
-            )
-        }
-
-        pub fn try_from_dto_unverified(value: ReceiptMilestoneOptionDto) -> Result<Self, Error> {
-            let funds = value
-                .funds
-                .into_iter()
-                .map(MigratedFundsEntry::try_from_dto_unverified)
-                .collect::<Result<Vec<_>, _>>()?;
-
-            Ok(Self {
-                migrated_at: MilestoneIndex(value.migrated_at),
-                last: value.last,
-                funds: VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds)
-                    .map_err(Error::InvalidReceiptFundsCount)?,
-                transaction: if let PayloadDto::TreasuryTransaction(transaction) = value.transaction {
-                    TreasuryTransactionPayload::try_from_dto_unverified(*transaction)?.into()
-                } else {
-                    return Err(Error::InvalidField("transaction"));
-                },
+                    .map(|f| TryFromDto::try_from_dto_with_params(f, &params))
+                    .collect::<Result<Vec<_>, _>>()?;
+                Self {
+                    migrated_at: MilestoneIndex(dto.migrated_at),
+                    last: dto.last,
+                    funds: VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds)
+                        .map_err(Error::InvalidReceiptFundsCount)?,
+                    transaction: if let PayloadDto::TreasuryTransaction(transaction) = dto.transaction {
+                        TreasuryTransactionPayload::try_from_dto_with_params(*transaction, &params)?.into()
+                    } else {
+                        return Err(Error::InvalidField("transaction"));
+                    },
+                }
             })
         }
     }

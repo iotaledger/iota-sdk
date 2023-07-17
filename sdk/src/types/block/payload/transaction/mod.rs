@@ -14,7 +14,10 @@ pub use self::{
     essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
     transaction_id::TransactionId,
 };
-use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
+use crate::types::{
+    block::{protocol::ProtocolParameters, unlock::Unlocks, Error},
+    ValidationParams,
+};
 
 /// A transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -105,7 +108,10 @@ pub mod dto {
 
     pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};
     use super::*;
-    use crate::types::block::{unlock::dto::UnlockDto, Error};
+    use crate::types::{
+        block::{unlock::dto::UnlockDto, Error},
+        TryFromDto,
+    };
 
     /// The payload type to define a value transaction.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -126,29 +132,15 @@ pub mod dto {
         }
     }
 
-    impl TransactionPayload {
-        pub fn try_from_dto(
-            value: TransactionPayloadDto,
-            protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, Error> {
-            Self::new(
-                TransactionEssence::try_from_dto(value.essence, protocol_parameters)?,
-                Unlocks::new(
-                    value
-                        .unlocks
-                        .into_iter()
-                        .map(TryInto::try_into)
-                        .collect::<Result<Box<[_]>, _>>()?,
-                )?,
-            )
-        }
+    impl TryFromDto for TransactionPayload {
+        type Dto = TransactionPayloadDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: TransactionPayloadDto) -> Result<Self, Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             Self::new(
-                TransactionEssence::try_from_dto_unverified(value.essence)?,
+                TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?,
                 Unlocks::new(
-                    value
-                        .unlocks
+                    dto.unlocks
                         .into_iter()
                         .map(TryInto::try_into)
                         .collect::<Result<Box<[_]>, _>>()?,

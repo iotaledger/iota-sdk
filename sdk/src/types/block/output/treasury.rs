@@ -1,7 +1,10 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{protocol::ProtocolParameters, Error};
+use crate::types::{
+    block::{protocol::ProtocolParameters, Error},
+    ValidationParams,
+};
 
 /// [`TreasuryOutput`] is an output which holds the treasury of a network.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -19,7 +22,7 @@ impl TreasuryOutput {
 
     /// Creates a new [`TreasuryOutput`].
     pub fn new(amount: u64, token_supply: u64) -> Result<Self, Error> {
-        verify_amount::<true>(&amount, &token_supply)?;
+        verify_amount(&amount, &token_supply)?;
 
         Ok(Self { amount })
     }
@@ -31,8 +34,8 @@ impl TreasuryOutput {
     }
 }
 
-fn verify_amount<const VERIFY: bool>(amount: &u64, token_supply: &u64) -> Result<(), Error> {
-    if VERIFY && amount > token_supply {
+fn verify_amount(amount: &u64, token_supply: &u64) -> Result<(), Error> {
+    if amount > token_supply {
         Err(Error::InvalidTreasuryOutputAmount(*amount))
     } else {
         Ok(())
@@ -43,7 +46,10 @@ fn verify_amount_packable<const VERIFY: bool>(
     amount: &u64,
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
+    if VERIFY {
+        verify_amount(amount, &protocol_parameters.token_supply())?;
+    }
+    Ok(())
 }
 
 #[allow(missing_docs)]
@@ -53,7 +59,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
+    use crate::types::{block::Error, TryFromDto};
 
     /// Describes a treasury output.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -72,17 +78,20 @@ pub mod dto {
         }
     }
 
-    impl TreasuryOutput {
-        pub fn try_from_dto(value: TreasuryOutputDto, token_supply: u64) -> Result<Self, Error> {
-            Self::new(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                token_supply,
-            )
-        }
+    impl TryFromDto for TreasuryOutput {
+        type Dto = TreasuryOutputDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: TreasuryOutputDto) -> Result<Self, Error> {
-            Ok(Self {
-                amount: value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(if let Some(token_supply) = params.token_supply() {
+                Self::new(
+                    dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                    token_supply,
+                )?
+            } else {
+                Self {
+                    amount: dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                }
             })
         }
     }

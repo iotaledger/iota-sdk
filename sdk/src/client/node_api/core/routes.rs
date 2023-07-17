@@ -26,6 +26,7 @@ use crate::{
             },
             Block, BlockDto, BlockId,
         },
+        TryFromDto,
     },
 };
 
@@ -230,7 +231,10 @@ impl ClientInner {
             .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?)
+        Ok(Block::try_from_dto_with_params(
+            dto,
+            self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Finds a block by its BlockId. This method returns the given block raw data.
@@ -272,7 +276,7 @@ impl ClientInner {
             .await?;
 
         let token_supply = self.get_token_supply().await?;
-        let output = Output::try_from_dto(response.output, token_supply)?;
+        let output = Output::try_from_dto_with_params(response.output, token_supply)?;
         let metadata = OutputMetadata::try_from(response.metadata)?;
 
         Ok(OutputWithMetadata::new(output, metadata))
@@ -360,7 +364,10 @@ impl ClientInner {
             .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
             .await?;
 
-        Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?)
+        Ok(Block::try_from_dto_with_params(
+            dto,
+            self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Returns the block, as raw bytes, that was included in the ledger for a given TransactionId.
@@ -401,9 +408,9 @@ impl ClientInner {
             .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        Ok(MilestonePayload::try_from_dto(
+        Ok(MilestonePayload::try_from_dto_with_params(
             dto,
-            &self.get_protocol_parameters().await?,
+            self.get_protocol_parameters().await?,
         )?)
     }
 
@@ -443,9 +450,9 @@ impl ClientInner {
             .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        Ok(MilestonePayload::try_from_dto(
+        Ok(MilestonePayload::try_from_dto_with_params(
             dto,
-            &self.get_protocol_parameters().await?,
+            self.get_protocol_parameters().await?,
         )?)
     }
 

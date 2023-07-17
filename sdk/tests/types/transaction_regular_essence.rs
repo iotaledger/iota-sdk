@@ -48,14 +48,14 @@ fn build_valid() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
 }
@@ -72,7 +72,7 @@ fn build_valid_with_payload() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
@@ -80,7 +80,7 @@ fn build_valid_with_payload() {
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
 }
@@ -97,14 +97,14 @@ fn build_valid_add_inputs_outputs() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
 }
@@ -121,7 +121,7 @@ fn build_invalid_payload_kind() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
@@ -129,7 +129,7 @@ fn build_invalid_payload_kind() {
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidPayloadKind(4))));
 }
@@ -143,13 +143,13 @@ fn build_invalid_input_count_low() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,
@@ -168,14 +168,14 @@ fn build_invalid_input_count_high() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input; 129])
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,
@@ -191,7 +191,7 @@ fn build_invalid_output_count_low() {
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,
@@ -210,14 +210,14 @@ fn build_invalid_output_count_high() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
         .with_outputs(vec![output; 129])
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,
@@ -236,14 +236,14 @@ fn build_invalid_duplicate_utxo() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input; 2])
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::DuplicateUtxo(_))));
 }
@@ -258,14 +258,14 @@ fn build_invalid_input_kind() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidInputKind(1))));
 }
@@ -281,7 +281,7 @@ fn build_invalid_output_kind() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
         .add_output(output)
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidOutputKind(2))));
 }
@@ -298,7 +298,7 @@ fn build_invalid_accumulated_output() {
     let output1 = Output::Basic(
         BasicOutput::build_with_amount(amount1)
             .add_unlock_condition(AddressUnlockCondition::new(address1))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
@@ -308,14 +308,14 @@ fn build_invalid_accumulated_output() {
     let output2 = Output::Basic(
         BasicOutput::build_with_amount(amount2)
             .add_unlock_condition(AddressUnlockCondition::new(address2))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
         .with_outputs([output1, output2])
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidTransactionAmountSum(_))));
 }
@@ -332,7 +332,7 @@ fn getters() {
     let outputs = [Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     )];
     let payload = Payload::from(rand_tagged_data_payload());
@@ -341,7 +341,7 @@ fn getters() {
         .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
-        .finish(&protocol_parameters)
+        .finish_with_params(&protocol_parameters)
         .unwrap();
 
     assert_eq!(essence.outputs(), outputs.as_slice());
@@ -370,7 +370,7 @@ fn duplicate_output_nft() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,
@@ -400,7 +400,7 @@ fn duplicate_output_nft_null() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
 }
@@ -428,7 +428,7 @@ fn duplicate_output_alias() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, alias.clone(), alias])
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,
@@ -462,7 +462,7 @@ fn duplicate_output_foundry() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, foundry.clone(), foundry])
-        .finish(&protocol_parameters);
+        .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
         essence,

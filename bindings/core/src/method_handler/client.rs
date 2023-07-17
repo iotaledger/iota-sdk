@@ -21,6 +21,7 @@ use iota_sdk::{
             protocol::dto::ProtocolParametersDto,
             Block, BlockDto,
         },
+        TryFromDto,
     },
 };
 #[cfg(feature = "mqtt")]
@@ -260,9 +261,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::SignedTransaction(PayloadDto::from(
                 &block_builder
-                    .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-                        prepared_transaction_data,
-                    )?)
+                    .sign_transaction(PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                     .await?,
             ))
         }
@@ -270,9 +269,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let block_builder = client.build_block();
 
             let block = block_builder
-                .finish_block(Some(Payload::try_from_dto(
+                .finish_block(Some(Payload::try_from_dto_with_params(
                     payload,
-                    &client.get_protocol_parameters().await?,
+                    client.get_protocol_parameters().await?,
                 )?))
                 .await?;
 
@@ -297,7 +296,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto(block, &client.get_protocol_parameters().await?)?)
+                .post_block(&Block::try_from_dto_with_params(
+                    block,
+                    client.get_protocol_parameters().await?,
+                )?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
@@ -457,7 +459,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
         ClientMethod::MinimumRequiredStorageDeposit { output } => {
-            let output = Output::try_from_dto(output, client.get_token_supply().await?)?;
+            let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
             let rent_structure = client.get_rent_structure().await?;
 
             let minimum_storage_deposit = output.rent_cost(&rent_structure);

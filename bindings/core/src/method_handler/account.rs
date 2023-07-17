@@ -9,7 +9,10 @@ use iota_sdk::{
         input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
         SignedTransactionDataDto,
     },
-    types::block::output::{dto::OutputDto, Output},
+    types::{
+        block::output::{dto::OutputDto, Output},
+        TryFromDto,
+    },
     wallet::account::{
         types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions,
     },
@@ -236,7 +239,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .prepare_transaction(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
+                        .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
                         .collect::<Result<Vec<Output>>>()?,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
@@ -275,7 +278,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .send_outputs(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
+                        .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
                         .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
@@ -295,9 +298,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .sign_and_submit_transaction(
-                    PreparedTransactionData::try_from_dto(
+                    PreparedTransactionData::try_from_dto_with_params(
                         prepared_transaction_data,
-                        &account.client().get_protocol_parameters().await?,
+                        account.client().get_protocol_parameters().await?,
                     )?,
                     None,
                 )
@@ -308,9 +311,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             prepared_transaction_data,
         } => {
             let signed_transaction_data = account
-                .sign_transaction_essence(&PreparedTransactionData::try_from_dto(
+                .sign_transaction_essence(&PreparedTransactionData::try_from_dto_with_params(
                     prepared_transaction_data,
-                    &account.client().get_protocol_parameters().await?,
+                    account.client().get_protocol_parameters().await?,
                 )?)
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
@@ -318,9 +321,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::SubmitAndStoreTransaction {
             signed_transaction_data,
         } => {
-            let signed_transaction_data = SignedTransactionData::try_from_dto(
+            let signed_transaction_data = SignedTransactionData::try_from_dto_with_params(
                 signed_transaction_data,
-                &account.client().get_protocol_parameters().await?,
+                account.client().get_protocol_parameters().await?,
             )?;
             let transaction = account
                 .submit_and_store_transaction(signed_transaction_data, None)

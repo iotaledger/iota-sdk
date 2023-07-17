@@ -27,7 +27,10 @@ pub use self::{
     option::{MilestoneOption, MilestoneOptions, ParametersMilestoneOption, ReceiptMilestoneOption},
 };
 pub(crate) use self::{essence::MilestoneMetadataLength, option::BinaryParametersLength};
-use crate::types::block::{protocol::ProtocolParameters, signature::Signature, Error};
+use crate::types::{
+    block::{protocol::ProtocolParameters, signature::Signature, Error},
+    ValidationParams,
+};
 
 #[derive(Debug)]
 #[allow(missing_docs)]
@@ -168,8 +171,9 @@ pub mod dto {
 
     use self::option::dto::MilestoneOptionDto;
     use super::*;
-    use crate::types::block::{
-        parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error,
+    use crate::types::{
+        block::{parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error},
+        TryFromDto,
     };
 
     /// The payload type to define a milestone.
@@ -210,89 +214,36 @@ pub mod dto {
         }
     }
 
-    impl MilestonePayload {
-        // TODO: find a solution to factorize.
-        pub fn try_from_dto(
-            value: MilestonePayloadDto,
-            protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, Error> {
+    impl TryFromDto for MilestonePayload {
+        type Dto = MilestonePayloadDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             let essence = {
-                let index = value.index;
-                let timestamp = value.timestamp;
-                let previous_milestone_id = MilestoneId::from_str(&value.previous_milestone_id)
+                let index = dto.index;
+                let timestamp = dto.timestamp;
+                let protocol_version = dto.protocol_version;
+                let previous_milestone_id = MilestoneId::from_str(&dto.previous_milestone_id)
                     .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
-                let parent_ids = value
+
+                let parent_ids = dto
                     .parents
                     .into_iter()
                     .map(|block_id| block_id.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<_, _>>()?;
 
-                let inclusion_merkle_root = MerkleRoot::from_str(&value.inclusion_merkle_root)
+                let inclusion_merkle_root = MerkleRoot::from_str(&dto.inclusion_merkle_root)
                     .map_err(|_| Error::InvalidField("inclusionMerkleRoot"))?;
-                let applied_merkle_root = MerkleRoot::from_str(&value.applied_merkle_root)
+                let applied_merkle_root = MerkleRoot::from_str(&dto.applied_merkle_root)
                     .map_err(|_| Error::InvalidField("appliedMerkleRoot"))?;
                 let options = MilestoneOptions::try_from(
-                    value
-                        .options
+                    dto.options
                         .into_iter()
-                        .map(|o| MilestoneOption::try_from_dto(o, protocol_parameters.token_supply()))
+                        .map(|dto| MilestoneOption::try_from_dto_with_params(dto, &params))
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
-                let metadata = if !value.metadata.is_empty() {
-                    prefix_hex::decode(&value.metadata).map_err(|_| Error::InvalidField("metadata"))?
-                } else {
-                    Vec::new()
-                };
-
-                MilestoneEssence::new(
-                    MilestoneIndex(index),
-                    timestamp,
-                    protocol_parameters.protocol_version(),
-                    previous_milestone_id,
-                    Parents::from_vec(parent_ids)?,
-                    inclusion_merkle_root,
-                    applied_merkle_root,
-                    metadata,
-                    options,
-                )?
-            };
-
-            let signatures = value
-                .signatures
-                .into_iter()
-                .map(|v| v.try_into().map_err(|_| Error::InvalidField("signatures")))
-                .collect::<Result<Vec<_>, _>>()?;
-
-            Self::new(essence, signatures)
-        }
-
-        pub fn try_from_dto_unverified(value: MilestonePayloadDto) -> Result<Self, Error> {
-            let essence = {
-                let index = value.index;
-                let timestamp = value.timestamp;
-                let protocol_version = value.protocol_version;
-                let previous_milestone_id = MilestoneId::from_str(&value.previous_milestone_id)
-                    .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
-
-                let parent_ids = value
-                    .parents
-                    .into_iter()
-                    .map(|block_id| block_id.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
-                    .collect::<Result<_, _>>()?;
-
-                let inclusion_merkle_root = MerkleRoot::from_str(&value.inclusion_merkle_root)
-                    .map_err(|_| Error::InvalidField("inclusionMerkleRoot"))?;
-                let applied_merkle_root = MerkleRoot::from_str(&value.applied_merkle_root)
-                    .map_err(|_| Error::InvalidField("appliedMerkleRoot"))?;
-                let options = MilestoneOptions::try_from(
-                    value
-                        .options
-                        .into_iter()
-                        .map(MilestoneOption::try_from_dto_unverified)
-                        .collect::<Result<Vec<_>, _>>()?,
-                )?;
-                let metadata = if !value.metadata.is_empty() {
-                    prefix_hex::decode(&value.metadata).map_err(|_| Error::InvalidField("metadata"))?
+                let metadata = if !dto.metadata.is_empty() {
+                    prefix_hex::decode(&dto.metadata).map_err(|_| Error::InvalidField("metadata"))?
                 } else {
                     Vec::new()
                 };
@@ -311,7 +262,7 @@ pub mod dto {
             };
 
             let mut signatures = Vec::new();
-            for v in value.signatures {
+            for v in dto.signatures {
                 signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 

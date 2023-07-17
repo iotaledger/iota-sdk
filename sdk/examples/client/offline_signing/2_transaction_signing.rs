@@ -16,7 +16,7 @@ use iota_sdk::{
         secret::{SecretManage, SecretManager},
         Result,
     },
-    types::block::payload::transaction::TransactionPayload,
+    types::{block::payload::transaction::TransactionPayload, TryFromDto},
 };
 
 const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";
@@ -56,9 +56,9 @@ async fn read_prepared_transaction_from_file(path: impl AsRef<std::path::Path>) 
     let mut json = String::new();
     file.read_to_string(&mut json).await.expect("failed to read file");
 
-    Ok(PreparedTransactionData::try_from_dto_unverified(
-        serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
-    )?)
+    Ok(PreparedTransactionData::try_from_dto(serde_json::from_str::<
+        PreparedTransactionDataDto,
+    >(&json)?)?)
 }
 
 async fn write_signed_transaction_to_file(

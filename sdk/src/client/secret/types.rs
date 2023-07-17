@@ -7,13 +7,15 @@ use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::Result,
-    types::block::{
-        address::Address,
-        output::{
-            dto::{OutputDto, OutputMetadataDto},
-            Output, OutputId, OutputMetadata,
+    types::{
+        block::{
+            address::Address,
+            output::{
+                dto::{OutputDto, OutputMetadataDto},
+                Output, OutputId, OutputMetadata,
+            },
         },
+        TryFromDto, ValidationParams,
     },
     utils::serde::bip44::option_bip44,
 };
@@ -183,21 +185,15 @@ pub struct InputSigningDataDto {
     pub chain: Option<Bip44>,
 }
 
-#[allow(missing_docs)]
-impl InputSigningData {
-    pub fn try_from_dto(input: InputSigningDataDto, token_supply: u64) -> Result<Self> {
-        Ok(Self {
-            output: Output::try_from_dto(input.output, token_supply)?,
-            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
-            chain: input.chain,
-        })
-    }
+impl TryFromDto for InputSigningData {
+    type Dto = InputSigningDataDto;
+    type Error = crate::client::Error;
 
-    pub fn try_from_dto_unverified(input: InputSigningDataDto) -> Result<Self> {
+    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            output: Output::try_from_dto_unverified(input.output)?,
-            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
-            chain: input.chain,
+            output: Output::try_from_dto_with_params_inner(dto.output, params)?,
+            output_metadata: OutputMetadata::try_from(dto.output_metadata)?,
+            chain: dto.chain,
         })
     }
 }

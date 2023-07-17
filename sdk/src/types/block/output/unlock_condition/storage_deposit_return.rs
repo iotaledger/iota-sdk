@@ -1,7 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error};
+use crate::types::{
+    block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error},
+    ValidationParams,
+};
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -46,8 +49,7 @@ impl StorageDepositReturnUnlockCondition {
 
 fn verify_amount<const VERIFY: bool>(amount: &u64, token_supply: &u64) -> Result<(), Error> {
     if VERIFY {
-        verify_output_amount::<VERIFY>(amount, token_supply)
-            .map_err(|_| Error::InvalidStorageDepositAmount(*amount))?;
+        verify_output_amount(amount, token_supply).map_err(|_| Error::InvalidStorageDepositAmount(*amount))?;
     }
 
     Ok(())
@@ -67,7 +69,10 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::{
+        block::{address::dto::AddressDto, Error},
+        TryFromDto,
+    };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -88,19 +93,22 @@ pub mod dto {
         }
     }
 
-    impl StorageDepositReturnUnlockCondition {
-        pub fn try_from_dto(value: StorageDepositReturnUnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
-            Self::new(
-                Address::try_from(value.return_address)?,
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                token_supply,
-            )
-        }
+    impl TryFromDto for StorageDepositReturnUnlockCondition {
+        type Dto = StorageDepositReturnUnlockConditionDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: StorageDepositReturnUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self {
-                return_address: Address::try_from(value.return_address)?,
-                amount: value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(if let Some(token_supply) = params.token_supply() {
+                Self::new(
+                    Address::try_from(dto.return_address)?,
+                    dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                    token_supply,
+                )?
+            } else {
+                Self {
+                    return_address: Address::try_from(dto.return_address)?,
+                    amount: dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                }
             })
         }
     }

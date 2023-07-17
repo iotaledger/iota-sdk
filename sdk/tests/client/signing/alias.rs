@@ -94,7 +94,7 @@ async fn sign_alias_state_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .finish(&protocol_parameters)?,
+        .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -185,7 +185,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .finish(&protocol_parameters)?,
+        .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -302,7 +302,11 @@ async fn alias_reference_unlocks() -> Result<()> {
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(
             protocol_parameters.network_id(),
-            InputsCommitment::new(inputs.iter().map(|i| &i.output)),
+            InputsCommitment::new(
+                inputs
+                    .iter()
+                    .map(|i: &iota_sdk::client::secret::types::InputSigningData| &i.output),
+            ),
         )
         .with_inputs(
             inputs
@@ -311,7 +315,7 @@ async fn alias_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .finish(&protocol_parameters)?,
+        .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {

@@ -6,12 +6,15 @@ use alloc::vec::Vec;
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{
-    input::{Input, INPUT_COUNT_RANGE},
-    output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
-    payload::{OptionalPayload, Payload},
-    protocol::ProtocolParameters,
-    Error,
+use crate::types::{
+    block::{
+        input::{Input, INPUT_COUNT_RANGE},
+        output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        payload::{OptionalPayload, Payload},
+        protocol::ProtocolParameters,
+        Error,
+    },
+    ValidationParams,
 };
 
 /// A builder to build a [`RegularTransactionEssence`].
@@ -68,12 +71,18 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Finishes a [`RegularTransactionEssenceBuilder`] into a [`RegularTransactionEssence`].
-    pub fn finish(self, protocol_parameters: &ProtocolParameters) -> Result<RegularTransactionEssence, Error> {
-        if self.network_id != protocol_parameters.network_id() {
-            return Err(Error::NetworkIdMismatch {
-                expected: protocol_parameters.network_id(),
-                actual: self.network_id,
-            });
+    pub fn finish_with_params<'a>(
+        self,
+        params: impl Into<ValidationParams<'a>> + Send,
+    ) -> Result<RegularTransactionEssence, Error> {
+        let params = params.into();
+        if let Some(protocol_parameters) = params.protocol_parameters() {
+            if self.network_id != protocol_parameters.network_id() {
+                return Err(Error::NetworkIdMismatch {
+                    expected: protocol_parameters.network_id(),
+                    actual: self.network_id,
+                });
+            }
         }
 
         let inputs: BoxedSlicePrefix<Input, InputCount> = self
@@ -90,7 +99,9 @@ impl RegularTransactionEssenceBuilder {
             .try_into()
             .map_err(Error::InvalidOutputCount)?;
 
-        verify_outputs::<true>(&outputs, protocol_parameters)?;
+        if let Some(protocol_parameters) = params.protocol_parameters() {
+            verify_outputs::<true>(&outputs, protocol_parameters)?;
+        }
 
         verify_payload::<true>(&self.payload)?;
 
@@ -104,32 +115,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     ///
-    pub fn finish_unverified(self) -> Result<RegularTransactionEssence, Error> {
-        let inputs: BoxedSlicePrefix<Input, InputCount> = self
-            .inputs
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidInputCount)?;
-
-        verify_inputs::<true>(&inputs)?;
-
-        let outputs: BoxedSlicePrefix<Output, OutputCount> = self
-            .outputs
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidOutputCount)?;
-
-        verify_outputs_unverified::<true>(&outputs)?;
-
-        verify_payload::<true>(&self.payload)?;
-
-        Ok(RegularTransactionEssence {
-            network_id: self.network_id,
-            inputs,
-            inputs_commitment: self.inputs_commitment,
-            outputs,
-            payload: self.payload,
-        })
+    pub fn finish(self) -> Result<RegularTransactionEssence, Error> {
+        self.finish_with_params(ValidationParams::default())
     }
 }
 
@@ -275,45 +262,6 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
     Ok(())
 }
 
-// TODO: find a solution to avoid this duplication.
-fn verify_outputs_unverified<const VERIFY: bool>(outputs: &[Output]) -> Result<(), Error> {
-    if VERIFY {
-        let mut amount_sum: u64 = 0;
-        let mut native_tokens_count: u8 = 0;
-        let mut chain_ids = HashSet::new();
-
-        for output in outputs.iter() {
-            let (amount, native_tokens, chain_id) = match output {
-                Output::Basic(output) => (output.amount(), output.native_tokens(), None),
-                Output::Alias(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                Output::Foundry(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                Output::Nft(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                _ => return Err(Error::InvalidOutputKind(output.kind())),
-            };
-
-            amount_sum = amount_sum
-                .checked_add(amount)
-                .ok_or(Error::InvalidTransactionAmountSum(amount_sum as u128 + amount as u128))?;
-
-            native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
-                Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
-            )?;
-
-            if native_tokens_count > NativeTokens::COUNT_MAX {
-                return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
-            }
-
-            if let Some(chain_id) = chain_id {
-                if !chain_id.is_null() && !chain_ids.insert(chain_id) {
-                    return Err(Error::DuplicateOutputChain(chain_id));
-                }
-            }
-        }
-    }
-
-    Ok(())
-}
-
 fn verify_payload<const VERIFY: bool>(payload: &OptionalPayload) -> Result<(), Error> {
     if VERIFY {
         match &payload.0 {
@@ -343,7 +291,10 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error};
+    use crate::types::{
+        block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        TryFromDto,
+    };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -376,32 +327,32 @@ pub mod dto {
         }
     }
 
-    impl RegularTransactionEssence {
-        pub fn try_from_dto(
-            value: RegularTransactionEssenceDto,
-            protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, Error> {
-            let outputs = value
+    impl TryFromDto for RegularTransactionEssence {
+        type Dto = RegularTransactionEssenceDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let outputs = dto
                 .outputs
                 .into_iter()
-                .map(|o| Output::try_from_dto(o, protocol_parameters.token_supply()))
+                .map(|o| Output::try_from_dto_with_params(o, &params))
                 .collect::<Result<Vec<Output>, Error>>()?;
 
-            let network_id = value
+            let network_id = dto
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let inputs = value
+            let inputs = dto
                 .inputs
                 .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<Vec<Input>, Error>>()?;
 
-            let mut builder = Self::builder(network_id, InputsCommitment::from_str(&value.inputs_commitment)?)
+            let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
                 .with_inputs(inputs)
                 .with_outputs(outputs);
 
-            builder = if let Some(p) = value.payload {
+            builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
                     builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
                 } else {
@@ -411,41 +362,7 @@ pub mod dto {
                 builder
             };
 
-            builder.finish(protocol_parameters).map_err(Into::into)
-        }
-
-        pub fn try_from_dto_unverified(value: RegularTransactionEssenceDto) -> Result<Self, Error> {
-            let outputs = value
-                .outputs
-                .into_iter()
-                .map(Output::try_from_dto_unverified)
-                .collect::<Result<Vec<Output>, Error>>()?;
-
-            let network_id = value
-                .network_id
-                .parse::<u64>()
-                .map_err(|_| Error::InvalidField("network_id"))?;
-            let inputs = value
-                .inputs
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<Input>, Error>>()?;
-
-            let mut builder = Self::builder(network_id, InputsCommitment::from_str(&value.inputs_commitment)?)
-                .with_inputs(inputs)
-                .with_outputs(outputs);
-
-            builder = if let Some(p) = value.payload {
-                if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
-                } else {
-                    return Err(Error::InvalidField("payload"));
-                }
-            } else {
-                builder
-            };
-
-            builder.finish_unverified().map_err(Into::into)
+            builder.finish_with_params(params).map_err(Into::into)
         }
     }
 }

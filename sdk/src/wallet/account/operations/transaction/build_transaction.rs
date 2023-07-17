@@ -60,7 +60,7 @@ where
             essence_builder = essence_builder.with_payload(options.tagged_data_payload);
         }
 
-        let essence = essence_builder.finish(&protocol_parameters)?;
+        let essence = essence_builder.finish_with_params(protocol_parameters)?;
 
         validate_regular_transaction_essence_length(&essence)?;
 

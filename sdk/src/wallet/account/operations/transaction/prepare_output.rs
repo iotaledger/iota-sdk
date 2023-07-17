@@ -97,7 +97,7 @@ where
             }
         }
 
-        let first_output = first_output_builder.finish(token_supply)?;
+        let first_output = first_output_builder.finish_with_params(token_supply)?;
 
         let mut second_output_builder = BasicOutputBuilder::from(&first_output);
 
@@ -147,7 +147,7 @@ where
             }
         }
 
-        let second_output = second_output_builder.finish(token_supply)?;
+        let second_output = second_output_builder.finish_with_params(token_supply)?;
 
         let required_storage_deposit = Output::Basic(second_output.clone()).rent_cost(&rent_structure);
 
@@ -271,7 +271,7 @@ where
 
         let first_output = first_output_builder
             .with_minimum_storage_deposit(rent_structure)
-            .finish(token_supply)?;
+            .finish_with_params(token_supply)?;
 
         let mut second_output_builder = NftOutputBuilder::from(&first_output);
 
@@ -321,7 +321,7 @@ where
             }
         }
 
-        let second_output = second_output_builder.finish(token_supply)?;
+        let second_output = second_output_builder.finish_with_params(token_supply)?;
 
         let required_storage_deposit = Output::Nft(second_output.clone()).rent_cost(&rent_structure);
 

@@ -13,18 +13,24 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{
-    address::{Address, AliasAddress},
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent,
-        RentStructure, StateTransitionError, StateTransitionVerifier,
+use super::verify_output_amount_packable;
+use crate::types::{
+    block::{
+        address::{Address, AliasAddress},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    ValidationParams,
 };
 
 /// Types of alias transition.
@@ -240,7 +246,7 @@ impl AliasOutputBuilder {
     }
 
     ///
-    pub fn finish_unverified(self) -> Result<AliasOutput, Error> {
+    pub fn finish(self) -> Result<AliasOutput, Error> {
         let state_index = self.state_index.unwrap_or(0);
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
@@ -287,17 +293,19 @@ impl AliasOutputBuilder {
     }
 
     ///
-    pub fn finish(self, token_supply: u64) -> Result<AliasOutput, Error> {
-        let output = self.finish_unverified()?;
+    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<AliasOutput, Error> {
+        let output = self.finish()?;
 
-        verify_output_amount::<true>(&output.amount, &token_supply)?;
+        if let Some(token_supply) = params.into().token_supply() {
+            verify_output_amount(&output.amount, &token_supply)?;
+        }
 
         Ok(output)
     }
 
     /// Finishes the [`AliasOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Alias(self.finish(token_supply)?))
+    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
+        Ok(Output::Alias(self.finish_with_params(params)?))
     }
 }
 
@@ -619,7 +627,7 @@ impl Packable for AliasOutput {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        verify_output_amount::<VERIFY>(&amount, &visitor.token_supply()).map_err(UnpackError::Packable)?;
+        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let alias_id = AliasId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -706,9 +714,14 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{
-        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
-        Error,
+    use crate::types::{
+        block::{
+            output::{
+                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
+            },
+            Error,
+        },
+        TryFromDto,
     };
 
     /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
@@ -758,81 +771,50 @@ pub mod dto {
         }
     }
 
+    impl TryFromDto for AliasOutput {
+        type Dto = AliasOutputDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let mut builder = AliasOutputBuilder::new_with_amount(
+                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                dto.alias_id,
+            );
+
+            builder = builder.with_state_index(dto.state_index);
+
+            if !dto.state_metadata.is_empty() {
+                builder = builder.with_state_metadata(
+                    prefix_hex::decode::<Vec<_>>(&dto.state_metadata)
+                        .map_err(|_| Error::InvalidField("state_metadata"))?,
+                );
+            }
+
+            builder = builder.with_foundry_counter(dto.foundry_counter);
+
+            for t in dto.native_tokens {
+                builder = builder.add_native_token(t);
+            }
+
+            for b in dto.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for b in dto.immutable_features {
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+            }
+
+            for u in dto.unlock_conditions {
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+            }
+
+            builder.finish_with_params(params)
+        }
+    }
+
     impl AliasOutput {
-        pub fn try_from_dto(value: AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = AliasOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.alias_id,
-            );
-
-            builder = builder.with_state_index(value.state_index);
-
-            if !value.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(
-                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
-                        .map_err(|_| Error::InvalidField("state_metadata"))?,
-                );
-            }
-
-            builder = builder.with_foundry_counter(value.foundry_counter);
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: AliasOutputDto) -> Result<Self, Error> {
-            let mut builder = AliasOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.alias_id,
-            );
-
-            builder = builder.with_state_index(value.state_index);
-
-            if !value.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(
-                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
-                        .map_err(|_| Error::InvalidField("state_metadata"))?,
-                );
-            }
-
-            builder = builder.with_foundry_counter(value.foundry_counter);
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
+        pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
             alias_id: &AliasId,
@@ -842,8 +824,9 @@ pub mod dto {
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
+            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
+            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
@@ -872,7 +855,7 @@ pub mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
+                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
@@ -892,7 +875,7 @@ pub mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish(token_supply)
+            builder.finish_with_params(params)
         }
     }
 }
@@ -902,24 +885,27 @@ mod tests {
     use packable::PackableExt;
 
     use super::*;
-    use crate::types::block::{
-        address::AliasAddress,
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            FoundryId, SimpleTokenScheme, TokenId,
-        },
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_alias_address,
+    use crate::types::{
+        block::{
+            address::AliasAddress,
             output::{
-                feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
-                rand_alias_id, rand_alias_output,
-                unlock_condition::{
-                    rand_governor_address_unlock_condition_different_from,
-                    rand_state_controller_address_unlock_condition_different_from,
+                dto::{OutputBuilderAmountDto, OutputDto},
+                FoundryId, SimpleTokenScheme, TokenId,
+            },
+            protocol::protocol_parameters,
+            rand::{
+                address::rand_alias_address,
+                output::{
+                    feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
+                    rand_alias_id, rand_alias_output,
+                    unlock_condition::{
+                        rand_governor_address_unlock_condition_different_from,
+                        rand_state_controller_address_unlock_condition_different_from,
+                    },
                 },
             },
         },
+        TryFromDto,
     };
 
     #[test]
@@ -945,7 +931,7 @@ mod tests {
             .replace_immutable_feature(issuer_1)
             .add_immutable_feature(issuer_2);
 
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_1));
         assert_eq!(
             output.unlock_conditions().state_controller_address(),
@@ -960,7 +946,7 @@ mod tests {
             .clear_immutable_features()
             .replace_unlock_condition(gov_address_2)
             .replace_unlock_condition(state_address_2);
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_2));
         assert_eq!(
             output.unlock_conditions().state_controller_address(),
@@ -977,7 +963,7 @@ mod tests {
             .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
             .with_features([Feature::from(metadata.clone()), sender_1.into()])
             .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
             .unwrap();
 
         assert_eq!(
@@ -1004,9 +990,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_alias_output(protocol_parameters.token_supply());
         let dto = OutputDto::Alias((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
+        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_alias());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto_with_params(dto, protocol_parameters.clone()).unwrap();
         assert_eq!(&output, output_ver.as_alias());
 
         let output_split = AliasOutput::try_from_dtos(
@@ -1019,7 +1005,7 @@ mod tests {
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().iter().map(Into::into).collect()),
             Some(output.immutable_features().iter().map(Into::into).collect()),
-            protocol_parameters.token_supply(),
+            protocol_parameters.clone(),
         )
         .unwrap();
         assert_eq!(output, output_split);
@@ -1040,11 +1026,11 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),
                 Some(builder.immutable_features.iter().map(Into::into).collect()),
-                protocol_parameters.token_supply(),
+                protocol_parameters.clone(),
             )
             .unwrap();
             assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                builder.finish_with_params(protocol_parameters.clone()).unwrap(),
                 output_split
             );
         };

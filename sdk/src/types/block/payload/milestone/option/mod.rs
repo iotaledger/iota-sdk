@@ -15,7 +15,10 @@ pub use self::{
     parameters::ParametersMilestoneOption,
     receipt::{MigratedFundsEntry, ReceiptMilestoneOption, TailTransactionHash},
 };
-use crate::types::block::{protocol::ProtocolParameters, Error};
+use crate::types::{
+    block::{protocol::ProtocolParameters, Error},
+    ValidationParams,
+};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
@@ -181,7 +184,7 @@ pub mod dto {
         receipt::dto::{MigratedFundsEntryDto, ReceiptMilestoneOptionDto},
     };
     use super::*;
-    use crate::types::block::Error;
+    use crate::types::{block::Error, TryFromDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum MilestoneOptionDto {
@@ -254,17 +257,15 @@ pub mod dto {
         }
     }
 
-    impl MilestoneOption {
-        pub fn try_from_dto(value: MilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(match value {
-                MilestoneOptionDto::Receipt(v) => Self::Receipt(ReceiptMilestoneOption::try_from_dto(v, token_supply)?),
-                MilestoneOptionDto::Parameters(v) => Self::Parameters(v.try_into()?),
-            })
-        }
+    impl TryFromDto for MilestoneOption {
+        type Dto = MilestoneOptionDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: MilestoneOptionDto) -> Result<Self, Error> {
-            Ok(match value {
-                MilestoneOptionDto::Receipt(v) => Self::Receipt(ReceiptMilestoneOption::try_from_dto_unverified(v)?),
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(match dto {
+                MilestoneOptionDto::Receipt(v) => {
+                    Self::Receipt(ReceiptMilestoneOption::try_from_dto_with_params_inner(v, params)?)
+                }
                 MilestoneOptionDto::Parameters(v) => Self::Parameters(v.try_into()?),
             })
         }

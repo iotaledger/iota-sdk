@@ -67,7 +67,11 @@ pub use self::{
     treasury::TreasuryOutput,
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-use crate::types::block::{address::Address, protocol::ProtocolParameters, semantic::ValidationContext, Error};
+use super::protocol::ProtocolParameters;
+use crate::types::{
+    block::{address::Address, semantic::ValidationContext, Error},
+    ValidationParams,
+};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -473,8 +477,8 @@ impl Rent for Output {
     }
 }
 
-pub(crate) fn verify_output_amount<const VERIFY: bool>(amount: &u64, token_supply: &u64) -> Result<(), Error> {
-    if VERIFY && (*amount < Output::AMOUNT_MIN || amount > token_supply) {
+pub(crate) fn verify_output_amount(amount: &u64, token_supply: &u64) -> Result<(), Error> {
+    if *amount < Output::AMOUNT_MIN || amount > token_supply {
         Err(Error::InvalidOutputAmount(*amount))
     } else {
         Ok(())
@@ -485,7 +489,10 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
     amount: &u64,
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_output_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
+    if VERIFY {
+        verify_output_amount(amount, &protocol_parameters.token_supply())?;
+    }
+    Ok(())
 }
 
 /// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
@@ -495,7 +502,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
     // not important, we are only interested in the storage requirements of the type.
     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(*address))
-        .finish(token_supply)
+        .finish_with_params(token_supply)
         .unwrap()
         .amount()
 }
@@ -517,7 +524,7 @@ pub mod dto {
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };
-    use crate::types::block::Error;
+    use crate::types::{block::Error, TryFromDto};
 
     #[derive(Clone, Debug, From)]
     #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
@@ -557,24 +564,17 @@ pub mod dto {
         }
     }
 
-    impl Output {
-        pub fn try_from_dto(value: OutputDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(match value {
-                OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto(o, token_supply)?),
-            })
-        }
+    impl TryFromDto for Output {
+        type Dto = OutputDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: OutputDto) -> Result<Self, Error> {
-            Ok(match value {
-                OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto_unverified(o)?),
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_unverified(o)?),
-                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto_unverified(o)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_unverified(o)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_unverified(o)?),
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(match dto {
+                OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto_with_params_inner(o, params)?),
+                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_with_params_inner(o, params)?),
+                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto_with_params_inner(o, params)?),
+                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_with_params_inner(o, params)?),
+                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_with_params_inner(o, params)?),
             })
         }
     }
