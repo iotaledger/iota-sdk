@@ -429,8 +429,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             options['output'] = options.pop('output').as_dict()
 
         if 'outputs' in options:
-            options['outputs'] = [ v.as_dict() for v in options['outputs'] ]
-
+            options['outputs'] = [v.as_dict() for v in options['outputs']]
 
         if 'coin_type' in options:
             options['coin_type'] = int(options.pop('coin_type'))
