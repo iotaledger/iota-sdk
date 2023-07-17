@@ -40,7 +40,7 @@ async function run() {
             );
         }
 
-        console.log(`Balance before melting:`, token.available.toString());
+        console.log(`Balance before melting: ${token.available}`);
 
         // Melt some of the circulating supply
         const transaction = await account
@@ -67,7 +67,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-        console.log(`Balance after melting:`, token.available.toString());
+        console.log(`Balance after melting: ${token.available}`);
     } catch (error) {
         console.log('Error: ', error);
     }

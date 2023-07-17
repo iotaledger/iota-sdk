@@ -30,7 +30,7 @@ async function run() {
         await account.sync();
 
         console.log(
-            `Sending '${SEND_MICRO_AMOUNT.toString()}' coin(s) to '${RECV_ADDRESS}'...`,
+            `Sending '${SEND_MICRO_AMOUNT}' coin(s) to '${RECV_ADDRESS}'...`,
         );
         const params: SendParams[] = [
             { address: RECV_ADDRESS, amount: SEND_MICRO_AMOUNT },

@@ -39,7 +39,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-        console.log(`Balance before minting:`, token.available.toString());
+        console.log(`Balance before minting: ${token.available}`);
 
         // Mint some more native tokens
         const transaction = await account
@@ -66,7 +66,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-        console.log(`Balance after minting:`, token.available.toString());
+        console.log(`Balance after minting: ${token.available}`);
     } catch (error) {
         console.log('Error: ', error);
     }
