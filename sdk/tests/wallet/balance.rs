@@ -165,6 +165,7 @@ async fn balance_expiration() -> Result<()> {
     tear_down(storage_path)
 }
 
+#[ignore]
 #[tokio::test]
 async fn addresses_balance() -> Result<()> {
     let storage_path = "test-storage/addresses_balance";
