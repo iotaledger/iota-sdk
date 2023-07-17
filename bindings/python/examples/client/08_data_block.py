@@ -22,6 +22,5 @@ print(f'Block data: {json.dumps(asdict(block), indent=4)}')
 
 payload = block.payload
 
-# ! TODO - should the data be in the tagged_data?
 if payload and 'data' in payload and payload['data']:
     print(f'Decoded data: { hex_to_utf8(payload["data"]) }')
