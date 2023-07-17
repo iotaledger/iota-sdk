@@ -44,9 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::prepare_send_nft()` now accepts `SendNftParams`;
 - `Account::send_outputs()` now accepts `Output`;
 - `Account::{generate_ed25519_addresses(), addresses()}` now return `AccountAddress`;
-- `Account::addresses_with_unspent_outputs()` returns now `AddressWithUnspentOutputs`;
-- `Account::prepare_output()` returns now `Output`;
-- `Wallet::get_accounts()` returns now `List[Account]`;
+- `Account::addresses_with_unspent_outputs()` now returns `AddressWithUnspentOutputs`;
+- `Account::prepare_output()` now returns `Output`;
+- `Wallet::get_accounts()` now returns `List[Account]`;
 - `OutputData.chain` is now `Optional[Bip44]`;
 
 ### Fixed
