@@ -63,7 +63,7 @@ async function run() {
             {
                 address:
                     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu',
-                amount: '1000000',
+                amount: BigInt(1000000),
             },
         ];
         const options = {

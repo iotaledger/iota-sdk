@@ -49,22 +49,19 @@ async function run() {
         const addressOutputs = await client.getOutputs(outputIdsResponse.items);
 
         // Calculate the total amount and native tokens
-        let totalAmount = 0;
-        const totalNativeTokens: { [id: string]: number } = {};
+        let totalAmount = BigInt(0);
+        const totalNativeTokens: { [id: string]: bigint } = {};
         for (const outputResponse of addressOutputs) {
             const output = outputResponse['output'];
             if (output instanceof CommonOutput) {
-                (output as CommonOutput)
-                    .getNativeTokens()
-                    ?.forEach(
-                        (token) =>
-                            (totalNativeTokens[token.id] =
-                                (totalNativeTokens[token.id] || 0) +
-                                parseInt(token.amount)),
-                    );
+                (output as CommonOutput).getNativeTokens()?.forEach((token) => {
+                    totalNativeTokens[token.id] =
+                        (totalNativeTokens[token.id] || BigInt(0)) +
+                        token.amount;
+                });
             }
 
-            totalAmount += parseInt(output.getAmount());
+            totalAmount += output.getAmount();
         }
 
         console.log(

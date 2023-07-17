@@ -3,10 +3,10 @@
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The minimum available native token amount to search for in the account, 11 hex encoded.
-const MIN_AVAILABLE_AMOUNT = '0xB';
-// The amount of the native token to burn, 1 hex encoded.
-const BURN_AMOUNT = '0x1';
+// The minimum available native token amount to search for in the account.
+const MIN_AVAILABLE_AMOUNT = BigInt(11);
+// The amount of the native token to burn.
+const BURN_AMOUNT = BigInt(1);
 
 // In this example we will burn a native token. This will not increase the melted supply in the foundry,
 // therefore the foundry output is also not required. But this will also make it impossible to destroy the foundry
@@ -30,13 +30,13 @@ async function run() {
 
         // Get a token with sufficient balance
         const tokenId = balance.nativeTokens.find(
-            (t) => Number(t.available) >= Number(MIN_AVAILABLE_AMOUNT),
+            (t) => t.available >= MIN_AVAILABLE_AMOUNT,
         )?.tokenId;
 
         let token = balance.nativeTokens.find(
             (nativeToken) =>
                 nativeToken.tokenId == tokenId &&
-                Number(nativeToken.available) >= Number(MIN_AVAILABLE_AMOUNT),
+                Number(nativeToken.available) >= MIN_AVAILABLE_AMOUNT,
         );
         if (!token) {
             throw new Error(
@@ -46,7 +46,7 @@ async function run() {
             );
         }
 
-        console.log(`Balance before burning: ${parseInt(token.available)}`);
+        console.log(`Balance before burning: ${token.available}`);
 
         // Burn a native token
         const transaction = await account
@@ -70,7 +70,7 @@ async function run() {
             (nativeToken) => nativeToken.tokenId == tokenId,
         );
         if (token) {
-            console.log(`Balance after burning: ${parseInt(token.available)}`);
+            console.log(`Balance after burning: ${token.available}`);
         } else {
             console.log(`No remaining tokens`);
         }
