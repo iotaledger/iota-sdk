@@ -5,8 +5,6 @@ import {
     Block,
     Client,
     initLogger,
-    MilestonePayload,
-    parsePayload,
 } from '@iota/sdk';
 import { plainToInstance } from 'class-transformer';
 
@@ -38,19 +36,7 @@ async function run() {
         }
 
         const parsed = JSON.parse(data);
-        if (parsed.topic == 'milestone') {
-            const payload = parsePayload(
-                JSON.parse(parsed.payload),
-            ) as MilestonePayload;
-            const index = payload.index;
-            const previousMilestone = payload.previousMilestoneId;
-            console.log(
-                'New milestone index' +
-                    index +
-                    ', previous ID: ' +
-                    previousMilestone,
-            );
-        } else if (parsed.topic == 'blocks') {
+        if (parsed.topic == 'blocks') {
             const block = plainToInstance(Block, JSON.parse(parsed.payload));
             console.log('payload:', block.payload);
         }
