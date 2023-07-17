@@ -1,5 +1,7 @@
+from dataclasses import asdict
 from iota_sdk import Client
 from dotenv import load_dotenv
+import json
 import os
 
 load_dotenv()
@@ -15,8 +17,8 @@ print(f'Block id: {block_ids[0]}')
 
 # Get the metadata for the block
 metadata = client.get_block_metadata(block_ids[0])
-print(f'Block metadata: {metadata}')
+print(f'Block metadata: {json.dumps(asdict(metadata), indent=4)}')
 
 # Request the block by its id
 block = client.get_block_data(block_ids[0])
-print(f'Block: {metadata}')
+print(f'Block: {json.dumps(asdict(block), indent=4)}')

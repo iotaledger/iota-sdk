@@ -1,5 +1,8 @@
+from dataclasses import asdict
 from iota_sdk import Client, utf8_to_hex, hex_to_utf8
 from dotenv import load_dotenv
+from pprint import pprint
+import json
 import os
 
 load_dotenv()
@@ -16,7 +19,7 @@ block = client.build_and_post_block(
 print(f'Data block sent: {os.environ["EXPLORER_URL"]}/block/{block[0]}')
 
 block = client.get_block_data(block[0])
-print(f'Block data: {block}')
+print(f'Block data: {json.dumps(asdict(block), indent=4)}')
 
 payload = block.payload
 

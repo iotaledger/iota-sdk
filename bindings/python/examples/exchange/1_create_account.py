@@ -19,8 +19,9 @@ if 'STRONGHOLD_SNAPSHOT_PATH' not in os.environ:
         ".env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example")
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
+if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
+    raise Exception(
+        ".env NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1 is undefined, see .env.example")
 
 client_options = {
     'nodes': [os.environ.get('NODE_URL')],
@@ -34,7 +35,7 @@ wallet = Wallet(os.environ.get('WALLET_DB_PATH'),
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be done once
 wallet.store_mnemonic(
-    os.environ['MNEMONIC'])
+    os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 account = wallet.create_account('Alice')
 
