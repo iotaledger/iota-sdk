@@ -87,20 +87,15 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
 
     // Get accounts
-    let restored_accounts = if let Some(opts) = &client_options {
-        stronghold
-            .get::<Vec<AccountDetailsDto>>(ACCOUNTS_KEY)
-            .await?
-            .map(|v| {
-                v.into_iter()
-                    .map(|dto| AccountDetails::try_from_dto(dto, &opts.network_info.protocol_parameters))
-                    .collect::<Result<Vec<_>, _>>()
-            })
-            .transpose()?
-    } else {
-        // TODO: Should we use `try_from_dto_unverified` here?
-        None
-    };
+    let restored_accounts = stronghold
+        .get::<Vec<AccountDetailsDto>>(ACCOUNTS_KEY)
+        .await?
+        .map(|v| {
+            v.into_iter()
+                .map(|dto| AccountDetails::try_from_dto_unverified(dto))
+                .collect::<Result<Vec<_>, _>>()
+        })
+        .transpose()?;
 
     Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
 }

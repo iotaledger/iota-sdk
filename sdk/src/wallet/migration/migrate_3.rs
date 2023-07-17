@@ -40,9 +40,9 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
             if let Some(version) = params.remove("protocol_version") {
                 params.insert("version".to_owned(), version);
             }
+            ConvertNetworkName::check(&mut wallet["client_options"]["protocolParameters"]["network_name"])?;
+            ConvertTokenSupply::check(&mut wallet["client_options"]["protocolParameters"]["token_supply"])?;
             rename_keys(&mut wallet);
-            ConvertNetworkName::check(&mut wallet["clientOptions"]["protocolParameters"]["networkName"])?;
-            ConvertTokenSupply::check(&mut wallet["clientOptions"]["protocolParameters"]["tokenSupply"])?;
 
             storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
         }
@@ -71,9 +71,9 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
             if let Some(version) = params.remove("protocol_version") {
                 params.insert("version".to_owned(), version);
             }
+            ConvertNetworkName::check(&mut client_options["protocolParameters"]["network_name"])?;
+            ConvertTokenSupply::check(&mut client_options["protocolParameters"]["token_supply"])?;
             rename_keys(&mut client_options);
-            ConvertNetworkName::check(&mut client_options["protocolParameters"]["networkName"])?;
-            ConvertTokenSupply::check(&mut client_options["protocolParameters"]["tokenSupply"])?;
 
             storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
         }
@@ -114,12 +114,14 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
         ConvertTransaction::check(transaction)?;
     }
 
-    for foundry_output in account["nativeTokenFoundries"]
-        .as_object_mut()
-        .ok_or(Error::Storage("malformatted foundry outputs".to_owned()))?
-        .values_mut()
-    {
-        ConvertFoundryOutput::check(foundry_output)?;
+    if let Some(foundries) = account.get_mut("nativeTokenFoundries") {
+        for foundry_output in foundries
+            .as_object_mut()
+            .ok_or(Error::Storage("malformatted foundry outputs".to_owned()))?
+            .values_mut()
+        {
+            ConvertFoundryOutput::check(foundry_output)?;
+        }
     }
 
     Ok(())
