@@ -25,8 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Account::get_metadata()`;
 - `Bip44` type;
-- `SendParams, SendNativeTokensParams, SendNftParams, CreateNativeTokenParams, MintNftParams, CreateAliasOutputParams`;
+- `SendParams, SendNativeTokensParams, SendNftParams, CreateNativeTokenParams, MintNftParams, CreateAliasOutputParams, OutputParams, Assets, Features, Unlocks, ReturnStrategy, StorageDeposit`;
 - `AccountAddress, AddressWithUnspentOutputs`;
+- `FilterOptions`;
+- `NetworkInfo`;
 
 ### Changed
 

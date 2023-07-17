@@ -11,6 +11,7 @@ from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, Node, AddressAndAmount
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import Output
 from iota_sdk.types.token_scheme import TokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
@@ -454,10 +455,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('getNode')
 
-    def get_network_info(self) -> Dict[str, Any]:
+    def get_network_info(self) -> NetworkInfo:
         """Gets the network related information such as network_id and min_pow_score.
         """
-        return self._call_method('getNetworkInfo')
+        return from_dict(NetworkInfo, self._call_method('getNetworkInfo'))
 
     def get_network_id(self) -> int:
         """Gets the network id of the node we're connecting to.
