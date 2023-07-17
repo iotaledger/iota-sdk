@@ -119,7 +119,12 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let r = client.get_outputs(&output_ids_response.items).await.unwrap();
+    println!("{r:#?}");
 
+    let r = client.get_outputs_ignore_errors(&output_ids_response.items).await.unwrap();
+    println!("{r:#?}");
+
+    let r = client.get_outputs_metadata_ignore_errors(&output_ids_response.items).await.unwrap();
     println!("{r:#?}");
 }
 
@@ -153,6 +158,19 @@ async fn test_get_output_raw() {
     .unwrap();
 
     assert_eq!(output, output_raw);
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_get_output_metadata() {
+    let (_block_id, transaction_id) = setup_transaction_block().await;
+    let output_id = OutputId::new(transaction_id, 0).unwrap();
+
+    let client = setup_client_with_node_health_ignored().await;
+
+    let r = client.get_output_metadata(&output_id).await.unwrap();
+
+    println!("{r:#?}");
 }
 
 #[ignore]
@@ -338,6 +356,18 @@ async fn test_get_included_block_raw() {
     .unwrap();
 
     assert_eq!(block, block_raw);
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_get_included_block_metadata() {
+    let (_block_id, transaction_id) = setup_transaction_block().await;
+
+    let client = setup_client_with_node_health_ignored().await;
+
+    let r = client.get_included_block_metadata(&transaction_id).await.unwrap();
+
+    println!("{r:#?}");
 }
 
 #[ignore]
