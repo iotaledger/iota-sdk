@@ -58,7 +58,7 @@ mod storage_stub {
                 let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
                 log::debug!("get_secret_manager {secret_manager_dto:?}");
 
-                Ok(Some(WalletBuilder::from(data).with_secret_manager(
+                Ok(Some(Self::from(data).with_secret_manager(
                     secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
                 )))
             } else {
