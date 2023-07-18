@@ -1,11 +1,15 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::sync::{Arc, Mutex};
+
 use crypto::keys::bip39::Mnemonic;
 #[cfg(feature = "ledger_nano")]
 use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
+#[cfg(feature = "events")]
+use iota_sdk::wallet::events::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
@@ -119,6 +123,20 @@ async fn wallet_address_generation_ledger() -> Result<()> {
         "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
     );
 
+    let address_event = Arc::new(Mutex::new(None));
+    let address_event_clone = address_event.clone();
+
+    #[cfg(feature = "events")]
+    wallet
+        .listen([WalletEventType::LedgerAddressGeneration], move |event| {
+            if let WalletEvent::LedgerAddressGeneration(address) = &event.event {
+                *address_event_clone.lock().unwrap() = Some(address.address);
+            } else {
+                panic!("expected LedgerAddressGeneration")
+            }
+        })
+        .await;
+
     let address = wallet
         .generate_ed25519_address(
             0,
@@ -132,6 +150,13 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
+        // Address generated with bip32 path: [44, 4218, 0, 0, 0].
+        // This address was generated with a MnemonicSecretManager and the ledger simulator mnemonic.
+        "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
+    );
+
+    assert_eq!(
+        address_event.lock().unwrap().unwrap(),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         // This address was generated with a MnemonicSecretManager and the ledger simulator mnemonic.
         "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
