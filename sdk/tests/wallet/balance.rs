@@ -208,7 +208,6 @@ async fn addresses_balance() -> Result<()> {
     let balance_1_sync = account_1.balance().await?;
     assert!(balance_1.base_coin().available() > 0);
     assert_eq!(balance_1, balance_1_sync);
-    println!("{:?}", &balance_1_sync);
     
     // Internal transfer on account 1
     let acc_1_addr_2 = &account_1.generate_ed25519_addresses(1, None).await?[0];
