@@ -321,7 +321,7 @@ impl Convert for ConvertIncomingTransactions {
     }
 }
 
-pub(super) struct ConvertOutputMetadata;
+struct ConvertOutputMetadata;
 impl Convert for ConvertOutputMetadata {
     type New = types::OutputMetadata;
     type Old = types::OutputMetadataDto;

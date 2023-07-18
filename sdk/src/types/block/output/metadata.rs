@@ -5,7 +5,6 @@ use crate::types::block::{output::OutputId, payload::transaction::TransactionId,
 
 /// Metadata of an [`Output`](crate::types::block::output::Output).
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(rename_all = "camelCase"))]
 pub struct OutputMetadata {
     /// The identifier of the block in which the output was included.
     block_id: BlockId,
@@ -14,13 +13,10 @@ pub struct OutputMetadata {
     /// Whether the output is spent or not.
     is_spent: bool,
     /// If spent, the index of the milestone in which the output was spent.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     milestone_index_spent: Option<u32>,
     /// If spent, the timestamp of the milestone in which the output was spent.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     milestone_timestamp_spent: Option<u32>,
     /// If spent, the identifier of the transaction that spent the output.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     transaction_id_spent: Option<TransactionId>,
     /// The index of the milestone that booked the output.
     milestone_index_booked: u32,
@@ -120,86 +116,75 @@ impl OutputMetadata {
 
 #[cfg(feature = "serde")]
 mod dto {
-    use serde::Deserialize;
+    use serde::{Deserialize, Serialize};
 
     use super::*;
 
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct OutputMetadataDto {
+        pub block_id: BlockId,
+        pub transaction_id: TransactionId,
+        pub output_index: u16,
+        pub is_spent: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub milestone_index_spent: Option<u32>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub milestone_timestamp_spent: Option<u32>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub transaction_id_spent: Option<TransactionId>,
+        pub milestone_index_booked: u32,
+        pub milestone_timestamp_booked: u32,
+        pub ledger_index: u32,
+    }
+
+    impl TryFrom<OutputMetadataDto> for OutputMetadata {
+        type Error = crate::types::block::Error;
+
+        fn try_from(value: OutputMetadataDto) -> Result<Self, Self::Error> {
+            Ok(Self {
+                block_id: value.block_id,
+                output_id: OutputId::new(value.transaction_id, value.output_index)?,
+                is_spent: value.is_spent,
+                milestone_index_spent: value.milestone_index_spent,
+                milestone_timestamp_spent: value.milestone_timestamp_spent,
+                transaction_id_spent: value.transaction_id_spent,
+                milestone_index_booked: value.milestone_index_booked,
+                milestone_timestamp_booked: value.milestone_timestamp_booked,
+                ledger_index: value.ledger_index,
+            })
+        }
+    }
+
+    impl From<&OutputMetadata> for OutputMetadataDto {
+        fn from(value: &OutputMetadata) -> Self {
+            Self {
+                block_id: value.block_id,
+                transaction_id: *value.transaction_id(),
+                output_index: value.output_index(),
+                is_spent: value.is_spent,
+                milestone_index_spent: value.milestone_index_spent,
+                milestone_timestamp_spent: value.milestone_timestamp_spent,
+                transaction_id_spent: value.transaction_id_spent,
+                milestone_index_booked: value.milestone_index_booked,
+                milestone_timestamp_booked: value.milestone_timestamp_booked,
+                ledger_index: value.ledger_index,
+            }
+        }
+    }
+
     impl<'de> Deserialize<'de> for OutputMetadata {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            #[derive(Deserialize)]
-            #[serde(untagged)]
-            enum OutputMetadataAlias {
-                V1(OutputMetadataV1),
-                V2(OutputMetadataV2),
-            }
+            OutputMetadataDto::deserialize(d).and_then(|dto| dto.try_into().map_err(serde::de::Error::custom))
+        }
+    }
 
-            #[derive(Deserialize)]
-            #[serde(rename_all = "camelCase")]
-            struct OutputMetadataV1 {
-                pub block_id: BlockId,
-                pub transaction_id: TransactionId,
-                pub output_index: u16,
-                pub is_spent: bool,
-                #[serde(default)]
-                pub milestone_index_spent: Option<u32>,
-                #[serde(default)]
-                pub milestone_timestamp_spent: Option<u32>,
-                #[serde(default)]
-                pub transaction_id_spent: Option<TransactionId>,
-                pub milestone_index_booked: u32,
-                pub milestone_timestamp_booked: u32,
-                pub ledger_index: u32,
-            }
-
-            #[derive(Deserialize)]
-            #[serde(rename_all = "camelCase")]
-            struct OutputMetadataV2 {
-                pub block_id: BlockId,
-                pub output_id: OutputId,
-                pub is_spent: bool,
-                #[serde(default)]
-                pub milestone_index_spent: Option<u32>,
-                #[serde(default)]
-                pub milestone_timestamp_spent: Option<u32>,
-                #[serde(default)]
-                pub transaction_id_spent: Option<TransactionId>,
-                pub milestone_index_booked: u32,
-                pub milestone_timestamp_booked: u32,
-                pub ledger_index: u32,
-            }
-
-            impl TryFrom<OutputMetadataAlias> for OutputMetadata {
-                type Error = crate::types::block::Error;
-
-                fn try_from(value: OutputMetadataAlias) -> Result<Self, Self::Error> {
-                    Ok(match value {
-                        OutputMetadataAlias::V1(value) => Self {
-                            block_id: value.block_id,
-                            output_id: OutputId::new(value.transaction_id, value.output_index)?,
-                            is_spent: value.is_spent,
-                            milestone_index_spent: value.milestone_index_spent,
-                            milestone_timestamp_spent: value.milestone_timestamp_spent,
-                            transaction_id_spent: value.transaction_id_spent,
-                            milestone_index_booked: value.milestone_index_booked,
-                            milestone_timestamp_booked: value.milestone_timestamp_booked,
-                            ledger_index: value.ledger_index,
-                        },
-                        OutputMetadataAlias::V2(value) => Self {
-                            block_id: value.block_id,
-                            output_id: value.output_id,
-                            is_spent: value.is_spent,
-                            milestone_index_spent: value.milestone_index_spent,
-                            milestone_timestamp_spent: value.milestone_timestamp_spent,
-                            transaction_id_spent: value.transaction_id_spent,
-                            milestone_index_booked: value.milestone_index_booked,
-                            milestone_timestamp_booked: value.milestone_timestamp_booked,
-                            ledger_index: value.ledger_index,
-                        },
-                    })
-                }
-            }
-
-            OutputMetadataAlias::deserialize(d).and_then(|alias| alias.try_into().map_err(serde::de::Error::custom))
+    impl Serialize for OutputMetadata {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            OutputMetadataDto::from(self).serialize(s)
         }
     }
 }

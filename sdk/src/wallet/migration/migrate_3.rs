@@ -132,13 +132,17 @@ mod types {
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
 
-    use super::{migrate_0::types::OutputId, migrate_1::types::NewNativeToken as NativeToken, migrate_2::types::Bip44};
+    use super::{
+        migrate_0::types::{OutputId, OutputMetadata, OutputMetadataDto},
+        migrate_1::types::NewNativeToken as NativeToken,
+        migrate_2::types::Bip44,
+    };
 
     #[derive(Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct OutputData {
         pub output_id: Value,
-        pub metadata: Value,
+        pub metadata: OutputMetadata,
         pub output: Output,
         pub is_spent: bool,
         pub address: Address,
@@ -151,7 +155,7 @@ mod types {
     #[serde(rename_all = "camelCase")]
     pub struct OutputDataDto {
         pub output_id: Value,
-        pub metadata: Value,
+        pub metadata: OutputMetadataDto,
         pub output: OutputDto,
         pub is_spent: bool,
         pub address: AddressDto,
@@ -1182,7 +1186,18 @@ impl Convert for ConvertOutputData {
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(Self::New {
             output_id: old.output_id,
-            metadata: old.metadata,
+            metadata: migrate_0::types::OutputMetadataDto {
+                block_id: old.metadata.block_id,
+                transaction_id: old.metadata.output_id.transaction_id.to_string(),
+                output_index: old.metadata.output_id.index,
+                is_spent: old.metadata.is_spent,
+                milestone_index_spent: old.metadata.milestone_index_spent,
+                milestone_timestamp_spent: old.metadata.milestone_timestamp_spent,
+                transaction_id_spent: old.metadata.transaction_id_spent.as_ref().map(ToString::to_string),
+                milestone_index_booked: old.metadata.milestone_index_booked,
+                milestone_timestamp_booked: old.metadata.milestone_timestamp_booked,
+                ledger_index: old.metadata.ledger_index,
+            },
             output: old.output.into(),
             is_spent: old.is_spent,
             address: old.address.into(),
@@ -1198,10 +1213,7 @@ impl Convert for ConvertTransaction {
     type New = types::TransactionDto;
     type Old = types::Transaction;
 
-    fn convert(mut old: Self::Old) -> crate::wallet::Result<Self::New> {
-        for input in &mut old.inputs {
-            migrate_0::ConvertOutputMetadata::check(&mut input["metadata"])?;
-        }
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(Self::New {
             payload: old.payload.into(),
             block_id: old.block_id,
