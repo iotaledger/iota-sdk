@@ -14,6 +14,7 @@ from .types.address import *
 from .types.balance import *
 from .types.block import *
 from .types.burn import *
+from .types.client_options import *
 from .types.common import *
 from .types.event import *
 from .types.feature import *
