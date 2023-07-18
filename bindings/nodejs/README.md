@@ -2,19 +2,27 @@
 
 ## Table of contents
 
-- [Requirements](#requirements)
-- [Getting Started](#getting-started)
-    - [Install the IOTA SDK](#installation-using-a-package-manager)
-- [Client](#client-usage)
-- [Wallet](#wallet-usage)
-- [Examples](#examples)
-- [API Reference](#api-reference)
-- [Available Scripts](#available-scripts)
-    - [`install`](#npm-install-or-yarn-install)
-    - [`build`](#npm-build-or-yarn-build)
-    - [`test`](#npm-test-or-yarn-test)
-- [Important Files and Directories](#important-files-and-directories)
-- [Learn More](#learn-more)
+- [IOTA SDK Library - Node.js binding](#iota-sdk-library---nodejs-binding)
+  - [Table of contents](#table-of-contents)
+  - [Requirements](#requirements)
+    - [Windows](#windows)
+  - [Getting Started](#getting-started)
+    - [Installation Using a Package Manager](#installation-using-a-package-manager)
+      - [npm](#npm)
+      - [Yarn:](#yarn)
+    - [Install the Binding from Source](#install-the-binding-from-source)
+      - [Build nodejs bindings](#build-nodejs-bindings)
+  - [Client Usage](#client-usage)
+  - [Wallet Usage](#wallet-usage)
+  - [Examples](#examples)
+  - [API Reference](#api-reference)
+  - [Available Scripts](#available-scripts)
+    - [`npm install` or `yarn install`](#npm-install-or-yarn-install)
+    - [`npm run build` or `yarn build`](#npm-run-build-or-yarn-build)
+    - [`npm run test` or `yarn test`](#npm-run-test-or-yarn-test)
+    - [`npm run create-api-docs` or `yarn create-api-docs`](#npm-run-create-api-docs-or-yarn-create-api-docs)
+  - [Important Files and Directories](#important-files-and-directories)
+  - [Learn More](#learn-more)
 
 ## Requirements
 
@@ -128,7 +136,7 @@ const wallet = new Wallet(walletOptions);
 
 ## Examples
 
-You can use the provided code [examples](examples) to get acquainted with the IOTA SDK. You can use the following
+You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples) to get acquainted with the IOTA SDK. You can use the following
 command to run any example:
 
 ```bash
