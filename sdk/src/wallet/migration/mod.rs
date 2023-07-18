@@ -4,6 +4,7 @@
 mod migrate_0;
 mod migrate_1;
 mod migrate_2;
+mod migrate_3;
 
 use std::collections::HashMap;
 
@@ -27,7 +28,7 @@ static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| 
     #[cfg(feature = "storage")]
     {
         use super::storage::Storage;
-        const STORAGE_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<Storage>); 3] = [
+        const STORAGE_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<Storage>); 4] = [
             // In order to add a new storage migration, add an entry at the bottom of this list
             // and change the list length above.
             // The entry should be in the form of a key-value pair, from previous migration to next.
@@ -35,13 +36,14 @@ static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| 
             (None, &migrate_0::Migrate),
             (Some(migrate_0::Migrate::ID), &migrate_1::Migrate),
             (Some(migrate_1::Migrate::ID), &migrate_2::Migrate),
+            (Some(migrate_2::Migrate::ID), &migrate_3::Migrate),
         ];
         migrations.insert(std::collections::HashMap::from(STORAGE_MIGRATIONS));
     }
     #[cfg(feature = "stronghold")]
     {
         use crate::client::stronghold::StrongholdAdapter;
-        const BACKUP_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<StrongholdAdapter>); 3] = [
+        const BACKUP_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<StrongholdAdapter>); 4] = [
             // In order to add a new backup migration, and add an entry at the bottom of this list
             // and change the list length above.
             // The entry should be in the form of a key-value pair, from previous migration to next.
@@ -49,6 +51,7 @@ static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| 
             (None, &migrate_0::Migrate),
             (Some(migrate_0::Migrate::ID), &migrate_1::Migrate),
             (Some(migrate_1::Migrate::ID), &migrate_2::Migrate),
+            (Some(migrate_2::Migrate::ID), &migrate_3::Migrate),
         ];
         migrations.insert(LatestBackupMigration(BACKUP_MIGRATIONS.last().unwrap().1.version()));
         migrations.insert(std::collections::HashMap::from(BACKUP_MIGRATIONS));
@@ -155,8 +158,8 @@ trait Convert {
     type Old: DeserializeOwned;
 
     fn check(value: &mut serde_json::Value) -> crate::wallet::Result<()> {
-        if serde_json::from_value::<Self::New>(value.clone()).is_err() {
-            *value = serde_json::to_value(Self::convert(serde_json::from_value::<Self::Old>(value.clone())?)?)?;
+        if Self::New::deserialize(&*value).is_err() {
+            *value = serde_json::to_value(Self::convert(Self::Old::deserialize(&*value)?)?)?;
         }
         Ok(())
     }

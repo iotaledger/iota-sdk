@@ -247,6 +247,15 @@ export type __RetryTransactionUntilIncludedMethod__ = {
 export type __SendMethod__ = {
     name: 'send';
     data: {
+        amount: string;
+        address: string;
+        options?: TransactionOptions;
+    };
+};
+
+export type __SendWithParamsMethod__ = {
+    name: 'sendWithParams';
+    data: {
         params: SendParams[];
         options?: TransactionOptions;
     };

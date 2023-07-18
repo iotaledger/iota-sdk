@@ -17,7 +17,8 @@ Python binding to the [iota-sdk library](/README.md).
 
 - [Python 3.10+](https://www.python.org)
 - [pip ^21.x](https://pypi.org/project/pip)
-- `Rust` and `Cargo` to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+- `Rust` and `Cargo` to compile the binding. Install
+  them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
 ## Getting Started
 
@@ -57,6 +58,12 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Client Usage
 
+The following example creates a [`Client`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/)
+instance connected to
+the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
+calling [`Client.get_info()`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/_node_core_api/#get_info),
+and then print the node's information.
+
 ```python
 from iota_sdk import Client
 
@@ -69,6 +76,12 @@ print(f'{node_info}')
 ```
 
 ## Wallet Usage
+
+The following example will create a
+new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/account/)
+that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
+[`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
+to safely store a seed derived from a mnemonic, and then print the account's information.
 
 ```python
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType
@@ -93,7 +106,8 @@ print(account.get_metadata())
 
 ## Examples
 
-You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to
+run any example:
 
 ```bash
 python3 example/[example file]
@@ -107,17 +121,9 @@ python3 examples/client/00_get_info.py
 
 ## API Reference
 
-To generate the Python API reference you need to first install the needed dependencies with the following command:
+You can find the API reference for the Python bindings in the
+[IOTA Wiki](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/).
 
-```bash
-pip install -r requirements-dev.txt
-```
-
-and afterwards you can generate them with:
-
-```bash
-PYTHONPATH=. pydoc-markdown
-```
 
 ## Learn More
 

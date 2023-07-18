@@ -15,7 +15,6 @@ pub(crate) mod update;
 use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
-    str::FromStr,
     sync::Arc,
 };
 
@@ -67,8 +66,8 @@ use crate::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
             },
-            BlockId,
         },
+        TryFromDto,
     },
     wallet::{account::types::InclusionState, Result},
 };
@@ -92,9 +91,8 @@ pub struct FilterOptions {
 }
 
 /// Details of an account.
-#[derive(Clone, Debug, Eq, PartialEq, Getters, Setters, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Getters, Setters)]
 #[getset(get = "pub")]
-#[serde(rename_all = "camelCase")]
 pub struct AccountDetails {
     /// The account index
     index: u32,
@@ -133,10 +131,8 @@ pub struct AccountDetails {
     /// Some incoming transactions can be pruned by the node before we requested them, then this node can never return
     /// it. To avoid useless requests, these transaction ids are stored here and cleared when new client options are
     /// set, because another node might still have them.
-    #[serde(default)]
     inaccessible_incoming_transactions: HashSet<TransactionId>,
     /// Foundries for native tokens in outputs
-    #[serde(default)]
     native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
@@ -453,13 +449,11 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
     let TransactionEssence::Regular(tx_essence) = &tx_payload.essence();
     Ok(Transaction {
         payload: tx_payload.clone(),
-        block_id: inputs
-            .first()
-            .and_then(|i| BlockId::from_str(&i.metadata.block_id).ok()),
+        block_id: inputs.first().map(|i| *i.metadata.block_id()),
         inclusion_state: InclusionState::Confirmed,
         timestamp: inputs
             .first()
-            .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
+            .and_then(|i| i.metadata.milestone_timestamp_spent().map(|t| t as u128 * 1000))
             .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
         network_id: tx_essence.network_id(),
@@ -500,6 +494,53 @@ pub struct AccountDetailsDto {
     /// Foundries for native tokens in outputs
     #[serde(default)]
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
+}
+
+impl TryFromDto for AccountDetails {
+    type Dto = AccountDetailsDto;
+    type Error = crate::wallet::Error;
+
+    fn try_from_dto_with_params_inner(
+        dto: Self::Dto,
+        params: crate::types::ValidationParams<'_>,
+    ) -> core::result::Result<Self, Self::Error> {
+        Ok(Self {
+            index: dto.index,
+            coin_type: dto.coin_type,
+            alias: dto.alias,
+            public_addresses: dto.public_addresses,
+            internal_addresses: dto.internal_addresses,
+            addresses_with_unspent_outputs: dto.addresses_with_unspent_outputs,
+            outputs: dto
+                .outputs
+                .into_iter()
+                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            locked_outputs: dto.locked_outputs,
+            unspent_outputs: dto
+                .unspent_outputs
+                .into_iter()
+                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            transactions: dto
+                .transactions
+                .into_iter()
+                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            pending_transactions: dto.pending_transactions,
+            incoming_transactions: dto
+                .incoming_transactions
+                .into_iter()
+                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            inaccessible_incoming_transactions: Default::default(),
+            native_token_foundries: dto
+                .native_token_foundries
+                .into_iter()
+                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+        })
+    }
 }
 
 impl From<&AccountDetails> for AccountDetailsDto {
@@ -544,6 +585,8 @@ impl From<&AccountDetails> for AccountDetailsDto {
 
 #[test]
 fn serialize() {
+    use core::str::FromStr;
+
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
@@ -638,7 +681,13 @@ fn serialize() {
         native_token_foundries: HashMap::new(),
     };
 
-    serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
+    let deser_account = AccountDetails::try_from_dto(
+        serde_json::from_str::<AccountDetailsDto>(&serde_json::to_string(&AccountDetailsDto::from(&account)).unwrap())
+            .unwrap(),
+    )
+    .unwrap();
+
+    assert_eq!(account, deser_account);
 }
 
 #[cfg(test)]
@@ -649,6 +698,7 @@ impl AccountDetails {
     /// defaults.
     #[cfg(feature = "storage")]
     pub(crate) fn mock() -> Self {
+        use core::str::FromStr;
         Self {
             index: 0,
             coin_type: 4218,

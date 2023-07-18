@@ -123,7 +123,7 @@ impl Address {
     pub fn unlock(
         &self,
         unlock: &Unlock,
-        inputs: &[(OutputId, &Output)],
+        inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         match (self, unlock) {
@@ -149,7 +149,7 @@ impl Address {
             (Self::Alias(alias_address), Unlock::Alias(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Alias(alias_output)) = inputs[unlock.index() as usize] {
-                    if &alias_output.alias_id_non_null(&output_id) != alias_address.alias_id() {
+                    if &alias_output.alias_id_non_null(output_id) != alias_address.alias_id() {
                         return Err(ConflictReason::InvalidUnlock);
                     }
                     if !context.unlocked_addresses.contains(self) {
@@ -162,7 +162,7 @@ impl Address {
             (Self::Nft(nft_address), Unlock::Nft(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Nft(nft_output)) = inputs[unlock.index() as usize] {
-                    if &nft_output.nft_id_non_null(&output_id) != nft_address.nft_id() {
+                    if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
                         return Err(ConflictReason::InvalidUnlock);
                     }
                     if !context.unlocked_addresses.contains(self) {

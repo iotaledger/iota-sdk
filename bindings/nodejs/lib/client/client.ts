@@ -137,6 +137,20 @@ export class Client {
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
     ): Promise<[BlockId, Block]> {
+        if (
+            options &&
+            options.output &&
+            typeof options.output.amount === 'bigint'
+        ) {
+            options.output.amount = options.output.amount.toString(10);
+        }
+        if (
+            options &&
+            options.outputHex &&
+            typeof options.outputHex.amount === 'bigint'
+        ) {
+            options.outputHex.amount = options.outputHex.amount.toString(10);
+        }
         const response = await this.methodHandler.callMethod({
             name: 'buildAndPostBlock',
             data: {
@@ -209,13 +223,13 @@ export class Client {
      */
     async findInputs(
         addresses: string[],
-        amount: number,
+        amount: bigint,
     ): Promise<UTXOInput[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findInputs',
             data: {
                 addresses,
-                amount,
+                amount: Number(amount),
             },
         });
 
@@ -932,6 +946,9 @@ export class Client {
     async buildBasicOutput(
         params: BasicOutputBuilderParams,
     ): Promise<BasicOutput> {
+        if (params.amount && typeof params.amount === 'bigint') {
+            params.amount = params.amount.toString(10);
+        }
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
             data: params,
@@ -947,6 +964,9 @@ export class Client {
     async buildAliasOutput(
         params: AliasOutputBuilderParams,
     ): Promise<AliasOutput> {
+        if (params.amount && typeof params.amount === 'bigint') {
+            params.amount = params.amount.toString(10);
+        }
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
             data: params,
@@ -962,6 +982,9 @@ export class Client {
     async buildFoundryOutput(
         params: FoundryOutputBuilderParams,
     ): Promise<FoundryOutput> {
+        if (params.amount && typeof params.amount === 'bigint') {
+            params.amount = params.amount.toString(10);
+        }
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
             data: params,
@@ -975,6 +998,9 @@ export class Client {
      * Build an Nft Output.
      */
     async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
+        if (params.amount && typeof params.amount === 'bigint') {
+            params.amount = params.amount.toString(10);
+        }
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
             data: params,

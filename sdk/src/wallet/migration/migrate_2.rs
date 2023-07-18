@@ -5,29 +5,6 @@ use super::*;
 
 pub struct Migrate;
 
-fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
-    for output_data in account["outputs"]
-        .as_object_mut()
-        .ok_or(Error::Storage("malformatted outputs".to_owned()))?
-        .values_mut()
-    {
-        if let Some(chain) = output_data.get_mut("chain") {
-            ConvertChain::check(chain)?;
-        }
-    }
-
-    for output_data in account["unspentOutputs"]
-        .as_object_mut()
-        .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
-        .values_mut()
-    {
-        if let Some(chain) = output_data.get_mut("chain") {
-            ConvertChain::check(chain)?;
-        }
-    }
-    Ok(())
-}
-
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 2;
@@ -78,7 +55,30 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
     }
 }
 
-mod types {
+fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
+    for output_data in account["outputs"]
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted outputs".to_owned()))?
+        .values_mut()
+    {
+        if let Some(chain) = output_data.get_mut("chain") {
+            ConvertChain::check(chain)?;
+        }
+    }
+
+    for output_data in account["unspentOutputs"]
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
+        .values_mut()
+    {
+        if let Some(chain) = output_data.get_mut("chain") {
+            ConvertChain::check(chain)?;
+        }
+    }
+    Ok(())
+}
+
+pub(super) mod types {
     use serde::{Deserialize, Serialize};
 
     pub const HARDEN_MASK: u32 = 1 << 31;

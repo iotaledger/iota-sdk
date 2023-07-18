@@ -99,16 +99,20 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
     })
     private returnAddress: Address;
 
-    constructor(returnAddress: Address, amount: string) {
+    constructor(returnAddress: Address, amount: bigint | string) {
         super(UnlockConditionType.StorageDepositReturn);
-        this.amount = amount;
+        if (typeof amount == 'bigint') {
+            this.amount = amount.toString(10);
+        } else {
+            this.amount = amount;
+        }
         this.returnAddress = returnAddress;
     }
     /**
      * Amount of tokens the consuming transaction must deposit to the address defined in return address.
      */
-    getAmount(): string {
-        return this.amount;
+    getAmount(): bigint {
+        return BigInt(this.amount);
     }
 
     /**

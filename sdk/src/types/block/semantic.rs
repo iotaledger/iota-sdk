@@ -187,7 +187,7 @@ impl<'a> ValidationContext<'a> {
 ///
 pub fn semantic_validation(
     mut context: ValidationContext<'_>,
-    inputs: &[(OutputId, &Output)],
+    inputs: &[(&OutputId, &Output)],
     unlocks: &Unlocks,
 ) -> Result<ConflictReason, Error> {
     // Validation of the inputs commitment.

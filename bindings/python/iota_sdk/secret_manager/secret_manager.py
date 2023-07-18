@@ -9,6 +9,7 @@ import humps
 from typing import List, Optional
 from dacite import from_dict
 
+
 class LedgerNanoSecretManager(dict):
     """Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator.
     """
@@ -92,13 +93,13 @@ class SecretManager():
             return response
 
     def generate_ed25519_addresses(self,
-                           account_index: Optional[int] = None,
-                           start: Optional[int] = None,
-                           end: Optional[int] = None,
-                           internal: Optional[bool] = None,
-                           coin_type: Optional[int] = None,
-                           bech32_hrp: Optional[str] = None,
-                           ledger_nano_prompt: Optional[bool] = None):
+                                   account_index: Optional[int] = None,
+                                   start: Optional[int] = None,
+                                   end: Optional[int] = None,
+                                   internal: Optional[bool] = None,
+                                   coin_type: Optional[int] = None,
+                                   bech32_hrp: Optional[str] = None,
+                                   ledger_nano_prompt: Optional[bool] = None) -> List[str]:
         """Generate ed25519 addresses.
 
         Parameters
@@ -144,7 +145,8 @@ class SecretManager():
         if 'ledger_nano_prompt' in options:
             if 'options' not in options:
                 options['options'] = {}
-            options['options']['ledger_nano_prompt'] = options.pop('ledger_nano_prompt')
+            options['options']['ledger_nano_prompt'] = options.pop(
+                'ledger_nano_prompt')
 
         options = humps.camelize(options)
 
@@ -153,12 +155,12 @@ class SecretManager():
         })
 
     def generate_evm_addresses(self,
-                           account_index=None,
-                           start=None,
-                           end=None,
-                           internal=None,
-                           coin_type=None,
-                           ledger_nano_prompt=None):
+                               account_index: Optional[int] = None,
+                               start: Optional[int] = None,
+                               end: Optional[int] = None,
+                               internal: Optional[bool] = None,
+                               coin_type: Optional[int] = None,
+                               ledger_nano_prompt: Optional[bool] = None):
         """Generate EVM addresses.
 
         Parameters

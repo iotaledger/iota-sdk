@@ -5,10 +5,10 @@ import { CreateNativeTokenParams, utf8ToHex } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The circulating supply of the native token. `100` hex encoded
-const CIRCULATING_SUPPLY = '0x64';
-// The maximum supply of the native token. `100` hex encoded
-const MAXIMUM_SUPPLY = '0x64';
+// The circulating supply of the native token.
+const CIRCULATING_SUPPLY = BigInt(100);
+// The maximum supply of the native token.
+const MAXIMUM_SUPPLY = BigInt(100);
 
 // In this example we will create a native token.
 //

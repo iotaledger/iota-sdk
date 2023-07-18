@@ -3,7 +3,7 @@
 
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
-import type { HexEncodedString } from '../utils/hex-encoded-types';
+import type { HexEncodedString } from '../utils/hex-encoding';
 /**
  * The migrated funds for receipts.
  */

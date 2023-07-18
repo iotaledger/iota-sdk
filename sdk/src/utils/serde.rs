@@ -79,23 +79,46 @@ pub mod option_prefix_hex_vec {
     }
 }
 
+pub mod string_prefix {
+    use alloc::string::String;
+
+    use packable::{bounded::Bounded, prefix::StringPrefix};
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T: Bounded, S>(value: &StringPrefix<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_str(&**value)
+    }
+
+    pub fn deserialize<'de, T: Bounded, D>(deserializer: D) -> Result<StringPrefix<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+        <T as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        String::deserialize(deserializer)
+            .map_err(de::Error::custom)
+            .and_then(|s| s.try_into().map_err(de::Error::custom))
+    }
+}
+
 #[cfg(feature = "client")]
 pub mod bip44 {
     use crypto::keys::bip44::Bip44;
     use serde::{Deserialize, Serialize};
 
     #[derive(Default, Serialize, Deserialize)]
-    #[serde(default, rename_all = "camelCase", remote = "Bip44")]
+    #[serde(default = "default_bip44", rename_all = "camelCase", remote = "Bip44")]
     pub struct Bip44Def {
-        #[serde(default = "default_coin_type")]
         coin_type: u32,
         account: u32,
         change: u32,
         address_index: u32,
     }
 
-    const fn default_coin_type() -> u32 {
-        crate::client::constants::IOTA_COIN_TYPE
+    fn default_bip44() -> Bip44 {
+        Bip44::new(crate::client::constants::IOTA_COIN_TYPE)
     }
 
     pub mod option_bip44 {

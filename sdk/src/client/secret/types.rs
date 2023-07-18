@@ -10,10 +10,7 @@ use crate::{
     types::{
         block::{
             address::Address,
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                Output, OutputId, OutputMetadata,
-            },
+            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
         },
         TryFromDto, ValidationParams,
     },
@@ -179,7 +176,7 @@ pub struct InputSigningDataDto {
     /// The output
     pub output: OutputDto,
     /// The output metadata
-    pub output_metadata: OutputMetadataDto,
+    pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
     #[serde(with = "option_bip44")]
     pub chain: Option<Bip44>,
@@ -192,7 +189,7 @@ impl TryFromDto for InputSigningData {
     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
             output: Output::try_from_dto_with_params_inner(dto.output, params)?,
-            output_metadata: OutputMetadata::try_from(dto.output_metadata)?,
+            output_metadata: dto.output_metadata,
             chain: dto.chain,
         })
     }
@@ -202,7 +199,7 @@ impl From<&InputSigningData> for InputSigningDataDto {
     fn from(input: &InputSigningData) -> Self {
         Self {
             output: OutputDto::from(&input.output),
-            output_metadata: OutputMetadataDto::from(&input.output_metadata),
+            output_metadata: input.output_metadata,
             chain: input.chain,
         }
     }

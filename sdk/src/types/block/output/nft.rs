@@ -358,7 +358,7 @@ impl NftOutput {
         &self,
         output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(OutputId, &Output)],
+        inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         self.unlock_conditions()

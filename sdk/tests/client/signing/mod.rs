@@ -93,7 +93,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,
@@ -163,7 +163,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,
@@ -173,7 +173,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(1)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
         ),
         Basic(
             1_000_000,
@@ -183,7 +183,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(2)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(2)),
         ),
         Basic(
             1_000_000,
@@ -193,7 +193,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(2)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(2)),
         ),
         Nft(
             1_000_000,
@@ -204,7 +204,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,
@@ -246,7 +246,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((&nft_3_bech32_address.to_string(), 150)),
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,

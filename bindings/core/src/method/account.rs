@@ -13,6 +13,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
+        address::Bech32Address,
         output::{dto::OutputDto, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
@@ -269,6 +270,13 @@ pub enum AccountMethod {
     /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     Send {
+        amount: u64,
+        address: Bech32Address,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Send base coins to multiple addresses, or with additional parameters.
+    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    SendWithParams {
         params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },

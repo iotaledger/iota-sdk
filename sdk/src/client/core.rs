@@ -115,7 +115,7 @@ impl ClientInner {
             }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self.network_info.write().await;
-            client_network_info.protocol_parameters = info.protocol.try_into()?;
+            client_network_info.protocol_parameters = info.protocol.clone();
 
             *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }

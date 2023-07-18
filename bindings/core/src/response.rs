@@ -11,7 +11,7 @@ use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::Node,
-        NetworkInfoDto, NodeInfoWrapper,
+        NetworkInfo, NodeInfoWrapper,
     },
     types::{
         api::{
@@ -24,16 +24,13 @@ use iota_sdk::{
         block::{
             address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                AliasId, FoundryId, NftId, OutputId, TokenId,
-            },
+            output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
                 milestone::MilestoneId,
                 transaction::TransactionId,
             },
-            protocol::dto::ProtocolParametersDto,
+            protocol::ProtocolParameters,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
             BlockDto, BlockId,
@@ -70,7 +67,7 @@ pub enum Response {
     Node(Node),
     /// Response for:
     /// - [`GetNetworkInfo`](crate::method::ClientMethod::GetNetworkInfo)
-    NetworkInfo(NetworkInfoDto),
+    NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
     NetworkId(u64),
@@ -85,7 +82,7 @@ pub enum Response {
     TipsInterval(u64),
     /// Response for:
     /// - [`GetProtocolParameters`](crate::method::ClientMethod::GetProtocolParameters)
-    ProtocolParameters(ProtocolParametersDto),
+    ProtocolParameters(ProtocolParameters),
     /// Response for:
     /// - [`PrepareTransaction`](crate::method::ClientMethod::PrepareTransaction)
     PreparedTransactionData(PreparedTransactionDataDto),
@@ -140,7 +137,7 @@ pub enum Response {
     OutputWithMetadataResponse(OutputWithMetadataResponse),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
-    OutputMetadata(OutputMetadataDto),
+    OutputMetadata(OutputMetadata),
     /// Response for:
     /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)

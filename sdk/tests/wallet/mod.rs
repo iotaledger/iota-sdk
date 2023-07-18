@@ -3,6 +3,7 @@
 
 mod account_recovery;
 mod accounts;
+mod address_generation;
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 mod backup_restore;
 mod balance;

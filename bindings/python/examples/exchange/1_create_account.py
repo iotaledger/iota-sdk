@@ -3,7 +3,7 @@
 
 # This example creates a new database and account.
 
-from iota_sdk import Wallet, StrongholdSecretManager, SyncOptions, CoinType
+from iota_sdk import Wallet, StrongholdSecretManager, SyncOptions, CoinType, ClientOptions
 from dotenv import load_dotenv
 import os
 
@@ -22,9 +22,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 if 'MNEMONIC' not in os.environ:
     raise Exception(".env MNEMONIC is undefined, see .env.example")
 
-client_options = {
-    'nodes': [os.environ.get('NODE_URL')],
-}
+client_options = ClientOptions(nodes=[os.environ.get('NODE_URL')])
 
 secret_manager = StrongholdSecretManager(
     os.environ.get('STRONGHOLD_SNAPSHOT_PATH'), os.environ['STRONGHOLD_PASSWORD'])

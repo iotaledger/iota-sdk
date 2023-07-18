@@ -63,14 +63,14 @@ async function run() {
             {
                 address:
                     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu',
-                amount: '1000000',
+                amount: BigInt(1000000),
             },
         ];
         const options = {
             mandatoryInputs: [input],
             allowMicroAmount: false,
         };
-        const transaction = await account.send(params, options);
+        const transaction = await account.sendWithParams(params, options);
         await account.retryTransactionUntilIncluded(transaction.transactionId);
         console.log(
             `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,

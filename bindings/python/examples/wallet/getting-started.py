@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, Utils
+from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions, Utils
 from dotenv import load_dotenv
 import os
 
@@ -15,7 +15,8 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 
 # A password to encrypt the stored data.
 # WARNING: Never hardcode passwords in production code.
-STRONGHOLD_PASSWORD = os.environ.get('STRONGHOLD_PASSWORD', 'a-secure-password')
+STRONGHOLD_PASSWORD = os.environ.get(
+    'STRONGHOLD_PASSWORD', 'a-secure-password')
 
 # The path to store the account snapshot.
 STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold'
@@ -25,9 +26,7 @@ secret_manager = StrongholdSecretManager(
     STRONGHOLD_SNAPSHOT_PATH, STRONGHOLD_PASSWORD)
 
 # Set up and store the wallet.
-client_options = {
-    'nodes': [node_url],
-}
+client_options = ClientOptions(nodes=[node_url])
 
 wallet = Wallet(
     client_options=client_options,
@@ -45,4 +44,4 @@ account = wallet.create_account(ACCOUNT_ALIAS)
 
 # Get the first address and print it.
 address = account.addresses()[0]
-print(f'Address:\n{address["address"]}')
+print(f'Address:\n{address.address}')

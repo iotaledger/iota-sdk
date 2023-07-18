@@ -23,7 +23,7 @@ params = [{
     "amount": "1",
 }]
 
-transaction = account.send(params, {"allowMicroAmount": True})
+transaction = account.send_with_params(params, {"allowMicroAmount": True})
 print(f'Transaction sent: {transaction.transactionId}')
 
 block_id = account.retry_transaction_until_included(transaction.transactionId)

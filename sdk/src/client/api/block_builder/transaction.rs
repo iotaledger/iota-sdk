@@ -111,7 +111,6 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 }
 
-// TODO @thibault-martinez: this is very cumbersome with the current state, will refactor.
 /// Verifies the semantic of a prepared transaction.
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
@@ -120,20 +119,15 @@ pub fn verify_semantic(
 ) -> crate::client::Result<ConflictReason> {
     let transaction_id = transaction.id();
     let TransactionEssence::Regular(essence) = transaction.essence();
-    let output_ids = input_signing_data.iter().map(|input| *input.output_id());
-    let outputs = input_signing_data
+    let inputs = input_signing_data
         .iter()
-        .map(|i| i.output.clone())
-        .collect::<Vec<Output>>();
-    let inputs = output_ids
-        .into_iter()
-        .zip(outputs.iter())
-        .collect::<Vec<(OutputId, &Output)>>();
+        .map(|input| (input.output_id(), &input.output))
+        .collect::<Vec<(&OutputId, &Output)>>();
 
     let context = ValidationContext::new(
         &transaction_id,
         essence,
-        inputs.iter().map(|(id, input)| (id, *input)),
+        inputs.iter().map(|(id, input)| (*id, *input)),
         transaction.unlocks(),
         current_time,
     );

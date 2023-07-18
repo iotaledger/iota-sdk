@@ -6,7 +6,7 @@ import { AddressUnlockCondition, BasicOutput, Output, Utils } from '@iota/sdk';
 import { getUnlockedWallet } from './common';
 
 // The amount to build the basic output with
-const AMOUNT = '1000000';
+const AMOUNT = BigInt(1000000);
 
 // In this example we check if an output has only an address unlock condition and that the address is from the account.
 //
