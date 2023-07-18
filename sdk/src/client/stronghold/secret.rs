@@ -10,7 +10,7 @@ use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     keys::{
-        bip39::{Mnemonic, MnemonicRef},
+        bip39::{Mnemonic, MnemonicRef, Passphrase},
         bip44::Bip44,
         slip10::Segment,
     },
@@ -325,19 +325,14 @@ impl SecretManagerConfig for StrongholdAdapter {
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
     /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
-    async fn bip39_recover(
-        &self,
-        mnemonic: Mnemonic,
-        passphrase: Option<String>,
-        output: Location,
-    ) -> Result<(), Error> {
+    async fn bip39_recover(&self, mnemonic: Mnemonic, passphrase: Passphrase, output: Location) -> Result<(), Error> {
         self.stronghold
             .lock()
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .execute_procedure(procedures::BIP39Recover {
                 mnemonic,
-                passphrase: passphrase.map(Into::into).unwrap_or_default(),
+                passphrase,
                 output,
             })?;
 
@@ -487,7 +482,8 @@ impl StrongholdAdapter {
         }
 
         // Execute the BIP-39 recovery procedure to put it into the vault (in memory).
-        self.bip39_recover(trimmed_mnemonic, None, output).await?;
+        self.bip39_recover(trimmed_mnemonic, Passphrase::default(), output)
+            .await?;
 
         // Persist Stronghold to the disk
         self.write_stronghold_snapshot(None).await?;

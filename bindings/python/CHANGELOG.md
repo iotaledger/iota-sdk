@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AccountAddress, AddressWithUnspentOutputs`;
 - `FilterOptions`;
 - `NetworkInfo`;
+- `ClientOptions, MqttBrokerOptions, Duration`;
 
 ### Changed
 
@@ -50,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::prepare_output()` now returns `Output`;
 - `Wallet::get_accounts()` now returns `List[Account]`;
 - `OutputData.chain` now is `Optional[Bip44]`;
+- `Wallet()` constructor and `Wallet::set_client_options()` now accept `ClientOptions`;
 
 ### Removed
 
