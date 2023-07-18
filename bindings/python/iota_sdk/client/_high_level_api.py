@@ -28,8 +28,8 @@ class GenerateAddressOptions():
     """Options for generating an address.
 
     Attributes:
-        internal: whether to generate internal addresses
-        ledgerNanoPrompt: whether to prompt the user for a ledger nano seed
+        internal: whether to generate an internal address
+        ledgerNanoPrompt: whether to display the generated address on Ledger Nano devices
     """
 
     def __init__(self, internal: bool, ledgerNanoPrompt: bool):
