@@ -120,7 +120,7 @@ iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
 The following example creates a [`Client`](https://docs.rs/iota-sdk/latest/iota_sdk/client/index.html)
 instance connected to
 the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
-calling [`Client.getInfo()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.ClientInner.html#method.get_info),
+calling [`Client.get_info()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.ClientInner.html#method.get_info),
 and then print the node's information.
 
 ```rust
