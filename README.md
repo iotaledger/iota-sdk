@@ -24,7 +24,7 @@ modules: `client` and `wallet`.
 
 - **Client module**: The `client` module in the IOTA SDK offers low-level functions that allow you to have
   fine-grained control over your interactions with Shimmer nodes. The module is stateless. It provides access to the
-  underlying API endpoints and enables advanced operations such as custom message construction and direct communication 
+  underlying API endpoints and enables advanced operations such as custom message construction and direct communication
   with the network.
 
 - **Wallet module**: The `wallet` module in the IOTA SDK provides high-level functions for managing accounts, generating
@@ -33,7 +33,8 @@ modules: `client` and `wallet`.
   with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling, storage, and state backup.
 
 - **Bindings**: The IOTA SDK includes bindings for `Python`, `Node.js`, and `WASM`, which allow you
-  to use the SDK in your preferred programming language. These bindings provide seamless integration with existing projects, enabling cross-platform compatibility and flexibility.
+  to use the SDK in your preferred programming language. These bindings provide seamless integration with existing
+  projects, enabling cross-platform compatibility and flexibility.
 
 ## Branching Structure for Development
 
@@ -41,7 +42,7 @@ This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
 |--------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on release.           |
+| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on release.            |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
 | other        | Other branches that may reflect current projects. Like `develop`, they will find their way into `staging` once they are ready. |
@@ -116,6 +117,12 @@ iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
 
 ## Client Usage
 
+The following example creates a [`Client`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html)
+instance connected to
+the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
+calling [`Client.get_info()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html#method.get_info),
+and then print the node's information.
+
 ```rust
 use iota_sdk::client::{
     Client,
@@ -136,6 +143,12 @@ async fn main() -> Result<()> {
 ```
 
 ## Wallet Usage
+
+The following example will create a
+new [`Wallet`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/core/struct.Wallet.html) [`Account`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/account/struct.Account.html)
+that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
+[`StrongholdSecretManager`](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
+to store a mnemonic.
 
 ```rust
 use iota_sdk::{
@@ -205,7 +218,8 @@ cargo run --example
 
 ## API Reference
 
-The IOTA SDK Rust API Reference is in the [crate documentation](https://docs.rs/iota-sdk/latest/iota_sdk/).
+You can find the IOTA SDK Rust API Reference is in
+the [IOTA SDK crate documentation](https://docs.rs/iota-sdk/latest/iota_sdk/).
 
 ## Contribute
 
