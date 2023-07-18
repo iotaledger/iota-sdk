@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.0 - 2023-XX-XX
+
+### Changed
+
+- Migrated storage types to Dtos;
+- Removed inappropriate serde impls from `AccountDetails`, `ClientBuilder`, `WalletBuilder`, `NetworkInfo`, `ProtocolParameters` and added `try_from_dto` impls for conversion;
+
 ## 0.4.0 - 2023-07-14
 
 ### Added
@@ -129,8 +136,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made `StorageOptions` public;
 - Renamed `Client::block` to `build_block`;
 - Renamed "inception" modules to `core` (ex. `wallet::wallet` -> `wallet::core`);
-- Migrated storage types to Dtos;
-- Removed inappropriate serde impls from `AccountDetails`, `ClientBuilder`, `WalletBuilder`, `NetworkInfo`, `ProtocolParameters` and added `try_from_dto` impls for conversion;
 
 ### Removed
 
