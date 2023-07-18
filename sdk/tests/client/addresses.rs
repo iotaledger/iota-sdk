@@ -313,5 +313,5 @@ async fn search_address() -> Result<()> {
         _ => panic!("should not have found search address range & public"),
     }
 
-    return Ok(());
+    Ok(())
 }
