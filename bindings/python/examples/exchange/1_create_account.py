@@ -34,7 +34,7 @@ wallet = Wallet(os.environ.get('WALLET_DB_PATH'),
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be done once
 wallet.store_mnemonic(
-    os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
+    os.environ['MNEMONIC'])
 
 account = wallet.create_account('Alice')
 
