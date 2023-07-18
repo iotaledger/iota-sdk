@@ -36,9 +36,7 @@ mod storage_stub {
     {
         async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
             log::debug!("save_wallet_data");
-            storage
-                .set(WALLET_INDEXATION_KEY, &WalletBuilderDto::from(self))
-                .await?;
+            storage.set(WALLET_INDEXATION_KEY, self).await?;
 
             if let Some(secret_manager) = &self.secret_manager {
                 let secret_manager = secret_manager.read().await;
@@ -73,9 +71,7 @@ mod storage_stub {
     impl SaveLoadWallet for WalletBuilder<MnemonicSecretManager> {
         async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
             log::debug!("save_wallet_data");
-            storage
-                .set(WALLET_INDEXATION_KEY, &WalletBuilderDto::from(self))
-                .await?;
+            storage.set(WALLET_INDEXATION_KEY, self).await?;
             Ok(())
         }
 

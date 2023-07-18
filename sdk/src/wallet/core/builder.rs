@@ -9,6 +9,7 @@ use std::sync::{
 use std::{collections::HashSet, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
+use serde::Serialize;
 use tokio::sync::RwLock;
 
 use super::operations::storage::SaveLoadWallet;
@@ -27,12 +28,14 @@ use crate::{
 };
 
 /// Builder for the wallet.
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
     pub(crate) client_options: Option<ClientOptions>,
     pub(crate) coin_type: Option<u32>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: Option<StorageOptions>,
+    #[serde(skip)]
     pub(crate) secret_manager: Option<Arc<RwLock<S>>>,
 }
 
@@ -282,41 +285,18 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
 }
 
 pub mod dto {
-    use serde::{Deserialize, Serialize};
+    use serde::Deserialize;
 
     use super::*;
     use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
 
-    #[derive(Debug, Serialize, Deserialize)]
+    #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
         pub(crate) client_options: Option<ClientOptions>,
         pub(crate) coin_type: Option<u32>,
         #[cfg(feature = "storage")]
         pub(crate) storage_options: Option<StorageOptions>,
-    }
-
-    // TODO: This duplication can be streamlined using Borrowed or Owned enum
-    impl<S: SecretManage> From<&WalletBuilder<S>> for WalletBuilderDto {
-        fn from(value: &WalletBuilder<S>) -> Self {
-            Self {
-                client_options: value.client_options.clone(),
-                coin_type: value.coin_type,
-                #[cfg(feature = "storage")]
-                storage_options: value.storage_options.clone(),
-            }
-        }
-    }
-
-    impl<S: SecretManage> From<WalletBuilder<S>> for WalletBuilderDto {
-        fn from(value: WalletBuilder<S>) -> Self {
-            Self {
-                client_options: value.client_options,
-                coin_type: value.coin_type,
-                #[cfg(feature = "storage")]
-                storage_options: value.storage_options,
-            }
-        }
     }
 
     impl WalletBuilderDto {

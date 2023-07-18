@@ -334,6 +334,7 @@ impl ClientBuilder {
 
 /// Struct containing network and PoW related information
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]

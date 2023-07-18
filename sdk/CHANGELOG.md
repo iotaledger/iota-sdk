@@ -24,7 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Migrated storage types field casing to uniform camelCase;
-- Removed inappropriate serde impls from `AccountDetails` and `WalletBuilder`, and added fn impls for conversion;
+- Replaced inappropriate serde impls from `AccountDetails` and `WalletBuilder` with fn impls for conversion;
+
+### Removed
+
+- `ProtocolParametersDto`, `NetworkInfoDto`, `OutputMetadataDto` in favor of base types;
 
 ### Fixed
 
