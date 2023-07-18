@@ -17,7 +17,7 @@ use iota_sdk::{
 use serde::{Deserialize, Serialize};
 
 #[tokio::test]
-async fn addresses() {
+async fn ed25519_addresses() {
     let secret_manager = crate::client::node_api::setup_secret_manager();
 
     let opts = GetAddressesOptions::default()
@@ -38,6 +38,24 @@ async fn addresses() {
         internal[0],
         "atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak"
     );
+}
+
+#[tokio::test]
+async fn evm_addresses() {
+    let secret_manager = crate::client::node_api::setup_secret_manager();
+
+    let opts = GetAddressesOptions::default()
+        .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
+        .with_coin_type(IOTA_COIN_TYPE)
+        .with_range(0..1);
+    let public = secret_manager.generate_evm_addresses(opts.clone()).await.unwrap();
+    let internal = secret_manager.generate_evm_addresses(opts.internal()).await.unwrap();
+
+    // Address generated with bip32 path: [44, 4218, 0, 0, 0].
+    // This address was generated with a MnemonicSecretManager and verified with an outside source.
+    // Seed: 0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2.
+    assert_eq!(public[0], "0xb23e784f0464a30d536c961e414925eab6b3107d");
+    assert_eq!(internal[0], "0x98d8833ec4b82587d66207eb9c578fd0134c51b6");
 }
 
 #[tokio::test]
@@ -236,6 +254,7 @@ async fn search_address() -> Result<()> {
 
     let secret_manager = SecretManager::try_from_mnemonic(generate_mnemonic()?)?;
 
+    // Public
     let addresses = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
@@ -258,6 +277,41 @@ async fn search_address() -> Result<()> {
     .await?;
 
     assert_eq!(res, (9, false));
+
+    // Internal
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .internal()
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(9..10)
+                .with_bech32_hrp(IOTA_BECH32_HRP),
+        )
+        .await?;
+
+    let res = iota_sdk::client::api::search_address(
+        &secret_manager,
+        IOTA_BECH32_HRP,
+        IOTA_COIN_TYPE,
+        0,
+        0..10,
+        &addresses[0],
+    )
+    .await?;
+
+    assert_eq!(res, (9, true));
+
+    // not in range
+    let res =
+        iota_sdk::client::api::search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..9, &addresses[0])
+            .await;
+
+    match res {
+        Err(iota_sdk::client::Error::InputAddressNotFound { .. }) => {}
+        _ => panic!("should not have found search address range & public"),
+    }
 
     Ok(())
 }

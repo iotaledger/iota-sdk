@@ -38,8 +38,7 @@ async fn main() -> Result<()> {
         .store_mnemonic(Mnemonic::from(std::env::var("MNEMONIC").unwrap()))
         .await?;
 
-    let bip44_chain = Bip44::new()
-        .with_coin_type(SHIMMER_COIN_TYPE)
+    let bip44_chain = Bip44::new(SHIMMER_COIN_TYPE)
         .with_account(ACCOUNT_INDEX)
         .with_change(INTERNAL_ADDRESS as _)
         .with_address_index(ADDRESS_INDEX);

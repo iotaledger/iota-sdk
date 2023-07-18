@@ -49,8 +49,7 @@ where
                     .map_or(false, |tx| !tx.incoming);
 
                 // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                let chain = Bip44::new()
-                    .with_coin_type(account_details.coin_type)
+                let chain = Bip44::new(account_details.coin_type)
                     .with_account(account_details.index)
                     .with_change(associated_address.internal as _)
                     .with_address_index(associated_address.key_index);

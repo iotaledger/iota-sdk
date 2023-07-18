@@ -494,7 +494,7 @@ async fn output_preparation_sdr() -> Result<()> {
 #[ignore]
 #[tokio::test]
 async fn prepare_nft_output_features_update() -> Result<()> {
-    let storage_path = "test-storage/output_preparation";
+    let storage_path = "test-storage/prepare_nft_output_features_update";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;

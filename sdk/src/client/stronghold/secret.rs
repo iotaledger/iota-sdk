@@ -66,8 +66,7 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let chain = Bip44::new()
-                .with_coin_type(coin_type)
+            let chain = Bip44::new(coin_type)
                 .with_account(account_index)
                 .with_change(internal as _)
                 .with_address_index(address_index);
@@ -139,8 +138,7 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let chain = Bip44::new()
-                .with_coin_type(coin_type)
+            let chain = Bip44::new(coin_type)
                 .with_account(account_index)
                 .with_change(internal as _)
                 .with_address_index(address_index);

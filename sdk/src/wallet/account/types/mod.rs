@@ -71,8 +71,7 @@ impl OutputData {
                 .find(|a| a.address.inner == unlock_address)
             {
                 Some(
-                    Bip44::new()
-                        .with_coin_type(account.coin_type)
+                    Bip44::new(account.coin_type)
                         .with_account(account.index)
                         .with_change(address.internal as _)
                         .with_address_index(address.key_index),
