@@ -5,6 +5,7 @@ mod core;
 mod indexer;
 #[cfg(feature = "mqtt")]
 mod mqtt;
+mod participation;
 
 use iota_sdk::{
     client::{

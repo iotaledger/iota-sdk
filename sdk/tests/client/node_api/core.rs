@@ -121,10 +121,16 @@ async fn test_get_address_outputs() {
     let r = client.get_outputs(&output_ids_response.items).await.unwrap();
     println!("{r:#?}");
 
-    let r = client.get_outputs_ignore_errors(&output_ids_response.items).await.unwrap();
+    let r = client
+        .get_outputs_ignore_errors(&output_ids_response.items)
+        .await
+        .unwrap();
     println!("{r:#?}");
 
-    let r = client.get_outputs_metadata_ignore_errors(&output_ids_response.items).await.unwrap();
+    let r = client
+        .get_outputs_metadata_ignore_errors(&output_ids_response.items)
+        .await
+        .unwrap();
     println!("{r:#?}");
 }
 
