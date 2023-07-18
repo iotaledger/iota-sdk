@@ -40,70 +40,68 @@ async function run() {
         })
         const senderAddress = addresses[0]
 
-        console.log('Expect to send from:', senderAddress)
-
         // 1. Create unsigned transaction data
         const txData = await createTxData(provider, senderAddress)
         const transaction = Transaction.fromTxData(txData, TX_OPTIONS)
 
-        // 2. Replace v value of raw transaction
-        const rawTx = transaction.raw()
-
-
-        // 3. RLP encode message for Stronghold        
-        const ethTx = Transaction.fromValuesArray(rawTx)
-        const rlpEncodedMessage = Buffer.from(RLP.encode(bufArrToArr(ethTx.getMessageToSign(false))))
-        const messageToSign = '0x' + rlpEncodedMessage.toString('hex')
-
-        // 4. Generate hardened bip44 path
+        // 2. Create messageToSign by external signer
+        const message = transaction.getMessageToSign(false)
+        const serializedMessage = Buffer.from(RLP.encode(bufArrToArr(message)))
+        const messageToSign = '0x' + serializedMessage.toString('hex')
+        
+        // 3. Sign message with external signer
         const bip44Path = {
             coinType: 60,
             account: 0,
             change: 0,
             addressIndex: 0,
         }
-
-        // 5. Sign the message using stronghold
         const { publicKey, signature } = await account.signSecp256k1Ecdsa(messageToSign, bip44Path)
-        console.log('Public key from signSecp256k1:', publicKey.slice(2))
-        console.log('Signature from signSecp256k1:', signature)
-        // Extracts v,r & s values from the signature
-        const txSignature = fromRpcSig(signature)
-        // 6. Replace with Eip155 compatible signature
-        txSignature.v = convertsVtoEip155Compatible(txSignature.v, CHAIN_ID)
-        console.log('txSignature', txSignature)
 
-        // 7. Recreate signed transaction
-        const { signedTransaction, fromAddress } = createSignedTransaction(rawTx, txSignature)
-        console.log('Address recovered from Ethereum Transaction', fromAddress)
-        // Unable to get the address to match the BIP path specified
-        console.warn('Are addresses equal:', fromAddress === senderAddress)   
+        // 4. Make Secp256k1Ecdsa an Eip155Compatible Signature
+        const ecdsaSignature = fromRpcSig(signature)
+        ecdsaSignature.v = convertsVToEip155Compatible(ecdsaSignature.v, CHAIN_ID)
+
+        // 5. Sign Transaction
+        const signedTransaction = createSignedTransaction(transaction, ecdsaSignature)
+
+        // 7. Send signed transaction
+        const hexSignedTransaction = getHexEncodedTransaction(signedTransaction)
+        const sentTransaction = await provider.eth.sendSignedTransaction(hexSignedTransaction)
+        console.log('sent Transaction', sentTransaction)
+
+        // Testing: check sender address matches
+        // console.log('Expected senderAddress:', senderAddress )
+        // console.log('Actual senderAddress:', signedTransaction.getSenderAddress().toString() )
+        // assert.strictEqual(senderAddress, signedTransaction.getSenderAddress().toString(), 'Mismatch in addresses', )   
         
-        // 8. Broadcast transaction
-        // const tx = await provider.eth.sendSignedTransaction(signedTransaction)
-        // console.log('tx', tx)
     } catch (error) {
-        console.log('Error: ', error);
+        console.error('Error: ', error);
     }
     process.exit(0);
 }
 
-function createSignedTransaction(rawTx, signature) {
+function createSignedTransaction(transaction, signature) {
+    const rawTx = transaction.raw()
+
     const vHex = padHexString(signature.v.toString(16))
     rawTx[6] = Buffer.from(vHex, 'hex')
     rawTx[7] = signature.r
     rawTx[8] = signature.s
+    const signedTransaction = Transaction.fromValuesArray(rawTx, TX_OPTIONS)
 
-    const transaction = Transaction.fromValuesArray(rawTx, TX_OPTIONS)
-    const fromAddress = transaction.getSenderAddress().toString('hex')
-    
-    const serializedTx = transaction.serialize()
-    return { signedTransaction: `0x${serializedTx.toString('hex')}`, fromAddress }
+    return signedTransaction
 }
 
-function convertsVtoEip155Compatible(v, chainId) {
+function getHexEncodedTransaction(transaction) {
+    const serializedTransaction = transaction.serialize()
+    const hexEncodedTransaction = '0x' + serializedTransaction.toString('hex')
+    return hexEncodedTransaction
+}
+
+function convertsVToEip155Compatible(v, chainId) {
     const parity = Number(v) % 27
-    const newV = parity + chainId * 2 + 35
+    const newV = (chainId * 2) + (35 + parity)
     return newV
 }
 
@@ -113,7 +111,7 @@ async function createTxData(provider, address) {
     
     const data = '' //erc20Contract.methods.transfer(RECIPIENT_ACCOUNT_ADDRESS, provider.utils.toHex(AMOUNT)).encodeABI()
     
-    const nonce = provider.utils.toHex(9)
+    const nonce = provider.utils.toHex(await provider.eth.getTransactionCount(address))
 
     const _gasPrice = await provider.eth.getGasPrice()
     console.log('Gas Price:', _gasPrice)
