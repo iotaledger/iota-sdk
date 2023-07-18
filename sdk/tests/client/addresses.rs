@@ -52,7 +52,7 @@ async fn evm_addresses() {
     let internal = secret_manager.generate_evm_addresses(opts.internal()).await.unwrap();
 
     // Address generated with bip32 path: [44, 4218, 0, 0, 0].
-    // This address was generated with a MnemonicSecretManager.
+    // This address was generated with a MnemonicSecretManager and verified with an outside source.
     // Seed: 0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2.
     assert_eq!(public[0], "0xb23e784f0464a30d536c961e414925eab6b3107d");
     assert_eq!(internal[0], "0x98d8833ec4b82587d66207eb9c578fd0134c51b6");
