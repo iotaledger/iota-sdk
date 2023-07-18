@@ -156,7 +156,12 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     );
 
     assert_eq!(
-        address_event.lock().unwrap().unwrap(),
+        address_event
+            .lock()
+            .unwrap()
+            .unwrap()
+            .inner()
+            .to_bech32_unchecked("smr"),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         // This address was generated with a MnemonicSecretManager and the ledger simulator mnemonic.
         "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
