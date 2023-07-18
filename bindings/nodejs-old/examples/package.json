@@ -6,7 +6,6 @@
         "@ethereumjs/tx": "^4.1.2",
         "@ethereumjs/util": "^8.0.6",
         "@iota/wallet": "../",
-        "@truffle/hdwallet-provider": "^2.1.12",
         "dotenv": "^16.0.1",
         "web3": "^1.10.0"
     }
