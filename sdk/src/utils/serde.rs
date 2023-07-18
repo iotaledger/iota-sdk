@@ -87,19 +87,14 @@ pub mod bip44 {
     #[derive(Default, Serialize, Deserialize)]
     #[serde(default = "default_bip44", rename_all = "camelCase", remote = "Bip44")]
     pub struct Bip44Def {
-        #[serde(default = "default_coin_type")]
         coin_type: u32,
         account: u32,
         change: u32,
         address_index: u32,
     }
 
-    const fn default_coin_type() -> u32 {
-        crate::client::constants::IOTA_COIN_TYPE
-    }
-
     fn default_bip44() -> Bip44 {
-        Bip44::new(default_coin_type())
+        Bip44::new(crate::client::constants::IOTA_COIN_TYPE)
     }
 
     pub mod option_bip44 {
