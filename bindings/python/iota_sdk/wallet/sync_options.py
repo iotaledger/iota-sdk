@@ -68,29 +68,34 @@ class SyncOptions():
     """The synchronization options.
 
     **Attributes**
-    --------------
-    addresses : List[str], optional)
-        list of addresses to sync
+    addresses : List[str], optional
+        Specific Bech32 encoded addresses of the account to sync, if addresses are provided, then `address_start_index` will be ignored
     address_start_index : int, optional
-        starting index for addresses
+        Address index from which to start syncing addresses. 0 by default, using a higher index will be faster because
+        addresses with a lower index will be skipped, but could result in a wrong balance for that reason
     address_start_index_internal : int, optional
-        starting index for internal addresses
+        Address index from which to start syncing internal addresses. 0 by default, using a higher index will be faster
+        because addresses with a lower index will be skipped, but could result in a wrong balance for that reasonfor internal addresses
     force_syncing : bool, optional
-        whether to force syncing
+        Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
+        milestone and calling it twice "at the same time" will not return new data
+        When this to true, we will sync anyways, even if it's called 0ms after the las sync finished.
     sync_incoming_transactions : bool, optional
-        whether to sync incoming transactions
+        Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
+        pruned.
     sync_pending_transactions : bool, optional
-        whether to sync pending transactions
+        Checks pending transactions and promotes/reattaches them if necessary.
     account : AccountSyncOptions, optional
-        account sync options
+        Specifies what outputs should be synced for the ed25519 addresses from the account.
     alias : AliasSyncOptions, optional
-        alias sync options
+        Specifies what outputs should be synced for the address of an alias output.
     nft : NftSyncOptions, optional
-        NFT sync options
+        Specifies what outputs should be synced for the address of an nft output.
     sync_only_most_basic_outputs : bool, optional
-        whether to sync only most basic outputs
+        Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
+        `account`, `alias` and `nft` options.
     sync_native_token_foundries : bool, optional
-        whether to sync native token foundries
+        Sync native token foundries, so their metadata can be returned in the balance.
     """
 
     def __init__(self,
