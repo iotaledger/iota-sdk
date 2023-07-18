@@ -42,7 +42,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
-        // Address generated with bip32 path: [44, 4218, 0, 0, 0]
+        // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
@@ -80,7 +80,7 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
-        // Address generated with bip32 path: [44, 4218, 0, 0, 0]
+        // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
@@ -114,8 +114,9 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
-        // Address generated with bip32 path: [44, 4218, 0, 0, 0]
-        "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
+        // Address generated with bip32 path: [44, 4218, 0, 0, 0].
+        // This address was generated with a MnemonicSecretManager and the ledger simulator mnemonic.
+        "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
     );
 
     let address = wallet
@@ -131,8 +132,9 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
-        // Address generated with bip32 path: [44, 4218, 0, 0, 0]
-        "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
+        // Address generated with bip32 path: [44, 4218, 0, 0, 0].
+        // This address was generated with a MnemonicSecretManager and the ledger simulator mnemonic.
+        "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
     );
 
     tear_down(storage_path)
