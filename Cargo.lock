@@ -1726,7 +1726,7 @@ dependencies = [
  "derivative",
  "fern-logger",
  "futures",
- "iota-crypto 0.22.2",
+ "iota-crypto 0.23.0",
  "iota-sdk",
  "log",
  "packable",
