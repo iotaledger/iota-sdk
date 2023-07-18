@@ -9,7 +9,7 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString } from '../../utils';
+import { HexEncodedString, hexToBigInt } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 
@@ -31,9 +31,13 @@ abstract class Output /*implements ICommonOutput*/ {
 
     private type: OutputType;
 
-    constructor(type: OutputType, amount: string) {
+    constructor(type: OutputType, amount: bigint | string) {
         this.type = type;
-        this.amount = amount;
+        if (typeof amount == 'bigint') {
+            this.amount = amount.toString(10);
+        } else {
+            this.amount = amount;
+        }
     }
 
     /**
@@ -46,8 +50,8 @@ abstract class Output /*implements ICommonOutput*/ {
     /**
      * The amount of the output.
      */
-    getAmount(): string {
-        return this.amount;
+    getAmount(): bigint {
+        return BigInt(this.amount);
     }
 
     public static parse(data: any): Output {
@@ -87,7 +91,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
 
     constructor(
         type: OutputType,
-        amount: string,
+        amount: bigint,
         unlockConditions: UnlockCondition[],
     ) {
         super(type, amount);
@@ -103,6 +107,17 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
      * The native tokens held by the output.
      */
     getNativeTokens(): INativeToken[] | undefined {
+        if (!this.nativeTokens) {
+            return this.nativeTokens;
+        }
+
+        // Make sure the amount of native tokens are of bigint type.
+        for (let i = 0; i < this.nativeTokens.length; i++) {
+            const token = this.nativeTokens[i];
+            if (typeof token.amount === 'string') {
+                this.nativeTokens[i].amount = hexToBigInt(token.amount);
+            }
+        }
         return this.nativeTokens;
     }
 
@@ -124,7 +139,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
  * Treasury Output.
  */
 class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
-    constructor(amount: string) {
+    constructor(amount: bigint) {
         super(OutputType.Treasury, amount);
     }
 }
@@ -132,7 +147,7 @@ class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
  * Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
-    constructor(amount: string, unlockConditions: UnlockCondition[]) {
+    constructor(amount: bigint, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
     }
 }
@@ -145,7 +160,7 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
 
     constructor(
         type: OutputType,
-        amount: string,
+        amount: bigint,
         unlockConditions: UnlockCondition[],
     ) {
         super(type, amount, unlockConditions);
@@ -167,7 +182,7 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
 
     constructor(
         type: OutputType,
-        amount: string,
+        amount: bigint,
         unlockConditions: UnlockCondition[],
     ) {
         super(type, amount, unlockConditions);
@@ -191,7 +206,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 
     constructor(
         unlockConditions: UnlockCondition[],
-        amount: string,
+        amount: bigint,
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
@@ -228,7 +243,7 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
     constructor(
-        amount: string,
+        amount: bigint,
         nftId: HexEncodedString,
         unlockConditions: UnlockCondition[],
     ) {
@@ -255,7 +270,7 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     private tokenScheme: TokenScheme;
 
     constructor(
-        amount: string,
+        amount: bigint,
         serialNumber: number,
         unlockConditions: UnlockCondition[],
         tokenScheme: TokenScheme,

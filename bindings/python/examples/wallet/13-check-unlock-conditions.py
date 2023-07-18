@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, Utils
+from iota_sdk import Wallet, Utils, OutputParams
 from dotenv import load_dotenv
 import os
 
@@ -13,15 +13,13 @@ account = wallet.get_account("Alice")
 accountAddresses = account.addresses()
 
 # using prepare_output
-output = account.prepare_output(
-    {
-        "amount": "1000000",
-        "recipientAddress": accountAddresses[0].address,
-    }
-)
+output = account.prepare_output(OutputParams(
+    accountAddresses[0].address, "1000000"))
+
 
 def hexAddress(address):
     return Utils.bech32_to_hex(address.address)
+
 
 hexEncodedAccountAddresses = map(hexAddress, accountAddresses)
 

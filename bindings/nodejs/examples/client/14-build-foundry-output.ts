@@ -33,10 +33,13 @@ async function run() {
             '0xff311f59790ccb85343a36fbac2f06d233734794404142b308c13f2c616935b5';
 
         const foundryOutput = await client.buildFoundryOutput({
-            serialNumber: 0,
-            // 10 hex encoded
-            tokenScheme: new SimpleTokenScheme('0xa', '0x0', '0xa'),
-            amount: '1000000',
+            serialNumber: 1,
+            tokenScheme: new SimpleTokenScheme(
+                BigInt(10),
+                BigInt(0),
+                BigInt(10),
+            ),
+            amount: BigInt(1000000),
             unlockConditions: [
                 new ImmutableAliasAddressUnlockCondition(
                     new AliasAddress(aliasId),

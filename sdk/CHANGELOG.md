@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.0 - 2023-07-DD
+
+### Fixed
+
+- Call `ledger.set_non_interactive_mode()` only if it's a debug app;
+
 ## 0.4.0 - 2023-07-14
 
 ### Added

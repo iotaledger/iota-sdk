@@ -25,8 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Account::get_metadata()`;
 - `Bip44` type;
-- `SendParams, SendNativeTokensParams, SendNftParams, CreateNativeTokenParams, MintNftParams, CreateAliasOutputParams`;
+- `SendParams, SendNativeTokensParams, SendNftParams, CreateNativeTokenParams, MintNftParams, CreateAliasOutputParams, OutputParams, Assets, Features, Unlocks, ReturnStrategy, StorageDeposit`;
 - `AccountAddress, AddressWithUnspentOutputs`;
+- `FilterOptions`;
+- `NetworkInfo`;
+- `ClientOptions, MqttBrokerOptions, Duration`;
 
 ### Changed
 
@@ -48,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::prepare_output()` now returns `Output`;
 - `Wallet::get_accounts()` now returns `List[Account]`;
 - `OutputData.chain` now is `Optional[Bip44]`;
+- `Wallet()` constructor and `Wallet::set_client_options()` now accept `ClientOptions`;
 
 ### Removed
 

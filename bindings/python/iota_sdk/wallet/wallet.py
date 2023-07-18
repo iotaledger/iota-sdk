@@ -3,6 +3,7 @@
 
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
+from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.wallet.account import Account, _call_method_routine
 from iota_sdk.wallet.sync_options import SyncOptions
 from json import dumps
@@ -10,14 +11,14 @@ from typing import Any, Dict, List, Optional
 
 
 class Wallet():
-    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
+    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[ClientOptions] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
         """Initialize the IOTA Wallet.
         """
 
         # Setup the options
         options: Dict[str, Any] = {'storagePath': storage_path}
         if client_options:
-            options['clientOptions'] = client_options
+            options['clientOptions'] = client_options.as_dict()
         if coin_type:
             options['coinType'] = coin_type
         if secret_manager:
@@ -154,13 +155,13 @@ class Wallet():
             }
         )
 
-    def set_client_options(self, client_options):
+    def set_client_options(self, client_options: ClientOptions):
         """Updates the client options for all accounts.
         """
         return self._call_method(
             'setClientOptions',
             {
-                'clientOptions': client_options
+                'clientOptions': client_options.as_dict()
             }
         )
 

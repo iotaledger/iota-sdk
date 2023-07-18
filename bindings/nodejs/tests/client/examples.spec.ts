@@ -121,13 +121,13 @@ describe.skip('Main examples', () => {
                     .getNativeTokens()
                     ?.forEach(
                         (token) =>
-                            (totalNativeTokens[token.id] =
-                                (totalNativeTokens[token.id] || 0) +
-                                parseInt(token.amount)),
+                        (totalNativeTokens[token.id] =
+                            (totalNativeTokens[token.id] || 0) +
+                            Number(token.amount)),
                     );
             }
 
-            totalAmount += parseInt(output.getAmount());
+            totalAmount += Number(output.getAmount());
         }
 
         expect(totalAmount).toBe(1960954000);
@@ -164,7 +164,7 @@ describe.skip('Main examples', () => {
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
 
         expect(fetchedBlock.payload).toStrictEqual(
-            new TaggedDataPayload( utf8ToHex('Hello'), utf8ToHex('Tangle'))
+            new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle'))
         );
     });
 
@@ -179,7 +179,7 @@ describe.skip('Main examples', () => {
         const blockIdAndBlock = await client.buildAndPostBlock(secretManager, {
             output: {
                 address: addresses[0],
-                amount: '1000000',
+                amount: BigInt(1000000),
             },
         });
 

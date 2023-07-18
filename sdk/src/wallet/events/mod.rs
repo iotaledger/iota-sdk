@@ -8,7 +8,7 @@ use std::{
     fmt::{Debug, Formatter, Result},
 };
 
-use self::types::{Event, WalletEvent, WalletEventType};
+pub use self::types::{Event, WalletEvent, WalletEventType};
 
 type Handler<T> = Box<dyn Fn(&T) + Send + Sync + 'static>;
 

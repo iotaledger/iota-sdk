@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Wallet, MnemonicSecretManager, CoinType
+from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions
 import shutil
 
 
@@ -10,9 +10,7 @@ def test_address_generation_iota():
     db_path = './test_address_generation_iota'
     shutil.rmtree(db_path, ignore_errors=True)
 
-    client_options = {
-        'nodes': [],
-    }
+    client_options = ClientOptions(nodes=[])
 
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
@@ -33,9 +31,7 @@ def test_address_generation_shimmer():
     db_path = './test_address_generation_shimmer'
     shutil.rmtree(db_path, ignore_errors=True)
 
-    client_options = {
-        'nodes': [],
-    }
+    client_options = ClientOptions(nodes=[])
 
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
