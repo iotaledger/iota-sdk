@@ -2,6 +2,7 @@
 /**
  * In this example we check if an output has only an address unlock condition and that the address is from the account.
  */
+const assert = require('assert/strict')
 const { Buffer } = require('buffer')
 const Web3 = require('web3')
 const { Common } = require('@ethereumjs/common')
@@ -56,8 +57,8 @@ async function run() {
             change: 0,
             addressIndex: 0,
         }
-        const { publicKey, signature } = await account.signSecp256k1Ecdsa(messageToSign, bip44Path)
-
+        const { signature } = await account.signSecp256k1Ecdsa(messageToSign, bip44Path)
+        
         // 4. Make Secp256k1Ecdsa an Eip155Compatible Signature
         const ecdsaSignature = fromRpcSig(signature)
         ecdsaSignature.v = convertsVToEip155Compatible(ecdsaSignature.v, CHAIN_ID)
@@ -71,10 +72,7 @@ async function run() {
         console.log('sent Transaction', sentTransaction)
 
         // Testing: check sender address matches
-        // console.log('Expected senderAddress:', senderAddress )
-        // console.log('Actual senderAddress:', signedTransaction.getSenderAddress().toString() )
-        // assert.strictEqual(senderAddress, signedTransaction.getSenderAddress().toString(), 'Mismatch in addresses', )   
-        
+        assert.strictEqual(senderAddress, signedTransaction.getSenderAddress().toString(), 'Mismatch in addresses', )   
     } catch (error) {
         console.error('Error: ', error);
     }
@@ -106,25 +104,22 @@ function convertsVToEip155Compatible(v, chainId) {
 }
 
 async function createTxData(provider, address) {
-    // Disregard this for now
     const erc20Contract = new provider.eth.Contract(ERC_20_ABI, TOKEN_CONTRACT_ADDRESS)
     
-    const data = '' //erc20Contract.methods.transfer(RECIPIENT_ACCOUNT_ADDRESS, provider.utils.toHex(AMOUNT)).encodeABI()
+    const data = erc20Contract.methods.transfer(RECIPIENT_ACCOUNT_ADDRESS, provider.utils.toHex(AMOUNT)).encodeABI()
     
     const nonce = provider.utils.toHex(await provider.eth.getTransactionCount(address))
 
     const _gasPrice = await provider.eth.getGasPrice()
-    console.log('Gas Price:', _gasPrice)
-    const gasPrice = '0x4000'
-    // const estimatedGas = await provider.eth.estimateGas({ from: address, to: TOKEN_CONTRACT_ADDRESS, data })
-    const gasLimit = provider.utils.toHex(6000000) // Double to ensure we have enough gas
+    const gasPrice = provider.utils.toHex(_gasPrice)
+
+    const estimatedGas = await provider.eth.estimateGas({ from: address, to: TOKEN_CONTRACT_ADDRESS, data })
+    const gasLimit = provider.utils.toHex(estimatedGas)
 
     const to = TOKEN_CONTRACT_ADDRESS
     const value = provider.utils.toHex(0)
     
-    const v = 2 * CHAIN_ID + 35
-
-    return { nonce, gasPrice, gasLimit, to, value, data, v, r: 0, s: 0 }
+    return { nonce, gasPrice, gasLimit, to, value, data }
 }
 
 function padHexString(str) {
