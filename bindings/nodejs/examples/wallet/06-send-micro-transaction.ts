@@ -36,7 +36,7 @@ async function run() {
             { address: RECV_ADDRESS, amount: SEND_MICRO_AMOUNT },
         ];
 
-        const transaction = await account.send(params, {
+        const transaction = await account.sendWithParams(params, {
             allowMicroAmount: true,
         });
         console.log(`Transaction sent: ${transaction.transactionId}`);

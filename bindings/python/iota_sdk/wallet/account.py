@@ -364,11 +364,22 @@ class Account:
             }
         ))
 
-    def send(self, params: List[SendParams], options: Optional[TransactionOptions] = None) -> Transaction:
+    def send(self, amount: str, address: str, options: Optional[TransactionOptions] = None) -> Transaction:
         """Send base coins.
         """
         return Transaction.from_dict(self._call_account_method(
             'send', {
+                'amount': amount,
+                'address': address,
+                'options': options
+            }
+        ))
+
+    def send_with_params(self, params: List[SendParams], options: Optional[TransactionOptions] = None) -> Transaction:
+        """Send base coins to multiple addresses or with additional parameters.
+        """
+        return Transaction.from_dict(self._call_account_method(
+            'sendWithParams', {
                 'params': params,
                 'options': options
             }
