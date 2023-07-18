@@ -8,10 +8,12 @@ from iota_sdk.types.address import AccountAddress, AddressWithUnspentOutputs
 from iota_sdk.types.balance import Balance
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
+from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
@@ -201,7 +203,7 @@ class Account:
         )
         return [from_dict(AddressWithUnspentOutputs, address) for address in addresses]
 
-    def outputs(self, filter_options=None) -> List[OutputData]:
+    def outputs(self, filter_options: Optional[FilterOptions]=None) -> List[OutputData]:
         """Returns all outputs of the account.
         """
         outputs = self._call_account_method(
@@ -211,7 +213,7 @@ class Account:
         )
         return [from_dict(OutputData, o) for o in outputs]
 
-    def unspent_outputs(self, filter_options=None) -> List[OutputData]:
+    def unspent_outputs(self, filter_options: Optional[FilterOptions]=None) -> List[OutputData]:
         """Returns all unspent outputs of the account.
         """
         outputs = self._call_account_method(
@@ -302,7 +304,7 @@ class Account:
             'getBalance'
         ))
 
-    def prepare_output(self, output_options, transaction_options: Optional[TransactionOptions] = None) -> Output:
+    def prepare_output(self, params: OutputParams, transaction_options: Optional[TransactionOptions] = None) -> Output:
         """Prepare an output for sending
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -312,7 +314,7 @@ class Account:
         """
         return from_dict(Output, self._call_account_method(
             'prepareOutput', {
-                'params': output_options,
+                'params': params,
                 'transactionOptions': transaction_options
             }
         ))
