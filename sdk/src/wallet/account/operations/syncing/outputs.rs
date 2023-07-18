@@ -56,7 +56,7 @@ where
 
                 OutputData {
                     output_id: output_with_meta.metadata().output_id().to_owned(),
-                    metadata: output_with_meta.metadata().clone(),
+                    metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
                     is_spent: output_with_meta.metadata().is_spent(),
                     address: associated_address.address.inner,
@@ -89,7 +89,7 @@ where
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),
-                        output_data.metadata.clone(),
+                        output_data.metadata,
                     ));
                 }
                 None => unknown_outputs.push(output_id),

@@ -79,6 +79,30 @@ pub mod option_prefix_hex_vec {
     }
 }
 
+pub mod string_prefix {
+    use alloc::string::String;
+
+    use packable::{bounded::Bounded, prefix::StringPrefix};
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T: Bounded, S>(value: &StringPrefix<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_str(&**value)
+    }
+
+    pub fn deserialize<'de, T: Bounded, D>(deserializer: D) -> Result<StringPrefix<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+        <T as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        String::deserialize(deserializer)
+            .map_err(de::Error::custom)
+            .and_then(|s| s.try_into().map_err(de::Error::custom))
+    }
+}
+
 #[cfg(feature = "client")]
 pub mod bip44 {
     use crypto::keys::bip44::Bip44;

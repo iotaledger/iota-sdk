@@ -6,6 +6,72 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
+#[async_trait]
+impl MigrationData for Migrate {
+    const ID: usize = 1;
+    const SDK_VERSION: &'static str = "0.4.0";
+    const DATE: time::Date = time::macros::date!(2023 - 07 - 13);
+}
+
+#[async_trait]
+#[cfg(feature = "storage")]
+impl Migration<crate::wallet::storage::Storage> for Migrate {
+    async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
+        use crate::wallet::storage::constants::{
+            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
+        };
+
+        if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
+            for account_index in account_indexes {
+                if let Some(mut account) = storage
+                    .get::<serde_json::Value>(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
+                    .await?
+                {
+                    migrate_account(&mut account)?;
+
+                    storage
+                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
+                        .await?;
+                }
+            }
+        }
+
+        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
+            migrate_client_options(&mut wallet["client_options"])?;
+            if let Some(storage_options) = wallet.get_mut("storage_options") {
+                ConvertStorageOptions::check(storage_options)?;
+            }
+
+            storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
+        }
+        Ok(())
+    }
+}
+
+#[async_trait]
+#[cfg(feature = "stronghold")]
+impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
+    async fn migrate(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
+        use crate::{
+            client::storage::StorageAdapter,
+            wallet::core::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
+        };
+
+        if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
+            for account in &mut accounts {
+                migrate_account(account)?;
+            }
+            storage.set(ACCOUNTS_KEY, &accounts).await?;
+        }
+        if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
+            migrate_client_options(&mut client_options)?;
+
+            storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
+        }
+        Ok(())
+    }
+}
+
 fn migrate_native_tokens(output: &mut serde_json::Value) -> Result<()> {
     let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
 
@@ -81,118 +147,13 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
     Ok(())
 }
 
-#[async_trait]
-impl MigrationData for Migrate {
-    const ID: usize = 1;
-    const SDK_VERSION: &'static str = "0.4.0";
-    const DATE: time::Date = time::macros::date!(2023 - 07 - 14);
-}
-
-#[async_trait]
-#[cfg(feature = "storage")]
-impl Migration<crate::wallet::storage::Storage> for Migrate {
-    async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
-        use crate::wallet::storage::constants::{
-            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
-        };
-
-        if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
-            for account_index in account_indexes {
-                if let Some(mut account) = storage
-                    .get::<serde_json::Value>(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
-                    .await?
-                {
-                    migrate_account(&mut account)?;
-
-                    storage
-                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
-                        .await?;
-                }
-            }
-        }
-
-        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-            migrate_client_options(&mut wallet["client_options"])?;
-            if let Some(storage_options) = wallet.get_mut("storage_options") {
-                ConvertStorageOptions::check(storage_options)?;
-            }
-
-            storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
-        }
-        Ok(())
-    }
-}
-
-#[async_trait]
-#[cfg(feature = "stronghold")]
-impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
-    async fn migrate(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-        use crate::{
-            client::storage::StorageAdapter,
-            wallet::core::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
-        };
-
-        if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
-            for account in &mut accounts {
-                migrate_account(account)?;
-            }
-            storage.set(ACCOUNTS_KEY, &accounts).await?;
-        }
-        if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
-            migrate_client_options(&mut client_options)?;
-
-            storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
-        }
-        storage.delete("backup_schema_version").await.ok();
-        Ok(())
-    }
-}
-
-mod types {
-    use core::{marker::PhantomData, str::FromStr};
+pub(super) mod types {
+    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
+    use super::migrate_0::types::string_serde_impl;
     use crate::types::block::Error;
-
-    macro_rules! string_serde_impl {
-        ($type:ty) => {
-            impl serde::Serialize for $type {
-                fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-                    use alloc::string::ToString;
-
-                    s.serialize_str(&self.to_string())
-                }
-            }
-
-            impl<'de> serde::Deserialize<'de> for $type {
-                fn deserialize<D>(deserializer: D) -> Result<$type, D::Error>
-                where
-                    D: serde::Deserializer<'de>,
-                {
-                    struct StringVisitor;
-
-                    impl<'de> serde::de::Visitor<'de> for StringVisitor {
-                        type Value = $type;
-
-                        fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                            formatter.write_str("a string representing the value")
-                        }
-
-                        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-                        where
-                            E: serde::de::Error,
-                        {
-                            let value = core::str::FromStr::from_str(v).map_err(serde::de::Error::custom)?;
-                            Ok(value)
-                        }
-                    }
-
-                    deserializer.deserialize_str(StringVisitor)
-                }
-            }
-        };
-    }
 
     #[derive(Deserialize)]
     #[allow(non_camel_case_types)]
@@ -256,9 +217,8 @@ mod types {
 
     #[derive(Serialize, Deserialize)]
     #[repr(transparent)]
-    pub struct StringPrefix<B> {
+    pub struct StringPrefix {
         pub inner: String,
-        bounded: PhantomData<B>,
     }
 
     #[derive(Deserialize)]
@@ -303,7 +263,7 @@ impl Convert for ConvertSegment {
 struct ConvertHrp;
 impl Convert for ConvertHrp {
     type New = types::Hrp;
-    type Old = types::StringPrefix<u8>;
+    type Old = types::StringPrefix;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(Self::New::from_str_unchecked(&old.inner))
