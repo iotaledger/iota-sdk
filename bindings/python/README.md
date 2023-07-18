@@ -81,7 +81,7 @@ The following example will create a
 new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/account/)
 that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
 [`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
-to safely store a mnemonic, and then print the account's information.
+to safely store a seed derived from a mnemonic, and then print the account's information.
 
 ```python
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType
