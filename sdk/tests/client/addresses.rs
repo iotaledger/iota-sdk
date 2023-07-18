@@ -308,9 +308,10 @@ async fn search_address() -> Result<()> {
         iota_sdk::client::api::search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..9, &addresses[0])
             .await;
 
-    if let Err(iota_sdk::client::Error::InputAddressNotFound { .. }) = res {
-        return Ok(());
+    match res {
+        Err(iota_sdk::client::Error::InputAddressNotFound { .. }) => {}
+        _ => panic!("should not have found search address range & public"),
     }
 
-    panic!("should not have found search address range & public")
+    return Ok(());
 }
