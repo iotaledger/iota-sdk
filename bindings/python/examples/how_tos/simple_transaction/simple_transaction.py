@@ -23,5 +23,5 @@ params = [SendParams(
     amount=1000000,
 )]
 
-transaction = account.send(params)
+transaction = account.send_with_params(params)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

@@ -35,12 +35,7 @@ async function run() {
             'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
         const amount = BigInt(1000000);
 
-        const response = await account.send([
-            {
-                address,
-                amount,
-            },
-        ]);
+        const response = await account.send(amount, address);
 
         console.log(
             `Block sent: ${process.env.EXPLORER_URL}/block/${response.blockId}`,

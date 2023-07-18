@@ -28,10 +28,10 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 balance = account.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
-transaction = account.send([SendParams(
-    "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+transaction = account.send(
     1000000,
-)])
+    "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+)
 print(transaction)
 print(
     f'Check your block on: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

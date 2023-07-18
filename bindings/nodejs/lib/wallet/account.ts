@@ -1002,13 +1002,44 @@ export class Account {
     }
 
     /**
+     * Send base coins to an address.
+     * @param amount Amount of coins.
+     * @param address Receiving address.
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The sent transaction.
+     */
+    async send(
+        amount: bigint | string,
+        address: string,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        if (typeof amount === 'bigint') {
+            amount = amount.toString(10);
+        }
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'send',
+                data: {
+                    amount,
+                    address,
+                    options: transactionOptions,
+                },
+            },
+        );
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
+    }
+
+    /**
      * Send base coins with amounts from input addresses.
      * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async send(
+    async sendWithParams(
         params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
@@ -1020,7 +1051,7 @@ export class Account {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'send',
+                name: 'sendWithParams',
                 data: {
                     params,
                     options: transactionOptions,

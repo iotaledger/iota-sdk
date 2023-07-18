@@ -263,7 +263,21 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::BlockId(block_id)
         }
-        AccountMethod::Send { params, options } => {
+        AccountMethod::Send {
+            amount,
+            address,
+            options,
+        } => {
+            let transaction = account
+                .send(
+                    amount,
+                    address,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
+                )
+                .await?;
+            Response::SentTransaction(TransactionDto::from(&transaction))
+        }
+        AccountMethod::SendWithParams { params, options } => {
             let transaction = account
                 .send_with_params(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;

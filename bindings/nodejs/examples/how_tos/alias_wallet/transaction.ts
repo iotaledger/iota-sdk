@@ -70,7 +70,7 @@ async function run() {
             mandatoryInputs: [input],
             allowMicroAmount: false,
         };
-        const transaction = await account.send(params, options);
+        const transaction = await account.sendWithParams(params, options);
         await account.retryTransactionUntilIncluded(transaction.transactionId);
         console.log(
             `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,
