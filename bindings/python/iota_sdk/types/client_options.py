@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
-from iota_sdk.types.network_info import NetworkInfo
+from iota_sdk.types.node_info import NodeInfoProtocol
 
 
 @dataclass
@@ -47,24 +47,18 @@ class ClientOptions:
 
 
         Attributes:
-        nodes (List[str]): 
-            Array of Node URLs.
         primary_node (str): 
             Node which will be tried first for all requests.
         primary_pow_node (str):
             Node which will be tried first when using remote PoW, even before the primary_node.
+        nodes (List[str]): 
+            Array of Node URLs.
         permanode (str):
             Permanode URL.
         ignoreNodeHealth (bool):
             If the node health should be ignored.
-        apiTimeout (Duration):
-            Timeout for API requests.
         nodeSyncInterval (Duration):
             Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated.
-        remotePowTimeout (Duration):
-            Timeout when sending a block that requires remote proof of work.
-        tipsInterval (int):
-            Tips request interval during PoW in seconds.
         quorum (bool):
             If node quorum is enabled. Will compare the responses from multiple nodes
             and only returns the response if `quorum_threshold`% of the nodes return the same one.
@@ -74,10 +68,20 @@ class ClientOptions:
             % of nodes that have to return the same response so it gets accepted.
         userAgent (str):
             The User-Agent header for requests.
+        brokerOptions (MqttBrokerOptions):
+            Options for the MQTT broker.
+        protocolParameters (NodeInfoProtocol):
+            Protocol parameters.
         localPow (bool):
             Local proof of work.
         fallbackToLocalPow (bool):
             Fallback to local proof of work if the node doesn't support remote PoW.
+        tipsInterval (int):
+            Tips request interval during PoW in seconds.
+        apiTimeout (Duration):
+            Timeout for API requests.
+        remotePowTimeout (Duration):
+            Timeout when sending a block that requires remote proof of work.
         powWorkerCount (int):
             The amount of threads to be used for proof of work.
     """
@@ -87,18 +91,18 @@ class ClientOptions:
     permanodes: Optional[List[str]] = None
     ignoreNodeHealth: Optional[bool] = None
     nodeSyncInterval: Optional[Duration] = None
-    tipsInterval: Optional[int] = None
     quorum: Optional[bool] = None
     minQuorumSize: Optional[int] = None
     quorumThreshold: Optional[int] = None
     userAgent: Optional[str] = None
-    networkInfo: Optional[NetworkInfo] = None
     brokerOptions: Optional[MqttBrokerOptions] = None
+    protocolParameters: Optional[NodeInfoProtocol] = None
+    localPow: Optional[bool] = None
+    fallbackToLocalPow: Optional[bool] = None
+    tipsInterval: Optional[int] = None
     apiTimeout: Optional[Duration] = None
     remotePowTimeout: Optional[Duration] = None
     powWorkerCount: Optional[int] = None
-    localPow: Optional[bool] = None
-    fallbackToLocalPow: Optional[bool] = None
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v != None}
