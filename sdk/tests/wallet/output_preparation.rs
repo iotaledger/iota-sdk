@@ -12,7 +12,6 @@ use iota_sdk::{
         account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
         MintNftParams, Result,
     },
-    U256,
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -68,7 +67,7 @@ async fn output_preparation() -> Result<()> {
 
     let native_token = NativeToken::new(
         TokenId::from_str("0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000")?,
-        U256::from(10u32),
+        10,
     )?;
     let output = account
         .prepare_output(

@@ -31,9 +31,9 @@ async function run() {
         //TODO: Replace with the address of your choice!
         const address =
             'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
-        const amount = '1';
+        const amount = BigInt(1);
 
-        const transaction = await account.sendAmount(
+        const transaction = await account.send(
             [
                 {
                     address,

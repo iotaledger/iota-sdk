@@ -8,18 +8,17 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::slip10::{Chain, Seed},
+    keys::{bip39::Mnemonic, bip44::Bip44, slip10::Seed},
     signatures::{
         ed25519,
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use serde::{Deserialize, Serialize};
-use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
+use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{api::PreparedTransactionData, constants::HD_WALLET_TYPE, Client, Error},
+    client::{api::PreparedTransactionData, Client, Error},
     types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
 };
 
@@ -49,17 +48,14 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(address_indexes
             .map(|address_index| {
-                let chain = Chain::from_u32_hardened([
-                    HD_WALLET_TYPE,
-                    coin_type,
-                    account_index,
-                    internal as u32,
-                    address_index,
-                ]);
+                let chain = Bip44::new()
+                    .with_coin_type(coin_type)
+                    .with_account(account_index)
+                    .with_change(internal as _)
+                    .with_address_index(address_index);
 
-                let public_key = self
-                    .0
-                    .derive::<ed25519::SecretKey>(&chain)?
+                let public_key = chain
+                    .derive(&self.0.to_master_key::<ed25519::SecretKey>())
                     .secret_key()
                     .public_key()
                     .to_bytes();
@@ -85,25 +81,27 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(address_indexes
             .map(|address_index| {
-                let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
-                    .join(Chain::from_u32([internal as u32, address_index]));
+                let chain = Bip44::new()
+                    .with_coin_type(coin_type)
+                    .with_account(account_index)
+                    .with_change(internal as _)
+                    .with_address_index(address_index);
 
-                let public_key = self
-                    .0
-                    .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
+                let public_key = chain
+                    .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
                     .secret_key()
                     .public_key();
 
-                crate::client::Result::Ok(public_key.to_evm_address())
+                crate::client::Result::Ok(public_key.evm_address())
             })
             .collect::<Result<_, _>>()?)
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let private_key = self.0.derive::<ed25519::SecretKey>(chain)?.secret_key();
-        let public_key = private_key.public_key().to_bytes();
-        let signature = private_key.sign(msg).to_bytes();
+        let private_key = chain.derive(&self.0.to_master_key::<ed25519::SecretKey>()).secret_key();
+        let public_key = private_key.public_key();
+        let signature = private_key.sign(msg);
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
@@ -111,12 +109,14 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         // Get the private and public key for this secp256k1_ecdsa key
-        let private_key = self.0.derive::<secp256k1_ecdsa::SecretKey>(chain)?.secret_key();
+        let private_key = chain
+            .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
+            .secret_key();
         let public_key = private_key.public_key();
-        let signature = private_key.sign(msg);
+        let signature = private_key.try_sign_keccak256(msg)?;
 
         Ok((public_key, signature))
     }
@@ -141,10 +141,8 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
-        let mnemonic = mnemonic.into();
-        let mnemonic = Mnemonic::try_from(mnemonic.as_str().to_owned())?;
-        Ok(Self(Client::mnemonic_to_seed(&mnemonic)))
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
+        Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?.into()))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
@@ -156,75 +154,75 @@ impl MnemonicSecretManager {
     }
 }
 
-impl From<Mnemonic> for MnemonicSecretManager {
-    fn from(m: Mnemonic) -> Self {
-        Self(Client::mnemonic_to_seed(&m))
-    }
-}
+// impl From<Mnemonic> for MnemonicSecretManager {
+//     fn from(m: Mnemonic) -> Self {
+//         Self(Client::mnemonic_to_seed(&m))
+//     }
+// }
 
-/// A mnemonic (space separated list of words) that allows to create a seed from.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
-pub struct Mnemonic(String);
+// /// A mnemonic (space separated list of words) that allows to create a seed from.
+// #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+// pub struct Mnemonic(String);
 
-impl Mnemonic {
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
-    }
-}
+// impl Mnemonic {
+//     pub fn as_str(&self) -> &str {
+//         self.0.as_str()
+//     }
+// }
 
-impl TryFrom<String> for Mnemonic {
-    type Error = Error;
+// impl TryFrom<String> for Mnemonic {
+//     type Error = Error;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        let value: Zeroizing<String> = Zeroizing::new(value);
-        // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
-        let trimmed = value.as_str().trim();
-        // first we check if the mnemonic is valid to give meaningful errors
-        if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH) {
-            Err(crate::client::Error::InvalidMnemonic(format!("{err:?}")))
-        } else {
-            Ok(Self(trimmed.to_string()))
-        }
-    }
-}
+//     fn try_from(value: String) -> Result<Self, Self::Error> {
+//         let value: Zeroizing<String> = Zeroizing::new(value);
+//         // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
+//         let trimmed = value.as_str().trim();
+//         // first we check if the mnemonic is valid to give meaningful errors
+//         if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH) {
+//             Err(crate::client::Error::InvalidMnemonic(format!("{err:?}")))
+//         } else {
+//             Ok(Self(trimmed.to_string()))
+//         }
+//     }
+// }
 
-pub trait MnemonicLike: Send {
-    fn to_mnemonic(self) -> Result<Mnemonic, Error>;
-}
+// pub trait MnemonicLike: Send {
+//     fn to_mnemonic(self) -> Result<Mnemonic, Error>;
+// }
 
-impl MnemonicLike for Mnemonic {
-    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
-        Ok(self)
-    }
-}
+// impl MnemonicLike for Mnemonic {
+//     fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+//         Ok(self)
+//     }
+// }
 
-impl MnemonicLike for String {
-    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
-        Mnemonic::try_from(self)
-    }
-}
+// impl MnemonicLike for String {
+//     fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+//         Mnemonic::try_from(self)
+//     }
+// }
 
-impl MnemonicLike for Vec<String> {
-    fn to_mnemonic(mut self) -> Result<Mnemonic, Error> {
-        let m = self.join(" ");
-        self.zeroize();
-        Mnemonic::try_from(m)
-    }
-}
+// impl MnemonicLike for Vec<String> {
+//     fn to_mnemonic(mut self) -> Result<Mnemonic, Error> {
+//         let m = self.join(" ");
+//         self.zeroize();
+//         Mnemonic::try_from(m)
+//     }
+// }
 
-impl MnemonicLike for [&'static str; 24] {
-    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
-        let m = self.join(" ");
-        Mnemonic::try_from(m)
-    }
-}
+// impl MnemonicLike for [&'static str; 24] {
+//     fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+//         let m = self.join(" ");
+//         Mnemonic::try_from(m)
+//     }
+// }
 
-// that's only necessary to use it in `assert!` macros
-impl core::fmt::Debug for Mnemonic {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "<mnemonic>")
-    }
-}
+// // that's only necessary to use it in `assert!` macros
+// impl core::fmt::Debug for Mnemonic {
+//     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+//         write!(f, "<mnemonic>")
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
@@ -267,63 +265,64 @@ mod tests {
         );
     }
 
-    #[test]
-    fn mnemonic_like() {
-        // Mnemonic from a space-separated word list stored in a `String`
-        let mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
-        // Mnemonic from a word list stored in a `Vec<String>`
-        let mnemonic2 = [
-            "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
-            "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
-            "abuse", "rally",
-        ]
-        .into_iter()
-        .map(|s| s.to_owned())
-        .collect::<Vec<_>>()
-        .to_mnemonic()
-        .unwrap();
-        // Mnemonic from a word list stored in a `[&'static str; 24]`
-        let mnemonic3 = [
-            "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
-            "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
-            "abuse", "rally",
-        ]
-        .to_mnemonic()
-        .unwrap();
+    // #[test]
+    // fn mnemonic_like() {
+    //     // Mnemonic from a space-separated word list stored in a `String`
+    //     let mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle
+    // shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();     // Mnemonic
+    // from a word list stored in a `Vec<String>`     let mnemonic2 = [
+    //         "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
+    //         "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
+    //         "abuse", "rally",
+    //     ]
+    //     .into_iter()
+    //     .map(|s| s.to_owned())
+    //     .collect::<Vec<_>>()
+    //     .to_mnemonic()
+    //     .unwrap();
+    //     // Mnemonic from a word list stored in a `[&'static str; 24]`
+    //     let mnemonic3 = [
+    //         "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
+    //         "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
+    //         "abuse", "rally",
+    //     ]
+    //     .to_mnemonic()
+    //     .unwrap();
 
-        assert_eq!(mnemonic1, mnemonic2);
-        assert_eq!(mnemonic1, mnemonic3);
-        assert_eq!(mnemonic2, mnemonic3);
+    //     assert_eq!(mnemonic1, mnemonic2);
+    //     assert_eq!(mnemonic1, mnemonic3);
+    //     assert_eq!(mnemonic2, mnemonic3);
 
-        // Different mnemonic
-        let mnemonic4 = [
-            "endorse", "answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
-            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
-            "prepare", "broken", "river",
-        ]
-        .to_mnemonic()
-        .unwrap();
+    //     // Different mnemonic
+    //     let mnemonic4 = [
+    //         "endorse", "answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+    //         "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
+    //         "prepare", "broken", "river",
+    //     ]
+    //     .to_mnemonic()
+    //     .unwrap();
 
-        assert_ne!(mnemonic1, mnemonic4);
-        assert_ne!(mnemonic2, mnemonic4);
-        assert_ne!(mnemonic3, mnemonic4);
+    //     assert_ne!(mnemonic1, mnemonic4);
+    //     assert_ne!(mnemonic2, mnemonic4);
+    //     assert_ne!(mnemonic3, mnemonic4);
 
-        // Incorrect mnemonic
-        assert!(
-            [
-                "dynamic", "giant", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access",
-                "mercy", "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy",
-                "hawk", "abuse", "rally"
-            ]
-            .to_mnemonic()
-            .is_err()
-        );
-    }
+    //     // Incorrect mnemonic
+    //     assert!(
+    //         [
+    //             "dynamic", "giant", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access",
+    //             "mercy", "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm",
+    // "heavy",             "hawk", "abuse", "rally"
+    //         ]
+    //         .to_mnemonic()
+    //         .is_err()
+    //     );
+    // }
 
-    #[test]
-    fn zeroize_mnemonic() {
-        let mut mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
-        mnemonic1.zeroize();
-        assert!(mnemonic1.as_str().is_empty());
-    }
+    // #[test]
+    // fn zeroize_mnemonic() {
+    //     let mut mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain
+    // muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
+    //     mnemonic1.zeroize();
+    //     assert!(mnemonic1.as_str().is_empty());
+    // }
 }

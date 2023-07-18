@@ -1,7 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { callClientMethodAsync, createClient, listenMqtt } from '../bindings';
+import {
+    callClientMethodAsync,
+    createClient,
+    listenMqtt,
+    destroyClient,
+} from '../bindings';
 import type { IClientOptions, __ClientMethods__ } from '../types/client';
 
 /** The MethodHandler which sends the commands to the Rust side. */
@@ -15,6 +20,10 @@ export class ClientMethodHandler {
         } else {
             this.methodHandler = options as ClientMethodHandler;
         }
+    }
+
+    async destroy() {
+        return destroyClient(this.methodHandler);
     }
 
     async callMethod(method: __ClientMethods__): Promise<string> {

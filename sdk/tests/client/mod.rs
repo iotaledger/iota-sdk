@@ -22,7 +22,7 @@ use std::{
     str::FromStr,
 };
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
@@ -40,7 +40,6 @@ use iota_sdk::{
         rand::{block::rand_block_id, transaction::rand_transaction_id},
     },
 };
-use primitive_types::U256;
 
 const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
 const ALIAS_ID_0: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -72,7 +71,7 @@ enum Build<'a> {
         Option<(&'a str, u64)>,
         Option<u32>,
         Option<(&'a str, u32)>,
-        Option<Chain>,
+        Option<Bip44>,
     ),
     Nft(
         u64,
@@ -83,7 +82,7 @@ enum Build<'a> {
         Option<&'a str>,
         Option<(&'a str, u64)>,
         Option<(&'a str, u32)>,
-        Option<Chain>,
+        Option<Bip44>,
     ),
     Alias(
         u64,
@@ -94,7 +93,7 @@ enum Build<'a> {
         Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
         Option<&'a str>,
-        Option<Chain>,
+        Option<Bip44>,
     ),
     Foundry(u64, AliasId, u32, SimpleTokenScheme, Option<Vec<(&'a str, u64)>>),
 }
@@ -115,7 +114,7 @@ fn build_basic_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -157,7 +156,7 @@ fn build_nft_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -201,7 +200,7 @@ fn build_alias_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
@@ -230,14 +229,14 @@ fn build_foundry_output(
         builder = builder.with_native_tokens(
             native_tokens
                 .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), U256::from(amount)).unwrap()),
+                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
         );
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
 }
 
-fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
+fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
     match build {
         Build::Basic(amount, bech32_address, native_tokens, bech32_sender, sdruc, timelock, expiration, chain) => (
             build_basic_output(
@@ -380,9 +379,7 @@ fn is_remainder_or_return(
             let native_tokens = NativeTokens::from_set(
                 native_tokens
                     .into_iter()
-                    .map(|(token_id, amount)| {
-                        NativeToken::new(TokenId::from_str(token_id).unwrap(), U256::from(amount)).unwrap()
-                    })
+                    .map(|(token_id, amount)| NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap())
                     .collect::<BTreeSet<_>>(),
             )
             .unwrap();

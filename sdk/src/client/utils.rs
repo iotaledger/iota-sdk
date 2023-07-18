@@ -3,17 +3,18 @@
 
 //! Utility functions for IOTA
 
+use core::borrow::Borrow;
 use std::collections::HashMap;
 
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::{bip39::wordlist, slip10::Seed},
+    keys::bip39::{wordlist, Mnemonic, MnemonicRef, Passphrase, Seed},
     utils,
 };
 use serde::{Deserialize, Serialize};
-use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
-use super::{secret::mnemonic::Mnemonic, Client, ClientInner};
+use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
@@ -52,25 +53,34 @@ pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hr
 
 /// Generates a new mnemonic.
 pub fn generate_mnemonic() -> Result<Mnemonic> {
-    let mut entropy = Zeroizing::new([0u8; 32]);
-    utils::rand::fill(entropy.as_mut())?;
-    let mnemonic = wordlist::encode(entropy.as_ref(), &crypto::keys::bip39::wordlist::ENGLISH)
+    let mut entropy = [0u8; 32];
+    utils::rand::fill(&mut entropy)?;
+    let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
-    mnemonic.try_into()
+    entropy.zeroize();
+    Ok(mnemonic)
 }
 
 /// Returns a hex encoded seed for a mnemonic.
-pub fn mnemonic_to_hex_seed(mnemonic: &Mnemonic) -> String {
-    let mut mnemonic_seed = [0u8; 64];
-    crypto::keys::bip39::mnemonic_to_seed(mnemonic.as_str(), "", &mut mnemonic_seed);
-    prefix_hex::encode(mnemonic_seed)
+pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String> {
+    Ok(prefix_hex::encode(mnemonic_to_seed(mnemonic)?.as_ref()))
 }
 
 /// Returns a seed for a mnemonic.
-pub fn mnemonic_to_seed(mnemonic: &Mnemonic) -> Seed {
-    let mut mnemonic_seed = Zeroizing::new([0u8; 64]);
-    crypto::keys::bip39::mnemonic_to_seed(mnemonic.as_str(), "", &mut mnemonic_seed);
-    Seed::from_bytes(mnemonic_seed.as_ref())
+pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
+    // first we check if the mnemonic is valid to give meaningful errors
+    verify_mnemonic(mnemonic.borrow())?;
+    Ok(crypto::keys::bip39::mnemonic_to_seed(
+        mnemonic.borrow(),
+        &Passphrase::default(),
+    ))
+}
+
+/// Verifies that a &str is a valid mnemonic.
+pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<()> {
+    crypto::keys::bip39::wordlist::verify(mnemonic.borrow(), &crypto::keys::bip39::wordlist::ENGLISH)
+        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+    Ok(())
 }
 
 /// Requests funds from a faucet
@@ -153,12 +163,12 @@ impl Client {
     }
 
     /// Returns a seed for a mnemonic.
-    pub fn mnemonic_to_seed(mnemonic: &Mnemonic) -> Seed {
+    pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
         mnemonic_to_seed(mnemonic)
     }
 
     /// Returns a hex encoded seed for a mnemonic.
-    pub fn mnemonic_to_hex_seed(mnemonic: &Mnemonic) -> String {
+    pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String> {
         mnemonic_to_hex_seed(mnemonic)
     }
 

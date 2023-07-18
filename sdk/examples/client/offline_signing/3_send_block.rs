@@ -3,9 +3,12 @@
 
 //! In this example we send the signed transaction in a block.
 //!
-//! `cargo run --example 3_send_block --release`
-
-use std::{fs::File, io::prelude::*, path::Path};
+//! Make sure to run `2_transaction_signing` before.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 3_send_block
+//! ```
 
 use iota_sdk::{
     client::{
@@ -24,14 +27,10 @@ async fn main() -> Result<()> {
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
-    // Create a client instance.
-    let online_client = Client::builder()
-        // Insert your node URL in the .env.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    // Create a node client.
+    let online_client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let signed_transaction_payload = read_signed_transaction_from_file(SIGNED_TRANSACTION_FILE_NAME)?;
+    let signed_transaction_payload = read_signed_transaction_from_file(SIGNED_TRANSACTION_FILE_NAME).await?;
 
     let current_time = online_client.get_time_checked().await?;
 
@@ -47,7 +46,7 @@ async fn main() -> Result<()> {
 
     // Sends the offline signed transaction online.
     let block = online_client
-        .block()
+        .build_block()
         .finish_block(Some(Payload::Transaction(Box::new(
             signed_transaction_payload.transaction_payload,
         ))))
@@ -62,10 +61,12 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn read_signed_transaction_from_file<P: AsRef<Path>>(path: P) -> Result<SignedTransactionData> {
-    let mut file = File::open(&path).unwrap();
+async fn read_signed_transaction_from_file(path: impl AsRef<std::path::Path>) -> Result<SignedTransactionData> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(path).await.expect("failed to open file");
     let mut json = String::new();
-    file.read_to_string(&mut json).unwrap();
+    file.read_to_string(&mut json).await.expect("failed to read file");
 
     let dto = serde_json::from_str::<SignedTransactionDataDto>(&json)?;
 

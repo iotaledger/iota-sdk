@@ -11,7 +11,6 @@ use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::Node,
-        secret::mnemonic::Mnemonic,
         NetworkInfoDto, NodeInfoWrapper,
     },
     types::{
@@ -27,7 +26,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
-                AliasId, FoundryId, NftId, OutputId,
+                AliasId, FoundryId, NftId, OutputId, TokenId,
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
@@ -40,12 +39,9 @@ use iota_sdk::{
             BlockDto, BlockId,
         },
     },
-    wallet::{
-        account::{
-            types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
-            PreparedCreateNativeTokenTransactionDto,
-        },
-        message_interface::dtos::AccountDetailsDto,
+    wallet::account::{
+        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
+        AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
 use serde::Serialize;
@@ -136,7 +132,9 @@ pub enum Response {
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
-    BlockRaw(Vec<u8>),
+    /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
+    /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
+    Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
     OutputWithMetadataResponse(OutputWithMetadataResponse),
@@ -152,10 +150,6 @@ pub enum Response {
     /// - [`GetMilestoneById`](crate::method::ClientMethod::GetMilestoneById)
     /// - [`GetMilestoneByIndex`](crate::method::ClientMethod::GetMilestoneByIndex)
     Milestone(MilestonePayloadDto),
-    /// Response for:
-    /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
-    /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
-    MilestoneRaw(Vec<u8>),
     /// Response for:
     /// - [`GetUtxoChangesById`](crate::method::ClientMethod::GetUtxoChangesById)
     /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
@@ -211,6 +205,9 @@ pub enum Response {
     /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
     MilestoneId(MilestoneId),
     /// Response for:
+    /// - [`ComputeTokenId`](crate::method::UtilsMethod::ComputeTokenId)
+    TokenId(TokenId),
+    /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:
@@ -224,11 +221,14 @@ pub enum Response {
     FoundryId(FoundryId),
     /// Response for:
     /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
-    TransactionEssenceHash(String),
+    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
+    Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
+    /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
+    CustomJson(serde_json::Value),
 
     // Responses in client and wallet
     /// Response for:
@@ -249,7 +249,7 @@ pub enum Response {
     Faucet(String),
     /// Response for:
     /// - [`GenerateMnemonic`](crate::method::UtilsMethod::GenerateMnemonic)
-    GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] Mnemonic),
+    GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for
     /// - [`GetLedgerNanoStatus`](crate::method::SecretManagerMethod::GetLedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
@@ -308,7 +308,8 @@ pub enum Response {
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for:
-    /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
+    /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
+    /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)
@@ -329,7 +330,7 @@ pub enum Response {
     /// - [`PrepareMeltNativeToken`](crate::method::AccountMethod::PrepareMeltNativeToken)
     /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
     /// - [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
-    /// - [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
+    /// - [`PrepareSend`](crate::method::AccountMethod::PrepareSend),
     /// - [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
     /// - [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
@@ -361,7 +362,7 @@ pub enum Response {
     Balance(Balance),
     /// Response for:
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
-    /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)
+    /// - [`Send`](crate::method::AccountMethod::Send)
     /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::AccountMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)

@@ -4,6 +4,7 @@
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 from iota_sdk.wallet.account import Account, _call_method_routine
+from iota_sdk.wallet.sync_options import SyncOptions
 from json import dumps
 from typing import Any, Dict, List, Optional
 
@@ -30,20 +31,26 @@ class Wallet():
     def get_handle(self):
         return self.handle
 
-    def create_account(self, alias: Optional[str] = None, bech32_hrp: Optional[str] = None):
+    def create_account(self, alias: Optional[str] = None, bech32_hrp: Optional[str] = None) -> Account:
         """Create a new account
         """
-        return self._call_method(
+        account_data = self._call_method(
             'createAccount', {
                 'alias': self.__return_str_or_none(alias),
                 'bech32Hrp': self.__return_str_or_none(bech32_hrp),
             }
         )
+        return Account(account_data, self.handle)
 
     def get_account(self, account_id: str | int) -> Account:
         """Get the account instance
         """
-        return Account(account_id, self.handle)
+        account_data = self._call_method(
+            'getAccount', {
+                'accountId': account_id,
+            }
+        )
+        return Account(account_data, self.handle)
 
     def get_client(self):
         """Get the client instance
@@ -76,9 +83,10 @@ class Wallet():
     def get_accounts(self):
         """Get accounts
         """
-        return self._call_method(
+        accounts_data =  self._call_method(
             'getAccounts',
         )
+        return [Account(account_data, self.handle) for account_data in accounts_data]
 
     def backup(self, destination: str, password: str):
         """Backup storage.
@@ -114,7 +122,7 @@ class Wallet():
             'isStrongholdPasswordAvailable'
         )
 
-    def recover_accounts(self, account_start_index: int, account_gap_limit: int, address_gap_limit: int, sync_options: Optional[Any] = None):
+    def recover_accounts(self, account_start_index: int, account_gap_limit: int, address_gap_limit: int, sync_options: Optional[SyncOptions] = None):
         """Recover accounts.
         """
         return self._call_method(
@@ -143,22 +151,6 @@ class Wallet():
             'restoreBackup', {
                 'source': source,
                 'password': password
-            }
-        )
-
-    def generate_mnemonic(self) -> str:
-        """Generates a new mnemonic.
-        """
-        return self._call_method(
-            'generateMnemonic'
-        )
-
-    def verify_mnemonic(self, mnemonic: str):
-        """Checks if the given mnemonic is valid.
-        """
-        return self._call_method(
-            'verifyMnemonic', {
-                'mnemonic': mnemonic
             }
         )
 
@@ -214,7 +206,7 @@ class Wallet():
 
         )
 
-    def start_background_sync(self, options, interval_in_milliseconds: int):
+    def start_background_sync(self, options: Optional[SyncOptions] = None, interval_in_milliseconds: Optional[int] = None):
         """Start background sync.
         """
         return self._call_method(
@@ -231,14 +223,14 @@ class Wallet():
             'stopBackgroundSync',
         )
 
-    def listen(self, handler, events: Optional[List[str]] = None):
+    def listen(self, handler, events: Optional[List[int]] = None):
         """Listen to wallet events, empty array or None will listen to all events
            The default value for events is None
         """
         events_array = [] if events is None else events
         listen_wallet(self.handle, events_array, handler)
 
-    def clear_listeners(self, events: Optional[List[str]] = None):
+    def clear_listeners(self, events: Optional[List[int]] = None):
         """Remove wallet event listeners, empty array or None will remove all listeners
            The default value for events is None
         """

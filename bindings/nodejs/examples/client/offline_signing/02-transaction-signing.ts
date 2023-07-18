@@ -20,12 +20,12 @@ async function run() {
     const offlineClient = new Client({});
 
     try {
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
+        if (!process.env.MNEMONIC) {
+            throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
 
         const secretManager = {
-            mnemonic: process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
+            mnemonic: process.env.MNEMONIC,
         };
 
         // Read in prepared transaction from example 2_transaction_preparation

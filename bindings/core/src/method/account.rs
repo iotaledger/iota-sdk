@@ -21,7 +21,7 @@ use iota_sdk::{
             CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
             SyncOptions, TransactionOptionsDto,
         },
-        SendAmountParams, SendNativeTokensParams, SendNftParams,
+        SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -120,10 +120,6 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
-    /// Calculate the minimum required storage deposit for an output.
-    /// Expected response:
-    /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
     /// Returns all outputs of the account
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
@@ -156,7 +152,8 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to create a native token.
-    /// Expected response: [`PreparedNativeTokenTransaction`](crate::Response::PreparedNativeTokenTransaction)
+    /// Expected response:
+    /// [`PreparedCreateNativeTokenTransaction`](crate::Response::PreparedCreateNativeTokenTransaction)
     PrepareCreateNativeToken {
         params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
@@ -209,10 +206,10 @@ pub enum AccountMethod {
         params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
-    /// Prepare send amount.
+    /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareSendAmount {
-        params: Vec<SendAmountParams>,
+    PrepareSend {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to send native tokens.
@@ -269,10 +266,10 @@ pub enum AccountMethod {
         /// Maximum attempts
         max_attempts: Option<u64>,
     },
-    /// Send amount.
+    /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendAmount {
-        params: Vec<SendAmountParams>,
+    Send {
+        params: Vec<SendParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send outputs in a transaction.

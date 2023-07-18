@@ -4,9 +4,9 @@ import os
 
 load_dotenv()
 
-# In this example we will create an alias ouput
+# In this example we will create an alias output
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 
@@ -20,4 +20,4 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Send transaction.
 transaction = account.prepare_create_alias_output(None, None).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')

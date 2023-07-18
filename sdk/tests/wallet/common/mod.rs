@@ -1,18 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#![allow(clippy::redundant_pub_crate)]
-
 mod constants;
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{
-            mnemonic::{Mnemonic, MnemonicSecretManager},
-            SecretManager,
-        },
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Client,
     },
     wallet::{Account, ClientOptions, Result, Wallet},
@@ -35,7 +31,7 @@ pub use self::constants::*;
 #[allow(dead_code, unused_variables)]
 pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, node: Option<&str>) -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
-    let secret_manager = MnemonicSecretManager::from(mnemonic.unwrap_or(Client::generate_mnemonic()?));
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic()?))?;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()

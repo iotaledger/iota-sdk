@@ -5,7 +5,7 @@
 
 use std::collections::HashSet;
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
@@ -16,7 +16,6 @@ use crate::{
             },
             ClientBlockBuilder,
         },
-        constants::HD_WALLET_TYPE,
         secret::types::InputSigningData,
         Error, Result,
     },
@@ -71,13 +70,13 @@ impl<'a> ClientBlockBuilder<'a> {
                             required_inputs.push(InputSigningData {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
-                                chain: Some(Chain::from_u32_hardened([
-                                    HD_WALLET_TYPE,
-                                    self.coin_type,
-                                    self.account_index,
-                                    internal as u32,
-                                    address_index,
-                                ])),
+                                chain: Some(
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(self.account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index),
+                                ),
                             });
                             found_output = true;
                             break;
@@ -131,13 +130,11 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened([
-                                        HD_WALLET_TYPE,
-                                        self.coin_type,
-                                        self.account_index,
-                                        internal as u32,
-                                        address_index,
-                                    ])
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(self.account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index)
                                 }),
                             });
                         }
@@ -188,13 +185,11 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened([
-                                        HD_WALLET_TYPE,
-                                        self.coin_type,
-                                        self.account_index,
-                                        internal as u32,
-                                        address_index,
-                                    ])
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(self.account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index)
                                 }),
                             });
                         }
@@ -209,7 +204,7 @@ impl<'a> ClientBlockBuilder<'a> {
         let utxo_chain_inputs = self
             .get_utxo_chains_inputs(required_inputs.iter().map(|i| &i.output))
             .await?;
-        required_inputs.extend(utxo_chain_inputs.into_iter());
+        required_inputs.extend(utxo_chain_inputs);
 
         Ok(required_inputs)
     }

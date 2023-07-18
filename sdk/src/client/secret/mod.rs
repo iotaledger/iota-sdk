@@ -21,7 +21,7 @@ use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
-    keys::slip10::Chain,
+    keys::{bip39::Mnemonic, bip44::Bip44},
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -29,7 +29,7 @@ use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
-use self::mnemonic::{Mnemonic, MnemonicSecretManager};
+use self::mnemonic::MnemonicSecretManager;
 #[cfg(feature = "stronghold")]
 use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
@@ -80,18 +80,18 @@ pub trait SecretManage: Send + Sync {
     ) -> Result<Vec<EvmAddress>, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Ed25519.
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Secp256k1.
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error>;
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> Result<Unlock, Self::Error> {
-        Ok(Unlock::Signature(SignatureUnlock::new(Signature::Ed25519(
+    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+        Ok(Unlock::Signature(SignatureUnlock::new(Signature::from(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
     }
@@ -216,8 +216,7 @@ impl TryFrom<SecretManagerDto> for SecretManager {
             SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(is_simulator)),
 
             SecretManagerDto::Mnemonic(mnemonic) => {
-                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?)
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
 
             SecretManagerDto::HexSeed(hex_seed) => {
@@ -311,7 +310,7 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> crate::client::Result<Ed25519Signature> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> crate::client::Result<Ed25519Signature> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
@@ -325,8 +324,8 @@ impl SecretManage for SecretManager {
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
-        chain: &Chain,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
@@ -409,22 +408,16 @@ impl SecretManagerConfig for SecretManager {
                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
             }
             SecretManagerDto::Mnemonic(mnemonic) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
             SecretManagerDto::Placeholder => Self::Placeholder,
         })
     }
 }
 
-impl From<Mnemonic> for SecretManager {
-    fn from(m: Mnemonic) -> Self {
-        Self::Mnemonic(MnemonicSecretManager::from(m))
-    }
-}
-
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 
@@ -476,7 +469,7 @@ where
                     Err(InputSelectionError::MissingInputWithEd25519Address)?;
                 }
 
-                let chain = input.chain.as_ref().ok_or(Error::MissingBip32Chain)?;
+                let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
                 let block = secret_manager.signature_unlock(&hashed_essence, chain).await?;
                 blocks.push(block);

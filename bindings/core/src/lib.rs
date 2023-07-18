@@ -4,6 +4,7 @@
 //! Core library for iota-sdk bindings
 
 mod error;
+pub mod message_interface_old;
 mod method;
 mod method_handler;
 mod panic;
@@ -15,8 +16,8 @@ use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
-    client::secret::{mnemonic::Mnemonic, SecretManager, SecretManagerDto},
-    wallet::{wallet::Wallet, ClientOptions},
+    client::secret::{SecretManager, SecretManagerDto},
+    wallet::{ClientOptions, Wallet},
 };
 use serde::Deserialize;
 
@@ -79,7 +80,7 @@ pub(crate) trait OmittedDebug {
         f.write_str("<omitted>")
     }
 }
-impl OmittedDebug for Mnemonic {}
+impl OmittedDebug for crypto::keys::bip39::Mnemonic {}
 impl OmittedDebug for String {}
 impl OmittedDebug for SecretManagerDto {}
 impl<T: OmittedDebug> OmittedDebug for Option<T> {

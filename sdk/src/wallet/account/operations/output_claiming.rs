@@ -6,12 +6,13 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
+    client::secret::SecretManage,
     types::block::{
         address::Address,
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
+            Output, OutputId,
         },
     },
     wallet::account::{
@@ -298,7 +299,9 @@ where
             required_amount_for_nfts
         } else {
             required_amount_for_nfts
-                + minimum_storage_deposit_basic_output(&rent_structure, &option_native_token, token_supply)?
+                + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                    .with_native_tokens(option_native_token)
+                    .finish()?
         };
 
         let mut additional_inputs = Vec::new();
@@ -316,7 +319,10 @@ where
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
                 required_amount = required_amount_for_nfts
-                    + minimum_storage_deposit_basic_output(&rent_structure, &option_native_token, token_supply)?;
+                    + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                        .with_native_tokens(option_native_token)
+                        .finish()?;
+
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {
                         if let Some(native_tokens) = output_data.output.native_tokens() {

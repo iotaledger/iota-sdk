@@ -50,6 +50,9 @@ jobs:
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
 
+      - name: Start ledger nano
+        uses: "./.github/actions/ledger-nano"
+
       - name: Collect coverage data
         run: >
           cargo llvm-cov nextest 

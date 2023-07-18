@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Wallet } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // In this example we will burn an existing nft output.
 //
-// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
@@ -24,9 +25,7 @@ async function run() {
         });
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();

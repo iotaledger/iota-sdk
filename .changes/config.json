@@ -8,21 +8,21 @@
   },
   "packages": {
     "wallet-nodejs-binding": {
-      "path": "./sdk/src/wallet/bindings/nodejs",
+      "path": "./bindings/nodejs-old",
       "manager": "javascript",
       "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
       "prepublish": [
         {
-          "command": "false || dasel put -f Cargo.toml '.dependencies.iota-sdk.rev' -v $GITHUB_SHA"
+          "command": "false || dasel put -f Cargo.toml '.dependencies.iota-sdk-bindings-core.rev' -v $GITHUB_SHA"
         },
         {
-          "command": "dasel put -f Cargo.toml '.dependencies.iota-sdk.git' -v https://github.com/iotaledger/iota-sdk"
+          "command": "dasel put -f Cargo.toml '.dependencies.iota-sdk-bindings-core.git' -v https://github.com/iotaledger/iota-sdk"
         },
         {
-          "command": "dasel delete -f Cargo.toml '.dependencies.iota-sdk.path'"
+          "command": "dasel delete -f Cargo.toml '.dependencies.iota-sdk-bindings-core.path'"
         },
         {
-          "command": "dasel delete -f Cargo.toml '.dependencies.iota-sdk.default-features'"
+          "command": "dasel delete -f Cargo.toml '.dependencies.iota-sdk-bindings-core.default-features'"
         },
         {
           "command": "yarn --ignore-scripts"

@@ -3,7 +3,10 @@
 
 //! In this example we will create three alias outputs, where the first one can control the other two (recursively).
 //!
-//! `cargo run --example recursive_alias --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example recursive_alias
+//! ```
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -25,21 +28,22 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
+    // Create a node client.
+    let client = Client::builder()
+        .with_node(&std::env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
-    // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
-
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
-    println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
-    // Wait some time for the faucet transaction
+
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address).await?,
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let rent_structure = client.get_rent_structure().await?;
@@ -58,16 +62,18 @@ async fn main() -> Result<()> {
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?; 3];
 
     let block_1 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
         .await?;
 
     println!(
-        "Block with new alias outputs sent: {explorer_url}/block/{}",
+        "Block with new alias outputs sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_1.id()
     );
+
     let _ = client.retry_until_included(&block_1.id(), None, None).await?;
 
     //////////////////////////////////
@@ -104,13 +110,14 @@ async fn main() -> Result<()> {
     ];
 
     let block_2 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
         .await?;
     println!(
-        "Block with alias id set and ownership assigned to the first alias sent: {explorer_url}/block/{}",
+        "Block with alias id set and ownership assigned to the first alias sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_2.id()
     );
     let _ = client.retry_until_included(&block_2.id(), None, None).await?;
@@ -128,15 +135,17 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block_3 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
         .await?;
     println!(
-        "Block with state metadata of the third alias updated sent: {explorer_url}/block/{}",
+        "Block with state metadata of the third alias updated sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_3.id()
     );
+
     let _ = client.retry_until_included(&block_3.id(), None, None).await?;
 
     //////////////////////////////////
@@ -151,15 +160,17 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?];
 
     let block_3 = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
         .await?;
     println!(
-        "Another block with state metadata of the third alias updated sent: {explorer_url}/block/{}",
+        "Another block with state metadata of the third alias updated sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block_3.id()
     );
+
     let _ = client.retry_until_included(&block_3.id(), None, None).await?;
     Ok(())
 }

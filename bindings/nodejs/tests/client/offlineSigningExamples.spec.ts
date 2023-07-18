@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { describe, it } from '@jest/globals';
+import { describe, it, beforeAll, afterAll } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
@@ -20,23 +20,32 @@ import { addresses } from '../fixtures/addresses';
 import * as signedTransactionJson from '../fixtures/signedTransaction.json';
 import * as sigUnlockPreparedTx from '../fixtures/sigUnlockPreparedTx.json';
 
-const onlineClient = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-    localPow: true,
-});
-
-const offlineClient = new Client({});
-
-const secretManager = {
-    mnemonic:
-        'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
-};
-
 describe('Offline signing examples', () => {
+    let onlineClient: Client;
+    let offlineClient: Client;
+
+    const secretManager = {
+        mnemonic:
+            'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
+    };
+
+    beforeAll(() => {
+        onlineClient = new Client({
+            nodes: [
+                {
+                    url: process.env.NODE_URL || 'http://localhost:14265',
+                },
+            ],
+            localPow: true,
+        });
+        offlineClient = new Client({})
+    });
+
+    afterAll(async () => {
+        await onlineClient.destroy();
+        await offlineClient.destroy();
+    });
+
     it('generates addresses offline', async () => {
         const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
@@ -56,7 +65,7 @@ describe('Offline signing examples', () => {
     it.skip('prepares and signs a transaction', async () => {
         const address =
             'rms1qqv5avetndkxzgr3jtrswdtz5ze6mag20s0jdqvzk4fwezve8q9vkpnqlqe';
-        const amount = 1000000;
+        const amount = BigInt(1000000);
 
         const inputs = await onlineClient.findInputs(addresses, amount);
 
@@ -64,7 +73,7 @@ describe('Offline signing examples', () => {
             undefined,
             {
                 inputs,
-                output: { address, amount: amount.toString() },
+                output: { address, amount: amount },
             },
         );
 

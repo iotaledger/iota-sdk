@@ -215,6 +215,106 @@ async fn check_existing_db_2() -> Result<()> {
     tear_down(storage_path)
 }
 
+// Db created with iota-sdk commit 5d47eaf362fa769ca3c55c5e947fc7fcd9d6457f (npm @iota/wallet@2.0.3-rc.35)
+#[cfg(feature = "stronghold")]
+#[tokio::test]
+async fn check_existing_db_3() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
+    let storage_path = "check_existing_3_db_test";
+    setup(storage_path)?;
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/check_existing_3_db_test", storage_path).unwrap();
+
+    let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+
+    // Migrate old snapshots.
+    let _ = StrongholdAdapter::migrate_snapshot_v2_to_v3(
+        "check_existing_3_db_test/walletstronghold",
+        "A12345678*".to_owned().into(),
+        "wallet.rs",
+        100,
+        None,
+        None,
+    );
+
+    // Test if setting stronghold password still works
+    wallet.set_stronghold_password("A12345678*".to_owned()).await?;
+
+    assert_eq!(wallet.get_accounts().await?.len(), 2);
+
+    let client_options = wallet.client_options().await;
+    assert_eq!(client_options.node_manager_builder.nodes.len(), 1);
+
+    let account = wallet.get_account("Alice").await?;
+
+    let addresses = account.addresses().await?;
+    // One public address
+    assert_eq!(addresses.len(), 1);
+    // Wallet was created with mnemonic: "bulk spoon broken license diary nominee tribe visit used giant rail insect
+    // lesson home toast autumn cancel alley park give same wet wash vanish"
+    assert_eq!(
+        addresses[0].address().to_string(),
+        "rms1qrhdre8ra8n42h30zkf9jjlezefrull082dgcrtrpfyng3qtsgnywquf58d"
+    );
+    assert!(!addresses[0].internal());
+
+    let transactions = account.transactions().await;
+    assert_eq!(transactions.len(), 4);
+
+    let pending_transactions = account.pending_transactions().await;
+    assert_eq!(pending_transactions.len(), 1);
+
+    let pending_transactions = account.incoming_transactions().await;
+    assert_eq!(pending_transactions.len(), 24);
+
+    tear_down(storage_path)
+}
+
+// Db created with iota-sdk commit cbf89d995d62cdcd2a2c29e363af6e8e4debcc54 (pypi iota-sdk==1.0.0rc0)
+#[cfg(feature = "stronghold")]
+#[tokio::test]
+async fn check_existing_db_4() -> Result<()> {
+    let storage_path = "check_existing_4_db_test";
+    setup(storage_path)?;
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/check_existing_4_db_test", storage_path).unwrap();
+
+    let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+
+    // Commented because it wasn't created with encrypt_work_factor 0
+    // wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
+
+    assert_eq!(wallet.get_accounts().await?.len(), 1);
+
+    let client_options = wallet.client_options().await;
+    assert_eq!(client_options.node_manager_builder.nodes.len(), 1);
+
+    let account = wallet.get_account("Alice").await?;
+
+    let addresses = account.addresses().await?;
+    // One public address
+    assert_eq!(addresses.len(), 1);
+    // Wallet was created with mnemonic: "width scatter jaguar sponsor erosion enable cave since ancient first garden
+    // royal luggage exchange ritual exotic play wall clinic ride autumn divert spin exchange"
+    assert_eq!(
+        addresses[0].address().to_string(),
+        "rms1qz7tvqdr2usmecs2f669vccl5nw6yhh3xnl6dkas3zxv56esx7zw2ekjesf"
+    );
+    assert!(!addresses[0].internal());
+
+    let transactions = account.transactions().await;
+    assert_eq!(transactions.len(), 1);
+
+    let pending_transactions = account.pending_transactions().await;
+    assert_eq!(pending_transactions.len(), 1);
+
+    let pending_transactions = account.incoming_transactions().await;
+    assert_eq!(pending_transactions.len(), 13);
+
+    tear_down(storage_path)
+}
+
 fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&dest)?;
     for entry in fs::read_dir(src)? {

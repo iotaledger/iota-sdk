@@ -5,8 +5,8 @@
 //! therefore the foundry output is also not required. But this will also make it impossible to destroy the foundry
 //! output that minted it.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! You may provide a TOKEN_ID that is available in the account. You can check this by running the
 //! `get_balance` example. You can create a new native token by running the `create_native_token` example.
@@ -59,8 +59,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Burn a native token
-        let burn_amount = U256::from(BURN_AMOUNT);
-        let transaction = account.burn(NativeToken::new(token_id, burn_amount)?, None).await?;
+        let transaction = account.burn(NativeToken::new(token_id, BURN_AMOUNT)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account

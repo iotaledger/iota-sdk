@@ -7,13 +7,15 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
-    client::{secret::mnemonic::Mnemonic, utils::Password},
+    client::{utils::Password, verify_mnemonic},
+    crypto::keys::bip39::Mnemonic,
     wallet::{Account, Wallet},
 };
 use tokio::{
     fs::{self, OpenOptions},
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
 };
+use zeroize::Zeroize;
 
 use crate::{
     command::{account::AccountCli, wallet::WalletCli},
@@ -144,7 +146,7 @@ pub async fn generate_mnemonic() -> Result<Mnemonic, Error> {
 
     if [0, 2].contains(&selected_choice) {
         println!("YOUR MNEMONIC:");
-        println!("{}", mnemonic.as_str());
+        println!("{}", mnemonic.as_ref());
     }
     if [1, 2].contains(&selected_choice) {
         write_mnemonic_to_file(DEFAULT_MNEMONIC_FILE_PATH, &mnemonic).await?;
@@ -162,15 +164,15 @@ pub async fn generate_mnemonic() -> Result<Mnemonic, Error> {
 
 pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
     loop {
-        let input = Input::<String>::new()
-            .with_prompt("Enter your mnemonic")
-            .interact_text()?;
-
-        match Mnemonic::try_from(input) {
-            Err(e) => {
-                println_log_error!("Invalid mnemonic: {e:?}\nPlease enter a bip-39 conform mnemonic.");
-            }
-            Ok(mnemonic) => return Ok(mnemonic),
+        let input = Mnemonic::from(
+            Input::<String>::new()
+                .with_prompt("Enter your mnemonic")
+                .interact_text()?,
+        );
+        if verify_mnemonic(&*input).is_err() {
+            println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
+        } else {
+            return Ok(input);
         }
     }
 }
@@ -207,7 +209,7 @@ async fn write_mnemonic_to_file(path: &str, mnemonic: &Mnemonic) -> Result<(), E
     open_options.mode(0o600);
 
     let mut file = open_options.open(path).await?;
-    file.write_all(format!("{}\n", mnemonic.as_str()).as_bytes()).await?;
+    file.write_all(format!("{}\n", mnemonic.as_ref()).as_bytes()).await?;
 
     Ok(())
 }
@@ -217,14 +219,16 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<Mnemonic>, Error> {
     let mut lines = BufReader::new(file).lines();
     let mut mnemonics = Vec::new();
     let mut line_index = 1;
-    while let Some(line) = lines.next_line().await? {
-        match Mnemonic::try_from(line) {
-            Ok(mnemonic) => mnemonics.push(mnemonic),
-            Err(err) => {
-                return Err(Error::Miscellaneous(format!(
-                    "Invalid mnemonic in file '{path}' at line '{line_index}':\n{err:?}"
-                )));
-            }
+    while let Some(mut line) = lines.next_line().await? {
+        // we allow surrounding whitespace in the file
+        let trimmed = Mnemonic::from(line.trim().to_owned());
+        line.zeroize();
+        if verify_mnemonic(&*trimmed).is_ok() {
+            mnemonics.push(trimmed);
+        } else {
+            return Err(Error::Miscellaneous(format!(
+                "Invalid mnemonic in file '{path}' at line '{line_index}'."
+            )));
         }
         line_index += 1;
     }
@@ -232,7 +236,7 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<Mnemonic>, Error> {
     Ok(mnemonics)
 }
 
-/// Converts a unix timestamp in milliseconds to a DateTime<Utc>
+/// Converts a unix timestamp in milliseconds to a `DateTime<Utc>`
 pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     let millis = ts_millis % 1000;
     let secs = (ts_millis - millis) / 1000;

@@ -8,7 +8,7 @@ import {
     SyncOptions,
     AccountMeta,
     AccountAddress,
-    SendAmountParams,
+    SendParams,
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
@@ -35,24 +35,20 @@ import {
     BuildNftOutputData,
     SignedTransactionEssence,
     PreparedTransaction,
-} from '../types/wallet';
-import {
-    INode,
-    Burn,
-    PreparedTransactionData,
     PreparedCreateNativeTokenTransactionData,
-} from '../client';
+} from '../types/wallet';
+import { INode, Burn, PreparedTransactionData } from '../client';
 import {
     AliasOutput,
     NftOutput,
     Output,
-    HexEncodedAmount,
     BasicOutput,
     FoundryOutput,
     Response,
     PreparedCreateNativeTokenTransaction,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
+import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
 
 /** The Account class. */
 export class Account {
@@ -168,7 +164,7 @@ export class Account {
      */
     async prepareBurnNativeToken(
         tokenId: string,
-        burnAmount: HexEncodedAmount,
+        burnAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -315,7 +311,7 @@ export class Account {
      */
     async prepareMeltNativeToken(
         tokenId: string,
-        meltAmount: HexEncodedAmount,
+        meltAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -324,7 +320,7 @@ export class Account {
                 name: 'prepareMeltNativeToken',
                 data: {
                     tokenId,
-                    meltAmount,
+                    meltAmount: bigIntToHex(meltAmount),
                     options: transactionOptions,
                 },
             },
@@ -452,8 +448,40 @@ export class Account {
                 name: 'getBalance',
             },
         );
+        const payload = JSON.parse(response).payload;
+        return this.adjustBalancePayload(payload);
+    }
 
-        return JSON.parse(response).payload;
+    /**
+     * Converts hex encoded or decimal strings of amounts to `bigint`
+     * for the balance payload.
+     */
+    private adjustBalancePayload(payload: any): Balance {
+        for (let i = 0; i < payload.nativeTokens.length; i++) {
+            payload.nativeTokens[i].total = hexToBigInt(
+                payload.nativeTokens[i].total,
+            );
+            payload.nativeTokens[i].available = hexToBigInt(
+                payload.nativeTokens[i].available,
+            );
+        }
+        payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
+        payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
+
+        payload.requiredStorageDeposit.alias = hexToBigInt(
+            payload.requiredStorageDeposit.alias,
+        );
+        payload.requiredStorageDeposit.basic = hexToBigInt(
+            payload.requiredStorageDeposit.basic,
+        );
+        payload.requiredStorageDeposit.foundry = hexToBigInt(
+            payload.requiredStorageDeposit.foundry,
+        );
+        payload.requiredStorageDeposit.nft = hexToBigInt(
+            payload.requiredStorageDeposit.nft,
+        );
+
+        return payload;
     }
 
     /**
@@ -731,24 +759,6 @@ export class Account {
     }
 
     /**
-     * Calculate the minimum required storage deposit for an output.
-     * @param output output to calculate the deposit amount for.
-     * @returns The amount.
-     */
-    async minimumRequiredStorageDeposit(output: Output): Promise<string> {
-        const response = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'minimumRequiredStorageDeposit',
-                data: {
-                    output,
-                },
-            },
-        );
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Mint additional native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
@@ -758,7 +768,7 @@ export class Account {
      */
     async prepareMintNativeToken(
         tokenId: string,
-        mintAmount: HexEncodedAmount,
+        mintAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -767,7 +777,7 @@ export class Account {
                 name: 'prepareMintNativeToken',
                 data: {
                     tokenId,
-                    mintAmount,
+                    mintAmount: bigIntToHex(mintAmount),
                     options: transactionOptions,
                 },
             },
@@ -793,12 +803,18 @@ export class Account {
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedCreateNativeTokenTransaction> {
+        const adjustedParams: any = params;
+        adjustedParams.circulatingSupply = bigIntToHex(
+            params.circulatingSupply,
+        );
+        adjustedParams.maximumSupply = bigIntToHex(params.maximumSupply);
+
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'prepareCreateNativeToken',
                 data: {
-                    params: params,
+                    params: adjustedParams,
                     options: transactionOptions,
                 },
             },
@@ -864,6 +880,10 @@ export class Account {
         params: OutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Output> {
+        if (typeof params.amount === 'bigint') {
+            params.amount = params.amount.toString(10);
+        }
+
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -879,20 +899,25 @@ export class Account {
     }
 
     /**
-     * Prepare a send amount transaction, useful for offline signing.
+     * Prepare to send base coins, useful for offline signing.
      * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The prepared transaction data.
      */
-    async prepareSendAmount(
-        params: SendAmountParams[],
+    async prepareSend(
+        params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
+        for (let i = 0; i < params.length; i++) {
+            if (typeof params[i].amount === 'bigint') {
+                params[i].amount = params[i].amount.toString(10);
+            }
+        }
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareSendAmount',
+                name: 'prepareSend',
                 data: {
                     params,
                     options,
@@ -977,20 +1002,25 @@ export class Account {
     }
 
     /**
-     * Send a transaction with amounts from input addresses.
+     * Send base coins with amounts from input addresses.
      * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendAmount(
-        params: SendAmountParams[],
+    async send(
+        params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
+        for (let i = 0; i < params.length; i++) {
+            if (typeof params[i].amount === 'bigint') {
+                params[i].amount = params[i].amount.toString(10);
+            }
+        }
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendAmount',
+                name: 'send',
                 data: {
                     params,
                     options: transactionOptions,
@@ -1197,7 +1227,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        const payload = JSON.parse(response).payload;
+        return this.adjustBalancePayload(payload);
     }
 
     async prepareVote(

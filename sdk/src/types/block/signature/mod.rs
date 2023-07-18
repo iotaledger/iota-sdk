@@ -3,6 +3,8 @@
 
 mod ed25519;
 
+use alloc::boxed::Box;
+
 use derive_more::From;
 
 pub use self::ed25519::Ed25519Signature;
@@ -13,7 +15,7 @@ use crate::types::block::Error;
 /// This is defined as part of the Unspent Transaction Output (UTXO) transaction protocol.
 ///
 /// RFC: <https://github.com/luca-moser/protocol-rfcs/blob/signed-tx-payload/text/0000-transaction-payload/0000-transaction-payload.md#signature-unlock-block>
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -24,7 +26,13 @@ use crate::types::block::Error;
 pub enum Signature {
     /// An Ed25519 signature.
     #[packable(tag = Ed25519Signature::KIND)]
-    Ed25519(Ed25519Signature),
+    Ed25519(Box<Ed25519Signature>),
+}
+
+impl From<Ed25519Signature> for Signature {
+    fn from(value: Ed25519Signature) -> Self {
+        Self::Ed25519(Box::new(value))
+    }
 }
 
 impl core::fmt::Debug for Signature {
@@ -56,13 +64,13 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
     pub enum SignatureDto {
-        Ed25519(Ed25519SignatureDto),
+        Ed25519(Box<Ed25519SignatureDto>),
     }
 
     impl From<&Signature> for SignatureDto {
         fn from(value: &Signature) -> Self {
             match value {
-                Signature::Ed25519(s) => Self::Ed25519(s.into()),
+                Signature::Ed25519(s) => Self::Ed25519(Box::new(s.as_ref().into())),
             }
         }
     }
@@ -72,7 +80,7 @@ pub mod dto {
 
         fn try_from(value: SignatureDto) -> Result<Self, Self::Error> {
             match value {
-                SignatureDto::Ed25519(s) => Ok(Self::Ed25519(s.try_into()?)),
+                SignatureDto::Ed25519(s) => Ok(Self::Ed25519(Box::new((*s).try_into()?))),
             }
         }
     }

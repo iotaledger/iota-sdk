@@ -3,12 +3,12 @@
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The amount of native tokens to melt, 10 hex encoded. TODO Convert to int
-const MELT_AMOUNT = '0xA';
+// The amount of native tokens to melt.
+const MELT_AMOUNT = BigInt(10);
 
 // In this example we will melt an existing native token with its foundry.
 //
-// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
@@ -40,7 +40,7 @@ async function run() {
             );
         }
 
-        console.log(`Balance before melting:`, parseInt(token.available));
+        console.log(`Balance before melting: ${token.available}`);
 
         // Melt some of the circulating supply
         const transaction = await account
@@ -67,7 +67,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-        console.log(`Balance after melting:`, parseInt(token.available));
+        console.log(`Balance after melting: ${token.available}`);
     } catch (error) {
         console.log('Error: ', error);
     }

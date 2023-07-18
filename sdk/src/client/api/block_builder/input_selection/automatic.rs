@@ -5,7 +5,8 @@
 
 use std::collections::HashSet;
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip44::Bip44;
+use itertools::Itertools;
 
 use crate::{
     client::{
@@ -14,7 +15,6 @@ use crate::{
             input_selection::is_alias_transition,
             ClientBlockBuilder, GetAddressesOptions, ADDRESS_GAP_RANGE,
         },
-        constants::HD_WALLET_TYPE,
         node_api::indexer::query_parameters::QueryParameter,
         secret::types::InputSigningData,
         Error, Result,
@@ -142,8 +142,7 @@ impl<'a> ClientBlockBuilder<'a> {
             let public_and_internal_addresses = public
                 .iter()
                 .map(|a| (a, false))
-                .zip(internal.iter().map(|a| (a, true)))
-                .flat_map(|(a, b)| [a, b]);
+                .interleave(internal.iter().map(|a| (a, true)));
 
             // For each address, get the address outputs.
             let mut address_index = gap_index;
@@ -176,13 +175,13 @@ impl<'a> ClientBlockBuilder<'a> {
                             available_inputs.push(InputSigningData {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
-                                chain: Some(Chain::from_u32_hardened([
-                                    HD_WALLET_TYPE,
-                                    self.coin_type,
-                                    account_index,
-                                    internal as u32,
-                                    address_index,
-                                ])),
+                                chain: Some(
+                                    Bip44::new()
+                                        .with_coin_type(self.coin_type)
+                                        .with_account(account_index)
+                                        .with_change(internal as _)
+                                        .with_address_index(address_index),
+                                ),
                             });
                         }
                     }

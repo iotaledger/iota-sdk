@@ -3,7 +3,6 @@
 
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
-import { HexEncodedAmount } from '../utils/hex-encoded-types';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {
@@ -46,9 +45,9 @@ export type CustomAddress = {
 export interface CreateNativeTokenParams {
     aliasId?: string;
     /** Hex encoded number */
-    circulatingSupply: HexEncodedAmount;
+    circulatingSupply: bigint;
     /** Hex encoded number */
-    maximumSupply: HexEncodedAmount;
+    maximumSupply: bigint;
     /** Hex encoded bytes */
     foundryMetadata?: string;
 }

@@ -3,14 +3,14 @@
 
 use std::str::FromStr;
 
-use crypto::keys::slip10::Chain;
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
             transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
-        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{SecretManage, SecretManager},
         Client, Result,
     },
@@ -36,7 +36,7 @@ use crate::client::{
 
 #[tokio::test]
 async fn sign_alias_state_transition() -> Result<()> {
-    let secret_manager = SecretManager::from(Client::generate_mnemonic()?);
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -67,7 +67,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+        Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
     )]);
 
     let outputs = build_outputs([Alias(
@@ -127,7 +127,7 @@ async fn sign_alias_state_transition() -> Result<()> {
 
 #[tokio::test]
 async fn sign_alias_governance_transition() -> Result<()> {
-    let secret_manager = SecretManager::from(Client::generate_mnemonic()?);
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -158,7 +158,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
+        Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(1)),
     )]);
 
     let outputs = build_outputs([Alias(
@@ -218,7 +218,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
 
 #[tokio::test]
 async fn alias_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::from(Client::generate_mnemonic()?);
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -251,7 +251,7 @@ async fn alias_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
+            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,

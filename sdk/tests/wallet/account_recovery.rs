@@ -61,7 +61,7 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::from(mnemonic.clone());
+    let secret_manager = SecretManager::try_from_mnemonic(mnemonic.clone())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(

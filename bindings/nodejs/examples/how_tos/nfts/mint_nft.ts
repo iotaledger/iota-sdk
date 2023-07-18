@@ -11,6 +11,7 @@ import {
     Utils,
     Wallet,
 } from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 // The owner address of the first NFT we'll mint
 const NFT1_OWNER_ADDRESS =
@@ -26,7 +27,7 @@ const NFT2_AMOUNT = '1000000';
 
 // In this example we will mint a new nft.
 //
-// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
@@ -43,9 +44,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         // We send from the first address in the account.
         const senderAddress = (await account.addresses())[0].address;

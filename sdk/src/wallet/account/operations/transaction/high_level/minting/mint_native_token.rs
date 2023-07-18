@@ -16,12 +16,14 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Function to mint additional native tokens when the max supply isn't reached yet. The foundry needs to be
+    /// Mints additional native tokens.
+    ///
+    /// The max supply must not be reached yet. The foundry needs to be
     /// controlled by this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore
     /// let tx = account.mint_native_token(
     ///             TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
-    ///             U256::from(100),
+    ///             100,
     ///             None
     ///         ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
@@ -32,7 +34,7 @@ where
     pub async fn mint_native_token(
         &self,
         token_id: TokenId,
-        mint_amount: U256,
+        mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
@@ -44,16 +46,17 @@ where
         Ok(transaction)
     }
 
-    /// Function to prepare the transaction for
-    /// [Account.mint_native_token()](crate::account::Account.mint_native_token)
+    /// Prepares the transaction for
+    /// [Account::mint_native_token()](crate::wallet::Account::mint_native_token).
     pub async fn prepare_mint_native_token(
         &self,
         token_id: TokenId,
-        mint_amount: U256,
+        mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] mint_native_token");
 
+        let mint_amount = mint_amount.into();
         let account_details = self.details().await;
         let token_supply = self.client().get_token_supply().await?;
         let existing_foundry_output = account_details.unspent_outputs().values().find(|output_data| {

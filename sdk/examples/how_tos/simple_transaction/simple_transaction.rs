@@ -3,20 +3,15 @@
 
 //! In this example we will issue a simple base coin transaction.
 //!
-//! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
+//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example simple_transaction
 //! ```
 
-use std::env::var;
-
-use iota_sdk::{
-    wallet::{Result, SendAmountParams},
-    Wallet,
-};
+use iota_sdk::{wallet::Result, Wallet};
 
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
@@ -29,7 +24,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -39,19 +34,22 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-    let transaction = account.send_amount(outputs, None).await?;
+    let transaction = account.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
 
     // Wait for transaction to get included
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     Ok(())
 }

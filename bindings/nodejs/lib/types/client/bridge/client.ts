@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SecretManagerType } from '../../secret_manager/secret-manager';
+import type {
+    Bip44,
+    SecretManagerType,
+} from '../../secret_manager/secret-manager';
 import type { IGenerateAddressesOptions } from '../generate-addresses-options';
 import type { IBuildBlockOptions } from '../build-block-options';
-import type { Block, BlockId, Payload } from '../../block';
-import type {
-    PreparedTransactionData,
-    IBip32Chain,
-} from '../prepared-transaction-data';
+import type { Block, BlockId, Output, Payload } from '../../block';
+import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AliasQueryParameter,
     FoundryQueryParameter,
@@ -121,7 +121,7 @@ export interface __SignatureUnlockMethod__ {
     data: {
         secretManager: SecretManagerType;
         transactionEssenceHash: HexEncodedString;
-        chain: IBip32Chain;
+        chain: Bip44;
     };
 }
 
@@ -424,10 +424,28 @@ export interface __ClearListenersMethod__ {
     };
 }
 
+export type __MinimumRequiredStorageDepositMethod__ = {
+    name: 'minimumRequiredStorageDeposit';
+    data: {
+        output: Output;
+    };
+};
+
 export type __RequestFundsFromFaucetMethod__ = {
     name: 'requestFundsFromFaucet';
     data: {
         url: string;
         address: string;
+    };
+};
+
+export type __CallPluginRouteMethod__ = {
+    name: 'callPluginRoute';
+    data: {
+        basePluginPath: string;
+        method: 'GET' | 'POST';
+        endpoint: string;
+        queryParams: string[];
+        request?: string;
     };
 };

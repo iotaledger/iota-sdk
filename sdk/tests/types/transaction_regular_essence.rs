@@ -26,7 +26,6 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
-use primitive_types::U256;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 const ED25519_ADDRESS_1: &str = "0xd56da1eb7726ed482dfe9d457cf548c2ae2a6ce3e053dbf82f11223be476adb9";
@@ -451,12 +450,11 @@ fn duplicate_output_foundry() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let alias_id = AliasId::from(bytes);
-    let token_scheme =
-        TokenScheme::Simple(SimpleTokenScheme::new(U256::from(70u8), U256::from(0u8), U256::from(100u8)).unwrap());
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100).unwrap());
     let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
     let token_id = TokenId::from(foundry_id);
     let foundry = FoundryOutput::build_with_amount(1_000_000, 1, token_scheme)
-        .add_native_token(NativeToken::new(token_id, U256::from(70u8)).unwrap())
+        .add_native_token(NativeToken::new(token_id, 70).unwrap())
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();

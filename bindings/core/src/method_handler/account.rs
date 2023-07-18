@@ -9,15 +9,11 @@ use iota_sdk::{
         input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
         SignedTransactionDataDto,
     },
-    types::block::{
-        output::{dto::OutputDto, Output, Rent},
-        Error,
-    },
+    types::block::output::{dto::OutputDto, Output},
     wallet::account::{
         types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions,
     },
 };
-use primitive_types::U256;
 
 use crate::{method::AccountMethod, Response, Result};
 
@@ -103,14 +99,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transactions = account.incoming_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
-        AccountMethod::MinimumRequiredStorageDeposit { output } => {
-            let output = Output::try_from_dto(output, account.client().get_token_supply().await?)?;
-            let rent_structure = account.client().get_rent_structure().await?;
-
-            let minimum_storage_deposit = output.rent_cost(&rent_structure);
-
-            Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
-        }
         AccountMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
@@ -151,7 +139,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_melt_native_token(
                     token_id,
-                    U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
+                    melt_amount,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -174,7 +162,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_mint_native_token(
                     token_id,
-                    U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
+                    mint_amount,
                     options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -213,9 +201,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::Output(OutputDto::from(&output))
         }
-        AccountMethod::PrepareSendAmount { params, options } => {
+        AccountMethod::PrepareSend { params, options } => {
             let data = account
-                .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
@@ -275,16 +263,16 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::BlockId(block_id)
         }
-        AccountMethod::SendAmount { params, options } => {
+        AccountMethod::Send { params, options } => {
             let transaction = account
-                .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                .send_with_params(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendOutputs { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
             let transaction = account
-                .send(
+                .send_outputs(
                     outputs
                         .into_iter()
                         .map(|o| Ok(Output::try_from_dto(o, token_supply)?))

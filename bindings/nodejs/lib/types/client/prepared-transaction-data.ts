@@ -9,6 +9,7 @@ import {
     TransactionEssenceDiscriminator,
 } from '../block/payload/transaction/essence';
 import { IOutputMetadataResponse } from '../models/api';
+import { Bip44 } from '../secret_manager';
 
 /**
  * Helper struct for offline signing
@@ -49,7 +50,7 @@ export class InputSigningData {
     /**
      * The chain derived from seed, only for ed25519 addresses
      */
-    chain?: IBip32Chain;
+    chain?: Bip44;
 }
 
 export class Remainder {
@@ -63,7 +64,7 @@ export class Remainder {
     /**
      * The chain derived from seed, for the remainder addresses
      */
-    chain?: IBip32Chain;
+    chain?: Bip44;
     /**
      * The remainder address
      */
@@ -72,8 +73,3 @@ export class Remainder {
     })
     address!: Address;
 }
-
-/**
- * BIP 32 chain.
- */
-export type IBip32Chain = number[];

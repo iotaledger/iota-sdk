@@ -19,83 +19,80 @@ rustdoc-args = [ "--cfg", "docsrs" ]
 [dependencies]
 # Mandatory dependencies
 bech32 = { version = "0.9.1", default-features = false }
-bitflags = { version = "2.3.1", default-features = false }
+bitflags = { version = "2.3.3", default-features = false }
 bytemuck = { version = "1.13.1", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [ "from", "as_ref", "deref", "deref_mut" ] }
 getset = { version = "0.1.2", default-features = false }
-hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
+hashbrown = { version = "0.14.0", default-features = false, features = [ "ahash", "inline-more" ] }
 hex = { version = "0.4.3", default-features = false }
-iota-crypto = { version = "0.20.1", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
+iota-crypto = { version = "0.22.2", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
+itertools = { version = "0.11.0", default-features = false, features = [ "use_alloc" ] }
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
 primitive-types = { version = "0.12.1", default-features = false }
-serde = { version = "1.0.163", default-features = false, features = [ "derive" ] }
-serde_json = { version = "1.0.96", default-features = false, features = [ "alloc" ] }
+serde = { version = "1.0.171", default-features = false, features = [ "derive" ] }
+serde_json = { version = "1.0.102", default-features = false, features = [ "alloc" ] }
 
 # Optional dependencies
 anymap = { version = "0.12.1", default-features = false, optional = true }
-async-trait = { version = "0.1.68", default-features = false, optional = true }
-backtrace = { version = "0.3.67", default-features = false, optional = true }
+async-trait = { version = "0.1.71", default-features = false, optional = true }
 derive_builder = { version = "0.12.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
 heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-# iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
-iota_stronghold = { git = "https://github.com/iotaledger/stronghold.rs", branch = "2.0", default-features = false, optional = true }
-log = { version = "0.4.18", default-features = false, optional = true }
-num_cpus = { version = "1.15.0", default-features = false, optional = true }
-once_cell = { version = "1.17.2", default-features = false, optional = true }
+iota_stronghold = { version = "2.0.0-rc.1", default-features = false, optional = true }
+log = { version = "0.4.19", default-features = false, optional = true }
+num_cpus = { version = "1.16.0", default-features = false, optional = true }
+once_cell = { version = "1.18.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen" ], optional = true }
-regex = { version = "1.8.3", default-features = false, features = [ "unicode-perl" ], optional = true }
+regex = { version = "1.9.1", default-features = false, features = [ "unicode-perl" ], optional = true }
 reqwest = { version = "0.11.18", default-features = false, features = [ "json" ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [ "lz4" ], optional = true }
-rumqttc = { version = "0.21.0", default-features = false, features = [ "websocket" ], optional = true }
-serde-big-array = { version = "0.5.1", default-features = false, optional = true }
-serde_repr = { version = "0.1.12", default-features = false, optional = true }
-thiserror = { version = "1.0.40", default-features = false, optional = true }
-time = { version = "0.3.21", default-features = false, features = [ "serde", "macros" ], optional = true }
-url = { version = "2.3.1", default-features = false, features = [ "serde" ], optional = true }
+rumqttc = { version = "0.22.0", default-features = false, features = [ "websocket" ], optional = true }
+serde_repr = { version = "0.1.14", default-features = false, optional = true }
+thiserror = { version = "1.0.43", default-features = false, optional = true }
+time = { version = "0.3.23", default-features = false, features = [ "serde", "macros" ], optional = true }
+url = { version = "2.4.0", default-features = false, features = [ "serde" ], optional = true }
 zeroize = { version = "1.6.0", default-features = false, features = [ "zeroize_derive" ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ], optional = true }
+tokio = { version = "1.29.1", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ], optional = true }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-storage = { version = "0.2.2", default-features = false, optional = true }
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ], optional = true }
 lazy_static = { version = "1.4.0", default-features = false }
-tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt", "time", "sync" ], optional = true }
-wasm-bindgen-futures = { version = "0.4.36", default-features = false, optional = true }
+tokio = { version = "1.29.1", default-features = false, features = [ "macros", "rt", "time", "sync" ], optional = true }
+wasm-bindgen-futures = { version = "0.4.37", default-features = false, optional = true }
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync", "fs" ] }
+tokio = { version = "1.29.1", default-features = false, features = [ "macros", "rt", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
 
 events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
-message_interface = [ "backtrace", "fern-logger" ]
 mqtt = [ "std", "regex", "rumqttc", "dep:once_cell" ]
 participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
-serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
-std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
+serde = [ "serde_repr", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
+std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std", "itertools/use_std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
-stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
-client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
+client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/keccak", "iota-crypto/bip44", "iota-crypto/random" ]
 wallet = [ "client" ]
 
 # Ed25519 Examples
@@ -185,6 +182,18 @@ name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# NFT Collection Examples
+
+[[example]]
+name = "mint_issuer_nft"
+path = "examples/how_tos/nft_collection/00_mint_issuer_nft.rs"
+required-features = [ "wallet", "storage", "stronghold" ]
+
+[[example]]
+name = "mint_collection_nft"
+path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Native Tokens Examples
 
 [[example]]
@@ -228,6 +237,16 @@ required-features = [ "rocksdb", "stronghold" ]
 name = "alias_wallet_transaction"
 path = "examples/how_tos/alias_wallet/transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "create_alias"
+path = "examples/how_tos/alias/create.rs"
+required-features = [ "wallet", "stronghold" ]
+
+[[example]]
+name = "destroy_alias"
+path = "examples/how_tos/alias/destroy.rs"
+required-features = [ "wallet", "stronghold" ]
 
 # Outputs
 
@@ -296,6 +315,23 @@ required-features = [ "client" ]
 [[example]]
 name = "transaction"
 path = "examples/client/block/transaction.rs"
+required-features = [ "client" ]
+
+# High Level examples
+
+[[example]]
+name = "address_consolidation"
+path = "examples/client/high_level/consolidation.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "inputs_from_transaction_id"
+path = "examples/client/high_level/inputs_from_transaction_id.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "search_address"
+path = "examples/client/high_level/search_address.rs"
 required-features = [ "client" ]
 
 # Node API core examples
@@ -445,14 +481,29 @@ required-features = [ "client" ]
 #######
 
 [[example]]
-name = "generate_addresses"
+name = "01_generate_addresses"
 path = "examples/client/01_generate_addresses.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "02_address_balance"
+path = "examples/client/02_address_balance.rs"
 required-features = [ "client" ]
 
 [[example]]
 name = "07_mqtt"
 path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
+
+[[example]]
+name = "client_config"
+path = "examples/client/client_config.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "custom_remainder_address"
+path = "examples/client/custom_remainder_address.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "get_block"
@@ -468,6 +519,11 @@ required-features = [ "client", "ledger_nano" ]
 name = "ledger_nano_transaction"
 path = "examples/client/ledger_nano_transaction.rs"
 required-features = [ "client", "ledger_nano" ]
+
+[[example]]
+name = "client_logger"
+path = "examples/client/logger.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "stronghold"
@@ -564,22 +620,32 @@ name = "participation"
 path = "examples/client/participation.rs"
 required-features = [ "client", "participation" ]
 
+[[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "client_split_funds"
+path = "examples/client/split_funds.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
+required-features = [ "client" ]
+
 ### Wallet
 
 [[example]]
 name = "wallet_getting_started"
 path = "examples/wallet/getting_started.rs"
 required-features = [ "stronghold" ]
-
-[[example]]
-name = "mint_issuer_nft"
-path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
-required-features = [ "wallet", "storage", "stronghold" ]
-
-[[example]]
-name = "mint_collection_nft"
-path = "examples/wallet/nft_collection/01_mint_collection_nft.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "0_generate_addresses"
@@ -614,16 +680,6 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "burn_nft"
 path = "examples/how_tos/nfts/burn_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "create_alias"
-path = "examples/wallet/create_alias.rs"
-required-features = [ "stronghold" ]
-
-[[example]]
-name = "destroy_alias"
-path = "examples/wallet/16_destroy_alias.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]

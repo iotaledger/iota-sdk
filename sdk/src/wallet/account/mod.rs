@@ -27,7 +27,7 @@ use tokio::sync::{Mutex, RwLock};
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
     address::{AccountAddress, AddressWithUnspentOutputs},
-    Balance, OutputData, Transaction,
+    Balance, OutputData, Transaction, TransactionDto,
 };
 pub use self::{
     operations::{
@@ -53,7 +53,7 @@ pub use self::{
     },
     types::OutputDataDto,
 };
-use super::wallet::WalletInner;
+use super::core::WalletInner;
 use crate::{
     client::{
         secret::{SecretManage, SecretManager},
@@ -62,7 +62,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
+            output::{dto::FoundryOutputDto, AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
@@ -153,6 +153,12 @@ impl<S: SecretManage> Clone for Account<S> {
             inner: self.inner.clone(),
             wallet: self.wallet.clone(),
         }
+    }
+}
+
+impl<S: SecretManage> Account<S> {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
+        self.wallet.get_secret_manager()
     }
 }
 
@@ -463,6 +469,79 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
     })
 }
 
+/// Dto for an Account.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountDetailsDto {
+    /// The account index
+    pub index: u32,
+    /// The coin type
+    pub coin_type: u32,
+    /// The account alias.
+    pub alias: String,
+    /// Public addresses
+    pub public_addresses: Vec<AccountAddress>,
+    /// Internal addresses
+    pub internal_addresses: Vec<AccountAddress>,
+    /// Addresses with unspent outputs
+    pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
+    /// Outputs
+    pub outputs: HashMap<OutputId, OutputDataDto>,
+    /// Unspent outputs that are currently used as input for transactions
+    pub locked_outputs: HashSet<OutputId>,
+    /// Unspent outputs
+    pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
+    /// Sent transactions
+    pub transactions: HashMap<TransactionId, TransactionDto>,
+    /// Pending transactions
+    pub pending_transactions: HashSet<TransactionId>,
+    /// Incoming transactions
+    pub incoming_transactions: HashMap<TransactionId, TransactionDto>,
+    /// Foundries for native tokens in outputs
+    #[serde(default)]
+    pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
+}
+
+impl From<&AccountDetails> for AccountDetailsDto {
+    fn from(value: &AccountDetails) -> Self {
+        Self {
+            index: *value.index(),
+            coin_type: *value.coin_type(),
+            alias: value.alias().clone(),
+            public_addresses: value.public_addresses().clone(),
+            internal_addresses: value.internal_addresses().clone(),
+            addresses_with_unspent_outputs: value.addresses_with_unspent_outputs().clone(),
+            outputs: value
+                .outputs()
+                .iter()
+                .map(|(id, output)| (*id, OutputDataDto::from(output)))
+                .collect(),
+            locked_outputs: value.locked_outputs().clone(),
+            unspent_outputs: value
+                .unspent_outputs()
+                .iter()
+                .map(|(id, output)| (*id, OutputDataDto::from(output)))
+                .collect(),
+            transactions: value
+                .transactions()
+                .iter()
+                .map(|(id, transaction)| (*id, TransactionDto::from(transaction)))
+                .collect(),
+            pending_transactions: value.pending_transactions().clone(),
+            incoming_transactions: value
+                .incoming_transactions()
+                .iter()
+                .map(|(id, transaction)| (*id, TransactionDto::from(transaction)))
+                .collect(),
+            native_token_foundries: value
+                .native_token_foundries()
+                .iter()
+                .map(|(id, foundry)| (*id, FoundryOutputDto::from(foundry)))
+                .collect(),
+        }
+    }
+}
+
 #[test]
 fn serialize() {
     use crate::types::block::{
@@ -514,10 +593,10 @@ fn serialize() {
             .unwrap(),
     );
 
-    let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
-    let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
-    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
+    let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
+    let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
+    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 

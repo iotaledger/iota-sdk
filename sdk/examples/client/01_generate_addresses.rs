@@ -1,9 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! This example shows how to generate addresses.
 //!
-//! `cargo run --example generate_addresses --release -- [NODE_URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 01_generate_addresses
+//! ```
 
 use iota_sdk::client::{
     api::GetAddressesOptions,
@@ -16,26 +19,20 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args()
-        .nth(1)
-        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
-
-    // Create a client instance
+    // Create a node client.
     let client = Client::builder()
-        .with_node(&node_url)? // Insert your node URL here
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     // Generate addresses with default account index and range
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?)
         .await?;
 
-    println!("List of generated public addresses:");
+    println!("List of generated public addresses (default):");
     println!("{addresses:#?}\n");
 
     // Generate addresses with custom account index and range
@@ -48,7 +45,7 @@ async fn main() -> Result<()> {
         )
         .await?;
 
-    println!("List of generated public addresses:\n");
+    println!("List of generated public addresses (0..4):\n");
     println!("{addresses:#?}\n");
 
     // Generate internal addresses with custom account index and range

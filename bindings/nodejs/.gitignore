@@ -8,3 +8,4 @@ out/
 package-lock.json
 **/dist
 offline_signing*.json
+docs

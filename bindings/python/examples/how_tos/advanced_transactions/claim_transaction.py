@@ -6,7 +6,7 @@ load_dotenv()
 
 # In this example we will claim outputs that have additional unlock conditions as expiration or storage deposit return
 
-wallet = Wallet('./alice-database')
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account('Alice')
 

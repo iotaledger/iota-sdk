@@ -1,10 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// Increased limit required specifically for call_method
-#![recursion_limit = "256"]
-#![allow(clippy::needless_borrow)]
-
 mod client;
 mod secret_manager;
 mod wallet;
@@ -50,6 +46,7 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     // Client
     cx.export_function("callClientMethod", client::call_client_method)?;
     cx.export_function("createClient", client::create_client)?;
+    cx.export_function("destroyClient", client::destroy_client)?;
     // MQTT
     cx.export_function("listenMqtt", client::listen_mqtt)?;
 

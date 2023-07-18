@@ -63,13 +63,9 @@
                 "milestoneTimestampBooked": 1675248149,
                 "ledgerIndex": 3527507
             },
-            "chain": [
-                44,
-                4219,
-                0,
-                0,
-                0
-            ],
+            "chain": {
+                "coinType": 4219
+            },
             "bech32Address": "rms1qz0krpgy6xj6p7dkrg9x37uy08yr3n3fau02cdm7qalg7ynqcswywncmd9p"
         }
     ],
@@ -87,13 +83,9 @@
                 }
             ]
         },
-        "chain": [
-            44,
-            4219,
-            0,
-            0,
-            0
-        ],
+        "chain": {
+            "coinType": 4219
+        },
         "address": {
             "type": 0,
             "pubKeyHash": "0x9f618504d1a5a0f9b61a0a68fb8479c838ce29ef1eac377e077e8f1260c41c47"

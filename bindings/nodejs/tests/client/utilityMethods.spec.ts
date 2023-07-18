@@ -94,13 +94,13 @@ describe('Client utility methods', () => {
     });
 
     it('compute foundry id', async () => {
-        const aliasAddress =
+        const aliasId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
         const serialNumber = 0;
         const tokenSchemeKind = 0;
 
         const foundryId = Utils.computeFoundryId(
-            aliasAddress,
+            aliasId,
             serialNumber,
             tokenSchemeKind,
         );
@@ -119,8 +119,12 @@ describe('Client utility methods', () => {
         const message = '0x494f5441';
         const signature = await new SecretManager(secretManager).signEd25519(
             message,
-            // HD-Wallet type, IOTA coin type, first account, public, first address
-            [44, 4218, 0, 0, 0],
+            {
+                coinType: 4218,
+                account: 0,
+                change: 0,
+                addressIndex: 0,
+            },
         );
 
         const validSignature = Utils.verifyEd25519Signature(signature, message);

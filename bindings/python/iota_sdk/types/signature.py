@@ -1,11 +1,18 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.common import HexStr
+from dataclasses import dataclass
+from iota_sdk.types.common import HexStr, CoinType
 
+@dataclass
 class Ed25519Signature():
-    def __init__(self, public_key: HexStr, signature: HexStr):
-        """Initialize an Ed25519Signature"""
+    publicKey: HexStr
+    signature: HexStr
+    type: int = 0
 
-        self.public_key = public_key
-        self.signature = signature
+@dataclass
+class Bip44():
+    coinType: int = CoinType.IOTA
+    account: int = 0
+    change: int = 0
+    addressIndex: int = 0

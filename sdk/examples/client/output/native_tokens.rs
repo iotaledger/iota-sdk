@@ -5,9 +5,10 @@
 //! 1. receiver gets the full output amount + native tokens
 //! 2. receiver needs to claim the output to get the native tokens, but has to send the amount back
 //!
-//! `cargo run --example native_tokens --release`
-
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example native_tokens [TOKEN ID]
+//! ```
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
@@ -16,7 +17,6 @@ use iota_sdk::{
         BasicOutputBuilder, NativeToken, TokenId,
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,15 +25,13 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
+    // Create a node client.
+    let client = Client::builder()
+        .with_node(&std::env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
-    // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
-
-    let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -43,32 +41,37 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    request_funds_from_faucet(&faucet_url, &sender_address).await?;
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &sender_address).await?,
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))
-        .duration_since(UNIX_EPOCH)
+    let tomorrow = (std::time::SystemTime::now() + std::time::Duration::from_secs(24 * 3600))
+        .duration_since(std::time::UNIX_EPOCH)
         .expect("clock went backwards")
         .as_secs()
         .try_into()
         .unwrap();
 
     // Replace with the token ID of native tokens you own.
-    let token_id: [u8; 38] =
-        prefix_hex::decode("0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000")?;
+    let token_id = std::env::args()
+        .nth(1)
+        .unwrap_or("0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000".to_string());
+    let token_id: [u8; 38] = prefix_hex::decode(token_id)?;
 
     let outputs = [
         // Without StorageDepositReturnUnlockCondition, the receiver will get the amount of the output and the native
         // tokens
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
+            .add_native_token(NativeToken::new(TokenId::new(token_id), 10)?)
             .finish_output(token_supply)?,
         // With StorageDepositReturnUnlockCondition, the receiver can consume the output to get the native tokens, but
         // he needs to send the amount back
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
+            .add_native_token(NativeToken::new(TokenId::new(token_id), 10)?)
             // Return the full amount.
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 sender_address,
@@ -82,13 +85,17 @@ async fn main() -> Result<()> {
     ];
 
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
         .await?;
 
-    println!("Block with native tokens sent: {explorer_url}/block/{}", block.id());
+    println!(
+        "Block with native tokens sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
 
     Ok(())
 }
