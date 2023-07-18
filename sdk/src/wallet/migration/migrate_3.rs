@@ -8,8 +8,8 @@ pub struct Migrate;
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 3;
-    const SDK_VERSION: &'static str = "0.4.0";
-    const DATE: time::Date = time::macros::date!(2023 - 07 - 13);
+    const SDK_VERSION: &'static str = "1.0.0-rc.0";
+    const DATE: time::Date = time::macros::date!(2023 - 07 - DD);
 }
 
 #[async_trait]
