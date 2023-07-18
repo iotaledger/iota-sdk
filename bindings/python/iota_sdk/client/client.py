@@ -71,7 +71,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         tips_interval : int
             Tips request interval during PoW in seconds.
         quorum : bool
-            If node quorum is enabled. Will compare the responses from multiple nodes 
+            If node quorum is enabled. Will compare the responses from multiple nodes
             and only returns the response if `quorum_threshold`% of the nodes return the same one.
         min_quorum_size : int
             Minimum amount of nodes required for request when quorum is enabled.
@@ -428,6 +428,9 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         if 'output' in options:
             options['output'] = options.pop('output').as_dict()
+
+        if 'outputs' in options:
+            options['outputs'] = [v.as_dict() for v in options['outputs']]
 
         if 'coin_type' in options:
             options['coin_type'] = int(options.pop('coin_type'))
