@@ -178,7 +178,7 @@ async fn addresses_balance() -> Result<()> {
     let addresses_0 = account_0.addresses_with_unspent_outputs().await?;
     let acc_1_addr = &account_1.generate_ed25519_addresses(1, None).await?[0];
 
-    let balance_0: Balance = account_0
+    let balance_0 = account_0
         .addresses_balance(addresses_0.iter().map(|a| a.address()).collect())
         .await?;
     let balance_0_sync = account_0.balance().await?;
@@ -189,13 +189,13 @@ async fn addresses_balance() -> Result<()> {
     assert_eq!(balance_0, balance_0_sync);
 
     // Make sure 1 is empty
-    let balance_1: Balance = account_1.sync(None).await?;
+    let balance_1 = account_1.sync(None).await?;
     assert_eq!(balance_1.base_coin().available(), 0);
 
     // Send to 1
     let tx = account_0.send(to_send, acc_1_addr.address(), None).await?;
     // Balance should update without sync
-    let balance_0: Balance = account_0
+    let balance_0 = account_0
         .addresses_balance(addresses_0.iter().map(|a| a.address()).collect())
         .await?;
     let balance_0_sync = account_0.balance().await?;
@@ -208,7 +208,7 @@ async fn addresses_balance() -> Result<()> {
     account_1.sync(None).await?;
 
     // Balance should have transferred entirely
-    let balance_1: Balance = account_1.addresses_balance(vec![acc_1_addr.address()]).await?;
+    let balance_1 = account_1.addresses_balance(vec![acc_1_addr.address()]).await?;
     let balance_1_sync = account_1.balance().await?;
     assert!(balance_1.base_coin().available() > 0);
     assert_eq!(balance_1, balance_1_sync);
@@ -223,11 +223,11 @@ async fn addresses_balance() -> Result<()> {
     let balance_1_sync = account_1.sync(None).await?;
 
     // Check the new address
-    let balance_1: Balance = account_1.addresses_balance(vec![acc_1_addr_2.address()]).await?;
+    let balance_1 = account_1.addresses_balance(vec![acc_1_addr_2.address()]).await?;
     assert_eq!(to_send / 2, balance_1.base_coin().available());
 
     // Check old and new together
-    let balance_1_total: Balance = account_1
+    let balance_1_total = account_1
         .addresses_balance(vec![acc_1_addr.address(), acc_1_addr_2.address()])
         .await?;
     assert_eq!(balance_1_total, balance_1_sync);
