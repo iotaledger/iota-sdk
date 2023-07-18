@@ -153,9 +153,11 @@ impl SecretManage for LedgerSecretManager {
 
         // get ledger
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
-        ledger
-            .set_non_interactive_mode(self.non_interactive)
-            .map_err(Error::from)?;
+        if ledger.is_debug_app() {
+            ledger
+                .set_non_interactive_mode(self.non_interactive)
+                .map_err(Error::from)?;
+        }
 
         let addresses = ledger
             .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
@@ -195,9 +197,11 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, account_index, self.is_simulator).map_err(Error::from)?;
-        ledger
-            .set_non_interactive_mode(self.non_interactive)
-            .map_err(Error::from)?;
+        if ledger.is_debug_app() {
+            ledger
+                .set_non_interactive_mode(self.non_interactive)
+                .map_err(Error::from)?;
+        }
 
         log::debug!("[LEDGER] prepare_blind_signing");
         log::debug!("[LEDGER] {:?} {:?}", bip32_index, msg);
@@ -273,9 +277,11 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
-        ledger
-            .set_non_interactive_mode(self.non_interactive)
-            .map_err(Error::from)?;
+        if ledger.is_debug_app() {
+            ledger
+                .set_non_interactive_mode(self.non_interactive)
+                .map_err(Error::from)?;
+        }
         let blind_signing = needs_blind_signing(prepared_transaction, ledger.get_buffer_size());
 
         // if essence + bip32 input indices are larger than the buffer size or the essence contains
