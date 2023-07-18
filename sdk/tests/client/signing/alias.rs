@@ -67,7 +67,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+        Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
     let outputs = build_outputs([Alias(
@@ -158,7 +158,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE).with_address_index(1)),
+        Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
     )]);
 
     let outputs = build_outputs([Alias(
@@ -251,7 +251,7 @@ async fn alias_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Bip44::new().with_coin_type(SHIMMER_COIN_TYPE)),
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
             1_000_000,
