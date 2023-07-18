@@ -33,7 +33,7 @@ async function run() {
             'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
         const amount = BigInt(1);
 
-        const transaction = await account.send(address, amount, {
+        const transaction = await account.send(amount, address, {
             allowMicroAmount: true,
         });
 
