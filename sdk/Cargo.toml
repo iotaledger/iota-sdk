@@ -43,7 +43,7 @@ futures = { version = "0.3.28", default-features = false, features = [ "thread-p
 heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-iota_stronghold = { version = "2.0.0-rc.1", default-features = false, optional = true }
+iota_stronghold = { version = "2.0.0-rc.2", default-features = false, optional = true }
 log = { version = "0.4.19", default-features = false, optional = true }
 num_cpus = { version = "1.16.0", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }
