@@ -41,7 +41,7 @@ account = wallet.get_account('Alice')
 print('Fill your address with the faucet: https://faucet.testnet.shimmer.network/')
 
 addresses = account.addresses()
-print('Send funds to:', addresses[0]["address"])
+print('Send funds to:', addresses[0].address)
 
 # Sync every 5 seconds until the faucet transaction gets confirmed.
 for _ in range(100):

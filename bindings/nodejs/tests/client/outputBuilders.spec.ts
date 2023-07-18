@@ -36,7 +36,7 @@ describe.skip('Output builder methods', () => {
 
         // most simple basic output
         const basicOutput = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [
                 new AddressUnlockCondition(
                     new Ed25519Address(hexAddress),
@@ -85,11 +85,11 @@ describe.skip('Output builder methods', () => {
             nativeTokens: [
                 {
                     id: '0x081e6439529b020328c08224b43172f282cb16649d50c891fa156365323667e47a0100000000',
-                    amount: '0x32',
+                    amount: BigInt(50),
                 },
             ],
             // 10 hex encoded
-            tokenScheme: new SimpleTokenScheme('0xa', '0x0', '0xa'),
+            tokenScheme: new SimpleTokenScheme(BigInt(10), BigInt(0), BigInt(10)),
             unlockConditions: [
                 new ImmutableAliasAddressUnlockCondition(
                     new AliasAddress(aliasId),

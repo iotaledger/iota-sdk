@@ -19,12 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.0 - 2023-XX-XX
+## 1.0.0-rc.0 - 2023-07-DD
 
 ### Changed
 
 - Migrated storage types to Dtos;
 - Removed inappropriate serde impls from `AccountDetails`, `ClientBuilder`, `WalletBuilder`, `NetworkInfo`, `ProtocolParameters` and added `try_from_dto` impls for conversion;
+
+### Fixed
+
+- Call `ledger.set_non_interactive_mode()` only if it's a debug app;
 
 ## 0.4.0 - 2023-07-14
 

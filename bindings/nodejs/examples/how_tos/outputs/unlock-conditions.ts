@@ -37,7 +37,11 @@ async function run() {
             'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux',
         );
 
-        const tokenSchema = new SimpleTokenScheme('0x32', '0x0', '0x64');
+        const tokenSchema = new SimpleTokenScheme(
+            BigInt(50),
+            BigInt(0),
+            BigInt(100),
+        );
 
         const addressUnlockCondition: UnlockCondition =
             new AddressUnlockCondition(new Ed25519Address(hexAddress));

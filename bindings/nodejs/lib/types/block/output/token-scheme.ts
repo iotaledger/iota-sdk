@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedAmount } from '../../utils';
+import { hexToBigInt } from '../../utils/hex-encoding';
 
 enum TokenSchemeType {
     Simple = 0,
@@ -26,39 +26,59 @@ abstract class TokenScheme {
  * Simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: HexEncodedAmount;
-    private meltedTokens: HexEncodedAmount;
-    private maximumSupply: HexEncodedAmount;
+    private mintedTokens: bigint;
+    private meltedTokens: bigint;
+    private maximumSupply: bigint;
 
     constructor(
-        mintedTokens: HexEncodedAmount,
-        meltedTokens: HexEncodedAmount,
-        maximumSupply: HexEncodedAmount,
+        mintedTokens: bigint,
+        meltedTokens: bigint,
+        maximumSupply: bigint,
     ) {
         super(TokenSchemeType.Simple);
-        this.mintedTokens = mintedTokens;
-        this.meltedTokens = meltedTokens;
-        this.maximumSupply = maximumSupply;
+        if (typeof mintedTokens === 'bigint') {
+            this.mintedTokens = mintedTokens;
+        } else if (mintedTokens) {
+            this.mintedTokens = hexToBigInt(mintedTokens);
+        } else {
+            this.mintedTokens = BigInt(0);
+        }
+
+        if (typeof meltedTokens === 'bigint') {
+            this.meltedTokens = meltedTokens;
+        } else if (meltedTokens) {
+            this.meltedTokens = hexToBigInt(meltedTokens);
+        } else {
+            this.meltedTokens = BigInt(0);
+        }
+
+        if (typeof maximumSupply === 'bigint') {
+            this.maximumSupply = maximumSupply;
+        } else if (maximumSupply) {
+            this.maximumSupply = hexToBigInt(maximumSupply);
+        } else {
+            this.maximumSupply = BigInt(0);
+        }
     }
 
     /**
      * Amount of tokens minted.
      */
-    getMintedTokens(): HexEncodedAmount {
+    getMintedTokens(): bigint {
         return this.mintedTokens;
     }
 
     /**
      * Amount of tokens melted.
      */
-    getMeltedTokens(): HexEncodedAmount {
+    getMeltedTokens(): bigint {
         return this.meltedTokens;
     }
 
     /**
      * Maximum supply of tokens controlled.
      */
-    getMaximumSupply(): HexEncodedAmount {
+    getMaximumSupply(): bigint {
         return this.maximumSupply;
     }
 }

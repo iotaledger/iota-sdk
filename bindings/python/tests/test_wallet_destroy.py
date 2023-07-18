@@ -25,7 +25,7 @@ class WalletDestroy(unittest.TestCase):
 
         addresses = account.addresses()
         assert 'smr1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4sp36wye' == addresses[
-            0]['address']
+            0].address
 
         # Destroy the wallet
         wallet.destroy()
@@ -38,7 +38,7 @@ class WalletDestroy(unittest.TestCase):
 
         addresses = account.addresses()
         assert 'smr1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4sp36wye' == addresses[
-            0]['address']
+            0].address
         shutil.rmtree(db_path, ignore_errors=True)
 
     def test_wallet_destroy_error(self):
