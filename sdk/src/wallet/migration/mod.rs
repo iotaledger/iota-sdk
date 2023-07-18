@@ -159,7 +159,7 @@ trait Convert {
 
     fn check(value: &mut serde_json::Value) -> crate::wallet::Result<()> {
         if Self::New::deserialize(&*value).is_err() {
-            *value = serde_json::to_value(Self::convert(Self::Old::deserialize(&*value).unwrap())?)?;
+            *value = serde_json::to_value(Self::convert(Self::Old::deserialize(&*value)?)?)?;
         }
         Ok(())
     }
