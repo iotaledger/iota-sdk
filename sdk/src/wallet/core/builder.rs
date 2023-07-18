@@ -285,24 +285,22 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        client::{builder::dto::ClientBuilderDto, secret::SecretManage},
-        wallet::storage::StorageOptions,
-    };
+    use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
 
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
-        pub(crate) client_options: Option<ClientBuilderDto>,
+        pub(crate) client_options: Option<ClientOptions>,
         pub(crate) coin_type: Option<u32>,
         #[cfg(feature = "storage")]
         pub(crate) storage_options: Option<StorageOptions>,
     }
 
+    // TODO: This duplication can be streamlined using Borrowed or Owned enum
     impl<S: SecretManage> From<&WalletBuilder<S>> for WalletBuilderDto {
         fn from(value: &WalletBuilder<S>) -> Self {
             Self {
-                client_options: value.client_options.as_ref().map(Into::into),
+                client_options: value.client_options.clone(),
                 coin_type: value.coin_type,
                 #[cfg(feature = "storage")]
                 storage_options: value.storage_options.clone(),
@@ -310,18 +308,26 @@ pub mod dto {
         }
     }
 
+    impl<S: SecretManage> From<WalletBuilder<S>> for WalletBuilderDto {
+        fn from(value: WalletBuilder<S>) -> Self {
+            Self {
+                client_options: value.client_options,
+                coin_type: value.coin_type,
+                #[cfg(feature = "storage")]
+                storage_options: value.storage_options,
+            }
+        }
+    }
+
     impl WalletBuilderDto {
-        pub(crate) fn into_builder<S: SecretManage>(
-            self,
-            secret_manager: Option<S>,
-        ) -> crate::wallet::Result<WalletBuilder<S>> {
-            Ok(WalletBuilder {
-                client_options: self.client_options.map(TryInto::try_into).transpose()?,
+        pub(crate) fn into_builder<S: SecretManage>(self, secret_manager: Option<S>) -> WalletBuilder<S> {
+            WalletBuilder {
+                client_options: self.client_options,
                 coin_type: self.coin_type,
                 #[cfg(feature = "storage")]
                 storage_options: self.storage_options,
                 secret_manager: secret_manager.map(|s| Arc::new(RwLock::new(s))),
-            })
+            }
         }
     }
 }

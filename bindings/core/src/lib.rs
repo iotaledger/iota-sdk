@@ -16,10 +16,7 @@ use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
-    client::{
-        builder::dto::ClientBuilderDto,
-        secret::{SecretManager, SecretManagerDto},
-    },
+    client::secret::{SecretManager, SecretManagerDto},
     wallet::{ClientOptions, Wallet},
 };
 use serde::Deserialize;
@@ -46,7 +43,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
     pub storage_path: Option<String>,
-    pub client_options: Option<ClientBuilderDto>,
+    pub client_options: Option<ClientOptions>,
     pub coin_type: Option<u32>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
@@ -67,7 +64,7 @@ impl WalletOptions {
         }
 
         if let Some(client_options) = self.client_options {
-            builder = builder.with_client_options(ClientOptions::try_from(client_options)?);
+            builder = builder.with_client_options(client_options);
         }
 
         if let Some(coin_type) = self.coin_type {

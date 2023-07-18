@@ -9,7 +9,7 @@ mod response;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
-    wallet::{ClientOptions, ClientOptionsDto, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 use serde::{Deserialize, Serialize, Serializer};
 
@@ -21,7 +21,7 @@ pub use self::{
 #[serde(rename_all = "camelCase")]
 pub struct ManagerOptions {
     pub storage_path: Option<String>,
-    pub client_options: Option<ClientOptionsDto>,
+    pub client_options: Option<ClientOptions>,
     pub coin_type: Option<u32>,
     #[serde(serialize_with = "secret_manager_serialize")]
     pub secret_manager: Option<SecretManagerDto>,
@@ -76,7 +76,7 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> iota_sdk
         }
 
         if let Some(client_options) = options.client_options {
-            builder = builder.with_client_options(ClientOptions::try_from(client_options)?);
+            builder = builder.with_client_options(client_options);
         }
 
         if let Some(coin_type) = options.coin_type {

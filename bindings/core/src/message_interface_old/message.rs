@@ -12,7 +12,7 @@ use iota_sdk::{
     types::block::address::{Bech32Address, Hrp},
     wallet::{
         account::{types::AccountIdentifier, SyncOptions},
-        ClientOptionsDto,
+        ClientOptions,
     },
     Url,
 };
@@ -135,7 +135,7 @@ pub enum Message {
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[serde(rename_all = "camelCase")]
-    SetClientOptions { client_options: Box<ClientOptionsDto> },
+    SetClientOptions { client_options: Box<ClientOptions> },
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]

@@ -11,7 +11,7 @@ use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::Node,
-        NetworkInfoDto, NodeInfoWrapper,
+        NetworkInfo, NodeInfoWrapper,
     },
     types::{
         api::{
@@ -30,7 +30,7 @@ use iota_sdk::{
                 milestone::MilestoneId,
                 transaction::TransactionId,
             },
-            protocol::dto::ProtocolParametersDto,
+            protocol::ProtocolParameters,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
             BlockDto, BlockId,
@@ -67,7 +67,7 @@ pub enum Response {
     Node(Node),
     /// Response for:
     /// - [`GetNetworkInfo`](crate::method::ClientMethod::GetNetworkInfo)
-    NetworkInfo(NetworkInfoDto),
+    NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
     NetworkId(u64),
@@ -82,7 +82,7 @@ pub enum Response {
     TipsInterval(u64),
     /// Response for:
     /// - [`GetProtocolParameters`](crate::method::ClientMethod::GetProtocolParameters)
-    ProtocolParameters(ProtocolParametersDto),
+    ProtocolParameters(ProtocolParameters),
     /// Response for:
     /// - [`PrepareTransaction`](crate::method::ClientMethod::PrepareTransaction)
     PreparedTransactionData(PreparedTransactionDataDto),

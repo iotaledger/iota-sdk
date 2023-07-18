@@ -62,7 +62,7 @@ mod storage_stub {
 
                 Ok(Some(data.into_builder(
                     secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
-                )?))
+                )))
             } else {
                 Ok(None)
             }
@@ -85,7 +85,7 @@ mod storage_stub {
             log::debug!("get_wallet_data");
             let res = storage.get::<WalletBuilderDto>(WALLET_INDEXATION_KEY).await?;
             log::debug!("get_wallet_data {res:?}");
-            Ok(res.map(|data| data.into_builder(None)).transpose()?)
+            Ok(res.map(|data| data.into_builder(None)))
         }
     }
 }

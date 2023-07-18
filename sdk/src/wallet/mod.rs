@@ -13,7 +13,6 @@ pub(crate) mod migration;
 
 /// The ClientOptions to build the iota_client for interactions with the IOTA Tangle.
 pub use crate::client::ClientBuilder as ClientOptions;
-pub use crate::client::ClientBuilderDto as ClientOptionsDto;
 
 /// The error module.
 pub mod error;

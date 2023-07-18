@@ -4,7 +4,8 @@
 //! Builder of the Client Instance
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use self::dto::ClientBuilderDto;
+use serde::{Deserialize, Serialize};
+
 use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
 #[cfg(feature = "mqtt")]
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
@@ -18,61 +19,35 @@ use crate::{
         },
         Client,
     },
-    types::block::protocol::{dto::ProtocolParametersDto, ProtocolParameters},
+    types::block::protocol::ProtocolParameters,
 };
-
-/// Struct containing network and PoW related information
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct NetworkInfo {
-    /// Protocol parameters.
-    pub protocol_parameters: ProtocolParameters,
-    /// Local proof of work.
-    pub local_pow: bool,
-    /// Fallback to local proof of work if the node doesn't support remote PoW.
-    pub fallback_to_local_pow: bool,
-    /// Tips request interval during PoW in seconds.
-    pub tips_interval: u64,
-    /// The latest cached milestone timestamp.
-    pub latest_milestone_timestamp: Option<u32>,
-}
-
-fn default_local_pow() -> bool {
-    #[cfg(not(target_family = "wasm"))]
-    {
-        true
-    }
-    #[cfg(target_family = "wasm")]
-    {
-        false
-    }
-}
-
-fn default_fallback_to_local_pow() -> bool {
-    true
-}
-
-fn default_tips_interval() -> u64 {
-    DEFAULT_TIPS_INTERVAL
-}
 
 /// Builder to construct client instance with sensible default values
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct ClientBuilder {
     /// Node manager builder
+    #[serde(flatten)]
     pub node_manager_builder: crate::client::node_manager::builder::NodeManagerBuilder,
     /// Options for the MQTT broker
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
+    #[serde(flatten)]
     pub broker_options: BrokerOptions,
     /// Data related to the used network
+    #[serde(flatten, default)]
     pub network_info: NetworkInfo,
     /// Timeout for API requests
+    #[serde(default = "default_api_timeout")]
     pub api_timeout: Duration,
     /// Timeout when sending a block that requires remote proof of work
+    #[serde(default = "default_remote_pow_timeout")]
     pub remote_pow_timeout: Duration,
     /// The amount of threads to be used for proof of work
     #[cfg(not(target_family = "wasm"))]
+    #[serde(default)]
     pub pow_worker_count: Option<usize>,
 }
 
@@ -121,7 +96,7 @@ impl ClientBuilder {
     /// Set the fields from a client JSON config
     #[allow(unused_assignments)]
     pub fn from_json(mut self, client_config: &str) -> Result<Self> {
-        self = serde_json::from_str::<ClientBuilderDto>(client_config)?.try_into()?;
+        self = serde_json::from_str::<Self>(client_config)?;
         // validate URLs
         if let Some(node_dto) = &self.node_manager_builder.primary_node {
             let node: Node = node_dto.into();
@@ -358,109 +333,41 @@ impl ClientBuilder {
     }
 }
 
-pub mod dto {
-    use serde::{Deserialize, Serialize};
+/// Struct containing network and PoW related information
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct NetworkInfo {
+    /// Protocol parameters.
+    #[serde(default)]
+    pub protocol_parameters: ProtocolParameters,
+    /// Local proof of work.
+    #[serde(default = "default_local_pow")]
+    pub local_pow: bool,
+    /// Fallback to local proof of work if the node doesn't support remote PoW.
+    #[serde(default = "default_fallback_to_local_pow")]
+    pub fallback_to_local_pow: bool,
+    /// Tips request interval during PoW in seconds.
+    #[serde(default = "default_tips_interval")]
+    pub tips_interval: u64,
+    /// The latest cached milestone timestamp.
+    #[serde(skip)]
+    pub latest_milestone_timestamp: Option<u32>,
+}
 
-    use super::*;
-
-    #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-    #[serde(rename_all = "camelCase")]
-    pub struct ClientBuilderDto {
-        /// Node manager builder
-        #[serde(flatten)]
-        pub node_manager_builder: crate::client::node_manager::builder::NodeManagerBuilder,
-        /// Options for the MQTT broker
-        #[cfg(feature = "mqtt")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
-        #[serde(flatten)]
-        pub broker_options: BrokerOptions,
-        /// Data related to the used network
-        #[serde(flatten, default)]
-        pub network_info: NetworkInfoDto,
-        /// Timeout for API requests
-        #[serde(default = "default_api_timeout")]
-        pub api_timeout: Duration,
-        /// Timeout when sending a block that requires remote proof of work
-        #[serde(default = "default_remote_pow_timeout")]
-        pub remote_pow_timeout: Duration,
-        /// The amount of threads to be used for proof of work
-        #[serde(default)]
-        #[cfg(not(target_family = "wasm"))]
-        pub pow_worker_count: Option<usize>,
+fn default_local_pow() -> bool {
+    #[cfg(not(target_family = "wasm"))]
+    {
+        true
     }
-
-    impl TryFrom<ClientBuilderDto> for ClientBuilder {
-        type Error = crate::client::Error;
-
-        fn try_from(value: ClientBuilderDto) -> core::result::Result<Self, Self::Error> {
-            Ok(Self {
-                node_manager_builder: value.node_manager_builder,
-                #[cfg(feature = "mqtt")]
-                broker_options: value.broker_options,
-                network_info: value.network_info.try_into()?,
-                api_timeout: value.api_timeout,
-                remote_pow_timeout: value.remote_pow_timeout,
-                #[cfg(not(target_family = "wasm"))]
-                pow_worker_count: value.pow_worker_count,
-            })
-        }
+    #[cfg(target_family = "wasm")]
+    {
+        false
     }
+}
 
-    impl From<&ClientBuilder> for ClientBuilderDto {
-        fn from(value: &ClientBuilder) -> Self {
-            Self {
-                node_manager_builder: value.node_manager_builder.clone(),
-                #[cfg(feature = "mqtt")]
-                broker_options: value.broker_options,
-                network_info: (&value.network_info).into(),
-                api_timeout: value.api_timeout,
-                remote_pow_timeout: value.remote_pow_timeout,
-                #[cfg(not(target_family = "wasm"))]
-                pow_worker_count: value.pow_worker_count,
-            }
-        }
-    }
+fn default_fallback_to_local_pow() -> bool {
+    true
+}
 
-    /// Dto for the NetworkInfo
-    #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-    #[serde(rename_all = "camelCase")]
-    pub struct NetworkInfoDto {
-        /// Protocol parameters.
-        #[serde(default)]
-        protocol_parameters: ProtocolParametersDto,
-        /// Local proof of work.
-        #[serde(default = "default_local_pow")]
-        local_pow: bool,
-        /// Fallback to local proof of work if the node doesn't support remote PoW.
-        #[serde(default = "default_fallback_to_local_pow")]
-        fallback_to_local_pow: bool,
-        /// Tips request interval during PoW in seconds.
-        #[serde(default = "default_tips_interval")]
-        tips_interval: u64,
-    }
-
-    impl TryFrom<NetworkInfoDto> for NetworkInfo {
-        type Error = crate::client::Error;
-
-        fn try_from(value: NetworkInfoDto) -> core::result::Result<Self, Self::Error> {
-            Ok(Self {
-                protocol_parameters: value.protocol_parameters.try_into()?,
-                local_pow: value.local_pow,
-                fallback_to_local_pow: value.fallback_to_local_pow,
-                tips_interval: value.tips_interval,
-                latest_milestone_timestamp: None,
-            })
-        }
-    }
-
-    impl From<&NetworkInfo> for NetworkInfoDto {
-        fn from(info: &NetworkInfo) -> Self {
-            Self {
-                protocol_parameters: (&info.protocol_parameters).into(),
-                local_pow: info.local_pow,
-                fallback_to_local_pow: info.fallback_to_local_pow,
-                tips_interval: info.tips_interval,
-            }
-        }
-    }
+fn default_tips_interval() -> u64 {
+    DEFAULT_TIPS_INTERVAL
 }

@@ -122,7 +122,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::Ok
         }
         WalletMethod::SetClientOptions { client_options } => {
-            wallet.set_client_options((*client_options).try_into()?).await?;
+            wallet.set_client_options(*client_options).await?;
             Response::Ok
         }
         #[cfg(feature = "ledger_nano")]

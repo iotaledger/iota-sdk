@@ -4,10 +4,7 @@
 use std::sync::atomic::Ordering;
 
 use crate::{
-    client::{
-        builder::dto::ClientBuilderDto, secret::SecretManagerConfig, storage::StorageAdapter,
-        stronghold::StrongholdAdapter,
-    },
+    client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
@@ -28,9 +25,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
             .await?;
 
         let client_options = self.client_options().await;
-        stronghold
-            .set(CLIENT_OPTIONS_KEY, &ClientBuilderDto::from(&client_options))
-            .await?;
+        stronghold.set(CLIENT_OPTIONS_KEY, &client_options).await?;
 
         let coin_type = self.coin_type.load(Ordering::Relaxed);
         stronghold.set_bytes(COIN_TYPE_KEY, &coin_type.to_le_bytes()).await?;
@@ -63,11 +58,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     migrate(stronghold).await?;
 
     // Get client_options
-    let client_options = stronghold
-        .get::<ClientBuilderDto>(CLIENT_OPTIONS_KEY)
-        .await?
-        .map(ClientOptions::try_from)
-        .transpose()?;
+    let client_options = stronghold.get::<ClientOptions>(CLIENT_OPTIONS_KEY).await?;
 
     // Get coin_type
     let coin_type_bytes = stronghold.get_bytes(COIN_TYPE_KEY).await?;
