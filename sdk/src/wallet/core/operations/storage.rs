@@ -30,7 +30,7 @@ mod storage_stub {
     }
 
     #[async_trait]
-    impl<S: SecretManagerConfig> SaveLoadWallet for WalletBuilder<S>
+    impl<S: 'static + SecretManagerConfig> SaveLoadWallet for WalletBuilder<S>
     where
         crate::wallet::Error: From<S::Error>,
     {
@@ -58,7 +58,7 @@ mod storage_stub {
                 let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
                 log::debug!("get_secret_manager {secret_manager_dto:?}");
 
-                Ok(Some(data.into_builder(
+                Ok(Some(WalletBuilder::from(data).with_secret_manager(
                     secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
                 )))
             } else {
@@ -81,7 +81,7 @@ mod storage_stub {
             log::debug!("get_wallet_data");
             let res = storage.get::<WalletBuilderDto>(WALLET_INDEXATION_KEY).await?;
             log::debug!("get_wallet_data {res:?}");
-            Ok(res.map(|data| data.into_builder(None)))
+            Ok(res.map(Into::into))
         }
     }
 }

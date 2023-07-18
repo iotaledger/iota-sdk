@@ -284,7 +284,7 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
     Ok(())
 }
 
-pub mod dto {
+pub(crate) mod dto {
     use serde::Deserialize;
 
     use super::*;
@@ -299,15 +299,24 @@ pub mod dto {
         pub(crate) storage_options: Option<StorageOptions>,
     }
 
-    impl WalletBuilderDto {
-        pub(crate) fn into_builder<S: SecretManage>(self, secret_manager: Option<S>) -> WalletBuilder<S> {
-            WalletBuilder {
-                client_options: self.client_options,
-                coin_type: self.coin_type,
+    impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
+        fn from(value: WalletBuilderDto) -> Self {
+            Self {
+                client_options: value.client_options,
+                coin_type: value.coin_type,
                 #[cfg(feature = "storage")]
-                storage_options: self.storage_options,
-                secret_manager: secret_manager.map(|s| Arc::new(RwLock::new(s))),
+                storage_options: value.storage_options,
+                secret_manager: None,
             }
+        }
+    }
+
+    impl<'de, S: SecretManage> Deserialize<'de> for WalletBuilder<S> {
+        fn deserialize<D>(d: D) -> Result<Self, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            WalletBuilderDto::deserialize(d).map(Into::into)
         }
     }
 }
