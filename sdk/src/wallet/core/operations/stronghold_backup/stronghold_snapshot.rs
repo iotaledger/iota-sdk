@@ -58,7 +58,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     migrate(stronghold).await?;
 
     // Get client_options
-    let client_options = stronghold.get::<ClientOptions>(CLIENT_OPTIONS_KEY).await?;
+    let client_options = stronghold.get(CLIENT_OPTIONS_KEY).await?;
 
     // Get coin_type
     let coin_type_bytes = stronghold.get_bytes(COIN_TYPE_KEY).await?;

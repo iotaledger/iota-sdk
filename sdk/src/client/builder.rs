@@ -23,8 +23,7 @@ use crate::{
 };
 
 /// Builder to construct client instance with sensible default values
-#[derive(Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct ClientBuilder {

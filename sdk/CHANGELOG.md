@@ -23,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Migrated storage types to Dtos;
-- Removed inappropriate serde impls from `AccountDetails`, `ClientBuilder`, `WalletBuilder`, `NetworkInfo`, `ProtocolParameters` and added `try_from_dto` impls for conversion;
+- Migrated storage types field casing to uniform camelCase;
+- Removed inappropriate serde impls from `AccountDetails` and `WalletBuilder`, and added fn impls for conversion;
 
 ### Fixed
 
