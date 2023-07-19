@@ -1,5 +1,5 @@
 /**
- * In this example we check if an output has only an address unlock condition and that the address is from the account.
+ * In this example we generate an EVM address.
  */
 
 const getUnlockedManager = require('./account-manager');
