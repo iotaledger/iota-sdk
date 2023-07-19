@@ -12,29 +12,46 @@ export enum StateMutabilityType {
     Payable = 'payable',
 }
 
-
 export const ISC_SANDBOX_ABI = [
     {
         inputs: [
             { internalType: 'address', name: 'target', type: 'address' },
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: 'allowance',
@@ -54,8 +71,16 @@ export const ISC_SANDBOX_ABI = [
                 components: [
                     {
                         components: [
-                            { internalType: 'bytes', name: 'key', type: 'bytes' },
-                            { internalType: 'bytes', name: 'value', type: 'bytes' },
+                            {
+                                internalType: 'bytes',
+                                name: 'key',
+                                type: 'bytes',
+                            },
+                            {
+                                internalType: 'bytes',
+                                name: 'value',
+                                type: 'bytes',
+                            },
                         ],
                         internalType: 'struct ISCDictItem[]',
                         name: 'items',
@@ -68,22 +93,40 @@ export const ISC_SANDBOX_ABI = [
             },
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: 'allowance',
@@ -96,8 +139,16 @@ export const ISC_SANDBOX_ABI = [
                 components: [
                     {
                         components: [
-                            { internalType: 'bytes', name: 'key', type: 'bytes' },
-                            { internalType: 'bytes', name: 'value', type: 'bytes' },
+                            {
+                                internalType: 'bytes',
+                                name: 'key',
+                                type: 'bytes',
+                            },
+                            {
+                                internalType: 'bytes',
+                                name: 'value',
+                                type: 'bytes',
+                            },
                         ],
                         internalType: 'struct ISCDictItem[]',
                         name: 'items',
@@ -120,8 +171,16 @@ export const ISC_SANDBOX_ABI = [
                 components: [
                     {
                         components: [
-                            { internalType: 'bytes', name: 'key', type: 'bytes' },
-                            { internalType: 'bytes', name: 'value', type: 'bytes' },
+                            {
+                                internalType: 'bytes',
+                                name: 'key',
+                                type: 'bytes',
+                            },
+                            {
+                                internalType: 'bytes',
+                                name: 'value',
+                                type: 'bytes',
+                            },
                         ],
                         internalType: 'struct ISCDictItem[]',
                         name: 'items',
@@ -139,8 +198,16 @@ export const ISC_SANDBOX_ABI = [
                 components: [
                     {
                         components: [
-                            { internalType: 'bytes', name: 'key', type: 'bytes' },
-                            { internalType: 'bytes', name: 'value', type: 'bytes' },
+                            {
+                                internalType: 'bytes',
+                                name: 'key',
+                                type: 'bytes',
+                            },
+                            {
+                                internalType: 'bytes',
+                                name: 'value',
+                                type: 'bytes',
+                            },
                         ],
                         internalType: 'struct ISCDictItem[]',
                         name: 'items',
@@ -170,7 +237,9 @@ export const ISC_SANDBOX_ABI = [
         type: AbiType.Function,
     },
     {
-        inputs: [{ internalType: 'NFTID', name: 'collectionID', type: 'bytes32' }],
+        inputs: [
+            { internalType: 'NFTID', name: 'collectionID', type: 'bytes32' },
+        ],
         name: 'erc721NFTCollectionAddress',
         outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: StateMutabilityType.View,
@@ -185,22 +254,40 @@ export const ISC_SANDBOX_ABI = [
         outputs: [
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: '',
@@ -216,22 +303,40 @@ export const ISC_SANDBOX_ABI = [
         outputs: [
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: '',
@@ -247,22 +352,40 @@ export const ISC_SANDBOX_ABI = [
         outputs: [
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: '',
@@ -279,9 +402,17 @@ export const ISC_SANDBOX_ABI = [
             {
                 components: [
                     { internalType: 'string', name: 'name', type: 'string' },
-                    { internalType: 'string', name: 'tickerSymbol', type: 'string' },
+                    {
+                        internalType: 'string',
+                        name: 'tickerSymbol',
+                        type: 'string',
+                    },
                     { internalType: 'uint8', name: 'decimals', type: 'uint8' },
-                    { internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'totalSupply',
+                        type: 'uint256',
+                    },
                 ],
                 internalType: 'struct ISCTokenProperties',
                 name: '',
@@ -303,7 +434,9 @@ export const ISC_SANDBOX_ABI = [
         name: 'getChainOwnerID',
         outputs: [
             {
-                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                components: [
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                ],
                 internalType: 'struct ISCAgentID',
                 name: '',
                 type: 'tuple',
@@ -327,16 +460,36 @@ export const ISC_SANDBOX_ABI = [
                 components: [
                     {
                         components: [
-                            { internalType: 'NFTID', name: 'ID', type: 'bytes32' },
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                internalType: 'NFTID',
+                                name: 'ID',
+                                type: 'bytes32',
+                            },
+                            {
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct L1Address',
                                 name: 'issuer',
                                 type: 'tuple',
                             },
-                            { internalType: 'bytes', name: 'metadata', type: 'bytes' },
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                internalType: 'bytes',
+                                name: 'metadata',
+                                type: 'bytes',
+                            },
+                            {
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct ISCAgentID',
                                 name: 'owner',
                                 type: 'tuple',
@@ -348,11 +501,31 @@ export const ISC_SANDBOX_ABI = [
                     },
                     {
                         components: [
-                            { internalType: 'string', name: 'standard', type: 'string' },
-                            { internalType: 'string', name: 'version', type: 'string' },
-                            { internalType: 'string', name: 'mimeType', type: 'string' },
-                            { internalType: 'string', name: 'uri', type: 'string' },
-                            { internalType: 'string', name: 'name', type: 'string' },
+                            {
+                                internalType: 'string',
+                                name: 'standard',
+                                type: 'string',
+                            },
+                            {
+                                internalType: 'string',
+                                name: 'version',
+                                type: 'string',
+                            },
+                            {
+                                internalType: 'string',
+                                name: 'mimeType',
+                                type: 'string',
+                            },
+                            {
+                                internalType: 'string',
+                                name: 'uri',
+                                type: 'string',
+                            },
+                            {
+                                internalType: 'string',
+                                name: 'name',
+                                type: 'string',
+                            },
                         ],
                         internalType: 'struct IRC27NFTMetadata',
                         name: 'metadata',
@@ -375,14 +548,26 @@ export const ISC_SANDBOX_ABI = [
                 components: [
                     { internalType: 'NFTID', name: 'ID', type: 'bytes32' },
                     {
-                        components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                        components: [
+                            {
+                                internalType: 'bytes',
+                                name: 'data',
+                                type: 'bytes',
+                            },
+                        ],
                         internalType: 'struct L1Address',
                         name: 'issuer',
                         type: 'tuple',
                     },
                     { internalType: 'bytes', name: 'metadata', type: 'bytes' },
                     {
-                        components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                        components: [
+                            {
+                                internalType: 'bytes',
+                                name: 'data',
+                                type: 'bytes',
+                            },
+                        ],
                         internalType: 'struct ISCAgentID',
                         name: 'owner',
                         type: 'tuple',
@@ -401,7 +586,9 @@ export const ISC_SANDBOX_ABI = [
         name: 'getNativeTokenID',
         outputs: [
             {
-                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                components: [
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                ],
                 internalType: 'struct NativeTokenID',
                 name: '',
                 type: 'tuple',
@@ -416,9 +603,21 @@ export const ISC_SANDBOX_ABI = [
         outputs: [
             {
                 components: [
-                    { internalType: 'uint256', name: 'mintedTokens', type: 'uint256' },
-                    { internalType: 'uint256', name: 'meltedTokens', type: 'uint256' },
-                    { internalType: 'uint256', name: 'maximumSupply', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'mintedTokens',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'meltedTokens',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'maximumSupply',
+                        type: 'uint256',
+                    },
                 ],
                 internalType: 'struct NativeTokenScheme',
                 name: '',
@@ -433,7 +632,9 @@ export const ISC_SANDBOX_ABI = [
         name: 'getRequestID',
         outputs: [
             {
-                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                components: [
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                ],
                 internalType: 'struct ISCRequestID',
                 name: '',
                 type: 'tuple',
@@ -447,7 +648,9 @@ export const ISC_SANDBOX_ABI = [
         name: 'getSenderAccount',
         outputs: [
             {
-                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                components: [
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                ],
                 internalType: 'struct ISCAgentID',
                 name: '',
                 type: 'tuple',
@@ -466,45 +669,85 @@ export const ISC_SANDBOX_ABI = [
     {
         inputs: [
             {
-                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                components: [
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                ],
                 internalType: 'struct L1Address',
                 name: 'targetAddress',
                 type: 'tuple',
             },
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: 'assets',
                 type: 'tuple',
             },
-            { internalType: 'bool', name: 'adjustMinimumStorageDeposit', type: 'bool' },
+            {
+                internalType: 'bool',
+                name: 'adjustMinimumStorageDeposit',
+                type: 'bool',
+            },
             {
                 components: [
-                    { internalType: 'ISCHname', name: 'targetContract', type: 'uint32' },
-                    { internalType: 'ISCHname', name: 'entrypoint', type: 'uint32' },
+                    {
+                        internalType: 'ISCHname',
+                        name: 'targetContract',
+                        type: 'uint32',
+                    },
+                    {
+                        internalType: 'ISCHname',
+                        name: 'entrypoint',
+                        type: 'uint32',
+                    },
                     {
                         components: [
                             {
                                 components: [
-                                    { internalType: 'bytes', name: 'key', type: 'bytes' },
-                                    { internalType: 'bytes', name: 'value', type: 'bytes' },
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'key',
+                                        type: 'bytes',
+                                    },
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'value',
+                                        type: 'bytes',
+                                    },
                                 ],
                                 internalType: 'struct ISCDictItem[]',
                                 name: 'items',
@@ -517,28 +760,50 @@ export const ISC_SANDBOX_ABI = [
                     },
                     {
                         components: [
-                            { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                            {
+                                internalType: 'uint64',
+                                name: 'baseTokens',
+                                type: 'uint64',
+                            },
                             {
                                 components: [
                                     {
-                                        components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                        components: [
+                                            {
+                                                internalType: 'bytes',
+                                                name: 'data',
+                                                type: 'bytes',
+                                            },
+                                        ],
                                         internalType: 'struct NativeTokenID',
                                         name: 'ID',
                                         type: 'tuple',
                                     },
-                                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                                    {
+                                        internalType: 'uint256',
+                                        name: 'amount',
+                                        type: 'uint256',
+                                    },
                                 ],
                                 internalType: 'struct NativeToken[]',
                                 name: 'nativeTokens',
                                 type: 'tuple[]',
                             },
-                            { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                            {
+                                internalType: 'NFTID[]',
+                                name: 'nfts',
+                                type: 'bytes32[]',
+                            },
                         ],
                         internalType: 'struct ISCAssets',
                         name: 'allowance',
                         type: 'tuple',
                     },
-                    { internalType: 'uint64', name: 'gasBudget', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'gasBudget',
+                        type: 'uint64',
+                    },
                 ],
                 internalType: 'struct ISCSendMetadata',
                 name: 'metadata',
@@ -549,9 +814,19 @@ export const ISC_SANDBOX_ABI = [
                     { internalType: 'int64', name: 'timelock', type: 'int64' },
                     {
                         components: [
-                            { internalType: 'int64', name: 'time', type: 'int64' },
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                internalType: 'int64',
+                                name: 'time',
+                                type: 'int64',
+                            },
+                            {
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct L1Address',
                                 name: 'returnAddress',
                                 type: 'tuple',
@@ -577,22 +852,40 @@ export const ISC_SANDBOX_ABI = [
             { internalType: 'address', name: 'addr', type: 'address' },
             {
                 components: [
-                    { internalType: 'uint64', name: 'baseTokens', type: 'uint64' },
+                    {
+                        internalType: 'uint64',
+                        name: 'baseTokens',
+                        type: 'uint64',
+                    },
                     {
                         components: [
                             {
-                                components: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+                                components: [
+                                    {
+                                        internalType: 'bytes',
+                                        name: 'data',
+                                        type: 'bytes',
+                                    },
+                                ],
                                 internalType: 'struct NativeTokenID',
                                 name: 'ID',
                                 type: 'tuple',
                             },
-                            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                            {
+                                internalType: 'uint256',
+                                name: 'amount',
+                                type: 'uint256',
+                            },
                         ],
                         internalType: 'struct NativeToken[]',
                         name: 'nativeTokens',
                         type: 'tuple[]',
                     },
-                    { internalType: 'NFTID[]', name: 'nfts', type: 'bytes32[]' },
+                    {
+                        internalType: 'NFTID[]',
+                        name: 'nfts',
+                        type: 'bytes32[]',
+                    },
                 ],
                 internalType: 'struct ISCAssets',
                 name: 'allowance',
@@ -611,4 +904,4 @@ export const ISC_SANDBOX_ABI = [
         stateMutability: StateMutabilityType.NonPayable,
         type: AbiType.Function,
     },
-]
+];

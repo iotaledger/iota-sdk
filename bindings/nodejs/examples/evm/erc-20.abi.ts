@@ -233,4 +233,4 @@ export const ERC_20_ABI = [
         name: 'Transfer',
         type: AbiType.Event,
     },
-]
+];
