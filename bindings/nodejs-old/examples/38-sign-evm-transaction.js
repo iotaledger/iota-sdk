@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /**
- * In this example we check if an output has only an address unlock condition and that the address is from the account.
+ * In this example we sign and send an EVM transaction.
  */
 const assert = require('assert/strict')
 const { Buffer } = require('buffer')
