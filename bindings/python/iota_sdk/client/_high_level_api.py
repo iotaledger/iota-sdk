@@ -136,7 +136,7 @@ class HighLevelAPI():
             block_id: A block id.
 
         Returns:
-            A list of `HexStr`s or `Block`s.
+            A list where the first element is the block id and the second one the block.
         """
         result = self._call_method('retry', {'blockId': block_id})
         result[1] = Block.from_dict(result[1])
@@ -154,7 +154,7 @@ class HighLevelAPI():
             max_attempts: A maximum number of retries. Defaults to 40.
 
         Returns:
-            A list of lists of `HexStr`s or `Block`s.
+            A list of lists where the first element is the block id and the second one the block.
         """
         result = self._call_method('retryUntilIncluded', {
             'blockId': block_id,
