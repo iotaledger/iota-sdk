@@ -18,7 +18,7 @@ wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 account = wallet.get_account('Alice')
 
 # Sync account to make sure account is updated with outputs from previous
-# examples
+# examples.
 account.sync()
 print('Account synced')
 
