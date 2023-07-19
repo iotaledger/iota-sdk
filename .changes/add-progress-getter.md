@@ -3,4 +3,4 @@
 ---
 
 Add `TransactionProgressWalletEvent::getProgress` method.
-Exports `TransactionProgressType`.
+Export `TransactionProgressType`.
