@@ -466,10 +466,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('unhealthyNodes')
 
-    def prepare_transaction(self,
-                            secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                                                     SeedSecretManager | StrongholdSecretManager] = None,
-                            options: Optional[TransactionOptions] = None):
+    def prepare_transaction(self, secret_manager = None, options = None):
         """Prepare a transaction for signing.
 
         Args:
