@@ -12,7 +12,7 @@ class Ed25519Signature():
     Attributes:
         publicKey: The Ed25519 public key.
         signature: The Ed25519 signature of some message.
-        type: The Ed25519 signature type code.
+        type: The Ed25519 signature type.
     """
     publicKey: HexStr
     signature: HexStr

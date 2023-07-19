@@ -79,7 +79,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         """Initialize `Self`.
 
         Args:
-            amount: The amount of base coins the consuming transaction should deposit to `return_address`.
+            amount: The amount of base coins the consuming transaction must deposit to `return_address`.
             return_address: The address to return the amount to.
         """
         super().__init__(type=UnlockConditionType.StorageDepositReturn,
