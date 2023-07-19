@@ -9,7 +9,7 @@
   - [Getting Started](#getting-started)
     - [Installation Using a Package Manager](#installation-using-a-package-manager)
       - [npm](#npm)
-      - [Yarn:](#yarn)
+      - [Yarn](#yarn)
     - [Install the Binding from Source](#install-the-binding-from-source)
       - [Build nodejs bindings](#build-nodejs-bindings)
   - [Client Usage](#client-usage)
