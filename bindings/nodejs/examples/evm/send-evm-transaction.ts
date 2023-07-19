@@ -8,7 +8,7 @@ import { strictEqual } from 'assert/strict';
 import { Buffer } from 'buffer';
 import Web3 from 'web3';
 import { Common } from '@ethereumjs/common';
-import { Transaction } from '@ethereumjs/tx';
+import { Transaction, TxData } from '@ethereumjs/tx';
 import { RLP } from '@ethereumjs/rlp';
 import { fromRpcSig } from '@ethereumjs/util';
 
@@ -35,7 +35,7 @@ const TX_OPTIONS = {
     freeze: false,
 };
 
-async function run() {
+async function run(): Promise<void> {
     const provider = new Web3(RPC_ENDPOINT);
     try {
         if (!process.env.MNEMONIC) {
@@ -134,7 +134,7 @@ function convertsVToEip155Compatible(v: bigint, chainId: number): bigint {
     return BigInt(newV);
 }
 
-async function createTxData(provider: any, address: string) {
+async function createTxData(provider: any, address: string): Promise<TxData> {
     const erc20Contract = new provider.eth.Contract(
         ERC_20_ABI,
         TOKEN_CONTRACT_ADDRESS,
@@ -164,7 +164,7 @@ async function createTxData(provider: any, address: string) {
     return { nonce, gasPrice, gasLimit, to, value, data };
 }
 
-function padHexString(str: string) {
+function padHexString(str: string): string {
     return str.length % 2 !== 0 ? '0' + str : str;
 }
 
