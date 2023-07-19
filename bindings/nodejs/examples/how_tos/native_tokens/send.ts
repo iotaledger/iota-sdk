@@ -30,7 +30,6 @@ async function run() {
         let balance = await account.sync();
 
         // Get a token with sufficient balance
-        // TODO: use BigNumber library
         const tokenId = balance.nativeTokens.find(
             (t) => Number(t.available) >= Number(SEND_NATIVE_TOKEN_AMOUNT),
         )?.tokenId;

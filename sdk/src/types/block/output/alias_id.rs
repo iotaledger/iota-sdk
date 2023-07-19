@@ -6,7 +6,7 @@ use crate::types::block::{
     output::OutputId,
 };
 
-impl_id!(pub AliasId, 32, "TODO.");
+impl_id!(pub AliasId, 32, "Unique identifier of an alias, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
 #[cfg(feature = "serde")]
 string_serde_impl!(AliasId);
@@ -20,7 +20,11 @@ impl From<&OutputId> for AliasId {
 impl AliasId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 

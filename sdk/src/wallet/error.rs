@@ -115,6 +115,10 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("voting error {0}")]
     Voting(String),
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    #[error("invalid voting power")]
+    InvalidVotingPower,
 }
 
 // Serialize type with Display error
