@@ -28,7 +28,7 @@ if 'MNEMONIC' not in os.environ:
     raise Exception(".env MNEMONIC is undefined, see .env.example")
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be
-# done once
+# done once.
 wallet.store_mnemonic(os.environ['MNEMONIC'])
 
 account = wallet.create_account('Alice')
