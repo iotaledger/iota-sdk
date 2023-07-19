@@ -1594,10 +1594,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b059f1e0f2ba0b7253419ff4308fb4f9729f2ad76d49d6bfcf0a64b63a429904"
 dependencies = [
  "aead",
+ "autocfg",
+ "base64 0.21.2",
+ "blake2",
+ "chacha20poly1305",
+ "cipher",
+ "curve25519-dalek 3.2.0",
+ "digest 0.10.7",
+ "generic-array",
+ "getrandom",
+ "hkdf",
+ "hmac",
+ "k256",
+ "pbkdf2",
+ "rand",
+ "scrypt",
+ "serde",
+ "sha2",
+ "x25519-dalek",
+ "zeroize",
+]
+
+[[package]]
+name = "iota-crypto"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5d5a986d972c3a703d48ced24fdc0bf16fb2d02959ff4b152fa77b9132f6fb0"
+dependencies = [
+ "aead",
  "aes",
  "aes-gcm",
  "autocfg",
- "base64 0.21.2",
  "blake2",
  "chacha20poly1305",
  "cipher",
@@ -1606,14 +1633,12 @@ dependencies = [
  "ed25519-zebra",
  "generic-array",
  "getrandom",
- "hkdf",
  "hmac",
  "iterator-sorted",
  "k256",
  "num-traits",
  "pbkdf2",
  "rand",
- "scrypt",
  "serde",
  "sha2",
  "tiny-keccak",
@@ -1664,7 +1689,7 @@ dependencies = [
  "heck",
  "hex",
  "instant",
- "iota-crypto",
+ "iota-crypto 0.23.0",
  "iota-ledger-nano",
  "iota-sdk",
  "iota_stronghold",
@@ -1701,7 +1726,7 @@ dependencies = [
  "derivative",
  "fern-logger",
  "futures",
- "iota-crypto",
+ "iota-crypto 0.23.0",
  "iota-sdk",
  "log",
  "packable",
@@ -1770,13 +1795,13 @@ dependencies = [
 
 [[package]]
 name = "iota_stronghold"
-version = "2.0.0-rc.1"
+version = "2.0.0-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec36553cbc1499de54e3c6c6cc8f7f88108a6eb360ded33d97cd207a1b27859d"
+checksum = "073d65d06cb5bb352871d2285c44fc0d0e1a654f1bf109fca515ba8229fd1e12"
 dependencies = [
  "bincode",
  "hkdf",
- "iota-crypto",
+ "iota-crypto 0.23.0",
  "rust-argon2",
  "serde",
  "stronghold-derive",
@@ -3165,7 +3190,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51ded9181ba64ef82d0c417cd10779e76900e057f19e135659652f3d5b5d84b6"
 dependencies = [
  "dirs",
- "iota-crypto",
+ "iota-crypto 0.22.2",
  "libc",
  "libsodium-sys",
  "log",
@@ -3196,7 +3221,7 @@ dependencies = [
  "anyhow",
  "dirs-next",
  "hex",
- "iota-crypto",
+ "iota-crypto 0.22.2",
  "once_cell",
  "paste",
  "serde",

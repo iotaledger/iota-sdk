@@ -10,9 +10,6 @@ members = [
 	"sdk",
 ]
 
-[profile.dev]
-panic = "abort"
-
 # Necessary to get coverage to work as for some reason using a custom profile breaks it
 [profile.test]
 debug = 0
@@ -23,12 +20,8 @@ inherits = "dev"
 debug = 0
 incremental = false
 
-[profile.release]
-panic = "abort"
-
 [profile.production]
 codegen-units = 1
 inherits = "release"
 lto = true
-panic = "abort"
 strip = "symbols"

@@ -512,7 +512,6 @@ pub mod dto {
         alias::dto::AliasOutputDto,
         basic::dto::BasicOutputDto,
         foundry::dto::FoundryOutputDto,
-        metadata::dto::OutputMetadataDto,
         nft::dto::NftOutputDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,

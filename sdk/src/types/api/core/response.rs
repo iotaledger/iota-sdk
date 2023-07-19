@@ -4,12 +4,9 @@
 use alloc::{string::String, vec::Vec};
 
 use crate::types::block::{
-    output::{
-        dto::{OutputDto, OutputMetadataDto},
-        OutputId, OutputWithMetadata,
-    },
+    output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     payload::milestone::{option::dto::ReceiptMilestoneOptionDto, MilestoneId},
-    protocol::dto::ProtocolParametersDto,
+    protocol::ProtocolParameters,
     BlockId,
 };
 
@@ -26,7 +23,7 @@ pub struct InfoResponse {
     pub version: String,
     pub status: StatusResponse,
     pub supported_protocol_versions: Vec<u8>,
-    pub protocol: ProtocolParametersDto,
+    pub protocol: ProtocolParameters,
     pub pending_protocol_parameters: Vec<PendingProtocolParameter>,
     pub base_token: BaseTokenResponse,
     pub metrics: MetricsResponse,
@@ -209,14 +206,14 @@ pub struct BlockMetadataResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct OutputWithMetadataResponse {
-    pub metadata: OutputMetadataDto,
+    pub metadata: OutputMetadata,
     pub output: OutputDto,
 }
 
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
-            metadata: OutputMetadataDto::from(value.metadata()),
+            metadata: value.metadata,
             output: OutputDto::from(value.output()),
         }
     }

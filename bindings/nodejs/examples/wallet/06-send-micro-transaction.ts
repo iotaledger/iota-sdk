@@ -6,7 +6,7 @@ import { SendParams } from '@iota/sdk';
 import { getUnlockedWallet } from './common';
 
 // The base coin micro amount to send
-const SEND_MICRO_AMOUNT = '1';
+const SEND_MICRO_AMOUNT = BigInt(1);
 // The address to send the coins to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
@@ -36,7 +36,7 @@ async function run() {
             { address: RECV_ADDRESS, amount: SEND_MICRO_AMOUNT },
         ];
 
-        const transaction = await account.send(params, {
+        const transaction = await account.sendWithParams(params, {
             allowMicroAmount: true,
         });
         console.log(`Transaction sent: ${transaction.transactionId}`);

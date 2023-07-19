@@ -27,7 +27,7 @@ async function run() {
 
     const address =
         'rms1qqv5avetndkxzgr3jtrswdtz5ze6mag20s0jdqvzk4fwezve8q9vkpnqlqe';
-    const amount = 1000000;
+    const amount = BigInt(1000000);
     try {
         // Recovers the address from example `0_address_generation`.
         const input_address = JSON.parse(
@@ -42,7 +42,7 @@ async function run() {
             undefined,
             {
                 inputs,
-                output: { address, amount: amount.toString() },
+                output: { address, amount: amount },
             },
         );
 

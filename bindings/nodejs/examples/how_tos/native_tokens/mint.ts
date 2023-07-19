@@ -3,8 +3,8 @@
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The amount of native tokens to mint, 10 hex encoded.
-const MINT_AMOUNT = '0xA';
+// The amount of native tokens to mint.
+const MINT_AMOUNT = BigInt(10);
 
 // In this example we will mint an existing native token with its foundry.
 //
@@ -39,8 +39,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-
-        console.log(`Balance before minting:`, parseInt(token.available));
+        console.log(`Balance before minting: ${token.available}`);
 
         // Mint some more native tokens
         const transaction = await account
@@ -67,7 +66,7 @@ async function run() {
                 `Couldn't find native token '${tokenId}' in the account`,
             );
         }
-        console.log(`Balance after minting:`, parseInt(token.available));
+        console.log(`Balance after minting: ${token.available}`);
     } catch (error) {
         console.log('Error: ', error);
     }

@@ -42,13 +42,13 @@ import {
     AliasOutput,
     NftOutput,
     Output,
-    HexEncodedAmount,
     BasicOutput,
     FoundryOutput,
     Response,
     PreparedCreateNativeTokenTransaction,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
+import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
 
 /** The Account class. */
 export class Account {
@@ -164,7 +164,7 @@ export class Account {
      */
     async prepareBurnNativeToken(
         tokenId: string,
-        burnAmount: HexEncodedAmount,
+        burnAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -311,7 +311,7 @@ export class Account {
      */
     async prepareMeltNativeToken(
         tokenId: string,
-        meltAmount: HexEncodedAmount,
+        meltAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -320,7 +320,7 @@ export class Account {
                 name: 'prepareMeltNativeToken',
                 data: {
                     tokenId,
-                    meltAmount,
+                    meltAmount: bigIntToHex(meltAmount),
                     options: transactionOptions,
                 },
             },
@@ -448,8 +448,40 @@ export class Account {
                 name: 'getBalance',
             },
         );
+        const payload = JSON.parse(response).payload;
+        return this.adjustBalancePayload(payload);
+    }
 
-        return JSON.parse(response).payload;
+    /**
+     * Converts hex encoded or decimal strings of amounts to `bigint`
+     * for the balance payload.
+     */
+    private adjustBalancePayload(payload: any): Balance {
+        for (let i = 0; i < payload.nativeTokens.length; i++) {
+            payload.nativeTokens[i].total = hexToBigInt(
+                payload.nativeTokens[i].total,
+            );
+            payload.nativeTokens[i].available = hexToBigInt(
+                payload.nativeTokens[i].available,
+            );
+        }
+        payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
+        payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
+
+        payload.requiredStorageDeposit.alias = hexToBigInt(
+            payload.requiredStorageDeposit.alias,
+        );
+        payload.requiredStorageDeposit.basic = hexToBigInt(
+            payload.requiredStorageDeposit.basic,
+        );
+        payload.requiredStorageDeposit.foundry = hexToBigInt(
+            payload.requiredStorageDeposit.foundry,
+        );
+        payload.requiredStorageDeposit.nft = hexToBigInt(
+            payload.requiredStorageDeposit.nft,
+        );
+
+        return payload;
     }
 
     /**
@@ -736,7 +768,7 @@ export class Account {
      */
     async prepareMintNativeToken(
         tokenId: string,
-        mintAmount: HexEncodedAmount,
+        mintAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -745,7 +777,7 @@ export class Account {
                 name: 'prepareMintNativeToken',
                 data: {
                     tokenId,
-                    mintAmount,
+                    mintAmount: bigIntToHex(mintAmount),
                     options: transactionOptions,
                 },
             },
@@ -771,12 +803,18 @@ export class Account {
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedCreateNativeTokenTransaction> {
+        const adjustedParams: any = params;
+        adjustedParams.circulatingSupply = bigIntToHex(
+            params.circulatingSupply,
+        );
+        adjustedParams.maximumSupply = bigIntToHex(params.maximumSupply);
+
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'prepareCreateNativeToken',
                 data: {
-                    params: params,
+                    params: adjustedParams,
                     options: transactionOptions,
                 },
             },
@@ -842,6 +880,10 @@ export class Account {
         params: OutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Output> {
+        if (typeof params.amount === 'bigint') {
+            params.amount = params.amount.toString(10);
+        }
+
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -867,6 +909,11 @@ export class Account {
         params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
+        for (let i = 0; i < params.length; i++) {
+            if (typeof params[i].amount === 'bigint') {
+                params[i].amount = params[i].amount.toString(10);
+            }
+        }
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -955,20 +1002,56 @@ export class Account {
     }
 
     /**
+     * Send base coins to an address.
+     * @param amount Amount of coins.
+     * @param address Receiving address.
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The sent transaction.
+     */
+    async send(
+        amount: bigint | string,
+        address: string,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        if (typeof amount === 'bigint') {
+            amount = amount.toString(10);
+        }
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'send',
+                data: {
+                    amount,
+                    address,
+                    options: transactionOptions,
+                },
+            },
+        );
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
+    }
+
+    /**
      * Send base coins with amounts from input addresses.
      * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async send(
+    async sendWithParams(
         params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
+        for (let i = 0; i < params.length; i++) {
+            if (typeof params[i].amount === 'bigint') {
+                params[i].amount = params[i].amount.toString(10);
+            }
+        }
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'send',
+                name: 'sendWithParams',
                 data: {
                     params,
                     options: transactionOptions,
@@ -1175,7 +1258,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        const payload = JSON.parse(response).payload;
+        return this.adjustBalancePayload(payload);
     }
 
     async prepareVote(

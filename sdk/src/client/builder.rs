@@ -19,91 +19,11 @@ use crate::{
         },
         Client,
     },
-    types::block::{
-        output::RentStructure,
-        protocol::{dto::ProtocolParametersDto, ProtocolParameters},
-    },
+    types::block::protocol::ProtocolParameters,
 };
 
-/// Struct containing network and PoW related information
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct NetworkInfo {
-    // TODO do we really want a default?
-    /// Protocol parameters.
-    #[serde(default = "ProtocolParameters::default")]
-    pub protocol_parameters: ProtocolParameters,
-    /// Local proof of work.
-    #[serde(default = "default_local_pow")]
-    pub local_pow: bool,
-    /// Fallback to local proof of work if the node doesn't support remote PoW.
-    #[serde(default = "default_fallback_to_local_pow")]
-    pub fallback_to_local_pow: bool,
-    /// Tips request interval during PoW in seconds.
-    #[serde(default = "default_tips_interval")]
-    pub tips_interval: u64,
-    /// The latest cached milestone timestamp.
-    pub latest_milestone_timestamp: Option<u32>,
-}
-
-/// Dto for the NetworkInfo
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct NetworkInfoDto {
-    /// Protocol parameters.
-    protocol_parameters: ProtocolParametersDto,
-    /// Local proof of work.
-    local_pow: bool,
-    /// Fallback to local proof of work if the node doesn't support remote PoW.
-    fallback_to_local_pow: bool,
-    /// Tips request interval during PoW in seconds.
-    tips_interval: u64,
-}
-
-impl From<NetworkInfo> for NetworkInfoDto {
-    fn from(info: NetworkInfo) -> Self {
-        Self {
-            protocol_parameters: ProtocolParametersDto {
-                protocol_version: info.protocol_parameters.protocol_version(),
-                network_name: info.protocol_parameters.network_name().to_string(),
-                bech32_hrp: *info.protocol_parameters.bech32_hrp(),
-                min_pow_score: info.protocol_parameters.min_pow_score(),
-                below_max_depth: info.protocol_parameters.below_max_depth(),
-                rent_structure: RentStructure::new(
-                    info.protocol_parameters.rent_structure().byte_cost(),
-                    info.protocol_parameters.rent_structure().byte_factor_key(),
-                    info.protocol_parameters.rent_structure().byte_factor_data(),
-                ),
-                token_supply: info.protocol_parameters.token_supply().to_string(),
-            },
-            local_pow: info.local_pow,
-            fallback_to_local_pow: info.fallback_to_local_pow,
-            tips_interval: info.tips_interval,
-        }
-    }
-}
-
-fn default_local_pow() -> bool {
-    #[cfg(not(target_family = "wasm"))]
-    {
-        true
-    }
-    #[cfg(target_family = "wasm")]
-    {
-        false
-    }
-}
-
-fn default_fallback_to_local_pow() -> bool {
-    true
-}
-
-fn default_tips_interval() -> u64 {
-    DEFAULT_TIPS_INTERVAL
-}
-
 /// Builder to construct client instance with sensible default values
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct ClientBuilder {
@@ -125,8 +45,8 @@ pub struct ClientBuilder {
     #[serde(default = "default_remote_pow_timeout")]
     pub remote_pow_timeout: Duration,
     /// The amount of threads to be used for proof of work
-    #[serde(default)]
     #[cfg(not(target_family = "wasm"))]
+    #[serde(default)]
     pub pow_worker_count: Option<usize>,
 }
 
@@ -175,7 +95,7 @@ impl ClientBuilder {
     /// Set the fields from a client JSON config
     #[allow(unused_assignments)]
     pub fn from_json(mut self, client_config: &str) -> Result<Self> {
-        self = serde_json::from_str(client_config)?;
+        self = serde_json::from_str::<Self>(client_config)?;
         // validate URLs
         if let Some(node_dto) = &self.node_manager_builder.primary_node {
             let node: Node = node_dto.into();
@@ -196,11 +116,6 @@ impl ClientBuilder {
             }
         }
         Ok(self)
-    }
-
-    /// Export the client builder as JSON string
-    pub fn to_json(&self) -> Result<String> {
-        Ok(serde_json::to_string(&self)?)
     }
 
     /// Adds an IOTA node by its URL.
@@ -415,4 +330,44 @@ impl ClientBuilder {
             pow_worker_count: *client.pow_worker_count.read().await,
         }
     }
+}
+
+/// Struct containing network and PoW related information
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NetworkInfo {
+    /// Protocol parameters.
+    #[serde(default)]
+    pub protocol_parameters: ProtocolParameters,
+    /// Local proof of work.
+    #[serde(default = "default_local_pow")]
+    pub local_pow: bool,
+    /// Fallback to local proof of work if the node doesn't support remote PoW.
+    #[serde(default = "default_fallback_to_local_pow")]
+    pub fallback_to_local_pow: bool,
+    /// Tips request interval during PoW in seconds.
+    #[serde(default = "default_tips_interval")]
+    pub tips_interval: u64,
+    /// The latest cached milestone timestamp.
+    #[serde(skip)]
+    pub latest_milestone_timestamp: Option<u32>,
+}
+
+fn default_local_pow() -> bool {
+    #[cfg(not(target_family = "wasm"))]
+    {
+        true
+    }
+    #[cfg(target_family = "wasm")]
+    {
+        false
+    }
+}
+
+fn default_fallback_to_local_pow() -> bool {
+    true
+}
+
+fn default_tips_interval() -> u64 {
+    DEFAULT_TIPS_INTERVAL
 }

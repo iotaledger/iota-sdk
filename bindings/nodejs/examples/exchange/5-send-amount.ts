@@ -39,14 +39,11 @@ async function run() {
         // have a storage deposit return, expiration or are nft/alias/foundry outputs.
         await account.sync({ syncOnlyMostBasicOutputs: true });
 
-        const response = await account.send([
-            {
-                // Replace with the address of your choice!
-                address:
-                    'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
-                amount: '1000000',
-            },
-        ]);
+        const response = await account.send(
+            BigInt(1000000),
+            // Replace with the address of your choice!
+            'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
+        );
 
         console.log(response);
 

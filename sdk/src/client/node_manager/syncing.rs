@@ -3,7 +3,7 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
-    crate::types::{api::core::response::InfoResponse, block::protocol::ProtocolParameters},
+    crate::types::api::core::response::InfoResponse,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
@@ -73,12 +73,13 @@ impl ClientInner {
             match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
-                        match network_nodes.get_mut(&info.protocol.network_name) {
+                        match network_nodes.get_mut(info.protocol.network_name()) {
                             Some(network_node_entry) => {
                                 network_node_entry.push((info, node.clone()));
                             }
                             None => {
-                                network_nodes.insert(info.protocol.network_name.clone(), vec![(info, node.clone())]);
+                                network_nodes
+                                    .insert(info.protocol.network_name().to_owned(), vec![(info, node.clone())]);
                             }
                         }
                     } else {
@@ -105,7 +106,7 @@ impl ClientInner {
                 let mut network_info = self.network_info.write().await;
 
                 network_info.latest_milestone_timestamp = info.status.latest_milestone.timestamp;
-                network_info.protocol_parameters = ProtocolParameters::try_from(info.protocol.clone())?;
+                network_info.protocol_parameters = info.protocol.clone();
             }
 
             for (info, node_url) in nodes {

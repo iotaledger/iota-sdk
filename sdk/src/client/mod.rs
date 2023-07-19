@@ -52,7 +52,7 @@ pub mod utils;
 #[cfg(feature = "mqtt")]
 pub use self::node_api::mqtt;
 pub use self::{
-    builder::{ClientBuilder, NetworkInfo, NetworkInfoDto},
+    builder::{ClientBuilder, NetworkInfo},
     core::*,
     error::*,
     node_api::core::routes::NodeInfoWrapper,

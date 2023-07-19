@@ -4,12 +4,7 @@
 use crate::types::block::{output::OutputId, payload::transaction::TransactionId, BlockId};
 
 /// Metadata of an [`Output`](crate::types::block::output::Output).
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OutputMetadata {
     /// The identifier of the block in which the output was included.
     block_id: BlockId,
@@ -18,13 +13,10 @@ pub struct OutputMetadata {
     /// Whether the output is spent or not.
     is_spent: bool,
     /// If spent, the index of the milestone in which the output was spent.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     milestone_index_spent: Option<u32>,
     /// If spent, the timestamp of the milestone in which the output was spent.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     milestone_timestamp_spent: Option<u32>,
     /// If spent, the identifier of the transaction that spent the output.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     transaction_id_spent: Option<TransactionId>,
     /// The index of the milestone that booked the output.
     milestone_index_booked: u32,
@@ -122,81 +114,77 @@ impl OutputMetadata {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::{String, ToString};
-    use core::str::FromStr;
-
+#[cfg(feature = "serde")]
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
-    /// DTO for an [`OutputMetadata`].
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct OutputMetadataDto {
-        pub block_id: String,
-        pub transaction_id: String,
+    struct OutputMetadataDto {
+        pub block_id: BlockId,
+        pub transaction_id: TransactionId,
         pub output_index: u16,
         pub is_spent: bool,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub milestone_index_spent: Option<u32>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub milestone_timestamp_spent: Option<u32>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-        pub transaction_id_spent: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub transaction_id_spent: Option<TransactionId>,
         pub milestone_index_booked: u32,
         pub milestone_timestamp_booked: u32,
         pub ledger_index: u32,
     }
 
-    impl OutputMetadataDto {
-        /// Returns the output id.
-        pub fn output_id(&self) -> Result<OutputId, crate::types::block::Error> {
-            OutputId::new(TransactionId::from_str(&self.transaction_id)?, self.output_index)
-        }
-    }
-
     impl TryFrom<OutputMetadataDto> for OutputMetadata {
-        type Error = Error;
+        type Error = crate::types::block::Error;
 
-        fn try_from(response: OutputMetadataDto) -> Result<Self, Self::Error> {
+        fn try_from(value: OutputMetadataDto) -> Result<Self, Self::Error> {
             Ok(Self {
-                block_id: BlockId::from_str(&response.block_id)?,
-                output_id: OutputId::new(
-                    TransactionId::from_str(&response.transaction_id)?,
-                    response.output_index,
-                )?,
-                is_spent: response.is_spent,
-                milestone_index_spent: response.milestone_index_spent,
-                milestone_timestamp_spent: response.milestone_timestamp_spent,
-                transaction_id_spent: response
-                    .transaction_id_spent
-                    .as_ref()
-                    .map(|s| TransactionId::from_str(s))
-                    .transpose()?,
-                milestone_index_booked: response.milestone_index_booked,
-                milestone_timestamp_booked: response.milestone_timestamp_booked,
-                ledger_index: response.ledger_index,
+                block_id: value.block_id,
+                output_id: OutputId::new(value.transaction_id, value.output_index)?,
+                is_spent: value.is_spent,
+                milestone_index_spent: value.milestone_index_spent,
+                milestone_timestamp_spent: value.milestone_timestamp_spent,
+                transaction_id_spent: value.transaction_id_spent,
+                milestone_index_booked: value.milestone_index_booked,
+                milestone_timestamp_booked: value.milestone_timestamp_booked,
+                ledger_index: value.ledger_index,
             })
         }
     }
 
     impl From<&OutputMetadata> for OutputMetadataDto {
-        fn from(output_metadata: &OutputMetadata) -> Self {
+        fn from(value: &OutputMetadata) -> Self {
             Self {
-                block_id: output_metadata.block_id().to_string(),
-                transaction_id: output_metadata.transaction_id().to_string(),
-                output_index: output_metadata.output_index(),
-                is_spent: output_metadata.is_spent(),
-                milestone_index_spent: output_metadata.milestone_index_spent(),
-                milestone_timestamp_spent: output_metadata.milestone_timestamp_spent(),
-                transaction_id_spent: output_metadata.transaction_id_spent().map(|t| t.to_string()),
-                milestone_index_booked: output_metadata.milestone_index_booked(),
-                milestone_timestamp_booked: output_metadata.milestone_timestamp_booked(),
-                ledger_index: output_metadata.ledger_index(),
+                block_id: value.block_id,
+                transaction_id: *value.transaction_id(),
+                output_index: value.output_index(),
+                is_spent: value.is_spent,
+                milestone_index_spent: value.milestone_index_spent,
+                milestone_timestamp_spent: value.milestone_timestamp_spent,
+                transaction_id_spent: value.transaction_id_spent,
+                milestone_index_booked: value.milestone_index_booked,
+                milestone_timestamp_booked: value.milestone_timestamp_booked,
+                ledger_index: value.ledger_index,
             }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for OutputMetadata {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            OutputMetadataDto::deserialize(d).and_then(|dto| dto.try_into().map_err(serde::de::Error::custom))
+        }
+    }
+
+    impl Serialize for OutputMetadata {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            OutputMetadataDto::from(self).serialize(s)
         }
     }
 }

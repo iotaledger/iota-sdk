@@ -49,15 +49,14 @@ where
                     .map_or(false, |tx| !tx.incoming);
 
                 // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                let chain = Bip44::new()
-                    .with_coin_type(account_details.coin_type)
+                let chain = Bip44::new(account_details.coin_type)
                     .with_account(account_details.index)
                     .with_change(associated_address.internal as _)
                     .with_address_index(associated_address.key_index);
 
                 OutputData {
                     output_id: output_with_meta.metadata().output_id().to_owned(),
-                    metadata: output_with_meta.metadata().clone(),
+                    metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
                     is_spent: output_with_meta.metadata().is_spent(),
                     address: associated_address.address.inner,
@@ -90,7 +89,7 @@ where
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),
-                        output_data.metadata.clone(),
+                        output_data.metadata,
                     ));
                 }
                 None => unknown_outputs.push(output_id),

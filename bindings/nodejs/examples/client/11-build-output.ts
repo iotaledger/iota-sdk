@@ -42,7 +42,7 @@ async function run() {
 
         // Build most basic output with amound and a single address unlock condition
         const basicOutput = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
         });
 
@@ -50,7 +50,7 @@ async function run() {
 
         // Output with metadata feature block
         const basicOutputWithMetadata = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
             features: [new MetadataFeature(utf8ToHex('Hello World!'))],
         });
@@ -59,7 +59,7 @@ async function run() {
 
         // Output with storage deposit return
         const basicOutputWithStorageReturn = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [
                 addressUnlockCondition,
                 new StorageDepositReturnUnlockCondition(
@@ -73,7 +73,7 @@ async function run() {
 
         // Output with expiration
         const basicOutputWithExpiration = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [
                 addressUnlockCondition,
                 new ExpirationUnlockCondition(
@@ -87,7 +87,7 @@ async function run() {
 
         // Output with timelock
         const basicOutputWithTimelock = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [
                 addressUnlockCondition,
                 new TimelockUnlockCondition(1),
@@ -98,7 +98,7 @@ async function run() {
 
         // Output with tag feature
         const basicOutputWithTag = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
             features: [new TagFeature(utf8ToHex('Hello, World!'))],
         });
@@ -107,7 +107,7 @@ async function run() {
 
         // Output with sender feature
         const basicOutputWithSender = await client.buildBasicOutput({
-            amount: '1000000',
+            amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
             features: [new SenderFeature(new Ed25519Address(hexAddress))],
         });
