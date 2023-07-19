@@ -112,8 +112,7 @@ async function createTxData(provider, address) {
     
     const nonce = provider.utils.toHex(await provider.eth.getTransactionCount(address))
 
-    const _gasPrice = await provider.eth.getGasPrice()
-    const gasPrice = provider.utils.toHex(_gasPrice)
+    const gasPrice = provider.utils.toHex(await provider.eth.getGasPrice())
 
     const estimatedGas = await provider.eth.estimateGas({ from: address, to: TOKEN_CONTRACT_ADDRESS, data })
     const gasLimit = provider.utils.toHex(estimatedGas)
