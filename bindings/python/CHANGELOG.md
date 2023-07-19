@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RegularTransactionEssence`;
 - `Unlock` types;
 - `PreparedTransactionData, SignedTransactionData, InputSigningData, RemainderData`;
+- `UtxoChanges`;
 
 ### Changed
 

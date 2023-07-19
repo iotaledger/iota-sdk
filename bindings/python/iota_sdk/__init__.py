@@ -35,3 +35,4 @@ from .types.transaction_data import *
 from .types.transaction_options import *
 from .types.unlock import *
 from .types.unlock_condition import *
+from .types.utxo_changes import *
