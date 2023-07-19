@@ -89,7 +89,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         client_config = dict(locals())
         del client_config['self']
         # Delete client_handle, because it's not needed here and can't be
-        # serialized
+        # serialized.
         if "client_handle" in client_config:
             del client_config["client_handle"]
 
