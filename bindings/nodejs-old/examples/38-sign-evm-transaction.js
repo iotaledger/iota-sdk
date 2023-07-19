@@ -66,14 +66,15 @@ async function run() {
 
         // 5. Sign Transaction
         const signedTransaction = createSignedTransaction(transaction, ecdsaSignature)
-
-        // 7. Send signed transaction
+        
+        // Testing: check sender address matches
+        assert.strictEqual(senderAddress, signedTransaction.getSenderAddress().toString(), 'Mismatch in addresses', )
+        
+        // 6. Send signed transaction
         const hexSignedTransaction = getHexEncodedTransaction(signedTransaction)
         const sentTransaction = await provider.eth.sendSignedTransaction(hexSignedTransaction)
         console.log('Sent Transaction: ', sentTransaction)
 
-        // Testing: check sender address matches
-        assert.strictEqual(senderAddress, signedTransaction.getSenderAddress().toString(), 'Mismatch in addresses', )   
     } catch (error) {
         console.error('Error: ', error);
     }

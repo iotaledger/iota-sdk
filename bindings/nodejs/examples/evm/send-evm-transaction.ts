@@ -87,20 +87,20 @@ async function run(): Promise<void> {
             ecdsaSignature,
         );
 
-        // 7. Send signed transaction
-        const hexSignedTransaction =
-            getHexEncodedTransaction(signedTransaction);
-        const sentTransaction = await provider.eth.sendSignedTransaction(
-            hexSignedTransaction,
-        );
-        console.log('sent Transaction', sentTransaction);
-
         // Testing: check sender address matches
         strictEqual(
             senderAddress,
             signedTransaction.getSenderAddress().toString(),
             'Mismatch in addresses',
         );
+
+        // 6. Send signed transaction
+        const hexSignedTransaction =
+            getHexEncodedTransaction(signedTransaction);
+        const sentTransaction = await provider.eth.sendSignedTransaction(
+            hexSignedTransaction,
+        );
+        console.log('sent Transaction', sentTransaction);
     } catch (error) {
         console.error('Error: ', error);
     }
