@@ -165,8 +165,7 @@ impl OutputData {
 }
 
 /// A transaction with metadata
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Transaction {
     pub payload: TransactionPayload,
     pub block_id: Option<BlockId>,
@@ -182,7 +181,6 @@ pub struct Transaction {
     /// Outputs that are used as input in the transaction. May not be all, because some may have already been deleted
     /// from the node.
     // serde(default) is needed so it doesn't break with old dbs
-    #[serde(default)]
     pub inputs: Vec<OutputWithMetadataResponse>,
 }
 

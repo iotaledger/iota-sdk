@@ -292,7 +292,7 @@ mod test {
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::{format, string::ToString};
+    use alloc::format;
 
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
@@ -397,11 +397,11 @@ pub mod dto {
                 }),
                 Feature::Metadata(v) => Self::Metadata(MetadataFeatureDto {
                     kind: MetadataFeature::KIND,
-                    data: v.to_string(),
+                    data: v.data().into(),
                 }),
                 Feature::Tag(v) => Self::Tag(TagFeatureDto {
                     kind: TagFeature::KIND,
-                    tag: v.to_string(),
+                    tag: v.tag().into(),
                 }),
             }
         }
@@ -414,12 +414,8 @@ pub mod dto {
             Ok(match value {
                 FeatureDto::Sender(v) => Self::Sender(SenderFeature::new(Address::try_from(v.address)?)),
                 FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new(Address::try_from(v.address)?)),
-                FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
-                )?),
-                FeatureDto::Tag(v) => Self::Tag(TagFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
-                )?),
+                FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(v.data)?),
+                FeatureDto::Tag(v) => Self::Tag(TagFeature::new(v.tag)?),
             })
         }
     }

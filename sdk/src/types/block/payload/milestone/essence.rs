@@ -25,7 +25,6 @@ pub(crate) type MilestoneMetadataLength = BoundedU16<{ u16::MIN }, { u16::MAX }>
 /// Essence of a milestone payload.
 /// This is the signed part of a milestone payload.
 #[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MilestoneEssence {
     index: MilestoneIndex,
     timestamp: u32,
@@ -49,10 +48,11 @@ impl MilestoneEssence {
         parents: Parents,
         inclusion_merkle_root: MerkleRoot,
         applied_merkle_root: MerkleRoot,
-        metadata: Vec<u8>,
+        metadata: impl Into<Vec<u8>>,
         options: MilestoneOptions,
     ) -> Result<Self, Error> {
         let metadata = metadata
+            .into()
             .into_boxed_slice()
             .try_into()
             .map_err(Error::InvalidMilestoneMetadataLength)?;

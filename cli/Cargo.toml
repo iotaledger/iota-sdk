@@ -22,7 +22,7 @@ dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 humantime = { version = "2.1.0", default-features = false }
 log = { version = "0.4.19", default-features = false }
-prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ] }
+prefix-hex = { version = "0.7.1", default-features = false, features = [ "std" ] }
 serde_json = { version = "1.0.102", default-features = false }
 thiserror = { version = "1.0.43", default-features = false }
 tokio = { version = "1.29.1", default-features = false, features = [ "fs" ] }

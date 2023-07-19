@@ -3,7 +3,7 @@
 
 //! Module describing the tagged data payload.
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
 use packable::{
@@ -21,7 +21,6 @@ pub(crate) type TaggedDataLength =
 
 /// A payload which holds a tag and associated data.
 #[derive(Clone, Eq, PartialEq, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct TaggedDataPayload {
     #[packable(unpack_error_with = |err| Error::InvalidTagLength(err.into_prefix_err().into()))]
@@ -70,30 +69,28 @@ impl core::fmt::Debug for TaggedDataPayload {
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::string::String;
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
+    use crate::{types::block::Error, utils::serde::prefix_hex_bytes};
 
     /// The payload type to define a tagged data payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct TaggedDataPayloadDto {
         #[serde(rename = "type")]
         pub kind: u32,
-        #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub tag: String,
-        #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub data: String,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub tag: Box<[u8]>,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub data: Box<[u8]>,
     }
 
     impl From<&TaggedDataPayload> for TaggedDataPayloadDto {
         fn from(value: &TaggedDataPayload) -> Self {
             Self {
                 kind: TaggedDataPayload::KIND,
-                tag: prefix_hex::encode(value.tag()),
-                data: prefix_hex::encode(value.data()),
+                tag: value.tag().into(),
+                data: value.data().into(),
             }
         }
     }
@@ -102,18 +99,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: TaggedDataPayloadDto) -> Result<Self, Self::Error> {
-            Self::new(
-                if !value.tag.is_empty() {
-                    prefix_hex::decode(&value.tag).map_err(|_| Error::InvalidField("tag"))?
-                } else {
-                    Vec::new()
-                },
-                if !value.data.is_empty() {
-                    prefix_hex::decode(&value.data).map_err(|_| Error::InvalidField("data"))?
-                } else {
-                    Vec::new()
-                },
-            )
+            Self::new(value.tag, value.data)
         }
     }
 }
