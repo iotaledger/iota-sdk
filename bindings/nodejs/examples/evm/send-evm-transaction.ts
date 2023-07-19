@@ -64,7 +64,7 @@ async function run(): Promise<void> {
 
         // 3. Sign message with external signer
         const bip44Path = {
-            coinType: 60,
+            coinType: ETHEREUM_COIN_TYPE,
             account: 0,
             change: 0,
             addressIndex: 0,
