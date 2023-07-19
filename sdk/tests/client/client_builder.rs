@@ -18,16 +18,12 @@ async fn valid_url() {
 #[tokio::test]
 async fn client_builder() {
     let client_builder_json = r#"{
-        "primaryNode":null,
-        "primaryPowNode":null,
         "nodes":[
             {
                 "url":"http://localhost:14265/",
-                "auth":null,
                 "disabled":false
             }
         ],
-        "permanodes":null,
         "ignoreNodeHealth":true,
         "nodeSyncInterval":{
             "secs":60,
@@ -53,7 +49,6 @@ async fn client_builder() {
         "localPow":true,
         "fallbackToLocalPow":true,
         "tipsInterval":5,
-        "latestMilestoneTimestamp":null,
         "apiTimeout":{
             "secs":15,
             "nanos":0
@@ -61,8 +56,7 @@ async fn client_builder() {
         "remotePowTimeout":{
             "secs":100,
             "nanos":0
-        },
-        "powWorkerCount":null
+        }
     }"#;
 
     let _client_builder = serde_json::from_str::<ClientBuilder>(client_builder_json).unwrap();
