@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput`;
 - `Utils::parseBech32Address` now converts the string into a proper `Address`;
 - Change type of `transactionInputs` from `[OutputResponse]` `to OutputResponse[]` in class `NewOutputWalletEvent`;
+- Renamed `UTXOInput::transactionInputIndex` to `UTXOInput::transactionOutputIndex`;
 
 ## 1.0.0-rc.2 - 2023-07-05
 

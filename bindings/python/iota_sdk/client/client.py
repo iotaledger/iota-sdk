@@ -14,8 +14,10 @@ from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import Output
+from iota_sdk.types.payload import Payload
 from iota_sdk.types.token_scheme import TokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
+from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from json import dumps, loads
 import humps
 from datetime import timedelta
@@ -357,7 +359,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         }))
 
     def build_and_post_block(self,
-                             secret_manager=None,
+                             secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
+                                                      SeedSecretManager | StrongholdSecretManager] = None,
                              account_index: Optional[int] = None,
                              coin_type: Optional[int] = None,
                              custom_remainder_address: Optional[str] = None,
@@ -477,24 +480,25 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             secret_manager: One of the supported secret managers.
             options: the transaction options.
         """
-        return self._call_method('prepareTransaction', {
+        return from_dict(PreparedTransactionData, self._call_method('prepareTransaction', {
             'secretManager': secret_manager,
             'options': options
-        })
+        }))
 
-    def sign_transaction(self, secret_manager, prepared_transaction_data):
+    def sign_transaction(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
+                         StrongholdSecretManager, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
         """Sign a transaction.
 
         Args:
             secret_manager: One of the supported secret managers.
             prepared_transaction_data: a prepared transaction to sign.
         """
-        return self._call_method('signTransaction', {
+        return from_dict(SignedTransactionData, self._call_method('signTransaction', {
             'secretManager': secret_manager,
             'preparedTransactionData': prepared_transaction_data
-        })
+        }))
 
-    def submit_payload(self, payload) -> List[HexStr | Block]:
+    def submit_payload(self, payload: Payload) -> List[HexStr | Block]:
         """Submit a payload in a block.
 
         Args:
@@ -504,7 +508,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             List of HexStr or Block.
         """
         result = self._call_method('postBlockPayload', {
-            'payload': payload
+            'payload': payload.as_dict()
         })
         result[1] = Block.from_dict(result[1])
         return result

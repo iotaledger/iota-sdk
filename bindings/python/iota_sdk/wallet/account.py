@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.wallet.common import _call_method_routine
-from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedCreateTokenTransaction
+from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.address import AccountAddress, AddressWithUnspentOutputs
 from iota_sdk.types.balance import Balance
@@ -14,6 +14,7 @@ from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_params import OutputParams
+from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
@@ -77,7 +78,7 @@ class Account:
             self.meta["alias"], self.meta["coinType"], self.meta["index"])
 
     def prepare_burn(
-            self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+            self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and aliases.
         """
         prepared = self._call_account_method(
@@ -86,12 +87,12 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_burn_native_token(self,
                                   token_id: HexStr,
                                   burn_amount: int,
-                                  options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                                  options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
         the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
         recommended to use melting, if the foundry output is available.
@@ -102,11 +103,11 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_burn_nft(self,
                          nft_id: HexStr,
-                         options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                         options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Burn an nft output.
         """
         prepared = self._call_account_method(
@@ -115,11 +116,11 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_consolidate_outputs(self,
                                     force: bool,
-                                    output_consolidation_threshold: Optional[int] = None) -> PreparedTransactionData:
+                                    output_consolidation_threshold: Optional[int] = None) -> PreparedTransaction:
         """Consolidate outputs.
         """
         prepared = self._call_account_method(
@@ -128,11 +129,11 @@ class Account:
                 'outputConsolidationThreshold': output_consolidation_threshold
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_create_alias_output(self,
                                     params: Optional[CreateAliasOutputParams] = None,
-                                    options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                                    options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Create an alias output.
         """
         prepared = self._call_account_method(
@@ -141,11 +142,11 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_destroy_alias(self,
                               alias_id: HexStr,
-                              options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                              options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Destroy an alias output.
         """
         prepared = self._call_account_method(
@@ -154,11 +155,11 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_destroy_foundry(self,
                                 foundry_id: HexStr,
-                                options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                                options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Destroy a foundry output with a circulating supply of 0.
         """
         prepared = self._call_account_method(
@@ -167,7 +168,7 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def generate_ed25519_addresses(
             self, amount: int, options=None) -> List[AccountAddress]:
@@ -273,7 +274,7 @@ class Account:
         return [Transaction.from_dict(tx) for tx in transactions]
 
     def prepare_create_native_token(self, params: CreateNativeTokenParams,
-                                    options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                                    options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Create native token.
         """
         prepared = self._call_account_method(
@@ -288,7 +289,7 @@ class Account:
     def prepare_melt_native_token(self,
                                   token_id: HexStr,
                                   melt_amount: int,
-                                  options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                                  options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
         `melted_tokens` field.
         """
@@ -299,10 +300,10 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_mint_native_token(self, token_id: HexStr, mint_amount: int,
-                                  options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                                  options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Mint additional native tokens.
         """
         prepared = self._call_account_method(
@@ -312,10 +313,10 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_mint_nfts(self, params: List[MintNftParams],
-                          options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                          options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Mint NFTs.
         """
         prepared = self._call_account_method(
@@ -324,7 +325,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def get_balance(self) -> Balance:
         """Get account balance information.
@@ -350,7 +351,7 @@ class Account:
         ))
 
     def prepare_send(self, params: List[SendParams],
-                     options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                     options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Prepare to send base coins.
         """
         prepared = self._call_account_method(
@@ -359,10 +360,10 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_transaction(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Prepare transaction.
         """
         prepared = self._call_account_method(
@@ -371,7 +372,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def retry_transaction_until_included(
             self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
@@ -420,8 +421,8 @@ class Account:
             }
         ))
 
-    def prepare_send_native_tokens(self, params: List[SendNativeTokensParams],
-                                   options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+    def prepare_send_native_tokens(
+            self, params: List[SendNativeTokensParams], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Send native tokens.
         """
         prepared = self._call_account_method(
@@ -430,10 +431,10 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def prepare_send_nft(self, params: List[SendNftParams],
-                         options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+                         options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Send nft.
         """
         prepared = self._call_account_method(
@@ -442,7 +443,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(self, prepared)
+        return PreparedTransaction(self, prepared)
 
     def set_alias(self, alias: str):
         """Set alias.
@@ -463,17 +464,18 @@ class Account:
             }
         )
 
-    def sign_transaction_essence(self, prepared_transaction_data):
+    def sign_transaction_essence(
+            self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
         """Sign a transaction essence.
         """
-        return self._call_account_method(
+        return from_dict(SignedTransactionData, self._call_account_method(
             'signTransactionEssence', {
                 'preparedTransactionData': prepared_transaction_data
             }
-        )
+        ))
 
     def sign_and_submit_transaction(
-            self, prepared_transaction_data) -> Transaction:
+            self, prepared_transaction_data: PreparedTransactionData) -> Transaction:
         """Validate the transaction, sign it, submit it to a node and store it in the account.
         """
         return Transaction.from_dict(self._call_account_method(
@@ -483,7 +485,7 @@ class Account:
         ))
 
     def submit_and_store_transaction(
-            self, signed_transaction_data) -> Transaction:
+            self, signed_transaction_data: SignedTransactionData) -> Transaction:
         """Submit and store transaction.
         """
         return Transaction.from_dict(self._call_account_method(

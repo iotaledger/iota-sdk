@@ -3,13 +3,17 @@
 
 from __future__ import annotations
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.output import Output
+from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.signature import Ed25519Signature
-from dataclasses import dataclass
-from enum import Enum
+from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
+from dacite import from_dict
+from dataclasses import dataclass, field
+from enum import IntEnum
 from typing import Any, Optional, List
 
 
-class PayloadType(Enum):
+class PayloadType(IntEnum):
     """Block payload types.
 
     Attributes:
@@ -24,41 +28,56 @@ class PayloadType(Enum):
     Milestone = 7
 
 
-class Payload():
-    """Base class for `Block` payloads.
+@dataclass
+class TransactionEssence:
+    type: int
 
-    Attributes:
-        type: The type of payload.
-        milestone: A `MilestonePayload` object if it represents a milestone payload.
-        tagged_data: A `TaggedData` object if it represents a tagged data payload.
-        transaction: A `Transaction` object if it represents a transaction payload.
-        treasury_transaction: A `TreasuryTransaction` object if it represents a treasury transaction payload.
 
-    """
-
-    def __init__(self, type, milestone: Optional[Any] = None, tagged_data=None,
-                 transaction=None, treasury_transaction: Optional[Any] = None):
-        """Initialize a payload.
-        """
-        self.type = type
-        self.milestone = milestone
-        self.tagged_data = tagged_data
-        self.transaction = transaction
-        self.treasury_transaction = treasury_transaction
+@dataclass
+class RegularTransactionEssence(TransactionEssence):
+    networkId: str
+    inputsCommitment: HexStr
+    inputs: List[UtxoInput]
+    outputs: List[Output]
+    payload: Optional[TaggedDataPayload] = None
+    type: int = field(default=1, init=False)
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        if "milestone" in config:
-            del config["milestone"]
-        if "tagged_data" in config:
-            del config["tagged_data"]
-        if "transaction" in config:
-            del config["transaction"]
-        if "treasury_transaction" in config:
-            del config["treasury_transaction"]
+        if 'payload' in config:
+            config['payload'] = config['payload'].as_dict()
 
-        config['type'] = config['type'].value
+        config['inputs'] = list(map(
+            lambda x: x.__dict__, config['inputs']))
+
+        config['outputs'] = list(map(
+            lambda x: x.as_dict(), config['outputs']))
+
+        return config
+
+
+@dataclass
+class Payload():
+    """Initialize a Payload.
+    """
+    type: int
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        if 'essence' in config:
+            config['essence'] = config['essence'].as_dict()
+        if 'unlocks' in config:
+            def convert_to_dict(c):
+                try:
+                    return c.as_dict()
+                except AttributeError:
+                    return c.__dict__
+            config['unlocks'] = list(map(convert_to_dict, config['unlocks']))
+        if 'signatures' in config:
+            config['signatures'] = list(map(
+                lambda x: x.__dict__, config['signatures']))
 
         return config
 
@@ -89,17 +108,14 @@ class MilestonePayload(Payload):
     signatures: List[Ed25519Signature]
     options: Optional[List[Any]] = None
     metadata: Optional[HexStr] = None
+    type: int = field(default=int(PayloadType.Milestone), init=False)
 
     @classmethod
-    def from_dict(cls, milestone) -> MilestonePayload:
-        obj = cls.__new__(cls)
-        super(MilestonePayload, obj).__init__(milestone["type"])
-        del milestone["type"]
-        for k, v in milestone.items():
-            setattr(obj, k, v)
-        return obj
+    def from_dict(cls, milestone_dict) -> MilestonePayload:
+        return from_dict(MilestonePayload, milestone_dict)
 
 
+@dataclass
 class TaggedDataPayload(Payload):
     """A tagged data payload.
 
@@ -107,15 +123,12 @@ class TaggedDataPayload(Payload):
         tag: The tag part of the tagged data payload.
         data: The data part of the tagged data payload.
     """
-
-    def __init__(self, tag: HexStr, data: HexStr):
-        """Initialize a tagged data payload.
-        """
-        self.tag = tag
-        self.data = data
-        super().__init__(PayloadType.TaggedData, tagged_data=self)
+    tag: HexStr
+    data: HexStr
+    type: int = field(default=int(PayloadType.TaggedData), init=False)
 
 
+@dataclass
 class TransactionPayload(Payload):
     """A transaction payload.
 
@@ -123,10 +136,6 @@ class TransactionPayload(Payload):
         essence: The transaction essence.
         unlocks: The unlocks of the transaction.
     """
-
-    def __init__(self, essence, unlocks):
-        """Initialize a transaction payload.
-        """
-        self.essence = essence
-        self.unlocks = unlocks
-        super().__init__(PayloadType.Transaction, transaction=self)
+    essence: RegularTransactionEssence
+    unlocks: List[SignatureUnlock | ReferenceUnlock]
+    type: int = field(default=int(PayloadType.Transaction), init=False)
