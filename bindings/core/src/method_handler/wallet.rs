@@ -14,7 +14,11 @@ use crate::{method::WalletMethod, response::Response, Result};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
     let response = match method {
-        WalletMethod::CreateAccount { alias, bech32_hrp } => {
+        WalletMethod::CreateAccount {
+            alias,
+            bech32_hrp,
+            addresses,
+        } => {
             let mut builder = wallet.create_account();
 
             if let Some(alias) = alias {
@@ -23,6 +27,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
 
             if let Some(bech32_hrp) = bech32_hrp {
                 builder = builder.with_bech32_hrp(bech32_hrp);
+            }
+
+            if let Some(addresses) = addresses {
+                builder = builder.with_addresses(addresses);
             }
 
             match builder.finish().await {
