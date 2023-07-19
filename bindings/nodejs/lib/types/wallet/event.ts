@@ -296,4 +296,5 @@ export {
     SigningTransactionProgress,
     PerformingPowProgress,
     BroadcastingProgress,
+    TransactionProgressType,
 };
