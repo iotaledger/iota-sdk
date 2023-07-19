@@ -70,12 +70,20 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
 }
 
 fn migrate_wallet(wallet: &mut serde_json::Value) -> Result<()> {
-    migrate_client_options(&mut wallet["clientOptions"])?;
+    let wallet: &mut serde_json::Map<String, serde_json::Value> = wallet
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted wallet".to_owned()))?;
+    check_omitted_opt("clientOptions", wallet);
+    check_omitted_opt("coinType", wallet);
+    check_omitted_opt("storageOptions", wallet);
     if let Some(storage_opts) = wallet.get_mut("storageOptions") {
         let storage_opts = storage_opts
             .as_object_mut()
             .ok_or(Error::Storage("malformatted storage options".to_owned()))?;
         check_omitted_opt("encryptionKey", storage_opts)
+    }
+    if let Some(client_options) = wallet.get_mut("clientOptions") {
+        migrate_client_options(client_options)?;
     }
     Ok(())
 }
@@ -104,10 +112,9 @@ fn migrate_nodes(nodes: &mut serde_json::Value) -> Result<()> {
         .as_array_mut()
         .ok_or(Error::Storage("malformatted nodes".to_owned()))?
     {
-        let node = node
-            .as_object_mut()
-            .ok_or(Error::Storage("malformatted node".to_owned()))?;
-        check_omitted_opt("auth", node);
+        if let Some(node) = node.as_object_mut() {
+            check_omitted_opt("auth", node);
+        }
     }
     Ok(())
 }

@@ -293,9 +293,12 @@ pub(crate) mod dto {
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) client_options: Option<ClientOptions>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) coin_type: Option<u32>,
         #[cfg(feature = "storage")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) storage_options: Option<StorageOptions>,
     }
 

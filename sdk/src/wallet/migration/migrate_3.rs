@@ -36,12 +36,14 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
         }
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-            let params = wallet["client_options"]["protocolParameters"].as_object_mut().unwrap();
-            if let Some(version) = params.remove("protocol_version") {
-                params.insert("version".to_owned(), version);
+            if let Some(client_options) = wallet.get_mut("client_options") {
+                let params = client_options["protocolParameters"].as_object_mut().unwrap();
+                if let Some(version) = params.remove("protocol_version") {
+                    params.insert("version".to_owned(), version);
+                }
+                ConvertNetworkName::check(&mut client_options["protocolParameters"]["network_name"])?;
+                ConvertTokenSupply::check(&mut client_options["protocolParameters"]["token_supply"])?;
             }
-            ConvertNetworkName::check(&mut wallet["client_options"]["protocolParameters"]["network_name"])?;
-            ConvertTokenSupply::check(&mut wallet["client_options"]["protocolParameters"]["token_supply"])?;
             rename_keys(&mut wallet);
 
             storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
