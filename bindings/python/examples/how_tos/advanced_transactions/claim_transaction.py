@@ -5,7 +5,7 @@ import os
 load_dotenv()
 
 # In this example we will claim outputs that have additional unlock
-# conditions as expiration or storage deposit return
+# conditions as expiration or storage deposit return.
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
