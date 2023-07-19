@@ -6,9 +6,6 @@ from typing import NewType
 
 HexStr = NewType("HexStr", str)
 
-HD_WALLET_TYPE = 44
-HARDEN_MASK = 1 << 31
-
 
 class CoinType(IntEnum):
     IOTA = 4218
