@@ -11,7 +11,8 @@ from typing import Any, Dict, List, Optional
 
 
 class Wallet():
-    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[ClientOptions] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
+    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[ClientOptions] = None, coin_type: Optional[int] = None,
+                 secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
         """Initialize the IOTA Wallet.
         """
 
@@ -32,7 +33,8 @@ class Wallet():
     def get_handle(self):
         return self.handle
 
-    def create_account(self, alias: Optional[str] = None, bech32_hrp: Optional[str] = None) -> Account:
+    def create_account(
+            self, alias: Optional[str] = None, bech32_hrp: Optional[str] = None) -> Account:
         """Create a new account
         """
         account_data = self._call_method(
@@ -61,7 +63,8 @@ class Wallet():
     def get_secret_manager(self):
         """Get the secret manager instance
         """
-        return SecretManager(secret_manager_handle=get_secret_manager_from_wallet(self.handle))
+        return SecretManager(
+            secret_manager_handle=get_secret_manager_from_wallet(self.handle))
 
     @_call_method_routine
     def _call_method(self, name: str, data=None):
@@ -84,10 +87,11 @@ class Wallet():
     def get_accounts(self):
         """Get accounts
         """
-        accounts_data =  self._call_method(
+        accounts_data = self._call_method(
             'getAccounts',
         )
-        return [Account(account_data, self.handle) for account_data in accounts_data]
+        return [Account(account_data, self.handle)
+                for account_data in accounts_data]
 
     def backup(self, destination: str, password: str):
         """Backup storage.
@@ -123,7 +127,8 @@ class Wallet():
             'isStrongholdPasswordAvailable'
         )
 
-    def recover_accounts(self, account_start_index: int, account_gap_limit: int, address_gap_limit: int, sync_options: Optional[SyncOptions] = None):
+    def recover_accounts(self, account_start_index: int, account_gap_limit: int,
+                         address_gap_limit: int, sync_options: Optional[SyncOptions] = None):
         """Recover accounts.
         """
         return self._call_method(
@@ -165,7 +170,8 @@ class Wallet():
             }
         )
 
-    def generate_ed25519_address(self, account_index: int, internal: bool, address_index: int, options=None, bech32_hrp: Optional[str] = None) -> List[str]:
+    def generate_ed25519_address(self, account_index: int, internal: bool, address_index: int,
+                                 options=None, bech32_hrp: Optional[str] = None) -> List[str]:
         """Generate an address without storing it.
         """
         return self._call_method(
@@ -188,7 +194,8 @@ class Wallet():
 
         )
 
-    def set_stronghold_password_clear_interval(self, interval_in_milliseconds: int):
+    def set_stronghold_password_clear_interval(
+            self, interval_in_milliseconds: int):
         """Set stronghold password clear interval.
         """
         return self._call_method(
@@ -207,7 +214,8 @@ class Wallet():
 
         )
 
-    def start_background_sync(self, options: Optional[SyncOptions] = None, interval_in_milliseconds: Optional[int] = None):
+    def start_background_sync(
+            self, options: Optional[SyncOptions] = None, interval_in_milliseconds: Optional[int] = None):
         """Start background sync.
         """
         return self._call_method(

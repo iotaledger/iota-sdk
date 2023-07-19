@@ -20,15 +20,15 @@ class MqttBrokerOptions:
     """Options for the MQTT broker.
 
         Attributes:
-        automaticDisconnect (bool): 
+        automaticDisconnect (bool):
             Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not.
-        timeout (Duration): 
+        timeout (Duration):
             Sets the timeout used for the MQTT operations.
-        useWs (bool): 
+        useWs (bool):
             Sets the use_ws used for the MQTT operations.
-        port (int): 
+        port (int):
             Sets the port used for the MQTT operations.
-        maxReconnectionAttempts (int): 
+        maxReconnectionAttempts (int):
             Sets the maximum number of reconnection attempts. 0 is unlimited.
     """
     automaticDisconnect: Optional[bool] = None
@@ -38,7 +38,7 @@ class MqttBrokerOptions:
     maxReconnectionAttempts: Optional[int] = None
 
     def as_dict(self):
-        return {k: v for k, v in self.__dict__.items() if v != None}
+        return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
@@ -47,11 +47,11 @@ class ClientOptions:
 
 
         Attributes:
-        primary_node (str): 
+        primary_node (str):
             Node which will be tried first for all requests.
         primary_pow_node (str):
             Node which will be tried first when using remote PoW, even before the primary_node.
-        nodes (List[str]): 
+        nodes (List[str]):
             Array of Node URLs.
         permanode (str):
             Permanode URL.
@@ -105,7 +105,7 @@ class ClientOptions:
     powWorkerCount: Optional[int] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'brokerOptions' in config:
             config['brokerOptions'] = config['brokerOptions'].as_dict()

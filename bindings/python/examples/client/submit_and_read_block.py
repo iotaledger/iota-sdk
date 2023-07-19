@@ -90,4 +90,5 @@ print(f'\nYour message, read from the Shimmer network:')
 print(f'  {message_out}')
 
 # Or see the message online, with the testnet explorer
-print(f'\nOr see the message with the testnet explorer: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+print(
+    f'\nOr see the message with the testnet explorer: {os.environ["EXPLORER_URL"]}/block/{block_id}')

@@ -14,7 +14,7 @@ class TokenScheme():
 
     def as_dict(self):
         config = dict(self.__dict__)
-        
+
         if isinstance(config['mintedTokens'], int):
             config['mintedTokens'] = str(hex(config['mintedTokens']))
         if isinstance(config['meltedTokens'], int):

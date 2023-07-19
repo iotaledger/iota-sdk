@@ -5,7 +5,8 @@ import os
 
 # This example checks the balance of an account.
 
-# This example uses secrets in environment variables for simplicity which should not be done in production.
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])

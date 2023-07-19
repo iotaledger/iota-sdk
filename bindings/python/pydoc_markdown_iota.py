@@ -1,4 +1,6 @@
-# Inspired by https://github.com/tqdm/tqdm.github.io/blob/main/pydoc_markdown_tqdm.py as reference
+# Inspired by
+# https://github.com/tqdm/tqdm.github.io/blob/main/pydoc_markdown_tqdm.py
+# as reference
 
 from pydoc_markdown.contrib.processors.pydocmd import PydocmdProcessor
 import re
@@ -11,7 +13,7 @@ class IotaProcessor(PydocmdProcessor):
     def _process(self, node):
         if not getattr(node, "docstring", None):
             return
-        
+
         c = node.docstring.content
         # join long lines ending in escape (\)
         c = sub(r"\\\n\s*", "", c)

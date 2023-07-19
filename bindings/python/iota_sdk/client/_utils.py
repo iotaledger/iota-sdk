@@ -32,7 +32,8 @@ class ClientUtils():
             'bech32Hrp': bech32_hrp
         })
 
-    def hex_public_key_to_bech32_address(self, hex: HexStr, bech32_hrp: Optional[str] = None) -> str:
+    def hex_public_key_to_bech32_address(
+            self, hex: HexStr, bech32_hrp: Optional[str] = None) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return self._call_method('hexPublicKeyToBech32Address', {

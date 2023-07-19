@@ -6,7 +6,9 @@ import os
 
 load_dotenv()
 
-FAUCET_URL = os.environ.get('FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
+FAUCET_URL = os.environ.get(
+    'FAUCET_URL',
+    'https://faucet.testnet.shimmer.network/api/enqueue')
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 

@@ -55,8 +55,9 @@ class Burn:
         return self
 
     def as_dict(self) -> Dict[str, Any]:
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if "nativeTokens" in config:
-            config["nativeTokens"] = {nativeToken.__dict__["id"]: nativeToken.__dict__["amount"] for nativeToken in config["nativeTokens"]}
+            config["nativeTokens"] = {nativeToken.__dict__["id"]: nativeToken.__dict__[
+                "amount"] for nativeToken in config["nativeTokens"]}
         return config

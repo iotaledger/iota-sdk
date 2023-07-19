@@ -21,7 +21,8 @@ secret_manager = SecretManager(StrongholdSecretManager(
     "sign_ed25519.stronghold", os.environ['STRONGHOLD_PASSWORD']))
 
 # Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
-# The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
+# The mnemonic can't be retrieved from the Stronghold file, so make a
+# backup in a secure place!
 secret_manager.store_mnemonic(
     os.environ['MNEMONIC'])
 

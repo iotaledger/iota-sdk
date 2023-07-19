@@ -7,7 +7,8 @@ from iota_sdk import Wallet, StrongholdSecretManager, SyncOptions, CoinType, Cli
 from dotenv import load_dotenv
 import os
 
-# This example uses secrets in environment variables for simplicity which should not be done in production.
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 if 'WALLET_DB_PATH' not in os.environ:
@@ -30,7 +31,8 @@ secret_manager = StrongholdSecretManager(
 wallet = Wallet(os.environ.get('WALLET_DB_PATH'),
                 client_options, CoinType.IOTA, secret_manager)
 
-# Store the mnemonic in the Stronghold snapshot, this only needs to be done once
+# Store the mnemonic in the Stronghold snapshot, this only needs to be
+# done once
 wallet.store_mnemonic(
     os.environ['MNEMONIC'])
 

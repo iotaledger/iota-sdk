@@ -10,6 +10,7 @@ from iota_sdk.types.payload import MilestonePayload
 from typing import List
 from dacite import from_dict
 
+
 class NodeCoreAPI():
 
     def get_health(self, url: str):
@@ -159,14 +160,16 @@ class NodeCoreAPI():
             'transactionId': transaction_id
         }))
 
-    def get_included_block_metadata(self, transaction_id: HexStr) -> BlockMetadata:
+    def get_included_block_metadata(
+            self, transaction_id: HexStr) -> BlockMetadata:
         """Returns the metadata of the included block of the transaction.
         """
         return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         }))
 
-    def call_plugin_route(self, base_plugin_path: str, method: str, endpoint: str, query_params: [str] = None, request: str = None):
+    def call_plugin_route(self, base_plugin_path: str, method: str,
+                          endpoint: str, query_params: [str] = None, request: str = None):
         """Extension method which provides request methods for plugins.
         """
         if query_params is None:
