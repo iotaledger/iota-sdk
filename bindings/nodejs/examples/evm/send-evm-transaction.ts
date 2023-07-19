@@ -3,7 +3,7 @@
 // Run with command:
 // yarn run-example ./evm/send-evm-transaction.ts
 
-// In this example we will send an ERC-20 token transfer using Stronghold.
+// In this example we will send an ERC-20 token transfer using a SecretManager.
 import { strictEqual } from 'assert/strict';
 import { Buffer } from 'buffer';
 import Web3 from 'web3';
