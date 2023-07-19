@@ -34,6 +34,6 @@ account = wallet.store_mnemonic(os.environ['MNEMONIC'])
 
 # Searches for unspent outputs until no ones are found for 3 accounts in a row
 # and checks the addresses for each account until 10 addresses in a row
-# have nothing
+# have nothing.
 accounts = wallet.recover_accounts(0, 3, 10, None)
 print(json.dumps(accounts, indent=4))
