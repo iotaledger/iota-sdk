@@ -4,11 +4,13 @@
 from dataclasses import dataclass
 from iota_sdk.types.common import HexStr, CoinType
 
+
 @dataclass
 class Ed25519Signature():
     publicKey: HexStr
     signature: HexStr
     type: int = 0
+
 
 @dataclass
 class Bip44():

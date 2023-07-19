@@ -3,6 +3,7 @@
 
 from enum import IntEnum
 
+
 class WalletEventType(IntEnum):
     ConsolidationRequired = 0,
     LedgerAddressGeneration = 1,

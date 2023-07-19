@@ -5,7 +5,8 @@ import os
 # In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
 # them to the same address again.
 
-# This example uses secrets in environment variables for simplicity which should not be done in production.
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
@@ -16,7 +17,8 @@ wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 
 account = wallet.get_account('Alice')
 
-# Sync account to make sure account is updated with outputs from previous examples
+# Sync account to make sure account is updated with outputs from previous
+# examples.
 account.sync()
 print('Account synced')
 
@@ -41,7 +43,8 @@ for i, output_data in enumerate(outputs):
 print('Sending consolidation transaction...')
 
 # Consolidate unspent outputs and print the consolidation transaction ID
-# Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
+# Set `force` to true to force the consolidation even though the
+# `output_consolidation_threshold` isn't reached.
 transaction = account.prepare_consolidate_outputs(True, None).send()
 print('Transaction sent: ', transaction.transactionId)
 

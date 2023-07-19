@@ -181,6 +181,13 @@ class TransactionProgressWalletEvent extends WalletEvent {
         super(WalletEventType.TransactionProgress);
         this.progress = progress;
     }
+
+    /**
+     * Returns the progress.
+     */
+    getProgress(): TransactionProgress {
+        return this.progress;
+    }
 }
 
 abstract class TransactionProgress {
@@ -289,4 +296,5 @@ export {
     SigningTransactionProgress,
     PerformingPowProgress,
     BroadcastingProgress,
+    TransactionProgressType,
 };

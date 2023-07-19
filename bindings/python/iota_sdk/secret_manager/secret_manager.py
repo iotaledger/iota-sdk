@@ -62,7 +62,8 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
+                 SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
         if secret_manager_handle is None:
             self.handle = create_secret_manager(dumps(secret_manager))
         else:
@@ -126,7 +127,7 @@ class SecretManager():
         options = dict(locals())
         del options['self']
 
-        options = {k: v for k, v in options.items() if v != None}
+        options = {k: v for k, v in options.items() if v is not None}
 
         is_start_set = 'start' in options
         is_end_set = 'end' in options
@@ -185,7 +186,7 @@ class SecretManager():
         options = dict(locals())
         del options['self']
 
-        options = {k: v for k, v in options.items() if v != None}
+        options = {k: v for k, v in options.items() if v is not None}
 
         is_start_set = 'start' in options
         is_end_set = 'end' in options

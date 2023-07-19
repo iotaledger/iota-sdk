@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0-rc.3 - 2023-MM-DD
 
+### Added
+
+- `TransactionProgressWalletEvent::getProgress` method;
+- `TransactionProgressType` export;
+
 ### Changed
 
 - Rename `Client::listen` to `listenMqtt`, `Client::clearListeners` to `clearMqttListeners`;
@@ -28,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManagerMethod::SignEd25519`, `SignSecp256k1Ecdsa`, and `SignatureUnlock` now accept newly added `Bip44` type chains;
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
+
+### Removed
+
+- `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
 
 ### Fixed
 

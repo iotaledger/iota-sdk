@@ -17,7 +17,8 @@ class PayloadType(Enum):
 
 
 class Payload():
-    def __init__(self, type,  milestone: Optional[Any] = None, tagged_data=None, transaction=None, treasury_transaction: Optional[Any] = None):
+    def __init__(self, type, milestone: Optional[Any] = None, tagged_data=None,
+                 transaction=None, treasury_transaction: Optional[Any] = None):
         """Initialize a payload
         """
         self.type = type
@@ -27,7 +28,7 @@ class Payload():
         self.treasury_transaction = treasury_transaction
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if "milestone" in config:
             del config["milestone"]

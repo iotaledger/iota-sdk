@@ -4,7 +4,8 @@ import os
 
 load_dotenv()
 
-# In this example we will claim outputs that have additional unlock conditions as expiration or storage deposit return
+# In this example we will claim outputs that have additional unlock
+# conditions as expiration or storage deposit return.
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
@@ -30,4 +31,3 @@ print(f'Transaction sent: {transaction.transactionId}')
 
 block_id = account.retry_transaction_until_included(transaction)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
-

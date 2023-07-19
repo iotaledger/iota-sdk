@@ -9,6 +9,7 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output, OutputMetadata
 from iota_sdk.types.signature import Bip44
 
+
 @dataclass
 class OutputData():
     outputId: HexStr
