@@ -13,6 +13,7 @@ class OutputId(dict):
         output_index: The index of the output within a transaction.
 
     """
+
     def __init__(self, transaction_id: HexStr, output_index: int):
         """Initialize OutputId
         """

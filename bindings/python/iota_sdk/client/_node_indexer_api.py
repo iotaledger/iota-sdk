@@ -103,6 +103,7 @@ class NodeIndexerAPI():
             cursor: The cursor to the next page of results.
             items: The query results.
         """
+
         def __init__(self, dict: Dict):
             self.ledgerIndex = dict["ledgerIndex"]
             self.cursor = dict["cursor"]

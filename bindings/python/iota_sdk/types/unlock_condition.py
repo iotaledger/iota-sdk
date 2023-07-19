@@ -61,6 +61,7 @@ class UnlockCondition():
 class AddressUnlockCondition(UnlockCondition):
     """An address unlock condition.
     """
+
     def __init__(self, address):
         """Initialize `Self`.
 
@@ -73,6 +74,7 @@ class AddressUnlockCondition(UnlockCondition):
 class StorageDepositReturnUnlockCondition(UnlockCondition):
     """A storage-deposit-return unlock condition.
     """
+
     def __init__(self, amount, return_address):
         """Initialize `Self`.
 
@@ -87,6 +89,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
 class TimelockUnlockCondition(UnlockCondition):
     """A timelock unlock condition.
     """
+
     def __init__(self, unix_time):
         """Initialize `Self`.
 
@@ -99,6 +102,7 @@ class TimelockUnlockCondition(UnlockCondition):
 class ExpirationUnlockCondition(UnlockCondition):
     """An expiration unlock condition.
     """
+
     def __init__(self, unix_time, return_address):
         """Initialize an ExpirationUnlockCondition
 
@@ -113,6 +117,7 @@ class ExpirationUnlockCondition(UnlockCondition):
 class StateControllerAddressUnlockCondition(UnlockCondition):
     """A state controller address unlock condition.
     """
+
     def __init__(self, address):
         """Initialize `Self`.
 
@@ -125,6 +130,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
 class GovernorAddressUnlockCondition(UnlockCondition):
     """A governor address unlock condition.
     """
+
     def __init__(self, address):
         """Initialize `Self`.
 
@@ -137,6 +143,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
 class ImmutableAliasAddressUnlockCondition(UnlockCondition):
     """An immutable alias address unlock condition.
     """
+
     def __init__(self, address):
         """Initialize `Self`.
 

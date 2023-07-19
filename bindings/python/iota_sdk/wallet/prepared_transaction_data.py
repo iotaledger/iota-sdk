@@ -63,6 +63,7 @@ class PreparedTransactionData:
         return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
 
 
+
 class PreparedCreateTokenTransaction(PreparedTransactionData):
     """A prepared transaction for creating a native token.
     """

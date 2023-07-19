@@ -27,7 +27,8 @@ class Node():
     """Represents a node in the network.
     """
 
-    def __init__(self, url=None, jwt=None, username=None, password=None, disabled=None):
+    def __init__(self, url=None, jwt=None, username=None,
+                 password=None, disabled=None):
         """Initialize a Node.
 
         Args:

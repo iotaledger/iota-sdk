@@ -17,6 +17,7 @@ class RemainderValueStrategyCustomAddress:
         internal: Determines if an address is a public or an internal (change) address.
         used: Indicates whether an address has been used already.
     """
+
     def __init__(self,
                  address: str,
                  key_index: int,
@@ -57,6 +58,7 @@ class TransactionOptions():
         note: A string attached to the transaction.
         allow_micro_amount: Whether to allow sending a micro amount.
     """
+
     def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
                  tagged_data_payload: Optional[TaggedDataPayload] = None,
                  custom_inputs: Optional[List[OutputId]] = None,

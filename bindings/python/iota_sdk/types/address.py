@@ -42,6 +42,7 @@ class Address():
 class Ed25519Address(Address):
     """Represents an Ed25519 address.
     """
+
     def __init__(self, address: HexStr):
         """Initialize an Ed25519Address
 
@@ -54,6 +55,7 @@ class Ed25519Address(Address):
 class AliasAddress(Address):
     """Represents an Alias address.
     """
+
     def __init__(self, address_or_id: HexStr):
         """Initialize an AliasAddress
 
@@ -66,6 +68,7 @@ class AliasAddress(Address):
 class NFTAddress(Address):
     """Represents an NFT address.
     """
+
     def __init__(self, address_or_id: HexStr):
         """Initialize an NFTAddress
 

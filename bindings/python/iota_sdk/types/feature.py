@@ -61,6 +61,7 @@ class Feature():
 class SenderFeature(Feature):
     """Sender feature.
     """
+
     def __init__(self, sender):
         """Initialize a SenderFeature
 
@@ -73,6 +74,7 @@ class SenderFeature(Feature):
 class IssuerFeature(Feature):
     """Issuer feature.
     """
+
     def __init__(self, issuer):
         """Initialize an IssuerFeature
 
@@ -85,6 +87,7 @@ class IssuerFeature(Feature):
 class MetadataFeature(Feature):
     """Metadata feature.
     """
+
     def __init__(self, data: HexStr):
         """Initialize a MetadataFeature
 
@@ -97,6 +100,7 @@ class MetadataFeature(Feature):
 class TagFeature(Feature):
     """Tag feature.
     """
+
     def __init__(self, tag: HexStr):
         """Initialize a TagFeature
 

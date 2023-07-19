@@ -6,7 +6,7 @@ from enum import IntEnum
 
 class WalletEventType(IntEnum):
     """Types of wallet events.
-    
+
     Attributes:
         ConsolidationRequired (0): Consolidation is required.
         LedgerAddressGeneration (1): Nano Ledger has generated an address.
