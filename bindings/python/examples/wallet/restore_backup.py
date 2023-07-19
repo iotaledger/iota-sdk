@@ -14,7 +14,7 @@ client_options = ClientOptions(nodes=[node_url])
 coin_type = CoinType.SHIMMER
 
 wallet = Wallet('./restore-backup-database', client_options,
-                    coin_type, 'Placeholder')
+                coin_type, 'Placeholder')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")

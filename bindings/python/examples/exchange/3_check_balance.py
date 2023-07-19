@@ -7,7 +7,8 @@ from iota_sdk import Wallet, SyncOptions
 from dotenv import load_dotenv
 import os
 
-# This example uses secrets in environment variables for simplicity which should not be done in production.
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 if 'WALLET_DB_PATH' not in os.environ:

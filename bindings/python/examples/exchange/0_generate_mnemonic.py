@@ -5,6 +5,7 @@
 
 from iota_sdk import Utils
 
-# Set the generated mnemonic as env variable MNEMONIC so it can be used in the next examples.
+# Set the generated mnemonic as env variable MNEMONIC so it can be used in
+# the next examples.
 mnemonic = Utils.generate_mnemonic()
 print(f'Mnemonic: {mnemonic}')

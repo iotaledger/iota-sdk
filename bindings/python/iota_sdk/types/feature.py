@@ -14,6 +14,7 @@ class FeatureType(IntEnum):
     Metadata = 2
     Tag = 3
 
+
 @dataclass
 class Feature():
     """Initialize a feature
@@ -44,9 +45,9 @@ class Feature():
                 return MetadataFeature(self.data)
             case FeatureType.Metadata:
                 return TagFeature(self.tag)
-        
+
     def as_dict(self):
-        res = {k: v for k, v in self.__dict__.items() if v != None}
+        res = {k: v for k, v in self.__dict__.items() if v is not None}
         if 'address' in res:
             res['address'] = res['address'].as_dict()
         return res

@@ -37,7 +37,7 @@ class Output():
     tokenScheme: Optional[TokenScheme] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['unlockConditions'] = list(map(
             lambda x: x.as_dict(), config['unlockConditions']))

@@ -26,7 +26,7 @@ def test_mnemonic_address_generation():
             bech32_hrp=test['bech32_hrp'],
             internal=test['internal'],
             start=test['address_index'],
-            end=test['address_index']+1
+            end=test['address_index'] + 1
         )
 
         assert test['bech32_address'] == generated_address[0]

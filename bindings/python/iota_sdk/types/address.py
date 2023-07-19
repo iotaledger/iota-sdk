@@ -21,7 +21,7 @@ class Address():
     nftId: Optional[HexStr] = None
 
     def as_dict(self):
-        return {k: v for k, v in self.__dict__.items() if v != None}
+        return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 class Ed25519Address(Address):

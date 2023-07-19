@@ -26,7 +26,7 @@ class UnlockCondition():
     returnAddress: Optional[Address] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'address' in config:
             config['address'] = config['address'].as_dict()

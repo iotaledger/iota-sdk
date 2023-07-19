@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
 
+### Removed
+
+- `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
+
 ### Fixed
 
 - Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput`;

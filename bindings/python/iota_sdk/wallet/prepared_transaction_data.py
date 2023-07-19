@@ -3,6 +3,7 @@
 
 from iota_sdk.types.transaction import Transaction
 
+
 class PreparedTransactionData:
     def __init__(
         self,
@@ -21,15 +22,14 @@ class PreparedTransactionData:
         self.account = account
         self.prepared_transaction_data_dto = prepared_transaction_data
 
-    
     """
     The function returns the prepared transaction data.
 
     :returns: The method prepared_transaction_data() is returning an object of type PreparedTransaction
     """
+
     def prepared_transaction_data(self):
         return self.prepared_transaction_data_dto
-
 
     """
     The send function returns a promise that resolves to a Transaction object after signing
@@ -37,9 +37,9 @@ class PreparedTransactionData:
 
     :returns: The send() method is returning a Transaction object after it has been signed and submitted.
     """
+
     def send(self) -> Transaction:
         return self.sign_and_submit_transaction()
-
 
     """
     This function signs a prepared transaction essence using the account's private key and returns
@@ -47,10 +47,11 @@ class PreparedTransactionData:
 
     :returns: A SignedTransactionEssence object.
     """
-    def sign(self):
-        return self.account.sign_transaction_essence(self.prepared_transaction_data())
 
-    
+    def sign(self):
+        return self.account.sign_transaction_essence(
+            self.prepared_transaction_data())
+
     """
     This function signs and submits a transaction using prepared transaction data.
 
@@ -58,8 +59,11 @@ class PreparedTransactionData:
 
     :returns: A Transaction object.
     """
+
     def sign_and_submit_transaction(self) -> Transaction:
-        return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
+        return self.account.sign_and_submit_transaction(
+            self.prepared_transaction_data())
+
 
 class PreparedCreateTokenTransaction(PreparedTransactionData):
 
@@ -68,6 +72,7 @@ class PreparedCreateTokenTransaction(PreparedTransactionData):
 
     :returns: The token id of the PreparedCreateTokenTransaction.
     """
+
     def token_id(self):
         return self.prepared_transaction_data_dto["tokenId"]
 

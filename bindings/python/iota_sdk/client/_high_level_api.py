@@ -18,7 +18,7 @@ class Range:
 
 
 class GenerateAddressOptions():
-    def __init__(self,  internal: bool, ledgerNanoPrompt: bool):
+    def __init__(self, internal: bool, ledgerNanoPrompt: bool):
         self.internal = internal
         self.ledgerNanoPrompt = ledgerNanoPrompt
 
@@ -36,7 +36,7 @@ class GenerateAddressesOptions():
         self.options = options
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config["range"] = config["range"].__dict__
         if "options" in config:
@@ -46,7 +46,8 @@ class GenerateAddressesOptions():
 
 class HighLevelAPI():
 
-    def get_outputs(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
+    def get_outputs(
+            self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Fetch OutputWithMetadata from provided OutputIds (requests are sent in parallel).
         """
         outputs = self._call_method('getOutputs', {
@@ -54,7 +55,8 @@ class HighLevelAPI():
         })
         return [from_dict(OutputWithMetadata, o) for o in outputs]
 
-    def get_outputs_ignore_errors(self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
+    def get_outputs_ignore_errors(
+            self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Try to get OutputWithMetadata from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
@@ -79,7 +81,8 @@ class HighLevelAPI():
         result[1] = Block.from_dict(result[1])
         return result
 
-    def retry_until_included(self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None) -> List[List[HexStr | Block]]:
+    def retry_until_included(
+            self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None) -> List[List[HexStr | Block]]:
         """Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
            milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
            position and additional reattached blocks.
@@ -97,7 +100,8 @@ class HighLevelAPI():
                              for block_id_and_block in result]
         return blockIdsAndBlocks
 
-    def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions) -> str:
+    def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
+                          StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions) -> str:
         """Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
            Returns the address to which the funds got consolidated, if any were available.
         """

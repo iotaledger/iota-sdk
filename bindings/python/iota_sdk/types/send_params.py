@@ -16,7 +16,7 @@ class SendParams():
     expiration: Optional[int] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['amount'] = str(config['amount'])
 
@@ -31,7 +31,7 @@ class SendNativeTokensParams():
     expiration: Optional[int] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['amount'] = str(config['amount'])
         config['native_tokens'] = [native_token.as_dict()
@@ -54,7 +54,7 @@ class CreateNativeTokenParams():
     aliasId: Optional[str] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['circulatingSupply'] = hex(config['circulatingSupply'])
         config['maximumSupply'] = hex(config['maximumSupply'])

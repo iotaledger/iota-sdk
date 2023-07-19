@@ -89,5 +89,6 @@ message_out = hex_to_utf8(message_hex_out)
 print(f'\nYour message, read from the Shimmer network:')
 print(f'  {message_out}')
 
-# Or see the message online, with the testnet explorer
-print(f'\nOr see the message with the testnet explorer: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+# Or see the message online, with the testnet explorer.
+print(
+    f'\nOr see the message with the testnet explorer: {os.environ["EXPLORER_URL"]}/block/{block_id}')
