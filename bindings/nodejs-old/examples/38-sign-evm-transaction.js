@@ -15,7 +15,7 @@ const { ERC_20_ABI } = require('./erc-20.abi')
 const RPC_ENDPOINT = 'https://json-rpc.evm.testnet.shimmer.network'
 const RECIPIENT_ACCOUNT_ADDRESS = '0x2fF33407c26E36c32cA50A4e63ce661b2eeED3dd'
 const CHAIN_ID = 1072
-const COIN_TYPE = 60
+const ETHEREUM_COIN_TYPE = 60
 
 // fUSDC address. Tokens are available through: https://deepr.finance/faucet
 const TOKEN_CONTRACT_ADDRESS = '0x01ee95C34AeCAE1948aB618e467A6806b25fe7e4'
@@ -37,7 +37,7 @@ async function run() {
         const account = await manager.getAccount('Alice');
 
         const addresses = await account.generateEvmAddresses({
-            coinType: COIN_TYPE,
+            coinType: ETHEREUM_COIN_TYPE,
             accountIndex: 0,
         })
         const senderAddress = addresses[0]
@@ -53,7 +53,7 @@ async function run() {
         
         // 3. Sign message with external signer
         const bip44Path = {
-            coinType: 60,
+            coinType: ETHEREUM_COIN_TYPE,
             account: 0,
             change: 0,
             addressIndex: 0,
