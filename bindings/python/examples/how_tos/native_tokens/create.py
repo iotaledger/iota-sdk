@@ -20,7 +20,7 @@ balance = account.sync()
 
 # We can first check if we already have an alias in our account, because
 # an alias can have many foundry outputs and therefore we can reuse an
-# existing one
+# existing one.
 if not balance.aliases:
     # If we don't have an alias, we need to create one
     transaction = account.prepare_create_alias_output(None, None).send()
