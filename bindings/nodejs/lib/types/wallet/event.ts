@@ -83,9 +83,9 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
 }
 
 class NewOutputWalletEvent extends WalletEvent {
-    output: OutputData;
-    transaction?: TransactionPayload;
-    transactionInputs?: [OutputResponse];
+    private output: OutputData;
+    private transaction?: TransactionPayload;
+    private transactionInputs?: [OutputResponse];
 
     constructor(
         output: OutputData,
@@ -121,7 +121,7 @@ class NewOutputWalletEvent extends WalletEvent {
 }
 
 class SpentOutputWalletEvent extends WalletEvent {
-    output: OutputData;
+    private output: OutputData;
 
     constructor(output: OutputData) {
         super(WalletEventType.SpentOutput);
@@ -137,8 +137,8 @@ class SpentOutputWalletEvent extends WalletEvent {
 }
 
 class TransactionInclusionWalletEvent extends WalletEvent {
-    transactionId: TransactionId;
-    inclusionState: InclusionState;
+    private transactionId: TransactionId;
+    private inclusionState: InclusionState;
 
     constructor(transactionId: TransactionId, inclusionState: InclusionState) {
         super(WalletEventType.TransactionInclusion);
