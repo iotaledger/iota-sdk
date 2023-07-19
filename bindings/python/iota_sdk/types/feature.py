@@ -12,10 +12,10 @@ class FeatureType(IntEnum):
     """Types of features.
 
     Attributes:
-        Sender (0): Sender feature
-        Issuer (1): Issuer feature
-        Metadata (2): Metadata feature
-        Tag (3): Tag feature
+        Sender (0): The sender feature.
+        Issuer (1): The issuer feature.
+        Metadata (2): The metadata feature.
+        Tag (3): The tag feature.
     """
     Sender = 0
     Issuer = 1
@@ -28,10 +28,10 @@ class Feature():
     """Base class of a feature.
 
     Attributes:
-        type (FeatureType): The type of feature
-        address (Address, optional): Issuer or Sender address
-        data (HexStr, optional): Hex encoded metadata
-        tag (HexStr, optional): Hex encoded tag used to index the output
+        type: The type of feature.
+        address: Holds either an issuer or a sender address.
+        data: Some hex encoded metadata.
+        tag: A hex encoded tag used to index an output.
     """
     type: int
     address: Optional[Address] = None
@@ -52,8 +52,6 @@ class Feature():
                 return TagFeature(self.tag)
 
     def as_dict(self):
-        """Get `self` as dictionary.
-        """
         res = {k: v for k, v in self.__dict__.items() if v != None}
         if 'address' in res:
             res['address'] = res['address'].as_dict()
@@ -67,7 +65,7 @@ class SenderFeature(Feature):
         """Initialize a SenderFeature
 
         Args:
-            sender (Address): Sender address
+            sender: A given sender address.
         """
         super().__init__(int(FeatureType.Sender), address=sender)
 
@@ -79,7 +77,7 @@ class IssuerFeature(Feature):
         """Initialize an IssuerFeature
 
         Args:
-            issuer (Address): Issuer address
+            issuer: A given issuer address.
         """
         super().__init__(int(FeatureType.Issuer), address=issuer)
 
@@ -91,7 +89,7 @@ class MetadataFeature(Feature):
         """Initialize a MetadataFeature
 
         Args:
-            data (HexStr): Hex encoded metadata
+            data: Some hex encoded metadata.
         """
         super().__init__(int(FeatureType.Metadata), data=data)
 
@@ -103,6 +101,6 @@ class TagFeature(Feature):
         """Initialize a TagFeature
 
         Args:
-            tag (HexStr): Hex encoded tag used to index the output
+            tag: A hex encoded tag used to index the output.
         """
         super().__init__(int(FeatureType.Tag), tag=tag)

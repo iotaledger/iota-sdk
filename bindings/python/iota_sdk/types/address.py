@@ -25,10 +25,10 @@ class Address():
     """Base class for addresses.
 
      Attributes:
-     type (int): The address type.
-     pubKeyHash (HexStr): The hex encoded public key hash.
-     aliasId (HexStr): The hex encoded alias id.
-     nftId (HexStr): The hex encoded nft id.
+        type: The address type.
+        pubKeyHash: The hex encoded public key hash.
+        aliasId: The hex encoded alias id.
+        nftId: The hex encoded nft id.
     """
     type: int
     pubKeyHash: Optional[HexStr] = None
@@ -46,7 +46,7 @@ class Ed25519Address(Address):
         """Initialize an Ed25519Address
 
         Args:
-            address (HexStr): the hex encoded address to use
+            address: The hex encoded address to use.
         """
         super().__init__(AddressType.ED25519, pubKeyHash=address)
 
@@ -58,7 +58,7 @@ class AliasAddress(Address):
         """Initialize an AliasAddress
 
         Args:
-            address_or_id (HexStr): the hex encoded address to use
+            address_or_id: The hex encoded address to use.
         """
         super().__init__(AddressType.ALIAS, aliasId=address_or_id)
 
@@ -70,7 +70,7 @@ class NFTAddress(Address):
         """Initialize an NFTAddress
 
         Args:
-            address_or_id (HexStr): the hex encoded address to use
+            address_or_id: The hex encoded address to use.
         """
         super().__init__(AddressType.NFT, nftId=address_or_id)
 

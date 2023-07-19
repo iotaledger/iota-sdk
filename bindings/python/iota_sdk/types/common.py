@@ -28,14 +28,14 @@ class Node():
     """
 
     def __init__(self, url=None, jwt=None, username=None, password=None, disabled=None):
-        """Initialize a Node
+        """Initialize a Node.
 
         Args:
-            url (str, optional): Node url
-            jwt (str, optional): JWT token
-            username (str, optional): Username for basic authentication
-            password (str, optional): Password for basic authentication
-            disabled (bool, optional): Disable node
+            url: The node url.
+            jwt: A JWT token for authentication.
+            username: A username for basic authentication.
+            password: A password for basic authentication.
+            disabled: TODO.
         """
         self.url = url
         self.jwt = jwt
@@ -68,11 +68,11 @@ class AddressAndAmount():
         """Initialize AddressAndAmount for options in Client::build_and_post_block()
 
         Args:
-            amount (int): Amount of the output
-            address (str): Address of the output
+            amount: The base coin amount to send.
+            address: The receive address.
         """
-        self.address = address
         self.amount = amount
+        self.address = address
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}

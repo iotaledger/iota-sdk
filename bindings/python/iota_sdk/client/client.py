@@ -23,12 +23,15 @@ from dacite import from_dict
 
 
 class ClientError(Exception):
-    """client error"""
+    """Represents a client error."""
     pass
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     """Represents an IOTA client.
+
+    Attributes:
+        handle: The handle to the inner client object.
     """
 
     def __init__(
@@ -54,41 +57,40 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Initialize the IOTA Client.
 
         **Arguments**
-        -------------
-        nodes : string or array of string, optional
-            A single Node URL or an array of URLs
-        primary_node : string, optional
-            Node which will be tried first for all requests
-        primary_pow_node : string, optional
-            Node which will be tried first when using remote PoW, even before the primary_node
-        permanode : string, optional
+        nodes :
+            A single Node URL or an array of URLs.
+        primary_node :
+            Node which will be tried first for all requests.
+        primary_pow_node :
+            Node which will be tried first when using remote PoW, even before the primary_node.
+        permanode :
             Permanode URL.
-        ignore_node_health : bool, optional
-            If the node health should be ignored
-        api_timeout : datetime.timedelta, optional
-            Timeout for API requests
-        node_sync_interval : datetime.timedelta, optional
-            Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated
-        remote_pow_timeout : datetime.timedelta, optional
-            Timeout when sending a block that requires remote proof of work
-        tips_interval : int, optional
-            Tips request interval during PoW in seconds
-        quorum : bool, optional
-            If node quorum is enabled. Will compare the responses from multiple nodes and only returns the response if 'quorum_threshold'% of the nodes return the same one
-        min_quorum_size : int, optional
-            Minimum amount of nodes required for request when quorum is enabled
-        quorum_threshold : int, optional
-            % of nodes that have to return the same response so it gets accepted
-        user_agent : string, optional
-            The User-Agent header for requests
-        local_pow : bool, optional
-            Local proof of work
-        fallback_to_local_pow : bool, optional
-            Fallback to local proof of work if the node doesn't support remote PoW
-        pow_worker_count : int, optional
-            The amount of threads to be used for proof of work
-        client_handle : optional
-            An instance of a node client
+        ignore_node_health :
+            If the node health should be ignored.
+        api_timeout :
+            Timeout for API requests.
+        node_sync_interval :
+            Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated.
+        remote_pow_timeout :
+            Timeout when sending a block that requires remote proof of work.
+        tips_interval :
+            Tips request interval during PoW in seconds.
+        quorum :
+            If node quorum is enabled. Will compare the responses from multiple nodes and only returns the response if 'quorum_threshold'% of the nodes return the same one.
+        min_quorum_size :
+            Minimum amount of nodes required for request when quorum is enabled.
+        quorum_threshold :
+            % of nodes that have to return the same response so it gets accepted.
+        user_agent :
+            The User-Agent header for requests.
+        local_pow :
+            Local proof of work.
+        fallback_to_local_pow :
+            Fallback to local proof of work if the node doesn't support remote PoW.
+        pow_worker_count :
+            The amount of threads to be used for proof of work.
+        client_handle :
+            An instance of a node client.
         """
         client_config = dict(locals())
         del client_config['self']
@@ -162,7 +164,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Get the client handle.
 
         Returns:
-            A node client instance
+            The inner client object.
         """
         return self.handle
 
@@ -178,19 +180,19 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            immutable_features: Optional[List[Feature]] = None):
         """Build an AliasOutput.
 
-        Arguments:
-            alias_id (HexStr): Hex encoded alias id
-            unlock_conditions (List[UnlockCondition]): The unlock conditions for this output
-            amount (int, optional): Amount of base token
-            native_tokens (List[NativeToken], optional): The native token to add to the output
-            state_index (int, optional): Index of the state
-            state_metadata (str, optional): Hex encoded state metadata
-            foundry_counter (int, optional): Counter of foundry outputs created
-            features (List[Feature], optional): Features for this outputs
-            immutable_features (List[Feature], optional): Immutable features
+        Args:
+            alias_id: TODO.
+            unlock_conditions: TODO.
+            amount: TODO.
+            native_tokens: TODO.
+            state_index: TODO.
+            state_metadata: TODO.
+            foundry_counter: TODO.
+            features: TODO.
+            immutable_features: TODO.
 
-        Returns:
-            Output as dict
+        Returns: 
+            The alias output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -228,15 +230,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            features: Optional[List[Feature]] = None):
         """Build a BasicOutput.
 
-        Arguments:
-            unlock_conditions (List[UnlockCondition]): The unlock conditions for this output
-            amount (int, optional): Amount of base token
-            native_tokens (List[NativeToken], optional): The native token to add to the output
-            features : array of Feature
-                Features for this outputs
+        Args:
+            unlock_conditions: The unlock conditions for this output.
+            amount: TODO.
+            native_tokens: TODO.
+            features: TODO.
 
         Returns:
-            Output as dict
+            The basic output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -270,16 +271,16 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build a FoundryOutput.
 
         Args:
-            serial_number (int): The serial number of the foundry
-            token_scheme (TokenScheme): The Token scheme. Currently only a simple scheme is supported
-            unlock_conditions (List[UnlockCondition]): The unlock conditions for this output
-            amount (int, optional): Amount of base token
-            native_tokens (List[NativeToken], optional): The native token to add to the output
-            features  (List[Feature], optional): Features for this outputs
-            immutable_features (List[Feature], optional): Immutable features
+            serial_number: The serial number of the foundry.
+            token_scheme: The Token scheme. Currently only a simple scheme is supported.
+            unlock_conditions: The unlock conditions for this output.
+            amount: Amount of base token.
+            native_tokens: The native token to add to the output.
+            features: Features for this outputs.
+            immutable_features: Immutable features.
 
         Returns:
-            Output as dict
+            The foundry output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -318,15 +319,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build an NftOutput.
 
         Args:
-            nft_id (HexStr): Hex encoded nft id
-            unlock_conditions (List[UnlockCondition]): The unlock conditions for this output
-            amount (int, optional): Amount of base token
-            native_tokens (List[NativeToken], optional): The native tokens to add to the output
-            features (List[Feature], optional): Features for this outputs
-            immutable_features (List[Feature], optional): Immutable features
+            nft_id: Hex encoded nft id.
+            unlock_conditions: The unlock conditions for this output.
+            amount: Amount of base token.
+            native_tokens: The native tokens to add to the output.
+            features: Features for this outputs.
+            immutable_features: Immutable features.
 
         Returns:
-            Output as dict
+            The NFT output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -370,31 +371,20 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build and post a block.
 
         **Arguments**
-        account_index : int, optional
-            Account Index
-        coin_type : int, optional
-            Coin type. The CoinType enum can be used
-        custom_remainder_address : str, optional
-            Address to send the remainder funds to
-        data : HexStr, optional
-            Hex encoded data
-        initial_address_index : int, optional
-            Initial address index
-        input_range_start : int, optional
-            Start of the input range
-        input_range_end : int, optional
-            End of the input range
-        inputs : Array of Inputs, optional
-            Inputs to use
-        output : AddressAndAmount, optional
-            Address and amount to send to
-        outputs : Array of Outputs, optional
-            Outputs to use
-        tag : HexStr, optional
-            Hex encoded tag
+        account_index : TODO.
+        coin_type : TODO.
+        custom_remainder_address : Address to send the remainder funds to.
+        data : Hex encoded data.
+        initial_address_index : Initial address index.
+        input_range_start : Start of the input range.
+        input_range_end : End of the input range.
+        inputs : Inputs to use.
+        output : Address and amount to send to.
+        outputs : Outputs to use.
+        tag : Hex encoded tag.
 
         Returns:
-            Block as dict
+            The created block as dict.
         """
 
         options = dict(locals())
@@ -482,8 +472,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Prepare a transaction for signing.
 
         Args:
-            secret_manager (LedgerNanoSecretManager|MnemonicSecretManager|SeedSecretManager|StrongholdSecretManager, optional): One of the supported secret managers
-            options (TransactionOptions): The transaction options
+            secret_manager: One of the supported secret managers.
+            options: the transaction options.
         """
         return self._call_method('prepareTransaction', {
             'secretManager': secret_manager,
@@ -494,8 +484,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Sign a transaction.
 
         Args:
-            secret_manager (LedgerNanoSecretManager|MnemonicSecretManager|SeedSecretManager|StrongholdSecretManager): One of the supported secret managers.
-            prepared_transaction_data: a prepared transaction to sign
+            secret_manager: One of the supported secret managers.
+            prepared_transaction_data: a prepared transaction to sign.
         """
         return self._call_method('signTransaction', {
             'secretManager': secret_manager,
@@ -506,10 +496,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Submit a payload in a block.
 
         Args:
-            payload : the payload to submit
+            payload : The payload to submit.
 
         Returns:
-            Array of HexStr or Block.
+            List of HexStr or Block.
         """
         result = self._call_method('postBlockPayload', {
             'payload': payload
@@ -521,8 +511,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Listen to MQTT events.
 
         Args:
-            topics (List[str]): The topics to listen to
-            handler: a callback function for MQTT events
+            topics: The topics to listen to.
+            handler: A callback function for MQTT events.
         """
         listen_mqtt(self.handle, topics, handler)
 
@@ -530,7 +520,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Removes all listeners for the provided MQTT topics.
 
         Args:
-            topics (List[str]): The topics to stop listening to
+            topics: The topics to stop listening to.
         """
         return self._call_method('clearListeners', {
             'topics': topics

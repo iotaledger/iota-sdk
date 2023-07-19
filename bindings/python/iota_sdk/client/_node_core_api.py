@@ -19,7 +19,7 @@ class NodeCoreAPI():
         """ Get node health.
 
         Args:
-            url (str): the node's url
+            url: The node's url.
         """
         return self._call_method('getHealth', {
             'url': url
@@ -29,8 +29,8 @@ class NodeCoreAPI():
         """Get node info.
 
         Args:
-            url (str): the node's url
-            auth (optional): JWT or username/password authentication
+            url: The node's url.
+            auth: A JWT or username/password authentication object.
         """
         return from_dict(NodeInfo, self._call_method('getNodeInfo', {
             'url': url,
@@ -56,10 +56,10 @@ class NodeCoreAPI():
         """Post a block.
 
         Args:
-            block (Block): the block to post
+            block: The block to post.
 
         Returns:
-            HexStr: the block id of the posted block
+            The block id of the posted block.
         """
         return self._call_method('postBlock', {
             'block': block.__dict__
@@ -90,7 +90,7 @@ class NodeCoreAPI():
         """Post a block as raw bytes.
 
         Returns:
-            HexStr: the corresponding block id of the block
+            The corresponding block id of the block.
         """
         return self._call_method('postBlockRaw', {
             'blockBytes': block_bytes
@@ -100,7 +100,7 @@ class NodeCoreAPI():
         """Get the output corresponding to the given output id.
 
         Returns:
-            OutputWithMetadata: the output itself with its metadata
+            The output itself with its metadata.
         """
         return from_dict(OutputWithMetadata, self._call_method('getOutput', {
             'outputId': output_id
@@ -110,7 +110,7 @@ class NodeCoreAPI():
         """Get the output metadata corresponding to the given output id.
 
         Returns:
-            OutputMetadata: the output metadata
+            The output metadata.
         """
         return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
             'outputId': output_id
@@ -120,7 +120,7 @@ class NodeCoreAPI():
         """Get the milestone corresponding to the given milestone id.
 
         Returns:
-            MilestonePayload: the milestone payload
+            The milestone payload.
         """
         result = self._call_method('getMilestoneById', {
             'milestoneId': milestone_id
@@ -131,7 +131,7 @@ class NodeCoreAPI():
         """Get the raw bytes of the milestone corresponding to the given milestone id.
 
         Returns:
-            List[int]: the raw bytes of the milestone
+            The raw bytes of the milestone.
         """
         return self._call_method('getMilestoneByIdRaw', {
             'milestoneId': milestone_id
@@ -141,7 +141,7 @@ class NodeCoreAPI():
         """Get the milestone by the given milestone index.
 
         Returns:
-            MilestonePayload: the milestone payload
+            The milestone payload.
         """
         result = self._call_method('getMilestoneByIndex', {
             'index': index
@@ -152,7 +152,7 @@ class NodeCoreAPI():
         """Get the raw bytes of the milestone corresponding to the given milestone index.
 
         Returns:
-            List[int]: the raw bytes of the milestone
+            The raw bytes of the milestone.
         """
         return self._call_method('getMilestoneByIndexRaw', {
             'index': index
@@ -193,7 +193,7 @@ class NodeCoreAPI():
         """Returns the included block of the given transaction.
 
         Returns:
-            Block: the included block
+            The included block.
         """
         return Block.from_dict(self._call_method('getIncludedBlock', {
             'transactionId': transaction_id
@@ -204,7 +204,7 @@ class NodeCoreAPI():
         """Returns the metadata of the included block of the given transaction.
 
         Returns:
-            BlockMetadata: the metadata of the included block
+            The metadata of the included block.
         """
         return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
@@ -215,11 +215,11 @@ class NodeCoreAPI():
         """Extension method which provides request methods for plugins.
 
         Args:
-            base_plugin_path (str): the base path of the routes provided by the plugin
-            method (str): the HTTP method
-            endpoint (str): the endpoint to query provided by the plugin
-            query_params (optional): the parameters of the query
-            request (optional): the request object sent to the endpoint of the plugin
+            base_plugin_path: The base path of the routes provided by the plugin.
+            method: The HTTP method.
+            endpoint: The endpoint to query provided by the plugin.
+            query_params: The parameters of the query.
+            request: The request object sent to the endpoint of the plugin.
         """
         if query_params is None:
             query_params = []

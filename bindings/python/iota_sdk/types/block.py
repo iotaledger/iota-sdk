@@ -15,10 +15,10 @@ class Block:
     """Represent the object that nodes gossip around the network.
 
     Attributes:
-        protocolVersion (int): The protocol version at which this block was issued.
-        parents (List[HexStr]): The parents of this block.
-        nonce (int): The nonce of this block.
-        payload (Payload): The optional payload of this block.
+        protocolVersion: The protocol version with which this block was issued.
+        parents: The parents of this block.
+        nonce: The nonce of this block.
+        payload: The optional payload of this block.
     """
 
     protocolVersion: int
@@ -42,9 +42,9 @@ class LedgerInclusionState(str, Enum):
     """Represents whether a block is included in the ledger.
 
     Attributes:
-        noTransaction ('noTransaction'): The block does not contain a transaction.
-        included ('included'): The block contains an included transaction.
-        conflicting ('conflicting'): The block contains a conflicting transaction.
+        noTransaction: The block does not contain a transaction.
+        included: The block contains an included transaction.
+        conflicting: The block contains a conflicting transaction.
     """
     noTransaction = 'noTransaction'
     included = 'included'
@@ -91,15 +91,15 @@ class BlockMetadata:
     """Block Metadata.
 
     Attributes:
-        blockId (HexStr): The id of the block.
-        parents (List[HexStr]): The parents of the block.
-        isSolid (bool): Whether the block is solid.
-        referencedByMilestoneIndex (int): The milestone index referencing the block.
-        milestoneIndex (int): The milestone index if the block contains a milestone payload.
-        ledgerInclusionState (LedgerInclusionState): The ledger inclusion state of the block.
-        conflictReason (ConflictReason): The optional conflict reason of the block.
-        shouldPromote (bool): Whether the block should be promoted.
-        shouldReattach (bool): Whether the block should be reattached.
+        blockId: The id of the block.
+        parents: The parents of the block.
+        isSolid: Whether the block is solid.
+        referencedByMilestoneIndex: The milestone index referencing the block.
+        milestoneIndex: The milestone index if the block contains a milestone payload.
+        ledgerInclusionState: The ledger inclusion state of the block.
+        conflictReason: The optional conflict reason of the block.
+        shouldPromote: Whether the block should be promoted.
+        shouldReattach: Whether the block should be reattached.
     """
     blockId: HexStr
     parents: List[HexStr]

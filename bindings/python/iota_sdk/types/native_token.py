@@ -7,11 +7,11 @@ from dataclasses import dataclass
 
 @dataclass
 class NativeToken():
-    """Represents a native token.
+    """A native token.
 
     Attributes:
-        id (HexStr): The unique identifier of the token
-        amount (HexStr): The amount of the token
+        id: The unique identifier of the native token.
+        amount: The amount of native tokens.
     """
     id: HexStr
     amount: HexStr

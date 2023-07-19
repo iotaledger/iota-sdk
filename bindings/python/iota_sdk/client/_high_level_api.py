@@ -15,8 +15,8 @@ class Range:
     """Represents a range of address indexes.
 
     Attributes:
-        start: the start index of the address range
-        end: the end index of the address range
+        start: The start index of the address range.
+        end: The end index of the address range.
     """
 
     def __init__(self, start: int, end: int):
@@ -28,8 +28,8 @@ class GenerateAddressOptions():
     """Options for generating an address.
 
     Attributes:
-        internal: whether to generate an internal address
-        ledgerNanoPrompt: whether to display the generated address on Ledger Nano devices
+        internal: Whether to generate an internal address.
+        ledgerNanoPrompt: Whether to display the generated address on Ledger Nano devices.
     """
 
     def __init__(self, internal: bool, ledgerNanoPrompt: bool):
@@ -43,11 +43,11 @@ class GenerateAddressesOptions():
     """Options for generating addresses.
 
     Attributes:
-        coinType (CoinType): the coin type
-        range (Range): the range
-        bech32Hrp (str): the bech32 HRP
-        accountIndex (int, optional): the account index
-        options (GenerateAddressOptions, optional): generate address options
+        coinType: The type of coin.
+        range: The range of addresses to generate.
+        bech32Hrp: The bech32 HRP (human readable part) to use.
+        accountIndex: An account index.
+        options: An instance of `GenerateAddressOptions`.
     """
 
     def __init__(self, coinType: CoinType,
@@ -55,6 +55,15 @@ class GenerateAddressesOptions():
                  bech32Hrp: str,
                  accountIndex: Optional[int] = None,
                  options: Optional[GenerateAddressOptions] = None):
+        """Initialize GenerateAddressesOptions.
+
+        Args:
+            coinType: The type of coin.
+            range: The range of addresses to generate.
+            bech32Hrp: The bech32 HRP (human readable part) to use.
+            accountIndex: An account index.
+            options: An instance of `GenerateAddressOptions`.
+        """
         self.coinType = coinType
         self.range = Range(range.start, range.stop)
         self.bech32Hrp = bech32Hrp
@@ -79,10 +88,10 @@ class HighLevelAPI():
         """Fetch OutputWithMetadata from provided OutputIds (requests are sent in parallel).
 
         Args:
-            output_ids (List[OutputId]): list of output ids
+            output_ids: A list of output ids.
 
         Returns:
-            list of `OutputWithMetadata` objects
+            A list of corresponding `OutputWithMetadata` objects.
         """
         outputs = self._call_method('getOutputs', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
@@ -95,10 +104,10 @@ class HighLevelAPI():
         Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
 
         Args:
-            output_ids (List[OutputId]): list of output ids
+            output_ids: A list of output ids.
 
         Returns:
-            list of `OutputWithMetadata` objects
+            A list of corresponding `OutputWithMetadata` objects.
         """
         outputs = self._call_method('getOutputsIgnoreErrors', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
@@ -109,10 +118,10 @@ class HighLevelAPI():
         """Find all blocks by provided block IDs.
 
         Args:
-            block_ids (List[HexStr]): list of block ids
+            block_ids: A list of block ids.
 
         Returns:
-            list of `Block` objects
+            A list of corresponding `Block`s.
         """
         blocks = self._call_method('findBlocks', {
             'blockIds': block_ids
@@ -124,10 +133,10 @@ class HighLevelAPI():
         retried only if they are valid and haven't been confirmed for a while.
 
         Args:
-            block_id (HexStr): block id
+            block_id: A block id.
 
         Returns:
-            list of `HexStr` or `Block` objects
+            A list of `HexStr`s or `Block`s.
         """
         result = self._call_method('retry', {'blockId': block_id})
         result[1] = Block.from_dict(result[1])
@@ -140,12 +149,12 @@ class HighLevelAPI():
         position and additional reattached blocks.
 
         Args:
-            block_id (HexStr): block id
-            interval (int, optional): retry interval in seconds. Defaults to 5.
-            max_attempts (int, optional): maximum number of retries. Defaults to 40.
+            block_id: A block id.
+            interval: A retry interval in seconds. Defaults to 5.
+            max_attempts: A maximum number of retries. Defaults to 40.
 
         Returns:
-            list of a list of `HexStr` or `Block` objects
+            A list of lists of `HexStr`s or `Block`s.
         """
         result = self._call_method('retryUntilIncluded', {
             'blockId': block_id,
@@ -167,11 +176,11 @@ class HighLevelAPI():
         Returns the address to which the funds got consolidated, if any were available.
 
         Args:
-            secret_manager(LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager): a supported secret manager
-            generate_addresses_options(GenerateAddressesOptions): options to generate addresses
+            secret_manager: A supported secret manager.
+            generate_addresses_options: Options to generate addresses.
 
         Returns:
-            str: address to which the funds got consolidated
+            An address to which the funds got consolidated.
         """
         return self._call_method('consolidateFunds', {
             'secretManager': secret_manager,
@@ -182,8 +191,8 @@ class HighLevelAPI():
         """Function to find inputs from addresses for a provided amount(useful for offline signing).
 
         Args:
-            addresses(List[str]): list of included addresses
-            amount(int): amount to find
+            addresses: A list of included addresses.
+            amount: The amount to find inputs for.
         """
         return self._call_method('findInputs', {
             'addresses': addresses,
@@ -195,8 +204,8 @@ class HighLevelAPI():
         the request amount exceeds individual node limit.
 
         Args:
-            output_ids(List[OutputId]): list of included output ids
-            addresses(List[str]): list of included addresses
+            output_ids: A list of included output ids.
+            addresses: A list of included addresses.
         """
         return self._call_method('findOutputs', {
             'outputIds': output_ids,
@@ -208,10 +217,10 @@ class HighLevelAPI():
         haven't been confirmed for a while .
 
         Args:
-            block_id(HexStr): block id to reattach
+            block_id: A block id of a block that should be reattached.
 
         Returns:
-            list of `HexStr` or `Block` objects
+            The list of reattached blocks.
         """
         result = self._call_method('reattach', {
             'blockId': block_id
@@ -223,10 +232,10 @@ class HighLevelAPI():
         """Reattach a block without checking if it should be reattached.
 
         Args:
-            block_id(HexStr): block id to reattach
+            block_id: A block id of a block that should be reattached.
 
         Returns:
-            list of `HexStr` or `Block` objects
+            The list of reattached blocks.
         """
         result = self._call_method('reattachUnchecked', {
             'blockId': block_id
@@ -239,10 +248,10 @@ class HighLevelAPI():
         If not, the method should error out and should not allow unnecessary promotions.
 
         Args:
-            block_id(HexStr): block id to promote
+            block_id: A block id of a block that should be promoted.
 
         Returns:
-            list of `HexStr` or `Block` objects
+            The list of promoted blocks.
         """
         result = self._call_method('promote', {
             'blockId': block_id
@@ -254,10 +263,10 @@ class HighLevelAPI():
         """Promote a block without checking if it should be promoted.
 
         Args:
-            block_id(HexStr): block id to promote
+            block_id: A block id of a block that should be promoted.
 
         Returns:
-            list of `HexStr` or `Block` objects
+            The list of promoted blocks.
         """
         result = self._call_method('promoteUnchecked', {
             'blockId': block_id
