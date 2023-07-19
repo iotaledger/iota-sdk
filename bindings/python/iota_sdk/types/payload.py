@@ -10,13 +10,13 @@ from typing import Any, Optional, List
 
 
 class PayloadType(Enum):
-    """Type of block payload.
+    """Block payload types.
 
     Attributes:
-        TreasuryTransaction (4): TreasuryTransaction payload
-        TaggedData (5): TaggedData payload
-        Transaction (6): Transaction payload
-        Milestone (7): Milestone payload
+        TreasuryTransaction (4): A treasury transaction payload.
+        TaggedData (5): A tagged data payload.
+        Transaction (6): A transaction payload.
+        Milestone (7): A milestone payload.
     """
     TreasuryTransaction = 4
     TaggedData = 5
@@ -25,25 +25,18 @@ class PayloadType(Enum):
 
 
 class Payload():
-    """Base class for block payloads.
+    """Base class for `Block` payloads.
 
     Attributes:
-        type (int): Payload type
-        milestone (optional): Milestone payload
-        tagged_data (optional): TaggedData payload
-        transaction (optional): Transaction payload
-        treasury_transaction (optional): TreasuryTransaction payload
+        type: The type of payload.
+        milestone: A `MilestonePayload` object if it represents a milestone payload.
+        tagged_data: A `TaggedData` object if it represents a tagged data payload.
+        transaction: A `Transaction` object if it represents a transaction payload.
+        treasury_transaction: A `TreasuryTransaction` object if it represents a treasury transaction payload.
         
     """
     def __init__(self, type, milestone=None, tagged_data=None, transaction=None, treasury_transaction=None):
-        """Initialize a payload
-
-        Args:
-            type (int): Payload type
-            milestone (optional): Milestone payload
-            tagged_data (optional): TaggedData payload
-            transaction (optional): Transaction payload
-            treasury_transaction (optional): TreasuryTransaction payload
+        """Initialize a payload.
         """
         self.type = type
         self.milestone = milestone
@@ -70,19 +63,19 @@ class Payload():
 
 @dataclass
 class MilestonePayload(Payload):
-    """Represents a MilestonePayload. Inherits `Payload`.
+    """A milestone payload.
 
     Attributes:
-        index (int): corresponding milestone index
-        timestamp (int): corresponding milestone timestamp
-        protocolVersion (int): current protocol version
-        previousMilestoneId (HexStr): previous milestone id
-        parents (List[HexStr]): parents of the milestone 
-        inclusionMerkleRoot (HexStr): the inclusion merkle root
-        appliedMerkleRoot (HexStr): the applied merkle root
-        signatures (List[Ed25519Signature]): milestone signatures
-        options (List[Any], optional): milestone options
-        metadata (HexStr, optional): milestone metadata
+        index: The index of corresponding milestone.
+        timestamp: The timestamp of the corresponding milestone.
+        protocolVersion: The current protocol version.
+        previousMilestoneId: The ID of the previous milestone.
+        parents: The parents of the milestone.
+        inclusionMerkleRoot: The merkle root of all blocks included in the milestone cone.
+        appliedMerkleRoot: The merkle root of all applied transactions in the milestone cone.
+        signatures: The signatures that verify the milestone.
+        options: TODO.
+        metadata: TODO.
     """
     index: int
     timestamp: int
@@ -106,18 +99,14 @@ class MilestonePayload(Payload):
 
 
 class TaggedDataPayload(Payload):
-    """Represents a TaggedDataPayload. Inherits `Payload`.
+    """A tagged data payload.
 
     Attributes:
-        tag (HexStr): tag as hex string
-        data (HexStr): data as hex string
+        tag: The tag part of the tagged data payload.
+        data: The data part of the tagged data payload.
     """
     def __init__(self, tag: HexStr, data: HexStr):
-        """Initialize a TaggedDataPayload
-
-        Args:
-            tag (HexStr): tag as hex string
-            data (HexStr): data as hex string
+        """Initialize a tagged data payload.
         """
         self.tag = tag
         self.data = data
@@ -125,18 +114,14 @@ class TaggedDataPayload(Payload):
 
 
 class TransactionPayload(Payload):
-    """Represents a TransactionPayload. Inherits `Payload`.
+    """A transaction payload.
 
     Attributes:
-        essence (HexStr): transaction essence as hex string
-        unlocks (List[HexStr]): transaction unlocks as a list of hex strings
+        essence: The transaction essence.
+        unlocks: The unlocks of the transaction.
     """
     def __init__(self, essence, unlocks):
-        """Initialize a TransactionPayload
-
-        Args:
-            essence (HexStr): transaction essence as hex string
-            unlocks (List[HexStr]): transaction unlocks as a list of hex strings
+        """Initialize a transaction payload.
         """
         self.essence = essence
         self.unlocks = unlocks

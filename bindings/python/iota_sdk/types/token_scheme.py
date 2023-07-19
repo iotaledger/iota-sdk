@@ -7,13 +7,13 @@ from iota_sdk.types.common import HexStr
 
 @dataclass
 class TokenScheme():
-    """Represents a token scheme.
+    """A token scheme.
 
     Attributes:
-        mintedTokens (HexStr): Number of minted tokens as hex string
-        meltedTokens (HexStr): Number of melted tokens as hex string
-        maximumSupply (HexStr): The maximum supply as hex string
-        type (int): token scheme type
+        mintedTokens: The number of tokens that were minted.
+        meltedTokens: The number of tokens that were melted.
+        maximumSupply: The maximum supply of the token.
+        type: The type code of the token scheme.
     """
     mintedTokens: HexStr
     meltedTokens: HexStr

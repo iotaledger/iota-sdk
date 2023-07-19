@@ -9,7 +9,13 @@ from typing import Optional, List
 
 
 class RemainderValueStrategyCustomAddress:
-    """Custom Address remainder value strategy.
+    """Remainder value strategy for custom addresses.
+
+    Attributes:
+        address: TODO.
+        key_index: TODO.
+        internal: Whether the address is internal.
+        used: TODO.
     """
     def __init__(self,
                  address: str,
@@ -26,11 +32,11 @@ class RemainderValueStrategyCustomAddress:
 
 
 class RemainderValueStrategy(Enum):
-    """Remainder value stragegy options.
+    """Remainder value stragegy variants.
 
     Attributes:
-        ChangeAddress: Changes the address
-        ReuseAddress: Reuses the address
+        ChangeAddress: TODO.
+        ReuseAddress: TODO.
     """
     ChangeAddress = None,
     ReuseAddress = None,
@@ -43,13 +49,13 @@ class TransactionOptions():
     """Transaction options.
 
     Attributes:
-        remainder_value_strategy (RemainderValueStrategy | RemainderValueStrategyCustomAddress, optional): the remainder value strategy
-        tagged_data_payload (TaggedDataPayload, optional): a tagged data payload
-        custom_inputs (List[OutputId], optional): an array of custom inputs
-        mandatory_inputs (List[OutputId], optional): an array of mandatory inputs
-        burn (Burn, optional): some assets to burn in the transaction
-        note (str, optional): a note with the transaction
-        allow_micro_amount (bool, optional): whether micro amounts should be allowed in this transaction
+        remainder_value_strategy: TODO.
+        tagged_data_payload: TODO.
+        custom_inputs: TODO.
+        mandatory_inputs: TODO.
+        burn: TODO.
+        note: TODO.
+        allow_micro_amount: TODO.
     """
     def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
                  tagged_data_payload: Optional[TaggedDataPayload] = None,
@@ -58,16 +64,7 @@ class TransactionOptions():
                  burn: Optional[Burn] = None,
                  note: Optional[str] = None,
                  allow_micro_amount: Optional[bool] = None):
-        """Initialize TransactionOptions
-
-        Args:
-            remainder_value_strategy (RemainderValueStrategy | RemainderValueStrategyCustomAddress, optional): the remainder value strategy
-            tagged_data_payload (TaggedDataPayload, optional): a tagged data payload
-            custom_inputs (List[OutputId], optional): an array of custom inputs
-            mandatory_inputs (List[OutputId], optional): an array of mandatory inputs
-            burn (Burn, optional): some assets to burn in the transaction
-            note (str, optional): a note with the transaction
-            allow_micro_amount (bool, optional): whether micro amounts should be allowed in this transaction
+        """Initialize transaction options.
         """
         self.remainder_value_strategy = remainder_value_strategy
         self.tagged_data_payload = tagged_data_payload

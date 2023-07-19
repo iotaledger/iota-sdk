@@ -8,16 +8,16 @@ from dataclasses import dataclass
 
 
 class UnlockConditionType(IntEnum):
-    """The type of unlock condition.
+    """Unlock condition variants.
 
     Attributes:
-        Address (0): address unlock condition
-        StorageDepositReturn (1): storage deposit return unlock condition
-        Timelock (2): timelock unlock condition
-        Expiration (3): expiration unlock condition
-        StateControllerAddress (4): state controller address unlock condition
-        GovernorAddress (5): governor address unlock condition
-        ImmutableAliasAddress (6): immutable alias address unlock condition
+        Address (0): An address unlock condition.
+        StorageDepositReturn (1): A storage deposit return unlock condition.
+        Timelock (2): A timelock unlock condition.
+        Expiration (3): An expiration unlock condition.
+        StateControllerAddress (4): A state controller address unlock condition.
+        GovernorAddress (5): A governor address unlock condition.
+        ImmutableAliasAddress (6): An immutable alias address unlock condition.
     """
     Address = 0
     StorageDepositReturn = 1
@@ -33,7 +33,11 @@ class UnlockCondition():
     """Base class for unlock conditions.
 
     Attributes:
-        type (int): the type of unlock condition
+        type: The type code of the unlock condition.
+        amount: Some amount depending on the unlock condition type.
+        address: Some address depending on the unlock condition type.
+        unixTime: Some Unix timestamp depending on the unlock condition type.
+        return_address: An address to return funds to.
     """
 
     type: int
@@ -56,32 +60,25 @@ class UnlockCondition():
 
 class AddressUnlockCondition(UnlockCondition):
     """An address unlock condition.
-
-    Attributes:
-        address (Address): a regular address owned by an account
     """
     def __init__(self, address):
-        """Initialize an AddressUnlockCondition
+        """Initialize `Self`.
 
         Args:
-            address (Address): a regular address owned by an account
+            address: An address unlocked with a private key.
         """
         super().__init__(type=UnlockConditionType.Address, address=address)
 
 
 class StorageDepositReturnUnlockCondition(UnlockCondition):
-    """A storage deposit return unlock condition.
-
-    Attributes:
-        amount (int): amount of coins the consuming transaction should return
-        return_address (Address): the address to return the amount to
+    """A storage-deposit-return unlock condition.
     """
     def __init__(self, amount, return_address):
-        """Initialize a StorageDepositReturnUnlockCondition
+        """Initialize `Self`.
 
         Args:
-            amount (int): amount of coins the consuming transaction should return
-            return_address (Address): the address to return the amount to
+            amount: TODO.
+            return_address: The address to return the amount to.
         """
         super().__init__(type=UnlockConditionType.StorageDepositReturn,
                          amount=str(amount), returnAddress=return_address)
@@ -89,32 +86,25 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
 
 class TimelockUnlockCondition(UnlockCondition):
     """A timelock unlock condition.
-
-    Attributes:
-        unix_time (int): Unix timestamp until which an output cannot be unlocked/claimed
     """
     def __init__(self, unix_time):
-        """Initialize a TimelockUnlockCondition
+        """Initialize `Self`.
 
         Args:
-            unix_time (int): Unix timestamp until which an output cannot be unlocked/claimed
+            unix_time: The Unix timestamp marking the end of the timelock.
         """
         super().__init__(type=UnlockConditionType.Timelock, unixTime=unix_time)
 
 
 class ExpirationUnlockCondition(UnlockCondition):
     """An expiration unlock condition.
-
-    Attributes:
-        unix_time (int): Unix timestamp until which an output can be unlocked/claimed
-        return_address (Address): return address if the output was not unlocked/claimed in time
     """
     def __init__(self, unix_time, return_address):
         """Initialize an ExpirationUnlockCondition
 
         Args:
-            unix_time (int): Unix timestamp until which an output can be unlocked/claimed
-            return_address (Address): return address if the output was not unlocked/claimed in time
+            unix_time: Unix timestamp marking the expiration of the claim.
+            return_address: The return address if the output was not claimed in time.
         """
         super().__init__(type=UnlockConditionType.Expiration,
                          unixTime=unix_time, returnAddress=return_address)
@@ -124,10 +114,10 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     """A state controller address unlock condition.
     """
     def __init__(self, address):
-        """Initialize a StateControllerAddressUnlockCondition
+        """Initialize `Self`.
 
         Args:
-            address (Address): a state controller address
+            address: The state controller address.
         """
         super().__init__(type=UnlockConditionType.StateControllerAddress, address=address)
 
@@ -136,10 +126,10 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     """A governor address unlock condition.
     """
     def __init__(self, address):
-        """Initialize a GovernorAddressUnlockCondition
+        """Initialize `Self`.
 
         Args:
-            address (Address): a governor address
+            address: The governor address.
         """
         super().__init__(type=UnlockConditionType.GovernorAddress, address=address)
 
@@ -148,9 +138,9 @@ class ImmutableAliasAddressUnlockCondition(UnlockCondition):
     """An immutable alias address unlock condition.
     """
     def __init__(self, address):
-        """Initialize an ImmutableAliasAddressUnlockCondition
+        """Initialize `Self`.
 
         Args:
-            address (Address): an immutable alias address
+            address: TODO.
         """
         super().__init__(type=UnlockConditionType.ImmutableAliasAddress, address=address)

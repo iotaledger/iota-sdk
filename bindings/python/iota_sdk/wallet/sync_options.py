@@ -2,19 +2,19 @@ from typing import List, Optional
 
 
 class AccountSyncOptions():
-    """Sync options for Ed25519 addresses from the account.
+    """Sync options for addresses from the account.
 
     Attributes:
-        basic_outputs (bool, optional): whether to sync basic outputs
-        nft_outputs (bool, optional): whether to sync NFT outputs
-        alias_outputs (bool, optional): whether to sync alias outputs
+        basic_outputs: Whether to sync basic outputs.
+        nft_outputs: Whether to sync NFT outputs.
+        alias_outputs: whether to sync alias outputs.
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
                  alias_outputs: Optional[bool] = None):
-        """Initialize AccountSyncOptions.
+        """Initialize `Self`.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
@@ -25,10 +25,10 @@ class AliasSyncOptions():
     """Sync options for addresses from alias outputs.
 
     Attributes:
-        basic_outputs (bool, optional): whether to sync basic outputs
-        nft_outputs (bool, optional): whether to sync NFT outputs
-        alias_outputs (bool, optional): whether to sync alias outputs
-        foundry_outputs (bool, optional): whether to sync foundry outputs
+        basic_outputs: Whether to sync basic outputs.
+        nft_outputs: Whether to sync NFT outputs.
+        alias_outputs: Whether to sync alias outputs.
+        foundry_outputs: Whether to sync foundry outputs.
     """
 
     def __init__(self,
@@ -36,7 +36,7 @@ class AliasSyncOptions():
                  nft_outputs: Optional[bool] = None,
                  alias_outputs: Optional[bool] = None,
                  foundry_outputs: Optional[bool] = None):
-        """Initialize AliasSyncOptions.
+        """Initialize `Self`.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
@@ -48,16 +48,16 @@ class NftSyncOptions():
     """Sync options for addresses from NFT outputs.
 
     Attributes:
-        basic_outputs (bool, optional): whether to sync basic outputs
-        nft_outputs (bool, optional): whether to sync NFT outputs
-        alias_outputs (bool, optional): whether to sync alias outputs
+        basic_outputs: Whether to sync basic outputs.
+        nft_outputs: Whether to sync NFT outputs.
+        alias_outputs: Whether to sync alias outputs.
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
                  alias_outputs: Optional[bool] = None):
-        """Initialize NftSyncOptions.
+        """Initialize `Self`.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
@@ -68,33 +68,37 @@ class SyncOptions():
     """The synchronization options.
 
     **Attributes**
-    addresses : List[str], optional
-        Specific Bech32 encoded addresses of the account to sync, if addresses are provided, then `address_start_index` will be ignored
-    address_start_index : int, optional
-        Address index from which to start syncing addresses. 0 by default, using a higher index will be faster because
-        addresses with a lower index will be skipped, but could result in a wrong balance for that reason
-    address_start_index_internal : int, optional
-        Address index from which to start syncing internal addresses. 0 by default, using a higher index will be faster
-        because addresses with a lower index will be skipped, but could result in a wrong balance for that reasonfor internal addresses
-    force_syncing : bool, optional
-        Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
-        milestone and calling it twice "at the same time" will not return new data
-        When this to true, we will sync anyways, even if it's called 0ms after the las sync finished.
-    sync_incoming_transactions : bool, optional
-        Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
-        pruned.
-    sync_pending_transactions : bool, optional
+    addresses :
+        Specific Bech32 encoded addresses of the account to sync. If addresses are provided,
+        then `address_start_index` will be ignored.
+    address_start_index :
+        Address index from which to start syncing addresses. 0 by default.
+        Using a higher index will be faster because addresses with a lower index will be skipped,
+        but this could result in a wrong balance for that reason.
+    address_start_index_internal :
+        Address index from which to start syncing internal addresses. 0 by default.
+        Using a higher index will be faster because addresses with a lower index will be skipped,
+        but this could result in a wrong balance for internal addresses for that reason.
+    force_syncing :
+        Usually syncing is skipped if it's called in between 200ms, because there can only be new
+        changes every milestone and calling it twice "at the same time" will not return new data.
+        When this is set to true, we will sync anyways, even if it's called 0ms after the last sync
+        finished.
+    sync_incoming_transactions :
+        Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained
+        if it has been pruned.
+    sync_pending_transactions :
         Checks pending transactions and promotes/reattaches them if necessary.
-    account : AccountSyncOptions, optional
-        Specifies what outputs should be synced for the ed25519 addresses from the account.
-    alias : AliasSyncOptions, optional
+    account :
+        Specifies what outputs should be synced for the Ed25519 addresses from the account.
+    alias :
         Specifies what outputs should be synced for the address of an alias output.
-    nft : NftSyncOptions, optional
+    nft :
         Specifies what outputs should be synced for the address of an nft output.
-    sync_only_most_basic_outputs : bool, optional
-        Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
-        `account`, `alias` and `nft` options.
-    sync_native_token_foundries : bool, optional
+    sync_only_most_basic_outputs :
+        Specifies if only basic outputs with just an address unlock condition should be synced.
+        This will overwrite the `account`, `alias` and `nft` options.
+    sync_native_token_foundries :
         Sync native token foundries, so their metadata can be returned in the balance.
     """
 
@@ -110,7 +114,7 @@ class SyncOptions():
                  nft: Optional[NftSyncOptions] = None,
                  sync_only_most_basic_outputs: Optional[bool] = None,
                  sync_native_token_foundries: Optional[bool] = None):
-        """Initialize SyncOptions.
+        """Initialize `Self`.
         """
         self.addresses = addresses
         self.addressStartIndex = address_start_index

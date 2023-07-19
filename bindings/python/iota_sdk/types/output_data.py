@@ -15,14 +15,14 @@ class OutputData():
     """Output data.
 
     Attributes:
-        outputId (HexStr): the associated output ID
-        metadata (OutputMetadata): metadata associated with the output
-        output (Output): the output itself
-        isSpent (bool): whether the output is spent
-        address (Address): the address associated with the output
-        networkId (str): the network ID associated with the output
-        remainder (bool): whether the output is a remainder
-        chain (List[int], optional): array of chain state indexes 
+        outputId: With the output data corresponding output ID.
+        metadata: With the output corresponding metadata.
+        output: The output object itself.
+        isSpent: Whether the output is spent.
+        address: The address associated with the output.
+        networkId: The network ID the output belongs to.
+        remainder: Whether the output represents a remainder amount.
+        chain: A list of chain state indexes.
     """
 
     outputId: HexStr

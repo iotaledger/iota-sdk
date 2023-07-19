@@ -13,14 +13,14 @@ from iota_sdk.types.unlock_condition import UnlockCondition
 
 
 class OutputType(IntEnum):
-    """Output type.
+    """Output types.
 
     Attributes:
-        Treasury (2): Treasury outpu.
-        Basic (3): Basic output
-        Alias (4): Alias output
-        Foundry (5): Foundry output
-        Nft (6): NFT output
+        Treasury (2): A treasury output.
+        Basic (3): A basic output.
+        Alias (4): An alias output.
+        Foundry (5): A foundry output.
+        Nft (6): An NFT output.
     """
     Treasury = 2
     Basic = 3
@@ -31,37 +31,36 @@ class OutputType(IntEnum):
 
 @dataclass
 class Output():
-    """Output.
+    """An output in a UTXO ledger.
 
     **Attributes**
-    type : int
-        Output type
-    amount : str
-        Output amount as string
-    unlockConditions : List[UnlockCondition]
-        Unlock conditions
-    aliasId : HexStr, optional
-        Alias ID
-    nftId : HexStr, optional
-        NFT ID
-    stateIndex : int, optional
-        State index
-    stateMetadata : HexStr, optional
-        State metadata
-    foundryCounter : int, optional
-        Foundry counter
-    features : List[Feature], optional
-        Features
-    nativeTokens : List[NativeToken], optional
-        Native tokens
-    immutableFeatures : List[Feature], optional
-        Immutable features
-    serialNumber : int, optional 
-        Serial number
-    tokenScheme : TokenScheme, optional
-        Token scheme
+    type :
+        The type of output.
+    amount :
+        The base coin amount of the output.
+    unlockConditions :
+        The conditions to unlock the output.
+    aliasId :
+        The alias ID if it's an alias output.
+    nftId :
+        The NFT ID if it's an NFT output.
+    stateIndex :
+        TODO.
+    stateMetadata :
+        TODO.
+    foundryCounter :
+        TODO.
+    features :
+        TODO.
+    nativeTokens :
+        TODO.
+    immutableFeatures :
+        TODO.
+    serialNumber :
+        TODO.
+    tokenScheme :
+        TODO.
     """
-
     type: int
     amount: str
     unlockConditions: List[UnlockCondition]
@@ -101,18 +100,17 @@ class OutputMetadata:
     """Metadata about an output.
 
     Attributes:
-        blockId (HexStr): the corresponding block ID in which the output appeared
-        transactionId (HexStr): the transaction ID where that output was created
-        outputIndex (int): the index of the output within the corresponding transaction
-        isSpent (bool): whether the output is spent
-        milestoneIndexBooked (int): the milestone index where that output was created
-        milestoneTimestampBooked (int): the milestone timestamp where that output was created
-        ledgerIndex (int): the ledger index at which the output appeared
-        milestoneIndexSpent (int, optional): the milestone index spent where that output was spent
-        milestoneTimestampSpent (int, optional): the milestone timestamp spent where that output was spent
-        transactionIdSpent (HexStr, optional): the transaction ID that spent the output
+        blockId: The ID of the block in which the output appeared in.
+        transactionId: The ID of the transaction in which the output was created.
+        outputIndex: The index of the output within the corresponding transaction.
+        isSpent: Whether the output is already spent.
+        milestoneIndexBooked: The index of the milestone which booked/created the output.
+        milestoneTimestampBooked: The timestamp of the milestone which booked/created the output.
+        ledgerIndex: The current ledger index.
+        milestoneIndexSpent: The index of the milestone which spent the output.
+        milestoneTimestampSpent: The timestamp of the milestone which spent the output.
+        transactionIdSpent: The ID of the transaction that spent the output.
     """
-
     blockId: HexStr
     transactionId: HexStr
     outputIndex: int
@@ -138,8 +136,8 @@ class OutputWithMetadata:
     """An output with its metadata.
 
     Attributes:
-        metadata (OutputMetadata): metadata about the output
-        output (Output): the output itself
+        metadata: The `OutputMetadata` object that belongs to `output`.
+        output: An `Output` object.
     """
 
     metadata: OutputMetadata

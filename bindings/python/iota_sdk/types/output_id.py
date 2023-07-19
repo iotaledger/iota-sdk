@@ -8,9 +8,9 @@ class OutputId(dict):
     """Represents an output ID.
 
     Attributes:
-        output_id (HexStr): The unique id of an output.
-        transaction_id (HexStr): The transaction id associated with the output.
-        output_index (int): The index of the output within the transaction.
+        output_id: The unique id of an output.
+        transaction_id: The transaction id associated with the output.
+        output_index: The index of the output within a transaction.
 
     """
     def __init__(self, transaction_id: HexStr, output_index: int):

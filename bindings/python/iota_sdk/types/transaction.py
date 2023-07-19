@@ -11,13 +11,13 @@ from enum import Enum
 
 
 class InclusionState(str, Enum):
-    """The inclusion state of a transaction.
+    """Inclusion state variants of a transaction.
 
     Attributes:
-        Pending: The transaction is pending
-        Confirmed: The transaction is confirmed
-        Conflicting: The transaction is conflicting
-        UnknownPruned: The transaction is unknowned or already pruned
+        Pending: The transaction is pending.
+        Confirmed: The transaction is confirmed.
+        Conflicting: The transaction is conflicting.
+        UnknownPruned: The transaction is unknown or already pruned.
     """
     Pending = 'pending'
     Confirmed = 'confirmed'
@@ -27,18 +27,18 @@ class InclusionState(str, Enum):
 
 @dataclass
 class Transaction:
-    """Represents a transaction with metadata.
+    """A transaction with some metadata.
 
     Attributes:
-        payload (TransactionPayload): the transaction payload
-        inclusionState (InclusionState): inclusion state of the transaction
-        timestamp (int): the timestamp of the transaction
-        transactionId (HexStr): the corresponding transaction
-        networkId (int): the network this transaction belongs to
-        incoming (bool): whether the transaction is incoming
-        inputs (List[OutputWithMetadata]): the inputs of the transaction
-        note (str, optional): A note with the transaction
-        blockId (HexStr, optional): the block that contains the transaction payload
+        payload: The transaction payload.
+        inclusionState: The inclusion state of the transaction.
+        timestamp: The timestamp of the transaction.
+        transactionId: The ID of the corresponding transaction.
+        networkId: The ID of the network this transaction was issued in.
+        incoming: TODO.
+        inputs: The inputs of the transaction.
+        note: A note attached to the transaction.
+        blockId: The ID of the block that holds the transaction.
     """
     payload: TransactionPayload
     inclusionState: InclusionState
