@@ -11,14 +11,13 @@ use iota_sdk::{
         block::{
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent, RentStructure,
+                dto::{OutputBuilderAmountDto, OutputDto},
+                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
                 Payload,
             },
-            protocol::dto::ProtocolParametersDto,
             Block, BlockDto,
         },
     },
@@ -201,28 +200,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Ok
         }
         ClientMethod::GetNode => Response::Node(client.get_node().await?),
-        ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?.into()),
+        ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetMinPowScore => Response::MinPowScore(client.get_min_pow_score().await?),
         ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval().await),
-        ClientMethod::GetProtocolParameters => {
-            let params = client.get_protocol_parameters().await?;
-            let protocol_response = ProtocolParametersDto {
-                protocol_version: params.protocol_version(),
-                network_name: params.network_name().to_string(),
-                bech32_hrp: *params.bech32_hrp(),
-                min_pow_score: params.min_pow_score(),
-                below_max_depth: params.below_max_depth(),
-                rent_structure: RentStructure::new(
-                    params.rent_structure().byte_cost(),
-                    params.rent_structure().byte_factor_key(),
-                    params.rent_structure().byte_factor_data(),
-                ),
-                token_supply: params.token_supply().to_string(),
-            };
-            Response::ProtocolParameters(protocol_response)
-        }
+        ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::GetLocalPow => Response::Bool(client.get_local_pow().await),
         ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow().await),
         ClientMethod::PrepareTransaction {
@@ -312,7 +295,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(OutputWithMetadataResponse::from)?,
         ),
         ClientMethod::GetOutputMetadata { output_id } => {
-            Response::OutputMetadata(OutputMetadataDto::from(&client.get_output_metadata(&output_id).await?))
+            Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
         ClientMethod::GetMilestoneById { milestone_id } => Response::Milestone(MilestonePayloadDto::from(
             &client.get_milestone_by_id(&milestone_id).await?,

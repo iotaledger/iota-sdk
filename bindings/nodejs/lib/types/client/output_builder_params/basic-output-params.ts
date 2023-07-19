@@ -9,7 +9,7 @@ export interface BasicOutputBuilderParams {
     /**
      * If not provided, minimum storage deposit will be used
      */
-    amount?: string;
+    amount?: bigint | string;
     /**
      * The native tokens to be held by the output.
      */

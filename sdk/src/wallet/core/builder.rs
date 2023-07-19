@@ -29,6 +29,7 @@ use crate::{
 
 /// Builder for the wallet.
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
     pub(crate) client_options: Option<ClientOptions>,
     pub(crate) coin_type: Option<u32>,
@@ -180,6 +181,7 @@ where
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.get_accounts().await?;
+
         // Check against potential account coin type before saving the wallet data
         #[cfg(feature = "storage")]
         if let Some(account) = accounts.first() {
@@ -267,7 +269,7 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
         for transaction_id in account.pending_transactions() {
             if let Some(tx) = account.transactions().get(transaction_id) {
                 for input in &tx.inputs {
-                    used_inputs.insert(input.metadata.output_id()?);
+                    used_inputs.insert(*input.metadata.output_id());
                 }
             }
         }
@@ -280,4 +282,41 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
         })
     }
     Ok(())
+}
+
+pub(crate) mod dto {
+    use serde::Deserialize;
+
+    use super::*;
+    use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
+
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct WalletBuilderDto {
+        pub(crate) client_options: Option<ClientOptions>,
+        pub(crate) coin_type: Option<u32>,
+        #[cfg(feature = "storage")]
+        pub(crate) storage_options: Option<StorageOptions>,
+    }
+
+    impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
+        fn from(value: WalletBuilderDto) -> Self {
+            Self {
+                client_options: value.client_options,
+                coin_type: value.coin_type,
+                #[cfg(feature = "storage")]
+                storage_options: value.storage_options,
+                secret_manager: None,
+            }
+        }
+    }
+
+    impl<'de, S: SecretManage> Deserialize<'de> for WalletBuilder<S> {
+        fn deserialize<D>(d: D) -> Result<Self, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            WalletBuilderDto::deserialize(d).map(Into::into)
+        }
+    }
 }

@@ -31,19 +31,11 @@ async function run() {
         //TODO: Replace with the address of your choice!
         const address =
             'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
-        const amount = '1';
+        const amount = BigInt(1);
 
-        const transaction = await account.send(
-            [
-                {
-                    address,
-                    amount,
-                },
-            ],
-            {
-                allowMicroAmount: true,
-            },
-        );
+        const transaction = await account.send(amount, address, {
+            allowMicroAmount: true,
+        });
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, StrongholdSecretManager, init_logger, CoinType
+from iota_sdk import Wallet, StrongholdSecretManager, init_logger, CoinType, ClientOptions
 from dotenv import load_dotenv
 import json
 import os
@@ -17,9 +17,7 @@ log_config = {
 init_logger(json.dumps(log_config))
 
 node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
-client_options = {
-    'nodes': [node_url],
-}
+client_options = ClientOptions(nodes=[node_url])
 
 # Shimmer coin type
 coin_type = CoinType.SHIMMER

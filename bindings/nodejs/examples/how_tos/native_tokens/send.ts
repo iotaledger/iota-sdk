@@ -5,8 +5,8 @@ import { SendNativeTokensParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
-// The native token amount to send, `10` hex encoded
-const SEND_NATIVE_TOKEN_AMOUNT = '0xA';
+// The native token amount to send.
+const SEND_NATIVE_TOKEN_AMOUNT = BigInt(10);
 // The address to send the tokens to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
@@ -51,7 +51,7 @@ async function run() {
                     `Couldn't find native token '${tokenId}' in the account`,
                 );
             }
-            console.log(`Balance before sending:`, parseInt(token.available));
+            console.log(`Balance before sending: ${token.available}`);
 
             const transaction = await account
                 .prepareSendNativeTokens(outputs)
@@ -77,7 +77,7 @@ async function run() {
                     `Couldn't find native token '${tokenId}' in the account`,
                 );
             }
-            console.log(`Balance after sending:`, parseInt(token.available));
+            console.log(`Balance after sending: ${token.available}`);
         }
     } catch (error) {
         console.log('Error: ', error);

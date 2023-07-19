@@ -110,7 +110,7 @@ async fn send_amount_custom_input() -> Result<()> {
         .await?;
 
     assert_eq!(tx.inputs.len(), 1);
-    assert_eq!(tx.inputs.first().unwrap().metadata.output_id()?, custom_input.output_id);
+    assert_eq!(tx.inputs.first().unwrap().metadata.output_id(), &custom_input.output_id);
 
     tear_down(storage_path)
 }

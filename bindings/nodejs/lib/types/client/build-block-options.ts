@@ -31,5 +31,5 @@ export interface IBuildBlockOptions {
 /** Address with base coin amount */
 export interface IClientBlockBuilderOutputAddress {
     address: string;
-    amount: string;
+    amount: bigint | string;
 }

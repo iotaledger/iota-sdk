@@ -40,7 +40,7 @@ params = [SendParams(
 options = {
     'mandatoryInputs': [input],
 }
-transaction = account.send(params, options)
+transaction = account.send_with_params(params, options)
 account.retry_transaction_until_included(transaction.transactionId, None, None)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transactionId}')

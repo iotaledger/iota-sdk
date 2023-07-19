@@ -7,7 +7,8 @@ WebAssembly (Wasm) bindings for TypeScript/JavaScript to the IOTA SDK library.
 The IOTA SDK library also offers dedicated [Node.js bindings](../nodejs). The differences with this package are outlined
 below.
 
-**NOTE: Use the Node.js bindings if you can. The Wasm bindings are more portable and exist to support browser environments.**
+**NOTE: Use the Node.js bindings if you can. The Wasm bindings are more portable and exist to support browser
+environments.**
 
 |              |   Wasm bindings   |   Node.js bindings    |
 |:-------------|:-----------------:|:---------------------:|
@@ -18,7 +19,8 @@ below.
 | Rocksdb      |         ❌         |          ✔️           |
 | Stronghold   |         ❌         |          ✔️           |
 
-* The Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your platform.
+* The Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your
+  platform.
 
 ## Requirements
 
@@ -113,6 +115,12 @@ A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupj
 
 ## Client Usage
 
+The following example creates a [`Client`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Client/)
+instance connected to
+the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
+calling [`Client.getInfo()`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Client/#getinfo),
+and then print the node's information.
+
 ```javascript
 const {Client, initLogger} = require('@iota/sdk-wasm/node');
 
@@ -136,6 +144,14 @@ run().then(() => process.exit());
 ```
 
 ## Wallet Usage
+
+The following example will create a
+new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Account/)
+that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
+[`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
+by calling
+the [`Wallet.createAccount(data)`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/#createaccount)
+function.
 
 ```javascript
 import init, {Wallet, CoinType} from "@iota/sdk-wasm/web";
@@ -166,3 +182,8 @@ init().then(() => {
 //
 // init("./static/iota_sdk_wasm_bg.wasm").then(...)
 ```
+
+## API Reference
+
+If you are using the Wasm binding, you use the Node.js API reference in the
+[IOTA Wiki](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/api_ref/).

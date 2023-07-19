@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::bip39::Mnemonic;
-#[cfg(feature = "stronghold")]
-use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 #[cfg(feature = "storage")]
 use iota_sdk::{
     client::constants::SHIMMER_COIN_TYPE,
@@ -16,7 +14,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::address::{Bech32Address, ToBech32Ext},
+    types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -171,71 +169,6 @@ async fn iota_coin_type() -> Result<()> {
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
-
-    tear_down(storage_path)
-}
-
-#[tokio::test]
-async fn wallet_address_generation() -> Result<()> {
-    let storage_path = "test-storage/wallet_address_generation";
-    setup(storage_path)?;
-
-    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
-    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
-
-    #[allow(unused_mut)]
-    let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_client_options(client_options)
-        .with_coin_type(IOTA_COIN_TYPE);
-
-    #[cfg(feature = "storage")]
-    {
-        wallet_builder = wallet_builder.with_storage_path(storage_path);
-    }
-    let wallet = wallet_builder.finish().await?;
-
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
-
-    assert_eq!(
-        address.to_bech32_unchecked("smr"),
-        // Address generated with bip32 path: [44, 4218, 0, 0, 0]
-        "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
-    );
-
-    drop(wallet);
-
-    #[cfg(feature = "stronghold")]
-    {
-        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
-
-        let secret_manager = StrongholdSecretManager::builder()
-            .password("some_hopefully_secure_password".to_owned())
-            .build("test-storage/wallet_address_generation/test.stronghold")?;
-        secret_manager
-            .store_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_string()))
-            .await?;
-
-        let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
-        #[allow(unused_mut)]
-        let mut wallet_builder = Wallet::builder()
-            .with_secret_manager(SecretManager::Stronghold(secret_manager))
-            .with_client_options(client_options)
-            .with_coin_type(IOTA_COIN_TYPE);
-        #[cfg(feature = "storage")]
-        {
-            wallet_builder = wallet_builder.with_storage_path(storage_path);
-        }
-        let wallet = wallet_builder.finish().await?;
-
-        let address = wallet.generate_ed25519_address(0, 0, None).await?;
-
-        assert_eq!(
-            address.to_bech32_unchecked("smr"),
-            // Address generated with bip32 path: [44, 4218, 0, 0, 0]
-            "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
-        );
-    }
 
     tear_down(storage_path)
 }

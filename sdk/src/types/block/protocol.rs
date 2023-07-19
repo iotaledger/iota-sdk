@@ -11,30 +11,30 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct ProtocolParameters {
     // The version of the protocol running.
-    #[cfg_attr(feature = "serde", serde(alias = "protocolVersion"))]
+    #[cfg_attr(feature = "serde", serde(rename = "version"))]
     protocol_version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
-    #[cfg_attr(feature = "serde", serde(alias = "networkName"))]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
     network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
-    #[cfg_attr(feature = "serde", serde(alias = "bech32Hrp"))]
     bech32_hrp: Hrp,
     // The minimum pow score of the network.
-    #[cfg_attr(feature = "serde", serde(alias = "minPowScore"))]
     min_pow_score: u32,
     // The below max depth parameter of the network.
-    #[cfg_attr(feature = "serde", serde(alias = "belowMaxDepth"))]
     below_max_depth: u8,
     // The rent structure used by given node/network.
-    #[cfg_attr(feature = "serde", serde(alias = "rentStructure"))]
     rent_structure: RentStructure,
     // TokenSupply defines the current token supply on the network.
-    #[cfg_attr(feature = "serde", serde(alias = "tokenSupply"))]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     token_supply: u64,
 }
 
@@ -138,47 +138,4 @@ pub fn protocol_parameters() -> ProtocolParameters {
         1_813_620_509_061_365,
     )
     .unwrap()
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-
-    use super::*;
-    use crate::types::block::{output::RentStructure, Error};
-
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[cfg_attr(
-        feature = "serde",
-        derive(serde::Serialize, serde::Deserialize),
-        serde(rename_all = "camelCase")
-    )]
-    pub struct ProtocolParametersDto {
-        #[cfg_attr(feature = "serde", serde(rename = "version"))]
-        pub protocol_version: u8,
-        pub network_name: String,
-        pub bech32_hrp: Hrp,
-        pub min_pow_score: u32,
-        pub below_max_depth: u8,
-        pub rent_structure: RentStructure,
-        pub token_supply: String,
-    }
-
-    impl TryFrom<ProtocolParametersDto> for ProtocolParameters {
-        type Error = Error;
-
-        fn try_from(value: ProtocolParametersDto) -> Result<Self, Self::Error> {
-            Self::new(
-                value.protocol_version,
-                value.network_name,
-                value.bech32_hrp,
-                value.min_pow_score,
-                value.below_max_depth,
-                value.rent_structure,
-                value
-                    .token_supply
-                    .parse()
-                    .map_err(|_| Error::InvalidField("token_supply"))?,
-            )
-        }
-    }
 }

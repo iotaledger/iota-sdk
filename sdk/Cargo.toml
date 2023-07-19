@@ -25,7 +25,7 @@ derive_more = { version = "0.99.17", default-features = false, features = [ "fro
 getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.14.0", default-features = false, features = [ "ahash", "inline-more" ] }
 hex = { version = "0.4.3", default-features = false }
-iota-crypto = { version = "0.22.2", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
+iota-crypto = { version = "0.23.0", default-features = false, features = [ "blake2b", "ed25519", "secp256k1", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
 itertools = { version = "0.11.0", default-features = false, features = [ "use_alloc" ] }
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
@@ -43,7 +43,7 @@ futures = { version = "0.3.28", default-features = false, features = [ "thread-p
 heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-iota_stronghold = { version = "2.0.0-rc.1", default-features = false, optional = true }
+iota_stronghold = { version = "2.0.0-rc.2", default-features = false, optional = true }
 log = { version = "0.4.19", default-features = false, optional = true }
 num_cpus = { version = "1.16.0", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }

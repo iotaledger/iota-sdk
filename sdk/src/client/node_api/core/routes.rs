@@ -19,7 +19,7 @@ use crate::{
             ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
         },
         block::{
-            output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
                 milestone::{dto::MilestonePayloadDto, MilestoneId, MilestonePayload},
                 transaction::TransactionId,
@@ -273,9 +273,8 @@ impl ClientInner {
 
         let token_supply = self.get_token_supply().await?;
         let output = Output::try_from_dto(response.output, token_supply)?;
-        let metadata = OutputMetadata::try_from(response.metadata)?;
 
-        Ok(OutputWithMetadata::new(output, metadata))
+        Ok(OutputWithMetadata::new(output, response.metadata))
     }
 
     /// Finds an output, as raw bytes, by its OutputId (TransactionId + output_index).
@@ -295,14 +294,11 @@ impl ClientInner {
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
-        let metadata = self
-            .node_manager
+        self.node_manager
             .read()
             .await
-            .get_request::<OutputMetadataDto>(path, None, self.get_timeout().await, false, true)
-            .await?;
-
-        Ok(OutputMetadata::try_from(metadata)?)
+            .get_request::<OutputMetadata>(path, None, self.get_timeout().await, false, true)
+            .await
     }
 
     /// Gets all stored receipts.

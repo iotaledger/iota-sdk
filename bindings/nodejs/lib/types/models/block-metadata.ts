@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ConflictReason } from './conflict-reason';
-import type { HexEncodedString } from '../utils/hex-encoded-types';
+import type { HexEncodedString } from '../utils/hex-encoding';
 import type { LedgerInclusionState } from './ledger-inclusion-state';
 /**
  * Response from the metadata endpoint.

@@ -22,12 +22,10 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             address::{dto::AddressDto, Address},
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                AliasTransition, Output, OutputId, OutputMetadata,
-            },
+            output::{dto::OutputDto, AliasTransition, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
-            BlockId,
+            protocol::ProtocolParameters,
+            BlockId, Error as BlockError,
         },
     },
     utils::serde::bip44::option_bip44,
@@ -35,8 +33,7 @@ use crate::{
 };
 
 /// An output with metadata
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
@@ -51,7 +48,6 @@ pub struct OutputData {
     pub network_id: u64,
     pub remainder: bool,
     // bip44 path
-    #[serde(with = "option_bip44")]
     pub chain: Option<Bip44>,
 }
 
@@ -75,8 +71,7 @@ impl OutputData {
                 .find(|a| a.address.inner == unlock_address)
             {
                 Some(
-                    Bip44::new()
-                        .with_coin_type(account.coin_type)
+                    Bip44::new(account.coin_type)
                         .with_account(account.index)
                         .with_change(address.internal as _)
                         .with_address_index(address.key_index),
@@ -91,7 +86,7 @@ impl OutputData {
 
         Ok(Some(InputSigningData {
             output: self.output.clone(),
-            output_metadata: self.metadata.clone(),
+            output_metadata: self.metadata,
             chain,
         }))
     }
@@ -104,7 +99,7 @@ pub struct OutputDataDto {
     /// The output id
     pub output_id: OutputId,
     /// The metadata of the output
-    pub metadata: OutputMetadataDto,
+    pub metadata: OutputMetadata,
     /// The actual Output
     pub output: OutputDto,
     /// If an output is spent
@@ -124,7 +119,7 @@ impl From<&OutputData> for OutputDataDto {
     fn from(value: &OutputData) -> Self {
         Self {
             output_id: value.output_id,
-            metadata: OutputMetadataDto::from(&value.metadata),
+            metadata: value.metadata,
             output: OutputDto::from(&value.output),
             is_spent: value.is_spent,
             address: AddressDto::from(&value.address),
@@ -132,6 +127,40 @@ impl From<&OutputData> for OutputDataDto {
             remainder: value.remainder,
             chain: value.chain,
         }
+    }
+}
+
+impl OutputData {
+    pub fn try_from_dto(dto: OutputDataDto, token_supply: u64) -> Result<Self, BlockError> {
+        Ok(Self {
+            output_id: dto.output_id,
+            metadata: dto.metadata,
+            output: Output::try_from_dto(dto.output, token_supply)?,
+            is_spent: dto.is_spent,
+            address: dto.address.try_into()?,
+            network_id: dto
+                .network_id
+                .parse()
+                .map_err(|_| BlockError::InvalidField("network id"))?,
+            remainder: dto.remainder,
+            chain: dto.chain,
+        })
+    }
+
+    pub fn try_from_dto_unverified(dto: OutputDataDto) -> Result<Self, BlockError> {
+        Ok(Self {
+            output_id: dto.output_id,
+            metadata: dto.metadata,
+            output: Output::try_from_dto_unverified(dto.output)?,
+            is_spent: dto.is_spent,
+            address: dto.address.try_into()?,
+            network_id: dto
+                .network_id
+                .parse()
+                .map_err(|_| BlockError::InvalidField("network id"))?,
+            remainder: dto.remainder,
+            chain: dto.chain,
+        })
     }
 }
 
@@ -164,6 +193,7 @@ pub struct TransactionDto {
     /// The transaction payload
     pub payload: TransactionPayloadDto,
     /// BlockId when it got sent to the Tangle
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<BlockId>,
     /// Inclusion state of the transaction
     pub inclusion_state: InclusionState,
@@ -174,6 +204,7 @@ pub struct TransactionDto {
     pub network_id: String,
     /// If the transaction was created by the wallet or if it was sent by someone else and is incoming
     pub incoming: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
     pub inputs: Vec<OutputWithMetadataResponse>,
 }
@@ -191,6 +222,48 @@ impl From<&Transaction> for TransactionDto {
             note: value.note.clone(),
             inputs: value.inputs.clone(),
         }
+    }
+}
+
+impl Transaction {
+    pub fn try_from_dto(dto: TransactionDto, protocol_parameters: &ProtocolParameters) -> Result<Self, BlockError> {
+        Ok(Self {
+            payload: TransactionPayload::try_from_dto(dto.payload, protocol_parameters)?,
+            block_id: dto.block_id,
+            inclusion_state: dto.inclusion_state,
+            timestamp: dto
+                .timestamp
+                .parse()
+                .map_err(|_| BlockError::InvalidField("timestamp"))?,
+            transaction_id: dto.transaction_id,
+            network_id: dto
+                .network_id
+                .parse()
+                .map_err(|_| BlockError::InvalidField("network id"))?,
+            incoming: dto.incoming,
+            note: dto.note,
+            inputs: dto.inputs,
+        })
+    }
+
+    pub fn try_from_dto_unverified(dto: TransactionDto) -> Result<Self, BlockError> {
+        Ok(Self {
+            payload: TransactionPayload::try_from_dto_unverified(dto.payload)?,
+            block_id: dto.block_id,
+            inclusion_state: dto.inclusion_state,
+            timestamp: dto
+                .timestamp
+                .parse()
+                .map_err(|_| BlockError::InvalidField("timestamp"))?,
+            transaction_id: dto.transaction_id,
+            network_id: dto
+                .network_id
+                .parse()
+                .map_err(|_| BlockError::InvalidField("network id"))?,
+            incoming: dto.incoming,
+            note: dto.note,
+            inputs: dto.inputs,
+        })
     }
 }
 

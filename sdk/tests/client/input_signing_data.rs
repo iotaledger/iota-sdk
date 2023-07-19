@@ -21,7 +21,7 @@ use iota_sdk::{
 fn input_signing_data_conversion() {
     let protocol_parameters = protocol_parameters();
 
-    let bip44_chain = Bip44::new().with_coin_type(SHIMMER_COIN_TYPE);
+    let bip44_chain = Bip44::new(SHIMMER_COIN_TYPE);
 
     let output = BasicOutput::build_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(

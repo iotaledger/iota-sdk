@@ -6,7 +6,7 @@ use std::sync::atomic::Ordering;
 use crate::{
     client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
     wallet::{
-        account::AccountDetails,
+        account::{AccountDetails, AccountDetailsDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
         ClientOptions, Wallet,
     },
@@ -36,7 +36,9 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
         let mut serialized_accounts = Vec::new();
         for account in self.accounts.read().await.iter() {
-            serialized_accounts.push(serde_json::to_value(&*account.details().await)?);
+            serialized_accounts.push(serde_json::to_value(&AccountDetailsDto::from(
+                &*account.details().await,
+            ))?);
         }
 
         stronghold.set(ACCOUNTS_KEY, &serialized_accounts).await?;
@@ -76,7 +78,15 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
 
     // Get accounts
-    let restored_accounts = stronghold.get(ACCOUNTS_KEY).await?;
+    let restored_accounts = stronghold
+        .get::<Vec<AccountDetailsDto>>(ACCOUNTS_KEY)
+        .await?
+        .map(|v| {
+            v.into_iter()
+                .map(AccountDetails::try_from_dto_unverified)
+                .collect::<Result<Vec<_>, _>>()
+        })
+        .transpose()?;
 
     Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
 }

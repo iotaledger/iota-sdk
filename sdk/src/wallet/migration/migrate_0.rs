@@ -9,28 +9,6 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
-fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
-    for output_data in account["outputs"]
-        .as_object_mut()
-        .ok_or(Error::Storage("malformatted outputs".to_owned()))?
-        .values_mut()
-    {
-        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-    }
-
-    for output_data in account["unspentOutputs"]
-        .as_object_mut()
-        .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
-        .values_mut()
-    {
-        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-    }
-
-    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
-
-    Ok(())
-}
-
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 0;
@@ -83,7 +61,29 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
     }
 }
 
-mod types {
+fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
+    for output_data in account["outputs"]
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted outputs".to_owned()))?
+        .values_mut()
+    {
+        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+    }
+
+    for output_data in account["unspentOutputs"]
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
+        .values_mut()
+    {
+        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+    }
+
+    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+
+    Ok(())
+}
+
+pub(super) mod types {
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
@@ -129,28 +129,37 @@ mod types {
         };
     }
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-    pub struct TransactionId([u8; Self::LENGTH]);
+    macro_rules! impl_id {
+        ($type:ident, $len:literal) => {
+            #[derive(Copy, Clone, PartialEq, Eq, Hash)]
+            pub struct $type([u8; Self::LENGTH]);
 
-    impl TransactionId {
-        pub const LENGTH: usize = 32;
+            impl $type {
+                pub const LENGTH: usize = $len;
+            }
+
+            impl core::str::FromStr for $type {
+                type Err = Error;
+
+                fn from_str(s: &str) -> Result<Self, Self::Err> {
+                    Ok(Self(prefix_hex::decode(s).map_err(Error::Hex)?))
+                }
+            }
+
+            impl core::fmt::Display for $type {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    write!(f, "{}", prefix_hex::encode(self.0))
+                }
+            }
+
+            string_serde_impl!($type);
+        };
     }
 
-    impl core::str::FromStr for TransactionId {
-        type Err = Error;
+    pub(crate) use impl_id;
+    pub(crate) use string_serde_impl;
 
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
-            Ok(Self(prefix_hex::decode(s).map_err(Error::Hex)?))
-        }
-    }
-
-    impl core::fmt::Display for TransactionId {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            write!(f, "{}", prefix_hex::encode(self.0))
-        }
-    }
-
-    string_serde_impl!(TransactionId);
+    impl_id!(TransactionId, 32);
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]

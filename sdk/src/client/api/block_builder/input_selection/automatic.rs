@@ -176,8 +176,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
                                 chain: Some(
-                                    Bip44::new()
-                                        .with_coin_type(self.coin_type)
+                                    Bip44::new(self.coin_type)
                                         .with_account(account_index)
                                         .with_change(internal as _)
                                         .with_address_index(address_index),

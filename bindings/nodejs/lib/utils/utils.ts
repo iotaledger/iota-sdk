@@ -15,8 +15,8 @@ import {
     TokenSchemeType,
     Output,
     IRent,
-    HexEncodedAmount,
     OutputId,
+    hexToBigInt,
 } from '../types';
 import { AliasId, BlockId, FoundryId, TokenId } from '../types/block/id';
 
@@ -121,17 +121,15 @@ export class Utils {
      * @param rentStructure Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(
-        output: Output,
-        rentStructure: IRent,
-    ): HexEncodedAmount {
-        return callUtilsMethod({
+    static computeStorageDeposit(output: Output, rentStructure: IRent): bigint {
+        const depositHex = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
                 rentStructure,
             },
         });
+        return hexToBigInt(depositHex);
     }
 
     /**

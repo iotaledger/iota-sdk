@@ -7,7 +7,7 @@ use zeroize::Zeroizing;
 use crate::{
     client::storage::StorageAdapter,
     wallet::{
-        account::{AccountDetails, SyncOptions},
+        account::{AccountDetails, AccountDetailsDto, SyncOptions},
         migration::migrate,
         storage::{constants::*, DynStorageAdapter, Storage},
     },
@@ -68,8 +68,9 @@ impl StorageManager {
             .filter_map(|account_index| async {
                 let account_index = *account_index;
                 let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}");
-                self.get(&key).await.transpose()
+                self.get::<AccountDetailsDto>(&key).await.transpose()
             })
+            .map(|res| AccountDetails::try_from_dto_unverified(res?))
             .try_collect::<Vec<_>>()
             .await
     }
@@ -81,8 +82,11 @@ impl StorageManager {
         }
 
         self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await?;
-        self.set(&format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()), account)
-            .await
+        self.set(
+            &format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()),
+            &AccountDetailsDto::from(account),
+        )
+        .await
     }
 
     pub async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {

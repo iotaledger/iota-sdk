@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from iota_sdk import Client, utf8_to_hex, hex_to_utf8
 from dotenv import load_dotenv
 import json
@@ -17,9 +18,9 @@ block = client.build_and_post_block(
 print(f'Data block sent: {os.environ["EXPLORER_URL"]}/block/{block[0]}')
 
 block = client.get_block_data(block[0])
-print(f'Block data: {json.dumps(block, indent=4)}')
+print(f'Block data: {json.dumps(asdict(block), indent=4)}')
 
-payload = block['payload']
+payload = block.payload
 
 if payload and 'data' in payload and payload['data']:
     print(f'Decoded data: { hex_to_utf8(payload["data"]) }')

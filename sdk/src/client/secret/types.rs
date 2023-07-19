@@ -10,10 +10,7 @@ use crate::{
     client::Result,
     types::block::{
         address::Address,
-        output::{
-            dto::{OutputDto, OutputMetadataDto},
-            Output, OutputId, OutputMetadata,
-        },
+        output::{dto::OutputDto, Output, OutputId, OutputMetadata},
     },
     utils::serde::bip44::option_bip44,
 };
@@ -177,7 +174,7 @@ pub struct InputSigningDataDto {
     /// The output
     pub output: OutputDto,
     /// The output metadata
-    pub output_metadata: OutputMetadataDto,
+    pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
     #[serde(with = "option_bip44")]
     pub chain: Option<Bip44>,
@@ -188,7 +185,7 @@ impl InputSigningData {
     pub fn try_from_dto(input: InputSigningDataDto, token_supply: u64) -> Result<Self> {
         Ok(Self {
             output: Output::try_from_dto(input.output, token_supply)?,
-            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
+            output_metadata: input.output_metadata,
             chain: input.chain,
         })
     }
@@ -196,7 +193,7 @@ impl InputSigningData {
     pub fn try_from_dto_unverified(input: InputSigningDataDto) -> Result<Self> {
         Ok(Self {
             output: Output::try_from_dto_unverified(input.output)?,
-            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
+            output_metadata: input.output_metadata,
             chain: input.chain,
         })
     }
@@ -206,7 +203,7 @@ impl From<&InputSigningData> for InputSigningDataDto {
     fn from(input: &InputSigningData) -> Self {
         Self {
             output: OutputDto::from(&input.output),
-            output_metadata: OutputMetadataDto::from(&input.output_metadata),
+            output_metadata: input.output_metadata,
             chain: input.chain,
         }
     }
