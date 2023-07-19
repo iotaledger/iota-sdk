@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0-rc.0 - 2023-07-DD
 
+### Added
+
+- `wallet::Error::InvalidVotingPower` variant;
+
 ### Changed
 
 - Migrated storage types field casing to uniform camelCase;
