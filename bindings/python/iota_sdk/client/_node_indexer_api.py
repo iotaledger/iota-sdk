@@ -139,7 +139,7 @@ class NodeIndexerAPI():
         return self.OutputIdsResponse(response)
 
     def alias_output_id(self, alias_id: HexStr) -> OutputId:
-        """Fetch alias output ID from the given query parameters.
+        """Fetch alias output ID from the given alias ID.
 
         Returns:
             The output ID of the alias output.
@@ -163,7 +163,7 @@ class NodeIndexerAPI():
         return self.OutputIdsResponse(response)
 
     def nft_output_id(self, nft_id: HexStr) -> OutputId:
-        """Fetch NFT output ID from the given query parameters.
+        """Fetch NFT output ID from the given NFT ID.
 
         Returns:
             The output ID of the NFT output.
@@ -187,7 +187,7 @@ class NodeIndexerAPI():
         return self.OutputIdsResponse(response)
 
     def foundry_output_id(self, foundry_id: HexStr) -> OutputId:
-        """Fetch foundry Output ID from the given query parameters.
+        """Fetch foundry Output ID from the given foundry ID.
 
         Returns:
             The output ID of the foundry output.
