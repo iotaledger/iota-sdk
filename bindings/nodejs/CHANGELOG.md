@@ -29,11 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
 
+### Removed
+- `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
+
 ### Fixed
 
 - Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput`;
 - `Utils::parseBech32Address` now converts the string into a proper `Address`;
-- `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
+
 
 ## 1.0.0-rc.2 - 2023-07-05
 
