@@ -45,21 +45,21 @@ class Output():
     nftId :
         The NFT ID if it's an NFT output.
     stateIndex :
-        TODO.
+        A counter that must increase by 1 every time the alias is state transitioned.
     stateMetadata :
-        TODO.
+        Metadata that can only be changed by the state controller.
     foundryCounter :
-        TODO.
+        A counter that denotes the number of foundries created by this alias account.
     features :
-        TODO.
+        Features that add utility to the output but do not impose unlocking conditions.
     nativeTokens :
-        TODO.
+        Native tokens added to the new output.
     immutableFeatures :
-        TODO.
+        Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
     serialNumber :
-        TODO.
+        The serial number of the foundry with respect to the controlling alias.
     tokenScheme :
-        TODO.
+        Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
     """
     type: int
     amount: str

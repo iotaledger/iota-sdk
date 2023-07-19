@@ -77,7 +77,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         """Initialize `Self`.
 
         Args:
-            amount: TODO.
+            amount: The amount of base coins the consuming transaction should deposit to `return_address`.
             return_address: The address to return the amount to.
         """
         super().__init__(type=UnlockConditionType.StorageDepositReturn,
@@ -117,7 +117,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
         """Initialize `Self`.
 
         Args:
-            address: The state controller address.
+            address: The state controller address that owns the output.
         """
         super().__init__(type=UnlockConditionType.StateControllerAddress, address=address)
 
@@ -129,7 +129,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
         """Initialize `Self`.
 
         Args:
-            address: The governor address.
+            address: The governor address that owns the output.
         """
         super().__init__(type=UnlockConditionType.GovernorAddress, address=address)
 
@@ -141,6 +141,6 @@ class ImmutableAliasAddressUnlockCondition(UnlockCondition):
         """Initialize `Self`.
 
         Args:
-            address: TODO.
+            address: The permanent alias address that owns this output.
         """
         super().__init__(type=UnlockConditionType.ImmutableAliasAddress, address=address)

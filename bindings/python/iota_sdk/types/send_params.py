@@ -76,7 +76,7 @@ class CreateNativeTokenParams():
         circulatingSupply: The circulating supply of the native token.
         maximumSupply: The maximum supply of the native token.
         foundryMetadata: The foundry metadata of the native token.
-        aliasId: TODO.
+        aliasId: The ID of the corresponding alias.
     """
     circulatingSupply: int
     maximumSupply: int
@@ -97,12 +97,12 @@ class MintNftParams():
     """Parameters for minting NFTs.
 
     Attributes:
-        address: TODO.
-        sender: TODO.
-        metadata: TODO.
-        tag: TODO.
-        issuer: TODO.
-        immutableMetadata: TODO.
+        address: A Bech32 encoded address to which the NFT will be minted. Default will use the first address of the account.
+        sender: An NFT sender feature.
+        metadata: An NFT metadata feature.
+        tag: An NFT tag feature.
+        issuer: An NFT issuer feature.
+        immutableMetadata: An NFT immutable metadata feature.
     """
     address: Optional[str] = None
     sender: Optional[str] = None
@@ -117,10 +117,10 @@ class CreateAliasOutputParams():
     """Parameters for creating aliases.
 
     Attributes:
-        address: TODO.
-        immutableMetadata: TODO.
-        metadata: TODO.
-        stateMetadata: TODO.
+        address: A Bech32 encoded address which will control the alias. Default will use the first address of the account.
+        immutableMetadata: Immutable alias metadata.
+        metadata: Alias metadata.
+        stateMetadata: Alias state metadata.
     """
     address: str
     immutableMetadata: Optional[str] = None

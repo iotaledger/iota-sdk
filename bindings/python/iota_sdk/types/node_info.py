@@ -56,9 +56,9 @@ class RentStructure:
     """Rent structure for the storage deposit.
 
     Attributes:
-        vByteCost: TODO.
-        vByteFactorData: TODO.
-        vByteFactorKey: TODO.
+        vByteCost: The cost of base coin per virtual byte.
+        vByteFactorData: The weight factor used for key fields in the outputs.
+        vByteFactorKey: The weight factor used for data fields in the outputs.
     """
     vByteCost: int
     vByteFactorData: int
@@ -70,12 +70,12 @@ class NodeInfoProtocol:
     """Protocol info.
 
     Attributes:
-        networkName: TODO.
-        bech32Hrp: TODO.
-        tokenSupply: TODO.
-        version: TODO.
-        minPowScore: TODO.
-        rentStructure: TODO.
+        networkName: The human friendly name of the network.
+        bech32Hrp: The HRP prefix used for Bech32 addresses in the network.
+        tokenSupply: TokenSupply defines the current token supply on the network.
+        version: The version of the protocol running.
+        minPowScore: The minimum pow score of the network.
+        rentStructure: The rent structure used by given node/network.
     """
     networkName: str
     bech32Hrp: str

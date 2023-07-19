@@ -181,15 +181,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build an AliasOutput.
 
         Args:
-            alias_id: TODO.
-            unlock_conditions: TODO.
-            amount: TODO.
-            native_tokens: TODO.
-            state_index: TODO.
-            state_metadata: TODO.
-            foundry_counter: TODO.
-            features: TODO.
-            immutable_features: TODO.
+            alias_id: A unique ID for the new alias.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            state_index: A counter that must increase by 1 every time the alias is state transitioned.
+            state_metadata: Metadata that can only be changed by the state controller.
+            foundry_counter: A counter that denotes the number of foundries created by this alias account.
+            features: A list of features.
+            immutable_features: A list of immutable features.
 
         Returns: 
             The alias output as dict.
@@ -231,10 +231,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build a BasicOutput.
 
         Args:
-            unlock_conditions: The unlock conditions for this output.
-            amount: TODO.
-            native_tokens: TODO.
-            features: TODO.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            features: Features that add utility to the output but do not impose unlocking conditions.
 
         Returns:
             The basic output as dict.
@@ -271,13 +271,13 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build a FoundryOutput.
 
         Args:
-            serial_number: The serial number of the foundry.
-            token_scheme: The Token scheme. Currently only a simple scheme is supported.
-            unlock_conditions: The unlock conditions for this output.
-            amount: Amount of base token.
-            native_tokens: The native token to add to the output.
-            features: Features for this outputs.
-            immutable_features: Immutable features.
+            serial_number: The serial number of the foundry with respect to the controlling alias.
+            token_scheme: Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            features: Features that add utility to the output but do not impose unlocking conditions.
+            immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
 
         Returns:
             The foundry output as dict.
@@ -319,12 +319,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build an NftOutput.
 
         Args:
-            nft_id: Hex encoded nft id.
-            unlock_conditions: The unlock conditions for this output.
-            amount: Amount of base token.
-            native_tokens: The native tokens to add to the output.
-            features: Features for this outputs.
-            immutable_features: Immutable features.
+            nft_id: A unique ID for the new NFT.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            features: Features that add utility to the output but do not impose unlocking conditions.
+            immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
 
         Returns:
             The NFT output as dict.
@@ -371,8 +371,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build and post a block.
 
         **Arguments**
-        account_index : TODO.
-        coin_type : TODO.
+        account_index : The account index to issue the block with.
+        coin_type : The type of base coin.
         custom_remainder_address : Address to send the remainder funds to.
         data : Hex encoded data.
         initial_address_index : Initial address index.

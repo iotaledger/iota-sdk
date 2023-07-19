@@ -74,8 +74,8 @@ class MilestonePayload(Payload):
         inclusionMerkleRoot: The merkle root of all blocks included in the milestone cone.
         appliedMerkleRoot: The merkle root of all applied transactions in the milestone cone.
         signatures: The signatures that verify the milestone.
-        options: TODO.
-        metadata: TODO.
+        options: The milestone options (e.g. receipt milestone option).
+        metadata: Some hex encoded milestone metadata.
     """
     index: int
     timestamp: int

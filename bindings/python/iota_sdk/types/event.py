@@ -9,11 +9,11 @@ class WalletEventType(IntEnum):
     
     Attributes:
         ConsolidationRequired (0): Consolidation is required.
-        LedgerAddressGeneration (1): Nano Ledger is generating addresses. TODO.
+        LedgerAddressGeneration (1): Nano Ledger has generated an address.
         NewOutput (2): A new output was created.
         SpentOutput (3): An output was spent.
         TransactionInclusion (4): A transaction was included into the ledger.
-        TransactionProgress (5): TODO.
+        TransactionProgress (5): A progress update while submitting a transaction.
     """
     ConsolidationRequired = 0,
     LedgerAddressGeneration = 1,

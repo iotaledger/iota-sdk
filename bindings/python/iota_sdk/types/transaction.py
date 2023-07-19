@@ -35,7 +35,7 @@ class Transaction:
         timestamp: The timestamp of the transaction.
         transactionId: The ID of the corresponding transaction.
         networkId: The ID of the network this transaction was issued in.
-        incoming: TODO.
+        incoming: Indicates whether the transaction was created by the wallet or whether it was sent by someone else and is incoming.
         inputs: The inputs of the transaction.
         note: A note attached to the transaction.
         blockId: The ID of the block that holds the transaction.

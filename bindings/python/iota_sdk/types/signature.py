@@ -21,7 +21,13 @@ class Ed25519Signature():
 
 @dataclass
 class Bip44():
-    """TODO.
+    """A BIP44 chain.
+
+    Attributes:
+        coinType: The coin type segment.
+        account: The account segment.
+        change: The change segment.
+        addressIndex: The address index segment.
     """
     coinType: int = CoinType.IOTA
     account: int = 0
