@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Split `Account::send` into `send` and `sendWithParams`;
 
 ### Removed
+
 - `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
 
 ### Fixed
