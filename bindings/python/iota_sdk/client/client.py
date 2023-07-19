@@ -7,6 +7,7 @@ from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, Node, AddressAndAmount
 from iota_sdk.types.feature import Feature
@@ -334,7 +335,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict()
+            native_tokens = [native_token.__dict__
                              for native_token in native_tokens]
 
         if features:
@@ -466,7 +467,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('unhealthyNodes')
 
-    def prepare_transaction(self, secret_manager=None, options=None):
+    def prepare_transaction(self,
+                            secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
+                                                     SeedSecretManager | StrongholdSecretManager] = None,
+                            options=None):
         """Prepare a transaction for signing.
 
         Args:
