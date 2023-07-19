@@ -183,8 +183,8 @@ class TransactionProgressWalletEvent extends WalletEvent {
     }
 
     /**
-    * Returns the progress.
-    */
+     * Returns the progress.
+     */
     getProgress(): TransactionProgress {
         return this.progress;
     }
