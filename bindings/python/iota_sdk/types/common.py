@@ -35,7 +35,7 @@ class Node():
             jwt: A JWT token for authentication.
             username: A username for basic authentication.
             password: A password for basic authentication.
-            disabled: TODO.
+            disabled: Whether the node should be used for API requests or not.
         """
         self.url = url
         self.jwt = jwt

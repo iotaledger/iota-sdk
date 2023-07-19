@@ -35,7 +35,7 @@ class OutputId(dict):
         """Creates an `OutputId` instance from a `HexStr`.
 
         Args:
-            output_id (HexStr): The unique id of an output as a hex string.
+            output_id: The unique id of an output as a hex string.
 
         Returns:
             OutputId: The unique id of an output.
