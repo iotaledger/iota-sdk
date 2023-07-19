@@ -246,6 +246,11 @@ jobs:
 
           tar -czf prebuilds/@iota/$TAR_NAME build/Release/index.node
 
-      - name: Upload prebuild to GitHub release
-        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix iota-sdk-nodejs-v
-        working-directory: bindings/nodejs
+      - name: Upload prebuild to Github release
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md
+          files: bindings/nodejs/prebuilds/@iota/*
+          tag_name: iota-sdk-nodejs-v${npm pkg get version --workspaces=false | tr -d \"}
+          prerelease: true
