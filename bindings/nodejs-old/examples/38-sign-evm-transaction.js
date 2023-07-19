@@ -8,17 +8,18 @@ const Web3 = require('web3')
 const { Common } = require('@ethereumjs/common')
 const { Transaction } = require('@ethereumjs/tx')
 const { RLP } = require('@ethereumjs/rlp')
-const { fromRpcSig, bufArrToArr } = require('@ethereumjs/util')
+const { fromRpcSig } = require('@ethereumjs/util')
 
 const { ERC_20_ABI } = require('./erc-20.abi')
 
-const RPC_ENDPOINT = 'https://rpc.sepolia.org'
-// const RPC_ENDPOINT = 'https://json-rpc.evm.testnet.shimmer.network'
-const RECIPIENT_ACCOUNT_ADDRESS = '0xcBCd6D8659Ed1998A452335AE53904dc0Af1c99b'
-const TOKEN_CONTRACT_ADDRESS = '0x68194a729C2450ad26072b3D33ADaCbcef39D574'
-const CHAIN_ID = 11155111
+const RPC_ENDPOINT = 'https://json-rpc.evm.testnet.shimmer.network'
+const RECIPIENT_ACCOUNT_ADDRESS = '0x2fF33407c26E36c32cA50A4e63ce661b2eeED3dd'
+const CHAIN_ID = 1072
 const COIN_TYPE = 60
-const AMOUNT = 1000000 // Since we don't want to transfer ETH
+
+// fUSDC address. Tokens are available through: https://deepr.finance/faucet
+const TOKEN_CONTRACT_ADDRESS = '0x01ee95C34AeCAE1948aB618e467A6806b25fe7e4'
+const AMOUNT = 1e6 //fUSDC has 6 decimals
 
 const TX_OPTIONS = { 
     common: Common.custom({
@@ -47,7 +48,7 @@ async function run() {
 
         // 2. Create messageToSign by external signer
         const message = transaction.getMessageToSign(false)
-        const serializedMessage = Buffer.from(RLP.encode(bufArrToArr(message)))
+        const serializedMessage = Buffer.from(RLP.encode(message))
         const messageToSign = '0x' + serializedMessage.toString('hex')
         
         // 3. Sign message with external signer
@@ -69,7 +70,7 @@ async function run() {
         // 7. Send signed transaction
         const hexSignedTransaction = getHexEncodedTransaction(signedTransaction)
         const sentTransaction = await provider.eth.sendSignedTransaction(hexSignedTransaction)
-        console.log('sent Transaction', sentTransaction)
+        console.log('Sent Transaction: ', sentTransaction)
 
         // Testing: check sender address matches
         assert.strictEqual(senderAddress, signedTransaction.getSenderAddress().toString(), 'Mismatch in addresses', )   
@@ -117,7 +118,7 @@ async function createTxData(provider, address) {
     const gasLimit = provider.utils.toHex(estimatedGas)
 
     const to = TOKEN_CONTRACT_ADDRESS
-    const value = provider.utils.toHex(0)
+    const value = 0
     
     return { nonce, gasPrice, gasLimit, to, value, data }
 }
