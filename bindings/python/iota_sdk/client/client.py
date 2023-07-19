@@ -191,7 +191,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             features: A list of features.
             immutable_features: A list of immutable features.
 
-        Returns: 
+        Returns:
             The alias output as dict.
         """
 

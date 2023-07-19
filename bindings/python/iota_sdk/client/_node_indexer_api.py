@@ -17,9 +17,9 @@ class NodeIndexerAPI():
         """Query parameters
 
         **Attributes:**
-        address : 
+        address :
             Bech32-encoded address that should be searched for.
-        alias_address : 
+        alias_address :
             Filter foundry outputs based on bech32-encoded address of the controlling alias.
         created_after :
             Returns outputs that were created after a certain Unix timestamp.

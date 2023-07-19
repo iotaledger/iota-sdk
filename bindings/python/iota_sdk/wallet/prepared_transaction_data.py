@@ -43,7 +43,7 @@ class PreparedTransactionData:
     def send(self) -> Transaction:
         """Send a transaction. Internally just calls `sign_and_submit_transaction`.
 
-        Returns: 
+        Returns:
             The transaction after it has been signed and submitted.
         """
         return self.sign_and_submit_transaction()
@@ -57,7 +57,7 @@ class PreparedTransactionData:
     def sign_and_submit_transaction(self) -> Transaction:
         """Sign and submit a transaction using prepared transaction data.
 
-        Returns: 
+        Returns:
             The transaction after it has been signed and submitted.
         """
         return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
