@@ -88,12 +88,12 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
 class NewOutputWalletEvent extends WalletEvent {
     private output: OutputData;
     private transaction?: ITransactionPayload;
-    private transactionInputs?: [IOutputResponse];
+    private transactionInputs?: IOutputResponse[];
 
     constructor(
         output: OutputData,
         transaction?: ITransactionPayload,
-        transactionInputs?: [IOutputResponse],
+        transactionInputs?: IOutputResponse[],
     ) {
         super(WalletEventType.NewOutput);
         this.output = output;
@@ -118,7 +118,7 @@ class NewOutputWalletEvent extends WalletEvent {
     /**
      * The transaction inputs.
      */
-    getTransactionInputs(): [IOutputResponse] | undefined {
+    getTransactionInputs(): IOutputResponse[] | undefined {
         return this.transactionInputs;
     }
 }

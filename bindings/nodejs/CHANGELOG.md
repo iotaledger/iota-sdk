@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
 - Properties in classes `NewOutputWalletEvent`, `SpentOutputWalletEvent` and `TransactionInclusionWalletEvent` are now private;
+- Change type of `transactionInputs` from `[OutputResponse]` `to OutputResponse[]` in class `NewOutputWalletEvent`;
 
 ### Removed
 
