@@ -6,7 +6,7 @@ import os
 load_dotenv()
 
 # In this example we will prepare an output with an address and expiration
-# unlock condition and send it
+# unlock condition and send it.
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
