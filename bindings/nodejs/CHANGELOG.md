@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Super class of `NftOutput` from `StateMetadataOutput` to `ImmutableFeaturesOutput`;
 - `Utils::parseBech32Address` now converts the string into a proper `Address`;
+- `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
 
 ## 1.0.0-rc.2 - 2023-07-05
 
