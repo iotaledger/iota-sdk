@@ -12,7 +12,12 @@ import {
     Secp256k1EcdsaSignature,
     SecretManagerType,
 } from '../types/secret_manager';
-import { Ed25519Signature, HexEncodedString, TransactionPayload, Unlock } from '../types';
+import {
+    Ed25519Signature,
+    HexEncodedString,
+    TransactionPayload,
+    Unlock,
+} from '../types';
 
 /** The SecretManager to interact with nodes. */
 export class SecretManager {
