@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PreparedTransactionData, SignedTransactionData, InputSigningData, RemainderData`;
 - `UtxoChanges`;
 - `TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput`;
-- `SimpleTokenScheme`;
+- `TokenScheme`;
 - `Signature`;
 
 ### Changed
