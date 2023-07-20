@@ -5,9 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.payload import Payload
+from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
 from iota_sdk.utils import Utils
 from enum import Enum
+from dacite import from_dict
 
 
 @dataclass
@@ -23,19 +24,24 @@ class Block:
 
     protocolVersion: int
     parents: List[HexStr]
-    nonce: int
-    payload: Optional[Payload] = None
+    nonce: str
+    payload: Optional[TaggedDataPayload |
+                      TransactionPayload | MilestonePayload] = None
 
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:
-        obj = cls.__new__(cls)
-        super(Block, obj).__init__()
-        for k, v in block_dict.items():
-            setattr(obj, k, v)
-        return obj
+        return from_dict(Block, block_dict)
 
     def id(self) -> HexStr:
         return Utils.block_id(self)
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        if 'payload' in config:
+            config['payload'] = config['payload'].as_dict()
+
+        return config
 
 
 class LedgerInclusionState(str, Enum):

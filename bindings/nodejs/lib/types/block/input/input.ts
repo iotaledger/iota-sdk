@@ -50,17 +50,17 @@ class UTXOInput extends Input {
      */
     transactionId: HexEncodedString;
     /**
-     * The input index.
+     * The output index.
      */
-    transactionInputIndex: number;
+    transactionOutputIndex: number;
 
     constructor(
         transactionId: HexEncodedString,
-        transactionInputIndex: number,
+        transactionOutputIndex: number,
     ) {
         super(InputType.UTXO);
         this.transactionId = transactionId;
-        this.transactionInputIndex = transactionInputIndex;
+        this.transactionOutputIndex = transactionOutputIndex;
     }
 }
 

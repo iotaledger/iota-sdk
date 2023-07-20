@@ -1,10 +1,17 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 from iota_sdk.types.transaction import Transaction
+from iota_sdk.types.transaction_data import PreparedTransactionData
+from dacite import from_dict
+from typing import TYPE_CHECKING, Dict
+# Required to prevent circular import
+if TYPE_CHECKING:
+    from iota_sdk.wallet.wallet import Account
 
 
-class PreparedTransactionData:
+class PreparedTransaction:
     """A helper class for offline signing.
 
     Attributes:
@@ -14,8 +21,8 @@ class PreparedTransactionData:
 
     def __init__(
         self,
-        account,
-        prepared_transaction_data
+        account: Account,
+        prepared_transaction_data: PreparedTransactionData | Dict
     ):
         """Initalize `Self`.
         """
@@ -28,10 +35,11 @@ class PreparedTransactionData:
     :returns: The method prepared_transaction_data() is returning an object of type PreparedTransaction
     """
 
-    def prepared_transaction_data(self):
+    def prepared_transaction_data(self) -> PreparedTransactionData:
         """Get the prepared transaction data.
         """
-        return self.prepared_transaction_data_dto
+        return self.prepared_transaction_data_dto if isinstance(
+            self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(PreparedTransactionData, self.prepared_transaction_data_dto)
 
     """
     The send function returns a promise that resolves to a Transaction object after signing
@@ -65,8 +73,12 @@ class PreparedTransactionData:
             self.prepared_transaction_data())
 
 
-class PreparedCreateTokenTransaction(PreparedTransactionData):
+class PreparedCreateTokenTransaction(PreparedTransaction):
+
     """A prepared transaction for creating a native token.
+    The function returns the token_id as a string.
+
+    Returns: The token id of the PreparedCreateTokenTransaction.
     """
 
     def token_id(self):
@@ -75,4 +87,7 @@ class PreparedCreateTokenTransaction(PreparedTransactionData):
         return self.prepared_transaction_data_dto["tokenId"]
 
     def prepared_transaction_data(self):
-        return self.prepared_transaction_data_dto["transaction"]
+        """The function returns the prepared transaction data.
+        """
+        return from_dict(PreparedTransactionData,
+                         self.prepared_transaction_data_dto["transaction"])

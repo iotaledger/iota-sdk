@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NetworkInfo`;
 - `ClientOptions, MqttBrokerOptions, Duration`;
 - Optional `addresses` parameter in `Wallet::create_account()`;
+- `UtxoInput, TreasuryInput`;
+- `RegularTransactionEssence`;
+- `Unlock` types;
+- `PreparedTransactionData, SignedTransactionData, InputSigningData, RemainderData`;
 
 ### Changed
 
@@ -55,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet()` constructor and `Wallet::set_client_options()` now accept `ClientOptions`;
 - Split `Account::send()` into `send` and `send_with_params`;
 - Switched order of `AddressAndAmount` init params;
+- Renamed `PreparedTransactionData` to `PreparedTransaction`;
 
 ### Removed
 

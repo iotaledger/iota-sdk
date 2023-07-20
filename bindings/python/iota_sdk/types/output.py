@@ -62,6 +62,7 @@ class Output():
         Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
     """
     type: int
+    # TODO: split into different outputs
     amount: str
     unlockConditions: List[UnlockCondition]
     aliasId: Optional[HexStr] = None

@@ -4,6 +4,7 @@
 from iota_sdk import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
+from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from json import dumps, loads
 import humps
 from typing import List, Optional
@@ -258,15 +259,16 @@ class SecretManager():
             'chain': chain.__dict__,
         })
 
-    def sign_transaction(self, prepared_transaction_data):
+    def sign_transaction(
+            self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
         """Sign a transaction.
 
         Args:
             prepare_transaction_data: The prepared transaction data that needs to be signed.
         """
-        return self._call_method('signTransaction', {
+        return from_dict(SignedTransactionData, self._call_method('signTransaction', {
             'preparedTransactionData': prepared_transaction_data
-        })
+        }))
 
     def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):
         """Sign a transaction essence hash.
