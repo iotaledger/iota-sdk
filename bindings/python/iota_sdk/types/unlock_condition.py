@@ -132,6 +132,6 @@ class ImmutableAliasAddressUnlockCondition(UnlockCondition):
     Args:
         address: The permanent alias address that owns this output.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: AliasAddress
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.ImmutableAliasAddress), init=False)

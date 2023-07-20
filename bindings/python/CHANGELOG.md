@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput`;
 - `TokenScheme`;
 - `Signature`;
+- `BlockBuilderOptions`;
 
 ### Changed
 
