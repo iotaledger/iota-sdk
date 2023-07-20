@@ -39,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
+- `CommonOutput::{setNativeTokens, setFeatures}`;
+- `ImmutableFeaturesOutput::setImmutableFeatures`;
+- `StateMetadataOutput::setStateMetadata`;
 
 ### Fixed
 
