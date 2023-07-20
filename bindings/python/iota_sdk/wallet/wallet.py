@@ -178,22 +178,6 @@ class Wallet():
             }
         )
 
-    def generate_mnemonic(self) -> str:
-        """Generate a new mnemonic.
-        """
-        return self._call_method(
-            'generateMnemonic'
-        )
-
-    def verify_mnemonic(self, mnemonic: str):
-        """Check if the given mnemonic is valid.
-        """
-        return self._call_method(
-            'verifyMnemonic', {
-                'mnemonic': mnemonic
-            }
-        )
-
     def set_client_options(self, client_options):
         """Update the client options for all accounts.
         """

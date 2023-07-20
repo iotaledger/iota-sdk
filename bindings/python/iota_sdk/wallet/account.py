@@ -333,7 +333,7 @@ class Account:
             'getBalance'
         ))
 
-    def prepare_output(self, output_options,
+    def prepare_output(self, params: OutputParams,
                        transaction_options: Optional[TransactionOptions] = None):
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
