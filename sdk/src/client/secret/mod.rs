@@ -47,7 +47,7 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::Output,
-        payload::{transaction::TransactionEssence, Payload, TransactionPayload},
+        payload::{transaction::TransactionEssence, TransactionPayload},
         semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -106,7 +106,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<Payload, Self::Error>;
+    ) -> Result<TransactionPayload, Self::Error>;
 }
 
 pub trait SecretManagerConfig: SecretManage {
@@ -357,7 +357,7 @@ impl SecretManage for SecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<Payload, Self::Error> {
+    ) -> Result<TransactionPayload, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
@@ -497,7 +497,7 @@ where
 pub(crate) async fn default_sign_transaction<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: PreparedTransactionData,
-) -> crate::client::Result<Payload>
+) -> crate::client::Result<TransactionPayload>
 where
     crate::client::Error: From<M::Error>,
 {
@@ -522,5 +522,5 @@ where
         return Err(Error::TransactionSemantic(conflict));
     }
 
-    Ok(Payload::from(tx_payload))
+    Ok(tx_payload)
 }

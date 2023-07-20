@@ -60,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Split `Account::send()` into `send` and `send_with_params`;
 - Switched order of `AddressAndAmount` init params;
 - Renamed `PreparedTransactionData` to `PreparedTransaction`;
+- `{Client, SecretManager}::sign_transaction` return type from `SignedTransactionData` to `TransactionPayload`;
 
 ### Removed
 

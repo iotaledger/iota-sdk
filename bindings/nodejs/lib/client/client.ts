@@ -33,10 +33,10 @@ import {
     BlockId,
     UnlockCondition,
     Payload,
+    TransactionPayload,
     MilestonePayload,
     TreasuryOutput,
     Output,
-    parsePayload,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
@@ -284,7 +284,7 @@ export class Client {
     async signTransaction(
         secretManager: SecretManagerType,
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<Payload> {
+    ): Promise<TransactionPayload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -293,7 +293,8 @@ export class Client {
             },
         });
 
-        return parsePayload(JSON.parse(response).payload);
+        const parsed = JSON.parse(response) as Response<TransactionPayload>;
+        return plainToInstance(TransactionPayload, parsed.payload);
     }
 
     /**

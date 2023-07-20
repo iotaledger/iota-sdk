@@ -16,10 +16,7 @@ use iota_sdk::{
                 dto::{OutputBuilderAmountDto, OutputDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
             },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                Payload,
-            },
+            payload::{dto::MilestonePayloadDto, Payload},
             Block, BlockDto,
         },
     },
@@ -239,13 +236,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             block_builder = block_builder.with_secret_manager(&secret_manager);
 
-            Response::SignedTransaction(PayloadDto::from(
-                &block_builder
+            Response::SignedTransaction(
+                (&block_builder
                     .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
                         prepared_transaction_data,
                     )?)
-                    .await?,
-            ))
+                    .await?)
+                    .into(),
+            )
         }
         ClientMethod::PostBlockPayload { payload } => {
             let block_builder = client.build_block();
