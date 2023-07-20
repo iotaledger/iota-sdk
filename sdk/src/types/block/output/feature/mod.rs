@@ -26,6 +26,7 @@ use crate::types::block::{create_bitflags, Error};
 )]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidFeatureKind)]
+#[non_exhaustive]
 pub enum Feature {
     /// A sender feature.
     #[packable(tag = SenderFeature::KIND)]
@@ -305,6 +306,7 @@ pub mod dto {
     use crate::types::block::{address::Address, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
+    #[non_exhaustive]
     pub enum FeatureDto {
         /// A sender feature.
         Sender(SenderFeatureDto),

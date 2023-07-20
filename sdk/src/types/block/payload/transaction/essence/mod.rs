@@ -15,6 +15,7 @@ use crate::types::block::Error;
 #[derive(Clone, Debug, Eq, PartialEq, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidEssenceKind)]
+#[non_exhaustive]
 pub enum TransactionEssence {
     /// A regular transaction essence.
     #[packable(tag = RegularTransactionEssence::KIND)]
@@ -33,6 +34,18 @@ impl TransactionEssence {
     pub fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
     }
+
+    /// Checks whether the essence is a [`RegularTransactionEssence`].
+    pub fn is_regular(&self) -> bool {
+        matches!(self, Self::Regular(_))
+    }
+
+    /// Gets the essence as an actual [`RegularTransactionEssence`].
+    /// PANIC: do not call on a non-regular essence.
+    pub fn as_regular(&self) -> &RegularTransactionEssence {
+        let Self::Regular(essence) = self;
+        essence
+    }
 }
 
 #[allow(missing_docs)]
@@ -46,6 +59,7 @@ pub mod dto {
     /// Describes all the different essence types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
+    #[non_exhaustive]
     pub enum TransactionEssenceDto {
         Regular(RegularTransactionEssenceDto),
     }

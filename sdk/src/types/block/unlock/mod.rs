@@ -39,6 +39,7 @@ pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNL
 )]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidUnlockKind)]
+#[non_exhaustive]
 pub enum Unlock {
     /// A signature unlock.
     #[packable(tag = SignatureUnlock::KIND)]
@@ -161,6 +162,7 @@ pub mod dto {
 
     /// Describes all the different unlock types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
+    #[non_exhaustive]
     pub enum UnlockDto {
         Signature(SignatureUnlockDto),
         Reference(ReferenceUnlockDto),

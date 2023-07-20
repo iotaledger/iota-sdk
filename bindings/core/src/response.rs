@@ -55,6 +55,7 @@ use crate::{error::Error, OmittedDebug};
 #[derive(Serialize, Derivative)]
 #[derivative(Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum Response {
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)

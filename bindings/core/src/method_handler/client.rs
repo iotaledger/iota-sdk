@@ -52,6 +52,7 @@ where
                 MqttPayload::Receipt(receipt) => {
                     serde_json::to_string(receipt).expect("failed to serialize MqttPayload::Receipt")
                 }
+                e => panic!("received unknown mqtt type: {e:?}"),
             };
             let response = MqttResponse {
                 topic: topic_event.topic.clone(),

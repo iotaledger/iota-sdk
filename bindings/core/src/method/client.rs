@@ -34,6 +34,7 @@ use crate::OmittedDebug;
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum ClientMethod {
     /// Build an AliasOutput.
     /// Expected response: [`Output`](crate::Response::Output)

@@ -22,6 +22,7 @@ use crate::types::block::{protocol::ProtocolParameters, Error};
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidMilestoneOptionKind)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[non_exhaustive]
 pub enum MilestoneOption {
     /// A receipt milestone option.
     #[packable(tag = ReceiptMilestoneOption::KIND)]
@@ -178,6 +179,7 @@ pub mod dto {
     use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
+    #[non_exhaustive]
     pub enum MilestoneOptionDto {
         /// A receipt milestone option.
         Receipt(ReceiptMilestoneOptionDto),

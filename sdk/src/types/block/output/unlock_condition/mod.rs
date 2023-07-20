@@ -38,6 +38,7 @@ use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolP
     derive(serde::Serialize, serde::Deserialize),
     serde(tag = "type", content = "data")
 )]
+#[non_exhaustive]
 pub enum UnlockCondition {
     /// An address unlock condition.
     Address(AddressUnlockCondition),
@@ -517,6 +518,7 @@ pub mod dto {
     use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
+    #[non_exhaustive]
     pub enum UnlockConditionDto {
         /// An address unlock condition.
         Address(AddressUnlockConditionDto),
