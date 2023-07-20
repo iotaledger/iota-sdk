@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PreparedTransactionData, SignedTransactionData, InputSigningData, RemainderData`;
 - `UtxoChanges`;
 - `TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput`;
+- `SimpleTokenScheme`;
+- `Signature`;
 
 ### Changed
 
@@ -64,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `PreparedTransactionData` to `PreparedTransaction`;
 - `{Client, SecretManager}::sign_transaction` return type from `SignedTransactionData` to `TransactionPayload`;
 - Split `Output` into multiple classes;
+- Renamed `TokenScheme` to `SimpleTokenScheme`;
 
 ### Removed
 
