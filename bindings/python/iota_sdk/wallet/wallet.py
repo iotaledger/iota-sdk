@@ -4,6 +4,7 @@
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 from iota_sdk.types.client_options import ClientOptions
+from iota_sdk.types.address import AccountAddress
 from iota_sdk.wallet.account import Account, _call_method_routine
 from iota_sdk.wallet.sync_options import SyncOptions
 from json import dumps
@@ -33,14 +34,15 @@ class Wallet():
     def get_handle(self):
         return self.handle
 
-    def create_account(
-            self, alias: Optional[str] = None, bech32_hrp: Optional[str] = None) -> Account:
+    def create_account(self, alias: Optional[str] = None, bech32_hrp: Optional[str]
+                       = None, addresses: Optional[AccountAddress] = None) -> Account:
         """Create a new account
         """
         account_data = self._call_method(
             'createAccount', {
                 'alias': self.__return_str_or_none(alias),
                 'bech32Hrp': self.__return_str_or_none(bech32_hrp),
+                'addresses': addresses,
             }
         )
         return Account(account_data, self.handle)
