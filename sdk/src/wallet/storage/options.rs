@@ -14,6 +14,7 @@ use crate::wallet::storage::{constants::default_storage_path, StorageKind};
 #[serde(rename_all = "camelCase")]
 pub struct StorageOptions {
     pub(crate) path: PathBuf,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) encryption_key: Option<Zeroizing<[u8; 32]>>,
     pub(crate) kind: StorageKind,
 }

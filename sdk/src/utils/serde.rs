@@ -54,24 +54,50 @@ pub mod option_string {
     }
 }
 
-pub mod option_prefix_hex_vec {
-    use alloc::{string::String, vec::Vec};
+pub mod prefix_hex_bytes {
+    use alloc::string::String;
 
+    use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
     use serde::{de, Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(value: &Option<Vec<u8>>, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S, T>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
+        for<'a> &'a T: ToHexPrefixed,
+    {
+        serializer.serialize_str(&prefix_hex::encode(value))
+    }
+
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+        T: FromHexPrefixed,
+    {
+        prefix_hex::decode(String::deserialize(deserializer)?).map_err(de::Error::custom)
+    }
+}
+
+pub mod option_prefix_hex_bytes {
+    use alloc::string::String;
+
+    use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S, T>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        for<'a> &'a T: ToHexPrefixed,
     {
         match value {
-            Some(bytes) => serializer.serialize_str(&prefix_hex::encode(bytes.as_slice())),
+            Some(bytes) => super::prefix_hex_bytes::serialize(bytes, serializer),
             None => serializer.serialize_none(),
         }
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Vec<u8>>, D::Error>
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
     where
         D: Deserializer<'de>,
+        T: FromHexPrefixed,
     {
         Option::<String>::deserialize(deserializer)?
             .map(|string| prefix_hex::decode(string).map_err(de::Error::custom))

@@ -33,13 +33,12 @@ pub struct CreateNativeTokenParams {
     /// Maximum supply
     pub maximum_supply: U256,
     /// Foundry metadata
-    #[serde(default, with = "crate::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "crate::utils::serde::option_prefix_hex_bytes")]
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
 /// The result of a transaction to create a native token
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 pub struct CreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: Transaction,

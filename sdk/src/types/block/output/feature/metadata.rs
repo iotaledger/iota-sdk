@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
@@ -24,10 +24,15 @@ impl TryFrom<Vec<u8>> for MetadataFeature {
     type Error = Error;
 
     fn try_from(data: Vec<u8>) -> Result<Self, Error> {
-        data.into_boxed_slice()
-            .try_into()
-            .map(Self)
-            .map_err(Error::InvalidMetadataFeatureLength)
+        data.into_boxed_slice().try_into()
+    }
+}
+
+impl TryFrom<Box<[u8]>> for MetadataFeature {
+    type Error = Error;
+
+    fn try_from(data: Box<[u8]>) -> Result<Self, Error> {
+        data.try_into().map(Self).map_err(Error::InvalidMetadataFeatureLength)
     }
 }
 
@@ -48,8 +53,7 @@ impl MetadataFeature {
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
     pub fn new(data: impl Into<Vec<u8>>) -> Result<Self, Error> {
-        let data = data.into();
-        Self::try_from(data)
+        Self::try_from(data.into())
     }
 
     /// Returns the data.
@@ -73,14 +77,17 @@ impl core::fmt::Debug for MetadataFeature {
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::string::String;
+    use alloc::boxed::Box;
 
     use serde::{Deserialize, Serialize};
+
+    use crate::utils::serde::prefix_hex_bytes;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct MetadataFeatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub data: String,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub data: Box<[u8]>,
     }
 }

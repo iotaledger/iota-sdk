@@ -46,7 +46,7 @@ pub struct ClientBuilder {
     pub remote_pow_timeout: Duration,
     /// The amount of threads to be used for proof of work
     #[cfg(not(target_family = "wasm"))]
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pow_worker_count: Option<usize>,
 }
 
@@ -109,11 +109,9 @@ impl ClientBuilder {
             let node: Node = node_dto.into();
             validate_url(node.url)?;
         }
-        if let Some(permanodes) = &self.node_manager_builder.permanodes {
-            for node_dto in permanodes {
-                let node: Node = node_dto.into();
-                validate_url(node.url)?;
-            }
+        for node_dto in &self.node_manager_builder.permanodes {
+            let node: Node = node_dto.into();
+            validate_url(node.url)?;
         }
         Ok(self)
     }

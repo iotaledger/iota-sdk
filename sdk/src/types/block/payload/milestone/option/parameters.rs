@@ -3,7 +3,7 @@
 
 //! Module describing the parameters milestone option.
 
-use alloc::vec::Vec;
+use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
@@ -39,13 +39,13 @@ impl ParametersMilestoneOption {
     pub fn new(
         target_milestone_index: MilestoneIndex,
         protocol_version: u8,
-        binary_parameters: Vec<u8>,
+        binary_parameters: impl Into<Box<[u8]>>,
     ) -> Result<Self, Error> {
         Ok(Self {
             target_milestone_index,
             protocol_version,
             binary_parameters: binary_parameters
-                .into_boxed_slice()
+                .into()
                 .try_into()
                 .map_err(Error::InvalidBinaryParametersLength)?,
         })
@@ -69,12 +69,11 @@ impl ParametersMilestoneOption {
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::string::String;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
+    use crate::{types::block::Error, utils::serde::prefix_hex_bytes};
 
     ///
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -85,7 +84,8 @@ pub mod dto {
         pub target_milestone_index: u32,
         pub protocol_version: u8,
         #[serde(rename = "params")]
-        pub binary_parameters: String,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub binary_parameters: Box<[u8]>,
     }
 
     impl From<&ParametersMilestoneOption> for ParametersMilestoneOptionDto {
@@ -94,7 +94,7 @@ pub mod dto {
                 kind: ParametersMilestoneOption::KIND,
                 target_milestone_index: *value.target_milestone_index(),
                 protocol_version: value.protocol_version(),
-                binary_parameters: prefix_hex::encode(value.binary_parameters()),
+                binary_parameters: value.binary_parameters().into(),
             }
         }
     }
@@ -106,7 +106,7 @@ pub mod dto {
             Self::new(
                 value.target_milestone_index.into(),
                 value.protocol_version,
-                prefix_hex::decode(&value.binary_parameters).map_err(|_| Error::InvalidField("params"))?,
+                value.binary_parameters,
             )
         }
     }
