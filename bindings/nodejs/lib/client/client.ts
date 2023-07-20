@@ -293,7 +293,8 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<TransactionPayload>;
+        return plainToInstance(TransactionPayload, parsed.payload);
     }
 
     /**
