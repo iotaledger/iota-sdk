@@ -98,7 +98,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -112,7 +112,7 @@ async fn output_preparation() -> Result<()> {
     // only address condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
     // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    assert_eq!(output.features().unwrap().len(), 2);
 
     // only send 1 with metadata feature
     let output = account
@@ -123,7 +123,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -141,7 +141,7 @@ async fn output_preparation() -> Result<()> {
     // output amount -1
     assert_eq!(storage_deposit_return.amount(), 48199);
     // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    assert_eq!(output.features().unwrap().len(), 2);
 
     let output = account
         .prepare_output(
@@ -151,7 +151,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -166,7 +166,7 @@ async fn output_preparation() -> Result<()> {
     // required storage deposit
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
     // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    assert_eq!(output.features().unwrap().len(), 2);
 
     let output = account
         .prepare_output(
@@ -176,7 +176,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -194,7 +194,7 @@ async fn output_preparation() -> Result<()> {
     // required storage deposit
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
     // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    assert_eq!(output.features().unwrap().len(), 2);
 
     // Error if this NftId is not in the account
     let error = account
@@ -327,7 +327,10 @@ async fn output_preparation() -> Result<()> {
                     issuer: Some(issuer_and_sender_address),
                     sender: Some(issuer_and_sender_address),
                 }),
-                unlocks: None,
+                unlocks: Some(Unlocks {
+                    expiration_unix_time: Some(1),
+                    timelock_unix_time: Some(1),
+                }),
                 storage_deposit: None,
             },
             None,
@@ -345,6 +348,10 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(issuer_feature.address(), issuer_and_sender_address.inner());
     let sender_feature = features.sender().unwrap();
     assert_eq!(sender_feature.address(), issuer_and_sender_address.inner());
+    // Unlocks
+    let conditions = output.unlock_conditions().unwrap();
+    assert!(conditions.is_time_locked(0));
+    assert!(conditions.is_expired(2));
 
     // nft with expiration
     let output = account

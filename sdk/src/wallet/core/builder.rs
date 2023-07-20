@@ -288,6 +288,7 @@ pub(crate) mod dto {
     use serde::Deserialize;
 
     use super::*;
+    #[cfg(feature = "storage")]
     use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
 
     #[derive(Debug, Deserialize)]
