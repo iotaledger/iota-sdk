@@ -3,7 +3,7 @@
 
 # In this example we sign the prepared transaction.
 
-from iota_sdk import Wallet, SecretManager, StrongholdSecretManager, PayloadType, Payload, PreparedTransactionData, SignedTransactionData
+from iota_sdk import Wallet, PreparedTransactionData
 from dotenv import load_dotenv
 from dacite import from_dict
 import json
