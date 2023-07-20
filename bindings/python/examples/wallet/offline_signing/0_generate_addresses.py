@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# In this example we generate addresses which will be used later to find
+# In this example we create an account and store its addresses in a file which will be used later to find
 # inputs.
 
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions
