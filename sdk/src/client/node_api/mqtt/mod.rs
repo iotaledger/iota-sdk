@@ -195,7 +195,7 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         match Block::unpack_verified(payload, protocol_parameters) {
                                             Ok(block) => Ok(TopicEvent {
                                                 topic: p.topic.clone(),
-                                                payload: MqttPayload::Block(block),
+                                                payload: MqttPayload::Block((&block).into()),
                                             }),
                                             Err(e) => {
                                                 warn!("Block unpacking failed: {:?}", e);
@@ -209,7 +209,7 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         match Payload::unpack_verified(payload, protocol_parameters) {
                                             Ok(Payload::Milestone(milestone)) => Ok(TopicEvent {
                                                 topic: p.topic.clone(),
-                                                payload: MqttPayload::MilestonePayload(*milestone),
+                                                payload: MqttPayload::MilestonePayload(milestone.as_ref().into()),
                                             }),
                                             Ok(p) => {
                                                 warn!(
@@ -230,7 +230,7 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         match ReceiptMilestoneOption::unpack_verified(payload, protocol_parameters) {
                                             Ok(receipt) => Ok(TopicEvent {
                                                 topic: p.topic.clone(),
-                                                payload: MqttPayload::Receipt(receipt),
+                                                payload: MqttPayload::Receipt((&receipt).into()),
                                             }),
                                             Err(e) => {
                                                 warn!("Receipt unpacking failed: {:?}", e);

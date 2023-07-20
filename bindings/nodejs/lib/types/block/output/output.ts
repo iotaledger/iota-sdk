@@ -121,18 +121,11 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
         return this.nativeTokens;
     }
 
-    setNativeTokens(tokens: INativeToken[] | undefined) {
-        this.nativeTokens = tokens;
-    }
     /**
      * Features contained by the output.
      */
     getFeatures(): Feature[] | undefined {
         return this.features;
-    }
-
-    setFeatures(features: Feature[] | undefined) {
-        this.features = features;
     }
 }
 /**
@@ -171,10 +164,6 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     getImmutableFeatures(): Feature[] | undefined {
         return this.immutableFeatures;
     }
-
-    setImmutableFeatures(immutableFeatures: Feature[] | undefined) {
-        this.immutableFeatures = immutableFeatures;
-    }
 }
 
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
@@ -192,10 +181,6 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
      */
     getStateMetadata(): HexEncodedString | undefined {
         return this.stateMetadata;
-    }
-
-    setStateMetadata(stateMetadata: HexEncodedString | undefined) {
-        this.stateMetadata = stateMetadata;
     }
 }
 

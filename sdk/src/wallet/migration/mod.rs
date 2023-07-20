@@ -5,6 +5,7 @@ mod migrate_0;
 mod migrate_1;
 mod migrate_2;
 mod migrate_3;
+mod migrate_4;
 
 use std::collections::HashMap;
 
@@ -28,7 +29,7 @@ static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| 
     #[cfg(feature = "storage")]
     {
         use super::storage::Storage;
-        const STORAGE_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<Storage>); 4] = [
+        const STORAGE_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<Storage>); 5] = [
             // In order to add a new storage migration, add an entry at the bottom of this list
             // and change the list length above.
             // The entry should be in the form of a key-value pair, from previous migration to next.
@@ -37,13 +38,14 @@ static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| 
             (Some(migrate_0::Migrate::ID), &migrate_1::Migrate),
             (Some(migrate_1::Migrate::ID), &migrate_2::Migrate),
             (Some(migrate_2::Migrate::ID), &migrate_3::Migrate),
+            (Some(migrate_3::Migrate::ID), &migrate_4::Migrate),
         ];
         migrations.insert(std::collections::HashMap::from(STORAGE_MIGRATIONS));
     }
     #[cfg(feature = "stronghold")]
     {
         use crate::client::stronghold::StrongholdAdapter;
-        const BACKUP_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<StrongholdAdapter>); 4] = [
+        const BACKUP_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<StrongholdAdapter>); 5] = [
             // In order to add a new backup migration, and add an entry at the bottom of this list
             // and change the list length above.
             // The entry should be in the form of a key-value pair, from previous migration to next.
@@ -52,6 +54,7 @@ static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| 
             (Some(migrate_0::Migrate::ID), &migrate_1::Migrate),
             (Some(migrate_1::Migrate::ID), &migrate_2::Migrate),
             (Some(migrate_2::Migrate::ID), &migrate_3::Migrate),
+            (Some(migrate_3::Migrate::ID), &migrate_4::Migrate),
         ];
         migrations.insert(LatestBackupMigration(BACKUP_MIGRATIONS.last().unwrap().1.version()));
         migrations.insert(std::collections::HashMap::from(BACKUP_MIGRATIONS));

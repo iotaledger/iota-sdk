@@ -88,7 +88,7 @@ fn milestone() {
             rand_parents(),
             rand_merkle_root(),
             rand_merkle_root(),
-            vec![],
+            [],
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),

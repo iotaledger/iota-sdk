@@ -13,11 +13,6 @@ use crate::types::block::Error;
 
 /// A generic essence that can represent different types defining transaction essences.
 #[derive(Clone, Debug, Eq, PartialEq, From, packable::Packable)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidEssenceKind)]
 pub enum TransactionEssence {

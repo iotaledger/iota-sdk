@@ -54,7 +54,6 @@ pub(crate) type SignatureCount =
 
 /// A payload which defines the inclusion set of other blocks in the Tangle.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct MilestonePayload {
@@ -164,16 +163,21 @@ fn verify_signatures_packable<const VERIFY: bool>(
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::string::ToString;
+    use alloc::{boxed::Box, string::ToString};
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
     use self::option::dto::MilestoneOptionDto;
     use super::*;
-    use crate::types::{
-        block::{parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error},
-        TryFromDto,
+    use crate::{
+        types::{
+            block::{
+                parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error,
+            },
+            TryFromDto,
+        },
+        utils::serde::prefix_hex_bytes,
     };
 
     /// The payload type to define a milestone.
@@ -191,8 +195,8 @@ pub mod dto {
         pub applied_merkle_root: String,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub options: Vec<MilestoneOptionDto>,
-        #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub metadata: String,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub metadata: Box<[u8]>,
         pub signatures: Vec<SignatureDto>,
     }
 
@@ -207,7 +211,7 @@ pub mod dto {
                 parents: value.essence().parents().iter().map(|p| p.to_string()).collect(),
                 inclusion_merkle_root: value.essence().inclusion_merkle_root().to_string(),
                 applied_merkle_root: value.essence().applied_merkle_root().to_string(),
-                metadata: prefix_hex::encode(value.essence().metadata()),
+                metadata: value.essence().metadata().into(),
                 options: value.essence().options().iter().map(Into::into).collect::<_>(),
                 signatures: value.signatures().iter().map(From::from).collect(),
             }
@@ -242,11 +246,6 @@ pub mod dto {
                         .map(|dto| MilestoneOption::try_from_dto_with_params(dto, &params))
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
-                let metadata = if !dto.metadata.is_empty() {
-                    prefix_hex::decode(&dto.metadata).map_err(|_| Error::InvalidField("metadata"))?
-                } else {
-                    Vec::new()
-                };
 
                 MilestoneEssence::new(
                     MilestoneIndex(index),
@@ -256,7 +255,7 @@ pub mod dto {
                     Parents::from_vec(parent_ids)?,
                     inclusion_merkle_root,
                     applied_merkle_root,
-                    metadata,
+                    dto.metadata,
                     options,
                 )?
             };

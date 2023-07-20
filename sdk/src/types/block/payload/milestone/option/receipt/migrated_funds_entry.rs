@@ -12,7 +12,6 @@ use crate::types::{
 
 /// Describes funds which were migrated from a legacy network.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct MigratedFundsEntry {
     tail_transaction_hash: TailTransactionHash,

@@ -9,7 +9,7 @@ from enum import Enum
 
 
 def _call_method_routine(func):
-    """The routine of dump json string and call call_wallet_method()
+    """The routine of dump json string and call call_wallet_method().
     """
     def wrapper(*args, **kwargs):
         class MyEncoder(JSONEncoder):
@@ -66,5 +66,5 @@ def _call_method_routine(func):
 
 
 class WalletError(Exception):
-    """wallet error"""
+    """A wallet error."""
     pass

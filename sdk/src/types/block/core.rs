@@ -104,7 +104,6 @@ impl BlockBuilder {
 
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Block {
     /// Protocol version of the block.
     protocol_version: u8,
@@ -275,7 +274,7 @@ pub mod dto {
         ///
         pub parents: Vec<String>,
         ///
-        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
         ///
         pub nonce: String,

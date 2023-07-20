@@ -21,7 +21,6 @@ use crate::types::{
 
 /// A transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TransactionPayload {
     essence: TransactionEssence,
     unlocks: Unlocks,

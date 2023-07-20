@@ -28,7 +28,7 @@ async function run() {
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        //TODO: Replace with the address of your choice!
+        // Replace with the address of your choice!
         const address =
             'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
         const amount = BigInt(1);

@@ -83,14 +83,14 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
 }
 
 class NewOutputWalletEvent extends WalletEvent {
-    output: OutputData;
-    transaction?: TransactionPayload;
-    transactionInputs?: [OutputResponse];
+    private output: OutputData;
+    private transaction?: TransactionPayload;
+    private transactionInputs?: OutputResponse[];
 
     constructor(
         output: OutputData,
         transaction?: TransactionPayload,
-        transactionInputs?: [OutputResponse],
+        transactionInputs?: OutputResponse[],
     ) {
         super(WalletEventType.NewOutput);
         this.output = output;
@@ -115,13 +115,13 @@ class NewOutputWalletEvent extends WalletEvent {
     /**
      * The transaction inputs.
      */
-    getTransactionInputs(): [OutputResponse] | undefined {
+    getTransactionInputs(): OutputResponse[] | undefined {
         return this.transactionInputs;
     }
 }
 
 class SpentOutputWalletEvent extends WalletEvent {
-    output: OutputData;
+    private output: OutputData;
 
     constructor(output: OutputData) {
         super(WalletEventType.SpentOutput);
@@ -137,8 +137,8 @@ class SpentOutputWalletEvent extends WalletEvent {
 }
 
 class TransactionInclusionWalletEvent extends WalletEvent {
-    transactionId: TransactionId;
-    inclusionState: InclusionState;
+    private transactionId: TransactionId;
+    private inclusionState: InclusionState;
 
     constructor(transactionId: TransactionId, inclusionState: InclusionState) {
         super(WalletEventType.TransactionInclusion);
@@ -180,6 +180,13 @@ class TransactionProgressWalletEvent extends WalletEvent {
     constructor(progress: TransactionProgress) {
         super(WalletEventType.TransactionProgress);
         this.progress = progress;
+    }
+
+    /**
+     * Returns the progress.
+     */
+    getProgress(): TransactionProgress {
+        return this.progress;
     }
 }
 
@@ -289,4 +296,5 @@ export {
     SigningTransactionProgress,
     PerformingPowProgress,
     BroadcastingProgress,
+    TransactionProgressType,
 };

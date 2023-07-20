@@ -157,6 +157,7 @@ export interface AccountMetadata {
 export interface CreateAccountPayload {
     alias?: string;
     bech32Hrp?: string;
+    addresses?: AccountAddress[];
 }
 
 /** Options to filter outputs */

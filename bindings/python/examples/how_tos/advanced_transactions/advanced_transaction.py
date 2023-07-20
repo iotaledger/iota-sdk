@@ -21,7 +21,11 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Create an ouput with amount 1_000_000 and a timelock of 1 hour
-in_an_hour = int(time.mktime((datetime.datetime.now() + datetime.timedelta(hours=1)).timetuple()))
+in_an_hour = int(
+    time.mktime(
+        (datetime.datetime.now() +
+         datetime.timedelta(
+            hours=1)).timetuple()))
 basic_output = Client().build_basic_output(
     unlock_conditions=[
         AddressUnlockCondition(

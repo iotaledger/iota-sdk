@@ -21,7 +21,8 @@ secret_manager = SecretManager(StrongholdSecretManager(
     "sign_secp256k1_ecdsa.stronghold", os.environ['STRONGHOLD_PASSWORD']))
 
 # Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
-# The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
+# The mnemonic can't be retrieved from the Stronghold file, so make a
+# backup in a secure place!
 secret_manager.store_mnemonic(os.environ['MNEMONIC'])
 
 bip44_chain = Bip44(
@@ -32,6 +33,7 @@ bip44_chain = Bip44(
 )
 
 message = utf8_to_hex(FOUNDRY_METADATA)
-secp256k1_ecdsa_signature = secret_manager.sign_secp256k1_ecdsa(message, bip44_chain)
+secp256k1_ecdsa_signature = secret_manager.sign_secp256k1_ecdsa(
+    message, bip44_chain)
 print(f'Public key: {secp256k1_ecdsa_signature["publicKey"]}')
 print(f'Signature: {secp256k1_ecdsa_signature["signature"]}')

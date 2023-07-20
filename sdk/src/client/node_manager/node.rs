@@ -23,6 +23,7 @@ pub struct Node {
     /// Node url.
     pub url: Url,
     /// Node auth options.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub auth: Option<NodeAuth>,
     /// Whether the node is disabled or not.
     #[serde(default)]

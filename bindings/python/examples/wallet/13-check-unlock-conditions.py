@@ -4,7 +4,8 @@ import os
 
 load_dotenv()
 
-# In this example we check if an output has only an address unlock condition and that the address is from the account.
+# In this example we check if an output has only an address unlock
+# condition and that the address is from the account.
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 

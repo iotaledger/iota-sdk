@@ -151,8 +151,7 @@ impl LedgerNanoStatus {
 }
 
 /// Data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct InputSigningData {
     /// The output
     pub output: Output,

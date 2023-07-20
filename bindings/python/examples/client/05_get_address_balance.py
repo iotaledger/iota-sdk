@@ -17,7 +17,8 @@ query_parameters = NodeIndexerAPI.QueryParameters(
     has_storage_deposit_return=False
 )
 
-# Get output ids of basic outputs that can be controlled by this address without further unlock constraints
+# Get output ids of basic outputs that can be controlled by this address
+# without further unlock constraints.
 output_ids_response = client.basic_output_ids(query_parameters)
 print(f'{output_ids_response.items}')
 

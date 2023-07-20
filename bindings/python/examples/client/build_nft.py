@@ -13,7 +13,8 @@ client = Client(nodes=[node_url])
 hexAddress = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
-# IOTA NFT Standard - IRC27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
+# IOTA NFT Standard - IRC27:
+# https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
 tip_27_immutable_metadata = {
     "standard": "IRC27",
     "version": "v1.0",

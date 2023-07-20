@@ -6,10 +6,15 @@ from typing import NewType
 
 HexStr = NewType("HexStr", str)
 
-HD_WALLET_TYPE = 44
-HARDEN_MASK = 1 << 31;
 
 class CoinType(IntEnum):
+    """Coin types.
+
+    Attributes:
+        IOTA (4218): IOTA
+        SHIMMER (4219): SHIMMER
+        ETHER (60): ETHER
+    """
     IOTA = 4218
     SHIMMER = 4219
     ETHER = 60
@@ -19,21 +24,19 @@ class CoinType(IntEnum):
 
 
 class Node():
-    def __init__(self, url=None, jwt=None, username=None, password=None, disabled=None):
-        """Initialize a Node
+    """Represents a node in the network.
+    """
 
-        Parameters
-        ----------
-        url : string
-            Node url
-        jwt : string
-            JWT token
-        username : string
-            Username for basic authentication
-        password : string
-            Password for basic authentication
-        disabled : bool
-            Disable node
+    def __init__(self, url=None, jwt=None, username=None,
+                 password=None, disabled=None):
+        """Initialize a Node.
+
+        Args:
+            url: The node url.
+            jwt: A JWT token for authentication.
+            username: A username for basic authentication.
+            password: A password for basic authentication.
+            disabled: Whether the node should be used for API requests or not.
         """
         self.url = url
         self.jwt = jwt
@@ -42,7 +45,7 @@ class Node():
         self.disabled = disabled
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'jwt' in config or 'username' in config or 'password' in config:
             config['auth'] = {}
@@ -59,21 +62,21 @@ class Node():
 
 
 class AddressAndAmount():
-    def __init__(self, address: str, amount: int):
+    """Parameters to send a certain amount of coins to an address.
+    """
+
+    def __init__(self, amount: int, address: str):
         """Initialize AddressAndAmount for options in Client::build_and_post_block()
 
-        Parameters
-        ----------
-        address : string
-            Address of the output
-        amount : int
-            Amount of the output
+        Args:
+            amount: The base coin amount to send.
+            address: The receive address.
         """
-        self.address = address
         self.amount = amount
+        self.address = address
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v != None}
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'amount' in config:
             config['amount'] = str(config['amount'])
