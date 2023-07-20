@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Output, Feature, SenderFeature, IssuerFeature, MetadataFeature
+from iota_sdk import BasicOutput, AliasOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
 
 
@@ -39,7 +39,7 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(Output, basic_output_dict)
+    basic_output = from_dict(BasicOutput, basic_output_dict)
     assert basic_output.as_dict() == basic_output_dict
 
     basic_output_dict = {
@@ -77,7 +77,7 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(Output, basic_output_dict)
+    basic_output = from_dict(BasicOutput, basic_output_dict)
     assert basic_output.as_dict() == basic_output_dict
 
     basic_output_dict = {
@@ -103,7 +103,7 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(Output, basic_output_dict)
+    basic_output = from_dict(BasicOutput, basic_output_dict)
     assert basic_output.as_dict() == basic_output_dict
 
     alias_output_dict = {
@@ -139,7 +139,7 @@ def test_output():
             }
         ]
     }
-    alias_output = from_dict(Output, alias_output_dict)
+    alias_output = from_dict(AliasOutput, alias_output_dict)
     assert alias_output.as_dict() == alias_output_dict
 
     alias_output_dict = {
@@ -179,7 +179,7 @@ def test_output():
             }
         ]
     }
-    alias_output = from_dict(Output, alias_output_dict)
+    alias_output = from_dict(AliasOutput, alias_output_dict)
     assert alias_output.as_dict() == alias_output_dict
 
     foundry_output_dict = {
@@ -208,7 +208,7 @@ def test_output():
             }
         ]
     }
-    foundry_output = from_dict(Output, foundry_output_dict)
+    foundry_output = from_dict(FoundryOutput, foundry_output_dict)
     assert foundry_output.as_dict() == foundry_output_dict
 
     nft_output_dict = {
@@ -237,5 +237,5 @@ def test_output():
             }
         ]
     }
-    nft_output = from_dict(Output, nft_output_dict)
+    nft_output = from_dict(NftOutput, nft_output_dict)
     assert nft_output.as_dict() == nft_output_dict

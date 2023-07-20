@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.output import Output
+from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
@@ -38,7 +38,7 @@ class RegularTransactionEssence(TransactionEssence):
     networkId: str
     inputsCommitment: HexStr
     inputs: List[UtxoInput]
-    outputs: List[Output]
+    outputs: List[AliasOutput | FoundryOutput | NftOutput | BasicOutput]
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: 1, init=False)
 
