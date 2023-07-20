@@ -41,4 +41,8 @@ setup(
     ],
     include_package_data=True,
     zip_safe=False,
+    install_requires=[
+        '<pyhumps> >= <3.8.0>',
+        '<dacite>'
+    ]
 )
