@@ -131,6 +131,9 @@ class OutputMetadata:
             setattr(obj, k, v)
         return obj
 
+    def as_dict(self):
+        return {k: v for k, v in self.__dict__.items() if v is not None}
+
 
 @dataclass
 class OutputWithMetadata:
