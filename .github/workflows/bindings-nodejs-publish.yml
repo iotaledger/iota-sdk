@@ -224,6 +224,11 @@ jobs:
           security -v list-keychains -s signing.keychain
           security find-identity -vp codesigning
 
+      - name: Prepare Github release
+        id: prepare_release
+        run: |
+          echo "tag_name=iota-sdk-nodejs-v$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_OUTPUT"
+
       - name: Sign and notarize index.node binary (macOS arm64)
         if: ${{ startsWith(matrix.os, 'macos') }}
         env:
@@ -246,6 +251,11 @@ jobs:
 
           tar -czf prebuilds/@iota/$TAR_NAME build/Release/index.node
 
-      - name: Upload prebuild to GitHub release
-        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix iota-sdk-nodejs-v
-        working-directory: bindings/nodejs
+      - name: Upload prebuild to Github release
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md
+          files: bindings/nodejs/prebuilds/@iota/*
+          tag_name: ${{ steps.prepare_release.outputs.tag_name }}
+          prerelease: true
