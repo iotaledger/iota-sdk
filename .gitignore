@@ -18,9 +18,9 @@ backup
 
 # JSON files
 address.json
-addresses.json
-prepared_transaction.json
-signed_transaction.json
+*addresses.json
+*prepared_transaction.json
+*signed_transaction.json
 
 # Miscellaneous
 *.log

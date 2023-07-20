@@ -8,7 +8,7 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import TransactionPayload
 from json import dumps, loads
 import humps
-from typing import List, Optional
+from typing import Optional
 from dacite import from_dict
 
 
@@ -268,7 +268,7 @@ class SecretManager():
             prepare_transaction_data: The prepared transaction data that needs to be signed.
         """
         return from_dict(TransactionPayload, self._call_method('signTransaction', {
-            'preparedTransactionData': prepared_transaction_data
+            'preparedTransactionData': prepared_transaction_data.as_dict()
         }))
 
     def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):
