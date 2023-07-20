@@ -18,6 +18,7 @@ class PreparedTransaction:
         account: An account object used to continue building this transaction.
         prepared_transaction_data_dto: A prepared transaction data object.
     """
+
     def __init__(
         self,
         account: Account,
@@ -88,4 +89,5 @@ class PreparedCreateTokenTransaction(PreparedTransaction):
     def prepared_transaction_data(self):
         """The function returns the prepared transaction data.
         """
-        return from_dict(PreparedTransactionData, self.prepared_transaction_data_dto["transaction"])
+        return from_dict(PreparedTransactionData,
+                         self.prepared_transaction_data_dto["transaction"])
