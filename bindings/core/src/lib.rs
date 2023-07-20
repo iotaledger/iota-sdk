@@ -72,7 +72,9 @@ impl WalletOptions {
 
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
-        let mut builder = Wallet::builder();
+        let mut builder = Wallet::builder()
+            .with_client_options(self.client_options)
+            .with_coin_type(self.coin_type);
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {
@@ -81,14 +83,6 @@ impl WalletOptions {
 
         if let Some(secret_manager) = self.secret_manager {
             builder = builder.with_secret_manager(SecretManager::try_from(secret_manager)?);
-        }
-
-        if let Some(client_options) = self.client_options {
-            builder = builder.with_client_options(client_options);
-        }
-
-        if let Some(coin_type) = self.coin_type {
-            builder = builder.with_coin_type(coin_type);
         }
 
         builder.finish().await
