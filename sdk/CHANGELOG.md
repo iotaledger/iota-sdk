@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prefix-hex string values replaced with boxed slices in Dtos;
 - `MilestoneEssence::new` now takes generic metadata for convenience;
 - `ParametersMilestoneOption::new` now accepts boxed slice;
+- Made most public enums `non_exhaustive`;
 
 ### Removed
 
