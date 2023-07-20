@@ -123,7 +123,7 @@ impl TryFromDto for SignedTransactionData {
                 .into_iter()
                 .map(|i| InputSigningData::try_from_dto_with_params(i, &params))
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
-                .map_err(|_| Error::InvalidField("input_data"))?,
+                .map_err(|_| Error::InvalidField("inputs_data"))?,
         })
     }
 }
