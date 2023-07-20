@@ -7,6 +7,7 @@ from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, Node, AddressAndAmount
 from iota_sdk.types.feature import Feature
@@ -23,11 +24,17 @@ from dacite import from_dict
 
 
 class ClientError(Exception):
-    """client error"""
+    """Represents a client error."""
     pass
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
+    """Represents an IOTA client.
+
+    Attributes:
+        handle: The handle to the inner client object.
+    """
+
     def __init__(
         self,
         nodes: Optional[str | List[str]] = None,
@@ -50,41 +57,41 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     ):
         """Initialize the IOTA Client.
 
-        Parameters
-        ----------
-        nodes : string or array of string
+        **Arguments**
+        nodes :
             A single Node URL or an array of URLs.
-        primary_node : string
+        primary_node :
             Node which will be tried first for all requests.
-        primary_pow_node : string
+        primary_pow_node :
             Node which will be tried first when using remote PoW, even before the primary_node.
-        permanode : string
+        permanode :
             Permanode URL.
-        ignore_node_health : bool
+        ignore_node_health :
             If the node health should be ignored.
-        api_timeout : datetime.timedelta
+        api_timeout :
             Timeout for API requests.
-        node_sync_interval : datetime.timedelta
+        node_sync_interval :
             Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated.
-        remote_pow_timeout : datetime.timedelta
+        remote_pow_timeout :
             Timeout when sending a block that requires remote proof of work.
-        tips_interval : int
+        tips_interval :
             Tips request interval during PoW in seconds.
-        quorum : bool
-            If node quorum is enabled. Will compare the responses from multiple nodes
-            and only returns the response if `quorum_threshold`% of the nodes return the same one.
-        min_quorum_size : int
+        quorum :
+            If node quorum is enabled. Will compare the responses from multiple nodes and only returns the response if 'quorum_threshold'% of the nodes return the same one.
+        min_quorum_size :
             Minimum amount of nodes required for request when quorum is enabled.
-        quorum_threshold : int
+        quorum_threshold :
             % of nodes that have to return the same response so it gets accepted.
-        user_agent : string
+        user_agent :
             The User-Agent header for requests.
-        local_pow : bool
+        local_pow :
             Local proof of work.
-        fallback_to_local_pow : bool
+        fallback_to_local_pow :
             Fallback to local proof of work if the node doesn't support remote PoW.
-        pow_worker_count : int
+        pow_worker_count :
             The amount of threads to be used for proof of work.
+        client_handle :
+            An instance of a node client.
         """
         client_config = dict(locals())
         del client_config['self']
@@ -131,7 +138,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             self.handle = client_handle
 
     def _call_method(self, name, data=None):
-        """Dumps json string and call call_client_method()
+        """Dumps json string and calls `call_client_method()`
         """
         message = {
             'name': name
@@ -155,6 +162,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             return response
 
     def get_handle(self):
+        """Get the client handle.
+
+        Returns:
+            The inner client object.
+        """
         return self.handle
 
     def build_alias_output(self,
@@ -169,30 +181,19 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            immutable_features: Optional[List[Feature]] = None):
         """Build an AliasOutput.
 
-        Parameters
-        ----------
-        alias_id : string
-            Hex encoded alias id
-        unlock_conditions : array of UnlockCondition
-            The unlock conditions for this output
-        amount : int
-            Amount of base token
-        native_tokens : array of NativeToken
-            The native token to add to the output
-        state_index : int
-            Index of the state
-        state_metadata : string
-            Hex encoded state metadata
-        foundry_counter : int
-            Counter of foundry outputs created
-        features : array of Feature
-            Features for this outputs
-        immutable_features : array of Feature
-            Immutable features
+        Args:
+            alias_id: A unique ID for the new alias.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            state_index: A counter that must increase by 1 every time the alias is state transitioned.
+            state_metadata: Metadata that can only be changed by the state controller.
+            foundry_counter: A counter that denotes the number of foundries created by this alias account.
+            features: A list of features.
+            immutable_features: A list of immutable features.
 
-        Returns
-        -------
-        Output as dict
+        Returns:
+            The alias output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -230,20 +231,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            features: Optional[List[Feature]] = None):
         """Build a BasicOutput.
 
-        Parameters
-        ----------
-        unlock_conditions : array of UnlockCondition
-            The unlock conditions for this output
-        amount : int
-            Amount of base token
-        native_tokens : array of NativeToken
-            The native token to add to the output
-        features : array of Feature
-            Features for this outputs
+        Args:
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            features: Features that add utility to the output but do not impose unlocking conditions.
 
-        Returns
-        -------
-        Output as dict
+        Returns:
+            The basic output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -276,26 +271,17 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              immutable_features: Optional[List[Feature]] = None):
         """Build a FoundryOutput.
 
-        Parameters
-        ----------
-        serial_number : int
-            The serial number of the foundry
-        token_scheme : TokenScheme
-            The Token scheme. Currently only a simple scheme is supported
-        unlock_conditions : array of UnlockCondition
-            The unlock conditions for this output
-        amount : int
-            Amount of base token
-        native_tokens : array of NativeToken
-            The native token to add to the output
-        features : array of Feature
-            Features for this outputs
-        immutable_features : array of Feature
-            Immutable features
+        Args:
+            serial_number: The serial number of the foundry with respect to the controlling alias.
+            token_scheme: Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            features: Features that add utility to the output but do not impose unlocking conditions.
+            immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
 
-        Returns
-        -------
-        Output as dict
+        Returns:
+            The foundry output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
@@ -333,31 +319,23 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                          immutable_features: Optional[List[Feature]] = None):
         """Build an NftOutput.
 
-        Parameters
-        ----------
-        nft_id : string
-            Hex encoded nft id
-        unlock_conditions : array of UnlockCondition
-            The unlock conditions for this output
-        amount : int
-            Amount of base token
-        native_tokens : array of NativeToken
-            The native tokens to add to the output
-        features : array of Feature
-            Features for this outputs
-        immutable_features : array of Feature
-            Immutable features
+        Args:
+            nft_id: A unique ID for the new NFT.
+            unlock_conditions: The unlock conditions for the new output.
+            amount: The amount of base coins in the new output.
+            native_tokens: Native tokens added to the new output.
+            features: Features that add utility to the output but do not impose unlocking conditions.
+            immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
 
-        Returns
-        -------
-        Output as dict
+        Returns:
+            The NFT output as dict.
         """
 
         unlock_conditions = [unlock_condition.as_dict()
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict()
+            native_tokens = [native_token.__dict__
                              for native_token in native_tokens]
 
         if features:
@@ -393,36 +371,23 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              tag: Optional[HexStr] = None) -> List[HexStr | Block]:
         """Build and post a block.
 
-        Parameters
-        ----------
-        account_index : int
-            Account Index
-        coin_type : int
-            Coin type. The CoinType enum can be used
-        custom_remainder_address : string
-            Address to send the remainder funds to
-        data : str
-            Hex encoded data
-        initial_address_index : int
-            Initial address index
-        input_range_start : int
-            Start of the input range
-        input_range_end : int
-            End of the input range
-        inputs : Array of Inputs
-            Inputs to use
-        output : AddressAndAmount
-            Address and amount to send to
-        outputs : Array of Outputs
-            Outputs to use
-        tag : string
-            Hex encoded tag
+        **Arguments**
+        account_index : The account index to issue the block with.
+        coin_type : The type of base coin.
+        custom_remainder_address : Address to send the remainder funds to.
+        data : Hex encoded data.
+        initial_address_index : Initial address index.
+        input_range_start : Start of the input range.
+        input_range_end : End of the input range.
+        inputs : Inputs to use.
+        output : Address and amount to send to.
+        outputs : Outputs to use.
+        tag : Hex encoded tag.
 
-        Returns
-        -------
-        Block as dict
-
+        Returns:
+            The created block as dict.
         """
+
         options = dict(locals())
 
         del options['self']
@@ -502,8 +467,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('unhealthyNodes')
 
-    def prepare_transaction(self, secret_manager=None, options=None):
+    def prepare_transaction(self,
+                            secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
+                                                     SeedSecretManager | StrongholdSecretManager] = None,
+                            options=None):
         """Prepare a transaction for signing.
+
+        Args:
+            secret_manager: One of the supported secret managers.
+            options: the transaction options.
         """
         return self._call_method('prepareTransaction', {
             'secretManager': secret_manager,
@@ -512,6 +484,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def sign_transaction(self, secret_manager, prepared_transaction_data):
         """Sign a transaction.
+
+        Args:
+            secret_manager: One of the supported secret managers.
+            prepared_transaction_data: a prepared transaction to sign.
         """
         return self._call_method('signTransaction', {
             'secretManager': secret_manager,
@@ -520,6 +496,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def submit_payload(self, payload) -> List[HexStr | Block]:
         """Submit a payload in a block.
+
+        Args:
+            payload : The payload to submit.
+
+        Returns:
+            List of HexStr or Block.
         """
         result = self._call_method('postBlockPayload', {
             'payload': payload
@@ -529,11 +511,18 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def listen_mqtt(self, topics: List[str], handler):
         """Listen to MQTT events.
+
+        Args:
+            topics: The topics to listen to.
+            handler: A callback function for MQTT events.
         """
         listen_mqtt(self.handle, topics, handler)
 
     def clear_mqtt_listeners(self, topics: List[str]):
         """Removes all listeners for the provided MQTT topics.
+
+        Args:
+            topics: The topics to stop listening to.
         """
         return self._call_method('clearListeners', {
             'topics': topics

@@ -10,6 +10,14 @@ from typing import Any, Optional, List
 
 
 class PayloadType(Enum):
+    """Block payload types.
+
+    Attributes:
+        TreasuryTransaction (4): A treasury transaction payload.
+        TaggedData (5): A tagged data payload.
+        Transaction (6): A transaction payload.
+        Milestone (7): A milestone payload.
+    """
     TreasuryTransaction = 4
     TaggedData = 5
     Transaction = 6
@@ -17,9 +25,20 @@ class PayloadType(Enum):
 
 
 class Payload():
+    """Base class for `Block` payloads.
+
+    Attributes:
+        type: The type of payload.
+        milestone: A `MilestonePayload` object if it represents a milestone payload.
+        tagged_data: A `TaggedData` object if it represents a tagged data payload.
+        transaction: A `Transaction` object if it represents a transaction payload.
+        treasury_transaction: A `TreasuryTransaction` object if it represents a treasury transaction payload.
+
+    """
+
     def __init__(self, type, milestone: Optional[Any] = None, tagged_data=None,
                  transaction=None, treasury_transaction: Optional[Any] = None):
-        """Initialize a payload
+        """Initialize a payload.
         """
         self.type = type
         self.milestone = milestone
@@ -46,7 +65,19 @@ class Payload():
 
 @dataclass
 class MilestonePayload(Payload):
-    """Initialize a MilestonePayload
+    """A milestone payload.
+
+    Attributes:
+        index: The index of corresponding milestone.
+        timestamp: The timestamp of the corresponding milestone.
+        protocolVersion: The current protocol version.
+        previousMilestoneId: The ID of the previous milestone.
+        parents: The parents of the milestone.
+        inclusionMerkleRoot: The merkle root of all blocks included in the milestone cone.
+        appliedMerkleRoot: The merkle root of all applied transactions in the milestone cone.
+        signatures: The signatures that verify the milestone.
+        options: The milestone options (e.g. receipt milestone option).
+        metadata: Some hex encoded milestone metadata.
     """
     index: int
     timestamp: int
@@ -70,8 +101,15 @@ class MilestonePayload(Payload):
 
 
 class TaggedDataPayload(Payload):
+    """A tagged data payload.
+
+    Attributes:
+        tag: The tag part of the tagged data payload.
+        data: The data part of the tagged data payload.
+    """
+
     def __init__(self, tag: HexStr, data: HexStr):
-        """Initialize a TaggedDataPayload
+        """Initialize a tagged data payload.
         """
         self.tag = tag
         self.data = data
@@ -79,8 +117,15 @@ class TaggedDataPayload(Payload):
 
 
 class TransactionPayload(Payload):
+    """A transaction payload.
+
+    Attributes:
+        essence: The transaction essence.
+        unlocks: The unlocks of the transaction.
+    """
+
     def __init__(self, essence, unlocks):
-        """Initialize a TransactionPayload
+        """Initialize a transaction payload.
         """
         self.essence = essence
         self.unlocks = unlocks

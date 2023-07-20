@@ -9,6 +9,14 @@ from typing import Optional
 
 
 class FeatureType(IntEnum):
+    """Types of features.
+
+    Attributes:
+        Sender (0): The sender feature.
+        Issuer (1): The issuer feature.
+        Metadata (2): The metadata feature.
+        Tag (3): The tag feature.
+    """
     Sender = 0
     Issuer = 1
     Metadata = 2
@@ -17,18 +25,13 @@ class FeatureType(IntEnum):
 
 @dataclass
 class Feature():
-    """Initialize a feature
+    """Base class of a feature.
 
-    Parameters
-    ----------
-    type : FeatureType
-        The type of feature
-    address : Address
-        Issuer or Sender address
-    data : HexStr
-        Hex encoded metadata
-    tag : HexStr
-        Hex encoded tag used to index the output
+    Attributes:
+        type: The type of feature.
+        address: Holds either an issuer or a sender address.
+        data: Some hex encoded metadata.
+        tag: A hex encoded tag used to index an output.
     """
     type: int
     address: Optional[Address] = None
@@ -36,6 +39,8 @@ class Feature():
     tag: Optional[HexStr] = None
 
     def into(self):
+        """Downcast to the actual feature type.
+        """
         match FeatureType(self.type):
             case FeatureType.Sender:
                 return SenderFeature(self.address)
@@ -43,7 +48,7 @@ class Feature():
                 return IssuerFeature(self.address)
             case FeatureType.Metadata:
                 return MetadataFeature(self.data)
-            case FeatureType.Metadata:
+            case FeatureType.Tag:
                 return TagFeature(self.tag)
 
     def as_dict(self):
@@ -54,48 +59,52 @@ class Feature():
 
 
 class SenderFeature(Feature):
+    """Sender feature.
+    """
+
     def __init__(self, sender):
         """Initialize a SenderFeature
 
-        Parameters
-        ----------
-        sender : Address
-            Sender address
+        Args:
+            sender: A given sender address.
         """
         super().__init__(int(FeatureType.Sender), address=sender)
 
 
 class IssuerFeature(Feature):
+    """Issuer feature.
+    """
+
     def __init__(self, issuer):
         """Initialize an IssuerFeature
 
-        Parameters
-        ----------
-        issuer : Address
-            Issuer address
+        Args:
+            issuer: A given issuer address.
         """
         super().__init__(int(FeatureType.Issuer), address=issuer)
 
 
 class MetadataFeature(Feature):
+    """Metadata feature.
+    """
+
     def __init__(self, data: HexStr):
         """Initialize a MetadataFeature
 
-        Parameters
-        ----------
-        data : HexStr
-            Hex encoded metadata
+        Args:
+            data: Some hex encoded metadata.
         """
         super().__init__(int(FeatureType.Metadata), data=data)
 
 
 class TagFeature(Feature):
+    """Tag feature.
+    """
+
     def __init__(self, tag: HexStr):
         """Initialize a TagFeature
 
-        Parameters
-        ----------
-        tag : HexStr
-            Hex encoded tag used to index the output
+        Args:
+            tag: A hex encoded tag used to index the output.
         """
         super().__init__(int(FeatureType.Tag), tag=tag)

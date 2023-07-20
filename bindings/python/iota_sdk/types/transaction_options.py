@@ -9,6 +9,15 @@ from typing import Optional, List
 
 
 class RemainderValueStrategyCustomAddress:
+    """Remainder value strategy for custom addresses.
+
+    Attributes:
+        address: An address to move the remainder value to.
+        key_index: The address key index.
+        internal: Determines if an address is a public or an internal (change) address.
+        used: Indicates whether an address has been used already.
+    """
+
     def __init__(self,
                  address: str,
                  key_index: int,
@@ -24,6 +33,12 @@ class RemainderValueStrategyCustomAddress:
 
 
 class RemainderValueStrategy(Enum):
+    """Remainder value stragegy variants.
+
+    Attributes:
+        ChangeAddress: Allows to move the remainder value to a change address.
+        ReuseAddress: Allows to keep the remainder value on the source address.
+    """
     ChangeAddress = None,
     ReuseAddress = None,
 
@@ -32,6 +47,18 @@ class RemainderValueStrategy(Enum):
 
 
 class TransactionOptions():
+    """Transaction options.
+
+    Attributes:
+        remainder_value_strategy: The strategy applied for base coin remainders.
+        tagged_data_payload: An optional tagged data payload.
+        custom_inputs: If custom inputs are provided only those are used. If also other additional inputs should be used, `mandatory_inputs` should be used instead.
+        mandatory_inputs: Inputs that must be used for the transaction.
+        burn: Specifies what needs to be burned during input selection.
+        note: A string attached to the transaction.
+        allow_micro_amount: Whether to allow sending a micro amount.
+    """
+
     def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
                  tagged_data_payload: Optional[TaggedDataPayload] = None,
                  custom_inputs: Optional[List[OutputId]] = None,
@@ -39,7 +66,7 @@ class TransactionOptions():
                  burn: Optional[Burn] = None,
                  note: Optional[str] = None,
                  allow_micro_amount: Optional[bool] = None):
-        """Initialize TransactionOptions
+        """Initialize transaction options.
         """
         self.remainder_value_strategy = remainder_value_strategy
         self.tagged_data_payload = tagged_data_payload
