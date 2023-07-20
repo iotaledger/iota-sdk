@@ -65,7 +65,6 @@ fn verify_output<const VERIFY: bool>(output: &Output, _: &ProtocolParameters) ->
     }
 }
 
-#[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 

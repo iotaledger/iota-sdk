@@ -331,8 +331,7 @@ fn verify_payload_packable<const VERIFY: bool>(
     verify_payload::<VERIFY>(payload)
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::{
         boxed::Box,
         string::{String, ToString},
