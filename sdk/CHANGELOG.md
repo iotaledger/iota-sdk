@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Migrated storage types field casing to uniform camelCase;
 - Replaced inappropriate serde impls from `AccountDetails` with fn impls for conversion;
+- `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
 
 ### Removed
 
