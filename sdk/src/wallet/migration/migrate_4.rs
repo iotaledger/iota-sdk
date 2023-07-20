@@ -196,7 +196,7 @@ fn migrate_transaction(transaction: &mut serde_json::Value) -> Result<()> {
         .as_object_mut()
         .ok_or(Error::Storage("malformatted transaction".to_owned()))?;
     check_omitted_str("note", transaction, "");
-    check_omitted_str("blockId", transaction, "");
+    check_omitted_opt("blockId", transaction);
 
     for output in transaction["payload"]["essence"]["outputs"]
         .as_array_mut()
