@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 from typing import Optional, List
-from iota_sdk.types.address import Address
+from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.output import Output, OutputMetadata
 from iota_sdk.types.payload import RegularTransactionEssence, TransactionPayload
 from iota_sdk.types.signature import Bip44
@@ -44,7 +44,7 @@ class RemainderData:
         chain: The BIP44 chain for the remainder address.
     """
     output: Output
-    address: Address
+    address: Ed25519Address | AliasAddress | NFTAddress
     chain: Optional[Bip44] = None
 
     def as_dict(self):

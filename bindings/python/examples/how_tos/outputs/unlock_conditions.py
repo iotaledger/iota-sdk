@@ -16,7 +16,7 @@ address_unlock_condition = AddressUnlockCondition(
     Ed25519Address(hex_address)
 )
 
-token_scheme = TokenScheme(50, 0, 100)
+token_scheme = SimpleTokenScheme(50, 0, 100)
 
 # Most simple output
 basic_output = client.build_basic_output(
@@ -83,4 +83,4 @@ foundry_output = client.build_foundry_output(
 )
 outputs.append(foundry_output)
 
-print(json.dumps(outputs, indent=2))
+print(json.dumps(list(map(lambda o: o.as_dict(), outputs)), indent=2))

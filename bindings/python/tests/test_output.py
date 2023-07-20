@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Output, Feature, IssuerFeature, MetadataFeature
+from iota_sdk import Output, Feature, SenderFeature, IssuerFeature, MetadataFeature
 from dacite import from_dict
 
 
@@ -11,10 +11,8 @@ def test_feature():
         "type": 2,
         "data": "0x426c61"
     }
-    feature = from_dict(Feature, feature_dict)
-    sender_feature = feature.into()
-    assert isinstance(sender_feature, MetadataFeature)
-    assert sender_feature.as_dict() == feature_dict
+    metadata_feature = from_dict(MetadataFeature, feature_dict)
+    assert metadata_feature.as_dict() == feature_dict
 
     issuer_dict = {
         "type": 1,
@@ -23,9 +21,7 @@ def test_feature():
             "pubKeyHash": "0xd970bcafdc18859b3fd3380f759bb520c36a29bd682b130623c6604ce3526ea1"
         }
     }
-    feature = from_dict(Feature, issuer_dict)
-    issuer_feature = feature.into()
-    assert isinstance(issuer_feature, IssuerFeature)
+    issuer_feature = from_dict(IssuerFeature, issuer_dict)
     assert issuer_feature.as_dict() == issuer_dict
 
 

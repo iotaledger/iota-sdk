@@ -6,10 +6,10 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import Dict, Optional, List
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.feature import Feature
+from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
-from iota_sdk.types.token_scheme import TokenScheme
-from iota_sdk.types.unlock_condition import UnlockCondition
+from iota_sdk.types.token_scheme import SimpleTokenScheme
+from iota_sdk.types.unlock_condition import AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -64,17 +64,20 @@ class Output():
     type: int
     # TODO: split into different outputs
     amount: str
-    unlockConditions: List[UnlockCondition]
+    unlockConditions: List[AddressUnlockCondition | ExpirationUnlockCondition | StorageDepositReturnUnlockCondition |
+                           TimelockUnlockCondition | StateControllerAddressUnlockCondition | GovernorAddressUnlockCondition | ImmutableAliasAddressUnlockCondition]
     aliasId: Optional[HexStr] = None
     nftId: Optional[HexStr] = None
     stateIndex: Optional[int] = None
     stateMetadata: Optional[HexStr] = None
     foundryCounter: Optional[int] = None
-    features: Optional[List[Feature]] = None
+    features: Optional[List[SenderFeature | IssuerFeature |
+                            MetadataFeature | TagFeature]] = None
     nativeTokens: Optional[List[NativeToken]] = None
-    immutableFeatures: Optional[List[Feature]] = None
+    immutableFeatures: Optional[List[SenderFeature |
+                                     IssuerFeature | MetadataFeature | TagFeature]] = None
     serialNumber: Optional[int] = None
-    tokenScheme: Optional[TokenScheme] = None
+    tokenScheme: Optional[SimpleTokenScheme] = None
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}

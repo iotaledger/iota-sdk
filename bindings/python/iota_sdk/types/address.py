@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk.types.common import HexStr
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 
 
 class AddressType(IntEnum):
@@ -23,59 +22,47 @@ class AddressType(IntEnum):
 @dataclass
 class Address():
     """Base class for addresses.
-
-     Attributes:
-        type: The address type.
-        pubKeyHash: The hex encoded public key hash.
-        aliasId: The hex encoded alias id.
-        nftId: The hex encoded nft id.
     """
     type: int
-    pubKeyHash: Optional[HexStr] = None
-    aliasId: Optional[HexStr] = None
-    nftId: Optional[HexStr] = None
 
     def as_dict(self):
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
+@dataclass
 class Ed25519Address(Address):
     """Represents an Ed25519 address.
+    Args:
+        pubKeyHash: The hex encoded Ed25519 public key hash.
     """
-
-    def __init__(self, address: HexStr):
-        """Initialize an Ed25519Address
-
-        Args:
-            address: The hex encoded address to use.
-        """
-        super().__init__(AddressType.ED25519, pubKeyHash=address)
+    pubKeyHash: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            AddressType.ED25519),
+        init=False)
 
 
+@dataclass
 class AliasAddress(Address):
     """Represents an Alias address.
+    Args:
+        aliasId: The hex encoded alias id.
     """
-
-    def __init__(self, address_or_id: HexStr):
-        """Initialize an AliasAddress
-
-        Args:
-            address_or_id: The hex encoded address to use.
-        """
-        super().__init__(AddressType.ALIAS, aliasId=address_or_id)
+    aliasId: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            AddressType.ALIAS),
+        init=False)
 
 
+@dataclass
 class NFTAddress(Address):
     """Represents an NFT address.
+    Args:
+        nftId: The hex encoded NFT id.
     """
-
-    def __init__(self, address_or_id: HexStr):
-        """Initialize an NFTAddress
-
-        Args:
-            address_or_id: The hex encoded address to use.
-        """
-        super().__init__(AddressType.NFT, nftId=address_or_id)
+    nftId: HexStr
+    type: int = field(default_factory=lambda: int(AddressType.NFT), init=False)
 
 
 @dataclass
