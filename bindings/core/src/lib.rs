@@ -42,11 +42,11 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 #[derivative(Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
-    storage_path: Option<String>,
-    client_options: Option<ClientOptions>,
-    coin_type: Option<u32>,
+    pub storage_path: Option<String>,
+    pub client_options: Option<ClientOptions>,
+    pub coin_type: Option<u32>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-    secret_manager: Option<SecretManagerDto>,
+    pub secret_manager: Option<SecretManagerDto>,
 }
 
 impl WalletOptions {
