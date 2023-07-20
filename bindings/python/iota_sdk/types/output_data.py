@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.output import Output, OutputMetadata
+from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput, OutputMetadata
 from iota_sdk.types.signature import Bip44
 
 
@@ -27,7 +27,7 @@ class OutputData():
 
     outputId: HexStr
     metadata: OutputMetadata
-    output: Output
+    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
     isSpent: bool
     address: Ed25519Address | AliasAddress | NFTAddress
     networkId: str

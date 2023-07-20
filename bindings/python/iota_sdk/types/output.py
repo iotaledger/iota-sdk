@@ -258,7 +258,7 @@ class OutputWithMetadata:
     """
 
     metadata: OutputMetadata
-    output: Output
+    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
 
     @classmethod
     def from_dict(cls, dict: Dict) -> OutputWithMetadata:
