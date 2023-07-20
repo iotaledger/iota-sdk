@@ -169,7 +169,6 @@ class HighLevelAPI():
                              for block_id_and_block in result]
         return blockIdsAndBlocks
 
-
     def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
                           StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions) -> str:
         """Function to consolidate all funds from a range of addresses to the address with the lowest index in that range.

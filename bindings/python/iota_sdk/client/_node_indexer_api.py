@@ -110,7 +110,8 @@ class NodeIndexerAPI():
             self.items = [OutputId.from_string(
                 output_id) for output_id in dict["items"]]
 
-    def basic_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
+    def basic_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch basic output IDs from the given query parameters.
 
         Returns:
@@ -124,7 +125,8 @@ class NodeIndexerAPI():
         })
         return self.OutputIdsResponse(response)
 
-    def alias_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
+    def alias_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch alias output IDs from the given query parameters.
 
         Returns:
@@ -148,7 +150,8 @@ class NodeIndexerAPI():
             'aliasId': alias_id
         }))
 
-    def nft_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
+    def nft_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch NFT output IDs from the given query parameters.
 
         Returns:
@@ -172,7 +175,8 @@ class NodeIndexerAPI():
             'nftId': nft_id
         }))
 
-    def foundry_output_ids(self, query_parameters: QueryParameters) -> OutputIdsResponse:
+    def foundry_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch foundry Output IDs from the given query parameters.
 
         Returns:

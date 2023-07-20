@@ -76,7 +76,8 @@ class Account:
         return AccountMetadata(
             self.meta["alias"], self.meta["coinType"], self.meta["index"])
 
-    def prepare_burn(self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+    def prepare_burn(
+            self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
         """A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and aliases.
         """
         prepared = self._call_account_method(
@@ -313,7 +314,8 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def prepare_mint_nfts(self, params: List[MintNftParams], options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
+    def prepare_mint_nfts(self, params: List[MintNftParams],
+                          options: Optional[TransactionOptions] = None) -> PreparedTransactionData:
         """Mint NFTs.
         """
         prepared = self._call_account_method(
@@ -331,7 +333,8 @@ class Account:
             'getBalance'
         ))
 
-    def prepare_output(self, output_options, transaction_options: Optional[TransactionOptions] = None):
+    def prepare_output(self, output_options,
+                       transaction_options: Optional[TransactionOptions] = None):
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full

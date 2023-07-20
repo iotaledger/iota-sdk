@@ -80,7 +80,8 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
+                 SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
         """Initialize a secret manager.
 
         Args:
@@ -118,13 +119,13 @@ class SecretManager():
             return response
 
     def generate_ed25519_addresses(self,
-                           account_index: Optional[int] = None,
-                           start: Optional[int] = None,
-                           end: Optional[int] = None,
-                           internal: Optional[bool] = None,
-                           coin_type: Optional[int] = None,
-                           bech32_hrp: Optional[str] = None,
-                           ledger_nano_prompt: Optional[bool] = None):
+                                   account_index: Optional[int] = None,
+                                   start: Optional[int] = None,
+                                   end: Optional[int] = None,
+                                   internal: Optional[bool] = None,
+                                   coin_type: Optional[int] = None,
+                                   bech32_hrp: Optional[str] = None,
+                                   ledger_nano_prompt: Optional[bool] = None):
         """Generate Ed25519 addresses.
 
         Args:
@@ -171,12 +172,12 @@ class SecretManager():
         })
 
     def generate_evm_addresses(self,
-                           account_index: Optional[int] = None,
-                           start: Optional[int] = None,
-                           end: Optional[int] = None,
-                           internal: Optional[bool] = None,
-                           coin_type: Optional[int] = None,
-                           ledger_nano_prompt: Optional[bool] = None):
+                               account_index: Optional[int] = None,
+                               start: Optional[int] = None,
+                               end: Optional[int] = None,
+                               internal: Optional[bool] = None,
+                               coin_type: Optional[int] = None,
+                               ledger_nano_prompt: Optional[bool] = None):
         """Generate EVM addresses.
 
         Args:

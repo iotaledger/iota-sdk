@@ -18,7 +18,8 @@ class Wallet():
         handle: The wallet handle.
     """
 
-    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
+    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None,
+                 secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
         """Initialize `self`.
         """
 

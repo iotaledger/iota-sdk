@@ -104,7 +104,8 @@ class Utils():
         })
 
     @staticmethod
-    def compute_foundry_id(alias_id: HexStr, serial_number: int, token_scheme_kind: int) -> HexStr:
+    def compute_foundry_id(alias_id: HexStr, serial_number: int,
+                           token_scheme_kind: int) -> HexStr:
         """Compute the foundry id.
         """
         return _call_method('computeFoundryId', {
@@ -148,7 +149,8 @@ class Utils():
         }))
 
     @staticmethod
-    def compute_token_id(alias_id: HexStr, serial_number: int, token_scheme_kind: int) -> HexStr:
+    def compute_token_id(alias_id: HexStr, serial_number: int,
+                         token_scheme_kind: int) -> HexStr:
         """Compute a token id from the alias id, serial number and token scheme type.
         """
         return _call_method('computeTokenId', {
@@ -174,7 +176,8 @@ class Utils():
         })
 
     @staticmethod
-    def verify_ed25519_signature(signature: Ed25519Signature, message: HexStr) -> bool:
+    def verify_ed25519_signature(
+            signature: Ed25519Signature, message: HexStr) -> bool:
         """Verify an Ed25519 signature against a message.
         """
         return _call_method('verifyEd25519Signature', {
@@ -183,7 +186,8 @@ class Utils():
         })
 
     @staticmethod
-    def verify_secp256k1_ecdsa_signature(public_key: HexStr, signature: HexStr, message: HexStr) -> bool:
+    def verify_secp256k1_ecdsa_signature(
+            public_key: HexStr, signature: HexStr, message: HexStr) -> bool:
         """Verify a Secp256k1Ecdsa signature against a message.
         """
         return _call_method('verifySecp256k1EcdsaSignature', {

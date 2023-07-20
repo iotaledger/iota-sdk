@@ -52,7 +52,8 @@ class PreparedTransactionData:
         """Sign a prepared transaction essence using the account's private key and returns
         the signed transaction essence.
         """
-        return self.account.sign_transaction_essence(self.prepared_transaction_data())
+        return self.account.sign_transaction_essence(
+            self.prepared_transaction_data())
 
     def sign_and_submit_transaction(self) -> Transaction:
         """Sign and submit a transaction using prepared transaction data.
@@ -60,8 +61,8 @@ class PreparedTransactionData:
         Returns:
             The transaction after it has been signed and submitted.
         """
-        return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
-
+        return self.account.sign_and_submit_transaction(
+            self.prepared_transaction_data())
 
 
 class PreparedCreateTokenTransaction(PreparedTransactionData):

@@ -52,7 +52,7 @@ class Feature():
                 return TagFeature(self.tag)
 
     def as_dict(self):
-        res = {k: v for k, v in self.__dict__.items() if v != None}
+        res = {k: v for k, v in self.__dict__.items() if v is not None}
         if 'address' in res:
             res['address'] = res['address'].as_dict()
         return res
