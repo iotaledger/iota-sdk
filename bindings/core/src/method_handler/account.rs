@@ -309,7 +309,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .sign_and_submit_transaction(
-                    PreparedTransactionData::try_from_dto_unverified(prepared_transaction_data)?,
+                    PreparedTransactionData::try_from_dto(
+                        prepared_transaction_data,
+                        &account.client().get_protocol_parameters().await?,
+                    )?,
                     None,
                 )
                 .await?;
