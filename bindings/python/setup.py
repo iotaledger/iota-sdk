@@ -5,6 +5,13 @@ import platform
 from setuptools import setup
 from setuptools_rust import RustExtension
 
+try:
+    # for pip >= 10
+    from pip._internal.req import parse_requirements
+except ImportError:
+    # for pip <= 9.0.3
+    from pip.req import parse_requirements
+
 
 def get_py_version_cfgs():
     # For now each Cfg Py_3_X flag is interpreted as "at least 3.X"
@@ -18,6 +25,11 @@ def get_py_version_cfgs():
         out_cfg.append("--cfg=PyPy")
 
     return out_cfg
+
+
+def load_requirements(fname):
+    reqs = parse_requirements(fname, session="test")
+    return [str(ir.req) for ir in reqs]
 
 
 setup(
@@ -41,8 +53,5 @@ setup(
     ],
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        '<pyhumps> >= <3.8.0>',
-        '<dacite>'
-    ]
+    install_requires=load_requirements("requirements-dev.txt")
 )
