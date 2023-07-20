@@ -38,6 +38,7 @@ wallet.store_mnemonic(os.environ['MNEMONIC'])
 account = wallet.create_account('Alice', "rms")
 print("Account created:", account.get_metadata())
 
+# Get the addresses from the account (by default only one)
 addresses = account.addresses()
 
 json_data = json.dumps(list(map(lambda x: x.__dict__, addresses)), indent=4)
