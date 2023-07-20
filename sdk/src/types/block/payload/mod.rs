@@ -33,11 +33,6 @@ use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 pub enum Payload {
     /// A transaction payload.
     Transaction(Box<TransactionPayload>),
@@ -144,7 +139,6 @@ impl Packable for Payload {
 /// Representation of an optional [`Payload`].
 /// Essentially an `Option<Payload>` with a different [`Packable`] implementation, to conform to specs.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OptionalPayload(Option<Payload>);
 
 impl OptionalPayload {

@@ -33,7 +33,7 @@ fn new_valid() {
             rand_parents(),
             rand_merkle_root(),
             rand_merkle_root(),
-            vec![],
+            [],
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .is_ok()
@@ -87,7 +87,7 @@ fn getters() {
         parents.clone(),
         inclusion_merkle_root,
         applied_merkle_root,
-        vec![],
+        [],
         options,
     )
     .unwrap();
@@ -128,7 +128,7 @@ fn pack_unpack_valid() {
         rand_parents(),
         rand_merkle_root(),
         rand_merkle_root(),
-        vec![],
+        [],
         MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();

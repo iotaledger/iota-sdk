@@ -30,14 +30,17 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct NodeManagerBuilder {
     /// Node which will be tried first for all requests
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub primary_node: Option<NodeDto>,
     /// Node which will be tried first when using remote PoW, even before the primary_node
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub primary_pow_node: Option<NodeDto>,
     /// Nodes
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub nodes: HashSet<NodeDto>,
     /// Permanodes
-    pub permanodes: Option<HashSet<NodeDto>>,
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
+    pub permanodes: HashSet<NodeDto>,
     /// If the node health should be ignored
     #[serde(default)]
     pub ignore_node_health: bool,
@@ -137,24 +140,12 @@ impl NodeManagerBuilder {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        match self.permanodes {
-            Some(ref mut permanodes) => {
-                permanodes.insert(NodeDto::Node(Node {
-                    url,
-                    auth,
-                    disabled: false,
-                }));
-            }
-            None => {
-                let mut permanodes = HashSet::new();
-                permanodes.insert(NodeDto::Node(Node {
-                    url,
-                    auth,
-                    disabled: false,
-                }));
-                self.permanodes.replace(permanodes);
-            }
-        }
+        self.permanodes.insert(NodeDto::Node(Node {
+            url,
+            auth,
+            disabled: false,
+        }));
+
         Ok(self)
     }
 
@@ -220,12 +211,10 @@ impl NodeManagerBuilder {
 
     pub(crate) fn build(self, healthy_nodes: HashMap<Node, InfoResponse>) -> NodeManager {
         NodeManager {
-            primary_node: self.primary_node.map(|node| node.into()),
-            primary_pow_node: self.primary_pow_node.map(|node| node.into()),
-            nodes: self.nodes.into_iter().map(|node| node.into()).collect(),
-            permanodes: self
-                .permanodes
-                .map(|nodes| nodes.into_iter().map(|node| node.into()).collect()),
+            primary_node: self.primary_node.map(Into::into),
+            primary_pow_node: self.primary_pow_node.map(Into::into),
+            nodes: self.nodes.into_iter().map(Into::into).collect(),
+            permanodes: self.permanodes.into_iter().map(Into::into).collect(),
             ignore_node_health: self.ignore_node_health,
             node_sync_interval: self.node_sync_interval,
             healthy_nodes: RwLock::new(healthy_nodes),
@@ -243,7 +232,7 @@ impl Default for NodeManagerBuilder {
             primary_node: None,
             primary_pow_node: None,
             nodes: HashSet::new(),
-            permanodes: None,
+            permanodes: HashSet::new(),
             ignore_node_health: false,
             node_sync_interval: NODE_SYNC_INTERVAL,
             quorum: false,
@@ -268,10 +257,7 @@ impl From<&NodeManager> for NodeManagerBuilder {
             primary_node: value.primary_node.clone().map(NodeDto::Node),
             primary_pow_node: value.primary_pow_node.clone().map(NodeDto::Node),
             nodes: value.nodes.iter().cloned().map(NodeDto::Node).collect(),
-            permanodes: value
-                .permanodes
-                .as_ref()
-                .map(|p| p.iter().cloned().map(NodeDto::Node).collect()),
+            permanodes: value.permanodes.iter().cloned().map(NodeDto::Node).collect(),
             ignore_node_health: value.ignore_node_health,
             node_sync_interval: value.node_sync_interval,
             quorum: value.quorum,

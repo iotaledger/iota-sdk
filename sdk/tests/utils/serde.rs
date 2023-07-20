@@ -25,7 +25,7 @@ pub struct SerdeOptionStringTest {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SerdeOptionPrefixHexVecTest {
-    #[serde(default, with = "iota_sdk::utils::serde::option_prefix_hex_vec")]
+    #[serde(default, with = "iota_sdk::utils::serde::option_prefix_hex_bytes")]
     pub metadata: Option<Vec<u8>>,
 }
 
@@ -61,7 +61,7 @@ fn serde_option_string() {
 }
 
 #[test]
-fn serde_option_prefix_hex_vec() {
+fn serde_option_prefix_hex_bytes() {
     let metadata = prefix_hex::decode(BLOCK_ID).unwrap();
     let test_1 = SerdeOptionPrefixHexVecTest {
         metadata: Some(metadata),

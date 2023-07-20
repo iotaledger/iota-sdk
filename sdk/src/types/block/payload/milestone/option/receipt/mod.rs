@@ -28,7 +28,6 @@ pub(crate) type ReceiptFundsCount =
 
 /// Receipt is a listing of migrated funds.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct ReceiptMilestoneOption {

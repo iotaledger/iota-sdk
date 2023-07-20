@@ -32,7 +32,7 @@ pub struct NodeManager {
     pub(crate) primary_node: Option<Node>,
     primary_pow_node: Option<Node>,
     pub(crate) nodes: HashSet<Node>,
-    permanodes: Option<HashSet<Node>>,
+    permanodes: HashSet<Node>,
     pub(crate) ignore_node_health: bool,
     node_sync_interval: Duration,
     pub(crate) healthy_nodes: RwLock<HashMap<Node, InfoResponse>>,
@@ -73,26 +73,24 @@ impl NodeManager {
         let mut nodes_with_modified_url: Vec<Node> = Vec::new();
 
         if prefer_permanode || (path == "api/core/v2/blocks" && query.is_some()) {
-            if let Some(permanodes) = self.permanodes.clone() {
-                for permanode in permanodes {
-                    if !nodes_with_modified_url.iter().any(|n| n.url == permanode.url) {
-                        nodes_with_modified_url.push(permanode);
-                    }
+            for permanode in &self.permanodes {
+                if !nodes_with_modified_url.iter().any(|n| n.url == permanode.url) {
+                    nodes_with_modified_url.push(permanode.clone());
                 }
             }
         }
 
         if use_pow_nodes {
-            if let Some(pow_node) = self.primary_pow_node.clone() {
+            if let Some(pow_node) = &self.primary_pow_node {
                 if !nodes_with_modified_url.iter().any(|n| n.url == pow_node.url) {
-                    nodes_with_modified_url.push(pow_node);
+                    nodes_with_modified_url.push(pow_node.clone());
                 }
             }
         }
 
-        if let Some(primary_node) = self.primary_node.clone() {
+        if let Some(primary_node) = &self.primary_node {
             if !nodes_with_modified_url.iter().any(|n| n.url == primary_node.url) {
-                nodes_with_modified_url.push(primary_node);
+                nodes_with_modified_url.push(primary_node.clone());
             }
         }
 
