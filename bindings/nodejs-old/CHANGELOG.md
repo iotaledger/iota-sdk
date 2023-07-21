@@ -1,5 +1,14 @@
 # Changelog
 
+## \[2.0.3-rc.41]
+
+- [`feef5577`](https://github.com/iotaledger/iota-sdk/commit/feef557757f4b6ad6d4e4a9a57b1b692387eb7ea)([#816](https://github.com/iotaledger/iota-sdk/pull/816)) Add `TransactionProgressWalletEvent::getProgress` method.
+  Export `TransactionProgressType`.
+- [`3502a3fe`](https://github.com/iotaledger/iota-sdk/commit/3502a3fecc8541604dbc4f1b325c7dd1a1db57f6)([#842](https://github.com/iotaledger/iota-sdk/pull/842)) Added optional `FilterOptions::{aliasIds, foundryIds, nftIds}` fields;
+- [`0edcaf59`](https://github.com/iotaledger/iota-sdk/commit/0edcaf5908c9ed31da485b99e9f0f45205e7c63f)([#837](https://github.com/iotaledger/iota-sdk/pull/837)) Make properties in classes event classes public;
+  Remove getters from event classes;
+  Change type of `transactionInputs` from `[IOutputResponse]` `to IOutputResponse[]` in class `NewOutputWalletEvent`;
+
 ## \[2.0.3-rc.40]
 
 - [`7746abaa`](https://github.com/iotaledger/iota-sdk/commit/7746abaa0c2cd63567d4cb4ba6ca9addb62aa5db)([#653](https://github.com/iotaledger/iota-sdk/pull/653)) Rename `Account::mintNativeToken` to `createNativeToken`, `Account::increaseNativeTokenSupply` to `mintNativeToken`, `Account::decreaseNativeTokenSupply` to `meltNativeToken`;
