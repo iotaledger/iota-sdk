@@ -23,8 +23,8 @@ async function run() {
         });
 
         const callback = function (err: any, event: Event) {
-            console.log('AccountIndex:', event.getAccountIndex());
-            console.log('Event:', event.getEvent());
+            console.log('AccountIndex:', event.accountIndex);
+            console.log('Event:', event.event);
 
             // Exit after receiving an event.
             process.exit(0);
