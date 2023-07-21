@@ -4,7 +4,7 @@ on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/core.yml"
+      - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -13,7 +13,7 @@ on:
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/core.yml"
+      - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
