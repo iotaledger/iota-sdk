@@ -212,7 +212,6 @@ impl Packable for OptionalPayload {
     }
 }
 
-#[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 

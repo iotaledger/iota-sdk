@@ -128,8 +128,7 @@ impl Packable for Ed25519Signature {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::string::String;
 
     use serde::{Deserialize, Serialize};

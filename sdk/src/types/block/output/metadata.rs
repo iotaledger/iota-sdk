@@ -123,19 +123,19 @@ mod dto {
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct OutputMetadataDto {
-        pub block_id: BlockId,
-        pub transaction_id: TransactionId,
-        pub output_index: u16,
-        pub is_spent: bool,
+        block_id: BlockId,
+        transaction_id: TransactionId,
+        output_index: u16,
+        is_spent: bool,
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub milestone_index_spent: Option<u32>,
+        milestone_index_spent: Option<u32>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub milestone_timestamp_spent: Option<u32>,
+        milestone_timestamp_spent: Option<u32>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub transaction_id_spent: Option<TransactionId>,
-        pub milestone_index_booked: u32,
-        pub milestone_timestamp_booked: u32,
-        pub ledger_index: u32,
+        transaction_id_spent: Option<TransactionId>,
+        milestone_index_booked: u32,
+        milestone_timestamp_booked: u32,
+        ledger_index: u32,
     }
 
     impl TryFrom<OutputMetadataDto> for OutputMetadata {

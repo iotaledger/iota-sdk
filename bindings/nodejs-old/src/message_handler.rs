@@ -12,9 +12,9 @@ use iota_sdk_bindings_core::{
         },
     },
     message_interface_old::{
-        create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
-        WalletMessageHandler,
+        create_message_handler, init_logger as init_logger_rust, Message, Response, WalletMessageHandler,
     },
+    WalletOptions,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;
@@ -34,7 +34,7 @@ type JsCallback = Root<JsFunction<JsObject>>;
 
 impl MessageHandler {
     fn new(channel: Channel, options: String) -> Result<Self> {
-        let manager_options = serde_json::from_str::<ManagerOptions>(&options)?;
+        let manager_options = serde_json::from_str::<WalletOptions>(&options)?;
 
         let wallet_message_handler =
             crate::RUNTIME.block_on(async move { create_message_handler(Some(manager_options)).await })?;

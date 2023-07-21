@@ -499,7 +499,6 @@ mod test {
     }
 }
 
-#[allow(missing_docs)]
 pub mod dto {
     use alloc::format;
 
