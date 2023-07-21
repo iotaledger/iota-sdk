@@ -38,6 +38,8 @@ class Feature():
 @dataclass
 class SenderFeature(Feature):
     """Sender feature.
+    Attributes:
+        address: A given sender address.
     """
     address: Ed25519Address | AliasAddress | NFTAddress
     type: int = field(
@@ -49,6 +51,8 @@ class SenderFeature(Feature):
 @dataclass
 class IssuerFeature(Feature):
     """Issuer feature.
+    Attributes:
+        address: A given issuer address.
     """
     address: Ed25519Address | AliasAddress | NFTAddress
     type: int = field(
@@ -60,6 +64,8 @@ class IssuerFeature(Feature):
 @dataclass
 class MetadataFeature(Feature):
     """Metadata feature.
+    Attributes:
+        data: Some hex encoded metadata.
     """
     data: HexStr
     type: int = field(
@@ -71,6 +77,8 @@ class MetadataFeature(Feature):
 @dataclass
 class TagFeature(Feature):
     """Tag feature.
+    Attributes:
+        tag: A hex encoded tag used to index the output.
     """
     tag: HexStr
     type: int = field(default_factory=lambda: int(FeatureType.Tag), init=False)

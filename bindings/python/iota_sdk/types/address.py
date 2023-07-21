@@ -32,7 +32,7 @@ class Address():
 @dataclass
 class Ed25519Address(Address):
     """Represents an Ed25519 address.
-    Args:
+    Attributes:
         pubKeyHash: The hex encoded Ed25519 public key hash.
     """
     pubKeyHash: HexStr
@@ -45,7 +45,7 @@ class Ed25519Address(Address):
 @dataclass
 class AliasAddress(Address):
     """Represents an Alias address.
-    Args:
+    Attributes:
         aliasId: The hex encoded alias id.
     """
     aliasId: HexStr
@@ -58,7 +58,7 @@ class AliasAddress(Address):
 @dataclass
 class NFTAddress(Address):
     """Represents an NFT address.
-    Args:
+    Attributes:
         nftId: The hex encoded NFT id.
     """
     nftId: HexStr
