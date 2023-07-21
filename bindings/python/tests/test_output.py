@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Output, Feature, IssuerFeature, MetadataFeature
+from iota_sdk import BasicOutput, AliasOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
 
 
@@ -11,10 +11,8 @@ def test_feature():
         "type": 2,
         "data": "0x426c61"
     }
-    feature = from_dict(Feature, feature_dict)
-    sender_feature = feature.into()
-    assert isinstance(sender_feature, MetadataFeature)
-    assert sender_feature.as_dict() == feature_dict
+    metadata_feature = from_dict(MetadataFeature, feature_dict)
+    assert metadata_feature.as_dict() == feature_dict
 
     issuer_dict = {
         "type": 1,
@@ -23,9 +21,7 @@ def test_feature():
             "pubKeyHash": "0xd970bcafdc18859b3fd3380f759bb520c36a29bd682b130623c6604ce3526ea1"
         }
     }
-    feature = from_dict(Feature, issuer_dict)
-    issuer_feature = feature.into()
-    assert isinstance(issuer_feature, IssuerFeature)
+    issuer_feature = from_dict(IssuerFeature, issuer_dict)
     assert issuer_feature.as_dict() == issuer_dict
 
 
@@ -43,7 +39,7 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(Output, basic_output_dict)
+    basic_output = from_dict(BasicOutput, basic_output_dict)
     assert basic_output.as_dict() == basic_output_dict
 
     basic_output_dict = {
@@ -81,7 +77,7 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(Output, basic_output_dict)
+    basic_output = from_dict(BasicOutput, basic_output_dict)
     assert basic_output.as_dict() == basic_output_dict
 
     basic_output_dict = {
@@ -107,7 +103,7 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(Output, basic_output_dict)
+    basic_output = from_dict(BasicOutput, basic_output_dict)
     assert basic_output.as_dict() == basic_output_dict
 
     alias_output_dict = {
@@ -143,7 +139,7 @@ def test_output():
             }
         ]
     }
-    alias_output = from_dict(Output, alias_output_dict)
+    alias_output = from_dict(AliasOutput, alias_output_dict)
     assert alias_output.as_dict() == alias_output_dict
 
     alias_output_dict = {
@@ -183,7 +179,7 @@ def test_output():
             }
         ]
     }
-    alias_output = from_dict(Output, alias_output_dict)
+    alias_output = from_dict(AliasOutput, alias_output_dict)
     assert alias_output.as_dict() == alias_output_dict
 
     foundry_output_dict = {
@@ -212,7 +208,7 @@ def test_output():
             }
         ]
     }
-    foundry_output = from_dict(Output, foundry_output_dict)
+    foundry_output = from_dict(FoundryOutput, foundry_output_dict)
     assert foundry_output.as_dict() == foundry_output_dict
 
     nft_output_dict = {
@@ -241,5 +237,5 @@ def test_output():
             }
         ]
     }
-    nft_output = from_dict(Output, nft_output_dict)
+    nft_output = from_dict(NftOutput, nft_output_dict)
     assert nft_output.as_dict() == nft_output_dict

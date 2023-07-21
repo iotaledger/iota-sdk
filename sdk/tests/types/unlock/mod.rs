@@ -1,9 +1,14 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod alias;
+mod nft;
+mod reference;
+mod signature;
+
 use iota_sdk::types::block::{
     rand::signature::rand_signature,
-    unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+    unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
@@ -12,6 +17,8 @@ use packable::bounded::TryIntoBoundedU16Error;
 fn kind() {
     assert_eq!(Unlock::from(SignatureUnlock::from(rand_signature())).kind(), 0);
     assert_eq!(Unlock::from(ReferenceUnlock::new(0).unwrap()).kind(), 1);
+    assert_eq!(Unlock::from(AliasUnlock::new(0).unwrap()).kind(), 2);
+    assert_eq!(Unlock::from(NftUnlock::new(0).unwrap()).kind(), 3);
 }
 
 #[test]
@@ -133,4 +140,48 @@ fn get_signature_through_reference() {
             .get(1),
         Some(&signature)
     );
+}
+
+#[test]
+fn invalid_alias_0() {
+    assert!(matches!(
+        Unlocks::new([
+            AliasUnlock::new(0).unwrap().into(),
+            SignatureUnlock::from(rand_signature()).into(),
+        ]),
+        Err(Error::InvalidUnlockAlias(0)),
+    ));
+}
+
+#[test]
+fn invalid_alias_index() {
+    assert!(matches!(
+        Unlocks::new([
+            SignatureUnlock::from(rand_signature()).into(),
+            AliasUnlock::new(2).unwrap().into(),
+        ]),
+        Err(Error::InvalidUnlockAlias(1)),
+    ));
+}
+
+#[test]
+fn invalid_nft_0() {
+    assert!(matches!(
+        Unlocks::new([
+            NftUnlock::new(0).unwrap().into(),
+            SignatureUnlock::from(rand_signature()).into(),
+        ]),
+        Err(Error::InvalidUnlockNft(0)),
+    ));
+}
+
+#[test]
+fn invalid_nft_index() {
+    assert!(matches!(
+        Unlocks::new([
+            SignatureUnlock::from(rand_signature()).into(),
+            NftUnlock::new(2).unwrap().into(),
+        ]),
+        Err(Error::InvalidUnlockNft(1)),
+    ));
 }

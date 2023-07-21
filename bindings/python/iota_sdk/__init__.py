@@ -13,6 +13,7 @@ from .prefix_hex import *
 from .types.address import *
 from .types.balance import *
 from .types.block import *
+from .types.block_builder_options import *
 from .types.burn import *
 from .types.client_options import *
 from .types.common import *
@@ -35,3 +36,4 @@ from .types.transaction_data import *
 from .types.transaction_options import *
 from .types.unlock import *
 from .types.unlock_condition import *
+from .types.utxo_changes import *

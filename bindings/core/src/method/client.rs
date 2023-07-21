@@ -382,15 +382,6 @@ pub enum ClientMethod {
         /// Amount
         amount: u64,
     },
-    /// Find all outputs based on the requests criteria. This method will try to query multiple nodes if
-    /// the request amount exceeds individual node limit.
-    #[serde(rename_all = "camelCase")]
-    FindOutputs {
-        /// Output IDs
-        output_ids: Vec<OutputId>,
-        /// Addresses
-        addresses: Vec<Bech32Address>,
-    },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
     #[serde(rename_all = "camelCase")]

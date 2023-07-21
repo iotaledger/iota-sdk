@@ -35,7 +35,10 @@ class SignatureUnlock(Unlock):
     """An unlock holding a signature unlocking one or more inputs.
     """
     signature: Ed25519Signature
-    type: int = field(default=int(UnlockType.Signature), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockType.Signature),
+        init=False)
 
 
 @dataclass
@@ -43,7 +46,10 @@ class ReferenceUnlock(Unlock):
     """An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
     """
     reference: int
-    type: int = field(default=int(UnlockType.Reference), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockType.Reference),
+        init=False)
 
 
 @dataclass
@@ -51,7 +57,10 @@ class AliasUnlock:
     """An unlock which must reference a previous unlock which unlocks the alias that the input is locked to.
     """
     reference: int
-    type: int = field(default=int(UnlockType.Alias), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockType.Alias),
+        init=False)
 
 
 @dataclass
@@ -59,4 +68,4 @@ class NftUnlock:
     """An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
     """
     reference: int
-    type: int = field(default=int(UnlockType.Nft), init=False)
+    type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)

@@ -47,13 +47,7 @@ class SendNativeTokensParams():
     expiration: Optional[int] = None
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
-
-        config['amount'] = str(config['amount'])
-        config['native_tokens'] = [native_token.as_dict()
-                                   for native_token in config['native_tokens']]
-
-        return config
+        return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
