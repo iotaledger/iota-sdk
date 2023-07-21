@@ -1,11 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::str::FromStr;
+
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
         address::{dto::AddressDto, Address, AliasAddress, ToBech32Ext},
+        input::{dto::UtxoInputDto, UtxoInput},
         output::{AliasId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
         payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
         signature::Ed25519Signature,
@@ -103,6 +106,11 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify_keccak256(&signature, &message))
+        }
+        UtilsMethod::OutputIdToUTXOInput { output_id } => {
+            let output_id: OutputId = OutputId::from_str(&output_id)?;
+            let input: UtxoInputDto = UtxoInputDto::from(&UtxoInput::from(output_id));
+            Response::Input(input)
         }
     };
     Ok(response)

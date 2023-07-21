@@ -188,3 +188,11 @@ export type __FaucetMethod__ = {
         address: string;
     };
 };
+
+export interface __OutputIdToUTXOInput__ {
+    name: 'outputIdToUTXOInput';
+    data: {
+        outputId: string;
+    };
+}
+

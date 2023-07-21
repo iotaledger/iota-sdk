@@ -181,6 +181,9 @@ pub enum Response {
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInputDto>),
     /// Response for:
+    /// [`OutputIdToUTXOInput`](crate::method::UtilsMethod::OutputIdToUTXOInput)
+    Input(UtxoInputDto),
+    /// Response for:
     /// - [`Reattach`](crate::method::ClientMethod::Reattach)
     /// - [`ReattachUnchecked`](crate::method::ClientMethod::ReattachUnchecked)
     Reattached((BlockId, BlockDto)),
