@@ -45,7 +45,6 @@ async fn test_find_inputs() {
             .unlock_conditions()
             .address()
             .unwrap()
-            .clone()
             .address()
             .to_bech32(client.get_bech32_hrp().await.unwrap());
 
