@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CommonOutput::{setNativeTokens, setFeatures}`;
 - `ImmutableFeaturesOutput::setImmutableFeatures`;
 - `StateMetadataOutput::setStateMetadata`;
-- `Client::find_outputs()` method;
+- `Client::findOutputs()` method;
 
 ### Fixed
 
