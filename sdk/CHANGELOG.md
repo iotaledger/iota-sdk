@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ProtocolParametersDto`, `NetworkInfoDto`, `OutputMetadataDto` in favor of base types;
 - `serde` derives for types with explicit Dtos;
 - More fields that are considered empty are no longer serialized;
+- `Client::find_outputs()` method;
 
 ### Fixed
 

@@ -73,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Wallet::{generate_mnemonic(), verify_mnemonic()}` since they're available from `Utils`;
 - `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
+- `Client::find_outputs()` method;
 
 ### Fixed
 

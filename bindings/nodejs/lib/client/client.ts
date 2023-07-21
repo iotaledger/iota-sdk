@@ -238,26 +238,6 @@ export class Client {
     }
 
     /**
-     * Find all outputs based on the requests criteria. This method will try to query multiple nodes if
-     * the request amount exceeds individual node limit.
-     */
-    async findOutputs(
-        outputIds: string[],
-        addresses: string[],
-    ): Promise<OutputResponse[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'findOutputs',
-            data: {
-                outputIds,
-                addresses,
-            },
-        });
-
-        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
-        return plainToInstance(OutputResponse, parsed.payload);
-    }
-
-    /**
      * Prepare a transaction for signing
      */
     async prepareTransaction(
