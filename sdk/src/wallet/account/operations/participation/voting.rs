@@ -64,8 +64,6 @@ where
             }
         }
 
-        // TODO check if answers match the questions ?
-
         let voting_output = self
             .get_voting_output()
             .await?
@@ -127,14 +125,12 @@ where
         .await
     }
 
-    /// Removes metadata corresponding to a given (voting) event ID from any outputs that contains it.
+    /// Removes metadata corresponding to a given (voting) event ID from the voting output if it contains it.
     ///
     /// If voting for other events, continues voting for them.
     /// Removes metadata for any event that has expired (use event IDs to get cached event information, checks event
     /// milestones in there against latest network milestone).
-    /// TODO: is it really doing that ?
-    /// If multiple outputs contain metadata for this event, removes all of them.
-    /// If NOT already voting for this event, throws an error (e.g. output with this event ID not found).
+    /// If NOT already voting for this event, throws an error.
     pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<Transaction> {
         let prepared = self.prepare_stop_participating(event_id).await?;
 
@@ -157,11 +153,9 @@ where
 
                 let length_before = participations.participations.len();
 
-                // TODO use remove return when merged
                 participations.remove(&event_id);
 
                 if length_before == participations.participations.len() {
-                    // TODO should this really be an error ?
                     return Err(crate::wallet::Error::Voting(format!(
                         "currently not participating for {event_id}"
                     )));
@@ -173,7 +167,6 @@ where
                 participations
             }
             None => {
-                // TODO should this really be an error ?
                 return Err(crate::wallet::Error::Voting(format!(
                     "currently not participating for {event_id}"
                 )));

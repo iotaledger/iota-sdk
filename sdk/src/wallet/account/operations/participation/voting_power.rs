@@ -118,7 +118,6 @@ where
             .ok_or_else(|| crate::wallet::Error::Voting("No unspent voting output found".to_string()))?;
         let output = current_output_data.output.as_basic();
 
-        // TODO what is amount > output.amount() ?
         // If the amount to decrease is the amount of the output, then we just remove the features.
         let (new_output, tagged_data_payload) = if amount == output.amount() {
             (
@@ -169,7 +168,6 @@ where
 
             participation_bytes
         } else {
-            // TODO participation bytes are incorrect, should we really just ignore?
             Vec::new()
         };
 
