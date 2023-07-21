@@ -90,7 +90,7 @@ class BasicOutput(Output):
     amount: str
     unlockConditions: List[AddressUnlockCondition | ExpirationUnlockCondition | StorageDepositReturnUnlockCondition |
                            TimelockUnlockCondition]
-    features: Optional[List[SenderFeature | IssuerFeature |
+    features: Optional[List[SenderFeature |
                             MetadataFeature | TagFeature]] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -130,10 +130,10 @@ class AliasOutput(Output):
     foundryCounter: int
     unlockConditions: List[StateControllerAddressUnlockCondition |
                            GovernorAddressUnlockCondition]
-    features: Optional[List[SenderFeature | IssuerFeature |
-                            MetadataFeature | TagFeature]] = None
-    immutableFeatures: Optional[List[SenderFeature |
-                                     IssuerFeature | MetadataFeature | TagFeature]] = None
+    features: Optional[List[SenderFeature |
+                            MetadataFeature]] = None
+    immutableFeatures: Optional[List[IssuerFeature |
+                                     MetadataFeature]] = None
     stateMetadata: Optional[HexStr] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -167,10 +167,8 @@ class FoundryOutput(Output):
     serialNumber: int
     tokenScheme: SimpleTokenScheme
     unlockConditions: List[ImmutableAliasAddressUnlockCondition]
-    features: Optional[List[SenderFeature | IssuerFeature |
-                            MetadataFeature | TagFeature]] = None
-    immutableFeatures: Optional[List[SenderFeature |
-                                     IssuerFeature | MetadataFeature | TagFeature]] = None
+    features: Optional[List[MetadataFeature]] = None
+    immutableFeatures: Optional[List[MetadataFeature]] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
@@ -201,10 +199,10 @@ class NftOutput(Output):
     nftId: HexStr
     unlockConditions: List[AddressUnlockCondition | ExpirationUnlockCondition |
                            StorageDepositReturnUnlockCondition | TimelockUnlockCondition]
-    features: Optional[List[SenderFeature | IssuerFeature |
+    features: Optional[List[SenderFeature |
                             MetadataFeature | TagFeature]] = None
-    immutableFeatures: Optional[List[SenderFeature |
-                                     IssuerFeature | MetadataFeature | TagFeature]] = None
+    immutableFeatures: Optional[List[
+        IssuerFeature | MetadataFeature]] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
 
