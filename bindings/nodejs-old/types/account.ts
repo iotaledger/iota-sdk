@@ -174,9 +174,9 @@ export interface FilterOptions {
     /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
     outputTypes?: Uint8Array;
     /** Return all alias outputs matching these IDs. */
-    aliasIds?: AliasId[];
+    aliasIds?: string[];
     /** Return all foundry outputs matching these IDs. */
-    foundryIds?: FoundryId[];
+    foundryIds?: string[];
     /** Return all NFT outputs matching these IDs. */
-    nftIds?: NftId[];
+    nftIds?: string[];
 }
