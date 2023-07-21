@@ -23,7 +23,7 @@ import type {
     __VerifySecp256k1EcdsaSignatureMethod__,
     __VerifyMnemonicMethod__,
     __FaucetMethod__,
-    __OutputIdToUTXOInput__,
+    __OutputIdToUtxoInput__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -51,4 +51,4 @@ export type __UtilsMethods__ =
     | __VerifySecp256k1EcdsaSignatureMethod__
     | __VerifyMnemonicMethod__
     | __FaucetMethod__
-    | __OutputIdToUTXOInput__;
+    | __OutputIdToUtxoInput__;

@@ -189,8 +189,8 @@ export type __FaucetMethod__ = {
     };
 };
 
-export interface __OutputIdToUTXOInput__ {
-    name: 'outputIdToUTXOInput';
+export interface __OutputIdToUtxoInput__ {
+    name: 'outputIdToUtxoInput';
     data: {
         outputId: string;
     };

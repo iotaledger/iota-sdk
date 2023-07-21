@@ -70,7 +70,7 @@ class UTXOInput extends Input {
      */
     static fromOutputId(outputId: OutputId): UTXOInput {
         const input = callUtilsMethod({
-            name: 'outputIdToUTXOInput',
+            name: 'outputIdToUtxoInput',
             data: {
                 outputId,
             },

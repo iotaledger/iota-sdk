@@ -154,5 +154,5 @@ pub enum UtilsMethod {
     },
     /// Creates a UTXOInput from outputId.
     #[serde(rename_all = "camelCase")]
-    OutputIdToUTXOInput { output_id: String },
+    OutputIdToUtxoInput { output_id: String },
 }
