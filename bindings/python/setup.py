@@ -5,6 +5,7 @@ import platform
 from setuptools import setup
 from setuptools_rust import RustExtension
 
+
 def get_py_version_cfgs():
     # For now each Cfg Py_3_X flag is interpreted as "at least 3.X"
     version = sys.version_info[0:3]
@@ -17,6 +18,7 @@ def get_py_version_cfgs():
         out_cfg.append("--cfg=PyPy")
 
     return out_cfg
+
 
 setup(
     name="iota_sdk",
