@@ -367,7 +367,10 @@ impl AccountInner {
                     }
                 }
 
-                filtered_outputs.push(output.clone());
+                // If ids are provided, only return them and no other outputs.
+                if filter.alias_ids.is_none() && filter.foundry_ids.is_none() && filter.nft_ids.is_none() {
+                    filtered_outputs.push(output.clone());
+                }
             }
 
             Ok(filtered_outputs)

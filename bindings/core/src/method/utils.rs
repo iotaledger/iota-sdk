@@ -23,6 +23,7 @@ use crate::OmittedDebug;
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum UtilsMethod {
     /// Transforms bech32 to hex
     Bech32ToHex {

@@ -191,8 +191,9 @@ async fn check_existing_db_2() -> Result<()> {
         .await
         .expect("missing tx");
 
-    let iota_sdk::types::block::payload::transaction::TransactionEssence::Regular(essence) = tx.payload.essence();
-    if let iota_sdk::types::block::payload::Payload::TaggedData(tagged_data_payload) = essence.payload().unwrap() {
+    if let iota_sdk::types::block::payload::Payload::TaggedData(tagged_data_payload) =
+        tx.payload.essence().as_regular().payload().unwrap()
+    {
         assert_eq!(tagged_data_payload.tag(), "Stardust".as_bytes());
         assert_eq!(tagged_data_payload.data(), "Stardust".as_bytes());
     } else {

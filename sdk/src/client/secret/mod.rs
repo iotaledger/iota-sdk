@@ -121,7 +121,7 @@ pub trait SecretManagerConfig: SecretManage {
 
 /// Supported secret managers
 
-// Boxes make this type clumsy to use.
+#[non_exhaustive]
 pub enum SecretManager {
     /// Secret manager that uses [`iota_stronghold`] as the backing storage.
     #[cfg(feature = "stronghold")]
@@ -165,6 +165,7 @@ impl FromStr for SecretManager {
 
 /// DTO for secret manager types with required data.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum SecretManagerDto {
     /// Stronghold
     #[cfg(feature = "stronghold")]

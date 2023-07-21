@@ -442,6 +442,7 @@ pub struct StorageDeposit {
 }
 
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum ReturnStrategy {
     // A storage deposit return unlock condition will be added with the required minimum storage deposit
     #[default]

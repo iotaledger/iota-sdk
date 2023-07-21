@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `wallet::Error::InvalidVotingPower` variant;
+- `TransactionEssence::is_regular` and `as_regular`;
 
 ### Changed
 
@@ -37,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UtilsMethod::ComputeTokenId` now takes a u8;
 - `UtilsMethod::ComputeFoundryId` field `tokenSchemeKind` renamed to `tokenSchemeType`;
 - `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
+- Made most public enums `non_exhaustive`;
 
 ### Removed
 
@@ -48,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Call `ledger.set_non_interactive_mode()` only if it's a debug app;
+- Don't return other output types if alias/nft/foundry ids are provided in the `FilterOptions` for `Account::{outputs(), unspent_outputs()`;
 
 ## 0.4.0 - 2023-07-14
 

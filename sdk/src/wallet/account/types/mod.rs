@@ -243,6 +243,7 @@ impl TryFromDto for Transaction {
 
 /// Possible InclusionStates for transactions
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum InclusionState {
     Pending,
     Confirmed,
@@ -284,6 +285,7 @@ impl FromStr for OutputKind {
 /// The account identifier.
 #[derive(Debug, Clone, Serialize, Eq, PartialEq, Hash)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum AccountIdentifier {
     /// Account alias as identifier.
     Alias(String),
