@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use core::ops::Deref;
+use std::collections::BTreeSet;
 
 use iota_sdk::types::block::{
     parent::Parents,
@@ -11,6 +12,13 @@ use iota_sdk::types::block::{
 use packable::{bounded::TryIntoBoundedU8Error, error::UnpackError, prefix::VecPrefix, PackableExt};
 
 #[test]
+fn len() {
+    for i in 1..=8 {
+        assert_eq!(Parents::from_vec(rand_block_ids(i)).unwrap().len(), i);
+    }
+}
+
+#[test]
 fn new_valid_iter() {
     let inner = rand_block_ids(8);
     let parents = Parents::from_vec(inner.clone()).unwrap();
@@ -18,6 +26,14 @@ fn new_valid_iter() {
     let parents_vec = parents.iter().copied().collect::<Vec<BlockId>>();
 
     assert_eq!(inner, parents_vec[0..].to_vec());
+}
+
+#[test]
+fn new_from_set() {
+    let inner = rand_block_ids(8);
+    let parents = Parents::from_set(BTreeSet::from_iter(inner.clone())).unwrap();
+
+    assert_eq!(*parents.to_vec(), inner);
 }
 
 #[test]

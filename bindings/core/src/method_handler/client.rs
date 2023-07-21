@@ -400,15 +400,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(UtxoInputDto::from)
                 .collect(),
         ),
-        ClientMethod::FindOutputs { output_ids, addresses } => {
-            let outputs_response = client
-                .find_outputs(&output_ids, &addresses)
-                .await?
-                .iter()
-                .map(OutputWithMetadataResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
-        }
         ClientMethod::Reattach { block_id } => {
             let (block_id, block) = client.reattach(&block_id).await?;
             Response::Reattached((block_id, BlockDto::from(&block)))

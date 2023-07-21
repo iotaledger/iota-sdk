@@ -13,7 +13,6 @@ import type {
     __GetBlockMethod__,
     __GetBlockMetadataMethod__,
     __FindInputsMethod__,
-    __FindOutputsMethod__,
     __PrepareTransactionMethod__,
     __SignTransactionMethod__,
     __PostBlockPayloadMethod__,
@@ -82,7 +81,6 @@ export type __ClientMethods__ =
     | __GetBlockMethod__
     | __GetBlockMetadataMethod__
     | __FindInputsMethod__
-    | __FindOutputsMethod__
     | __PrepareTransactionMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__

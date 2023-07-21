@@ -19,11 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.3 - 2023-MM-DD
+## 1.0.0-rc.3 - 2023-07-21
 
 ### Added
 
-- `TransactionProgressWalletEvent::getProgress` method;
 - `TransactionProgressType` export;
 - Optional `CreateAccountPayload::addresses` field;
 
@@ -36,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Split `Account::send` into `send` and `sendWithParams`;
 - Properties in classes `NewOutputWalletEvent`, `SpentOutputWalletEvent` and `TransactionInclusionWalletEvent` are now private;
 - Utils `computeTokenId` field `tokenSchemeType` renamed to `tokenSchemeKind`;
+- Properties in event classes are now public;
+- Remove getters from the event classes;
 - `{Client, SecretManager}::signTransaction` return type from `Payload` to `TransactionPayload`;
 
 ### Removed
@@ -44,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CommonOutput::{setNativeTokens, setFeatures}`;
 - `ImmutableFeaturesOutput::setImmutableFeatures`;
 - `StateMetadataOutput::setStateMetadata`;
+- `Client::findOutputs()` method;
 
 ### Fixed
 

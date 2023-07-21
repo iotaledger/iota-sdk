@@ -92,14 +92,6 @@ export interface __FindInputsMethod__ {
     };
 }
 
-export interface __FindOutputsMethod__ {
-    name: 'findOutputs';
-    data: {
-        outputIds: string[];
-        addresses: string[];
-    };
-}
-
 export interface __PrepareTransactionMethod__ {
     name: 'prepareTransaction';
     data: {
