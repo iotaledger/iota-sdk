@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `TransactionProgressType` export;
 - Optional `CreateAccountPayload::addresses` field;
+- Optional `FilterOptions::{aliasIds, foundryIds, nftIds}` fields;
 
 ### Changed
 
