@@ -20,7 +20,7 @@ use crate::{
         block::{
             address::Bech32Address,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
-            output::{OutputId, OutputWithMetadata},
+            output::OutputWithMetadata,
             parent::Parents,
             payload::{
                 transaction::{TransactionEssence, TransactionId},
