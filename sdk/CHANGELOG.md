@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `wallet::Error::InvalidVotingPower` variant;
+- `TransactionEssence::is_regular` and `as_regular`;
 
 ### Changed
 
@@ -36,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ParametersMilestoneOption::new` now accepts boxed slice;
 - `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
 - Made most public enums `non_exhaustive`;
-- Add `TransactionEssence::is_regular` and `as_regular`;
 
 ### Removed
 
