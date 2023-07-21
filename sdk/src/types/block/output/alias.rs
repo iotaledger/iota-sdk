@@ -321,7 +321,6 @@ pub(crate) type StateMetadataLength = BoundedU16<0, { AliasOutput::STATE_METADAT
 
 /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AliasOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
@@ -701,14 +700,22 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Ali
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::string::{String, ToString};
+    use alloc::{
+        boxed::Box,
+        string::{String, ToString},
+    };
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{
-        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
-        Error,
+    use crate::{
+        types::block::{
+            output::{
+                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
+            },
+            Error,
+        },
+        utils::serde::prefix_hex_bytes,
     };
 
     /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
@@ -727,8 +734,8 @@ pub mod dto {
         // A counter that must increase by 1 every time the alias is state transitioned.
         pub state_index: u32,
         // Metadata that can only be changed by the state controller.
-        #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub state_metadata: String,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub state_metadata: Box<[u8]>,
         // A counter that denotes the number of foundries created by this alias account.
         pub foundry_counter: u32,
         //
@@ -749,7 +756,7 @@ pub mod dto {
                 native_tokens: value.native_tokens().to_vec(),
                 alias_id: *value.alias_id(),
                 state_index: value.state_index(),
-                state_metadata: prefix_hex::encode(value.state_metadata()),
+                state_metadata: value.state_metadata().into(),
                 foundry_counter: value.foundry_counter(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().iter().map(Into::into).collect::<_>(),
@@ -768,10 +775,7 @@ pub mod dto {
             builder = builder.with_state_index(value.state_index);
 
             if !value.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(
-                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
-                        .map_err(|_| Error::InvalidField("state_metadata"))?,
-                );
+                builder = builder.with_state_metadata(value.state_metadata);
             }
 
             builder = builder.with_foundry_counter(value.foundry_counter);
@@ -804,10 +808,7 @@ pub mod dto {
             builder = builder.with_state_index(value.state_index);
 
             if !value.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(
-                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
-                        .map_err(|_| Error::InvalidField("state_metadata"))?,
-                );
+                builder = builder.with_state_metadata(value.state_metadata);
             }
 
             builder = builder.with_foundry_counter(value.foundry_counter);

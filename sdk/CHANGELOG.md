@@ -29,10 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Migrated storage types field casing to uniform camelCase;
 - Replaced inappropriate serde impls from `AccountDetails` with fn impls for conversion;
+- `MqttPayload` now uses Dtos;
+- `NodeManagerBuilder` node fields are no longer wrapped in `Option`;
+- Prefix-hex string values replaced with boxed slices in Dtos;
+- `MilestoneEssence::new` now takes generic metadata for convenience;
+- `ParametersMilestoneOption::new` now accepts boxed slice;
+- `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
 
 ### Removed
 
 - `ProtocolParametersDto`, `NetworkInfoDto`, `OutputMetadataDto` in favor of base types;
+- `serde` derives for types with explicit Dtos;
+- More fields that are considered empty are no longer serialized;
 
 ### Fixed
 

@@ -37,7 +37,9 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
         }
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-            migrate_client_options(&mut wallet["client_options"])?;
+            if let Some(client_options) = wallet.get_mut("client_options") {
+                migrate_client_options(client_options)?;
+            }
             if let Some(storage_options) = wallet.get_mut("storage_options") {
                 ConvertStorageOptions::check(storage_options)?;
             }

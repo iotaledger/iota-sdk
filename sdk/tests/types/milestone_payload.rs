@@ -33,7 +33,7 @@ fn new_valid() {
                 rand_parents(),
                 rand_merkle_root(),
                 rand_merkle_root(),
-                vec![],
+                [],
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
@@ -55,7 +55,7 @@ fn new_invalid_no_signature() {
                 rand_parents(),
                 rand_merkle_root(),
                 rand_merkle_root(),
-                vec![],
+                [],
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
@@ -77,7 +77,7 @@ fn new_invalid_too_many_signatures() {
                 rand_parents(),
                 rand_merkle_root(),
                 rand_merkle_root(),
-                vec![],
+                [],
                 MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
@@ -100,7 +100,7 @@ fn packed_len() {
             Parents::from_vec(rand_block_ids(4)).unwrap(),
             rand_merkle_root(),
             rand_merkle_root(),
-            vec![0x2a, 0x2a, 0x2a, 0x2a, 0x2a],
+            [0x2a, 0x2a, 0x2a, 0x2a, 0x2a],
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
@@ -124,7 +124,7 @@ fn pack_unpack_valid() {
             rand_parents(),
             rand_merkle_root(),
             rand_merkle_root(),
-            vec![],
+            [],
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
@@ -151,7 +151,7 @@ fn getters() {
         rand_parents(),
         rand_merkle_root(),
         rand_merkle_root(),
-        vec![],
+        [],
         MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();

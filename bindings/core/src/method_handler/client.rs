@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "mqtt")]
+use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
@@ -14,18 +16,10 @@ use iota_sdk::{
                 dto::{OutputBuilderAmountDto, OutputDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
             },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                Payload,
-            },
+            payload::{dto::MilestonePayloadDto, Payload},
             Block, BlockDto,
         },
     },
-};
-#[cfg(feature = "mqtt")]
-use {
-    iota_sdk::client::mqtt::{MqttPayload, Topic},
-    iota_sdk::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
 };
 
 use crate::{method::ClientMethod, response::Response, Result};
@@ -44,16 +38,17 @@ where
                 topic: String,
                 payload: String,
             }
-            // convert types to DTOs
             let payload = match &topic_event.payload {
                 MqttPayload::Json(val) => serde_json::to_string(&val).expect("failed to serialize MqttPayload::Json"),
                 MqttPayload::Block(block) => {
-                    serde_json::to_string(&BlockDto::from(block)).expect("failed to serialize MqttPayload::Block")
+                    serde_json::to_string(block).expect("failed to serialize MqttPayload::Block")
                 }
-                MqttPayload::MilestonePayload(ms) => serde_json::to_string(&MilestonePayloadDto::from(ms))
-                    .expect("failed to serialize MqttPayload::MilestonePayload"),
-                MqttPayload::Receipt(receipt) => serde_json::to_string(&ReceiptMilestoneOptionDto::from(receipt))
-                    .expect("failed to serialize MqttPayload::Receipt"),
+                MqttPayload::MilestonePayload(ms) => {
+                    serde_json::to_string(ms).expect("failed to serialize MqttPayload::MilestonePayload")
+                }
+                MqttPayload::Receipt(receipt) => {
+                    serde_json::to_string(receipt).expect("failed to serialize MqttPayload::Receipt")
+                }
             };
             let response = MqttResponse {
                 topic: topic_event.topic.clone(),
@@ -241,13 +236,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             block_builder = block_builder.with_secret_manager(&secret_manager);
 
-            Response::SignedTransaction(PayloadDto::from(
-                &block_builder
+            Response::SignedTransaction(
+                (&block_builder
                     .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
                         prepared_transaction_data,
                     )?)
-                    .await?,
-            ))
+                    .await?)
+                    .into(),
+            )
         }
         ClientMethod::PostBlockPayload { payload } => {
             let block_builder = client.build_block();

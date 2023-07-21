@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Optional, List
 from iota_sdk.types.address import Address
 from iota_sdk.types.output import Output, OutputMetadata
@@ -23,6 +23,16 @@ class InputSigningData:
     outputMetadata: OutputMetadata
     chain: Optional[Bip44] = None
 
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        config['output'] = config['output'].as_dict()
+        config['outputMetadata'] = config['outputMetadata'].as_dict()
+        if 'chain' in config:
+            config['chain'] = asdict(config['chain'])
+
+        return config
+
 
 @dataclass
 class RemainderData:
@@ -36,6 +46,16 @@ class RemainderData:
     output: Output
     address: Address
     chain: Optional[Bip44] = None
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        config['output'] = config['output'].as_dict()
+        config['address'] = config['address'].as_dict()
+        if 'chain' in config:
+            config['chain'] = asdict(config['chain'])
+
+        return config
 
 
 @dataclass
@@ -51,6 +71,19 @@ class PreparedTransactionData:
     inputsData: List[InputSigningData]
     remainder: Optional[RemainderData] = None
 
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        config['essence'] = config['essence'].as_dict()
+
+        config['inputsData'] = list(map(
+            lambda x: x.as_dict(), config['inputsData']))
+
+        if 'remainder' in config:
+            config['remainder'] = config['remainder'].as_dict()
+
+        return config
+
 
 @dataclass
 class SignedTransactionData:
@@ -62,3 +95,13 @@ class SignedTransactionData:
     """
     transactionPayload: TransactionPayload
     inputsData: List[InputSigningData]
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        config['transactionPayload'] = config['transactionPayload'].as_dict()
+
+        config['inputsData'] = list(map(
+            lambda x: x.as_dict(), config['inputsData']))
+
+        return config

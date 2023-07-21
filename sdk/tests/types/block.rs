@@ -124,3 +124,11 @@ fn getters() {
     assert_eq!(*block.payload().as_ref().unwrap(), &payload);
     assert_eq!(block.nonce(), nonce);
 }
+
+#[test]
+fn build_into_parents() {
+    let parents = rand_parents();
+    let block = Block::build(parents.clone()).finish().unwrap();
+
+    assert_eq!(block.into_parents(), parents);
+}

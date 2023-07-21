@@ -12,7 +12,15 @@ import {
     Secp256k1EcdsaSignature,
     SecretManagerType,
 } from '../types/secret_manager';
-import { Ed25519Signature, HexEncodedString, Payload, Unlock } from '../types';
+import {
+    Ed25519Signature,
+    HexEncodedString,
+    TransactionPayload,
+    Unlock,
+    Response,
+} from '../types';
+
+import { plainToInstance } from 'class-transformer';
 
 /** The SecretManager to interact with nodes. */
 export class SecretManager {
@@ -69,7 +77,7 @@ export class SecretManager {
      */
     async signTransaction(
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<Payload> {
+    ): Promise<TransactionPayload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -77,7 +85,8 @@ export class SecretManager {
             },
         });
 
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<TransactionPayload>;
+        return plainToInstance(TransactionPayload, parsed.payload);
     }
 
     /**
