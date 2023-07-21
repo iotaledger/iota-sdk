@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `TransactionProgressWalletEvent::getProgress` method;
 - `TransactionProgressType` export;
 - Optional `CreateAccountPayload::addresses` field;
 
@@ -34,7 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManagerMethod::SignEd25519`, `SignSecp256k1Ecdsa`, and `SignatureUnlock` now accept newly added `Bip44` type chains;
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
-- Properties in classes `NewOutputWalletEvent`, `SpentOutputWalletEvent` and `TransactionInclusionWalletEvent` are now private;
+- Properties in event classes are now public;
+- Remove getters from the event classes;
 - `{Client, SecretManager}::signTransaction` return type from `Payload` to `TransactionPayload`;
 
 ### Removed
