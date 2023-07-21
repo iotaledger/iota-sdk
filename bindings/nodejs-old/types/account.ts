@@ -173,4 +173,10 @@ export interface FilterOptions {
     upperBoundBookedTimestamp?: number;
     /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
     outputTypes?: Uint8Array;
+    /** Return all alias outputs matching these IDs. */
+    aliasIds?: AliasId[];
+    /** Return all foundry outputs matching these IDs. */
+    foundryIds?: FoundryId[];
+    /** Return all NFT outputs matching these IDs. */
+    nftIds?: NftId[];
 }
