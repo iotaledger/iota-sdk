@@ -108,7 +108,7 @@ pub enum UtilsMethod {
         /// Serial number
         serial_number: u32,
         /// Token scheme kind
-        token_scheme_kind: u8,
+        token_scheme_type: u8,
     },
     /// Computes the NFT ID
     #[serde(rename_all = "camelCase")]
@@ -123,7 +123,7 @@ pub enum UtilsMethod {
     ComputeTokenId {
         alias_id: AliasId,
         serial_number: u32,
-        token_scheme_kind: u8,
+        token_scheme_type: u8,
     },
     /// Computes the hash of a transaction essence.
     HashTransactionEssence {

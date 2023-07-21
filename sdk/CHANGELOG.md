@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MilestoneEssence::new` now takes generic metadata for convenience;
 - `ParametersMilestoneOption::new` now accepts boxed slice;
 - `UtilsMethod::ComputeTokenId` now takes a u8;
+- `UtilsMethod::ComputeFoundryId` field `tokenSchemeKind` renamed to `tokenSchemeType`;
 - `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
 
 ### Removed

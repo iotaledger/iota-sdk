@@ -53,20 +53,20 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ComputeFoundryId {
             alias_id,
             serial_number,
-            token_scheme_kind,
+            token_scheme_type,
         } => Response::FoundryId(FoundryId::build(
             &AliasAddress::new(alias_id),
             serial_number,
-            token_scheme_kind,
+            token_scheme_type,
         )),
         UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
         UtilsMethod::ComputeOutputId { id, index } => Response::OutputId(OutputId::new(id, index)?),
         UtilsMethod::ComputeTokenId {
             alias_id,
             serial_number,
-            token_scheme_kind,
+            token_scheme_type,
         } => {
-            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_kind);
+            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
         UtilsMethod::HashTransactionEssence { essence } => {

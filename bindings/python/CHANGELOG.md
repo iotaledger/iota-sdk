@@ -68,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{Client, SecretManager}::sign_transaction` return type from `SignedTransactionData` to `TransactionPayload`;
 - Split `Output` into multiple classes;
 - Renamed `TokenScheme` to `SimpleTokenScheme`;
+- Utils `compute_token_id` and `computer_foundry_id` field `tokenSchemeKind` renamed to `tokenSchemeType`;
 
 ### Removed
 

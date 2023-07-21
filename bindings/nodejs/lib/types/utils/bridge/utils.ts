@@ -35,7 +35,7 @@ export interface __ComputeFoundryIdMethod__ {
     data: {
         aliasId: AliasId;
         serialNumber: number;
-        tokenSchemeKind: number;
+        tokenSchemeType: number;
     };
 }
 
@@ -74,7 +74,7 @@ export interface __ComputeTokenIdMethod__ {
     data: {
         aliasId: AliasId;
         serialNumber: number;
-        tokenSchemeKind: TokenSchemeType;
+        tokenSchemeType: TokenSchemeType;
     };
 }
 
