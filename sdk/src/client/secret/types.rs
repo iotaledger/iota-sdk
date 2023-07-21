@@ -42,8 +42,7 @@ impl core::fmt::Debug for StrongholdDto {
 }
 
 /// An account address.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccountAddress {
     /// The address.
     pub address: Address,

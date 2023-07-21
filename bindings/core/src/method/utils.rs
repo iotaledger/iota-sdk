@@ -4,7 +4,7 @@
 use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure, TokenScheme},
+    output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure},
     payload::{
         dto::MilestonePayloadDto,
         transaction::{
@@ -123,7 +123,7 @@ pub enum UtilsMethod {
     ComputeTokenId {
         alias_id: AliasId,
         serial_number: u32,
-        token_scheme_type: TokenScheme,
+        token_scheme_kind: u8,
     },
     /// Computes the hash of a transaction essence.
     HashTransactionEssence {

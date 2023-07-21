@@ -10,6 +10,7 @@ use std::ops::Range;
 use packable::bounded::TryIntoBoundedU16Error;
 use serde::{Deserialize, Serialize};
 
+use self::input_selection::BurnDto;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{
@@ -90,7 +91,7 @@ pub struct ClientBlockBuilderOptions {
     /// Parents
     pub parents: Option<Vec<BlockId>>,
     /// Explicit burning of aliases, nfts, foundries and native tokens
-    pub burn: Option<Burn>,
+    pub burn: Option<BurnDto>,
 }
 
 impl<'a> ClientBlockBuilder<'a> {
@@ -306,7 +307,7 @@ impl<'a> ClientBlockBuilder<'a> {
             self = self.with_parents(parents)?;
         }
         if let Some(burn) = options.burn {
-            self = self.with_burn(burn);
+            self = self.with_burn(Burn::from(burn));
         }
 
         Ok(self)

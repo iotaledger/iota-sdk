@@ -8,7 +8,6 @@ use crate::types::block::signature::Signature;
 /// An [`Unlock`](crate::types::block::unlock::Unlock) which is used to unlock a signature locked
 /// [`Input`](crate::types::block::input::Input).
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SignatureUnlock(pub(crate) Signature);
 
 impl SignatureUnlock {

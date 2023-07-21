@@ -74,7 +74,7 @@ export interface __ComputeTokenIdMethod__ {
     data: {
         aliasId: AliasId;
         serialNumber: number;
-        tokenSchemeType: TokenSchemeType;
+        tokenSchemeKind: TokenSchemeType;
     };
 }
 

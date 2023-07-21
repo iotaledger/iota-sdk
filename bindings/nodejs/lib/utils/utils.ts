@@ -142,14 +142,14 @@ export class Utils {
     static computeTokenId(
         aliasId: AliasId,
         serialNumber: number,
-        tokenSchemeType: TokenSchemeType,
+        tokenSchemeKind: TokenSchemeType,
     ): TokenId {
         return callUtilsMethod({
             name: 'computeTokenId',
             data: {
                 aliasId,
                 serialNumber,
-                tokenSchemeType,
+                tokenSchemeKind,
             },
         });
     }

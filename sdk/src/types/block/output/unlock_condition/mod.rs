@@ -36,11 +36,6 @@ use crate::types::{
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     Address(AddressUnlockCondition),
@@ -305,7 +300,6 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MA
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockConditionCount(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct UnlockConditions(

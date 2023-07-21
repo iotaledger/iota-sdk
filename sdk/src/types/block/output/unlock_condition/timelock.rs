@@ -7,7 +7,6 @@ use crate::types::block::Error;
 
 /// Defines a unix timestamp until which the output can not be unlocked.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct TimelockUnlockCondition(#[packable(verify_with = verify_timestamp)] u32);
 

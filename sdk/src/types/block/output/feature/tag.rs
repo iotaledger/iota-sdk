@@ -13,7 +13,6 @@ pub(crate) type TagFeatureLength =
 
 /// Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| Error::InvalidTagFeatureLength(e.into_prefix_err().into()))]
 pub struct TagFeature(
     // Binary tag.

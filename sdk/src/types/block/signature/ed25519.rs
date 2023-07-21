@@ -18,7 +18,6 @@ use crate::types::block::{address::Ed25519Address, Error};
 
 /// An Ed25519 signature.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ed25519Signature {
     public_key: PublicKey,
     signature: Signature,

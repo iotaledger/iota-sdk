@@ -6,8 +6,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::{
-        input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
-        SignedTransactionDataDto,
+        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
     types::{
         block::output::{dto::OutputDto, Output},
@@ -112,10 +111,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PrepareBurn { burn, options } => {
             let data = account
-                .prepare_burn(
-                    Burn::try_from(burn)?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_burn(burn, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
