@@ -226,34 +226,6 @@ impl Client {
         Ok(selected_inputs)
     }
 
-    /// Find all outputs based on the requests criteria. This method will try to query multiple nodes if
-    /// the request amount exceeds individual node limit.
-    pub async fn find_outputs(
-        &self,
-        output_ids: &[OutputId],
-        addresses: &[Bech32Address],
-    ) -> Result<Vec<OutputWithMetadata>> {
-        let mut output_responses = self.get_outputs(output_ids).await?;
-
-        // Use `get_address()` API to get the address outputs first,
-        // then collect the `UtxoInput` in the HashSet.
-        for address in addresses {
-            // Get output ids of outputs that can be controlled by this address without further unlock constraints
-            let output_ids_response = self
-                .basic_output_ids([
-                    QueryParameter::Address(*address),
-                    QueryParameter::HasExpiration(false),
-                    QueryParameter::HasTimelock(false),
-                    QueryParameter::HasStorageDepositReturn(false),
-                ])
-                .await?;
-
-            output_responses.extend(self.get_outputs(&output_ids_response.items).await?);
-        }
-
-        Ok(output_responses.clone())
-    }
-
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
     pub async fn reattach(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
