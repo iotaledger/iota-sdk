@@ -1,4 +1,3 @@
-// Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 // These are E2E test samples, so they are ignored by default.
@@ -126,10 +125,9 @@ async fn test_get_address_outputs() {
 #[ignore]
 #[tokio::test]
 async fn test_get_output() {
-    let (_block_id, transaction_id) = setup_transaction_block().await;
+    let (_block_id, transaction_id, client) = setup_transaction_block().await;
 
-    let r = setup_client_with_node_health_ignored()
-        .await
+    let r = client
         .get_output(&OutputId::new(transaction_id, 0).unwrap())
         .await
         .unwrap();
@@ -140,10 +138,8 @@ async fn test_get_output() {
 #[ignore]
 #[tokio::test]
 async fn test_get_output_raw() {
-    let (_block_id, transaction_id) = setup_transaction_block().await;
+    let (_block_id, transaction_id, client) = setup_transaction_block().await;
     let output_id = OutputId::new(transaction_id, 0).unwrap();
-
-    let client = setup_client_with_node_health_ignored().await;
 
     let output = client.get_output(&output_id).await.unwrap().into_output();
     let output_raw = Output::unpack_verified(
@@ -313,13 +309,9 @@ async fn test_get_treasury() {
 #[ignore]
 #[tokio::test]
 async fn test_get_included_block() {
-    let (_block_id, transaction_id) = setup_transaction_block().await;
+    let (_block_id, transaction_id, client) = setup_transaction_block().await;
 
-    let r = setup_client_with_node_health_ignored()
-        .await
-        .get_included_block(&transaction_id)
-        .await
-        .unwrap();
+    let r = client.get_included_block(&transaction_id).await.unwrap();
 
     println!("{r:#?}");
 }
@@ -327,9 +319,7 @@ async fn test_get_included_block() {
 #[ignore]
 #[tokio::test]
 async fn test_get_included_block_raw() {
-    let (_block_id, transaction_id) = setup_transaction_block().await;
-
-    let client = setup_client_with_node_health_ignored().await;
+    let (_block_id, transaction_id, client) = setup_transaction_block().await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
     let block_raw = Block::unpack_verified(
@@ -372,8 +362,7 @@ async fn test_get_routes() {
 #[ignore]
 #[tokio::test]
 async fn test_get_included_block_metadata() {
-    let (block_id, transaction_id) = setup_transaction_block().await;
-    let client = setup_client_with_node_health_ignored().await;
+    let (block_id, transaction_id, client) = setup_transaction_block().await;
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);

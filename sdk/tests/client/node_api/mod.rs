@@ -9,7 +9,7 @@ mod mqtt;
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Result,
+        request_funds_from_faucet, secret::SecretManager, Client, Result,
     },
     types::block::{
         address::ToBech32Ext,
@@ -46,7 +46,7 @@ pub fn setup_secret_manager() -> SecretManager {
 }
 
 // Sends a transaction block to the node to test against it.
-pub async fn setup_transaction_block() -> (BlockId, TransactionId) {
+pub async fn setup_transaction_block() -> (BlockId, TransactionId, Client) {
     let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
@@ -98,11 +98,7 @@ pub async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .unwrap()
         .id();
 
-    let block = setup_client_with_node_health_ignored()
-        .await
-        .get_block(&block_id)
-        .await
-        .unwrap();
+    let block = client.get_block(&block_id).await.unwrap();
 
     let transaction_id = match block.payload() {
         Some(Payload::Transaction(t)) => t.id(),
@@ -111,7 +107,7 @@ pub async fn setup_transaction_block() -> (BlockId, TransactionId) {
 
     let _ = client.retry_until_included(&block.id(), None, None).await.unwrap();
 
-    (block_id, transaction_id)
+    (block_id, transaction_id, client)
 }
 
 // helper function to get the output id for the first alias output
