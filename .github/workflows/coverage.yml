@@ -2,7 +2,7 @@ name: Test coverage
 
 on:
   push:
-    branches: [develop, production, pr/qrayven/387-1]
+    branches: [develop, production]
     paths:
       - ".github/workflows/coverage.yml"
       - ".github/actions/**"
