@@ -17,7 +17,7 @@ use iota_sdk::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output, OutputId,
         },
-        payload::{transaction::TransactionEssence, Payload},
+        payload::Payload,
     },
 };
 
@@ -180,8 +180,7 @@ fn get_new_alias_output_ids(payload: &Payload) -> Result<Vec<OutputId>> {
     let mut output_ids = Vec::new();
     match payload {
         Payload::Transaction(tx_payload) => {
-            let TransactionEssence::Regular(regular) = tx_payload.essence();
-            for (index, output) in regular.outputs().iter().enumerate() {
+            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
                 if let Output::Alias(alias_output) = output {
                     if alias_output.alias_id().is_null() {
                         output_ids.push(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
