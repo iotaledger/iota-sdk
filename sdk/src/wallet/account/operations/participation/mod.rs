@@ -284,7 +284,6 @@ where
             .get_participation_events(account_index)
             .await?;
 
-        // TODO try to remove this clone
         for participation in participations.participations.clone().iter() {
             if let Some(event_with_nodes) = events.get(&participation.event_id) {
                 if event_with_nodes.data.milestone_index_end() < &latest_milestone_index {
