@@ -7,7 +7,7 @@ use iota_sdk::{
         secret::{SecretManage, SecretManager},
     },
     types::{
-        block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock},
+        block::{signature::dto::Ed25519SignatureDto, unlock::Unlock},
         TryFromDto,
     },
 };
@@ -41,10 +41,10 @@ pub(crate) async fn call_secret_manager_method_internal(
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,
         } => {
-            let payload = &secret_manager
+            let transaction = &secret_manager
                 .sign_transaction(PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                 .await?;
-            Response::SignedTransaction(PayloadDto::from(payload))
+            Response::SignedTransaction(transaction.into())
         }
         SecretManagerMethod::SignatureUnlock {
             transaction_essence_hash,

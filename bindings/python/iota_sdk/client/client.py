@@ -14,10 +14,10 @@ from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import Output
-from iota_sdk.types.payload import Payload
+from iota_sdk.types.payload import Payload, TransactionPayload
 from iota_sdk.types.token_scheme import TokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
-from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
+from iota_sdk.types.transaction_data import PreparedTransactionData
 from json import dumps, loads
 import humps
 from datetime import timedelta
@@ -486,14 +486,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         }))
 
     def sign_transaction(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
-                         StrongholdSecretManager, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
+                         StrongholdSecretManager, prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
         Args:
             secret_manager: One of the supported secret managers.
             prepared_transaction_data: a prepared transaction to sign.
         """
-        return from_dict(SignedTransactionData, self._call_method('signTransaction', {
+        return from_dict(TransactionPayload, self._call_method('signTransaction', {
             'secretManager': secret_manager,
             'preparedTransactionData': prepared_transaction_data
         }))
