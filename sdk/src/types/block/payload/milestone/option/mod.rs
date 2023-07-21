@@ -166,7 +166,6 @@ fn verify_unique_sorted_packable<const VERIFY: bool>(
     verify_unique_sorted::<VERIFY>(milestone_options)
 }
 
-#[allow(missing_docs)]
 pub mod dto {
     use alloc::format;
 

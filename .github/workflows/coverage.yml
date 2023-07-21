@@ -55,12 +55,12 @@ jobs:
 
       - name: Collect coverage data
         run: >
-          cargo llvm-cov nextest 
-          --lcov 
-          --output-path coverage.info 
-          --tests 
-          --package iota-sdk 
-          --all-features 
+          cargo llvm-cov nextest
+          --lcov
+          --output-path coverage.info
+          --tests
+          --package iota-sdk
+          --all-features
           --run-ignored all
           --test-threads "num-cpus"
           --retries 2

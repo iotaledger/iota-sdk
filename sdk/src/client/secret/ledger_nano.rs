@@ -111,7 +111,7 @@ pub struct LedgerSecretManager {
     /// Specifies whether the wallet should be in non-interactive mode.
     pub non_interactive: bool,
     /// Mutex to prevent multiple simultaneous requests to a ledger.
-    pub mutex: Mutex<()>,
+    mutex: Mutex<()>,
 }
 
 impl TryFrom<u8> for LedgerDeviceType {

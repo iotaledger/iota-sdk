@@ -3,7 +3,7 @@
 
 use super::*;
 
-pub struct Migrate;
+pub(crate) struct Migrate;
 
 #[async_trait]
 impl MigrationData for Migrate {

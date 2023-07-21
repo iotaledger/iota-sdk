@@ -161,7 +161,6 @@ fn verify_signatures_packable<const VERIFY: bool>(
     verify_signatures::<VERIFY>(signatures)
 }
 
-#[allow(missing_docs)]
 pub mod dto {
     use alloc::{boxed::Box, string::ToString};
     use core::str::FromStr;

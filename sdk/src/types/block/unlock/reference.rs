@@ -33,8 +33,7 @@ impl ReferenceUnlock {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     /// References a previous unlock in order to substitute the duplication of the same unlock data for inputs which

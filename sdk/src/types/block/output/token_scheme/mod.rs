@@ -33,8 +33,7 @@ impl TokenScheme {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use derive_more::From;
     use serde::{Deserialize, Serialize};
 

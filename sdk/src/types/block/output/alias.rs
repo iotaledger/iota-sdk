@@ -706,8 +706,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Ali
     verify_allowed_unlock_conditions(unlock_conditions, AliasOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::{
         boxed::Box,
         string::{String, ToString},

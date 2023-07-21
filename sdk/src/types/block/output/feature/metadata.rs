@@ -74,8 +74,7 @@ impl core::fmt::Debug for MetadataFeature {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::boxed::Box;
 
     use serde::{Deserialize, Serialize};

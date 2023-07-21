@@ -52,8 +52,7 @@ fn verify_amount_packable<const VERIFY: bool>(
     Ok(())
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::string::{String, ToString};
 
     use serde::{Deserialize, Serialize};

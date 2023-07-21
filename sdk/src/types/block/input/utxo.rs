@@ -49,8 +49,7 @@ impl core::fmt::Debug for UtxoInput {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::string::{String, ToString};
 
     use serde::{Deserialize, Serialize};

@@ -56,7 +56,7 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
+    pub(crate) async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
         if let Some(account_indexes) = self.get(ACCOUNTS_INDEXATION_KEY).await? {
             if self.account_indexes.is_empty() {
                 self.account_indexes = account_indexes;
@@ -76,7 +76,7 @@ impl StorageManager {
             .await
     }
 
-    pub async fn save_account(&mut self, account: &AccountDetails) -> crate::wallet::Result<()> {
+    pub(crate) async fn save_account(&mut self, account: &AccountDetails) -> crate::wallet::Result<()> {
         // Only add account index if not already present
         if !self.account_indexes.contains(account.index()) {
             self.account_indexes.push(*account.index());
@@ -90,13 +90,13 @@ impl StorageManager {
         .await
     }
 
-    pub async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {
+    pub(crate) async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {
         self.delete(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}")).await?;
         self.account_indexes.retain(|a| a != &account_index);
         self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await
     }
 
-    pub async fn set_default_sync_options(
+    pub(crate) async fn set_default_sync_options(
         &self,
         account_index: u32,
         sync_options: &SyncOptions,
@@ -105,7 +105,10 @@ impl StorageManager {
         self.set(&key, &sync_options).await
     }
 
-    pub async fn get_default_sync_options(&self, account_index: u32) -> crate::wallet::Result<Option<SyncOptions>> {
+    pub(crate) async fn get_default_sync_options(
+        &self,
+        account_index: u32,
+    ) -> crate::wallet::Result<Option<SyncOptions>> {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
         self.get(&key).await
     }

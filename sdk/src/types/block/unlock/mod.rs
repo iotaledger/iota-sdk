@@ -137,7 +137,6 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
     Ok(())
 }
 
-#[allow(missing_docs)]
 pub mod dto {
     use alloc::format;
 

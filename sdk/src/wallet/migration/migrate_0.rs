@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use super::*;
 use crate::wallet::Error;
 
-pub struct Migrate;
+pub(crate) struct Migrate;
 
 #[async_trait]
 impl MigrationData for Migrate {
@@ -132,10 +132,10 @@ pub(super) mod types {
     macro_rules! impl_id {
         ($type:ident, $len:literal) => {
             #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-            pub struct $type([u8; Self::LENGTH]);
+            pub(crate) struct $type([u8; Self::LENGTH]);
 
             impl $type {
-                pub const LENGTH: usize = $len;
+                pub(crate) const LENGTH: usize = $len;
             }
 
             impl core::str::FromStr for $type {
@@ -163,54 +163,54 @@ pub(super) mod types {
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Transaction {
-        pub payload: TransactionPayload,
-        pub block_id: Option<serde_json::Value>,
-        pub inclusion_state: InclusionState,
-        pub timestamp: u128,
-        pub transaction_id: TransactionId,
-        pub network_id: u64,
-        pub incoming: bool,
-        pub note: Option<String>,
+    pub(crate) struct Transaction {
+        pub(crate) payload: TransactionPayload,
+        pub(crate) block_id: Option<serde_json::Value>,
+        pub(crate) inclusion_state: InclusionState,
+        pub(crate) timestamp: u128,
+        pub(crate) transaction_id: TransactionId,
+        pub(crate) network_id: u64,
+        pub(crate) incoming: bool,
+        pub(crate) note: Option<String>,
         #[serde(default)]
-        pub inputs: Vec<OutputWithMetadataResponse>,
+        pub(crate) inputs: Vec<OutputWithMetadataResponse>,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct TransactionPayload {
-        pub essence: TransactionEssence,
-        pub unlocks: serde_json::Value,
+    pub(crate) struct TransactionPayload {
+        pub(crate) essence: TransactionEssence,
+        pub(crate) unlocks: serde_json::Value,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum TransactionEssence {
+    pub(crate) enum TransactionEssence {
         Regular(RegularTransactionEssence),
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct RegularTransactionEssence {
-        pub network_id: u64,
-        pub inputs: serde_json::Value,
-        pub inputs_commitment: serde_json::Value,
-        pub outputs: serde_json::Value,
-        pub payload: serde_json::Value,
+    pub(crate) struct RegularTransactionEssence {
+        pub(crate) network_id: u64,
+        pub(crate) inputs: serde_json::Value,
+        pub(crate) inputs_commitment: serde_json::Value,
+        pub(crate) outputs: serde_json::Value,
+        pub(crate) payload: serde_json::Value,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct OutputWithMetadataResponse {
-        pub metadata: OutputMetadataDto,
-        pub output: serde_json::Value,
+    pub(crate) struct OutputWithMetadataResponse {
+        pub(crate) metadata: OutputMetadataDto,
+        pub(crate) output: serde_json::Value,
     }
 
-    pub struct OutputId {
-        pub transaction_id: TransactionId,
-        pub index: u16,
+    pub(crate) struct OutputId {
+        pub(crate) transaction_id: TransactionId,
+        pub(crate) index: u16,
     }
 
     impl OutputId {
-        pub const LENGTH: usize = TransactionId::LENGTH + core::mem::size_of::<u16>();
+        pub(crate) const LENGTH: usize = TransactionId::LENGTH + core::mem::size_of::<u16>();
     }
 
     impl TryFrom<[u8; Self::LENGTH]> for OutputId {
@@ -248,41 +248,41 @@ pub(super) mod types {
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct OutputMetadata {
-        pub block_id: serde_json::Value,
-        pub output_id: OutputId,
-        pub is_spent: bool,
+    pub(crate) struct OutputMetadata {
+        pub(crate) block_id: serde_json::Value,
+        pub(crate) output_id: OutputId,
+        pub(crate) is_spent: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub milestone_index_spent: Option<u32>,
+        pub(crate) milestone_index_spent: Option<u32>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub milestone_timestamp_spent: Option<u32>,
+        pub(crate) milestone_timestamp_spent: Option<u32>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub transaction_id_spent: Option<TransactionId>,
-        pub milestone_index_booked: u32,
-        pub milestone_timestamp_booked: u32,
-        pub ledger_index: u32,
+        pub(crate) transaction_id_spent: Option<TransactionId>,
+        pub(crate) milestone_index_booked: u32,
+        pub(crate) milestone_timestamp_booked: u32,
+        pub(crate) ledger_index: u32,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct OutputMetadataDto {
-        pub block_id: serde_json::Value,
-        pub transaction_id: String,
-        pub output_index: u16,
-        pub is_spent: bool,
+    pub(crate) struct OutputMetadataDto {
+        pub(crate) block_id: serde_json::Value,
+        pub(crate) transaction_id: String,
+        pub(crate) output_index: u16,
+        pub(crate) is_spent: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub milestone_index_spent: Option<u32>,
+        pub(crate) milestone_index_spent: Option<u32>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub milestone_timestamp_spent: Option<u32>,
+        pub(crate) milestone_timestamp_spent: Option<u32>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub transaction_id_spent: Option<String>,
-        pub milestone_index_booked: u32,
-        pub milestone_timestamp_booked: u32,
-        pub ledger_index: u32,
+        pub(crate) transaction_id_spent: Option<String>,
+        pub(crate) milestone_index_booked: u32,
+        pub(crate) milestone_timestamp_booked: u32,
+        pub(crate) ledger_index: u32,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub enum InclusionState {
+    pub(crate) enum InclusionState {
         Pending,
         Confirmed,
         Conflicting,

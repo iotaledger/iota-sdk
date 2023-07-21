@@ -76,8 +76,7 @@ fn verify_amount_packable<const VERIFY: bool>(
     verify_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::string::String;
 
     use serde::{Deserialize, Serialize};

@@ -3,7 +3,7 @@
 
 use super::*;
 
-pub struct Migrate;
+pub(crate) struct Migrate;
 
 #[async_trait]
 impl MigrationData for Migrate {
@@ -142,33 +142,33 @@ mod types {
 
     #[derive(Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct OutputData {
-        pub output_id: Value,
-        pub metadata: OutputMetadata,
-        pub output: Output,
-        pub is_spent: bool,
-        pub address: Address,
-        pub network_id: u64,
-        pub remainder: bool,
-        pub chain: Option<Bip44>,
+    pub(crate) struct OutputData {
+        pub(crate) output_id: Value,
+        pub(crate) metadata: OutputMetadata,
+        pub(crate) output: Output,
+        pub(crate) is_spent: bool,
+        pub(crate) address: Address,
+        pub(crate) network_id: u64,
+        pub(crate) remainder: bool,
+        pub(crate) chain: Option<Bip44>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct OutputDataDto {
-        pub output_id: Value,
-        pub metadata: OutputMetadataDto,
-        pub output: OutputDto,
-        pub is_spent: bool,
-        pub address: AddressDto,
-        pub network_id: String,
-        pub remainder: bool,
-        pub chain: Option<Bip44>,
+    pub(crate) struct OutputDataDto {
+        pub(crate) output_id: Value,
+        pub(crate) metadata: OutputMetadataDto,
+        pub(crate) output: OutputDto,
+        pub(crate) is_spent: bool,
+        pub(crate) address: AddressDto,
+        pub(crate) network_id: String,
+        pub(crate) remainder: bool,
+        pub(crate) chain: Option<Bip44>,
     }
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Output {
+    pub(crate) enum Output {
         Treasury(TreasuryOutput),
         Basic(BasicOutput),
         Alias(AliasOutput),
@@ -178,7 +178,7 @@ mod types {
 
     #[derive(Serialize, From)]
     #[serde(untagged)]
-    pub enum OutputDto {
+    pub(crate) enum OutputDto {
         Treasury(TreasuryOutputDto),
         Basic(BasicOutputDto),
         Alias(AliasOutputDto),
@@ -235,15 +235,15 @@ mod types {
     }
 
     #[derive(Deserialize)]
-    pub struct TreasuryOutput {
-        pub amount: u64,
+    pub(crate) struct TreasuryOutput {
+        pub(crate) amount: u64,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct TreasuryOutputDto {
+    pub(crate) struct TreasuryOutputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub amount: String,
+        pub(crate) kind: u8,
+        pub(crate) amount: String,
     }
 
     impl From<TreasuryOutput> for TreasuryOutputDto {
@@ -256,24 +256,24 @@ mod types {
     }
 
     #[derive(Deserialize)]
-    pub struct BasicOutput {
-        pub amount: u64,
-        pub native_tokens: BoxedSlicePrefix<NativeToken>,
-        pub unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
-        pub features: BoxedSlicePrefix<Feature>,
+    pub(crate) struct BasicOutput {
+        pub(crate) amount: u64,
+        pub(crate) native_tokens: BoxedSlicePrefix<NativeToken>,
+        pub(crate) unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
+        pub(crate) features: BoxedSlicePrefix<Feature>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct BasicOutputDto {
+    pub(crate) struct BasicOutputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub amount: String,
+        pub(crate) kind: u8,
+        pub(crate) amount: String,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub(crate) native_tokens: Vec<NativeToken>,
+        pub(crate) unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub(crate) features: Vec<FeatureDto>,
     }
 
     impl From<BasicOutput> for BasicOutputDto {
@@ -289,36 +289,36 @@ mod types {
     }
 
     #[derive(Deserialize)]
-    pub struct AliasOutput {
-        pub amount: u64,
-        pub native_tokens: BoxedSlicePrefix<NativeToken>,
-        pub alias_id: Value,
-        pub state_index: u32,
-        pub state_metadata: BoxedSlicePrefix<u8>,
-        pub foundry_counter: u32,
-        pub unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
-        pub features: BoxedSlicePrefix<Feature>,
-        pub immutable_features: BoxedSlicePrefix<Feature>,
+    pub(crate) struct AliasOutput {
+        pub(crate) amount: u64,
+        pub(crate) native_tokens: BoxedSlicePrefix<NativeToken>,
+        pub(crate) alias_id: Value,
+        pub(crate) state_index: u32,
+        pub(crate) state_metadata: BoxedSlicePrefix<u8>,
+        pub(crate) foundry_counter: u32,
+        pub(crate) unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
+        pub(crate) features: BoxedSlicePrefix<Feature>,
+        pub(crate) immutable_features: BoxedSlicePrefix<Feature>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AliasOutputDto {
+    pub(crate) struct AliasOutputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub amount: String,
+        pub(crate) kind: u8,
+        pub(crate) amount: String,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        pub alias_id: Value,
-        pub state_index: u32,
+        pub(crate) native_tokens: Vec<NativeToken>,
+        pub(crate) alias_id: Value,
+        pub(crate) state_index: u32,
         #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub state_metadata: String,
-        pub foundry_counter: u32,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub(crate) state_metadata: String,
+        pub(crate) foundry_counter: u32,
+        pub(crate) unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub(crate) features: Vec<FeatureDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub(crate) immutable_features: Vec<FeatureDto>,
     }
 
     impl From<AliasOutput> for AliasOutputDto {
@@ -339,31 +339,31 @@ mod types {
     }
 
     #[derive(Deserialize)]
-    pub struct FoundryOutput {
-        pub amount: u64,
-        pub native_tokens: BoxedSlicePrefix<NativeToken>,
-        pub serial_number: u32,
-        pub token_scheme: TokenScheme,
-        pub unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
-        pub features: BoxedSlicePrefix<Feature>,
-        pub immutable_features: BoxedSlicePrefix<Feature>,
+    pub(crate) struct FoundryOutput {
+        pub(crate) amount: u64,
+        pub(crate) native_tokens: BoxedSlicePrefix<NativeToken>,
+        pub(crate) serial_number: u32,
+        pub(crate) token_scheme: TokenScheme,
+        pub(crate) unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
+        pub(crate) features: BoxedSlicePrefix<Feature>,
+        pub(crate) immutable_features: BoxedSlicePrefix<Feature>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct FoundryOutputDto {
+    pub(crate) struct FoundryOutputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub amount: String,
+        pub(crate) kind: u8,
+        pub(crate) amount: String,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        pub serial_number: u32,
-        pub token_scheme: TokenSchemeDto,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub(crate) native_tokens: Vec<NativeToken>,
+        pub(crate) serial_number: u32,
+        pub(crate) token_scheme: TokenSchemeDto,
+        pub(crate) unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub(crate) features: Vec<FeatureDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub(crate) immutable_features: Vec<FeatureDto>,
     }
 
     impl From<FoundryOutput> for FoundryOutputDto {
@@ -382,29 +382,29 @@ mod types {
     }
 
     #[derive(Deserialize)]
-    pub struct NftOutput {
-        pub amount: u64,
-        pub native_tokens: BoxedSlicePrefix<NativeToken>,
-        pub nft_id: Value,
-        pub unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
-        pub features: BoxedSlicePrefix<Feature>,
-        pub immutable_features: BoxedSlicePrefix<Feature>,
+    pub(crate) struct NftOutput {
+        pub(crate) amount: u64,
+        pub(crate) native_tokens: BoxedSlicePrefix<NativeToken>,
+        pub(crate) nft_id: Value,
+        pub(crate) unlock_conditions: BoxedSlicePrefix<UnlockCondition>,
+        pub(crate) features: BoxedSlicePrefix<Feature>,
+        pub(crate) immutable_features: BoxedSlicePrefix<Feature>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct NftOutputDto {
+    pub(crate) struct NftOutputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub amount: String,
+        pub(crate) kind: u8,
+        pub(crate) amount: String,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        pub nft_id: Value,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub(crate) native_tokens: Vec<NativeToken>,
+        pub(crate) nft_id: Value,
+        pub(crate) unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub(crate) features: Vec<FeatureDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub(crate) immutable_features: Vec<FeatureDto>,
     }
 
     impl From<NftOutput> for NftOutputDto {
@@ -423,13 +423,13 @@ mod types {
 
     #[derive(Deserialize)]
     #[repr(transparent)]
-    pub struct BoxedSlicePrefix<T> {
-        pub inner: Vec<T>,
+    pub(crate) struct BoxedSlicePrefix<T> {
+        pub(crate) inner: Vec<T>,
     }
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum UnlockCondition {
+    pub(crate) enum UnlockCondition {
         Address(Address),
         StorageDepositReturn(StorageDepositReturnUnlockCondition),
         Timelock(u32),
@@ -441,7 +441,7 @@ mod types {
 
     #[derive(Serialize, From)]
     #[serde(untagged)]
-    pub enum UnlockConditionDto {
+    pub(crate) enum UnlockConditionDto {
         Address(AddressUnlockConditionDto),
         StorageDepositReturn(StorageDepositReturnUnlockConditionDto),
         Timelock(TimelockUnlockConditionDto),
@@ -547,75 +547,75 @@ mod types {
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct AddressUnlockConditionDto {
+    pub(crate) struct AddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) address: AddressDto,
     }
 
     #[derive(Deserialize)]
-    pub struct StorageDepositReturnUnlockCondition {
-        pub return_address: Address,
-        pub amount: u64,
+    pub(crate) struct StorageDepositReturnUnlockCondition {
+        pub(crate) return_address: Address,
+        pub(crate) amount: u64,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct StorageDepositReturnUnlockConditionDto {
+    pub(crate) struct StorageDepositReturnUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: AddressDto,
-        pub amount: String,
+        pub(crate) kind: u8,
+        pub(crate) return_address: AddressDto,
+        pub(crate) amount: String,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct TimelockUnlockConditionDto {
+    pub(crate) struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        pub(crate) kind: u8,
         #[serde(rename = "unixTime")]
-        pub timestamp: u32,
+        pub(crate) timestamp: u32,
     }
 
     #[derive(Deserialize)]
-    pub struct ExpirationUnlockCondition {
-        pub return_address: Address,
-        pub timestamp: u32,
+    pub(crate) struct ExpirationUnlockCondition {
+        pub(crate) return_address: Address,
+        pub(crate) timestamp: u32,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct ExpirationUnlockConditionDto {
+    pub(crate) struct ExpirationUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) return_address: AddressDto,
         #[serde(rename = "unixTime")]
-        pub timestamp: u32,
+        pub(crate) timestamp: u32,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct StateControllerAddressUnlockConditionDto {
+    pub(crate) struct StateControllerAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) address: AddressDto,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct GovernorAddressUnlockConditionDto {
+    pub(crate) struct GovernorAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) address: AddressDto,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct ImmutableAliasAddressUnlockConditionDto {
+    pub(crate) struct ImmutableAliasAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) address: AddressDto,
     }
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Address {
+    pub(crate) enum Address {
         Ed25519(String),
         Alias(String),
         Nft(String),
@@ -623,7 +623,7 @@ mod types {
 
     #[derive(Serialize, From)]
     #[serde(untagged)]
-    pub enum AddressDto {
+    pub(crate) enum AddressDto {
         Ed25519(Ed25519AddressDto),
         Alias(AliasAddressDto),
         Nft(NftAddressDto),
@@ -669,31 +669,31 @@ mod types {
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519AddressDto {
+    pub(crate) struct Ed25519AddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub pub_key_hash: String,
+        pub(crate) kind: u8,
+        pub(crate) pub_key_hash: String,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AliasAddressDto {
+    pub(crate) struct AliasAddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub alias_id: String,
+        pub(crate) kind: u8,
+        pub(crate) alias_id: String,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct NftAddressDto {
+    pub(crate) struct NftAddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub nft_id: String,
+        pub(crate) kind: u8,
+        pub(crate) nft_id: String,
     }
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Feature {
+    pub(crate) enum Feature {
         Sender(Address),
         Issuer(Address),
         Metadata(BoxedSlicePrefix<u8>),
@@ -702,7 +702,7 @@ mod types {
 
     #[derive(Serialize, From)]
     #[serde(untagged)]
-    pub enum FeatureDto {
+    pub(crate) enum FeatureDto {
         Sender(SenderFeatureDto),
         Issuer(IssuerFeatureDto),
         Metadata(MetadataFeatureDto),
@@ -769,41 +769,41 @@ mod types {
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct SenderFeatureDto {
+    pub(crate) struct SenderFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) address: AddressDto,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct IssuerFeatureDto {
+    pub(crate) struct IssuerFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        pub(crate) kind: u8,
+        pub(crate) address: AddressDto,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct MetadataFeatureDto {
+    pub(crate) struct MetadataFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub data: String,
+        pub(crate) kind: u8,
+        pub(crate) data: String,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct TagFeatureDto {
+    pub(crate) struct TagFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub tag: String,
+        pub(crate) kind: u8,
+        pub(crate) tag: String,
     }
 
     #[derive(Deserialize)]
-    pub enum TokenScheme {
+    pub(crate) enum TokenScheme {
         Simple(SimpleTokenScheme),
     }
 
     #[derive(Serialize, Deserialize, From)]
     #[serde(untagged)]
-    pub enum TokenSchemeDto {
+    pub(crate) enum TokenSchemeDto {
         /// A simple token scheme.
         Simple(SimpleTokenSchemeDto),
     }
@@ -817,20 +817,20 @@ mod types {
     }
 
     #[derive(Deserialize)]
-    pub struct SimpleTokenScheme {
-        pub minted_tokens: Value,
-        pub melted_tokens: Value,
-        pub maximum_supply: Value,
+    pub(crate) struct SimpleTokenScheme {
+        pub(crate) minted_tokens: Value,
+        pub(crate) melted_tokens: Value,
+        pub(crate) maximum_supply: Value,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct SimpleTokenSchemeDto {
+    pub(crate) struct SimpleTokenSchemeDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub minted_tokens: Value,
-        pub melted_tokens: Value,
-        pub maximum_supply: Value,
+        pub(crate) kind: u8,
+        pub(crate) minted_tokens: Value,
+        pub(crate) melted_tokens: Value,
+        pub(crate) maximum_supply: Value,
     }
 
     impl From<SimpleTokenScheme> for SimpleTokenSchemeDto {
@@ -846,47 +846,47 @@ mod types {
 
     #[derive(Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Transaction {
-        pub payload: TransactionPayload,
+    pub(crate) struct Transaction {
+        pub(crate) payload: TransactionPayload,
         #[serde(default)]
-        pub block_id: Option<Value>,
-        pub inclusion_state: Value,
-        pub timestamp: u128,
-        pub transaction_id: Value,
-        pub network_id: u64,
-        pub incoming: bool,
+        pub(crate) block_id: Option<Value>,
+        pub(crate) inclusion_state: Value,
+        pub(crate) timestamp: u128,
+        pub(crate) transaction_id: Value,
+        pub(crate) network_id: u64,
+        pub(crate) incoming: bool,
         #[serde(default)]
-        pub note: Option<String>,
+        pub(crate) note: Option<String>,
         #[serde(default)]
-        pub inputs: Vec<Value>,
+        pub(crate) inputs: Vec<Value>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct TransactionDto {
-        pub payload: TransactionPayloadDto,
-        pub block_id: Option<Value>,
-        pub inclusion_state: Value,
-        pub timestamp: String,
-        pub transaction_id: Value,
-        pub network_id: String,
-        pub incoming: bool,
-        pub note: Option<String>,
-        pub inputs: Vec<Value>,
+    pub(crate) struct TransactionDto {
+        pub(crate) payload: TransactionPayloadDto,
+        pub(crate) block_id: Option<Value>,
+        pub(crate) inclusion_state: Value,
+        pub(crate) timestamp: String,
+        pub(crate) transaction_id: Value,
+        pub(crate) network_id: String,
+        pub(crate) incoming: bool,
+        pub(crate) note: Option<String>,
+        pub(crate) inputs: Vec<Value>,
     }
 
     #[derive(Deserialize)]
-    pub struct TransactionPayload {
-        pub essence: TransactionEssence,
-        pub unlocks: BoxedSlicePrefix<Unlock>,
+    pub(crate) struct TransactionPayload {
+        pub(crate) essence: TransactionEssence,
+        pub(crate) unlocks: BoxedSlicePrefix<Unlock>,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct TransactionPayloadDto {
+    pub(crate) struct TransactionPayloadDto {
         #[serde(rename = "type")]
-        pub kind: u32,
-        pub essence: TransactionEssenceDto,
-        pub unlocks: Vec<UnlockDto>,
+        pub(crate) kind: u32,
+        pub(crate) essence: TransactionEssenceDto,
+        pub(crate) unlocks: Vec<UnlockDto>,
     }
 
     impl From<TransactionPayload> for TransactionPayloadDto {
@@ -903,18 +903,18 @@ mod types {
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum TransactionEssence {
+    pub(crate) enum TransactionEssence {
         Regular(RegularTransactionEssence),
     }
 
     #[derive(Serialize, Deserialize, From)]
     #[serde(untagged)]
-    pub enum TransactionEssenceDto {
+    pub(crate) enum TransactionEssenceDto {
         Regular(RegularTransactionEssenceDto),
     }
 
     #[derive(Deserialize)]
-    pub struct RegularTransactionEssence {
+    pub(crate) struct RegularTransactionEssence {
         network_id: u64,
         inputs: BoxedSlicePrefix<Input>,
         inputs_commitment: Vec<u8>,
@@ -924,15 +924,15 @@ mod types {
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct RegularTransactionEssenceDto {
+    pub(crate) struct RegularTransactionEssenceDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub network_id: String,
-        pub inputs: Vec<InputDto>,
-        pub inputs_commitment: String,
-        pub outputs: Vec<OutputDto>,
+        pub(crate) kind: u8,
+        pub(crate) network_id: String,
+        pub(crate) inputs: Vec<InputDto>,
+        pub(crate) inputs_commitment: String,
+        pub(crate) outputs: Vec<OutputDto>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub payload: Option<TaggedDataPayloadDto>,
+        pub(crate) payload: Option<TaggedDataPayloadDto>,
     }
 
     impl From<RegularTransactionEssence> for RegularTransactionEssenceDto {
@@ -953,24 +953,24 @@ mod types {
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Payload {
+    pub(crate) enum Payload {
         TaggedData(TaggedDataPayload),
     }
 
     #[derive(Deserialize)]
-    pub struct TaggedDataPayload {
+    pub(crate) struct TaggedDataPayload {
         tag: BoxedSlicePrefix<u8>,
         data: BoxedSlicePrefix<u8>,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct TaggedDataPayloadDto {
+    pub(crate) struct TaggedDataPayloadDto {
         #[serde(rename = "type")]
-        pub kind: u32,
+        pub(crate) kind: u32,
         #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub tag: String,
+        pub(crate) tag: String,
         #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub data: String,
+        pub(crate) data: String,
     }
 
     impl From<TaggedDataPayload> for TaggedDataPayloadDto {
@@ -985,14 +985,14 @@ mod types {
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Input {
+    pub(crate) enum Input {
         Utxo(OutputId),
         Treasury(String),
     }
 
     #[derive(Serialize, Deserialize, From)]
     #[serde(untagged)]
-    pub enum InputDto {
+    pub(crate) enum InputDto {
         Utxo(UtxoInputDto),
         Treasury(TreasuryInputDto),
     }
@@ -1013,24 +1013,24 @@ mod types {
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct UtxoInputDto {
+    pub(crate) struct UtxoInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub transaction_id: String,
-        pub transaction_output_index: u16,
+        pub(crate) kind: u8,
+        pub(crate) transaction_id: String,
+        pub(crate) transaction_output_index: u16,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct TreasuryInputDto {
+    pub(crate) struct TreasuryInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub milestone_id: String,
+        pub(crate) kind: u8,
+        pub(crate) milestone_id: String,
     }
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Unlock {
+    pub(crate) enum Unlock {
         Signature(Signature),
         Reference(u16),
         Alias(u16),
@@ -1039,7 +1039,7 @@ mod types {
 
     #[derive(Serialize, From)]
     #[serde(untagged)]
-    pub enum UnlockDto {
+    pub(crate) enum UnlockDto {
         Signature(SignatureUnlockDto),
         Reference(ReferenceUnlockDto),
         Alias(AliasUnlockDto),
@@ -1098,55 +1098,55 @@ mod types {
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct SignatureUnlockDto {
+    pub(crate) struct SignatureUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub signature: Ed25519SignatureDto,
+        pub(crate) kind: u8,
+        pub(crate) signature: Ed25519SignatureDto,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct ReferenceUnlockDto {
+    pub(crate) struct ReferenceUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        pub(crate) kind: u8,
         #[serde(rename = "reference")]
-        pub index: u16,
+        pub(crate) index: u16,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct AliasUnlockDto {
+    pub(crate) struct AliasUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        pub(crate) kind: u8,
         #[serde(rename = "reference")]
-        pub index: u16,
+        pub(crate) index: u16,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct NftUnlockDto {
+    pub(crate) struct NftUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        pub(crate) kind: u8,
         #[serde(rename = "reference")]
-        pub index: u16,
+        pub(crate) index: u16,
     }
 
     #[derive(Deserialize)]
     #[serde(tag = "type", content = "data")]
-    pub enum Signature {
+    pub(crate) enum Signature {
         Ed25519(Ed25519Signature),
     }
 
     #[derive(Deserialize)]
-    pub struct Ed25519Signature {
-        pub public_key: Vec<u8>,
-        pub signature: Vec<u8>,
+    pub(crate) struct Ed25519Signature {
+        pub(crate) public_key: Vec<u8>,
+        pub(crate) signature: Vec<u8>,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519SignatureDto {
+    pub(crate) struct Ed25519SignatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub public_key: String,
-        pub signature: String,
+        pub(crate) kind: u8,
+        pub(crate) public_key: String,
+        pub(crate) signature: String,
     }
 
     impl From<Ed25519Signature> for Ed25519SignatureDto {

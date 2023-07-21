@@ -90,4 +90,4 @@ mod storage_stub {
     pub trait SaveLoadWallet {}
     impl<T> SaveLoadWallet for T {}
 }
-pub use storage_stub::*;
+pub(crate) use storage_stub::*;
