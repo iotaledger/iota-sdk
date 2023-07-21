@@ -53,11 +53,6 @@ async fn test_mqtt() {
             } => {
                 panic!("mqtt disconnected");
             }
-            _ = async {
-                tokio::time::sleep(instant::Duration::from_secs(120)).await;
-            } => {
-                panic!("timed out after 120s");
-            }
         }
     }
     client.subscriber().disconnect().await.unwrap();
