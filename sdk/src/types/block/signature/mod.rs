@@ -23,7 +23,6 @@ use crate::types::block::Error;
 )]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidSignatureKind)]
-#[non_exhaustive]
 pub enum Signature {
     /// An Ed25519 signature.
     #[packable(tag = Ed25519Signature::KIND)]
@@ -64,7 +63,6 @@ pub mod dto {
     /// Describes all the different signature types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
-    #[non_exhaustive]
     pub enum SignatureDto {
         Ed25519(Box<Ed25519SignatureDto>),
     }

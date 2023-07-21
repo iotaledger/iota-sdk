@@ -11,7 +11,6 @@ use crate::types::block::Error;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeKind)]
-#[non_exhaustive]
 pub enum TokenScheme {
     ///
     #[packable(tag = SimpleTokenScheme::KIND)]
@@ -46,7 +45,6 @@ pub mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
-    #[non_exhaustive]
     pub enum TokenSchemeDto {
         /// A simple token scheme.
         Simple(SimpleTokenSchemeDto),

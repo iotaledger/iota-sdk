@@ -31,7 +31,6 @@ use crate::types::block::{
 )]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
-#[non_exhaustive]
 pub enum Address {
     /// An Ed25519 address.
     #[packable(tag = Ed25519Address::KIND)]
@@ -229,7 +228,6 @@ pub mod dto {
 
     /// Describes all the different address types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
-    #[non_exhaustive]
     pub enum AddressDto {
         /// An Ed25519 address.
         Ed25519(Ed25519AddressDto),

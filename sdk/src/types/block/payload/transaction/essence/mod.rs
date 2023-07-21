@@ -15,7 +15,6 @@ use crate::types::block::Error;
 #[derive(Clone, Debug, Eq, PartialEq, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidEssenceKind)]
-#[non_exhaustive]
 pub enum TransactionEssence {
     /// A regular transaction essence.
     #[packable(tag = RegularTransactionEssence::KIND)]
@@ -59,7 +58,6 @@ pub mod dto {
     /// Describes all the different essence types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
-    #[non_exhaustive]
     pub enum TransactionEssenceDto {
         Regular(RegularTransactionEssenceDto),
     }

@@ -29,7 +29,6 @@ pub const INPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=INPUT_INDEX_MAX; // [0..1
 )]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
-#[non_exhaustive]
 pub enum Input {
     /// A UTXO input.
     #[packable(tag = UtxoInput::KIND)]
@@ -99,7 +98,6 @@ pub mod dto {
     /// Describes all the different input types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
-    #[non_exhaustive]
     pub enum InputDto {
         Utxo(UtxoInputDto),
         Treasury(TreasuryInputDto),

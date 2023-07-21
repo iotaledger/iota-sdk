@@ -120,7 +120,6 @@ impl OutputWithMetadata {
 
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
-#[non_exhaustive]
 pub enum Output {
     /// A treasury output.
     Treasury(TreasuryOutput),
@@ -531,7 +530,6 @@ pub mod dto {
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
-    #[non_exhaustive]
     pub enum OutputDto {
         Treasury(TreasuryOutputDto),
         Basic(BasicOutputDto),

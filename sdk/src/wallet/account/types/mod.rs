@@ -277,7 +277,6 @@ pub enum InclusionState {
 
 /// The output kind enum.
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
 pub enum OutputKind {
     /// Alias output.
     Alias,

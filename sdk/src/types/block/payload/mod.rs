@@ -33,7 +33,6 @@ use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq)]
-#[non_exhaustive]
 pub enum Payload {
     /// A transaction payload.
     Transaction(Box<TransactionPayload>),
@@ -227,7 +226,6 @@ pub mod dto {
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(untagged)]
-    #[non_exhaustive]
     pub enum PayloadDto {
         Transaction(Box<TransactionPayloadDto>),
         Milestone(Box<MilestonePayloadDto>),
