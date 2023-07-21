@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HexEncodedString } from '../../utils';
+import { OutputId } from '../output';
 
 /**
  * All of the input types.
@@ -61,6 +62,28 @@ class UTXOInput extends Input {
         super(InputType.UTXO);
         this.transactionId = transactionId;
         this.transactionOutputIndex = transactionOutputIndex;
+    }
+
+    /**
+     * Creates a `UTXOInput` from an output id.
+     */
+    static fromOutputId(outputId: OutputId): UTXOInput {
+        // Remove '0x' prefix.
+        outputId = outputId.substring(2);
+
+        const INDEX_LENGTH = 2;
+        const TRANSACTION_ID_LENGTH = 32;
+        const bytes = Uint8Array.from(Buffer.from(outputId, 'hex'));
+        if (bytes.length !== TRANSACTION_ID_LENGTH + INDEX_LENGTH) {
+            throw new Error('Invalid length of output id');
+        }
+        const transactionIdBytes = bytes.subarray(0, TRANSACTION_ID_LENGTH);
+        const transactionId = Buffer.from(transactionIdBytes).toString('hex');
+
+        const OutputIndex = Buffer.from(
+            bytes.subarray(TRANSACTION_ID_LENGTH),
+        ).toString('hex');
+        return new UTXOInput(transactionId, Number(OutputIndex));
     }
 }
 
