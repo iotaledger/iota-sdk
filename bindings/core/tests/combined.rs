@@ -39,6 +39,7 @@ async fn create_account() -> Result<()> {
         .call_method(WalletMethod::CreateAccount {
             alias: None,
             bech32_hrp: None,
+            addresses: None,
         })
         .await;
 
@@ -107,6 +108,7 @@ async fn verify_accounts() -> Result<()> {
                 .call_method(WalletMethod::CreateAccount {
                     alias: Some(alias.to_owned()),
                     bech32_hrp: None,
+                    addresses: None,
                 })
                 .await,
         );
@@ -205,6 +207,7 @@ async fn client_from_wallet() -> Result<()> {
         .call_method(WalletMethod::CreateAccount {
             alias: None,
             bech32_hrp: None,
+            addresses: None,
         })
         .await;
 

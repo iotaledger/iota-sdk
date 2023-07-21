@@ -7,6 +7,8 @@ from typing import Optional
 
 
 class ClientUtils():
+    """Client utility functions.
+    """
 
     def hex_to_bech32(self, hex: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.

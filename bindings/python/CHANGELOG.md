@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.1 - 2023-07-DD
+## 1.0.0-rc.1 - 2023-07-21
 
 ### Added
 
@@ -30,6 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FilterOptions`;
 - `NetworkInfo`;
 - `ClientOptions, MqttBrokerOptions, Duration`;
+- Optional `addresses` parameter in `Wallet::create_account()`;
+- `UtxoInput, TreasuryInput`;
+- `RegularTransactionEssence`;
+- `Unlock` types;
+- `PreparedTransactionData, SignedTransactionData, InputSigningData, RemainderData`;
+- `UtxoChanges`;
+- `TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput`;
+- `TokenScheme`;
+- `Signature`;
+- `BlockBuilderOptions`;
 
 ### Changed
 
@@ -53,11 +63,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputData.chain` now is `Optional[Bip44]`;
 - `Wallet()` constructor and `Wallet::set_client_options()` now accept `ClientOptions`;
 - Split `Account::send()` into `send` and `send_with_params`;
+- Switched order of `AddressAndAmount` init params;
+- Renamed `PreparedTransactionData` to `PreparedTransaction`;
+- `{Client, SecretManager}::sign_transaction` return type from `SignedTransactionData` to `TransactionPayload`;
+- Split `Output` into multiple classes;
+- Renamed `TokenScheme` to `SimpleTokenScheme`;
 
 ### Removed
 
 - `Wallet::{generate_mnemonic(), verify_mnemonic()}` since they're available from `Utils`;
 - `HD_WALLET_TYPE`, `HARDEN_MASK` constants;
+- `Client::find_outputs()` method;
 
 ### Fixed
 

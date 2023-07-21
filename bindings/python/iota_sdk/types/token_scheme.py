@@ -1,16 +1,31 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr
 
 
 @dataclass
 class TokenScheme():
+    """Base class of a token scheme.
+    """
+    type: int
+
+
+@dataclass
+class SimpleTokenScheme(TokenScheme):
+    """A simple token scheme.
+
+    Attributes:
+        mintedTokens: The number of tokens that were minted.
+        meltedTokens: The number of tokens that were melted.
+        maximumSupply: The maximum supply of the token.
+        type: The type code of the token scheme.
+    """
     mintedTokens: HexStr
     meltedTokens: HexStr
     maximumSupply: HexStr
-    type: int = 0
+    type: int = field(default_factory=lambda: 0, init=False)
 
     def as_dict(self):
         config = dict(self.__dict__)

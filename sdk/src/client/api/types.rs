@@ -102,8 +102,7 @@ impl PreparedTransactionData {
 }
 
 /// Helper struct for offline signing
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignedTransactionData {
     /// Signed transaction payload
     pub transaction_payload: TransactionPayload,

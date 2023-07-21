@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// TODO
+/// Convenience macro to implement and derive base features of identifiers.
 #[macro_export]
 macro_rules! impl_id {
     ($vis:vis $name:ident, $length:literal, $doc:literal) => {
@@ -100,7 +100,7 @@ macro_rules! impl_id {
 }
 pub(crate) use impl_id;
 
-/// Helper macro to serialize types to string via serde.
+/// Convenience macro to serialize types to string via serde.
 #[macro_export]
 #[cfg(feature = "serde")]
 macro_rules! string_serde_impl {
@@ -144,7 +144,7 @@ macro_rules! string_serde_impl {
 #[cfg(feature = "serde")]
 pub(crate) use string_serde_impl;
 
-/// A convenience macro to work around the fact the `[bitflags]` crate does not yet support iterating over the
+/// Convenience macro to work around the fact the `[bitflags]` crate does not yet support iterating over the
 /// individual flags. This macro essentially creates the `[bitflags]` and puts the individual flags into an associated
 /// constant `pub const ALL_FLAGS: &'static []`.
 #[macro_export]

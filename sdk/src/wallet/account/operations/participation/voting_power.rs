@@ -16,7 +16,7 @@ use crate::{
     },
     wallet::{
         account::{types::Transaction, Account, TransactionOptions},
-        Result,
+        Error, Result,
     },
 };
 
@@ -58,10 +58,10 @@ where
             Some(current_output_data) => {
                 let output = current_output_data.output.as_basic();
 
-                // TODO checked addition
+                let new_amount = output.amount().checked_add(amount).ok_or(Error::InvalidVotingPower)?;
 
                 let (new_output, tagged_data_payload) = self
-                    .new_voting_output_and_tagged_data(output, output.amount() + amount, token_supply)
+                    .new_voting_output_and_tagged_data(output, new_amount, token_supply)
                     .await?;
 
                 (
@@ -118,7 +118,6 @@ where
             .ok_or_else(|| crate::wallet::Error::Voting("No unspent voting output found".to_string()))?;
         let output = current_output_data.output.as_basic();
 
-        // TODO what is amount > output.amount() ?
         // If the amount to decrease is the amount of the output, then we just remove the features.
         let (new_output, tagged_data_payload) = if amount == output.amount() {
             (
@@ -128,9 +127,10 @@ where
                 None,
             )
         } else {
-            // TODO checked subtraction
+            let new_amount = output.amount().checked_sub(amount).ok_or(Error::InvalidVotingPower)?;
+
             let (new_output, tagged_data_payload) = self
-                .new_voting_output_and_tagged_data(output, output.amount() - amount, token_supply)
+                .new_voting_output_and_tagged_data(output, new_amount, token_supply)
                 .await?;
 
             (new_output, Some(tagged_data_payload))
@@ -168,7 +168,6 @@ where
 
             participation_bytes
         } else {
-            // TODO participation bytes are incorrect, should we really just ignore?
             Vec::new()
         };
 

@@ -102,26 +102,26 @@ where
             }
         }
 
-        if let Some(permanodes) = &node_manager_builder.permanodes {
-            let mut new_permanodes = HashSet::new();
-            for node in permanodes.iter() {
+        node_manager_builder.permanodes = node_manager_builder
+            .permanodes
+            .into_iter()
+            .map(|node| {
                 let (node_url, disabled) = match &node {
                     NodeDto::Url(node_url) => (node_url, false),
                     NodeDto::Node(node) => (&node.url, node.disabled),
                 };
 
                 if node_url == &url {
-                    new_permanodes.insert(NodeDto::Node(Node {
+                    NodeDto::Node(Node {
                         url: url.clone(),
                         auth: auth.clone(),
                         disabled,
-                    }));
+                    })
                 } else {
-                    new_permanodes.insert(node.clone());
+                    node
                 }
-            }
-            node_manager_builder.permanodes = Some(new_permanodes);
-        }
+            })
+            .collect();
 
         let mut new_nodes = HashSet::new();
         for node in node_manager_builder.nodes.iter() {

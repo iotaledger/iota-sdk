@@ -19,20 +19,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.0 - 2023-07-DD
+## 1.0.0-rc.0 - 2023-07-21
+
+### Added
+
+- `wallet::Error::InvalidVotingPower` variant;
+- `TransactionEssence::is_regular` and `as_regular`;
 
 ### Changed
 
 - Migrated storage types field casing to uniform camelCase;
 - Replaced inappropriate serde impls from `AccountDetails` with fn impls for conversion;
+- `MqttPayload` now uses Dtos;
+- `NodeManagerBuilder` node fields are no longer wrapped in `Option`;
+- Prefix-hex string values replaced with boxed slices in Dtos;
+- `MilestoneEssence::new` now takes generic metadata for convenience;
+- `ParametersMilestoneOption::new` now accepts boxed slice;
+- `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
+- Made most public enums `non_exhaustive`;
 
 ### Removed
 
 - `ProtocolParametersDto`, `NetworkInfoDto`, `OutputMetadataDto` in favor of base types;
+- `serde` derives for types with explicit Dtos;
+- More fields that are considered empty are no longer serialized;
+- `Client::find_outputs()` method;
 
 ### Fixed
 
 - Call `ledger.set_non_interactive_mode()` only if it's a debug app;
+- Don't return other output types if alias/nft/foundry ids are provided in the `FilterOptions` for `Account::{outputs(), unspent_outputs()`;
 
 ## 0.4.0 - 2023-07-14
 

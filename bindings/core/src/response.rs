@@ -26,7 +26,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
+                dto::{MilestonePayloadDto, TransactionPayloadDto},
                 milestone::MilestoneId,
                 transaction::TransactionId,
             },
@@ -55,6 +55,7 @@ use crate::{error::Error, OmittedDebug};
 #[derive(Serialize, Derivative)]
 #[derivative(Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum Response {
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
@@ -88,7 +89,7 @@ pub enum Response {
     PreparedTransactionData(PreparedTransactionDataDto),
     /// Response for:
     /// - [`SignTransaction`](crate::method::ClientMethod::SignTransaction)
-    SignedTransaction(PayloadDto),
+    SignedTransaction(TransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
     SignatureUnlock(UnlockDto),
@@ -139,7 +140,6 @@ pub enum Response {
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
     OutputMetadata(OutputMetadata),
     /// Response for:
-    /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
     Outputs(Vec<OutputWithMetadataResponse>),

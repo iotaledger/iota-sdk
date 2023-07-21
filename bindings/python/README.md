@@ -4,14 +4,16 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Table of contents
 
-- [Requirements](#requirements)
-- [Getting Started](#getting-started)
+- [IOTA SDK Library - Python binding](#iota-sdk-library---python-binding)
+  - [Table of contents](#table-of-contents)
+  - [Requirements](#requirements)
+  - [Getting Started](#getting-started)
     - [Install the IOTA SDK](#install-the-iota-sdk)
-- [Client](#client-usage)
-- [Wallet](#wallet-usage)
-- [Examples](#examples)
-- [API Reference](#api-reference)
-- [Learn More](#learn-more)
+  - [Client](#client-usage)
+  - [Wallet](#wallet-usage)
+  - [Examples](#examples)
+  - [API Reference](#api-reference)
+  - [Learn More](#learn-more)
 
 ## Requirements
 
@@ -106,7 +108,7 @@ print(account.get_metadata())
 
 ## Examples
 
-You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to
+You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/blob/develop/bindings/python/examples) to acquainted with the IOTA SDK. You can use the following command to
 run any example:
 
 ```bash

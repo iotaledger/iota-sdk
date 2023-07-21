@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// The kind of storage used by the manager.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum StorageKind {
     /// RocksDB storage.
     #[cfg(feature = "rocksdb")]

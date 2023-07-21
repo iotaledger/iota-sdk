@@ -26,6 +26,7 @@ pub struct Event {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum WalletEvent {
     ConsolidationRequired,
     #[cfg(feature = "ledger_nano")]
@@ -149,6 +150,7 @@ impl<'de> Deserialize<'de> for WalletEvent {
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[repr(u8)]
+#[non_exhaustive]
 pub enum WalletEventType {
     ConsolidationRequired = 0,
     #[cfg(feature = "ledger_nano")]
@@ -205,6 +207,7 @@ pub struct TransactionInclusionEvent {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum TransactionProgressEvent {
     /// Performing input selection.
     SelectingInputs,

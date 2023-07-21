@@ -1,14 +1,21 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.address import Address
+from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 
 
 class FeatureType(IntEnum):
+    """Types of features.
+
+    Attributes:
+        Sender (0): The sender feature.
+        Issuer (1): The issuer feature.
+        Metadata (2): The metadata feature.
+        Tag (3): The tag feature.
+    """
     Sender = 0
     Issuer = 1
     Metadata = 2
@@ -17,34 +24,9 @@ class FeatureType(IntEnum):
 
 @dataclass
 class Feature():
-    """Initialize a feature
-
-    Parameters
-    ----------
-    type : FeatureType
-        The type of feature
-    address : Address
-        Issuer or Sender address
-    data : HexStr
-        Hex encoded metadata
-    tag : HexStr
-        Hex encoded tag used to index the output
+    """Base class of a feature.
     """
     type: int
-    address: Optional[Address] = None
-    data: Optional[HexStr] = None
-    tag: Optional[HexStr] = None
-
-    def into(self):
-        match FeatureType(self.type):
-            case FeatureType.Sender:
-                return SenderFeature(self.address)
-            case FeatureType.Issuer:
-                return IssuerFeature(self.address)
-            case FeatureType.Metadata:
-                return MetadataFeature(self.data)
-            case FeatureType.Metadata:
-                return TagFeature(self.tag)
 
     def as_dict(self):
         res = {k: v for k, v in self.__dict__.items() if v is not None}
@@ -53,49 +35,50 @@ class Feature():
         return res
 
 
+@dataclass
 class SenderFeature(Feature):
-    def __init__(self, sender):
-        """Initialize a SenderFeature
+    """Sender feature.
+    Attributes:
+        address: A given sender address.
+    """
+    address: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.Sender),
+        init=False)
 
-        Parameters
-        ----------
-        sender : Address
-            Sender address
-        """
-        super().__init__(int(FeatureType.Sender), address=sender)
 
-
+@dataclass
 class IssuerFeature(Feature):
-    def __init__(self, issuer):
-        """Initialize an IssuerFeature
+    """Issuer feature.
+    Attributes:
+        address: A given issuer address.
+    """
+    address: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.Issuer),
+        init=False)
 
-        Parameters
-        ----------
-        issuer : Address
-            Issuer address
-        """
-        super().__init__(int(FeatureType.Issuer), address=issuer)
 
-
+@dataclass
 class MetadataFeature(Feature):
-    def __init__(self, data: HexStr):
-        """Initialize a MetadataFeature
+    """Metadata feature.
+    Attributes:
+        data: Some hex encoded metadata.
+    """
+    data: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.Metadata),
+        init=False)
 
-        Parameters
-        ----------
-        data : HexStr
-            Hex encoded metadata
-        """
-        super().__init__(int(FeatureType.Metadata), data=data)
 
-
+@dataclass
 class TagFeature(Feature):
-    def __init__(self, tag: HexStr):
-        """Initialize a TagFeature
-
-        Parameters
-        ----------
-        tag : HexStr
-            Hex encoded tag used to index the output
-        """
-        super().__init__(int(FeatureType.Tag), tag=tag)
+    """Tag feature.
+    Attributes:
+        tag: A hex encoded tag used to index the output.
+    """
+    tag: HexStr
+    type: int = field(default_factory=lambda: int(FeatureType.Tag), init=False)

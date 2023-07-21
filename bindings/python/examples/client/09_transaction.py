@@ -16,8 +16,8 @@ secret_manager = MnemonicSecretManager(
     os.environ['MNEMONIC'])
 
 address_and_amount = AddressAndAmount(
-    'rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46',
     1000000,
+    'rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46',
 )
 
 # Create and post a block with a transaction

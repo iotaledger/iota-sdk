@@ -46,6 +46,7 @@ where
                 stronghold_dto.password = None;
                 s.serialize_str(&format!("{stronghold_dto:?}"))
             }
+            _ => panic!("tried to serialize unknown secret manager type"),
         }
     } else {
         s.serialize_str("null")

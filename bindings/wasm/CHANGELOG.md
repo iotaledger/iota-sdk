@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.1 - 2023-07-21
+
+Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.
+
 ## 1.0.0-rc.0 - 2023-07-07
 
 Initial release of the wasm SDK bindings.

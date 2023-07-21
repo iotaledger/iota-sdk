@@ -11,7 +11,10 @@ use iota_sdk::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     types::block::address::Hrp,
     wallet::{
-        account::{types::AccountIdentifier, SyncOptions},
+        account::{
+            types::{AccountAddress, AccountIdentifier},
+            SyncOptions,
+        },
         ClientOptions,
     },
     Url,
@@ -26,6 +29,7 @@ use crate::OmittedDebug;
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum WalletMethod {
     /// Creates an account.
     /// Expected response: [`Account`](crate::Response::Account)
@@ -35,6 +39,8 @@ pub enum WalletMethod {
         alias: Option<String>,
         /// The bech32 HRP.
         bech32_hrp: Option<Hrp>,
+        /// Account addresses.
+        addresses: Option<Vec<AccountAddress>>,
     },
     /// Read account.
     /// Expected response: [`Account`](crate::Response::Account)

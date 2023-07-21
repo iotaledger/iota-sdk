@@ -30,9 +30,9 @@ async function run() {
         const callback = function (err: any, event: Event) {
             console.log(
                 'AccountIndex:',
-                event.getAccountIndex(),
+                event.accountIndex,
                 ', Event:',
-                event.getEvent(),
+                event.event,
             );
         };
 

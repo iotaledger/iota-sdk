@@ -91,6 +91,7 @@ impl LedgerApp {
 
 /// Ledger Device Type
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum LedgerDeviceType {
     /// Device Type Nano S
     #[serde(alias = "ledgerNanoS")]
@@ -149,8 +150,7 @@ impl LedgerNanoStatus {
 }
 
 /// Data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct InputSigningData {
     /// The output
     pub output: Output,

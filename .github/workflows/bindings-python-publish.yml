@@ -158,13 +158,13 @@ jobs:
           path: wheels
       - run: ls -R
 
-      - name: Upload Wheels to Github
+      - name: Upload Wheels to Github release
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          body: https://github.com/iotaledger/iota-sdk/blob/develop/bindings/python/CHANGELOG.md
           files: wheels/*
           tag_name: ${{ steps.tagname.outputs.TAG_NAME }}
-          append_body: true
           prerelease: true
 
       - uses: actions/setup-python@v4

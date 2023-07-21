@@ -19,11 +19,6 @@ use crate::types::block::{protocol::ProtocolParameters, Error};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidMilestoneOptionKind)]
 #[packable(unpack_visitor = ProtocolParameters)]
@@ -61,7 +56,6 @@ pub(crate) type MilestoneOptionCount = BoundedU8<0, { MilestoneOptions::COUNT_MA
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidMilestoneOptionCount(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct MilestoneOptions(

@@ -4,7 +4,7 @@ on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/core.yml"
+      - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -13,7 +13,7 @@ on:
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/core.yml"
+      - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -53,4 +53,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: nextest
-          args: run --all-features --no-fail-fast --cargo-profile ci --test-threads "num-cpus" --retries 2 -p iota-sdk -p iota-sdk-bindings-core
+          args: run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core

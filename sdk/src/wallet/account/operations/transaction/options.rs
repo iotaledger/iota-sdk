@@ -14,22 +14,16 @@ use crate::{
 };
 
 /// Options for transactions
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Default)]
 pub struct TransactionOptions {
-    #[serde(default)]
     pub remainder_value_strategy: RemainderValueStrategy,
-    #[serde(default)]
     pub tagged_data_payload: Option<TaggedDataPayload>,
     // If custom inputs are provided only they are used. If also other additional inputs should be used,
     // `mandatory_inputs` should be used instead.
-    #[serde(default)]
     pub custom_inputs: Option<Vec<OutputId>>,
-    #[serde(default)]
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<Burn>,
     pub note: Option<String>,
-    #[serde(default)]
     pub allow_micro_amount: bool,
 }
 

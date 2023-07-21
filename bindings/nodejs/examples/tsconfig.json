@@ -5,6 +5,8 @@
         "sourceMap": true,
         "strict": true,
         "moduleResolution": "node",
+        "types": ["node"],
+        "esModuleInterop": true,
         "noImplicitAny": true,
         "removeComments": true,
         "skipLibCheck": true,

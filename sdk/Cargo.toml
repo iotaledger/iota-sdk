@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "0.4.0"
+version = "1.0.0-rc.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -29,7 +29,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [ "blak
 iterator-sorted = { version = "0.1.0", default-features = false }
 itertools = { version = "0.11.0", default-features = false, features = [ "use_alloc" ] }
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
-prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
+prefix-hex = { version = "0.7.1", default-features = false, features = [ "primitive-types" ] }
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.171", default-features = false, features = [ "derive" ] }
 serde_json = { version = "1.0.102", default-features = false, features = [ "alloc" ] }

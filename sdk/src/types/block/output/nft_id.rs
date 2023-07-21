@@ -6,7 +6,7 @@ use crate::types::block::{
     output::OutputId,
 };
 
-impl_id!(pub NftId, 32, "TODO.");
+impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
 #[cfg(feature = "serde")]
 string_serde_impl!(NftId);

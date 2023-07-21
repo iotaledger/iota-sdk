@@ -6,7 +6,6 @@ build/
 out/
 **/dist
 stronghold
-package-lock.json
 web/
 node/
 lib/bindings.js

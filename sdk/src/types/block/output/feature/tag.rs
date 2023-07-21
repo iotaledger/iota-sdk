@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::ops::RangeInclusive;
 
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
@@ -24,10 +24,15 @@ impl TryFrom<Vec<u8>> for TagFeature {
     type Error = Error;
 
     fn try_from(tag: Vec<u8>) -> Result<Self, Error> {
-        tag.into_boxed_slice()
-            .try_into()
-            .map(Self)
-            .map_err(Error::InvalidTagFeatureLength)
+        tag.into_boxed_slice().try_into()
+    }
+}
+
+impl TryFrom<Box<[u8]>> for TagFeature {
+    type Error = Error;
+
+    fn try_from(tag: Box<[u8]>) -> Result<Self, Error> {
+        tag.try_into().map(Self).map_err(Error::InvalidTagFeatureLength)
     }
 }
 
@@ -40,8 +45,7 @@ impl TagFeature {
     /// Creates a new [`TagFeature`].
     #[inline(always)]
     pub fn new(tag: impl Into<Vec<u8>>) -> Result<Self, Error> {
-        let tag = tag.into();
-        Self::try_from(tag)
+        Self::try_from(tag.into())
     }
 
     /// Returns the tag.
@@ -65,14 +69,17 @@ impl core::fmt::Debug for TagFeature {
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::string::String;
+    use alloc::boxed::Box;
 
     use serde::{Deserialize, Serialize};
+
+    use crate::utils::serde::prefix_hex_bytes;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct TagFeatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub tag: String,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub tag: Box<[u8]>,
     }
 }

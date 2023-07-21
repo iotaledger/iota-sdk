@@ -13,7 +13,7 @@ client = Client(nodes=[node_url])
 # Configure foundry output
 # Replace with your own values
 serial_number = 1
-token_scheme = TokenScheme(32, 0, 64)
+token_scheme = SimpleTokenScheme(32, 0, 64)
 unlock_conditions = [
     ImmutableAliasAddressUnlockCondition(
         AliasAddress(

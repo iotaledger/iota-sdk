@@ -10,26 +10,15 @@ import { OutputResponse } from '../models';
 export type TransactionId = string;
 
 class Event {
-    private accountIndex: number;
-    private event: WalletEvent;
+    /**
+     * The account index for which the event was emitted.
+     */
+    accountIndex: number;
+    event: WalletEvent;
 
     constructor(accountIndex: number, event: WalletEvent) {
         this.accountIndex = accountIndex;
         this.event = event;
-    }
-
-    /**
-     * The account index for which the event was emitted.
-     */
-    getAccountIndex(): number {
-        return this.accountIndex;
-    }
-
-    /**
-     * The wallet event.
-     */
-    getEvent(): WalletEvent {
-        return this.event;
     }
 }
 
@@ -46,17 +35,10 @@ enum WalletEventType {
 }
 
 abstract class WalletEvent {
-    private type: WalletEventType;
+    type: WalletEventType;
 
     constructor(type: WalletEventType) {
         this.type = type;
-    }
-
-    /**
-     * The type of the wallet event.
-     */
-    getType(): WalletEventType {
-        return this.type;
     }
 }
 
@@ -67,56 +49,28 @@ class ConsolidationRequiredWalletEvent extends WalletEvent {
 }
 
 class LedgerAddressGenerationWalletEvent extends WalletEvent {
-    private address: string;
+    address: string;
 
     constructor(address: string) {
         super(WalletEventType.LedgerAddressGeneration);
         this.address = address;
-    }
-
-    /**
-     * The address.
-     */
-    getAddress(): string {
-        return this.address;
     }
 }
 
 class NewOutputWalletEvent extends WalletEvent {
     output: OutputData;
     transaction?: TransactionPayload;
-    transactionInputs?: [OutputResponse];
+    transactionInputs?: OutputResponse[];
 
     constructor(
         output: OutputData,
         transaction?: TransactionPayload,
-        transactionInputs?: [OutputResponse],
+        transactionInputs?: OutputResponse[],
     ) {
         super(WalletEventType.NewOutput);
         this.output = output;
         this.transaction = transaction;
         this.transactionInputs = transactionInputs;
-    }
-
-    /**
-     * The output.
-     */
-    getOutput(): OutputData {
-        return this.output;
-    }
-
-    /**
-     * The transaction.
-     */
-    getTransaction(): TransactionPayload | undefined {
-        return this.transaction;
-    }
-
-    /**
-     * The transaction inputs.
-     */
-    getTransactionInputs(): [OutputResponse] | undefined {
-        return this.transactionInputs;
     }
 }
 
@@ -126,13 +80,6 @@ class SpentOutputWalletEvent extends WalletEvent {
     constructor(output: OutputData) {
         super(WalletEventType.SpentOutput);
         this.output = output;
-    }
-
-    /**
-     * The output.
-     */
-    getOutput(): OutputData {
-        return this.output;
     }
 }
 
@@ -144,20 +91,6 @@ class TransactionInclusionWalletEvent extends WalletEvent {
         super(WalletEventType.TransactionInclusion);
         this.transactionId = transactionId;
         this.inclusionState = inclusionState;
-    }
-
-    /**
-     * The transaction ID.
-     */
-    getTransactionId(): TransactionId {
-        return this.transactionId;
-    }
-
-    /**
-     * The transaction inclusion state
-     */
-    getInclusionState(): InclusionState {
-        return this.inclusionState;
     }
 }
 
@@ -175,7 +108,7 @@ enum TransactionProgressType {
 }
 
 class TransactionProgressWalletEvent extends WalletEvent {
-    private progress: TransactionProgress;
+    progress: TransactionProgress;
 
     constructor(progress: TransactionProgress) {
         super(WalletEventType.TransactionProgress);
@@ -184,17 +117,10 @@ class TransactionProgressWalletEvent extends WalletEvent {
 }
 
 abstract class TransactionProgress {
-    private type: TransactionProgressType;
+    type: TransactionProgressType;
 
     constructor(type: TransactionProgressType) {
         this.type = type;
-    }
-
-    /**
-     * The type of the transaction progress.
-     */
-    getProgressType(): TransactionProgressType {
-        return this.type;
     }
 }
 
@@ -205,18 +131,11 @@ class SelectingInputsProgress extends TransactionProgress {
 }
 
 class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
-    private address: string;
+    address: string;
 
     constructor(address: string) {
         super(TransactionProgressType.GeneratingRemainderDepositAddress);
         this.address = address;
-    }
-
-    /**
-     * The address.
-     */
-    getAddress(): string {
-        return this.address;
     }
 }
 
@@ -238,18 +157,11 @@ class PreparedTransactionProgress extends TransactionProgress {
 }
 
 class PreparedTransactionEssenceHashProgress extends TransactionProgress {
-    private hash: string;
+    hash: string;
 
     constructor(hash: string) {
         super(TransactionProgressType.PreparedTransactionEssenceHash);
         this.hash = hash;
-    }
-
-    /**
-     * The address.
-     */
-    getHash(): string {
-        return this.hash;
     }
 }
 
@@ -289,4 +201,5 @@ export {
     SigningTransactionProgress,
     PerformingPowProgress,
     BroadcastingProgress,
+    TransactionProgressType,
 };

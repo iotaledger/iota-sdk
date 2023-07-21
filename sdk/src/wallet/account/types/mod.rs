@@ -165,8 +165,7 @@ impl OutputData {
 }
 
 /// A transaction with metadata
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Transaction {
     pub payload: TransactionPayload,
     pub block_id: Option<BlockId>,
@@ -182,7 +181,6 @@ pub struct Transaction {
     /// Outputs that are used as input in the transaction. May not be all, because some may have already been deleted
     /// from the node.
     // serde(default) is needed so it doesn't break with old dbs
-    #[serde(default)]
     pub inputs: Vec<OutputWithMetadataResponse>,
 }
 
@@ -269,6 +267,7 @@ impl Transaction {
 
 /// Possible InclusionStates for transactions
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum InclusionState {
     Pending,
     Confirmed,
@@ -310,6 +309,7 @@ impl FromStr for OutputKind {
 /// The account identifier.
 #[derive(Debug, Clone, Serialize, Eq, PartialEq, Hash)]
 #[serde(untagged)]
+#[non_exhaustive]
 pub enum AccountIdentifier {
     /// Account alias as identifier.
     Alias(String),

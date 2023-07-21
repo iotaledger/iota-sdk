@@ -9,15 +9,12 @@ mod mqtt;
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Result,
+        request_funds_from_faucet, secret::SecretManager, Client, Result,
     },
     types::block::{
         address::ToBech32Ext,
         output::{Output, OutputId},
-        payload::{
-            transaction::{TransactionEssence, TransactionId},
-            Payload,
-        },
+        payload::{transaction::TransactionId, Payload},
         BlockId,
     },
 };
@@ -46,17 +43,11 @@ pub fn setup_secret_manager() -> SecretManager {
 }
 
 // Sends a transaction block to the node to test against it.
-async fn setup_transaction_block() -> (BlockId, TransactionId) {
-    let client = setup_client_with_node_health_ignored().await;
+pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId) {
     let secret_manager = setup_secret_manager();
 
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await
-                .unwrap()
-                .with_range(0..2),
-        )
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await.unwrap().with_range(0..2))
         .await
         .unwrap();
     println!(
@@ -98,11 +89,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .unwrap()
         .id();
 
-    let block = setup_client_with_node_health_ignored()
-        .await
-        .get_block(&block_id)
-        .await
-        .unwrap();
+    let block = client.get_block(&block_id).await.unwrap();
 
     let transaction_id = match block.payload() {
         Some(Payload::Transaction(t)) => t.id(),
@@ -118,8 +105,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
 fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
     match payload {
         Payload::Transaction(tx_payload) => {
-            let TransactionEssence::Regular(regular) = tx_payload.essence();
-            for (index, output) in regular.outputs().iter().enumerate() {
+            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
                 if let Output::Alias(_alias_output) = output {
                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
                 }
@@ -134,8 +120,7 @@ fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
 fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
     match payload {
         Payload::Transaction(tx_payload) => {
-            let TransactionEssence::Regular(regular) = tx_payload.essence();
-            for (index, output) in regular.outputs().iter().enumerate() {
+            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
                 if let Output::Foundry(_foundry_output) = output {
                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
                 }
@@ -150,8 +135,7 @@ fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
 fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
     match payload {
         Payload::Transaction(tx_payload) => {
-            let TransactionEssence::Regular(regular) = tx_payload.essence();
-            for (index, output) in regular.outputs().iter().enumerate() {
+            for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
                 if let Output::Nft(_nft_output) = output {
                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
                 }
