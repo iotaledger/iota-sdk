@@ -109,7 +109,8 @@ class NodeCoreAPI():
             'outputId': output_id_str
         }))
 
-    def get_output_metadata(self, output_id: OutputId) -> OutputMetadata:
+    def get_output_metadata(self, output_id: OutputId |
+                            HexStr) -> OutputMetadata:
         """Get the output metadata corresponding to the given output id.
 
         Returns:
