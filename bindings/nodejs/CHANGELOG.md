@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
 - Properties in event classes are now public;
+- Remove getters from the event classes;
 - `{Client, SecretManager}::signTransaction` return type from `Payload` to `TransactionPayload`;
 
 ### Removed
