@@ -46,7 +46,7 @@ pub fn setup_secret_manager() -> SecretManager {
 }
 
 // Sends a transaction block to the node to test against it.
-async fn setup_transaction_block() -> (BlockId, TransactionId) {
+pub async fn setup_transaction_block() -> (BlockId, TransactionId) {
     let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 

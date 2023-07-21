@@ -357,3 +357,27 @@ async fn test_call_plugin_route() {
     // Just check name as info can change between 2 calls
     assert_eq!(plugin_res.node_info.name, info.node_info.name);
 }
+
+#[ignore]
+#[tokio::test]
+async fn test_get_routes() {
+    let client = setup_client_with_node_health_ignored().await;
+
+    let routes_response = client.get_routes().await.unwrap();
+    assert!(!routes_response.routes.is_empty());
+
+    println!("{routes_response:#?}");
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_get_included_block_metadata() {
+    let (block_id, transaction_id) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
+
+    assert_eq!(metadata_response.block_id, block_id);
+    assert!(!metadata_response.parents.is_empty());
+
+    println!("{metadata_response:#?}");
+}
