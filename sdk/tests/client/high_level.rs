@@ -6,12 +6,13 @@ use iota_sdk::types::block::{
     payload::{transaction::TransactionEssence, Payload},
 };
 
-use crate::client::node_api::setup_transaction_block;
+use crate::client::{common::setup_client_with_node_health_ignored, node_api::setup_transaction_block};
 
 #[ignore]
 #[tokio::test]
 async fn test_find_inputs_from_transaction_id() {
-    let (_block_id, transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (_block_id, transaction_id) = setup_transaction_block(&client).await;
     let inputs = client.inputs_from_transaction_id(&transaction_id).await.unwrap();
 
     assert_eq!(inputs.len(), 1);
@@ -20,7 +21,8 @@ async fn test_find_inputs_from_transaction_id() {
 #[ignore]
 #[tokio::test]
 async fn test_find_blocks() {
-    let (block_id, _transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (block_id, _transaction_id) = setup_transaction_block(&client).await;
     let blocks = client.find_blocks(&[block_id]).await.unwrap();
 
     assert_eq!(blocks.len(), 1);
@@ -30,7 +32,8 @@ async fn test_find_blocks() {
 #[ignore]
 #[tokio::test]
 async fn test_find_inputs() {
-    let (block_id, _transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (block_id, _transaction_id) = setup_transaction_block(&client).await;
     let block = client.get_block(&block_id).await.unwrap();
     let transaction = block.payload().unwrap();
 

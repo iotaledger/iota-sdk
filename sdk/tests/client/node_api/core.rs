@@ -50,7 +50,8 @@ async fn test_post_block_with_tagged_data() {
 #[ignore]
 #[tokio::test]
 async fn test_post_block_with_transaction() {
-    let block_id = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let block_id = setup_transaction_block(&client).await;
     println!("Block ID: {block_id:?}");
 }
 
@@ -125,7 +126,8 @@ async fn test_get_address_outputs() {
 #[ignore]
 #[tokio::test]
 async fn test_get_output() {
-    let (_block_id, transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let r = client
         .get_output(&OutputId::new(transaction_id, 0).unwrap())
@@ -138,7 +140,8 @@ async fn test_get_output() {
 #[ignore]
 #[tokio::test]
 async fn test_get_output_raw() {
-    let (_block_id, transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (_block_id, transaction_id) = setup_transaction_block(&client).await;
     let output_id = OutputId::new(transaction_id, 0).unwrap();
 
     let output = client.get_output(&output_id).await.unwrap().into_output();
@@ -309,7 +312,8 @@ async fn test_get_treasury() {
 #[ignore]
 #[tokio::test]
 async fn test_get_included_block() {
-    let (_block_id, transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let r = client.get_included_block(&transaction_id).await.unwrap();
 
@@ -319,7 +323,8 @@ async fn test_get_included_block() {
 #[ignore]
 #[tokio::test]
 async fn test_get_included_block_raw() {
-    let (_block_id, transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
     let block_raw = Block::unpack_verified(
@@ -354,7 +359,8 @@ async fn test_get_routes() {
     let client = setup_client_with_node_health_ignored().await;
 
     let routes_response = client.get_routes().await.unwrap();
-    assert!(!routes_response.routes.is_empty());
+    // At at least one route, which is not created by plugin, is available
+    assert!(routes_response.routes.contains(&"core/v2".to_string()));
 
     println!("{routes_response:#?}");
 }
@@ -362,7 +368,8 @@ async fn test_get_routes() {
 #[ignore]
 #[tokio::test]
 async fn test_get_included_block_metadata() {
-    let (block_id, transaction_id, client) = setup_transaction_block().await;
+    let client = setup_client_with_node_health_ignored().await;
+    let (block_id, transaction_id) = setup_transaction_block(&client).await;
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);

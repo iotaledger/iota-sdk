@@ -46,17 +46,11 @@ pub fn setup_secret_manager() -> SecretManager {
 }
 
 // Sends a transaction block to the node to test against it.
-pub async fn setup_transaction_block() -> (BlockId, TransactionId, Client) {
-    let client = setup_client_with_node_health_ignored().await;
+pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId) {
     let secret_manager = setup_secret_manager();
 
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await
-                .unwrap()
-                .with_range(0..2),
-        )
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await.unwrap().with_range(0..2))
         .await
         .unwrap();
     println!(
@@ -107,7 +101,7 @@ pub async fn setup_transaction_block() -> (BlockId, TransactionId, Client) {
 
     let _ = client.retry_until_included(&block.id(), None, None).await.unwrap();
 
-    (block_id, transaction_id, client)
+    (block_id, transaction_id)
 }
 
 // helper function to get the output id for the first alias output
