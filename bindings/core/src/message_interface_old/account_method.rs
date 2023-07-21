@@ -28,8 +28,8 @@ use iota_sdk::{
     utils::serde::bip44::Bip44Def,
     wallet::{
         account::{
-            CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
-            SyncOptions, TransactionOptionsDto,
+            ConsolidationParams, CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -123,10 +123,7 @@ pub enum AccountMethod {
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    ConsolidateOutputs {
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    },
+    ConsolidateOutputs { params: ConsolidationParams },
     /// Create an alias output.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]

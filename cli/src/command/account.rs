@@ -19,7 +19,7 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
+        account::{types::AccountAddress, Account, ConsolidationParams, OutputsToClaim, TransactionOptions},
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
@@ -396,7 +396,9 @@ pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
 pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Consolidating outputs.");
 
-    let transaction = account.consolidate_outputs(true, None).await?;
+    let transaction = account
+        .consolidate_outputs(ConsolidationParams::default().with_force(true))
+        .await?;
 
     println_log_info!(
         "Consolidation transaction sent:\n{:?}\n{:?}",

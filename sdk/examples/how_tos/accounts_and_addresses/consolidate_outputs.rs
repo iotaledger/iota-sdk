@@ -12,7 +12,11 @@
 //! cargo run --release --all-features --example consolidate_outputs
 //! ```
 
-use iota_sdk::{types::block::address::ToBech32Ext, wallet::Result, Wallet};
+use iota_sdk::{
+    types::block::address::ToBech32Ext,
+    wallet::{account::ConsolidationParams, Result},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -55,7 +59,9 @@ async fn main() -> Result<()> {
 
     // Consolidate unspent outputs and print the consolidation transaction ID
     // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
-    let transaction = account.consolidate_outputs(true, None).await?;
+    let transaction = account
+        .consolidate_outputs(ConsolidationParams::default().with_force(true))
+        .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for the consolidation transaction to get confirmed
