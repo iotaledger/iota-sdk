@@ -31,6 +31,7 @@ use serde::{Deserialize, Serialize};
 /// Each public account method.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum AccountMethod {
     /// List addresses.
     /// Expected response: [`Addresses`](crate::Response::Addresses)

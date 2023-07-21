@@ -49,6 +49,9 @@ async function run() {
         // We send from the first address in the account.
         const senderAddress = (await account.addresses())[0].address;
 
+        // We need to unlock stronghold.
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+
         const params: MintNftParams = {
             address: NFT1_OWNER_ADDRESS, // Remove or change to senderAddress to send to self
             sender: senderAddress,

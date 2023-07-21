@@ -1,12 +1,19 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, CoinType
 
 
 @dataclass
-class Ed25519Signature():
+class Signature():
+    """Base class of a signature.
+    """
+    type: int
+
+
+@dataclass
+class Ed25519Signature(Signature):
     """An Ed25519 signature.
 
     Attributes:
@@ -16,7 +23,7 @@ class Ed25519Signature():
     """
     publicKey: HexStr
     signature: HexStr
-    type: int = 0
+    type: int = field(default_factory=lambda: 0, init=False)
 
 
 @dataclass

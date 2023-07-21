@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    types::block::{
-        output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-                StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
+    types::block::output::{
+        unlock_condition::{
+            AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
+            StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
         },
-        payload::transaction::TransactionEssence,
+        AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
     },
     wallet::{account::SyncOptions, Result},
 };
@@ -191,7 +188,8 @@ async fn sync_incoming_transactions() -> Result<()> {
     assert_eq!(incoming_transactions.len(), 1);
     let incoming_tx = account_1.get_incoming_transaction(&tx.transaction_id).await.unwrap();
     assert_eq!(incoming_tx.inputs.len(), 1);
-    let TransactionEssence::Regular(essence) = incoming_tx.payload.essence();
+    let essence = incoming_tx.payload.essence().as_regular();
+
     // 2 created outputs plus remainder
     assert_eq!(essence.outputs().len(), 3);
 

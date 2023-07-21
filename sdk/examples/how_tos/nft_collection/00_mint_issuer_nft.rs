@@ -17,7 +17,7 @@
 use iota_sdk::{
     types::block::{
         output::{NftId, Output, OutputId},
-        payload::transaction::{TransactionEssence, TransactionId},
+        payload::transaction::TransactionId,
     },
     wallet::{Account, MintNftParams, Result},
     Wallet,
@@ -50,8 +50,7 @@ async fn main() -> Result<()> {
 
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
-    let TransactionEssence::Regular(essence) = transaction.payload.essence();
-    for (output_index, output) in essence.outputs().iter().enumerate() {
+    for (output_index, output) in transaction.payload.essence().as_regular().outputs().iter().enumerate() {
         if let Output::Nft(nft_output) = output {
             // New minted nft id is empty in the output
             if nft_output.nft_id().is_null() {

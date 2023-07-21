@@ -75,6 +75,7 @@ impl QueryParameters {
 /// Query parameter for output requests.
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 pub enum QueryParameter {
     /// Bech32-encoded address that should be searched for.
     Address(Bech32Address),

@@ -324,7 +324,7 @@ impl<'a> ClientBlockBuilder<'a> {
             // Send block with transaction
             let prepared_transaction_data = self.prepare_transaction().await?;
             let tx_payload = self.sign_transaction(prepared_transaction_data).await?;
-            self.finish_block(Some(tx_payload)).await
+            self.finish_block(Some(Payload::from(tx_payload))).await
         } else if self.tag.is_some() {
             // Send block with tagged_data payload
             self.finish_tagged_data().await

@@ -9,7 +9,7 @@ use iota_sdk::{
         address::ToBech32Ext,
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, OutputId},
-        payload::{transaction::TransactionEssence, Payload},
+        payload::Payload,
     },
 };
 
@@ -38,7 +38,7 @@ async fn send_basic_output() -> Result<()> {
         .await?;
 
     let output_id = if let Payload::Transaction(tx_payload) = block.payload().unwrap() {
-        let TransactionEssence::Regular(essence) = tx_payload.essence();
+        let essence = tx_payload.essence().as_regular();
         // only one input from the faucet
         assert_eq!(essence.inputs().len(), 1);
         // provided output + remainder output
@@ -125,7 +125,7 @@ async fn custom_input() -> Result<()> {
     client.retry_until_included(&block.id(), None, None).await?;
 
     if let Payload::Transaction(tx_payload) = block.payload().unwrap() {
-        let TransactionEssence::Regular(essence) = tx_payload.essence();
+        let essence = tx_payload.essence().as_regular();
         // only the provided input is used
         assert_eq!(essence.inputs().len(), 1);
         assert_eq!(essence.inputs()[0], Input::Utxo(utxo_input));

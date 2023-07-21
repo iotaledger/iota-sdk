@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountAddress, AddressWithUnspentOutputs } from './address';
+import { AliasId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
@@ -168,4 +169,10 @@ export interface FilterOptions {
     upperBoundBookedTimestamp?: number;
     /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
     outputTypes?: Uint8Array;
+    /** Return all alias outputs matching these IDs. */
+    aliasIds?: AliasId[];
+    /** Return all foundry outputs matching these IDs. */
+    foundryIds?: FoundryId[];
+    /** Return all NFT outputs matching these IDs. */
+    nftIds?: NftId[];
 }

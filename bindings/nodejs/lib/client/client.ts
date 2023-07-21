@@ -33,10 +33,10 @@ import {
     BlockId,
     UnlockCondition,
     Payload,
+    TransactionPayload,
     MilestonePayload,
     TreasuryOutput,
     Output,
-    parsePayload,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
@@ -238,26 +238,6 @@ export class Client {
     }
 
     /**
-     * Find all outputs based on the requests criteria. This method will try to query multiple nodes if
-     * the request amount exceeds individual node limit.
-     */
-    async findOutputs(
-        outputIds: string[],
-        addresses: string[],
-    ): Promise<OutputResponse[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'findOutputs',
-            data: {
-                outputIds,
-                addresses,
-            },
-        });
-
-        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
-        return plainToInstance(OutputResponse, parsed.payload);
-    }
-
-    /**
      * Prepare a transaction for signing
      */
     async prepareTransaction(
@@ -284,7 +264,7 @@ export class Client {
     async signTransaction(
         secretManager: SecretManagerType,
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<Payload> {
+    ): Promise<TransactionPayload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -293,7 +273,8 @@ export class Client {
             },
         });
 
-        return parsePayload(JSON.parse(response).payload);
+        const parsed = JSON.parse(response) as Response<TransactionPayload>;
+        return plainToInstance(TransactionPayload, parsed.payload);
     }
 
     /**

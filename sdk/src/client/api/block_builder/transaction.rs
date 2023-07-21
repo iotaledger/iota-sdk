@@ -16,7 +16,7 @@ use crate::{
         output::{InputsCommitment, Output, OutputId},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence, TransactionPayload},
-            Payload, TaggedDataPayload,
+            TaggedDataPayload,
         },
         semantic::{semantic_validation, ConflictReason, ValidationContext},
         signature::Ed25519Signature,
@@ -88,7 +88,10 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Sign the transaction
-    pub async fn sign_transaction(&self, prepared_transaction_data: PreparedTransactionData) -> Result<Payload> {
+    pub async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<TransactionPayload> {
         log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
         let secret_manager = self.secret_manager.ok_or(Error::MissingParameter("secret manager"))?;
         let current_time = self.client.get_time_checked().await?;
@@ -107,7 +110,7 @@ impl<'a> ClientBlockBuilder<'a> {
             return Err(Error::TransactionSemantic(conflict));
         }
 
-        Ok(Payload::from(tx_payload))
+        Ok(tx_payload)
     }
 }
 

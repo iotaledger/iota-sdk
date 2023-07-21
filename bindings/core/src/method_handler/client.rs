@@ -16,10 +16,7 @@ use iota_sdk::{
                 dto::{OutputBuilderAmountDto, OutputDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
             },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                Payload,
-            },
+            payload::{dto::MilestonePayloadDto, Payload},
             Block, BlockDto,
         },
     },
@@ -52,6 +49,7 @@ where
                 MqttPayload::Receipt(receipt) => {
                     serde_json::to_string(receipt).expect("failed to serialize MqttPayload::Receipt")
                 }
+                e => panic!("received unknown mqtt type: {e:?}"),
             };
             let response = MqttResponse {
                 topic: topic_event.topic.clone(),
@@ -239,13 +237,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             block_builder = block_builder.with_secret_manager(&secret_manager);
 
-            Response::SignedTransaction(PayloadDto::from(
-                &block_builder
+            Response::SignedTransaction(
+                (&block_builder
                     .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
                         prepared_transaction_data,
                     )?)
-                    .await?,
-            ))
+                    .await?)
+                    .into(),
+            )
         }
         ClientMethod::PostBlockPayload { payload } => {
             let block_builder = client.build_block();
@@ -400,15 +399,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(UtxoInputDto::from)
                 .collect(),
         ),
-        ClientMethod::FindOutputs { output_ids, addresses } => {
-            let outputs_response = client
-                .find_outputs(&output_ids, &addresses)
-                .await?
-                .iter()
-                .map(OutputWithMetadataResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
-        }
         ClientMethod::Reattach { block_id } => {
             let (block_id, block) = client.reattach(&block_id).await?;
             Response::Reattached((block_id, BlockDto::from(&block)))

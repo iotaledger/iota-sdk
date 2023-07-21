@@ -7,6 +7,7 @@ from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import MilestonePayload
+from iota_sdk.types.utxo_changes import UtxoChanges
 from typing import List
 from dacite import from_dict
 
@@ -96,24 +97,29 @@ class NodeCoreAPI():
             'blockBytes': block_bytes
         })
 
-    def get_output(self, output_id: OutputId) -> OutputWithMetadata:
+    def get_output(self, output_id: OutputId | HexStr) -> OutputWithMetadata:
         """Get the output corresponding to the given output id.
 
         Returns:
             The output itself with its metadata.
         """
+        output_id_str = output_id.output_id if isinstance(
+            output_id, OutputId) else output_id
         return from_dict(OutputWithMetadata, self._call_method('getOutput', {
-            'outputId': output_id
+            'outputId': output_id_str
         }))
 
-    def get_output_metadata(self, output_id: OutputId) -> OutputMetadata:
+    def get_output_metadata(self, output_id: OutputId |
+                            HexStr) -> OutputMetadata:
         """Get the output metadata corresponding to the given output id.
 
         Returns:
             The output metadata.
         """
+        output_id_str = output_id.output_id if isinstance(
+            output_id, OutputId) else output_id
         return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
-            'outputId': output_id
+            'outputId': output_id_str
         }))
 
     def get_milestone_by_id(self, milestone_id: HexStr) -> MilestonePayload:
@@ -158,19 +164,19 @@ class NodeCoreAPI():
             'index': index
         })
 
-    def get_utxo_changes_by_id(self, milestone_id: HexStr):
+    def get_utxo_changes_by_id(self, milestone_id: HexStr) -> UtxoChanges:
         """Get the UTXO changes applied in the given milestone.
         """
-        return self._call_method('getUtxoChangesById', {
+        return from_dict(UtxoChanges, self._call_method('getUtxoChangesById', {
             'milestoneId': milestone_id
-        })
+        }))
 
-    def get_utxo_changes_by_index(self, index: int):
+    def get_utxo_changes_by_index(self, index: int) -> UtxoChanges:
         """Get the UTXO changes applied at the given milestone index.
         """
-        return self._call_method('getUtxoChangesByIndex', {
+        return from_dict(UtxoChanges, self._call_method('getUtxoChangesByIndex', {
             'index': index
-        })
+        }))
 
     def get_receipts(self):
         """Get all receipts.

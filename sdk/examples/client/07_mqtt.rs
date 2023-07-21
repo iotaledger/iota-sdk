@@ -49,6 +49,7 @@ async fn main() -> Result<()> {
                     MqttPayload::Block(block) => println!("{block:?}"),
                     MqttPayload::MilestonePayload(ms) => println!("{ms:?}"),
                     MqttPayload::Receipt(receipt) => println!("{receipt:?}"),
+                    e => println!("unknown event received: {e:?}"),
                 }
                 tx.send(()).unwrap();
             },

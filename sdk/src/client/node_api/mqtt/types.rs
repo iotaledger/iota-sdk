@@ -32,6 +32,7 @@ pub struct TopicEvent {
 /// The payload of an `TopicEvent`.
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum MqttPayload {
     /// In case it contains JSON.
     Json(Value),

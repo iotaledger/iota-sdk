@@ -29,7 +29,7 @@ use crate::{
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
         output::Output,
-        payload::{transaction::TransactionEssence, Payload},
+        payload::transaction::{TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
@@ -405,7 +405,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<Payload, Self::Error> {
+    ) -> Result<TransactionPayload, Self::Error> {
         super::default_sign_transaction(self, prepared_transaction_data).await
     }
 }

@@ -30,6 +30,9 @@ async function run() {
         // Get the account we generated with `01-create-wallet`
         const account = await wallet.getAccount('Alice');
 
+        // We need to unlock stronghold.
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+
         // May want to ensure the account is synced before sending a transaction.
         const balance = await account.sync();
 

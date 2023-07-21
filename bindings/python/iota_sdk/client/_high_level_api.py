@@ -198,19 +198,6 @@ class HighLevelAPI():
             'amount': amount
         })
 
-    def find_outputs(self, output_ids: List[OutputId], addresses: List[str]):
-        """Find all outputs based on the requests criteria. This method will try to query multiple nodes if
-        the request amount exceeds individual node limit.
-
-        Args:
-            output_ids: A list of included output ids.
-            addresses: A list of included addresses.
-        """
-        return self._call_method('findOutputs', {
-            'outputIds': output_ids,
-            'addresses': addresses
-        })
-
     def reattach(self, block_id: HexStr) -> List[HexStr | Block]:
         """Reattaches blocks for a provided block id. Blocks can be reattached only if they are valid and
         haven't been confirmed for a while .
