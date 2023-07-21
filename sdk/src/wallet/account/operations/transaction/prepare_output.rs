@@ -127,7 +127,7 @@ where
                         )?);
                 }
 
-                // Check if the remainder balance wouldn't leave dust behind, which wouldn't allow the creation of this
+                // Check if the remaining balance wouldn't leave dust behind, which wouldn't allow the creation of this
                 // output. If that's the case, this remaining amount will be added to the output, to still allow sending
                 // it.
                 if storage_deposit.use_excess_if_low.unwrap_or_default() {
@@ -146,7 +146,6 @@ where
                 }
             }
         }
-
         let second_output = second_output_builder.finish(token_supply)?;
 
         let required_storage_deposit = Output::Basic(second_output.clone()).rent_cost(&rent_structure);
