@@ -26,7 +26,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
+                dto::{MilestonePayloadDto, TransactionPayloadDto},
                 milestone::MilestoneId,
                 transaction::TransactionId,
             },
@@ -89,7 +89,7 @@ pub enum Response {
     PreparedTransactionData(PreparedTransactionDataDto),
     /// Response for:
     /// - [`SignTransaction`](crate::method::ClientMethod::SignTransaction)
-    SignedTransaction(PayloadDto),
+    SignedTransaction(TransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
     SignatureUnlock(UnlockDto),

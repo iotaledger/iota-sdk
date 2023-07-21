@@ -19,7 +19,9 @@ use zeroize::Zeroizing;
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Client, Error},
-    types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
+    types::block::{
+        address::Ed25519Address, payload::transaction::TransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+    },
 };
 
 /// Secret manager that uses only a mnemonic.
@@ -130,7 +132,7 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<Payload, Self::Error> {
+    ) -> Result<TransactionPayload, Self::Error> {
         super::default_sign_transaction(self, prepared_transaction_data).await
     }
 }
