@@ -195,4 +195,3 @@ export interface __OutputIdToUTXOInput__ {
         outputId: string;
     };
 }
-
