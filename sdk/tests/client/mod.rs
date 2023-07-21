@@ -6,6 +6,7 @@ mod client_builder;
 mod common;
 mod consolidation;
 mod error;
+mod high_level;
 mod input_selection;
 mod input_signing_data;
 mod mnemonic;

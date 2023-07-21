@@ -9,7 +9,7 @@ mod mqtt;
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Result,
+        request_funds_from_faucet, secret::SecretManager, Client, Result,
     },
     types::block::{
         address::ToBech32Ext,
@@ -43,17 +43,11 @@ pub fn setup_secret_manager() -> SecretManager {
 }
 
 // Sends a transaction block to the node to test against it.
-async fn setup_transaction_block() -> (BlockId, TransactionId) {
-    let client = setup_client_with_node_health_ignored().await;
+pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId) {
     let secret_manager = setup_secret_manager();
 
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await
-                .unwrap()
-                .with_range(0..2),
-        )
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await.unwrap().with_range(0..2))
         .await
         .unwrap();
     println!(
@@ -95,11 +89,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .unwrap()
         .id();
 
-    let block = setup_client_with_node_health_ignored()
-        .await
-        .get_block(&block_id)
-        .await
-        .unwrap();
+    let block = client.get_block(&block_id).await.unwrap();
 
     let transaction_id = match block.payload() {
         Some(Payload::Transaction(t)) => t.id(),
