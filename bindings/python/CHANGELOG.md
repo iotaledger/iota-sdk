@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RegularTransactionEssence`;
 - `Unlock` types;
 - `PreparedTransactionData, SignedTransactionData, InputSigningData, RemainderData`;
+- `UtxoChanges`;
+- `TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput`;
+- `TokenScheme`;
+- `Signature`;
+- `BlockBuilderOptions`;
 
 ### Changed
 
@@ -61,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switched order of `AddressAndAmount` init params;
 - Renamed `PreparedTransactionData` to `PreparedTransaction`;
 - `{Client, SecretManager}::sign_transaction` return type from `SignedTransactionData` to `TransactionPayload`;
+- Split `Output` into multiple classes;
+- Renamed `TokenScheme` to `SimpleTokenScheme`;
 
 ### Removed
 

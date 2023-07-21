@@ -1,10 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.address import Address
+from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from enum import IntEnum
-from typing import Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 class UnlockConditionType(IntEnum):
@@ -31,23 +30,15 @@ class UnlockConditionType(IntEnum):
 @dataclass
 class UnlockCondition():
     """Base class for unlock conditions.
-
-    Attributes:
-        type: The type code of the unlock condition.
-        amount: Some amount depending on the unlock condition type.
-        address: Some address depending on the unlock condition type.
-        unixTime: Some Unix timestamp depending on the unlock condition type.
-        return_address: An address to return funds to.
     """
-
     type: int
-    amount: Optional[str] = None
-    address: Optional[Address] = None
-    unixTime: Optional[int] = None
-    returnAddress: Optional[Address] = None
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        if 'amount' in config:
+            if isinstance(config['amount'], int):
+                config['amount'] = str(config['amount'])
 
         if 'address' in config:
             config['address'] = config['address'].as_dict()
@@ -58,96 +49,89 @@ class UnlockCondition():
         return config
 
 
+@dataclass
 class AddressUnlockCondition(UnlockCondition):
     """An address unlock condition.
+
+    Args:
+        address: An address unlocked with a private key.
     """
-
-    def __init__(self, address):
-        """Initialize `Self`.
-
-        Args:
-            address: An address unlocked with a private key.
-        """
-        super().__init__(type=UnlockConditionType.Address, address=address)
+    address: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockConditionType.Address),
+        init=False)
 
 
+@dataclass
 class StorageDepositReturnUnlockCondition(UnlockCondition):
     """A storage-deposit-return unlock condition.
+    Args:
+        amount: The amount of base coins the consuming transaction must deposit to `return_address`.
+        return_address: The address to return the amount to.
     """
-
-    def __init__(self, amount, return_address):
-        """Initialize `Self`.
-
-        Args:
-            amount: The amount of base coins the consuming transaction must deposit to `return_address`.
-            return_address: The address to return the amount to.
-        """
-        super().__init__(type=UnlockConditionType.StorageDepositReturn,
-                         amount=str(amount), returnAddress=return_address)
+    amount: str
+    returnAddress: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.StorageDepositReturn), init=False)
 
 
+@dataclass
 class TimelockUnlockCondition(UnlockCondition):
     """A timelock unlock condition.
+    Args:
+        unix_time: The Unix timestamp marking the end of the timelock.
     """
-
-    def __init__(self, unix_time):
-        """Initialize `Self`.
-
-        Args:
-            unix_time: The Unix timestamp marking the end of the timelock.
-        """
-        super().__init__(type=UnlockConditionType.Timelock, unixTime=unix_time)
+    unixTime: int
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockConditionType.Timelock),
+        init=False)
 
 
+@dataclass
 class ExpirationUnlockCondition(UnlockCondition):
     """An expiration unlock condition.
+    Args:
+        unix_time: Unix timestamp marking the expiration of the claim.
+        return_address: The return address if the output was not claimed in time.
     """
-
-    def __init__(self, unix_time, return_address):
-        """Initialize an ExpirationUnlockCondition
-
-        Args:
-            unix_time: Unix timestamp marking the expiration of the claim.
-            return_address: The return address if the output was not claimed in time.
-        """
-        super().__init__(type=UnlockConditionType.Expiration,
-                         unixTime=unix_time, returnAddress=return_address)
+    unixTime: int
+    returnAddress: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockConditionType.Expiration),
+        init=False)
 
 
+@dataclass
 class StateControllerAddressUnlockCondition(UnlockCondition):
     """A state controller address unlock condition.
+    Args:
+        address: The state controller address that owns the output.
     """
-
-    def __init__(self, address):
-        """Initialize `Self`.
-
-        Args:
-            address: The state controller address that owns the output.
-        """
-        super().__init__(type=UnlockConditionType.StateControllerAddress, address=address)
+    address: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.StateControllerAddress), init=False)
 
 
+@dataclass
 class GovernorAddressUnlockCondition(UnlockCondition):
     """A governor address unlock condition.
+    Args:
+        address: The governor address that owns the output.
     """
-
-    def __init__(self, address):
-        """Initialize `Self`.
-
-        Args:
-            address: The governor address that owns the output.
-        """
-        super().__init__(type=UnlockConditionType.GovernorAddress, address=address)
+    address: Ed25519Address | AliasAddress | NFTAddress
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.GovernorAddress), init=False)
 
 
+@dataclass
 class ImmutableAliasAddressUnlockCondition(UnlockCondition):
     """An immutable alias address unlock condition.
+    Args:
+        address: The permanent alias address that owns this output.
     """
-
-    def __init__(self, address):
-        """Initialize `Self`.
-
-        Args:
-            address: The permanent alias address that owns this output.
-        """
-        super().__init__(type=UnlockConditionType.ImmutableAliasAddress, address=address)
+    address: AliasAddress
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.ImmutableAliasAddress), init=False)

@@ -15,7 +15,7 @@ from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import Output
 from iota_sdk.types.payload import Payload, TransactionPayload
-from iota_sdk.types.token_scheme import TokenScheme
+from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from json import dumps, loads
@@ -265,7 +265,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def build_foundry_output(self,
                              serial_number: int,
-                             token_scheme: TokenScheme,
+                             token_scheme: SimpleTokenScheme,
                              unlock_conditions: List[UnlockCondition],
                              amount: Optional[int] = None,
                              native_tokens: Optional[List[NativeToken]] = None,

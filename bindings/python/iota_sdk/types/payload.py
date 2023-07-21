@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.output import Output
+from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
@@ -38,9 +38,9 @@ class RegularTransactionEssence(TransactionEssence):
     networkId: str
     inputsCommitment: HexStr
     inputs: List[UtxoInput]
-    outputs: List[Output]
+    outputs: List[AliasOutput | FoundryOutput | NftOutput | BasicOutput]
     payload: Optional[TaggedDataPayload] = None
-    type: int = field(default=1, init=False)
+    type: int = field(default_factory=lambda: 1, init=False)
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}
@@ -108,7 +108,10 @@ class MilestonePayload(Payload):
     signatures: List[Ed25519Signature]
     options: Optional[List[Any]] = None
     metadata: Optional[HexStr] = None
-    type: int = field(default=int(PayloadType.Milestone), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            PayloadType.Milestone),
+        init=False)
 
     @classmethod
     def from_dict(cls, milestone_dict) -> MilestonePayload:
@@ -125,7 +128,10 @@ class TaggedDataPayload(Payload):
     """
     tag: HexStr
     data: HexStr
-    type: int = field(default=int(PayloadType.TaggedData), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            PayloadType.TaggedData),
+        init=False)
 
 
 @dataclass
@@ -138,4 +144,7 @@ class TransactionPayload(Payload):
     """
     essence: RegularTransactionEssence
     unlocks: List[SignatureUnlock | ReferenceUnlock]
-    type: int = field(default=int(PayloadType.Transaction), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            PayloadType.Transaction),
+        init=False)
