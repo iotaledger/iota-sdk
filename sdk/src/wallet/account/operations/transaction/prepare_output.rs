@@ -27,7 +27,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Prepare an output for sending
+    /// Prepare a basic or NFT output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
     /// minimum required storage deposit will be sent to the recipient.
@@ -48,52 +48,9 @@ where
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
-        let mut first_output_builder = if let Some(nft_id) = &nft_id {
-            let unspent_nft_outputs = self
-                .unspent_outputs(Some(FilterOptions {
-                    output_types: Some(vec![NftOutput::KIND]),
-                    ..Default::default()
-                }))
-                .await?;
-
-            // Find nft output from the inputs
-            let first_output_builder = if let Some(nft_output_data) = unspent_nft_outputs.iter().find(|o| {
-                if let Output::Nft(nft_output) = &o.output {
-                    *nft_id == nft_output.nft_id_non_null(&o.output_id)
-                } else {
-                    false
-                }
-            }) {
-                if let Output::Nft(nft_output) = &nft_output_data.output {
-                    OutputBuilder::Nft(
-                        NftOutputBuilder::from(nft_output)
-                            .with_nft_id(nft_output.nft_id_non_null(&nft_output_data.output_id)),
-                    )
-                } else {
-                    unreachable!("We checked before if it's an nft output")
-                }
-            } else if nft_id.is_null() {
-                OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(
-                    rent_structure,
-                    *nft_id,
-                ))
-            } else {
-                return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
-            };
-            first_output_builder
-        } else {
-            OutputBuilder::Basic(
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                    .add_unlock_condition(AddressUnlockCondition::new(params.recipient_address)),
-            )
-        };
-
-        // Remove potentially existing features.
-        first_output_builder = first_output_builder.clear_features();
-
-        // Set new address unlock condition
-        first_output_builder =
-            first_output_builder.with_unlock_conditions([AddressUnlockCondition::new(params.recipient_address)]);
+        let mut first_output_builder = self
+            .create_initial_output_builder(params.recipient_address, nft_id)
+            .await?;
 
         if let Some(assets) = &params.assets {
             if let Some(native_tokens) = &assets.native_tokens {
@@ -238,6 +195,64 @@ where
         Ok(third_output_builder.finish_output(token_supply)?)
     }
 
+    // Create the initial output builder for prepare_output()
+    async fn create_initial_output_builder(
+        &self,
+        recipient_address: Bech32Address,
+        nft_id: Option<NftId>,
+    ) -> crate::wallet::Result<OutputBuilder> {
+        let rent_structure = self.client().get_rent_structure().await?;
+
+        let mut first_output_builder = if let Some(nft_id) = &nft_id {
+            if nft_id.is_null() {
+                // Mint a new NFT output
+                OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(
+                    rent_structure,
+                    *nft_id,
+                ))
+            } else {
+                // Transition an existing NFT output
+                let unspent_nft_outputs = self
+                    .unspent_outputs(Some(FilterOptions {
+                        output_types: Some(vec![NftOutput::KIND]),
+                        ..Default::default()
+                    }))
+                    .await?;
+
+                // Find nft output from the inputs
+                let first_output_builder = if let Some(nft_output_data) = unspent_nft_outputs.iter().find(|o| {
+                    if let Output::Nft(nft_output) = &o.output {
+                        *nft_id == nft_output.nft_id_non_null(&o.output_id)
+                    } else {
+                        false
+                    }
+                }) {
+                    if let Output::Nft(nft_output) = &nft_output_data.output {
+                        OutputBuilder::Nft(
+                            NftOutputBuilder::from(nft_output)
+                                .with_nft_id(nft_output.nft_id_non_null(&nft_output_data.output_id)),
+                        )
+                    } else {
+                        unreachable!("We checked before if it's an nft output")
+                    }
+                } else {
+                    return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
+                };
+                first_output_builder
+            }
+        } else {
+            OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure))
+        };
+
+        // Remove potentially existing features.
+        first_output_builder = first_output_builder.clear_features();
+
+        // Set new address unlock condition
+        first_output_builder =
+            first_output_builder.with_unlock_conditions([AddressUnlockCondition::new(recipient_address)]);
+        Ok(first_output_builder)
+    }
+
     // Get a remainder address based on transaction_options or use the first account address
     async fn get_remainder_address(
         &self,
@@ -348,7 +363,7 @@ impl OutputBuilder {
     }
     fn add_immutable_feature(mut self, feature: impl Into<crate::types::block::output::Feature>) -> Self {
         match self {
-            Self::Basic(_) => { // Basic outputs can't have immmutable features
+            Self::Basic(_) => { // Basic outputs can't have immutable features
             }
             Self::Nft(b) => {
                 self = Self::Nft(b.add_immutable_feature(feature));
