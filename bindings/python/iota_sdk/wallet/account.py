@@ -12,7 +12,7 @@ from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import Output
+from iota_sdk.types.output import AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputType, TreasuryOutput, output_from_dict
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
@@ -343,12 +343,12 @@ class Account:
            When the assets contain an nft_id, the data from the existing nft output will be used, just with the address
            unlock conditions replaced
         """
-        return from_dict(Output, self._call_account_method(
+        return output_from_dict(self._call_account_method(
             'prepareOutput', {
                 'params': params,
                 'transactionOptions': transaction_options
-            }
-        ))
+            })
+        )
 
     def prepare_send(self, params: List[SendParams],
                      options: Optional[TransactionOptions] = None) -> PreparedTransaction:
