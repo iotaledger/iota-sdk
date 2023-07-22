@@ -96,6 +96,7 @@ where
             }
         }
 
+        // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
             .with_minimum_storage_deposit(rent_structure)
             .finish_output(token_supply)?;
@@ -229,8 +230,9 @@ where
                 } else {
                     return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
                 };
-                // Remove potentially existing features.
+                // Remove potentially existing features and unlock conditions.
                 first_output_builder = first_output_builder.clear_features();
+                first_output_builder = first_output_builder.clear_unlock_conditions();
                 OutputBuilder::Nft(first_output_builder)
             }
         } else {
@@ -239,7 +241,7 @@ where
 
         // Set new address unlock condition
         first_output_builder =
-            first_output_builder.with_unlock_conditions([AddressUnlockCondition::new(recipient_address)]);
+            first_output_builder.add_unlock_condition(AddressUnlockCondition::new(recipient_address));
         Ok(first_output_builder)
     }
 
@@ -368,20 +370,6 @@ impl OutputBuilder {
             }
             Self::Nft(b) => {
                 self = Self::Nft(b.add_unlock_condition(unlock_condition));
-            }
-        }
-        self
-    }
-    fn with_unlock_conditions(
-        mut self,
-        unlock_conditions: impl IntoIterator<Item = impl Into<UnlockCondition>>,
-    ) -> Self {
-        match self {
-            Self::Basic(b) => {
-                self = Self::Basic(b.with_unlock_conditions(unlock_conditions));
-            }
-            Self::Nft(b) => {
-                self = Self::Nft(b.with_unlock_conditions(unlock_conditions));
             }
         }
         self
