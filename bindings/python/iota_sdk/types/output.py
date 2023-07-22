@@ -288,7 +288,7 @@ def output_from_dict(
         return from_dict(AliasOutput, output)
     if output_type == OutputType.Foundry:
         return from_dict(FoundryOutput, output)
-    if output_type == OutputType.NFT:
+    if output_type == OutputType.Nft:
         return from_dict(NftOutput, output)
 
     return from_dict(Output, output)

@@ -73,4 +73,4 @@ nft_output = client.build_nft_output(
 )
 outputs.append(nft_output)
 
-print(json.dumps(outputs, indent=2))
+print(json.dumps([asdict(o) for o in outputs], indent=2))
