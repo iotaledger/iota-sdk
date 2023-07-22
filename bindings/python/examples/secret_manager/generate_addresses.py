@@ -14,8 +14,7 @@ secret_manager = SecretManager(MnemonicSecretManager(os.environ['MNEMONIC']))
 # Generate public address with default account index and range.
 addresses = secret_manager.generate_ed25519_addresses()
 
-print('List of generated public addresses:', *addresses, sep='\n')
-print()
+print('List of generated public addresses:', *addresses, sep='\n', end='\n\n')
 
 addresses = secret_manager.generate_ed25519_addresses(
     coin_type=CoinType.SHIMMER,
@@ -25,5 +24,4 @@ addresses = secret_manager.generate_ed25519_addresses(
     internal=False,
     bech32_hrp='rms')
 
-print('List of generated public addresses:', *addresses, sep='\n')
-print()
+print('List of generated public addresses:', *addresses, sep='\n', end='\n\n')
