@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -15,8 +15,8 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutput, NftOutputBuilder,
-            Output, Rent, RentStructure, UnlockCondition,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
+            RentStructure, UnlockCondition,
         },
         Error,
     },
@@ -49,7 +49,7 @@ where
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
         let mut first_output_builder = self
-            .create_initial_output_builder(params.recipient_address, nft_id)
+            .create_initial_output_builder(params.recipient_address, nft_id, rent_structure)
             .await?;
 
         if let Some(assets) = &params.assets {
@@ -200,9 +200,8 @@ where
         &self,
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
+        rent_structure: RentStructure,
     ) -> crate::wallet::Result<OutputBuilder> {
-        let rent_structure = self.client().get_rent_structure().await?;
-
         let mut first_output_builder = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
@@ -212,40 +211,31 @@ where
                 ))
             } else {
                 // Transition an existing NFT output
-                let unspent_nft_outputs = self
+                let unspent_nft_output = self
                     .unspent_outputs(Some(FilterOptions {
-                        output_types: Some(vec![NftOutput::KIND]),
+                        nft_ids: Some(HashSet::from([*nft_id])),
                         ..Default::default()
                     }))
                     .await?;
 
                 // Find nft output from the inputs
-                let first_output_builder = if let Some(nft_output_data) = unspent_nft_outputs.iter().find(|o| {
-                    if let Output::Nft(nft_output) = &o.output {
-                        *nft_id == nft_output.nft_id_non_null(&o.output_id)
-                    } else {
-                        false
-                    }
-                }) {
+                let mut first_output_builder = if let Some(nft_output_data) = unspent_nft_output.first() {
                     if let Output::Nft(nft_output) = &nft_output_data.output {
-                        OutputBuilder::Nft(
-                            NftOutputBuilder::from(nft_output)
-                                .with_nft_id(nft_output.nft_id_non_null(&nft_output_data.output_id)),
-                        )
+                        NftOutputBuilder::from(nft_output)
+                            .with_nft_id(nft_output.nft_id_non_null(&nft_output_data.output_id))
                     } else {
                         unreachable!("We checked before if it's an nft output")
                     }
                 } else {
                     return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
                 };
-                first_output_builder
+                // Remove potentially existing features.
+                first_output_builder = first_output_builder.clear_features();
+                OutputBuilder::Nft(first_output_builder)
             }
         } else {
             OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure))
         };
-
-        // Remove potentially existing features.
-        first_output_builder = first_output_builder.clear_features();
 
         // Set new address unlock condition
         first_output_builder =
@@ -392,17 +382,6 @@ impl OutputBuilder {
             }
             Self::Nft(b) => {
                 self = Self::Nft(b.with_unlock_conditions(unlock_conditions));
-            }
-        }
-        self
-    }
-    fn clear_features(mut self) -> Self {
-        match self {
-            Self::Basic(b) => {
-                self = Self::Basic(b.clear_features());
-            }
-            Self::Nft(b) => {
-                self = Self::Nft(b.clear_features());
             }
         }
         self
