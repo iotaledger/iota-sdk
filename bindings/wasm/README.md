@@ -121,6 +121,8 @@ the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the no
 calling [`Client.getInfo()`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Client/#getinfo),
 and then print the node's information.
 
+### Node.js
+
 ```javascript
 const {Client, initLogger} = require('@iota/sdk-wasm/node');
 
@@ -143,6 +145,29 @@ async function run() {
 run().then(() => process.exit());
 ```
 
+### Web
+
+```javascript
+import init, {Client, initLogger} from "@iota/sdk-wasm/web";
+
+init().then(async () => {
+    initLogger();
+
+    const client = new Client({
+        nodes: ['https://api.testnet.shimmer.network'],
+        localPow: true,
+    });
+
+    const nodeInfo = await client.getInfo();
+    console.log('Node info: ', nodeInfo);
+}).catch(console.error);
+
+// Default path to load is "iota_sdk_wasm_bg.wasm", 
+// but you can override it by passing a path explicitly.
+//
+// init("./static/iota_sdk_wasm_bg.wasm").then(...)
+```
+
 ## Wallet Usage
 
 The following example will create a
@@ -153,10 +178,42 @@ by calling
 the [`Wallet.createAccount(data)`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/#createaccount)
 function.
 
+### Node.js
+
+```javascript
+const { Wallet, CoinType } = require('@iota/sdk-wasm/node');
+
+async function run() {
+    try {
+        const wallet = new Wallet({
+            storagePath: './my-database',
+            coinType: CoinType.Shimmer,
+            clientOptions: {
+                nodes: ['https://api.testnet.shimmer.network'],
+            },
+            secretManager: {
+                mnemonic: "my development mnemonic",
+            },
+        });
+
+        const account = await wallet.createAccount({
+            alias: 'Alice',
+        });
+
+        const addresses = await account.addresses();
+        console.log(addresses);
+    } catch (err) { console.error }
+}
+
+run().then(() => process.exit());
+```
+
+### Web
+
 ```javascript
 import init, {Wallet, CoinType} from "@iota/sdk-wasm/web";
 
-init().then(() => {
+init().then(async () => {
     const wallet = new Wallet({
         storagePath: './my-database',
         coinType: CoinType.Shimmer,
@@ -172,9 +229,8 @@ init().then(() => {
         alias: 'Alice',
     });
 
-    account.addresses().then((addresses) => {
-        console.log(addresses);
-    });
+    const addresses = await account.addresses();
+    console.log(addresses);
 }).catch(console.error);
 
 // Default path to load is "iota_sdk_wasm_bg.wasm", 
