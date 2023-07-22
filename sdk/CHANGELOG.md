@@ -25,8 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `chain` property in `OutputDataDto`, `OutputDto`,`InputSigningDto` deserialization when undefined;
 
-### Security -->
-
 ## 1.0.0-rc.0 - 2023-07-21
 
 ### Added
