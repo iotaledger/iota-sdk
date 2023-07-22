@@ -1,4 +1,5 @@
 from iota_sdk import *
+from dataclasses import asdict
 from dotenv import load_dotenv
 import json
 
