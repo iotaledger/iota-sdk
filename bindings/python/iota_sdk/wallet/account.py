@@ -335,7 +335,7 @@ class Account:
         ))
 
     def prepare_output(self, params: OutputParams,
-                       transaction_options: Optional[TransactionOptions] = None):
+                       transaction_options: Optional[TransactionOptions] = None) -> TreasuryOutput | AliasOutput | BasicOutput | FoundryOutput | NftOutput | Output:
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
