@@ -19,6 +19,8 @@ async function run() {
     if (!process.env.NODE_URL) {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
+
+    console.log("create client")
     const onlineClient = new Client({
         // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL],
@@ -42,7 +44,7 @@ async function run() {
             undefined,
             {
                 inputs,
-                output: { address, amount: amount },
+                output: { address, amount: amount.toString() },
             },
         );
 

@@ -9,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/accounts_and_addresses/list-addresses.ts
 
-// This example lists all addresses in the account
+// This example lists all addresses in the account.
 async function run() {
     initLogger();
     if (!process.env.WALLET_DB_PATH) {

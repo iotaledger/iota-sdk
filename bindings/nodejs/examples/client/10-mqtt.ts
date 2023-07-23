@@ -15,7 +15,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/10-mqtt.ts
 
-// Initialize MQTT listener
+// In this example we will listen to MQTT topics and print the block and milestone payloads.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
@@ -24,6 +24,7 @@ async function run() {
 
     // Connecting to a MQTT broker using raw ip doesn't work with TCP. This is a limitation of rustls.
     const client = new Client({
+        // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL],
     });
 
@@ -46,9 +47,9 @@ async function run() {
             const previousMilestone = payload.previousMilestoneId;
             console.log(
                 'New milestone index' +
-                    index +
-                    ', previous ID: ' +
-                    previousMilestone,
+                index +
+                ', previous ID: ' +
+                previousMilestone,
             );
         } else if (parsed.topic == 'blocks') {
             const block = plainToInstance(Block, JSON.parse(parsed.payload));

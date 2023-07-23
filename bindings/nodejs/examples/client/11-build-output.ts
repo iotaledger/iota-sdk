@@ -21,7 +21,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/11-build-output.ts
 
-// Build a basic output
+// In this example we will build a basic output with various options.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
@@ -29,6 +29,7 @@ async function run() {
     }
 
     const client = new Client({
+        // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL],
     });
 

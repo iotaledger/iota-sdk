@@ -10,6 +10,7 @@ import { Wallet } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
+// In this example we will check the balance of an account.
 async function run() {
     try {
         if (!process.env.WALLET_DB_PATH) {

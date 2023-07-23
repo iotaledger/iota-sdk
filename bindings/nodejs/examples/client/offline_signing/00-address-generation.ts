@@ -16,7 +16,7 @@ require('dotenv').config({ path: '.env' });
 
 const ADDRESS_FILE_NAME = 'offline-signing-address.json';
 
-// In this example we will generate an address offline which will be used later to find inputs
+// In this example we will generate an address offline which will be used later to find inputs.
 async function run() {
     initLogger();
 
@@ -44,6 +44,7 @@ async function run() {
             ADDRESS_FILE_NAME,
             JSON.stringify(offlineGeneratedAddress),
         );
+        console.log("Address generated and saved to file: " + ADDRESS_FILE_NAME + "")
     } catch (error) {
         console.error('Error: ', error);
     }

@@ -7,7 +7,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/07-get-block-data.ts
 
-// In this example we will send a block and get the data and metadata for it
+// In this example we will send a block and get the data and metadata for the block.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
