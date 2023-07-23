@@ -640,13 +640,15 @@ async fn prepare_output_remainder_dust() -> Result<()> {
             None,
         )
         .await;
-    matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == balance.base_coin().available()+minimum_required_storage_deposit-1);
+    assert!(
+        matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == 85199)
+    );
 
     let output = account
         .prepare_output(
             OutputParams {
                 recipient_address: *address,
-                amount: 100, // leave more than min. deposit
+                amount: 100, // leave more behind than min. deposit
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -670,7 +672,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .prepare_output(
             OutputParams {
                 recipient_address: *address,
-                amount: 100, // leave more than min. deposit
+                amount: 100, // leave more behind than min. deposit
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -687,7 +689,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     output.verify_storage_deposit(rent_structure, token_supply)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
-    // storage deposit gifted, only address unlock condition
+    // storage deposit returned, address and SDR unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
     // We have ReturnStrategy::Return, so leftover amount gets returned
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
@@ -722,7 +724,6 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance = account_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    println!("{:?}", balance);
     let nft_data = &account_1.unspent_outputs(None).await?[0];
     // Send NFT back to first account
     let output = account_1

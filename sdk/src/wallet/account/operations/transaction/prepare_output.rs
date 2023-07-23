@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashSet;
-
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -21,7 +19,7 @@ use crate::{
         Error,
     },
     wallet::account::{
-        operations::transaction::RemainderValueStrategy, types::OutputData, Account, FilterOptions, TransactionOptions,
+        operations::transaction::RemainderValueStrategy, types::OutputData, Account, TransactionOptions,
     },
 };
 
@@ -249,31 +247,19 @@ where
                 )
             } else {
                 // Transition an existing NFT output
-                let unspent_nft_output = self
-                    .unspent_outputs(Some(FilterOptions {
-                        nft_ids: Some(HashSet::from([*nft_id])),
-                        ..Default::default()
-                    }))
-                    .await?;
+                let unspent_nft_output = self.unspent_nft_output(nft_id).await?;
 
                 // Find nft output from the inputs
-                let mut first_output_builder = if let Some(nft_output_data) = unspent_nft_output.first() {
-                    if let Output::Nft(nft_output) = &nft_output_data.output {
-                        NftOutputBuilder::from(nft_output)
-                            .with_nft_id(nft_output.nft_id_non_null(&nft_output_data.output_id))
-                    } else {
-                        unreachable!("We checked before if it's an nft output")
-                    }
+                let mut first_output_builder = if let Some(nft_output_data) = &unspent_nft_output {
+                    let nft_output = nft_output_data.output.as_nft();
+                    NftOutputBuilder::from(nft_output).with_nft_id(*nft_id)
                 } else {
                     return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
                 };
                 // Remove potentially existing features and unlock conditions.
                 first_output_builder = first_output_builder.clear_features();
                 first_output_builder = first_output_builder.clear_unlock_conditions();
-                (
-                    OutputBuilder::Nft(first_output_builder),
-                    unspent_nft_output.first().cloned(),
-                )
+                (OutputBuilder::Nft(first_output_builder), unspent_nft_output)
             }
         } else {
             (
