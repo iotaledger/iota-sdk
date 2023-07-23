@@ -34,7 +34,7 @@ async fn consolidation() -> Result<()> {
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 10);
 
     let tx = account_1
-        .consolidate_outputs(ConsolidationParams::default().with_force(true))
+        .consolidate_outputs(ConsolidationParams::new().with_force(true))
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)

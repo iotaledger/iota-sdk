@@ -46,6 +46,10 @@ pub struct ConsolidationParams {
 }
 
 impl ConsolidationParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn with_force(mut self, force: bool) -> Self {
         self.force = force;
         self

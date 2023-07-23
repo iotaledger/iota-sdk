@@ -397,7 +397,7 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Consolidating outputs.");
 
     let transaction = account
-        .consolidate_outputs(ConsolidationParams::default().with_force(true))
+        .consolidate_outputs(ConsolidationParams::new().with_force(true))
         .await?;
 
     println_log_info!(
