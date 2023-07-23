@@ -1,11 +1,14 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use serde::{Deserialize, Serialize};
+
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
+        address::Bech32Address,
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
@@ -33,6 +36,38 @@ use crate::wallet::{
     },
     Result,
 };
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConsolidationParams {
+    /// Ignores the output_threshold if set to `true`.
+    force: bool,
+    /// Consolidates if the output number is >= the output_threshold.
+    output_threshold: Option<usize>,
+    /// Address to which the consolidated output should be sent.
+    target_address: Option<Bech32Address>,
+}
+
+impl ConsolidationParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_force(mut self, force: bool) -> Self {
+        self.force = force;
+        self
+    }
+
+    pub fn with_output_threshold(mut self, output_threshold: impl Into<Option<usize>>) -> Self {
+        self.output_threshold = output_threshold.into();
+        self
+    }
+
+    pub fn with_target_address(mut self, target_address: impl Into<Option<Bech32Address>>) -> Self {
+        self.target_address = target_address.into();
+        self
+    }
+}
 
 impl<S: 'static + SecretManage> Account<S>
 where
@@ -67,17 +102,12 @@ where
         })
     }
 
-    /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to an own
-    /// address again if the output amount is >= the output_consolidation_threshold. When `force` is set to `true`, the
-    /// threshold is ignored. Only consolidates the amount of outputs that fit into a single transaction.
-    pub async fn consolidate_outputs(
-        &self,
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    ) -> Result<Transaction> {
-        let prepared_transaction = self
-            .prepare_consolidate_outputs(force, output_consolidation_threshold)
-            .await?;
+    /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to a provided
+    /// address or to an own address again if the output amount is >= the output_threshold. When `force`
+    /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
+    /// transaction.
+    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<Transaction> {
+        let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
         let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
         log::debug!(
@@ -91,11 +121,7 @@ where
 
     /// Prepares the transaction for
     /// [Account::consolidate_outputs()](crate::wallet::Account::consolidate_outputs).
-    pub async fn prepare_consolidate_outputs(
-        &self,
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    ) -> Result<PreparedTransactionData> {
+    pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
@@ -123,7 +149,7 @@ where
 
         drop(account_details);
 
-        let output_consolidation_threshold = match output_consolidation_threshold {
+        let output_threshold = match params.output_threshold {
             Some(t) => t,
             None => {
                 #[cfg(feature = "ledger_nano")]
@@ -144,18 +170,16 @@ where
             }
         };
 
-        // only consolidate if the unlocked outputs are >= output_consolidation_threshold
-        if outputs_to_consolidate.is_empty()
-            || (!force && outputs_to_consolidate.len() < output_consolidation_threshold)
-        {
+        // only consolidate if the unlocked outputs are >= output_threshold
+        if outputs_to_consolidate.is_empty() || (!params.force && outputs_to_consolidate.len() < output_threshold) {
             log::debug!(
-                "[OUTPUT_CONSOLIDATION] no consolidation needed, available_outputs: {}, consolidation_threshold: {}",
+                "[OUTPUT_CONSOLIDATION] no consolidation needed, available_outputs: {}, output_threshold: {}",
                 outputs_to_consolidate.len(),
-                output_consolidation_threshold
+                output_threshold
             );
             return Err(crate::wallet::Error::NoOutputsToConsolidate {
                 available_outputs: outputs_to_consolidate.len(),
-                consolidation_threshold: output_consolidation_threshold,
+                consolidation_threshold: output_threshold,
             });
         }
 
@@ -208,7 +232,12 @@ where
         }
 
         let consolidation_output = [BasicOutputBuilder::new_with_amount(total_amount)
-            .add_unlock_condition(AddressUnlockCondition::new(outputs_to_consolidate[0].address))
+            .add_unlock_condition(AddressUnlockCondition::new(
+                params
+                    .target_address
+                    .map(|bech32| bech32.into_inner())
+                    .unwrap_or(outputs_to_consolidate[0].address),
+            ))
             .with_native_tokens(total_native_tokens.finish()?)
             .finish_output(token_supply)?];
 

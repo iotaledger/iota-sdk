@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{Result, SendParams};
+use iota_sdk::wallet::{account::ConsolidationParams, Result, SendParams};
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
@@ -33,7 +33,9 @@ async fn consolidation() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 10 * amount);
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 10);
 
-    let tx = account_1.consolidate_outputs(true, None).await?;
+    let tx = account_1
+        .consolidate_outputs(ConsolidationParams::new().with_force(true))
+        .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;

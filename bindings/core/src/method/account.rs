@@ -19,8 +19,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
-            SyncOptions, TransactionOptionsDto,
+            ConsolidationParams, CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -142,11 +142,7 @@ pub enum AccountMethod {
     },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareConsolidateOutputs {
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    },
+    PrepareConsolidateOutputs { params: ConsolidationParams },
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAliasOutput {

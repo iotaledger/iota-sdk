@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `fromOutputId` constructor for `UTXOInput`;
 - `migrateStrongholdSnapshotV2ToV3` function;
+- `ConsolidationParams`;
+
+### Changed
+
+- `Account::prepareConsolidateOutputs` takes a `ConsolidationParams`;
 
 ## 1.0.0-rc.3 - 2023-07-21
 
