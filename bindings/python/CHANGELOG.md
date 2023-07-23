@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0-rc.2 - 2023-xx.xx
 
+### Added
+
+- `ConsolidationParams` type;
+
+### Changed
+
+- `Account::prepare_consolidate_outputs` takes a `ConsolidationParams`;
+
 ### Fixed
 
 - `Account::prepare_output()` deserialization;

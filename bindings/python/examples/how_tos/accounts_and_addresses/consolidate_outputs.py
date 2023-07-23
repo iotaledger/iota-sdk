@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, Utils
+from iota_sdk import Wallet, Utils, ConsolidationParams
 from dotenv import load_dotenv
 import os
 
@@ -45,7 +45,7 @@ print('Sending consolidation transaction...')
 # Consolidate unspent outputs and print the consolidation transaction ID
 # Set `force` to true to force the consolidation even though the
 # `output_consolidation_threshold` isn't reached.
-transaction = account.prepare_consolidate_outputs(True, None).send()
+transaction = account.prepare_consolidate_outputs(ConsolidationParams(force=True)).send()
 print('Transaction sent: ', transaction.transactionId)
 
 # Wait for the consolidation transaction to get confirmed
