@@ -35,6 +35,7 @@ import type {
     GenerateAddressesOptions,
     Secp256k1EcdsaSignature,
     Ed25519Signature,
+    ConsolidationParams,
     Bip44,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
@@ -207,21 +208,18 @@ export class Account {
      * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
-     * @param force Force consolidation on addresses where the threshold isn't met.
-     * @param outputConsolidationThreshold A default threshold is used if this is omitted.
+     * @param params The consolidation parameters.
      * @returns The consolidation transaction.
      */
     async consolidateOutputs(
-        force: boolean,
-        outputConsolidationThreshold?: number,
+        params: ConsolidationParams
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'consolidateOutputs',
                 data: {
-                    force,
-                    outputConsolidationThreshold,
+                    params
                 },
             },
         );

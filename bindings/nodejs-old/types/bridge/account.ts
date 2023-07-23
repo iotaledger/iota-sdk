@@ -33,6 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import type { ConsolidationParams } from '../consolidationParams';
 import { Bip44, Ed25519Signature } from '../secretManager';
 
 export type __BuildAliasOutputMethod__ = {
@@ -82,8 +83,7 @@ export type __ClaimOutputsMethod__ = {
 export type __ConsolidateOutputsMethod__ = {
     name: 'consolidateOutputs';
     data: {
-        force: boolean;
-        outputConsolidationThreshold?: number;
+        params: ConsolidationParams
     };
 };
 
