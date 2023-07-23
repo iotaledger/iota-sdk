@@ -34,7 +34,6 @@ async function run() {
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
-        console.log(balance);
 
         console.log(`Aliases BEFORE:\n`, balance.aliases);
 
