@@ -725,6 +725,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     assert_eq!(balance.nfts().len(), 1);
 
     let nft_data = &account_1.unspent_outputs(None).await?[0];
+    let nft_id = *balance.nfts().first().unwrap();
     // Send NFT back to first account
     let output = account_1
         .prepare_output(
@@ -733,7 +734,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
                 amount: nft_data.output.amount(),
                 assets: Some(Assets {
                     native_tokens: None,
-                    nft_id: Some(*balance.nfts().first().unwrap()),
+                    nft_id: Some(nft_id),
                 }),
                 features: None,
                 unlocks: None,
@@ -746,6 +747,15 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
+
+    // account_0 now has the NFT
+    let balance_0 = account_0.sync(None).await?;
+    assert_eq!(*balance_0.nfts().first().unwrap(), nft_id);
+
+    // account_1 has no NFT and also no base coin amount
+    let balance_1 = account_1.sync(None).await?;
+    assert!(balance_1.nfts().is_empty());
+    assert_eq!(balance_1.base_coin().total(), 0);
 
     tear_down(storage_path)
 }
