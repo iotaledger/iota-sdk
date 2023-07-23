@@ -58,7 +58,7 @@ async fn main() -> Result<()> {
     println!("Sending consolidation transaction...");
 
     // Consolidate unspent outputs and print the consolidation transaction ID
-    // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
+    // Set `force` to true to force the consolidation even though the `output_threshold` isn't reached
     let transaction = account
         .consolidate_outputs(ConsolidationParams::new().with_force(true))
         .await?;

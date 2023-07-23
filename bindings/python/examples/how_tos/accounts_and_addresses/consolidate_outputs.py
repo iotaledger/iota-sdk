@@ -44,7 +44,7 @@ print('Sending consolidation transaction...')
 
 # Consolidate unspent outputs and print the consolidation transaction ID
 # Set `force` to true to force the consolidation even though the
-# `output_consolidation_threshold` isn't reached.
+# `output_threshold` isn't reached.
 transaction = account.prepare_consolidate_outputs(
     ConsolidationParams(force=True)).send()
 print('Transaction sent: ', transaction.transactionId)

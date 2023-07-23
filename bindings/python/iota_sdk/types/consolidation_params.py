@@ -8,6 +8,14 @@ from typing import Optional
 @dataclass
 class ConsolidationParams:
     """Parameters for consolidation.
+
+        Attributes:
+        force (bool):
+            Ignores the output_threshold if set to `true`.
+        outputThreshold (Optional[int]):
+            Consolidates if the output number is >= the output_threshold.
+        targetAddress (Optional[str]):
+            Address to which the consolidated output should be sent.
     """
 
     force: bool

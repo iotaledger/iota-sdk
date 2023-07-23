@@ -40,8 +40,11 @@ use crate::wallet::{
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConsolidationParams {
+    /// Ignores the output_threshold if set to `true`.
     force: bool,
+    /// Consolidates if the output number is >= the output_threshold.
     output_threshold: Option<usize>,
+    /// Address to which the consolidated output should be sent.
     target_address: Option<Bech32Address>,
 }
 
@@ -100,7 +103,7 @@ where
     }
 
     /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to a provided
-    /// address or to an own address again if the output amount is >= the output_consolidation_threshold. When `force`
+    /// address or to an own address again if the output amount is >= the output_threshold. When `force`
     /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
     /// transaction.
     pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<Transaction> {
@@ -146,7 +149,7 @@ where
 
         drop(account_details);
 
-        let output_consolidation_threshold = match params.output_threshold {
+        let output_threshold = match params.output_threshold {
             Some(t) => t,
             None => {
                 #[cfg(feature = "ledger_nano")]
@@ -167,18 +170,16 @@ where
             }
         };
 
-        // only consolidate if the unlocked outputs are >= output_consolidation_threshold
-        if outputs_to_consolidate.is_empty()
-            || (!params.force && outputs_to_consolidate.len() < output_consolidation_threshold)
-        {
+        // only consolidate if the unlocked outputs are >= output_threshold
+        if outputs_to_consolidate.is_empty() || (!params.force && outputs_to_consolidate.len() < output_threshold) {
             log::debug!(
-                "[OUTPUT_CONSOLIDATION] no consolidation needed, available_outputs: {}, consolidation_threshold: {}",
+                "[OUTPUT_CONSOLIDATION] no consolidation needed, available_outputs: {}, output_threshold: {}",
                 outputs_to_consolidate.len(),
-                output_consolidation_threshold
+                output_threshold
             );
             return Err(crate::wallet::Error::NoOutputsToConsolidate {
                 available_outputs: outputs_to_consolidate.len(),
-                consolidation_threshold: output_consolidation_threshold,
+                consolidation_threshold: output_threshold,
             });
         }
 
