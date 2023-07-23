@@ -226,8 +226,10 @@ jobs:
 
       - name: Prepare Github release
         id: prepare_release
+        shell: bash
         run: |
           echo "tag_name=iota-sdk-nodejs-v$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_OUTPUT"
+        working-directory: bindings/nodejs
 
       - name: Sign and notarize index.node binary (macOS arm64)
         if: ${{ startsWith(matrix.os, 'macos') }}

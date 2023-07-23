@@ -4,7 +4,7 @@
 use super::*;
 use crate::wallet::Error;
 
-pub struct Migrate;
+pub(crate) struct Migrate;
 
 #[async_trait]
 impl MigrationData for Migrate {
@@ -159,19 +159,20 @@ pub(super) mod types {
 
     #[derive(Deserialize)]
     #[allow(non_camel_case_types)]
-    pub struct Crypto_0_18_0_Segment {
-        pub bs: [u8; 4],
-        pub hardened: bool,
+    pub(crate) struct Crypto_0_18_0_Segment {
+        pub(crate) bs: [u8; 4],
+        #[allow(unused)]
+        pub(crate) hardened: bool,
     }
 
-    pub struct Hrp {
+    pub(crate) struct Hrp {
         inner: [u8; 83],
         len: u8,
     }
 
     impl Hrp {
         /// Convert a string to an Hrp without checking validity.
-        pub const fn from_str_unchecked(hrp: &str) -> Self {
+        pub(crate) const fn from_str_unchecked(hrp: &str) -> Self {
             let len = hrp.len();
             let mut bytes = [0; 83];
             let hrp = hrp.as_bytes();
@@ -219,36 +220,37 @@ pub(super) mod types {
 
     #[derive(Serialize, Deserialize)]
     #[repr(transparent)]
-    pub struct StringPrefix {
-        pub inner: String,
+    pub(crate) struct StringPrefix {
+        pub(crate) inner: String,
     }
 
     #[derive(Deserialize)]
-    pub struct OldStorageOptions {
-        pub storage_path: serde_json::Value,
-        pub storage_file_name: serde_json::Value,
-        pub storage_encryption_key: serde_json::Value,
-        pub manager_store: serde_json::Value,
+    pub(crate) struct OldStorageOptions {
+        pub(crate) storage_path: serde_json::Value,
+        #[allow(unused)]
+        pub(crate) storage_file_name: serde_json::Value,
+        pub(crate) storage_encryption_key: serde_json::Value,
+        pub(crate) manager_store: serde_json::Value,
     }
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct NewStorageOptions {
-        pub path: serde_json::Value,
-        pub encryption_key: serde_json::Value,
-        pub kind: serde_json::Value,
+    pub(crate) struct NewStorageOptions {
+        pub(crate) path: serde_json::Value,
+        pub(crate) encryption_key: serde_json::Value,
+        pub(crate) kind: serde_json::Value,
     }
 
     #[derive(Deserialize)]
-    pub struct OldNativeToken {
-        pub token_id: serde_json::Value,
-        pub amount: serde_json::Value,
+    pub(crate) struct OldNativeToken {
+        pub(crate) token_id: serde_json::Value,
+        pub(crate) amount: serde_json::Value,
     }
 
     #[derive(Serialize, Deserialize)]
-    pub struct NewNativeToken {
-        pub id: serde_json::Value,
-        pub amount: serde_json::Value,
+    pub(crate) struct NewNativeToken {
+        pub(crate) id: serde_json::Value,
+        pub(crate) amount: serde_json::Value,
     }
 }
 

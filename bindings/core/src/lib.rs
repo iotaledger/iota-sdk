@@ -38,7 +38,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
     logger_init(config)
 }
 
-#[derive(Derivative, Deserialize)]
+#[derive(Derivative, Deserialize, Default)]
 #[derivative(Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
@@ -50,9 +50,31 @@ pub struct WalletOptions {
 }
 
 impl WalletOptions {
+    pub fn with_storage_path(mut self, storage_path: impl Into<Option<String>>) -> Self {
+        self.storage_path = storage_path.into();
+        self
+    }
+
+    pub fn with_client_options(mut self, client_options: impl Into<Option<ClientOptions>>) -> Self {
+        self.client_options = client_options.into();
+        self
+    }
+
+    pub fn with_coin_type(mut self, coin_type: impl Into<Option<u32>>) -> Self {
+        self.coin_type = coin_type.into();
+        self
+    }
+
+    pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<SecretManagerDto>>) -> Self {
+        self.secret_manager = secret_manager.into();
+        self
+    }
+
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
-        let mut builder = Wallet::builder();
+        let mut builder = Wallet::builder()
+            .with_client_options(self.client_options)
+            .with_coin_type(self.coin_type);
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {
@@ -61,14 +83,6 @@ impl WalletOptions {
 
         if let Some(secret_manager) = self.secret_manager {
             builder = builder.with_secret_manager(SecretManager::try_from(secret_manager)?);
-        }
-
-        if let Some(client_options) = self.client_options {
-            builder = builder.with_client_options(client_options);
-        }
-
-        if let Some(coin_type) = self.coin_type {
-            builder = builder.with_coin_type(coin_type);
         }
 
         builder.finish().await

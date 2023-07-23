@@ -110,7 +110,7 @@ pub struct StrongholdAdapter {
 
     /// The path to a Stronghold snapshot file.
     #[builder(setter(skip))]
-    pub snapshot_path: PathBuf,
+    pub(crate) snapshot_path: PathBuf,
 }
 
 fn check_or_create_snapshot(

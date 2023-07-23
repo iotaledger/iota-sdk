@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.4 - 2023-MM-DD
+
+### Added
+
+- `fromOutputId` constructor for `UTXOInput`;
+
 ## 1.0.0-rc.3 - 2023-07-21
 
 ### Added

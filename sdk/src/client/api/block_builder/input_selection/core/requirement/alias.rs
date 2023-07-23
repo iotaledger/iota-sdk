@@ -7,7 +7,7 @@ use crate::{
     types::block::output::{AliasId, AliasTransition, Output, OutputId},
 };
 
-pub fn is_alias_transition<'a>(
+pub(crate) fn is_alias_transition<'a>(
     input: &Output,
     input_id: OutputId,
     outputs: &[Output],

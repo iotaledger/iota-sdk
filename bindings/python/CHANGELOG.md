@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.2 - 2023-xx.xx
+
+### Fixed
+
+- `Account::prepare_output()` deserialization;
+- `Client::build_alias_output()`, `Client::build_nft_output()`, `Client::build_basic_output`, `Client::build_foundry_output` returned type of object;
+
 ## 1.0.0-rc.1 - 2023-07-21
 
 ### Added

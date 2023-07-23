@@ -18,7 +18,7 @@ import {
     OutputId,
     hexToBigInt,
 } from '../types';
-import { AliasId, BlockId, FoundryId, TokenId } from '../types/block/id';
+import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
 /** Utils class for utils. */
 export class Utils {
@@ -76,7 +76,7 @@ export class Utils {
     /**
      * Computes the NFT id for the given NFT output id.
      */
-    static computeNftId(outputId: string): string {
+    static computeNftId(outputId: string): NftId {
         return callUtilsMethod({
             name: 'computeNftId',
             data: {
