@@ -65,7 +65,7 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rentStructure: IRent;
+        rent: IRent;
     };
 }
 
