@@ -13,7 +13,7 @@ from iota_sdk.types.common import HexStr, Node, AddressAndAmount
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
-from iota_sdk.types.output import Output
+from iota_sdk.types.output import AliasOutput, BasicOutput, FoundryOutput, NftOutput, output_from_dict
 from iota_sdk.types.payload import Payload, TransactionPayload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
@@ -180,7 +180,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            state_metadata: Optional[str] = None,
                            foundry_counter: Optional[int] = None,
                            features: Optional[List[Feature]] = None,
-                           immutable_features: Optional[List[Feature]] = None):
+                           immutable_features: Optional[List[Feature]] = None) -> AliasOutput:
         """Build an AliasOutput.
 
         Args:
@@ -214,7 +214,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return from_dict(Output, self._call_method('buildAliasOutput', {
+        return output_from_dict(self._call_method('buildAliasOutput', {
             'aliasId': alias_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -230,7 +230,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            unlock_conditions: List[UnlockCondition],
                            amount: Optional[int] = None,
                            native_tokens: Optional[List[NativeToken]] = None,
-                           features: Optional[List[Feature]] = None):
+                           features: Optional[List[Feature]] = None) -> BasicOutput:
         """Build a BasicOutput.
 
         Args:
@@ -256,7 +256,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return from_dict(Output, self._call_method('buildBasicOutput', {
+        return output_from_dict(self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'nativeTokens': native_tokens,
@@ -270,7 +270,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              amount: Optional[int] = None,
                              native_tokens: Optional[List[NativeToken]] = None,
                              features: Optional[List[Feature]] = None,
-                             immutable_features: Optional[List[Feature]] = None):
+                             immutable_features: Optional[List[Feature]] = None) -> FoundryOutput:
         """Build a FoundryOutput.
 
         Args:
@@ -302,7 +302,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return from_dict(Output, self._call_method('buildFoundryOutput', {
+        return output_from_dict(self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
             'tokenScheme': token_scheme.as_dict(),
             'unlockConditions': unlock_conditions,
@@ -318,7 +318,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                          amount: Optional[int] = None,
                          native_tokens: Optional[List[NativeToken]] = None,
                          features: Optional[List[Feature]] = None,
-                         immutable_features: Optional[List[Feature]] = None):
+                         immutable_features: Optional[List[Feature]] = None) -> NftOutput:
         """Build an NftOutput.
 
         Args:
@@ -349,7 +349,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return from_dict(Output, self._call_method('buildNftOutput', {
+        return output_from_dict(self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
