@@ -4,7 +4,8 @@
 import {
     CoinType,
     WalletOptions,
-    Wallet, migrateStrongholdSnapshotV2ToV3
+    Wallet,
+    migrateStrongholdSnapshotV2ToV3,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -65,7 +66,6 @@ async function run() {
 
     // This shouldn't fail anymore as snapshot has been migrated.
     new Wallet(walletOptions);
-
 }
 
 run().then(() => process.exit());
