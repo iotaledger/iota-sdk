@@ -16,6 +16,9 @@ const v3Path = './v3.stronghold';
 // yarn run-example wallet/migrate-stronghold-snapshot-v2-to-v3.ts
 
 async function run() {
+    if (!process.env.WALLET_DB_PATH) {
+        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    }
     if (!process.env.NODE_URL) {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
