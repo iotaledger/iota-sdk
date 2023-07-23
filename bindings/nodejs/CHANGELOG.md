@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `migrateStrongholdSnapshotV2ToV3` function;
 - `Account::prepareConsolidateOutputs` takes a `ConsolidationParams`;
 
 ## 1.0.0-rc.3 - 2023-07-21
