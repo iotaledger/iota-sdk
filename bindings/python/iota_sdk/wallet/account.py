@@ -119,7 +119,8 @@ class Account:
         )
         return PreparedTransaction(self, prepared)
 
-    def prepare_consolidate_outputs(self, params: ConsolidationParams) -> PreparedTransaction:
+    def prepare_consolidate_outputs(
+            self, params: ConsolidationParams) -> PreparedTransaction:
         """Consolidate outputs.
         """
         prepared = self._call_account_method(
