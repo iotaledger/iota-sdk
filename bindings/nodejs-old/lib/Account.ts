@@ -212,14 +212,14 @@ export class Account {
      * @returns The consolidation transaction.
      */
     async consolidateOutputs(
-        params: ConsolidationParams
+        params: ConsolidationParams,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'consolidateOutputs',
                 data: {
-                    params
+                    params,
                 },
             },
         );

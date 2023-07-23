@@ -83,7 +83,7 @@ export type __ClaimOutputsMethod__ = {
 export type __ConsolidateOutputsMethod__ = {
     name: 'consolidateOutputs';
     data: {
-        params: ConsolidationParams
+        params: ConsolidationParams;
     };
 };
 

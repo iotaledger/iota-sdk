@@ -67,9 +67,9 @@ async function run() {
 
         // Consolidate unspent outputs and print the consolidation transaction ID
         // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
-        const preparedTransaction = await account.prepareConsolidateOutputs(
-            true,
-        );
+        const preparedTransaction = await account.prepareConsolidateOutputs({
+            force: true,
+        });
         const transaction = await preparedTransaction.send();
         console.log('Transaction sent: %s', transaction.transactionId);
 
