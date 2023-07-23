@@ -41,4 +41,3 @@ export class ClientMethodHandler {
         return listenMqtt(topics, callback, this.methodHandler);
     }
 }
-
