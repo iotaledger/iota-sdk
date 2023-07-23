@@ -176,7 +176,7 @@ pub struct InputSigningDataDto {
     /// The output metadata
     pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
-    #[serde(with = "option_bip44")]
+    #[serde(with = "option_bip44", default)]
     pub chain: Option<Bip44>,
 }
 
