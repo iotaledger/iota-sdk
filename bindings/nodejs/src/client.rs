@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,
-    iota_sdk::client::{mqtt::Topic, stronghold::StrongholdAdapter, Client, ClientBuilder},
+    iota_sdk::client::{mqtt::Topic, Client, ClientBuilder},
     listen_mqtt as rust_listen_mqtt, ClientMethod, Response, Result,
 };
 use neon::prelude::*;
@@ -168,39 +168,4 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: String, callb
 
         Ok(())
     });
-}
-
-pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let current_path = cx.argument::<JsString>(0)?.value(&mut cx);
-    let current_password = cx.argument::<JsString>(1)?.value(&mut cx).into();
-    let salt = cx.argument::<JsString>(2)?.value(&mut cx);
-    let rounds = cx.argument::<JsNumber>(3)?.value(&mut cx);
-    let new_path = cx
-        .argument_opt(4)
-        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
-        .transpose()?
-        .map(|opt| opt.value(&mut cx));
-    let new_password = cx
-        .argument_opt(5)
-        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
-        .transpose()?
-        .map(|opt| opt.value(&mut cx))
-        .map(Into::into);
-
-    StrongholdAdapter::migrate_snapshot_v2_to_v3(
-        &current_path,
-        current_password,
-        salt,
-        rounds as u32,
-        new_path.as_ref(),
-        new_password,
-    )
-    .or_else(|e| {
-        cx.throw_error(
-            serde_json::to_string(&Response::Error(e.into()))
-                .expect("the response is generated manually, so unwrap is safe."),
-        )
-    })?;
-
-    Ok(cx.undefined())
 }

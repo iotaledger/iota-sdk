@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { callSecretManagerMethodAsync, createSecretManager } from '../bindings';
+import { callSecretManagerMethodAsync, createSecretManager, migrateStrongholdSnapshotV2ToV3 } from '../bindings';
 import {
     SecretManagerType,
     __SecretManagerMethods__,
@@ -27,3 +27,5 @@ export class SecretManagerMethodHandler {
         );
     }
 }
+
+export { migrateStrongholdSnapshotV2ToV3 };
