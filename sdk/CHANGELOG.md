@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.0-rc.1 - 2023-07-DD
+
+### Added
+
+- `ConsolidationParams` type;
+
+### Changed
+
+- `Account::{consolidate_outputs, prepare_consolidate_outputs}` take a `ConsolidationParams`;
+
 ## 1.0.0-rc.0 - 2023-07-21
 
 ### Added
