@@ -142,7 +142,6 @@ pub enum AccountMethod {
     },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareConsolidateOutputs { params: ConsolidationParams },
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)

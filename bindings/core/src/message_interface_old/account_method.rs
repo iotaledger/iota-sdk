@@ -122,7 +122,6 @@ pub enum AccountMethod {
     ClaimableOutputs { outputs_to_claim: OutputsToClaim },
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
     ConsolidateOutputs { params: ConsolidationParams },
     /// Create an alias output.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
