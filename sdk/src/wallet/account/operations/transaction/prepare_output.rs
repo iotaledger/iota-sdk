@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{cmp::Ordering, collections::HashSet};
+use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output,
             RentStructure, UnlockCondition,
         },
         Error,
@@ -107,93 +107,119 @@ where
             OutputBuilder::Basic(BasicOutputBuilder::from(first_output.as_basic()))
         };
 
-        // Update the amount
-        match params.amount.cmp(&first_output.amount()) {
-            Ordering::Greater | Ordering::Equal => {
-                // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(params.amount);
+        let min_storage_deposit_basic_output =
+            MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+
+        if params.amount > min_storage_deposit_basic_output {
+            second_output_builder = second_output_builder.with_amount(params.amount);
+        }
+
+        let return_strategy = params
+            .storage_deposit
+            .clone()
+            .unwrap_or_default()
+            .return_strategy
+            .unwrap_or_default();
+        let remainder_address = self.get_remainder_address(transaction_options).await?;
+        if params.amount < min_storage_deposit_basic_output {
+            if return_strategy == ReturnStrategy::Gift {
+                second_output_builder = second_output_builder.with_amount(min_storage_deposit_basic_output);
             }
-            Ordering::Less => {
-                let storage_deposit = params.storage_deposit.unwrap_or_default();
-                // Gift return strategy doesn't need a change, since the amount is already the minimum storage
-                // deposit
-                if storage_deposit.return_strategy.unwrap_or_default() == ReturnStrategy::Return {
-                    let remainder_address = self.get_remainder_address(transaction_options).await?;
+            if return_strategy == ReturnStrategy::Return {
+                second_output_builder =
+                    second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                        remainder_address,
+                        // Return minimum storage deposit
+                        min_storage_deposit_basic_output,
+                        token_supply,
+                    )?);
 
-                    // Calculate the amount to be returned
-                    let min_storage_deposit_return_amount =
-                        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+                // Update output amount, so recipient still gets the provided amount
+                let new_amount = params.amount + min_storage_deposit_basic_output;
+                // new_amount could be not enough because we added the storage deposit return unlock condition, so we
+                // need to check the min required storage deposit again
+                let min_storage_deposit_new_amount = second_output_builder
+                    .clone()
+                    .with_minimum_storage_deposit(rent_structure)
+                    .finish_output(token_supply)?
+                    .amount();
 
+                if new_amount < min_storage_deposit_new_amount {
+                    let additional_required_amount = min_storage_deposit_new_amount - new_amount;
+                    second_output_builder = second_output_builder.with_amount(new_amount + additional_required_amount);
+                    // Add the additional amount to the SDR
                     second_output_builder =
-                        second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                        second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address,
                             // Return minimum storage deposit
-                            min_storage_deposit_return_amount,
+                            min_storage_deposit_basic_output + additional_required_amount,
                             token_supply,
                         )?);
+                } else {
+                    // new_amount is enough
+                    second_output_builder = second_output_builder.with_amount(new_amount);
                 }
+                // Set a bool to contains_return = true so it can be increased later if needed? Or just get mut
+            }
+        }
 
-                // Check if the remaining balance wouldn't leave dust behind, which wouldn't allow the creation of this
-                // output. If that's the case, this remaining amount will be added to the output, to still allow sending
-                // it.
-                if storage_deposit.use_excess_if_low.unwrap_or_default() {
-                    let balance = self.balance().await?;
-                    if balance.base_coin.available.cmp(&first_output.amount()) == Ordering::Greater {
-                        let balance_minus_output = balance.base_coin.available - first_output.amount();
-                        // Calculate the amount for a basic output
-                        let minimum_required_storage_deposit =
-                            MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+        let third_output = second_output_builder.clone().finish_output(token_supply)?;
+        let mut final_amount = third_output.amount();
+        // Now we have to make sure that our output also works with our available balance, without leaving <
+        // min_storage_deposit_basic_output for a remainder (if not 0)
+        let available_base_coin = self.balance().await?.base_coin.available;
 
-                        if balance_minus_output < minimum_required_storage_deposit {
-                            second_output_builder =
-                                second_output_builder.with_amount(first_output.amount() + balance_minus_output);
-                        }
+        if final_amount > available_base_coin {
+            return Err(crate::wallet::Error::InsufficientFunds {
+                available: available_base_coin,
+                required: final_amount,
+            });
+        }
+        if final_amount == available_base_coin {
+            return Ok(third_output);
+        }
+
+        if final_amount < available_base_coin {
+            let remaining_balance = available_base_coin - final_amount;
+            if remaining_balance < min_storage_deposit_basic_output {
+                // not enough for remainder
+                if params
+                    .storage_deposit
+                    .unwrap_or_default()
+                    .use_excess_if_low
+                    .unwrap_or_default()
+                {
+                    // add remaining amount
+                    let remaining_amount_from_balance = available_base_coin - final_amount;
+                    final_amount += remaining_amount_from_balance;
+                    second_output_builder = second_output_builder.with_amount(final_amount);
+
+                    if let Some(sdr) = third_output
+                        .unlock_conditions()
+                        .expect("basic and nft outputs have unlock conditions")
+                        .storage_deposit_return()
+                    {
+                        // create a new sdr unlock_condition with the updated amount and replace it
+                        let new_sdr_amount = sdr.amount() + remaining_amount_from_balance;
+                        second_output_builder =
+                            second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                                remainder_address,
+                                // Return minimum storage deposit
+                                new_sdr_amount,
+                                token_supply,
+                            )?);
                     }
+                } else {
+                    // Would leave dust behind, so return what's required for a remainder
+                    return Err(crate::wallet::Error::InsufficientFunds {
+                        available: available_base_coin,
+                        required: available_base_coin + min_storage_deposit_basic_output,
+                    });
                 }
             }
         }
 
-        let second_output = second_output_builder.finish_output(token_supply)?;
-
-        let required_storage_deposit = second_output.rent_cost(&rent_structure);
-
-        let mut third_output_builder = if nft_id.is_some() {
-            OutputBuilder::Nft(NftOutputBuilder::from(second_output.as_nft()))
-        } else {
-            OutputBuilder::Basic(BasicOutputBuilder::from(second_output.as_basic()))
-        };
-
-        // We might have added more unlock conditions, so we check the minimum storage deposit again and update the
-        // amounts if needed
-        if second_output.amount() < required_storage_deposit {
-            let mut new_sdr_amount = required_storage_deposit - params.amount;
-            let minimum_storage_deposit =
-                MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
-            let mut final_output_amount = required_storage_deposit;
-            if required_storage_deposit < params.amount + minimum_storage_deposit {
-                // return amount must be >= minimum_storage_deposit
-                new_sdr_amount = minimum_storage_deposit;
-
-                // increase the output amount by the additional required amount for the SDR
-                final_output_amount += minimum_storage_deposit - (required_storage_deposit - params.amount);
-            }
-            third_output_builder = third_output_builder.with_amount(final_output_amount);
-
-            // add newly added amount also to the storage deposit return unlock condition, if that was added
-            if let Some(sdr) = second_output
-                .unlock_conditions()
-                .expect("basic and nft outputs have unlock conditions")
-                .storage_deposit_return()
-            {
-                // create a new sdr unlock_condition with the updated amount and replace it
-                third_output_builder = third_output_builder.replace_unlock_condition(
-                    StorageDepositReturnUnlockCondition::new(*sdr.return_address(), new_sdr_amount, token_supply)?,
-                );
-            }
-        }
-
-        // Build and return the final output
-        Ok(third_output_builder.finish_output(token_supply)?)
+        Ok(second_output_builder.finish_output(token_supply)?)
     }
 
     // Create the initial output builder for prepare_output()
@@ -340,6 +366,7 @@ pub enum ReturnStrategy {
     Gift,
 }
 
+#[derive(Clone)]
 enum OutputBuilder {
     Basic(BasicOutputBuilder),
     Nft(NftOutputBuilder),
