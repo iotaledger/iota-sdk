@@ -39,7 +39,10 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
-        console.log(`Aliases BEFORE (${balance.aliases.length}):\n`, balance.aliases);
+        console.log(
+            `Aliases BEFORE (${balance.aliases.length}):\n`,
+            balance.aliases,
+        );
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
@@ -62,7 +65,10 @@ async function run() {
         );
 
         balance = await account.sync();
-        console.log(`Aliases AFTER (${balance.aliases.length}):\n`, balance.aliases);
+        console.log(
+            `Aliases AFTER (${balance.aliases.length}):\n`,
+            balance.aliases,
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

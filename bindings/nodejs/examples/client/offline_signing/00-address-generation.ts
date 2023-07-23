@@ -44,7 +44,9 @@ async function run() {
             ADDRESS_FILE_NAME,
             JSON.stringify(offlineGeneratedAddress),
         );
-        console.log("Address generated and saved to file: " + ADDRESS_FILE_NAME + "")
+        console.log(
+            'Address generated and saved to file: ' + ADDRESS_FILE_NAME + '',
+        );
     } catch (error) {
         console.error('Error: ', error);
     }

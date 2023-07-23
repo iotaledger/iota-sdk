@@ -42,7 +42,10 @@ async function run() {
         // We try to destroy the first alias in the account
         const aliasId = balance.aliases[0];
 
-        console.log(`Aliases BEFORE destroying (${balance.aliases.length}):\n`, balance.aliases);
+        console.log(
+            `Aliases BEFORE destroying (${balance.aliases.length}):\n`,
+            balance.aliases,
+        );
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
@@ -66,7 +69,10 @@ async function run() {
         console.log(`Destroyed alias ${aliasId}`);
 
         balance = await account.sync();
-        console.log(`Aliases AFTER destroying (${balance.aliases.length}):\n`, balance.aliases);
+        console.log(
+            `Aliases AFTER destroying (${balance.aliases.length}):\n`,
+            balance.aliases,
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

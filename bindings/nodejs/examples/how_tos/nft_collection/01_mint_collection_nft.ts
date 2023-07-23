@@ -68,7 +68,8 @@ async function run() {
             );
 
             console.log(
-                `Minting ${chunk.length} NFTs... (${i + chunk.length
+                `Minting ${chunk.length} NFTs... (${
+                    i + chunk.length
                 }/${NFT_COLLECTION_SIZE})`,
             );
             const prepared = await account.prepareMintNfts(chunk);

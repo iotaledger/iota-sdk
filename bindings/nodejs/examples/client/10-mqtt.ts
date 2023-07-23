@@ -47,9 +47,9 @@ async function run() {
             const previousMilestone = payload.previousMilestoneId;
             console.log(
                 'New milestone index' +
-                index +
-                ', previous ID: ' +
-                previousMilestone,
+                    index +
+                    ', previous ID: ' +
+                    previousMilestone,
             );
         } else if (parsed.topic == 'blocks') {
             const block = plainToInstance(Block, JSON.parse(parsed.payload));
