@@ -26,6 +26,7 @@ const {
     destroyWallet,
     getClientFromWallet,
     getSecretManagerFromWallet,
+    migrateStrongholdSnapshotV2ToV3
 } = addon;
 
 const callClientMethodAsync = (
@@ -123,4 +124,5 @@ export {
     getClientFromWallet,
     getSecretManagerFromWallet,
     listenMqtt,
+    migrateStrongholdSnapshotV2ToV3
 };

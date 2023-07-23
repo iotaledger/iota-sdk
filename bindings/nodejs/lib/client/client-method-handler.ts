@@ -3,6 +3,7 @@
 
 import {
     callClientMethodAsync,
+    migrateStrongholdSnapshotV2ToV3,
     createClient,
     listenMqtt,
     destroyClient,
@@ -41,3 +42,5 @@ export class ClientMethodHandler {
         return listenMqtt(topics, callback, this.methodHandler);
     }
 }
+
+export { migrateStrongholdSnapshotV2ToV3 };
