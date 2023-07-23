@@ -194,8 +194,7 @@ where
                     .unwrap_or_default()
                 {
                     // add remaining amount
-                    let remaining_amount_from_balance = available_base_coin - final_amount;
-                    final_amount += remaining_amount_from_balance;
+                    final_amount += remaining_balance;
                     second_output_builder = second_output_builder.with_amount(final_amount);
 
                     if let Some(sdr) = third_output
@@ -204,7 +203,7 @@ where
                         .storage_deposit_return()
                     {
                         // create a new sdr unlock_condition with the updated amount and replace it
-                        let new_sdr_amount = sdr.amount() + remaining_amount_from_balance;
+                        let new_sdr_amount = sdr.amount() + remaining_balance;
                         second_output_builder =
                             second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                                 remainder_address,
@@ -215,10 +214,9 @@ where
                     }
                 } else {
                     // Would leave dust behind, so return what's required for a remainder
-                    let remaining = available_base_coin - final_amount;
                     return Err(crate::wallet::Error::InsufficientFunds {
                         available: available_base_coin,
-                        required: available_base_coin + min_storage_deposit_basic_output - remaining,
+                        required: available_base_coin + min_storage_deposit_basic_output - remaining_balance,
                     });
                 }
             }
