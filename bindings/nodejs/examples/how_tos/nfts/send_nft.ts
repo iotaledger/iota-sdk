@@ -11,7 +11,7 @@ const RECV_ADDRESS =
 // In this example we will send an NFT (Non-fungible token).
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-wallet` example!
+// running the `how_tos/accounts-and-addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nfts/send_nft.ts

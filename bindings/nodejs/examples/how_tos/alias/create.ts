@@ -4,6 +4,10 @@
 import { Wallet, initLogger } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
+//
+// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// running the `how_tos/accounts-and-addresses/create-account` example!
+//
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -35,7 +39,7 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
-        console.log(`Aliases BEFORE:\n`, balance.aliases);
+        console.log(`Aliases BEFORE (${balance.aliases.length}):\n`, balance.aliases);
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
@@ -58,7 +62,7 @@ async function run() {
         );
 
         balance = await account.sync();
-        console.log(`Aliases AFTER:\n`, balance.aliases);
+        console.log(`Aliases AFTER (${balance.aliases.length}):\n`, balance.aliases);
     } catch (error) {
         console.log('Error: ', error);
     }

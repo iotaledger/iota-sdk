@@ -13,7 +13,7 @@ const BURN_AMOUNT = BigInt(1);
 // output that minted it.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-wallet` example!
+// running the `how_tos/accounts-and-addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/native_tokens/burn.ts

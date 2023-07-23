@@ -7,7 +7,7 @@ import { getUnlockedWallet } from '../../wallet/common';
 // circulating supply is 0 and no native tokens were burned.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-wallet` example!
+// running the `how_tos/accounts-and-addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/native_tokens/destroy-foundry.ts

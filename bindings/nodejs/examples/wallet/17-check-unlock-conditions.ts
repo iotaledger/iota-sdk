@@ -11,7 +11,7 @@ const AMOUNT = BigInt(1000000);
 // In this example we check if an output has only an address unlock condition and that the address is from the account.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-wallet` example!
+// running the `how_tos/accounts-and-addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./wallet/17-check-unlock-conditions.ts
@@ -40,7 +40,7 @@ async function run() {
             if (
                 basicOutput.getUnlockConditions().length === 1 &&
                 basicOutput.getUnlockConditions()[0] instanceof
-                    AddressUnlockCondition &&
+                AddressUnlockCondition &&
                 hexEncodedAccountAddresses.includes(
                     (
                         basicOutput.getUnlockConditions()[0] as AddressUnlockCondition
@@ -54,7 +54,7 @@ async function run() {
 
             console.log(
                 'The output has only an address unlock condition and the address is from the account: ' +
-                    controlledByAccount,
+                controlledByAccount,
             );
         }
     } catch (error) {
