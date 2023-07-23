@@ -218,9 +218,10 @@ where
                     }
                 } else {
                     // Would leave dust behind, so return what's required for a remainder
+                    let remaining = available_base_coin - final_amount;
                     return Err(crate::wallet::Error::InsufficientFunds {
                         available: available_base_coin,
-                        required: available_base_coin + min_storage_deposit_basic_output,
+                        required: available_base_coin + min_storage_deposit_basic_output - remaining,
                     });
                 }
             }
