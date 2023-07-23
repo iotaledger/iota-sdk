@@ -159,7 +159,6 @@ where
                     // new_amount is enough
                     second_output_builder = second_output_builder.with_amount(new_amount);
                 }
-                // Set a bool to contains_return = true so it can be increased later if needed? Or just get mut
             }
         }
 
