@@ -695,3 +695,56 @@ async fn prepare_output_remainder_dust() -> Result<()> {
 
     tear_down(storage_path)
 }
+
+#[ignore]
+#[tokio::test]
+async fn prepare_output_only_single_nft() -> Result<()> {
+    let storage_path = "test-storage/prepare_output_only_single_nft";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    // Create second account without funds, so it only gets the NFT
+    let account_1 = wallet.create_account().finish().await?;
+    let addresses = &account_0.addresses().await?;
+    let account_0_address = addresses[0].address();
+    let addresses = &account_1.addresses().await?;
+    let account_1_address = addresses[0].address();
+
+    // Send NFT to second account
+    let tx = account_0
+        .mint_nfts([MintNftParams::new().try_with_address(account_1_address)?], None)
+        .await?;
+    account_0
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    let balance = account_1.sync(None).await?;
+    assert_eq!(balance.nfts().len(), 1);
+
+    println!("{:?}", balance);
+    let nft_data = &account_1.unspent_outputs(None).await?[0];
+    // Send NFT back to first account
+    let output = account_1
+        .prepare_output(
+            OutputParams {
+                recipient_address: *account_0_address,
+                amount: nft_data.output.amount(),
+                assets: Some(Assets {
+                    native_tokens: None,
+                    nft_id: Some(*balance.nfts().first().unwrap()),
+                }),
+                features: None,
+                unlocks: None,
+                storage_deposit: None,
+            },
+            None,
+        )
+        .await?;
+    let tx = account_1.send_outputs([output], None).await?;
+    account_1
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    tear_down(storage_path)
+}

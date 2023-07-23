@@ -15,12 +15,14 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
             RentStructure, UnlockCondition,
         },
         Error,
     },
-    wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
+    wallet::account::{
+        operations::transaction::RemainderValueStrategy, types::OutputData, Account, FilterOptions, TransactionOptions,
+    },
 };
 
 impl<S: 'static + SecretManage> Account<S>
@@ -48,7 +50,7 @@ where
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
-        let mut first_output_builder = self
+        let (mut first_output_builder, existing_nft_output_data) = self
             .create_initial_output_builder(params.recipient_address, nft_id, rent_structure)
             .await?;
 
@@ -167,7 +169,12 @@ where
         let mut final_amount = third_output.amount();
         // Now we have to make sure that our output also works with our available balance, without leaving <
         // min_storage_deposit_basic_output for a remainder (if not 0)
-        let available_base_coin = self.balance().await?.base_coin.available;
+        let mut available_base_coin = self.balance().await?.base_coin.available;
+        // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
+        // balance, so we add it here
+        if let Some(existing_nft_output_data) = existing_nft_output_data {
+            available_base_coin += existing_nft_output_data.output.rent_cost(&rent_structure);
+        }
 
         if final_amount > available_base_coin {
             return Err(crate::wallet::Error::InsufficientFunds {
@@ -228,14 +235,17 @@ where
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
         rent_structure: RentStructure,
-    ) -> crate::wallet::Result<OutputBuilder> {
-        let mut first_output_builder = if let Some(nft_id) = &nft_id {
+    ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData>)> {
+        let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
-                OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(
-                    rent_structure,
-                    *nft_id,
-                ))
+                (
+                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(
+                        rent_structure,
+                        *nft_id,
+                    )),
+                    None,
+                )
             } else {
                 // Transition an existing NFT output
                 let unspent_nft_output = self
@@ -259,16 +269,22 @@ where
                 // Remove potentially existing features and unlock conditions.
                 first_output_builder = first_output_builder.clear_features();
                 first_output_builder = first_output_builder.clear_unlock_conditions();
-                OutputBuilder::Nft(first_output_builder)
+                (
+                    OutputBuilder::Nft(first_output_builder),
+                    unspent_nft_output.first().cloned(),
+                )
             }
         } else {
-            OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure))
+            (
+                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)),
+                None,
+            )
         };
 
         // Set new address unlock condition
         first_output_builder =
             first_output_builder.add_unlock_condition(AddressUnlockCondition::new(recipient_address));
-        Ok(first_output_builder)
+        Ok((first_output_builder, existing_nft_output_data))
     }
 
     // Get a remainder address based on transaction_options or use the first account address
