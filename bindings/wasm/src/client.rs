@@ -70,3 +70,21 @@ pub fn listen_mqtt(_topics: ArrayString, _callback: &js_sys::Function) -> Result
 
     Err(JsValue::from(js_error))
 }
+
+/// Stronghold snapshot migration is not supported for WebAssembly bindings.
+///
+/// Throws an error if called, only included for compatibility
+/// with the Node.js bindings TypeScript definitions.
+#[wasm_bindgen(js_name = migrateStrongholdSnapshotV2ToV3)]
+pub fn migrate_stronghold_snapshot_v2_to_v3(
+    _current_path: String,
+    _current_password: String,
+    _salt: &str,
+    _rounds: u32,
+    _new_path: Option<String>,
+    _new_password: Option<String>,
+) -> Result<(), JsValue> {
+    let js_error = js_sys::Error::new("Stronghold snapshot migration is not supported for WebAssembly");
+
+    Err(JsValue::from(js_error))
+}
