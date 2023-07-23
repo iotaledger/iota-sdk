@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Add serde default to `{RemainderDataDto, InputSigningDto, OutputDataDto}::chain`;
+- `Account::prepare_output()` for low amounts;
 
 ## 1.0.0-rc.0 - 2023-07-21
 
