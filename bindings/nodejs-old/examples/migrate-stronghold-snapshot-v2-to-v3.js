@@ -6,7 +6,7 @@ const {
     migrateStrongholdSnapshotV2ToV3,
 } = require('@iota/wallet');
 
-const v2Path = '../../../../../tests/wallet/fixtures/v2.stronghold';
+const v2Path = '../../../sdk/tests/wallet/fixtures/v2.stronghold';
 const v3Path = './v3.stronghold';
 
 async function run() {
