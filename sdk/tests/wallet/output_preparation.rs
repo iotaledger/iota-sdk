@@ -133,13 +133,13 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 48200);
+    assert_eq!(output.amount(), 49000);
     let unlock_conditions = output.unlock_conditions().unwrap();
     // address + sdr
     assert_eq!(unlock_conditions.len(), 2);
     let storage_deposit_return = unlock_conditions.storage_deposit_return().unwrap();
     // output amount -1
-    assert_eq!(storage_deposit_return.amount(), 48199);
+    assert_eq!(storage_deposit_return.amount(), 48999);
     // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
@@ -186,9 +186,9 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 48200);
+    assert_eq!(output.amount(), 49000);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 48199);
+    assert_eq!(sdr.amount(), 48999);
 
     // address and storage deposit unlock condition, because of the metadata feature block, 213000 is not enough for the
     // required storage deposit
