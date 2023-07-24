@@ -34,7 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Utils.computeStorageDeposit()`;
-- `Utils.computeTokenId()`
+- `Utils.computeTokenId()`;
+- `Utils.computeFoundryId` 's parameter `tokenSchemeKind` renamed to `tokenSchemeType`;
 
 ## 1.0.0-rc.3 - 2023-07-21
 
@@ -51,7 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManagerMethod::SignEd25519`, `SignSecp256k1Ecdsa`, and `SignatureUnlock` now accept newly added `Bip44` type chains;
 - Use `BigInt` instead of strings for token amounts;
 - Split `Account::send` into `send` and `sendWithParams`;
-- Properties in classes `NewOutputWalletEvent`, `SpentOutputWalletEvent` and `TransactionInclusionWalletEvent` are now private;
 - Properties in event classes are now public;
 - Remove getters from the event classes;
 - `{Client, SecretManager}::signTransaction` return type from `Payload` to `TransactionPayload`;
