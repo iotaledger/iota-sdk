@@ -427,6 +427,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::BuildBasicOutput {
                 amount,
+                mana,
                 native_tokens,
                 unlock_conditions,
                 features,
@@ -437,6 +438,7 @@ impl WalletMessageHandler {
                     } else {
                         OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
+                    mana,
                     native_tokens,
                     unlock_conditions,
                     features,

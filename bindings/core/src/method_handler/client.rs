@@ -89,6 +89,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::BuildBasicOutput {
             amount,
+            mana,
             native_tokens,
             unlock_conditions,
             features,
@@ -99,6 +100,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 } else {
                     OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
+                mana,
                 native_tokens,
                 unlock_conditions,
                 features,

@@ -17,6 +17,7 @@ use iota_sdk::{
         payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
     },
+    utils::serde::string,
 };
 use serde::{Deserialize, Serialize};
 
@@ -49,6 +50,8 @@ pub enum ClientMethod {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
