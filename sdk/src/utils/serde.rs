@@ -130,11 +130,9 @@ pub mod string_prefix {
 }
 
 pub mod boxed_slice_prefix {
-    use alloc::string::String;
-
     use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
     use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
-    use serde::{de, Deserialize, Deserializer, Serializer};
+    use serde::{de, Deserializer, Serializer};
 
     pub fn serialize<S, T, B: Bounded>(value: &BoxedSlicePrefix<T, B>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -150,10 +148,41 @@ pub mod boxed_slice_prefix {
         Box<[T]>: FromHexPrefixed,
         <B as TryFrom<usize>>::Error: core::fmt::Display,
     {
-        prefix_hex::decode::<Box<[T]>>(String::deserialize(deserializer)?)
-            .map_err(de::Error::custom)?
+        super::prefix_hex_bytes::deserialize::<_, Box<[T]>>(deserializer)?
             .try_into()
             .map_err(de::Error::custom)
+    }
+}
+
+pub mod cow_boxed_slice_prefix {
+    use alloc::borrow::Cow;
+
+    use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
+    use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
+    use serde::{Deserializer, Serializer};
+
+    pub fn serialize<'s, S, T, B: Bounded>(
+        value: &Cow<'s, BoxedSlicePrefix<T, B>>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        T: Clone,
+        B: Clone,
+        for<'a> &'a Box<[T]>: ToHexPrefixed,
+    {
+        super::boxed_slice_prefix::serialize(value.as_ref(), serializer)
+    }
+
+    pub fn deserialize<'de, 'a, D, T, B: Bounded>(deserializer: D) -> Result<Cow<'a, BoxedSlicePrefix<T, B>>, D::Error>
+    where
+        D: Deserializer<'de>,
+        T: Clone,
+        B: Clone,
+        Box<[T]>: FromHexPrefixed,
+        <B as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        Ok(Cow::Owned(super::boxed_slice_prefix::deserialize(deserializer)?))
     }
 }
 

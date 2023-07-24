@@ -80,12 +80,13 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
+    use crate::utils::serde::cow_boxed_slice_prefix;
 
     #[derive(Serialize, Deserialize)]
     struct MetadataFeatureDto<'a> {
         #[serde(rename = "type")]
         kind: u8,
-        #[serde(deserialize_with = "deserialize_data")]
+        #[serde(with = "cow_boxed_slice_prefix")]
         data: Cow<'a, BoxedSlicePrefix<u8, MetadataFeatureLength>>,
     }
 
@@ -102,13 +103,6 @@ mod dto {
         fn from(value: MetadataFeatureDto<'a>) -> Self {
             Self(value.data.into_owned())
         }
-    }
-
-    fn deserialize_data<'de, 'a, D>(d: D) -> Result<Cow<'a, BoxedSlicePrefix<u8, MetadataFeatureLength>>, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(Cow::Owned(crate::utils::serde::boxed_slice_prefix::deserialize(d)?))
     }
 
     impl<'de> Deserialize<'de> for MetadataFeature {

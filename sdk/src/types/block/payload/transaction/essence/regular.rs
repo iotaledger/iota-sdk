@@ -26,6 +26,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
     payload: OptionalPayload,
+    creation_time: Option<u64>,
 }
 
 impl RegularTransactionEssenceBuilder {
@@ -37,6 +38,7 @@ impl RegularTransactionEssenceBuilder {
             inputs_commitment,
             outputs: Vec::new(),
             payload: OptionalPayload::default(),
+            creation_time: None,
         }
     }
 
@@ -67,6 +69,11 @@ impl RegularTransactionEssenceBuilder {
     /// Add a payload to a [`RegularTransactionEssenceBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
+        self
+    }
+
+    fn with_creation_time(mut self, creation_time: u64) -> Self {
+        self.creation_time = creation_time.into();
         self
     }
 
@@ -105,15 +112,18 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
-        #[cfg(feature = "std")]
-        let creation_time = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_nanos() as u64;
-        // TODO no_std way to have a nanosecond timestamp
-        // https://github.com/iotaledger/iota-sdk/issues/647
-        #[cfg(not(feature = "std"))]
-        let creation_time = 0;
+        let creation_time = self.creation_time.unwrap_or_else(|| {
+            #[cfg(feature = "std")]
+            let t = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos() as u64;
+            // TODO no_std way to have a nanosecond timestamp
+            // https://github.com/iotaledger/iota-sdk/issues/647
+            #[cfg(not(feature = "std"))]
+            let t = 0;
+            t
+        });
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
@@ -303,9 +313,12 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
-        TryFromDto,
+    use crate::{
+        types::{
+            block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
+            TryFromDto,
+        },
+        utils::serde::string,
     };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
@@ -315,6 +328,7 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub network_id: String,
+        #[serde(with = "string")]
         pub creation_time: u64,
         pub inputs: Vec<Input>,
         pub inputs_commitment: String,
@@ -359,7 +373,8 @@ pub(crate) mod dto {
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
                 .with_inputs(dto.inputs)
-                .with_outputs(outputs);
+                .with_outputs(outputs)
+                .with_creation_time(dto.creation_time);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {

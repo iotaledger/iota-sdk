@@ -72,12 +72,13 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
+    use crate::utils::serde::cow_boxed_slice_prefix;
 
     #[derive(Serialize, Deserialize)]
     struct TagFeatureDto<'a> {
         #[serde(rename = "type")]
         kind: u8,
-        #[serde(deserialize_with = "deserialize_tag")]
+        #[serde(with = "cow_boxed_slice_prefix")]
         tag: Cow<'a, BoxedSlicePrefix<u8, TagFeatureLength>>,
     }
 
@@ -94,13 +95,6 @@ mod dto {
         fn from(value: TagFeatureDto<'a>) -> Self {
             Self(value.tag.into_owned())
         }
-    }
-
-    fn deserialize_tag<'de, 'a, D>(d: D) -> Result<Cow<'a, BoxedSlicePrefix<u8, TagFeatureLength>>, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(Cow::Owned(crate::utils::serde::boxed_slice_prefix::deserialize(d)?))
     }
 
     impl<'de> Deserialize<'de> for TagFeature {

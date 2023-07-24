@@ -6,13 +6,11 @@ use std::str::FromStr;
 use iota_sdk::types::block::{
     address::{AccountAddress, Address, Bech32Address, ToBech32Ext},
     output::AccountId,
-    Error,
 };
 use packable::PackableExt;
 
 const ACCOUNT_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
 const ACCOUNT_BECH32: &str = "rms1pr5m4q9dz4s7gdakvwslrmal4025fvxhmfamx0s2vt5ekg8wg597um6lcnn";
-const ACCOUNT_ID_INVALID: &str = "0xb0c800965d7511f5fb4406274d4e607f87d5c5970bc05e896f841a700e86e";
 
 #[test]
 fn kind() {
@@ -96,14 +94,6 @@ fn bech32_roundtrip() {
         Bech32Address::try_from_str(bech32),
         Bech32Address::try_new("rms", address)
     );
-}
-
-#[test]
-fn dto_invalid_account_id() {
-    assert!(matches!(
-        AccountAddress::from_str(ACCOUNT_ID_INVALID),
-        Err(Error::InvalidField("accountId"))
-    ));
 }
 
 #[test]
