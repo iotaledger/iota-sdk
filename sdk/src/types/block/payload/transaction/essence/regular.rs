@@ -297,10 +297,7 @@ fn verify_payload_packable<const VERIFY: bool>(
 }
 
 pub(crate) mod dto {
-    use alloc::{
-        boxed::Box,
-        string::{String, ToString},
-    };
+    use alloc::string::{String, ToString};
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
@@ -366,7 +363,7 @@ pub(crate) mod dto {
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
+                    builder.with_payload(*i)
                 } else {
                     return Err(Error::InvalidField("payload"));
                 }
