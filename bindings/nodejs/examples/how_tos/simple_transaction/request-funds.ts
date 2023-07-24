@@ -23,7 +23,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `01_create_wallet`
+        // Get the account we generated with `create-account`
         const account = await wallet.getAccount('Alice');
 
         const address = (await account.addresses())[0].address;

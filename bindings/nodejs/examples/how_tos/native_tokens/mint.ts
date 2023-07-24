@@ -9,7 +9,7 @@ const MINT_AMOUNT = BigInt(10);
 // In this example we will mint an existing native token with its foundry.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-wallet` example!
+// running the `how_tos/accounts_and_addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/native_tokens/mint.ts

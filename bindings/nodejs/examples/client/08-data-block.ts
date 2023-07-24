@@ -14,7 +14,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/08-data-block.ts
 
-// In this example we will send a block with a tagged data payload
+// In this example we will send a block with a tagged data payload.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
