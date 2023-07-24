@@ -3,15 +3,15 @@
 
 //! Common types required by nodes and clients APIs like blocks, responses and DTOs.
 
-use core::ops::Deref;
-
-use self::block::protocol::ProtocolParameters;
-
 #[cfg(feature = "std")]
 extern crate std;
 
 pub mod api;
 pub mod block;
+
+use core::ops::Deref;
+
+use self::block::protocol::ProtocolParameters;
 
 /// Borrowed or Owned. Useful for generic impls and UX.
 #[derive(Clone, Debug)]
