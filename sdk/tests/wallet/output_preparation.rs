@@ -111,7 +111,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.amount(), 300000);
     // only address condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
-    // metadata feature
+    // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
     // only send 1 with metadata feature
@@ -140,7 +140,7 @@ async fn output_preparation() -> Result<()> {
     let storage_deposit_return = unlock_conditions.storage_deposit_return().unwrap();
     // output amount -1
     assert_eq!(storage_deposit_return.amount(), 48199);
-    // metadata feature
+    // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
     let output = account
@@ -165,7 +165,7 @@ async fn output_preparation() -> Result<()> {
     // address and storage deposit unlock condition, because of the metadata feature block, 12000 is not enough for the
     // required storage deposit
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    // metadata feature
+    // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
     let output = account
@@ -193,7 +193,7 @@ async fn output_preparation() -> Result<()> {
     // address and storage deposit unlock condition, because of the metadata feature block, 213000 is not enough for the
     // required storage deposit
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    // metadata feature
+    // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
     // Error if this NftId is not in the account
