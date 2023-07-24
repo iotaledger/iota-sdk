@@ -19,10 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.2 - 2023-MM-DD
+## 1.0.0 - 2023-07-24
+
+### Added
+
+- `ConsolidationParams` type;
 
 ### Changed
 
+- `Account::prepare_consolidate_outputs` takes a `ConsolidationParams`;
 - Utils `compute_token_id` and `compute_foundry_id` param `token_scheme_kind` renamed to `token_scheme_type`;
 
 ### Fixed

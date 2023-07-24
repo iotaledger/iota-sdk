@@ -145,7 +145,7 @@ pub struct RemainderDataDto {
     /// The remainder output
     pub output: OutputDto,
     /// The chain derived from seed, for the remainder addresses
-    #[serde(with = "option_bip44")]
+    #[serde(with = "option_bip44", default)]
     pub chain: Option<Bip44>,
     /// The remainder address
     pub address: AddressDto,

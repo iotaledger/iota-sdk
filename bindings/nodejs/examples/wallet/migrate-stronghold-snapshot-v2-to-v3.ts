@@ -1,24 +1,36 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
-const {
-    AccountManager,
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import {
     CoinType,
+    WalletOptions,
+    Wallet,
     migrateStrongholdSnapshotV2ToV3,
-} = require('@iota/wallet');
+} from '@iota/sdk';
+require('dotenv').config({ path: '.env' });
 
 const v2Path = '../../../sdk/tests/wallet/fixtures/v2.stronghold';
 const v3Path = './v3.stronghold';
 
+// Run with command:
+// yarn run-example wallet/migrate-stronghold-snapshot-v2-to-v3.ts
+
 async function run() {
-    var accountManagerOptions = {
+    if (!process.env.WALLET_DB_PATH) {
+        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    }
+    if (!process.env.NODE_URL) {
+        throw new Error('.env NODE_URL is undefined, see .env.example');
+    }
+
+    let walletOptions: WalletOptions = {
         storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
             nodes: [process.env.NODE_URL],
-            localPow: true,
         },
         coinType: CoinType.Shimmer,
         secretManager: {
-            Stronghold: {
+            stronghold: {
                 snapshotPath: v2Path,
                 password: 'current_password',
             },
@@ -27,7 +39,7 @@ async function run() {
 
     try {
         // This should fail with error, migration required.
-        new AccountManager(accountManagerOptions);
+        new Wallet(walletOptions);
     } catch (error) {
         console.error(error);
     }
@@ -41,15 +53,14 @@ async function run() {
         'new_password',
     );
 
-    accountManagerOptions = {
+    walletOptions = {
         storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
             nodes: [process.env.NODE_URL],
-            localPow: true,
         },
         coinType: CoinType.Shimmer,
         secretManager: {
-            Stronghold: {
+            stronghold: {
                 snapshotPath: v3Path,
                 password: 'new_password',
             },
@@ -57,9 +68,7 @@ async function run() {
     };
 
     // This shouldn't fail anymore as snapshot has been migrated.
-    new AccountManager(accountManagerOptions);
-
-    process.exit(0);
+    new Wallet(walletOptions);
 }
 
-run();
+run().then(() => process.exit());

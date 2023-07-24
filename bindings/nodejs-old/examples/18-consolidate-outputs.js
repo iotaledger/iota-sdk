@@ -25,7 +25,7 @@ async function run() {
         // The timeout is required, since the transaction has to be confirmed before Bob can consolidate
         setTimeout(async () => {
             await bob.sync()
-            const resp = await bob.consolidateOutputs(true)
+            const resp = await bob.consolidateOutputs({ force: true })
             console.log(resp)
             process.exit(0);
         }, 10000)

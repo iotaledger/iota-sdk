@@ -14,3 +14,4 @@ export * from './secretManager';
 export * from './signedTransactionEssence';
 export * from './transaction';
 export * from './transactionOptions';
+export * from './consolidationParams';

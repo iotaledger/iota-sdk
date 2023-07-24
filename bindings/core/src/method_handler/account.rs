@@ -115,13 +115,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareConsolidateOutputs {
-            force,
-            output_consolidation_threshold,
-        } => {
-            let data = account
-                .prepare_consolidate_outputs(force, output_consolidation_threshold)
-                .await?;
+        AccountMethod::PrepareConsolidateOutputs { params } => {
+            let data = account.prepare_consolidate_outputs(params).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareCreateAliasOutput { params, options } => {

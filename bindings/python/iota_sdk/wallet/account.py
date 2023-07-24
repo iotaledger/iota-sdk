@@ -18,6 +18,7 @@ from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTrans
 from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
+from iota_sdk.types.consolidation_params import ConsolidationParams
 from typing import List, Optional
 from dacite import from_dict
 from dataclasses import dataclass
@@ -118,15 +119,13 @@ class Account:
         )
         return PreparedTransaction(self, prepared)
 
-    def prepare_consolidate_outputs(self,
-                                    force: bool,
-                                    output_consolidation_threshold: Optional[int] = None) -> PreparedTransaction:
+    def prepare_consolidate_outputs(
+            self, params: ConsolidationParams) -> PreparedTransaction:
         """Consolidate outputs.
         """
         prepared = self._call_account_method(
             'prepareConsolidateOutputs', {
-                'force': force,
-                'outputConsolidationThreshold': output_consolidation_threshold
+                'params': params
             }
         )
         return PreparedTransaction(self, prepared)
@@ -404,7 +403,7 @@ class Account:
         """
         return Transaction.from_dict(self._call_account_method(
             'send', {
-                'amount': amount,
+                'amount': str(amount),
                 'address': address,
                 'options': options
             }

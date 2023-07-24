@@ -29,6 +29,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import type { ConsolidationParams } from '../consolidation-params';
 import { HexEncodedAmount, Output } from '../../';
 
 export type __BuildAliasOutputMethod__ = {
@@ -69,8 +70,7 @@ export type __ClaimOutputsMethod__ = {
 export type __PrepareConsolidateOutputsMethod__ = {
     name: 'prepareConsolidateOutputs';
     data: {
-        force: boolean;
-        outputConsolidationThreshold?: number;
+        params: ConsolidationParams;
     };
 };
 

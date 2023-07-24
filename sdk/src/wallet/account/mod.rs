@@ -31,6 +31,7 @@ use self::types::{
 pub use self::{
     operations::{
         output_claiming::OutputsToClaim,
+        output_consolidation::ConsolidationParams,
         syncing::{
             options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
             SyncOptions,

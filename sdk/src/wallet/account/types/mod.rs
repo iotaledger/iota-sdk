@@ -111,7 +111,7 @@ pub struct OutputDataDto {
     /// Remainder
     pub remainder: bool,
     /// Bip32 path
-    #[serde(with = "option_bip44")]
+    #[serde(with = "option_bip44", default)]
     pub chain: Option<Bip44>,
 }
 

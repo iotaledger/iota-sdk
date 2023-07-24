@@ -118,15 +118,15 @@ export class Utils {
     /**
      * Computes the required storage deposit of an output.
      * @param output The output.
-     * @param rentStructure Rent cost of objects which take node resources.
+     * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rentStructure: IRent): bigint {
+    static computeStorageDeposit(output: Output, rent: IRent): bigint {
         const depositHex = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
-                rentStructure,
+                rent,
             },
         });
         return hexToBigInt(depositHex);

@@ -16,3 +16,4 @@ export * from './signed-transaction-essence';
 export * from './transaction';
 export * from './transaction-options';
 export * from './prepared-create-token-transaction-data';
+export * from './consolidation-params';

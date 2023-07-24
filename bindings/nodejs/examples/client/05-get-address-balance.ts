@@ -8,7 +8,7 @@ require('dotenv').config({ path: '.env' });
 // yarn run-example ./client/05-get-address-balance.ts
 
 // In this example we will get the outputs of an address that has no additional unlock
-// conditions and sum the amounts and native tokens
+// conditions and sum the amounts and native tokens.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
