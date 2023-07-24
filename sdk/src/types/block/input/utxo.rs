@@ -53,7 +53,7 @@ pub(super) mod dto {
     use crate::types::block::Error;
 
     /// Describes an input which references an unspent transaction output to consume.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct UtxoInputDto {
         #[serde(rename = "type")]
