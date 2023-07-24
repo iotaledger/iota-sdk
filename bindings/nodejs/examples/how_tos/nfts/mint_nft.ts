@@ -28,7 +28,7 @@ const NFT2_AMOUNT = '1000000';
 // In this example we will mint a new nft.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts-and-addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nfts/mint_nft.ts

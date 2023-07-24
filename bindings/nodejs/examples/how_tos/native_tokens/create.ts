@@ -13,7 +13,7 @@ const MAXIMUM_SUPPLY = BigInt(100);
 // In this example we will create a native token.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `how_tos/accounts-and-addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/native_tokens/create.ts
