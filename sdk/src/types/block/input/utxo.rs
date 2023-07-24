@@ -46,7 +46,7 @@ impl core::fmt::Debug for UtxoInput {
     }
 }
 
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -55,11 +55,11 @@ pub(crate) mod dto {
     /// Describes an input which references an unspent transaction output to consume.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct UtxoInputDto {
+    struct UtxoInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub transaction_id: TransactionId,
-        pub transaction_output_index: u16,
+        kind: u8,
+        transaction_id: TransactionId,
+        transaction_output_index: u16,
     }
 
     impl From<&UtxoInput> for UtxoInputDto {
