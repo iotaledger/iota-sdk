@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Account::{consolidate_outputs, prepare_consolidate_outputs}` take a `ConsolidationParams`;
+- Dto validation conversions unified with `TryFromDto` trait;
+- Output builder `finish` methods refactored using `ValidationParams`;
 
 ### Fixed
 
@@ -50,8 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prefix-hex string values replaced with boxed slices in Dtos;
 - `MilestoneEssence::new` now takes generic metadata for convenience;
 - `ParametersMilestoneOption::new` now accepts boxed slice;
-- `UtilsMethod::ComputeTokenId` now takes a u8;
-- `UtilsMethod::ComputeFoundryId` field `tokenSchemeKind` renamed to `tokenSchemeType`;
 - `{SecretManage, ClientBlockBuilder}::sign_transaction` return type from `Payload` to `TransactionPayload`;
 - Made most public enums `non_exhaustive`;
 
@@ -177,8 +177,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made `StorageOptions` public;
 - Renamed `Client::block` to `build_block`;
 - Renamed "inception" modules to `core` (ex. `wallet::wallet` -> `wallet::core`);
-- Dto validation conversions unified with `TryFromDto` trait;
-- Output builder `finish` methods refactored using `ValidationParams`;
 
 ### Removed
 
