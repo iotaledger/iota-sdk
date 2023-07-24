@@ -288,9 +288,8 @@ pub(crate) mod dto {
     use serde::Deserialize;
 
     use super::*;
-    use crate::client::secret::SecretManage;
     #[cfg(feature = "storage")]
-    use crate::wallet::storage::StorageOptions;
+    use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
 
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
