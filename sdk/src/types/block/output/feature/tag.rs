@@ -16,7 +16,7 @@ pub(crate) type TagFeatureLength =
 #[packable(unpack_error = Error, with = |e| Error::InvalidTagFeatureLength(e.into_prefix_err().into()))]
 pub struct TagFeature(
     // Binary tag.
-    BoxedSlicePrefix<u8, TagFeatureLength>,
+    pub(crate) BoxedSlicePrefix<u8, TagFeatureLength>,
 );
 
 impl TryFrom<Vec<u8>> for TagFeature {
@@ -66,18 +66,63 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::boxed::Box;
+pub(super) mod dto {
+    use alloc::borrow::Cow;
 
     use serde::{Deserialize, Serialize};
 
-    use crate::utils::serde::prefix_hex_bytes;
+    use super::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TagFeatureDto {
+    #[derive(Serialize, Deserialize)]
+    struct TagFeatureDto<'a> {
         #[serde(rename = "type")]
-        pub kind: u8,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub tag: Box<[u8]>,
+        kind: u8,
+        #[serde(deserialize_with = "deserialize_tag")]
+        tag: Cow<'a, BoxedSlicePrefix<u8, TagFeatureLength>>,
+    }
+
+    impl<'a> From<&'a TagFeature> for TagFeatureDto<'a> {
+        fn from(value: &'a TagFeature) -> Self {
+            Self {
+                kind: TagFeature::KIND,
+                tag: Cow::Borrowed(&value.0),
+            }
+        }
+    }
+
+    impl<'a> From<TagFeatureDto<'a>> for TagFeature {
+        fn from(value: TagFeatureDto<'a>) -> Self {
+            Self(value.tag.into_owned())
+        }
+    }
+
+    fn deserialize_tag<'de, 'a, D>(d: D) -> Result<Cow<'a, BoxedSlicePrefix<u8, TagFeatureLength>>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Cow::Owned(crate::utils::serde::boxed_slice_prefix::deserialize(d)?))
+    }
+
+    impl<'de> Deserialize<'de> for TagFeature {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = TagFeatureDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid tag feature type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for TagFeature {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            TagFeatureDto::from(self).serialize(s)
+        }
     }
 }

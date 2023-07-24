@@ -28,35 +28,53 @@ impl GovernorAddressUnlockCondition {
     }
 }
 
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     pub struct GovernorAddressUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub address: AddressDto,
+        pub address: Address,
     }
 
     impl From<&GovernorAddressUnlockCondition> for GovernorAddressUnlockConditionDto {
         fn from(value: &GovernorAddressUnlockCondition) -> Self {
             Self {
                 kind: GovernorAddressUnlockCondition::KIND,
-                address: value.address().into(),
+                address: value.0,
             }
         }
     }
 
-    impl TryFrom<GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
-        type Error = Error;
+    impl From<GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
+        fn from(value: GovernorAddressUnlockConditionDto) -> Self {
+            Self(value.address)
+        }
+    }
 
-        fn try_from(value: GovernorAddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(
-                Address::try_from(value.address).map_err(|_e| Error::InvalidField("governorAddressUnlockCondition"))?,
-            ))
+    impl<'de> Deserialize<'de> for GovernorAddressUnlockCondition {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = GovernorAddressUnlockConditionDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid governor address unlock condition type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for GovernorAddressUnlockCondition {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            GovernorAddressUnlockConditionDto::from(self).serialize(s)
         }
     }
 }

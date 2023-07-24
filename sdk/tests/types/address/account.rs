@@ -4,10 +4,7 @@
 use std::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{
-        dto::{AccountAddressDto, AddressDto},
-        AccountAddress, Address, Bech32Address, ToBech32Ext,
-    },
+    address::{AccountAddress, Address, Bech32Address, ToBech32Ext},
     output::AccountId,
     Error,
 };
@@ -102,41 +99,9 @@ fn bech32_roundtrip() {
 }
 
 #[test]
-fn dto_fields() {
-    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let account_dto = AccountAddressDto::from(&account_address);
-
-    assert_eq!(account_dto.kind, AccountAddress::KIND);
-    assert_eq!(account_dto.account_id, ACCOUNT_ID.to_string());
-
-    let address = Address::from(account_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(dto, AddressDto::Account(account_dto));
-}
-
-#[test]
-fn dto_roundtrip() {
-    let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let account_dto = AccountAddressDto::from(&account_address);
-
-    assert_eq!(AccountAddress::try_from(account_dto).unwrap(), account_address);
-
-    let address = Address::from(account_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(Address::try_from(dto).unwrap(), address);
-}
-
-#[test]
 fn dto_invalid_account_id() {
-    let dto = AccountAddressDto {
-        kind: AccountAddress::KIND,
-        account_id: ACCOUNT_ID_INVALID.to_string(),
-    };
-
     assert!(matches!(
-        AccountAddress::try_from(dto),
+        AccountAddress::from_str(ACCOUNT_ID_INVALID),
         Err(Error::InvalidField("accountId"))
     ));
 }

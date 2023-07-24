@@ -129,6 +129,34 @@ pub mod string_prefix {
     }
 }
 
+pub mod boxed_slice_prefix {
+    use alloc::string::String;
+
+    use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
+    use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S, T, B: Bounded>(value: &BoxedSlicePrefix<T, B>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        for<'a> &'a Box<[T]>: ToHexPrefixed,
+    {
+        super::prefix_hex_bytes::serialize(&**value, serializer)
+    }
+
+    pub fn deserialize<'de, D, T, B: Bounded>(deserializer: D) -> Result<BoxedSlicePrefix<T, B>, D::Error>
+    where
+        D: Deserializer<'de>,
+        Box<[T]>: FromHexPrefixed,
+        <B as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        prefix_hex::decode::<Box<[T]>>(String::deserialize(deserializer)?)
+            .map_err(de::Error::custom)?
+            .try_into()
+            .map_err(de::Error::custom)
+    }
+}
+
 #[cfg(feature = "client")]
 pub mod bip44 {
     use crypto::keys::bip44::Bip44;

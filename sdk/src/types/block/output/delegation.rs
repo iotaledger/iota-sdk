@@ -467,9 +467,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{
-            output::{
-                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
-            },
+            output::{dto::OutputBuilderAmountDto, unlock_condition::dto::UnlockConditionDto},
             Error,
         },
         TryFromDto,
@@ -488,7 +486,7 @@ pub(crate) mod dto {
         end_epoch: u64,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub immutable_features: Vec<Feature>,
     }
 
     impl From<&DelegationOutput> for DelegationOutputDto {
@@ -502,7 +500,7 @@ pub(crate) mod dto {
                 start_epoch: value.start_epoch(),
                 end_epoch: value.end_epoch(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
+                immutable_features: value.immutable_features().to_vec(),
             }
         }
     }
@@ -528,7 +526,7 @@ pub(crate) mod dto {
             builder = builder.with_end_epoch(dto.end_epoch);
 
             for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+                builder = builder.add_immutable_feature(b);
             }
 
             for u in dto.unlock_conditions {
@@ -549,7 +547,7 @@ pub(crate) mod dto {
             start_epoch: u64,
             end_epoch: u64,
             unlock_conditions: Vec<UnlockConditionDto>,
-            immutable_features: Option<Vec<FeatureDto>>,
+            immutable_features: Option<Vec<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
@@ -584,10 +582,6 @@ pub(crate) mod dto {
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 

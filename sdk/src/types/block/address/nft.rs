@@ -37,9 +37,6 @@ impl NftAddress {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(NftAddress);
-
 impl FromStr for NftAddress {
     type Err = Error;
 
@@ -60,37 +57,55 @@ impl core::fmt::Debug for NftAddress {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Describes an NFT address.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct NftAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub nft_id: String,
+        pub nft_id: NftId,
     }
 
     impl From<&NftAddress> for NftAddressDto {
         fn from(value: &NftAddress) -> Self {
             Self {
                 kind: NftAddress::KIND,
-                nft_id: value.to_string(),
+                nft_id: value.0,
             }
         }
     }
 
-    impl TryFrom<NftAddressDto> for NftAddress {
-        type Error = Error;
+    impl From<NftAddressDto> for NftAddress {
+        fn from(value: NftAddressDto) -> Self {
+            Self(value.nft_id)
+        }
+    }
 
-        fn try_from(value: NftAddressDto) -> Result<Self, Self::Error> {
-            value.nft_id.parse::<Self>().map_err(|_| Error::InvalidField("nftId"))
+    impl<'de> Deserialize<'de> for NftAddress {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = NftAddressDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid nft address type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for NftAddress {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            NftAddressDto::from(self).serialize(s)
         }
     }
 }

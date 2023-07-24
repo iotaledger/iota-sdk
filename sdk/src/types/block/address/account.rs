@@ -37,9 +37,6 @@ impl AccountAddress {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(AccountAddress);
-
 impl FromStr for AccountAddress {
     type Err = Error;
 
@@ -60,40 +57,55 @@ impl core::fmt::Debug for AccountAddress {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Describes an account address.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct AccountAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub account_id: String,
+        pub account_id: AccountId,
     }
 
     impl From<&AccountAddress> for AccountAddressDto {
         fn from(value: &AccountAddress) -> Self {
             Self {
                 kind: AccountAddress::KIND,
-                account_id: value.to_string(),
+                account_id: value.0,
             }
         }
     }
 
-    impl TryFrom<AccountAddressDto> for AccountAddress {
-        type Error = Error;
+    impl From<AccountAddressDto> for AccountAddress {
+        fn from(value: AccountAddressDto) -> Self {
+            Self(value.account_id)
+        }
+    }
 
-        fn try_from(value: AccountAddressDto) -> Result<Self, Self::Error> {
-            value
-                .account_id
-                .parse::<Self>()
-                .map_err(|_| Error::InvalidField("accountId"))
+    impl<'de> Deserialize<'de> for AccountAddress {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = AccountAddressDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid account address type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for AccountAddress {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            AccountAddressDto::from(self).serialize(s)
         }
     }
 }

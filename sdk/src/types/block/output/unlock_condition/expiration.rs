@@ -64,18 +64,18 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
     }
 }
 
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::Error;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct ExpirationUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub return_address: AddressDto,
+        pub return_address: Address,
         #[serde(rename = "unixTime")]
         pub timestamp: u32,
     }
@@ -84,7 +84,7 @@ pub(crate) mod dto {
         fn from(value: &ExpirationUnlockCondition) -> Self {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
-                return_address: value.return_address().into(),
+                return_address: *value.return_address(),
                 timestamp: value.timestamp(),
             }
         }
@@ -94,12 +94,31 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(
-                Address::try_from(value.return_address)
-                    .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
-                value.timestamp,
-            )
-            .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
+            Self::new(value.return_address, value.timestamp)
+                .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
+        }
+    }
+
+    impl<'de> Deserialize<'de> for ExpirationUnlockCondition {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = ExpirationUnlockConditionDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid expiration unlock condition type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            dto.try_into().map_err(serde::de::Error::custom)
+        }
+    }
+
+    impl Serialize for ExpirationUnlockCondition {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            ExpirationUnlockConditionDto::from(self).serialize(s)
         }
     }
 }

@@ -3,14 +3,11 @@
 
 use derive_more::From;
 
-use crate::types::block::{
-    address::{AccountAddress, Address},
-    Error,
-};
+use crate::types::block::address::AccountAddress;
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-pub struct ImmutableAccountAddressUnlockCondition(#[packable(verify_with = verify_account_address)] Address);
+pub struct ImmutableAccountAddressUnlockCondition(AccountAddress);
 
 impl ImmutableAccountAddressUnlockCondition {
     /// The [`UnlockCondition`](crate::types::block::output::UnlockCondition) kind of an
@@ -20,70 +17,62 @@ impl ImmutableAccountAddressUnlockCondition {
     /// Creates a new [`ImmutableAccountAddressUnlockCondition`].
     #[inline(always)]
     pub fn new(address: impl Into<AccountAddress>) -> Self {
-        Self(Address::Account(address.into()))
-    }
-
-    /// Returns the address of an [`ImmutableAccountAddressUnlockCondition`].
-    #[inline(always)]
-    pub fn address(&self) -> &Address {
-        // An ImmutableAccountAddressUnlockCondition must have an AccountAddress.
-        // It has already been validated at construction that the address is an `AccountAddress`.
-        debug_assert!(&self.0.is_account());
-        &self.0
+        Self(address.into())
     }
 
     /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
-    pub fn account_address(&self) -> &AccountAddress {
-        // It has already been validated at construction that the address is an `AccountAddress`.
-        self.0.as_account()
+    pub fn address(&self) -> &AccountAddress {
+        &self.0
     }
 }
 
-fn verify_account_address<const VERIFY: bool>(address: &Address, _: &()) -> Result<(), Error> {
-    if VERIFY && !address.is_account() {
-        Err(Error::InvalidAddressKind(address.kind()))
-    } else {
-        Ok(())
-    }
-}
-
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     pub struct ImmutableAccountAddressUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub address: AddressDto,
+        pub address: AccountAddress,
     }
 
     impl From<&ImmutableAccountAddressUnlockCondition> for ImmutableAccountAddressUnlockConditionDto {
         fn from(value: &ImmutableAccountAddressUnlockCondition) -> Self {
             Self {
                 kind: ImmutableAccountAddressUnlockCondition::KIND,
-                address: value.address().into(),
+                address: value.0,
             }
         }
     }
 
-    impl TryFrom<ImmutableAccountAddressUnlockConditionDto> for ImmutableAccountAddressUnlockCondition {
-        type Error = Error;
+    impl From<ImmutableAccountAddressUnlockConditionDto> for ImmutableAccountAddressUnlockCondition {
+        fn from(value: ImmutableAccountAddressUnlockConditionDto) -> Self {
+            Self(value.address)
+        }
+    }
 
-        fn try_from(value: ImmutableAccountAddressUnlockConditionDto) -> Result<Self, Error> {
-            let address: Address = value
-                .address
-                .try_into()
-                .map_err(|_e| Error::InvalidField("immutableAccountAddressUnlockCondition"))?;
-
-            // An ImmutableAccountAddressUnlockCondition must have an AccountAddress.
-            if let Address::Account(account_address) = address {
-                Ok(Self::new(account_address))
-            } else {
-                Err(Error::InvalidField("immutableAccountAddressUnlockCondition"))
+    impl<'de> Deserialize<'de> for ImmutableAccountAddressUnlockCondition {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = ImmutableAccountAddressUnlockConditionDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid immutable account adress unlock condition type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
             }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for ImmutableAccountAddressUnlockCondition {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            ImmutableAccountAddressUnlockConditionDto::from(self).serialize(s)
         }
     }
 }

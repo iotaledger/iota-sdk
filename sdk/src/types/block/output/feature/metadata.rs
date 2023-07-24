@@ -16,7 +16,7 @@ pub(crate) type MetadataFeatureLength =
 #[packable(unpack_error = Error, with = |err| Error::InvalidMetadataFeatureLength(err.into_prefix_err().into()))]
 pub struct MetadataFeature(
     // Binary data.
-    BoxedSlicePrefix<u8, MetadataFeatureLength>,
+    pub(crate) BoxedSlicePrefix<u8, MetadataFeatureLength>,
 );
 
 impl TryFrom<Vec<u8>> for MetadataFeature {
@@ -74,18 +74,63 @@ impl core::fmt::Debug for MetadataFeature {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::boxed::Box;
+pub(super) mod dto {
+    use alloc::borrow::Cow;
 
     use serde::{Deserialize, Serialize};
 
-    use crate::utils::serde::prefix_hex_bytes;
+    use super::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct MetadataFeatureDto {
+    #[derive(Serialize, Deserialize)]
+    struct MetadataFeatureDto<'a> {
         #[serde(rename = "type")]
-        pub kind: u8,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub data: Box<[u8]>,
+        kind: u8,
+        #[serde(deserialize_with = "deserialize_data")]
+        data: Cow<'a, BoxedSlicePrefix<u8, MetadataFeatureLength>>,
+    }
+
+    impl<'a> From<&'a MetadataFeature> for MetadataFeatureDto<'a> {
+        fn from(value: &'a MetadataFeature) -> Self {
+            Self {
+                kind: MetadataFeature::KIND,
+                data: Cow::Borrowed(&value.0),
+            }
+        }
+    }
+
+    impl<'a> From<MetadataFeatureDto<'a>> for MetadataFeature {
+        fn from(value: MetadataFeatureDto<'a>) -> Self {
+            Self(value.data.into_owned())
+        }
+    }
+
+    fn deserialize_data<'de, 'a, D>(d: D) -> Result<Cow<'a, BoxedSlicePrefix<u8, MetadataFeatureLength>>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Cow::Owned(crate::utils::serde::boxed_slice_prefix::deserialize(d)?))
+    }
+
+    impl<'de> Deserialize<'de> for MetadataFeature {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = MetadataFeatureDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid metadata feature type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for MetadataFeature {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            MetadataFeatureDto::from(self).serialize(s)
+        }
     }
 }

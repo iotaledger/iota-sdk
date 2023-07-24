@@ -368,7 +368,7 @@ impl FoundryOutput {
         // A FoundryOutput must have an ImmutableAccountAddressUnlockCondition.
         self.unlock_conditions
             .immutable_account_address()
-            .map(|unlock_condition| unlock_condition.account_address())
+            .map(|unlock_condition| unlock_condition.address())
             .unwrap()
     }
 
@@ -622,7 +622,7 @@ pub(crate) mod dto {
     use crate::types::{
         block::{
             output::{
-                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
+                dto::OutputBuilderAmountDto, token_scheme::dto::TokenSchemeDto,
                 unlock_condition::dto::UnlockConditionDto,
             },
             Error,
@@ -646,9 +646,9 @@ pub(crate) mod dto {
         pub token_scheme: TokenSchemeDto,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub immutable_features: Vec<Feature>,
     }
 
     impl From<&FoundryOutput> for FoundryOutputDto {
@@ -660,8 +660,8 @@ pub(crate) mod dto {
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().into(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
+                features: value.features().to_vec(),
+                immutable_features: value.immutable_features().to_vec(),
             }
         }
     }
@@ -682,11 +682,11 @@ pub(crate) mod dto {
             }
 
             for b in dto.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
+                builder = builder.add_feature(b);
             }
 
             for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+                builder = builder.add_immutable_feature(b);
             }
 
             for u in dto.unlock_conditions {
@@ -705,8 +705,8 @@ pub(crate) mod dto {
             serial_number: u32,
             token_scheme: TokenSchemeDto,
             unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
-            immutable_features: Option<Vec<FeatureDto>>,
+            features: Option<Vec<Feature>>,
+            immutable_features: Option<Vec<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
@@ -734,18 +734,10 @@ pub(crate) mod dto {
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
             if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
@@ -851,8 +843,8 @@ mod tests {
                 builder.serial_number,
                 (&builder.token_scheme).into(),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
-                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                Some(builder.features.iter().cloned().collect()),
+                Some(builder.immutable_features.iter().cloned().collect()),
                 protocol_parameters.clone(),
             )
             .unwrap();

@@ -26,9 +26,6 @@ impl Ed25519Address {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(Ed25519Address);
-
 impl FromStr for Ed25519Address {
     type Err = Error;
 
@@ -49,40 +46,57 @@ impl core::fmt::Debug for Ed25519Address {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
+    use crate::utils::serde::prefix_hex_bytes;
 
     /// Describes an Ed25519 address.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Ed25519AddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub pub_key_hash: String,
+        #[serde(with = "prefix_hex_bytes")]
+        pub pub_key_hash: [u8; Ed25519Address::LENGTH],
     }
 
     impl From<&Ed25519Address> for Ed25519AddressDto {
         fn from(value: &Ed25519Address) -> Self {
             Self {
                 kind: Ed25519Address::KIND,
-                pub_key_hash: value.to_string(),
+                pub_key_hash: value.0,
             }
         }
     }
 
-    impl TryFrom<Ed25519AddressDto> for Ed25519Address {
-        type Error = Error;
+    impl From<Ed25519AddressDto> for Ed25519Address {
+        fn from(value: Ed25519AddressDto) -> Self {
+            Self(value.pub_key_hash)
+        }
+    }
 
-        fn try_from(value: Ed25519AddressDto) -> Result<Self, Self::Error> {
-            value
-                .pub_key_hash
-                .parse::<Self>()
-                .map_err(|_| Error::InvalidField("pubKeyHash"))
+    impl<'de> Deserialize<'de> for Ed25519Address {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = Ed25519AddressDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid ed25519 address type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for Ed25519Address {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            Ed25519AddressDto::from(self).serialize(s)
         }
     }
 }

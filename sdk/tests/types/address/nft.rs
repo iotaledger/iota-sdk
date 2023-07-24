@@ -4,10 +4,7 @@
 use std::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{
-        dto::{AddressDto, NftAddressDto},
-        Address, Bech32Address, NftAddress, ToBech32Ext,
-    },
+    address::{Address, Bech32Address, NftAddress, ToBech32Ext},
     output::NftId,
     Error,
 };
@@ -102,40 +99,11 @@ fn bech32_roundtrip() {
 }
 
 #[test]
-fn dto_fields() {
-    let nft_address = NftAddress::from_str(NFT_ID).unwrap();
-    let nft_dto = NftAddressDto::from(&nft_address);
-
-    assert_eq!(nft_dto.kind, NftAddress::KIND);
-    assert_eq!(nft_dto.nft_id, NFT_ID.to_string());
-
-    let address = Address::from(nft_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(dto, AddressDto::Nft(nft_dto));
-}
-
-#[test]
-fn dto_roundtrip() {
-    let nft_address = NftAddress::from_str(NFT_ID).unwrap();
-    let nft_dto = NftAddressDto::from(&nft_address);
-
-    assert_eq!(NftAddress::try_from(nft_dto).unwrap(), nft_address);
-
-    let address = Address::from(nft_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(Address::try_from(dto).unwrap(), address);
-}
-
-#[test]
 fn dto_invalid_nft_id() {
-    let dto = NftAddressDto {
-        kind: NftAddress::KIND,
-        nft_id: NFT_ID_INVALID.to_string(),
-    };
-
-    assert!(matches!(NftAddress::try_from(dto), Err(Error::InvalidField("nftId"))));
+    assert!(matches!(
+        NftAddress::from_str(NFT_ID_INVALID),
+        Err(Error::InvalidField("nftId"))
+    ));
 }
 
 #[test]

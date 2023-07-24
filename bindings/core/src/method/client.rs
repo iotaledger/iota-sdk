@@ -10,7 +10,7 @@ use iota_sdk::{
         address::{Bech32Address, Hrp},
         output::{
             dto::{OutputDto, TokenSchemeDto},
-            feature::dto::FeatureDto,
+            feature::Feature,
             unlock_condition::dto::UnlockConditionDto,
             AccountId, FoundryId, NativeToken, NftId, OutputId,
         },
@@ -39,8 +39,8 @@ pub enum ClientMethod {
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -51,7 +51,7 @@ pub enum ClientMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -64,8 +64,8 @@ pub enum ClientMethod {
         serial_number: u32,
         token_scheme: TokenSchemeDto,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -77,8 +77,8 @@ pub enum ClientMethod {
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Removes all listeners for the provided topics.
     /// Expected response: [`Ok`](crate::Response::Ok)

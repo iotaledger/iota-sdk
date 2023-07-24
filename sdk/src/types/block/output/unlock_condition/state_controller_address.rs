@@ -28,17 +28,16 @@ impl StateControllerAddressUnlockCondition {
     }
 }
 
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     pub struct StateControllerAddressUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub address: AddressDto,
+        pub address: Address,
     }
 
     impl From<&StateControllerAddressUnlockCondition> for StateControllerAddressUnlockConditionDto {
@@ -50,13 +49,32 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFrom<StateControllerAddressUnlockConditionDto> for StateControllerAddressUnlockCondition {
-        type Error = Error;
+    impl From<StateControllerAddressUnlockConditionDto> for StateControllerAddressUnlockCondition {
+        fn from(value: StateControllerAddressUnlockConditionDto) -> Self {
+            Self(value.address)
+        }
+    }
 
-        fn try_from(value: StateControllerAddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(Address::try_from(value.address).map_err(|_e| {
-                Error::InvalidField("stateControllerAddressUnlockCondition")
-            })?))
+    impl<'de> Deserialize<'de> for StateControllerAddressUnlockCondition {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = StateControllerAddressUnlockConditionDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid state controller address unlock condition type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for StateControllerAddressUnlockCondition {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            StateControllerAddressUnlockConditionDto::from(self).serialize(s)
         }
     }
 }

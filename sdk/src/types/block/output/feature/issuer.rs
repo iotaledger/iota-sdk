@@ -7,7 +7,7 @@ use crate::types::block::address::Address;
 
 /// Identifies the validated issuer of the UTXO state machine.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-pub struct IssuerFeature(Address);
+pub struct IssuerFeature(pub(crate) Address);
 
 impl IssuerFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of an [`IssuerFeature`].
@@ -26,15 +26,53 @@ impl IssuerFeature {
     }
 }
 
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
-    use crate::types::block::address::dto::AddressDto;
+    use super::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct IssuerFeatureDto {
+    struct IssuerFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        kind: u8,
+        address: Address,
+    }
+
+    impl From<&IssuerFeature> for IssuerFeatureDto {
+        fn from(value: &IssuerFeature) -> Self {
+            Self {
+                kind: IssuerFeature::KIND,
+                address: value.0,
+            }
+        }
+    }
+
+    impl From<IssuerFeatureDto> for IssuerFeature {
+        fn from(value: IssuerFeatureDto) -> Self {
+            Self(value.address)
+        }
+    }
+
+    impl<'de> Deserialize<'de> for IssuerFeature {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = IssuerFeatureDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid issuer feature type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for IssuerFeature {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            IssuerFeatureDto::from(self).serialize(s)
+        }
     }
 }

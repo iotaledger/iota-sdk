@@ -26,35 +26,53 @@ impl AddressUnlockCondition {
     }
 }
 
-pub(crate) mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     pub struct AddressUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub address: AddressDto,
+        pub address: Address,
     }
 
     impl From<&AddressUnlockCondition> for AddressUnlockConditionDto {
         fn from(value: &AddressUnlockCondition) -> Self {
             Self {
                 kind: AddressUnlockCondition::KIND,
-                address: value.address().into(),
+                address: value.0,
             }
         }
     }
 
-    impl TryFrom<AddressUnlockConditionDto> for AddressUnlockCondition {
-        type Error = Error;
+    impl From<AddressUnlockConditionDto> for AddressUnlockCondition {
+        fn from(value: AddressUnlockConditionDto) -> Self {
+            Self(value.address)
+        }
+    }
 
-        fn try_from(value: AddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(
-                Address::try_from(value.address).map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
-            ))
+    impl<'de> Deserialize<'de> for AddressUnlockCondition {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = AddressUnlockConditionDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid address unlock condition type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            Ok(dto.into())
+        }
+    }
+
+    impl Serialize for AddressUnlockCondition {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            AddressUnlockConditionDto::from(self).serialize(s)
         }
     }
 }

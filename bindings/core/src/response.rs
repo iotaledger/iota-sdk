@@ -21,7 +21,7 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address, Hrp},
+            address::{Address, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
@@ -170,7 +170,7 @@ pub enum Response {
     Bech32ToHex(String),
     /// Response for:
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
-    ParsedBech32Address(AddressDto),
+    ParsedBech32Address(Address),
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),

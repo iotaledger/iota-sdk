@@ -341,9 +341,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{
-            output::{
-                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
-            },
+            output::{dto::OutputBuilderAmountDto, unlock_condition::dto::UnlockConditionDto},
             Error,
         },
         TryFromDto,
@@ -362,7 +360,7 @@ pub(crate) mod dto {
         pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub features: Vec<Feature>,
     }
 
     impl From<&BasicOutput> for BasicOutputDto {
@@ -372,7 +370,7 @@ pub(crate) mod dto {
                 amount: value.amount().to_string(),
                 native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
+                features: value.features().to_vec(),
             }
         }
     }
@@ -388,7 +386,7 @@ pub(crate) mod dto {
             builder = builder.with_native_tokens(dto.native_tokens);
 
             for b in dto.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
+                builder = builder.add_feature(b);
             }
 
             for u in dto.unlock_conditions {
@@ -404,7 +402,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
             unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
+            features: Option<Vec<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
@@ -428,10 +426,6 @@ pub(crate) mod dto {
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
@@ -531,7 +525,7 @@ mod tests {
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
             Some(output.native_tokens().to_vec()),
             output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().iter().map(Into::into).collect()),
+            Some(output.features().to_vec()),
             protocol_parameters.token_supply(),
         )
         .unwrap();
@@ -545,7 +539,7 @@ mod tests {
                 (&builder.amount).into(),
                 Some(builder.native_tokens.iter().copied().collect()),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
+                Some(builder.features.iter().cloned().collect()),
                 protocol_parameters.token_supply(),
             )
             .unwrap();

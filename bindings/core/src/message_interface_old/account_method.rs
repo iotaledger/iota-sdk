@@ -18,9 +18,8 @@ use iota_sdk::{
         address::Bech32Address,
         output::{
             dto::{OutputDto, TokenSchemeDto},
-            feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AccountId, FoundryId, NativeToken, NftId, OutputId, TokenId,
+            AccountId, Feature, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
@@ -54,8 +53,8 @@ pub enum AccountMethod {
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
@@ -66,7 +65,7 @@ pub enum AccountMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
@@ -79,8 +78,8 @@ pub enum AccountMethod {
         serial_number: u32,
         token_scheme: TokenSchemeDto,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
@@ -92,8 +91,8 @@ pub enum AccountMethod {
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
