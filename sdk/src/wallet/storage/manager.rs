@@ -6,6 +6,7 @@ use zeroize::Zeroizing;
 
 use crate::{
     client::storage::StorageAdapter,
+    types::TryFromDto,
     wallet::{
         account::{AccountDetails, AccountDetailsDto, SyncOptions},
         migration::migrate,
@@ -70,7 +71,7 @@ impl StorageManager {
                 let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}");
                 self.get::<AccountDetailsDto>(&key).await.transpose()
             })
-            .map(|res| AccountDetails::try_from_dto_unverified(res?))
+            .map(|res| AccountDetails::try_from_dto(res?))
             .try_collect::<Vec<_>>()
             .await
     }

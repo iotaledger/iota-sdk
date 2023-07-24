@@ -105,13 +105,13 @@ class Utils():
 
     @staticmethod
     def compute_foundry_id(alias_id: HexStr, serial_number: int,
-                           token_scheme_kind: int) -> HexStr:
+                           token_scheme_type: int) -> HexStr:
         """Compute the foundry id.
         """
         return _call_method('computeFoundryId', {
             'aliasId': alias_id,
             'serialNumber': serial_number,
-            'tokenSchemeKind': token_scheme_kind
+            'tokenSchemeType': token_scheme_type
         })
 
     @staticmethod
@@ -150,13 +150,13 @@ class Utils():
 
     @staticmethod
     def compute_token_id(alias_id: HexStr, serial_number: int,
-                         token_scheme_kind: int) -> HexStr:
+                         token_scheme_type: int) -> HexStr:
         """Compute a token id from the alias id, serial number and token scheme type.
         """
         return _call_method('computeTokenId', {
             'aliasId': alias_id,
             'serialNumber': serial_number,
-            'tokenSchemeKind': token_scheme_kind
+            'tokenSchemeType': token_scheme_type
         })
 
     @staticmethod

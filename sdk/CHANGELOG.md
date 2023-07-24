@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Account::{consolidate_outputs, prepare_consolidate_outputs}` take a `ConsolidationParams`;
+- Dto validation conversions unified with `TryFromDto` trait;
+- Output builder `finish` methods refactored using `ValidationParams`;
 
 ### Fixed
 

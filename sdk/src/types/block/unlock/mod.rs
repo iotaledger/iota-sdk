@@ -32,11 +32,6 @@ pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNL
 
 /// Defines the mechanism by which a transaction input is authorized to be consumed.
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidUnlockKind)]
 pub enum Unlock {

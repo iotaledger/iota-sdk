@@ -10,7 +10,6 @@ use crate::types::block::{
 
 /// Defines the permanent [`AliasAddress`] that owns this output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImmutableAliasAddressUnlockCondition(#[packable(verify_with = verify_alias_address)] Address);
 
 impl ImmutableAliasAddressUnlockCondition {

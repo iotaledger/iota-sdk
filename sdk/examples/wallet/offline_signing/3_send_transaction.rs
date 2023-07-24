@@ -14,7 +14,7 @@ use iota_sdk::{
         secret::SecretManager,
         Client,
     },
-    types::block::payload::transaction::TransactionId,
+    types::{block::payload::transaction::TransactionId, TryFromDto},
     wallet::{Account, Result},
     Wallet,
 };
@@ -57,9 +57,9 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
 
     let dto = serde_json::from_str::<SignedTransactionDataDto>(&json)?;
 
-    Ok(SignedTransactionData::try_from_dto(
+    Ok(SignedTransactionData::try_from_dto_with_params(
         dto,
-        &client.get_protocol_parameters().await?,
+        client.get_protocol_parameters().await?,
     )?)
 }
 

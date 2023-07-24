@@ -10,18 +10,24 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{
-    address::{Address, NftAddress},
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent,
-        RentStructure, StateTransitionError, StateTransitionVerifier,
+use super::verify_output_amount_packable;
+use crate::types::{
+    block::{
+        address::{Address, NftAddress},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    ValidationParams,
 };
 
 ///
@@ -179,7 +185,7 @@ impl NftOutputBuilder {
     }
 
     ///
-    pub fn finish_unverified(self) -> Result<NftOutput, Error> {
+    pub fn finish(self) -> Result<NftOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions, &self.nft_id)?;
@@ -212,17 +218,19 @@ impl NftOutputBuilder {
     }
 
     ///
-    pub fn finish(self, token_supply: u64) -> Result<NftOutput, Error> {
-        let output = self.finish_unverified()?;
+    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<NftOutput, Error> {
+        let output = self.finish()?;
 
-        verify_output_amount::<true>(&output.amount, &token_supply)?;
+        if let Some(token_supply) = params.into().token_supply() {
+            verify_output_amount(&output.amount, &token_supply)?;
+        }
 
         Ok(output)
     }
 
     /// Finishes the [`NftOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Nft(self.finish(token_supply)?))
+    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
+        Ok(Output::Nft(self.finish_with_params(params)?))
     }
 }
 
@@ -241,7 +249,6 @@ impl From<&NftOutput> for NftOutputBuilder {
 
 /// Describes an NFT output, a globally unique token with metadata attached.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NftOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
@@ -428,7 +435,7 @@ impl Packable for NftOutput {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        verify_output_amount::<VERIFY>(&amount, &visitor.token_supply()).map_err(UnpackError::Packable)?;
+        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let nft_id = NftId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -482,9 +489,14 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{
-        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
-        Error,
+    use crate::types::{
+        block::{
+            output::{
+                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
+            },
+            Error,
+        },
+        TryFromDto,
     };
 
     /// Describes an NFT output, a globally unique token with metadata attached.
@@ -521,66 +533,47 @@ pub(crate) mod dto {
         }
     }
 
+    impl TryFromDto for NftOutput {
+        type Dto = NftOutputDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let mut builder = NftOutputBuilder::new_with_amount(
+                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                dto.nft_id,
+            );
+
+            for t in dto.native_tokens {
+                builder = builder.add_native_token(t);
+            }
+
+            for b in dto.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for b in dto.immutable_features {
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+            }
+
+            for u in dto.unlock_conditions {
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+            }
+
+            builder.finish_with_params(params)
+        }
+    }
+
     impl NftOutput {
-        pub fn try_from_dto(value: NftOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = NftOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.nft_id,
-            );
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: NftOutputDto) -> Result<Self, Error> {
-            let mut builder = NftOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.nft_id,
-            );
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
-        pub fn try_from_dtos(
+        pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
             nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
+            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
+            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
@@ -597,7 +590,7 @@ pub(crate) mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
+                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
@@ -617,7 +610,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish(token_supply)
+            builder.finish_with_params(params)
         }
     }
 }
@@ -627,20 +620,23 @@ mod tests {
     use packable::PackableExt;
 
     use super::*;
-    use crate::types::block::{
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            FoundryId, SimpleTokenScheme, TokenId,
-        },
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_alias_address,
+    use crate::types::{
+        block::{
             output::{
-                feature::{rand_allowed_features, rand_issuer_feature, rand_sender_feature},
-                rand_nft_output,
-                unlock_condition::rand_address_unlock_condition,
+                dto::{OutputBuilderAmountDto, OutputDto},
+                FoundryId, SimpleTokenScheme, TokenId,
+            },
+            protocol::protocol_parameters,
+            rand::{
+                address::rand_alias_address,
+                output::{
+                    feature::{rand_allowed_features, rand_issuer_feature, rand_sender_feature},
+                    rand_nft_output,
+                    unlock_condition::rand_address_unlock_condition,
+                },
             },
         },
+        TryFromDto,
     };
 
     #[test]
@@ -662,7 +658,7 @@ mod tests {
             .replace_immutable_feature(issuer_1)
             .add_immutable_feature(issuer_2);
 
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().address(), Some(&address_1));
         assert_eq!(output.features().sender(), Some(&sender_2));
         assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
@@ -672,7 +668,7 @@ mod tests {
             .clear_features()
             .clear_immutable_features()
             .replace_unlock_condition(address_2);
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().address(), Some(&address_2));
         assert!(output.features().is_empty());
         assert!(output.immutable_features().is_empty());
@@ -680,7 +676,7 @@ mod tests {
         let output = builder
             .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap();
 
         assert_eq!(
@@ -703,9 +699,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_nft_output(protocol_parameters.token_supply());
         let dto = OutputDto::Nft((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
+        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_nft());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
         assert_eq!(&output, output_ver.as_nft());
 
         let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
@@ -717,7 +713,7 @@ mod tests {
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().iter().map(Into::into).collect()),
             Some(output.immutable_features().iter().map(Into::into).collect()),
-            protocol_parameters.token_supply(),
+            &protocol_parameters,
         )
         .unwrap();
         assert_eq!(output, output_split);
@@ -730,13 +726,10 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),
                 Some(builder.immutable_features.iter().map(Into::into).collect()),
-                protocol_parameters.token_supply(),
+                &protocol_parameters,
             )
             .unwrap();
-            assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
-                output_split
-            );
+            assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
         };
 
         let builder = NftOutput::build_with_amount(100, NftId::null())

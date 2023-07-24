@@ -61,14 +61,14 @@ export class Utils {
     static computeFoundryId(
         aliasId: AliasId,
         serialNumber: number,
-        tokenSchemeKind: number,
+        tokenSchemeType: number,
     ): FoundryId {
         return callUtilsMethod({
             name: 'computeFoundryId',
             data: {
                 aliasId,
                 serialNumber,
-                tokenSchemeKind,
+                tokenSchemeType,
             },
         });
     }

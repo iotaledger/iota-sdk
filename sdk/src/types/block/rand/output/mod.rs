@@ -49,7 +49,7 @@ pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
     BasicOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply))
         .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition())
-        .finish(token_supply)
+        .finish_with_params(token_supply)
         .unwrap()
 }
 
@@ -67,7 +67,7 @@ pub fn rand_alias_output(token_supply: u64) -> AliasOutput {
         .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
         .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
-        .finish(token_supply)
+        .finish_with_params(token_supply)
         .unwrap()
 }
 
@@ -89,7 +89,7 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
     )
     .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES))
     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
-    .finish(token_supply)
+    .finish_with_params(token_supply)
     .unwrap()
 }
 
@@ -101,7 +101,7 @@ pub fn rand_nft_output(token_supply: u64) -> NftOutput {
     NftOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), nft_id)
         .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition_different_from(&nft_id))
-        .finish(token_supply)
+        .finish_with_params(token_supply)
         .unwrap()
 }
 

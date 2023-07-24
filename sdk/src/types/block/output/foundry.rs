@@ -15,18 +15,24 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::block::{
-    address::{Address, AliasAddress},
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-        Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+use super::verify_output_amount_packable;
+use crate::types::{
+    block::{
+        address::{Address, AliasAddress},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    ValidationParams,
 };
 
 ///
@@ -201,7 +207,7 @@ impl FoundryOutputBuilder {
     }
 
     ///
-    pub fn finish_unverified(self) -> Result<FoundryOutput, Error> {
+    pub fn finish(self) -> Result<FoundryOutput, Error> {
         if self.serial_number == 0 {
             return Err(Error::InvalidFoundryZeroSerialNumber);
         }
@@ -239,17 +245,22 @@ impl FoundryOutputBuilder {
     }
 
     ///
-    pub fn finish(self, token_supply: u64) -> Result<FoundryOutput, Error> {
-        let output = self.finish_unverified()?;
+    pub fn finish_with_params<'a>(
+        self,
+        params: impl Into<ValidationParams<'a>> + Send,
+    ) -> Result<FoundryOutput, Error> {
+        let output = self.finish()?;
 
-        verify_output_amount::<true>(&output.amount, &token_supply)?;
+        if let Some(token_supply) = params.into().token_supply() {
+            verify_output_amount(&output.amount, &token_supply)?;
+        }
 
         Ok(output)
     }
 
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Foundry(self.finish(token_supply)?))
+    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
+        Ok(Output::Foundry(self.finish_with_params(params)?))
     }
 }
 
@@ -269,7 +280,6 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 
 /// Describes a foundry output that is controlled by an alias.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FoundryOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
@@ -558,7 +568,7 @@ impl Packable for FoundryOutput {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        verify_output_amount::<VERIFY>(&amount, &visitor.token_supply()).map_err(UnpackError::Packable)?;
+        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let serial_number = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -609,12 +619,15 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{
-        output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
-            unlock_condition::dto::UnlockConditionDto,
+    use crate::types::{
+        block::{
+            output::{
+                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
+                unlock_condition::dto::UnlockConditionDto,
+            },
+            Error,
         },
-        Error,
+        TryFromDto,
     };
 
     /// Describes a foundry output that is controlled by an alias.
@@ -653,61 +666,40 @@ pub(crate) mod dto {
         }
     }
 
+    impl TryFromDto for FoundryOutput {
+        type Dto = FoundryOutputDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let mut builder = FoundryOutputBuilder::new_with_amount(
+                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                dto.serial_number,
+                dto.token_scheme.try_into()?,
+            );
+
+            for t in dto.native_tokens {
+                builder = builder.add_native_token(t);
+            }
+
+            for b in dto.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for b in dto.immutable_features {
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+            }
+
+            for u in dto.unlock_conditions {
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+            }
+
+            builder.finish_with_params(params)
+        }
+    }
+
     impl FoundryOutput {
-        pub fn try_from_dto(value: FoundryOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = FoundryOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.serial_number,
-                value.token_scheme.try_into()?,
-            );
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: FoundryOutputDto) -> Result<Self, Error> {
-            let mut builder = FoundryOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.serial_number,
-                value.token_scheme.try_into()?,
-            );
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
+        pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
             serial_number: u32,
@@ -715,8 +707,9 @@ pub(crate) mod dto {
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
+            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
+            let params = params.into();
             let token_scheme = TokenScheme::try_from(token_scheme)?;
 
             let mut builder = match amount {
@@ -736,7 +729,7 @@ pub(crate) mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
+                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
@@ -756,7 +749,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish(token_supply)
+            builder.finish_with_params(params)
         }
     }
 }
@@ -766,19 +759,22 @@ mod tests {
     use packable::PackableExt;
 
     use super::*;
-    use crate::types::block::{
-        output::{
-            dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
-            TokenId,
-        },
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_alias_address,
+    use crate::types::{
+        block::{
             output::{
-                feature::{rand_allowed_features, rand_metadata_feature},
-                rand_foundry_output, rand_token_scheme,
+                dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
+                TokenId,
+            },
+            protocol::protocol_parameters,
+            rand::{
+                address::rand_alias_address,
+                output::{
+                    feature::{rand_allowed_features, rand_metadata_feature},
+                    rand_foundry_output, rand_token_scheme,
+                },
             },
         },
+        TryFromDto,
     };
 
     #[test]
@@ -799,7 +795,7 @@ mod tests {
             .with_immutable_features([metadata_2.clone()])
             .replace_immutable_feature(metadata_1.clone());
 
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.serial_number(), 85);
         assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_1));
         assert_eq!(output.features().metadata(), Some(&metadata_2));
@@ -810,7 +806,7 @@ mod tests {
             .clear_features()
             .clear_immutable_features()
             .replace_unlock_condition(alias_2);
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_2));
         assert!(output.features().is_empty());
         assert!(output.immutable_features().is_empty());
@@ -818,7 +814,7 @@ mod tests {
         let output = builder
             .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(&protocol_parameters)
             .unwrap();
 
         assert_eq!(
@@ -841,9 +837,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_foundry_output(protocol_parameters.token_supply());
         let dto = OutputDto::Foundry((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
+        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto_with_params(dto, protocol_parameters.clone()).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
@@ -857,11 +853,11 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),
                 Some(builder.immutable_features.iter().map(Into::into).collect()),
-                protocol_parameters.token_supply(),
+                protocol_parameters.clone(),
             )
             .unwrap();
             assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                builder.finish_with_params(protocol_parameters.clone()).unwrap(),
                 output_split
             );
         };

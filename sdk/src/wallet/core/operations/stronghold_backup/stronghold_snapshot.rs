@@ -5,6 +5,7 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
+    types::TryFromDto,
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
@@ -83,7 +84,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
         .await?
         .map(|v| {
             v.into_iter()
-                .map(AccountDetails::try_from_dto_unverified)
+                .map(AccountDetails::try_from_dto)
                 .collect::<Result<Vec<_>, _>>()
         })
         .transpose()?;

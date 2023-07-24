@@ -29,7 +29,8 @@ pub use self::{
     transaction::TransactionPayload,
     treasury_transaction::TreasuryTransactionPayload,
 };
-use crate::types::block::{protocol::ProtocolParameters, Error};
+use super::protocol::ProtocolParameters;
+use crate::types::{block::Error, ValidationParams};
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq)]
@@ -220,7 +221,7 @@ pub mod dto {
         milestone::dto::MilestonePayloadDto, tagged_data::dto::TaggedDataPayloadDto,
         transaction::dto::TransactionPayloadDto, treasury_transaction::dto::TreasuryTransactionPayloadDto,
     };
-    use crate::types::block::Error;
+    use crate::types::{block::Error, TryFromDto};
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -269,25 +270,18 @@ pub mod dto {
         }
     }
 
-    impl Payload {
-        pub fn try_from_dto(value: PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
-            Ok(match value {
-                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto(*p, protocol_parameters)?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto(*p, protocol_parameters)?),
-                PayloadDto::TreasuryTransaction(p) => Self::from(TreasuryTransactionPayload::try_from_dto(
-                    *p,
-                    protocol_parameters.token_supply(),
-                )?),
-                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
-            })
-        }
+    impl TryFromDto for Payload {
+        type Dto = PayloadDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: PayloadDto) -> Result<Self, Error> {
-            Ok(match value {
-                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(*p)?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(*p)?),
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(match dto {
+                PayloadDto::Transaction(p) => {
+                    Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)
+                }
+                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_with_params_inner(*p, params)?),
                 PayloadDto::TreasuryTransaction(p) => {
-                    Self::from(TreasuryTransactionPayload::try_from_dto_unverified(*p)?)
+                    Self::from(TreasuryTransactionPayload::try_from_dto_with_params_inner(*p, params)?)
                 }
                 PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })

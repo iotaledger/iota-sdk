@@ -74,12 +74,12 @@ describe('Utils methods', () => {
         const aliasAddress =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
         const serialNumber = 0;
-        const tokenSchemeKind = 0;
+        const tokenSchemeType = 0;
 
         const foundryId = Utils.computeFoundryId(
             aliasAddress,
             serialNumber,
-            tokenSchemeKind,
+            tokenSchemeType,
         );
 
         expect(foundryId).toBe(

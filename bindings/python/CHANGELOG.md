@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Account::prepare_consolidate_outputs` takes a `ConsolidationParams`;
+- Utils `compute_token_id` and `compute_foundry_id` param `token_scheme_kind` renamed to `token_scheme_type`;
 
 ### Fixed
 

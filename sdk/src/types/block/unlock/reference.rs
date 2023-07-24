@@ -5,7 +5,6 @@ use crate::types::block::{unlock::UnlockIndex, Error};
 
 /// An [`Unlock`](crate::types::block::unlock::Unlock) that refers to another unlock.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = Error::InvalidReferenceIndex)]
 pub struct ReferenceUnlock(UnlockIndex);
 

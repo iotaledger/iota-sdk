@@ -3,8 +3,11 @@
 
 use packable::Packable;
 
-use crate::types::block::{
-    address::Address, payload::milestone::option::receipt::TailTransactionHash, protocol::ProtocolParameters, Error,
+use crate::types::{
+    block::{
+        address::Address, payload::milestone::option::receipt::TailTransactionHash, protocol::ProtocolParameters, Error,
+    },
+    ValidationParams,
 };
 
 /// Describes funds which were migrated from a legacy network.
@@ -79,7 +82,10 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::{
+        block::{address::dto::AddressDto, Error},
+        TryFromDto,
+    };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -99,27 +105,27 @@ pub(crate) mod dto {
         }
     }
 
-    impl MigratedFundsEntry {
-        pub fn try_from_dto(value: MigratedFundsEntryDto, token_supply: u64) -> Result<Self, Error> {
-            let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
+    impl TryFromDto for MigratedFundsEntry {
+        type Dto = MigratedFundsEntryDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let tail_transaction_hash = prefix_hex::decode(&dto.tail_transaction_hash)
                 .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
 
-            Self::new(
-                TailTransactionHash::new(tail_transaction_hash)?,
-                value.address.try_into()?,
-                value.deposit,
-                token_supply,
-            )
-        }
-
-        pub fn try_from_dto_unverified(value: MigratedFundsEntryDto) -> Result<Self, Error> {
-            let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
-                .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
-
-            Ok(Self {
-                tail_transaction_hash: TailTransactionHash::new(tail_transaction_hash)?,
-                amount: value.deposit,
-                address: value.address.try_into()?,
+            Ok(if let Some(token_supply) = params.token_supply() {
+                Self::new(
+                    TailTransactionHash::new(tail_transaction_hash)?,
+                    dto.address.try_into()?,
+                    dto.deposit,
+                    token_supply,
+                )?
+            } else {
+                Self {
+                    tail_transaction_hash: TailTransactionHash::new(tail_transaction_hash)?,
+                    amount: dto.deposit,
+                    address: dto.address.try_into()?,
+                }
             })
         }
     }
