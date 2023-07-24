@@ -22,7 +22,7 @@ use iota_sdk::{
         },
         block::{
             address::{Address, Bech32Address, Hrp},
-            input::dto::UtxoInputDto,
+            input::UtxoInput,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
@@ -153,10 +153,10 @@ pub enum Response {
     RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
-    Inputs(Vec<UtxoInputDto>),
+    Inputs(Vec<UtxoInput>),
     /// Response for:
     /// [`OutputIdToUtxoInput`](crate::method::UtilsMethod::OutputIdToUtxoInput)
-    Input(UtxoInputDto),
+    Input(UtxoInput),
     /// Response for:
     /// - [`Reattach`](crate::method::ClientMethod::Reattach)
     /// - [`ReattachUnchecked`](crate::method::ClientMethod::ReattachUnchecked)

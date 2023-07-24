@@ -307,7 +307,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -319,7 +319,7 @@ pub(crate) mod dto {
         pub kind: u8,
         pub network_id: String,
         pub creation_time: u64,
-        pub inputs: Vec<InputDto>,
+        pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -332,7 +332,7 @@ pub(crate) mod dto {
                 kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
                 creation_time: value.creation_time(),
-                inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
+                inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
                 payload: match value.payload() {
@@ -359,14 +359,9 @@ pub(crate) mod dto {
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let inputs = dto
-                .inputs
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<Input>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
-                .with_inputs(inputs)
+                .with_inputs(dto.inputs)
                 .with_outputs(outputs);
 
             builder = if let Some(p) = dto.payload {

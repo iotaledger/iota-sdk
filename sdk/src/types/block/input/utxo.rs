@@ -26,9 +26,6 @@ impl UtxoInput {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(UtxoInput);
-
 impl FromStr for UtxoInput {
     type Err = Error;
 
@@ -50,8 +47,6 @@ impl core::fmt::Debug for UtxoInput {
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -63,7 +58,7 @@ pub(crate) mod dto {
     pub struct UtxoInputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub transaction_id: String,
+        pub transaction_id: TransactionId,
         pub transaction_output_index: u16,
     }
 
@@ -71,7 +66,7 @@ pub(crate) mod dto {
         fn from(value: &UtxoInput) -> Self {
             Self {
                 kind: UtxoInput::KIND,
-                transaction_id: value.output_id().transaction_id().to_string(),
+                transaction_id: *value.output_id().transaction_id(),
                 transaction_output_index: value.output_id().index(),
             }
         }
@@ -81,13 +76,30 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: UtxoInputDto) -> Result<Self, Self::Error> {
-            Self::new(
-                value
-                    .transaction_id
-                    .parse::<TransactionId>()
-                    .map_err(|_| Error::InvalidField("transactionId"))?,
-                value.transaction_output_index,
-            )
+            Self::new(value.transaction_id, value.transaction_output_index)
+        }
+    }
+
+    impl<'de> Deserialize<'de> for UtxoInput {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = UtxoInputDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid UTXO input type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            dto.try_into().map_err(serde::de::Error::custom)
+        }
+    }
+
+    impl Serialize for UtxoInput {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            UtxoInputDto::from(self).serialize(s)
         }
     }
 }

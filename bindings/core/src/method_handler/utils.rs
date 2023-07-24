@@ -104,7 +104,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
-        UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input((&UtxoInput::from(output_id)).into()),
+        UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
     };
     Ok(response)
 }

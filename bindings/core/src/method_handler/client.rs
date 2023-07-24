@@ -8,7 +8,6 @@ use iota_sdk::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            input::dto::UtxoInputDto,
             output::{
                 dto::{OutputBuilderAmountDto, OutputDto},
                 AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
@@ -286,14 +285,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .collect();
             Response::RetryUntilIncludedSuccessful(res)
         }
-        ClientMethod::FindInputs { addresses, amount } => Response::Inputs(
-            client
-                .find_inputs(addresses, amount)
-                .await?
-                .iter()
-                .map(UtxoInputDto::from)
-                .collect(),
-        ),
+        ClientMethod::FindInputs { addresses, amount } => {
+            Response::Inputs(client.find_inputs(addresses, amount).await?)
+        }
         ClientMethod::Reattach { block_id } => {
             let (block_id, block) = client.reattach(&block_id).await?;
             Response::Reattached((block_id, BlockDto::from(&block)))

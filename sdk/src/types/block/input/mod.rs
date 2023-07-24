@@ -23,6 +23,7 @@ pub const INPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=INPUT_INDEX_MAX; // [0..1
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 pub enum Input {
     /// A UTXO input.
     #[packable(tag = UtxoInput::KIND)]
@@ -55,38 +56,5 @@ impl Input {
     pub fn as_utxo(&self) -> &UtxoInput {
         let Self::Utxo(input) = self;
         input
-    }
-}
-
-pub mod dto {
-    use serde::{Deserialize, Serialize};
-
-    pub use super::utxo::dto::UtxoInputDto;
-    use super::*;
-    use crate::types::block::Error;
-
-    /// Describes all the different input types.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
-    #[serde(untagged)]
-    pub enum InputDto {
-        Utxo(UtxoInputDto),
-    }
-
-    impl From<&Input> for InputDto {
-        fn from(value: &Input) -> Self {
-            match value {
-                Input::Utxo(u) => Self::Utxo(u.into()),
-            }
-        }
-    }
-
-    impl TryFrom<InputDto> for Input {
-        type Error = Error;
-
-        fn try_from(value: InputDto) -> Result<Self, Self::Error> {
-            match value {
-                InputDto::Utxo(u) => Ok(Self::Utxo(u.try_into()?)),
-            }
-        }
     }
 }
