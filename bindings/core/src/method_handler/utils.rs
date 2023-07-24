@@ -64,7 +64,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             serial_number,
             token_scheme_type,
         } => {
-            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_type.kind());
+            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
         UtilsMethod::HashTransactionEssence { essence } => Response::Hash(prefix_hex::encode(
