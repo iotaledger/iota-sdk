@@ -36,15 +36,57 @@ impl NftUnlock {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
+    use super::*;
+
     /// Points to the unlock of a consumed NFT output.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct NftUnlockDto {
+    #[derive(Serialize, Deserialize)]
+    struct NftUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(rename = "reference")]
-        pub index: u16,
+        index: u16,
+    }
+
+    impl From<&NftUnlock> for NftUnlockDto {
+        fn from(value: &NftUnlock) -> Self {
+            Self {
+                kind: NftUnlock::KIND,
+                index: value.0.get(),
+            }
+        }
+    }
+
+    impl TryFrom<NftUnlockDto> for NftUnlock {
+        type Error = Error;
+
+        fn try_from(value: NftUnlockDto) -> Result<Self, Self::Error> {
+            Self::new(value.index)
+        }
+    }
+
+    impl<'de> Deserialize<'de> for NftUnlock {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = NftUnlockDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid nft unlock type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            dto.try_into().map_err(serde::de::Error::custom)
+        }
+    }
+
+    impl Serialize for NftUnlock {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            NftUnlockDto::from(self).serialize(s)
+        }
     }
 }

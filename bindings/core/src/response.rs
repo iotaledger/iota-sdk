@@ -26,8 +26,8 @@ use iota_sdk::{
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
-            signature::dto::Ed25519SignatureDto,
-            unlock::dto::UnlockDto,
+            signature::Ed25519Signature,
+            unlock::Unlock,
             BlockDto, BlockId,
         },
     },
@@ -84,10 +84,10 @@ pub enum Response {
     SignedTransaction(TransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
-    SignatureUnlock(UnlockDto),
+    SignatureUnlock(Unlock),
     /// Response for:
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
-    Ed25519Signature(Ed25519SignatureDto),
+    Ed25519Signature(Ed25519Signature),
     /// Response for:
     /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]

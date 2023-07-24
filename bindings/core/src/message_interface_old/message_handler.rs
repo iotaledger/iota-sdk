@@ -27,7 +27,6 @@ use iota_sdk::{
                 dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output,
                 OutputBuilderAmount, Rent,
             },
-            signature::Ed25519Signature,
             ConvertTo,
         },
         TryFromDto,
@@ -570,7 +569,6 @@ impl WalletMessageHandler {
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
             AccountMethod::VerifyEd25519Signature { signature, message } => {
-                let signature = Ed25519Signature::try_from(signature)?;
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(iota_sdk::client::Error::from)?;
                 Ok(Response::Bool(signature.verify(&message)))
             }

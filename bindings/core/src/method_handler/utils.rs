@@ -10,7 +10,6 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            signature::Ed25519Signature,
             Block,
         },
         TryFromDto,
@@ -86,7 +85,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::Ok
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
-            let signature = Ed25519Signature::try_from(signature)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(signature.verify(&message))
         }

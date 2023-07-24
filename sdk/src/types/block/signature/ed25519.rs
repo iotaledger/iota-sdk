@@ -17,7 +17,7 @@ use packable::{
 use crate::types::block::{address::Ed25519Address, Error};
 
 /// An Ed25519 signature.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
     public_key: PublicKey,
     signature: Signature,
@@ -127,7 +127,7 @@ impl Packable for Ed25519Signature {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use alloc::string::String;
 
     use serde::{Deserialize, Serialize};
@@ -136,13 +136,13 @@ pub(crate) mod dto {
     use crate::types::block::Error;
 
     /// Defines an Ed25519 signature.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519SignatureDto {
+    struct Ed25519SignatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub public_key: String,
-        pub signature: String,
+        kind: u8,
+        public_key: String,
+        signature: String,
     }
 
     impl From<&Ed25519Signature> for Ed25519SignatureDto {
@@ -163,6 +163,29 @@ pub(crate) mod dto {
                 prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
             )
+        }
+    }
+
+    impl<'de> Deserialize<'de> for Ed25519Signature {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = Ed25519SignatureDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid account unlock type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            dto.try_into().map_err(serde::de::Error::custom)
+        }
+    }
+
+    impl Serialize for Ed25519Signature {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            Ed25519SignatureDto::from(self).serialize(s)
         }
     }
 }

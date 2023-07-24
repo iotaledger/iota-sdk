@@ -21,7 +21,7 @@ use iota_sdk::{
             NftId, OutputId, TokenId, TokenScheme,
         },
         payload::transaction::TransactionId,
-        signature::dto::Ed25519SignatureDto,
+        signature::Ed25519Signature,
     },
     utils::serde::{bip44::Bip44Def, option_string, string},
     wallet::{
@@ -164,7 +164,7 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`Bool`](crate::wallet::message_interface::Response::Bool)
     VerifyEd25519Signature {
-        signature: Ed25519SignatureDto,
+        signature: Ed25519Signature,
         message: String,
     },
     /// Verify a Secp256k1Ecdsa signature against a message.
