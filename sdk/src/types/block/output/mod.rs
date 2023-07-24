@@ -28,7 +28,6 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
-use alloc::string::ToString;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
@@ -82,8 +81,8 @@ pub const OUTPUT_INDEX_MAX: u16 = OUTPUT_COUNT_MAX - 1; // 127
 /// The range of valid indices of outputs of a transaction .
 pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0..127]
 
-#[derive(Clone)]
-pub(crate) enum OutputBuilderAmount {
+#[derive(Copy, Clone)]
+pub enum OutputBuilderAmount {
     Amount(u64),
     MinimumStorageDeposit(RentStructure),
 }
@@ -507,7 +506,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
 }
 
 pub mod dto {
-    use alloc::{format, string::String};
+    use alloc::format;
 
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
@@ -518,22 +517,6 @@ pub mod dto {
         foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
     use crate::types::{block::Error, TryFromDto};
-
-    #[derive(Clone, Debug, From)]
-    #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-    pub enum OutputBuilderAmountDto {
-        Amount(String),
-        MinimumStorageDeposit(RentStructure),
-    }
-
-    impl From<&OutputBuilderAmount> for OutputBuilderAmountDto {
-        fn from(value: &OutputBuilderAmount) -> Self {
-            match value {
-                OutputBuilderAmount::Amount(a) => Self::Amount(a.to_string()),
-                OutputBuilderAmount::MinimumStorageDeposit(r) => Self::MinimumStorageDeposit(*r),
-            }
-        }
-    }
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]

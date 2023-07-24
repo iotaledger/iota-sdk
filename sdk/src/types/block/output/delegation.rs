@@ -460,17 +460,15 @@ fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockCondit
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputBuilderAmountDto, unlock_condition::dto::UnlockConditionDto},
-            Error,
+    use crate::{
+        types::{
+            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+            TryFromDto,
         },
-        TryFromDto,
+        utils::serde::string,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -478,11 +476,15 @@ pub(crate) mod dto {
     pub struct DelegationOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub amount: String,
-        pub delegated_amount: String,
+        #[serde(with = "string")]
+        pub amount: u64,
+        #[serde(with = "string")]
+        pub delegated_amount: u64,
         pub delegation_id: DelegationId,
         pub validator_id: AccountId,
+        #[serde(with = "string")]
         start_epoch: u64,
+        #[serde(with = "string")]
         end_epoch: u64,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -493,8 +495,8 @@ pub(crate) mod dto {
         fn from(value: &DelegationOutput) -> Self {
             Self {
                 kind: DelegationOutput::KIND,
-                amount: value.amount().to_string(),
-                delegated_amount: value.delegated_amount().to_string(),
+                amount: value.amount(),
+                delegated_amount: value.delegated_amount(),
                 delegation_id: *value.delegation_id(),
                 validator_id: *value.validator_id(),
                 start_epoch: value.start_epoch(),
@@ -514,10 +516,8 @@ pub(crate) mod dto {
             params: crate::types::ValidationParams<'_>,
         ) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(
-                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                dto.delegated_amount
-                    .parse::<u64>()
-                    .map_err(|_| Error::InvalidField("delegatedAmount"))?,
+                dto.amount,
+                dto.delegated_amount,
                 dto.delegation_id,
                 dto.validator_id,
             );
@@ -540,8 +540,8 @@ pub(crate) mod dto {
     impl DelegationOutput {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
-            amount: OutputBuilderAmountDto,
-            delegated_amount: String,
+            amount: OutputBuilderAmount,
+            delegated_amount: u64,
             delegation_id: &DelegationId,
             validator_id: &AccountId,
             start_epoch: u64,
@@ -552,20 +552,13 @@ pub(crate) mod dto {
         ) -> Result<Self, Error> {
             let params = params.into();
             let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => DelegationOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    delegated_amount
-                        .parse()
-                        .map_err(|_| Error::InvalidField("delegatedAmount"))?,
-                    *delegation_id,
-                    *validator_id,
-                ),
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
+                OutputBuilderAmount::Amount(amount) => {
+                    DelegationOutputBuilder::new_with_amount(amount, delegated_amount, *delegation_id, *validator_id)
+                }
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     DelegationOutputBuilder::new_with_minimum_storage_deposit(
                         rent_structure,
-                        delegated_amount
-                            .parse()
-                            .map_err(|_| Error::InvalidField("delegatedAmount"))?,
+                        delegated_amount,
                         *delegation_id,
                         *validator_id,
                     )

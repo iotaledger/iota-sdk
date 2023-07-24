@@ -484,17 +484,15 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputBuilderAmountDto, unlock_condition::dto::UnlockConditionDto},
-            Error,
+    use crate::{
+        types::{
+            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+            TryFromDto,
         },
-        TryFromDto,
+        utils::serde::string,
     };
 
     /// Describes an NFT output, a globally unique token with metadata attached.
@@ -504,7 +502,8 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
-        pub amount: String,
+        #[serde(with = "string")]
+        pub amount: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
@@ -521,7 +520,7 @@ pub(crate) mod dto {
         fn from(value: &NftOutput) -> Self {
             Self {
                 kind: NftOutput::KIND,
-                amount: value.amount().to_string(),
+                amount: value.amount(),
                 native_tokens: value.native_tokens().to_vec(),
                 nft_id: *value.nft_id(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -536,10 +535,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = NftOutputBuilder::new_with_amount(
-                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                dto.nft_id,
-            );
+            let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id);
 
             for t in dto.native_tokens {
                 builder = builder.add_native_token(t);
@@ -563,7 +559,7 @@ pub(crate) mod dto {
 
     impl NftOutput {
         pub fn try_from_dtos<'a>(
-            amount: OutputBuilderAmountDto,
+            amount: OutputBuilderAmount,
             native_tokens: Option<Vec<NativeToken>>,
             nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
@@ -573,11 +569,8 @@ pub(crate) mod dto {
         ) -> Result<Self, Error> {
             let params = params.into();
             let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    *nft_id,
-                ),
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
+                OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
                 }
             };
@@ -612,10 +605,7 @@ mod tests {
     use super::*;
     use crate::types::{
         block::{
-            output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                FoundryId, SimpleTokenScheme, TokenId,
-            },
+            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
             protocol::protocol_parameters,
             rand::{
                 address::rand_account_address,
@@ -697,7 +687,7 @@ mod tests {
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
         let output_split = NftOutput::try_from_dtos(
-            OutputBuilderAmountDto::Amount(output.amount().to_string()),
+            OutputBuilderAmount::Amount(output.amount()),
             Some(output.native_tokens().to_vec()),
             output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
@@ -710,7 +700,7 @@ mod tests {
 
         let test_split_dto = |builder: NftOutputBuilder| {
             let output_split = NftOutput::try_from_dtos(
-                (&builder.amount).into(),
+                builder.amount,
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.nft_id,
                 builder.unlock_conditions.iter().map(Into::into).collect(),

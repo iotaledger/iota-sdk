@@ -334,17 +334,15 @@ fn verify_features_packable<const VERIFY: bool>(blocks: &Features, _: &ProtocolP
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputBuilderAmountDto, unlock_condition::dto::UnlockConditionDto},
-            Error,
+    use crate::{
+        types::{
+            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+            TryFromDto,
         },
-        TryFromDto,
+        utils::serde::string,
     };
 
     /// Describes a basic output.
@@ -354,7 +352,8 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
-        pub amount: String,
+        #[serde(with = "string")]
+        pub amount: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
@@ -367,7 +366,7 @@ pub(crate) mod dto {
         fn from(value: &BasicOutput) -> Self {
             Self {
                 kind: BasicOutput::KIND,
-                amount: value.amount().to_string(),
+                amount: value.amount(),
                 native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().to_vec(),
@@ -380,8 +379,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder =
-                BasicOutputBuilder::new_with_amount(dto.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
+            let mut builder = BasicOutputBuilder::new_with_amount(dto.amount);
 
             builder = builder.with_native_tokens(dto.native_tokens);
 
@@ -399,7 +397,7 @@ pub(crate) mod dto {
 
     impl BasicOutput {
         pub fn try_from_dtos<'a>(
-            amount: OutputBuilderAmountDto,
+            amount: OutputBuilderAmount,
             native_tokens: Option<Vec<NativeToken>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
@@ -407,10 +405,8 @@ pub(crate) mod dto {
         ) -> Result<Self, Error> {
             let params = params.into();
             let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => {
-                    BasicOutputBuilder::new_with_amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
-                }
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
+                OutputBuilderAmount::Amount(amount) => BasicOutputBuilder::new_with_amount(amount),
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 }
             };
@@ -441,10 +437,7 @@ mod tests {
     use super::*;
     use crate::types::{
         block::{
-            output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                FoundryId, SimpleTokenScheme, TokenId,
-            },
+            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
             protocol::protocol_parameters,
             rand::{
                 address::rand_account_address,
@@ -522,7 +515,7 @@ mod tests {
         assert_eq!(&output, output_ver.as_basic());
 
         let output_split = BasicOutput::try_from_dtos(
-            OutputBuilderAmountDto::Amount(output.amount().to_string()),
+            OutputBuilderAmount::Amount(output.amount()),
             Some(output.native_tokens().to_vec()),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
@@ -536,7 +529,7 @@ mod tests {
 
         let test_split_dto = |builder: BasicOutputBuilder| {
             let output_split = BasicOutput::try_from_dtos(
-                (&builder.amount).into(),
+                builder.amount,
                 Some(builder.native_tokens.iter().copied().collect()),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),

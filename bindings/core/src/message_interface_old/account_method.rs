@@ -23,7 +23,7 @@ use iota_sdk::{
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
     },
-    utils::serde::bip44::Bip44Def,
+    utils::serde::{bip44::Bip44Def, option_string, string},
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
@@ -45,7 +45,8 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(with = "option_string")]
+        amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         state_index: Option<u32>,
@@ -61,7 +62,8 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(with = "option_string")]
+        amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
@@ -72,7 +74,8 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(with = "option_string")]
+        amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenScheme,
@@ -86,7 +89,8 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(with = "option_string")]
+        amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
@@ -387,13 +391,19 @@ pub enum AccountMethod {
     /// [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    IncreaseVotingPower { amount: String },
+    IncreaseVotingPower {
+        #[serde(with = "string")]
+        amount: u64,
+    },
     /// Reduces an account's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    DecreaseVotingPower { amount: String },
+    DecreaseVotingPower {
+        #[serde(with = "string")]
+        amount: u64,
+    },
     /// Stores participation information locally and returns the event.
     ///
     /// This will NOT store the node url and auth inside the client options.

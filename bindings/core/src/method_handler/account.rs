@@ -1,9 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "participation")]
-use std::str::FromStr;
-
 use iota_sdk::{
     client::api::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
@@ -141,11 +138,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         #[cfg(feature = "participation")]
         AccountMethod::PrepareDecreaseVotingPower { amount } => {
-            let data = account
-                .prepare_decrease_voting_power(
-                    u64::from_str(&amount).map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
-                )
-                .await?;
+            let data = account.prepare_decrease_voting_power(amount).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareMintNativeToken {
@@ -164,11 +157,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         #[cfg(feature = "participation")]
         AccountMethod::PrepareIncreaseVotingPower { amount } => {
-            let data = account
-                .prepare_increase_voting_power(
-                    u64::from_str(&amount).map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
-                )
-                .await?;
+            let data = account.prepare_increase_voting_power(amount).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareMintNfts { params, options } => {

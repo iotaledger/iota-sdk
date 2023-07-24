@@ -17,6 +17,7 @@ use iota_sdk::{
         output::{dto::OutputDto, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
+    utils::serde::string,
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
@@ -161,7 +162,10 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareDecreaseVotingPower { amount: String },
+    PrepareDecreaseVotingPower {
+        #[serde(with = "string")]
+        amount: u64,
+    },
     /// Designates a given amount of tokens towards an account's "voting power" by creating a
     /// special output, which is really a basic one with some metadata.
     /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
@@ -169,7 +173,10 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareIncreaseVotingPower { amount: String },
+    PrepareIncreaseVotingPower {
+        #[serde(with = "string")]
+        amount: u64,
+    },
     /// Prepare to melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)

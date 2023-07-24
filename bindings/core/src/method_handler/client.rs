@@ -9,8 +9,7 @@ use iota_sdk::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
             },
             payload::Payload,
             Block, BlockDto,
@@ -69,9 +68,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(AccountOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
                 &account_id,
@@ -94,9 +93,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(BasicOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
                 unlock_conditions,
@@ -117,9 +116,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(FoundryOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
                 serial_number,
@@ -142,9 +141,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(NftOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
                 &nft_id,

@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "participation")]
-use std::str::FromStr;
 use std::{
     any::Any,
     panic::{catch_unwind, AssertUnwindSafe},
@@ -26,8 +24,8 @@ use iota_sdk::{
         block::{
             address::{Hrp, ToBech32Ext},
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                AccountOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output,
+                OutputBuilderAmount, Rent,
             },
             signature::Ed25519Signature,
             ConvertTo,
@@ -408,9 +406,9 @@ impl WalletMessageHandler {
             } => {
                 let output = Output::from(AccountOutput::try_from_dtos(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
                     native_tokens,
                     &account_id,
@@ -433,9 +431,9 @@ impl WalletMessageHandler {
             } => {
                 let output = Output::from(BasicOutput::try_from_dtos(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
                     native_tokens,
                     unlock_conditions,
@@ -456,9 +454,9 @@ impl WalletMessageHandler {
             } => {
                 let output = Output::from(FoundryOutput::try_from_dtos(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
                     native_tokens,
                     serial_number,
@@ -481,9 +479,9 @@ impl WalletMessageHandler {
             } => {
                 let output = Output::from(NftOutput::try_from_dtos(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
                     native_tokens,
                     &nft_id,
@@ -915,12 +913,7 @@ impl WalletMessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::IncreaseVotingPower { amount } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .increase_voting_power(
-                            u64::from_str(&amount)
-                                .map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
-                        )
-                        .await?;
+                    let transaction = account.increase_voting_power(amount).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
@@ -928,12 +921,7 @@ impl WalletMessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::DecreaseVotingPower { amount } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .decrease_voting_power(
-                            u64::from_str(&amount)
-                                .map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
-                        )
-                        .await?;
+                    let transaction = account.decrease_voting_power(amount).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
