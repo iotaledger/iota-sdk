@@ -165,7 +165,6 @@ jobs:
           body: https://github.com/iotaledger/iota-sdk/blob/develop/bindings/python/CHANGELOG.md
           files: wheels/*
           tag_name: ${{ steps.tagname.outputs.TAG_NAME }}
-          prerelease: true
 
       - uses: actions/setup-python@v4
         with:
