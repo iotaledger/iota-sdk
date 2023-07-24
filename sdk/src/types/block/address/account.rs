@@ -57,7 +57,7 @@ impl core::fmt::Debug for AccountAddress {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -65,10 +65,10 @@ pub(super) mod dto {
     /// Describes an account address.
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AccountAddressDto {
+    struct AccountAddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub account_id: AccountId,
+        kind: u8,
+        account_id: AccountId,
     }
 
     impl From<&AccountAddress> for AccountAddressDto {

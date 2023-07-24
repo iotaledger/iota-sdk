@@ -26,7 +26,7 @@ impl IssuerFeature {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;

@@ -28,16 +28,16 @@ impl StateControllerAddressUnlockCondition {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
 
     #[derive(Serialize, Deserialize)]
-    pub struct StateControllerAddressUnlockConditionDto {
+    struct StateControllerAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: Address,
+        kind: u8,
+        address: Address,
     }
 
     impl From<&StateControllerAddressUnlockCondition> for StateControllerAddressUnlockConditionDto {

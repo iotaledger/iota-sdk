@@ -64,7 +64,7 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -72,12 +72,12 @@ pub(super) mod dto {
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct ExpirationUnlockConditionDto {
+    struct ExpirationUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: Address,
+        kind: u8,
+        return_address: Address,
         #[serde(rename = "unixTime")]
-        pub timestamp: u32,
+        timestamp: u32,
     }
 
     impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {

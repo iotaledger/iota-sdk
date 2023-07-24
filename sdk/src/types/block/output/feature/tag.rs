@@ -66,7 +66,7 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use alloc::borrow::Cow;
 
     use serde::{Deserialize, Serialize};

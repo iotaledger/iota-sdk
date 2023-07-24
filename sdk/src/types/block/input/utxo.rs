@@ -46,7 +46,7 @@ impl core::fmt::Debug for UtxoInput {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;

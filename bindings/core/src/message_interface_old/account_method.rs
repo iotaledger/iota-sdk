@@ -17,9 +17,8 @@ use iota_sdk::{
     types::block::{
         address::Bech32Address,
         output::{
-            dto::{OutputDto, TokenSchemeDto},
-            unlock_condition::dto::UnlockConditionDto,
-            AccountId, Feature, FoundryId, NativeToken, NftId, OutputId, TokenId,
+            dto::OutputDto, unlock_condition::dto::UnlockConditionDto, AccountId, Feature, FoundryId, NativeToken,
+            NftId, OutputId, TokenId, TokenScheme,
         },
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
@@ -76,7 +75,7 @@ pub enum AccountMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
-        token_scheme: TokenSchemeDto,
+        token_scheme: TokenScheme,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,

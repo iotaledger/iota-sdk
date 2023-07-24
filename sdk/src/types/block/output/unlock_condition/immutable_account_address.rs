@@ -26,16 +26,16 @@ impl ImmutableAccountAddressUnlockCondition {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
 
     #[derive(Serialize, Deserialize)]
-    pub struct ImmutableAccountAddressUnlockConditionDto {
+    struct ImmutableAccountAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AccountAddress,
+        kind: u8,
+        address: AccountAddress,
     }
 
     impl From<&ImmutableAccountAddressUnlockCondition> for ImmutableAccountAddressUnlockConditionDto {

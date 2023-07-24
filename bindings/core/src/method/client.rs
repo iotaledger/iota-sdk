@@ -9,10 +9,8 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::{OutputDto, TokenSchemeDto},
-            feature::Feature,
-            unlock_condition::dto::UnlockConditionDto,
-            AccountId, FoundryId, NativeToken, NftId, OutputId,
+            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
+            NativeToken, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
@@ -62,7 +60,7 @@ pub enum ClientMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
-        token_scheme: TokenSchemeDto,
+        token_scheme: TokenScheme,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,

@@ -500,13 +500,7 @@ mod test {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use self::{
-        address::dto::AddressUnlockConditionDto, expiration::dto::ExpirationUnlockConditionDto,
-        governor_address::dto::GovernorAddressUnlockConditionDto,
-        immutable_account_address::dto::ImmutableAccountAddressUnlockConditionDto,
-        state_controller_address::dto::StateControllerAddressUnlockConditionDto,
-        storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
-    };
+    pub use self::storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto;
     use super::*;
     use crate::types::{block::Error, TryFromDto};
 

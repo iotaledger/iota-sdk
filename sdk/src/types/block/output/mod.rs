@@ -514,12 +514,8 @@ pub mod dto {
 
     use super::*;
     pub use super::{
-        account::dto::AccountOutputDto,
-        basic::dto::BasicOutputDto,
-        delegation::dto::DelegationOutputDto,
-        foundry::dto::FoundryOutputDto,
-        nft::dto::NftOutputDto,
-        token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
+        account::dto::AccountOutputDto, basic::dto::BasicOutputDto, delegation::dto::DelegationOutputDto,
+        foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
     use crate::types::{block::Error, TryFromDto};
 

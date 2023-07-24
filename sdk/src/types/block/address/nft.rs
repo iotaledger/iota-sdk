@@ -57,7 +57,7 @@ impl core::fmt::Debug for NftAddress {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -65,10 +65,10 @@ pub(super) mod dto {
     /// Describes an NFT address.
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct NftAddressDto {
+    struct NftAddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub nft_id: NftId,
+        kind: u8,
+        nft_id: NftId,
     }
 
     impl From<&NftAddress> for NftAddressDto {

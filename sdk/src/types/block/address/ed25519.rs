@@ -46,7 +46,7 @@ impl core::fmt::Debug for Ed25519Address {
     }
 }
 
-pub(super) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -55,11 +55,11 @@ pub(super) mod dto {
     /// Describes an Ed25519 address.
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519AddressDto {
+    struct Ed25519AddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(with = "prefix_hex_bytes")]
-        pub pub_key_hash: [u8; Ed25519Address::LENGTH],
+        pub_key_hash: [u8; Ed25519Address::LENGTH],
     }
 
     impl From<&Ed25519Address> for Ed25519AddressDto {
