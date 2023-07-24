@@ -9,7 +9,7 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        api::{input_selection::BurnDto, PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
@@ -21,7 +21,7 @@ use iota_sdk::{
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -138,8 +138,8 @@ pub enum AccountMethod {
     ///
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareBurn {
-        burn: BurnDto,
-        options: Option<TransactionOptionsDto>,
+        burn: Burn,
+        options: Option<TransactionOptions>,
     },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -148,14 +148,14 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAccountOutput {
         params: Option<CreateAccountParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to create a native token.
     /// Expected response:
     /// [`PreparedCreateNativeTokenTransaction`](crate::Response::PreparedCreateNativeTokenTransaction)
     PrepareCreateNativeToken {
         params: CreateNativeTokenParams,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Reduces an account's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
@@ -186,7 +186,7 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be melted amount
         melt_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to mint additional native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -196,38 +196,38 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to mint NFTs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareMintNfts {
         params: Vec<MintNftParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
         params: Box<OutputParams>,
-        transaction_options: Option<TransactionOptionsDto>,
+        transaction_options: Option<TransactionOptions>,
     },
     /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSend {
         params: Vec<SendParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNativeTokens {
         params: Vec<SendNativeTokensParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to Send nft.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNft {
         params: Vec<SendNftParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Stop participating for an event.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -239,7 +239,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Vote for a participation event.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -277,19 +277,19 @@ pub enum AccountMethod {
         #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
         address: Bech32Address,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Send base coins to multiple addresses, or with additional parameters.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendWithParams {
         params: Vec<SendParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::Response::Ok)

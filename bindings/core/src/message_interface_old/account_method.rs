@@ -27,7 +27,7 @@ use iota_sdk::{
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -107,7 +107,7 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be burned amount
         burn_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
     /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
@@ -116,7 +116,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BurnNft {
         nft_id: NftId,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
@@ -130,7 +130,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     CreateAccountOutput {
         params: Option<CreateAccountParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Destroy an account output. Outputs controlled by it will be swept before if they don't have a
     /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
@@ -139,7 +139,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DestroyAccount {
         account_id: AccountId,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Destroy a foundry output with a circulating supply of 0.
     /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account
@@ -147,7 +147,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DestroyFoundry {
         foundry_id: FoundryId,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Generate new unused ed25519 addresses.
     /// Expected response:
@@ -236,7 +236,7 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be melted amount
         melt_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Calculate the minimum required storage deposit for an output.
     /// Expected response:
@@ -250,7 +250,7 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Create a native token.
     /// Expected response:
@@ -258,14 +258,14 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     CreateNativeToken {
         params: CreateNativeTokenParams,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Mint nft.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
         params: Vec<MintNftParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Get account balance information.
     /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
@@ -275,20 +275,20 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
         params: Box<OutputParams>,
-        transaction_options: Option<TransactionOptionsDto>,
+        transaction_options: Option<TransactionOptions>,
     },
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     PrepareTransaction {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSend {
         params: Vec<SendParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
@@ -314,21 +314,21 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     Send {
         params: Vec<SendParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Send native tokens.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNativeTokens {
         params: Vec<SendNativeTokensParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Send nft.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNft {
         params: Vec<SendNftParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
@@ -341,7 +341,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     SendOutputs {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Sign a prepared transaction.
     /// Expected response: [`SignedTransactionData`](crate::wallet::message_interface::Response::SignedTransactionData)

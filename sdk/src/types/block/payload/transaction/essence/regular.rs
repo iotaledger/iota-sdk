@@ -336,7 +336,7 @@ pub(crate) mod dto {
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
                 payload: match value.payload() {
-                    Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
+                    Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
                     None => None,
                 },

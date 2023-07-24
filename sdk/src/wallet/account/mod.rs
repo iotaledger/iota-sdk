@@ -48,7 +48,7 @@ pub use self::{
                 },
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
+            RemainderValueStrategy, TransactionOptions,
         },
     },
     types::OutputDataDto,

@@ -67,7 +67,7 @@ impl core::fmt::Debug for TaggedDataPayload {
     }
 }
 
-pub mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -75,13 +75,13 @@ pub mod dto {
 
     /// The payload type to define a tagged data payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TaggedDataPayloadDto {
+    struct TaggedDataPayloadDto {
         #[serde(rename = "type")]
-        pub kind: u32,
+        kind: u32,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub tag: Box<[u8]>,
+        tag: Box<[u8]>,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub data: Box<[u8]>,
+        data: Box<[u8]>,
     }
 
     impl From<&TaggedDataPayload> for TaggedDataPayloadDto {
@@ -99,6 +99,29 @@ pub mod dto {
 
         fn try_from(value: TaggedDataPayloadDto) -> Result<Self, Self::Error> {
             Self::new(value.tag, value.data)
+        }
+    }
+
+    impl<'de> Deserialize<'de> for TaggedDataPayload {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = TaggedDataPayloadDto::deserialize(d)?;
+            if dto.kind != Self::KIND {
+                return Err(serde::de::Error::custom(format!(
+                    "invalid tagged data payload type: expected {}, found {}",
+                    Self::KIND,
+                    dto.kind
+                )));
+            }
+            dto.try_into().map_err(serde::de::Error::custom)
+        }
+    }
+
+    impl Serialize for TaggedDataPayload {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            TaggedDataPayloadDto::from(self).serialize(s)
         }
     }
 }
