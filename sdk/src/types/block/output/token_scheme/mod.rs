@@ -9,7 +9,7 @@ use crate::types::block::Error;
 ///
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
 #[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeType)]
+#[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeKind)]
 pub enum TokenScheme {
     ///
     #[packable(tag = SimpleTokenScheme::KIND)]

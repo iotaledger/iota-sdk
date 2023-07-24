@@ -21,14 +21,14 @@ impl From<TokenId> for FoundryId {
 
 impl FoundryId {
     /// Builds a new [`FoundryId`] from its components.
-    pub fn build(alias_address: &AliasAddress, serial_number: u32, token_scheme_type: u8) -> Self {
+    pub fn build(alias_address: &AliasAddress, serial_number: u32, token_scheme_kind: u8) -> Self {
         let mut bytes = [0u8; Self::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
 
         // PANIC: packing to an array of the correct length can't fail.
         Address::Alias(*alias_address).pack(&mut packer).unwrap();
         serial_number.pack(&mut packer).unwrap();
-        token_scheme_type.pack(&mut packer).unwrap();
+        token_scheme_kind.pack(&mut packer).unwrap();
 
         Self::new(bytes)
     }
@@ -49,8 +49,8 @@ impl FoundryId {
         )
     }
 
-    /// Returns the [`TokenScheme`](crate::types::block::output::TokenScheme) type of the [`FoundryId`].
-    pub fn token_scheme_type(&self) -> u8 {
+    /// Returns the [`TokenScheme`](crate::types::block::output::TokenScheme) kind of the [`FoundryId`].
+    pub fn token_scheme_kind(&self) -> u8 {
         // PANIC: the lengths are known.
         *self.0.last().unwrap()
     }
