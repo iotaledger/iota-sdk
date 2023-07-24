@@ -130,8 +130,9 @@ impl NodeManagerBuilder {
         Ok(self)
     }
 
-    pub(crate) fn with_permanode(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
+    pub(crate) fn with_permanode(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
         let mut url = validate_url(Url::parse(url)?)?;
+        let auth = auth.into();
         if let Some(auth) = &auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
                 url.set_username(name)
@@ -154,8 +155,9 @@ impl NodeManagerBuilder {
         self
     }
 
-    pub(crate) fn with_node_auth(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
+    pub(crate) fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
         let mut url = validate_url(Url::parse(url)?)?;
+        let auth = auth.into();
         if let Some(auth) = &auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
                 url.set_username(name)

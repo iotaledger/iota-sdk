@@ -9,7 +9,7 @@ pub mod account;
 /// The core module.
 pub mod core;
 #[cfg(any(feature = "stronghold", feature = "storage"))]
-pub(crate) mod migration;
+pub mod migration;
 
 /// The ClientOptions to build the iota_client for interactions with the IOTA Tangle.
 pub use crate::client::ClientBuilder as ClientOptions;

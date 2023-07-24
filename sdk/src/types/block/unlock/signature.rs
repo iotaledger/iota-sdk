@@ -28,8 +28,7 @@ impl SignatureUnlock {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use crate::types::block::signature::dto::SignatureDto;

@@ -65,7 +65,7 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rentStructure: IRent;
+        rent: IRent;
     };
 }
 
@@ -188,3 +188,10 @@ export type __FaucetMethod__ = {
         address: string;
     };
 };
+
+export interface __OutputIdToUtxoInput__ {
+    name: 'outputIdToUtxoInput';
+    data: {
+        outputId: string;
+    };
+}

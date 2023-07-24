@@ -36,6 +36,7 @@ import {
     SignedTransactionEssence,
     PreparedTransaction,
     PreparedCreateNativeTokenTransactionData,
+    ConsolidationParams,
 } from '../types/wallet';
 import { INode, Burn, PreparedTransactionData } from '../client';
 import {
@@ -248,16 +249,14 @@ export class Account {
      * @returns The consolidation transaction.
      */
     async prepareConsolidateOutputs(
-        force: boolean,
-        outputConsolidationThreshold?: number,
+        params: ConsolidationParams,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'prepareConsolidateOutputs',
                 data: {
-                    force,
-                    outputConsolidationThreshold,
+                    params,
                 },
             },
         );

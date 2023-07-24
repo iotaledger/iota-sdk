@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Get the account we generated with `01_create_wallet`
+    // Get the account we generated with `create_account`
     let account = wallet.get_account("Alice").await?;
 
     // Ensure the account is synced after minting.

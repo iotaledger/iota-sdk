@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Dict, Optional, List
+from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
@@ -273,3 +274,21 @@ class OutputWithMetadata:
         config['output'] = self.output.as_dict()
 
         return config
+
+
+def output_from_dict(
+        output: Dict[str, any]) -> TreasuryOutput | BasicOutput | AliasOutput | FoundryOutput | NftOutput | Output:
+    output_type = OutputType(output['type'])
+
+    if output_type == OutputType.Treasury:
+        return from_dict(TreasuryOutput, output)
+    if output_type == OutputType.Basic:
+        return from_dict(BasicOutput, output)
+    if output_type == OutputType.Alias:
+        return from_dict(AliasOutput, output)
+    if output_type == OutputType.Foundry:
+        return from_dict(FoundryOutput, output)
+    if output_type == OutputType.Nft:
+        return from_dict(NftOutput, output)
+
+    return from_dict(Output, output)

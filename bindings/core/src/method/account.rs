@@ -19,8 +19,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
-            SyncOptions, TransactionOptionsDto,
+            ConsolidationParams, CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -142,11 +142,7 @@ pub enum AccountMethod {
     },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareConsolidateOutputs {
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    },
+    PrepareConsolidateOutputs { params: ConsolidationParams },
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAliasOutput {
@@ -271,6 +267,7 @@ pub enum AccountMethod {
     /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     Send {
+        #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
         address: Bech32Address,
         options: Option<TransactionOptionsDto>,

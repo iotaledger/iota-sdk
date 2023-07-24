@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { callUtilsMethod } from '../../../bindings';
 import { HexEncodedString } from '../../utils';
+import { OutputId } from '../output';
 
 /**
  * All of the input types.
@@ -61,6 +63,19 @@ class UTXOInput extends Input {
         super(InputType.UTXO);
         this.transactionId = transactionId;
         this.transactionOutputIndex = transactionOutputIndex;
+    }
+
+    /**
+     * Creates a `UTXOInput` from an output id.
+     */
+    static fromOutputId(outputId: OutputId): UTXOInput {
+        const input = callUtilsMethod({
+            name: 'outputIdToUtxoInput',
+            data: {
+                outputId,
+            },
+        });
+        return new UTXOInput(input.transactionId, input.transactionOutputIndex);
     }
 }
 

@@ -148,8 +148,7 @@ fn verify_transaction_packable<const VERIFY: bool>(transaction: &Payload, _: &Pr
     verify_transaction::<VERIFY>(transaction)
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use super::migrated_funds_entry::dto::MigratedFundsEntryDto;

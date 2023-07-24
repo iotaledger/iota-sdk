@@ -4,7 +4,7 @@
 use std::collections::BTreeMap;
 
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, ClientBuilder},
+    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
@@ -25,14 +25,13 @@ async fn create_account() -> Result<()> {
             ]
          }"#;
 
-    let options = WalletOptions {
-        storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
-        coin_type: Some(SHIMMER_COIN_TYPE),
-        secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
-    };
-
-    let wallet = options.build().await?;
+    let wallet = WalletOptions::default()
+        .with_storage_path(storage_path.to_string())
+        .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
+        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
+        .build()
+        .await?;
 
     // create an account
     let response = wallet
@@ -84,14 +83,13 @@ async fn verify_accounts() -> Result<()> {
             ]
          }"#;
 
-    let options = WalletOptions {
-        storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
-        coin_type: Some(SHIMMER_COIN_TYPE),
-        secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
-    };
-
-    let wallet = options.build().await?;
+    let wallet = WalletOptions::default()
+        .with_storage_path(storage_path.to_string())
+        .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
+        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
+        .build()
+        .await?;
 
     let mut account_details = BTreeMap::new();
     let mut handle_response = |response| match response {
@@ -193,14 +191,13 @@ async fn client_from_wallet() -> Result<()> {
             ]
          }"#;
 
-    let options = WalletOptions {
-        storage_path: Some(storage_path.to_string()),
-        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
-        coin_type: Some(SHIMMER_COIN_TYPE),
-        secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
-    };
-
-    let wallet = options.build().await?;
+    let wallet = WalletOptions::default()
+        .with_storage_path(storage_path.to_string())
+        .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
+        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
+        .build()
+        .await?;
 
     // create an account
     let response = wallet

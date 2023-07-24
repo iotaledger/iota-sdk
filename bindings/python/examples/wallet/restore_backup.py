@@ -1,5 +1,6 @@
 from iota_sdk import Wallet, CoinType, ClientOptions
 from dotenv import load_dotenv
+from dataclasses import asdict
 import json
 import os
 
@@ -22,4 +23,4 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.restore_backup("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
 
 accounts = wallet.get_accounts()
-print(f'Restored accounts: {json.dumps(accounts, indent=4)}')
+print(f'Restored accounts: {json.dumps(asdict(accounts), indent=4)}')

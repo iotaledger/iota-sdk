@@ -3,7 +3,7 @@
 
 use super::*;
 
-pub struct Migrate;
+pub(crate) struct Migrate;
 
 #[async_trait]
 impl MigrationData for Migrate {
@@ -81,15 +81,15 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
 pub(super) mod types {
     use serde::{Deserialize, Serialize};
 
-    pub const HARDEN_MASK: u32 = 1 << 31;
+    pub(crate) const HARDEN_MASK: u32 = 1 << 31;
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Bip44 {
-        pub coin_type: u32,
-        pub account: u32,
-        pub change: u32,
-        pub address_index: u32,
+    pub(crate) struct Bip44 {
+        pub(crate) coin_type: u32,
+        pub(crate) account: u32,
+        pub(crate) change: u32,
+        pub(crate) address_index: u32,
     }
 }
 

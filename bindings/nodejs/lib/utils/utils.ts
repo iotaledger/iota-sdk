@@ -18,7 +18,7 @@ import {
     OutputId,
     hexToBigInt,
 } from '../types';
-import { AliasId, BlockId, FoundryId, TokenId } from '../types/block/id';
+import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
 /** Utils class for utils. */
 export class Utils {
@@ -76,7 +76,7 @@ export class Utils {
     /**
      * Computes the NFT id for the given NFT output id.
      */
-    static computeNftId(outputId: string): string {
+    static computeNftId(outputId: string): NftId {
         return callUtilsMethod({
             name: 'computeNftId',
             data: {
@@ -118,15 +118,15 @@ export class Utils {
     /**
      * Computes the required storage deposit of an output.
      * @param output The output.
-     * @param rentStructure Rent cost of objects which take node resources.
+     * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rentStructure: IRent): bigint {
+    static computeStorageDeposit(output: Output, rent: IRent): bigint {
         const depositHex = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
-                rentStructure,
+                rent,
             },
         });
         return hexToBigInt(depositHex);

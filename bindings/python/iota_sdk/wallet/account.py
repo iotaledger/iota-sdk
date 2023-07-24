@@ -12,12 +12,13 @@ from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import Output
+from iota_sdk.types.output import BasicOutput, NftOutput, Output, output_from_dict
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
+from iota_sdk.types.consolidation_params import ConsolidationParams
 from typing import List, Optional
 from dacite import from_dict
 from dataclasses import dataclass
@@ -118,15 +119,13 @@ class Account:
         )
         return PreparedTransaction(self, prepared)
 
-    def prepare_consolidate_outputs(self,
-                                    force: bool,
-                                    output_consolidation_threshold: Optional[int] = None) -> PreparedTransaction:
+    def prepare_consolidate_outputs(
+            self, params: ConsolidationParams) -> PreparedTransaction:
         """Consolidate outputs.
         """
         prepared = self._call_account_method(
             'prepareConsolidateOutputs', {
-                'force': force,
-                'outputConsolidationThreshold': output_consolidation_threshold
+                'params': params
             }
         )
         return PreparedTransaction(self, prepared)
@@ -335,7 +334,7 @@ class Account:
         ))
 
     def prepare_output(self, params: OutputParams,
-                       transaction_options: Optional[TransactionOptions] = None):
+                       transaction_options: Optional[TransactionOptions] = None) -> BasicOutput | NftOutput:
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -343,12 +342,12 @@ class Account:
            When the assets contain an nft_id, the data from the existing nft output will be used, just with the address
            unlock conditions replaced
         """
-        return from_dict(Output, self._call_account_method(
+        return output_from_dict(self._call_account_method(
             'prepareOutput', {
                 'params': params,
                 'transactionOptions': transaction_options
-            }
-        ))
+            })
+        )
 
     def prepare_send(self, params: List[SendParams],
                      options: Optional[TransactionOptions] = None) -> PreparedTransaction:
@@ -404,7 +403,7 @@ class Account:
         """
         return Transaction.from_dict(self._call_account_method(
             'send', {
-                'amount': amount,
+                'amount': str(amount),
                 'address': address,
                 'options': options
             }

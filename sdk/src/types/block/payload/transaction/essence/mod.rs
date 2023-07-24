@@ -47,8 +47,7 @@ impl TransactionEssence {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use super::regular::dto::RegularTransactionEssenceDto;

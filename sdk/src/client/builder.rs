@@ -142,7 +142,7 @@ impl ClientBuilder {
     }
 
     /// Adds an IOTA node by its URL with optional jwt and or basic authentication
-    pub fn with_node_auth(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
+    pub fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
         self.node_manager_builder = self.node_manager_builder.with_node_auth(url, auth)?;
         Ok(self)
     }
@@ -349,6 +349,33 @@ pub struct NetworkInfo {
     /// The latest cached milestone timestamp.
     #[serde(skip)]
     pub latest_milestone_timestamp: Option<u32>,
+}
+
+impl NetworkInfo {
+    pub fn with_protocol_parameters(mut self, protocol_parameters: impl Into<ProtocolParameters>) -> Self {
+        self.protocol_parameters = protocol_parameters.into();
+        self
+    }
+
+    pub fn with_local_pow(mut self, local_pow: bool) -> Self {
+        self.local_pow = local_pow;
+        self
+    }
+
+    pub fn with_fallback_to_local_pow(mut self, fallback_to_local_pow: bool) -> Self {
+        self.fallback_to_local_pow = fallback_to_local_pow;
+        self
+    }
+
+    pub fn with_tips_interval(mut self, tips_interval: u64) -> Self {
+        self.tips_interval = tips_interval;
+        self
+    }
+
+    pub fn with_latest_milestone_timestamp(mut self, latest_milestone_timestamp: impl Into<Option<u32>>) -> Self {
+        self.latest_milestone_timestamp = latest_milestone_timestamp.into();
+        self
+    }
 }
 
 fn default_local_pow() -> bool {

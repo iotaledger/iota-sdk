@@ -521,14 +521,9 @@ impl WalletMessageHandler {
                 let output_ids = account.claimable_outputs(outputs_to_claim).await?;
                 Ok(Response::OutputIds(output_ids))
             }
-            AccountMethod::ConsolidateOutputs {
-                force,
-                output_consolidation_threshold,
-            } => {
+            AccountMethod::ConsolidateOutputs { params } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .consolidate_outputs(force, output_consolidation_threshold)
-                        .await?;
+                    let transaction = account.consolidate_outputs(params).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
