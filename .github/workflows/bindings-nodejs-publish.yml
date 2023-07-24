@@ -260,4 +260,3 @@ jobs:
           body: https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md
           files: bindings/nodejs/prebuilds/@iota/*
           tag_name: ${{ steps.prepare_release.outputs.tag_name }}
-          prerelease: true
