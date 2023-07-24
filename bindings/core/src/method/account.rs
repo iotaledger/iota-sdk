@@ -267,6 +267,7 @@ pub enum AccountMethod {
     /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     Send {
+        #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
         address: Bech32Address,
         options: Option<TransactionOptionsDto>,

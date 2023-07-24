@@ -13,7 +13,7 @@ const PREPARED_TRANSACTION_FILE_NAME =
     'offline-signing-prepared-transaction.json';
 const SIGNED_TRANSACTION_FILE_NAME = 'offline-signing-signed-transaction.json';
 
-// In this example we will sign the prepared transaction
+// In this example we will sign the prepared transaction.
 async function run() {
     initLogger();
 

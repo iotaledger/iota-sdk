@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
 
-    // Get the account we generated with `01_create_wallet`
+    // Get the account we generated with `create_account`
     let account = wallet.get_account("Alice").await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = wallet.sync(None).await?;

@@ -3,7 +3,7 @@
 
 # This example sends tokens to an address.
 
-from iota_sdk import Wallet, SendParams, SyncOptions
+from iota_sdk import Wallet, SyncOptions
 from dotenv import load_dotenv
 import os
 

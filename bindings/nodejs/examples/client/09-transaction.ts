@@ -7,7 +7,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/09-transaction.ts
 
-// In this example we will send a transaction
+// In this example we will send a transaction.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {

@@ -9,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/accounts_and_addresses/create-account.ts
 
-// This example creates a new database and account
+// This example creates a new database and account.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
