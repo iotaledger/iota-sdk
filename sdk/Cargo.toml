@@ -31,12 +31,12 @@ itertools = { version = "0.11.0", default-features = false, features = [ "use_al
 packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [ "primitive-types" ] }
 primitive-types = { version = "0.12.1", default-features = false }
-serde = { version = "1.0.171", default-features = false, features = [ "derive" ] }
-serde_json = { version = "1.0.102", default-features = false, features = [ "alloc" ] }
+serde = { version = "1.0.175", default-features = false, features = [ "derive" ] }
+serde_json = { version = "1.0.103", default-features = false, features = [ "alloc" ] }
 
 # Optional dependencies
 anymap = { version = "0.12.1", default-features = false, optional = true }
-async-trait = { version = "0.1.71", default-features = false, optional = true }
+async-trait = { version = "0.1.72", default-features = false, optional = true }
 derive_builder = { version = "0.12.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
@@ -52,8 +52,8 @@ regex = { version = "1.9.1", default-features = false, features = [ "unicode-per
 reqwest = { version = "0.11.18", default-features = false, features = [ "json" ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [ "lz4" ], optional = true }
 rumqttc = { version = "0.22.0", default-features = false, features = [ "websocket" ], optional = true }
-serde_repr = { version = "0.1.14", default-features = false, optional = true }
-thiserror = { version = "1.0.43", default-features = false, optional = true }
+serde_repr = { version = "0.1.15", default-features = false, optional = true }
+thiserror = { version = "1.0.44", default-features = false, optional = true }
 time = { version = "0.3.23", default-features = false, features = [ "serde", "macros" ], optional = true }
 url = { version = "2.4.0", default-features = false, features = [ "serde" ], optional = true }
 zeroize = { version = "1.6.0", default-features = false, features = [ "zeroize_derive" ], optional = true }
