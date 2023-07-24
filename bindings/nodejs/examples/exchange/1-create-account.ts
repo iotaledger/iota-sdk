@@ -10,7 +10,6 @@ import { Wallet, WalletOptions, CoinType } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-// In this example we will create a wallet from mnemonic and a new account.
 async function run() {
     try {
         if (!process.env.WALLET_DB_PATH) {

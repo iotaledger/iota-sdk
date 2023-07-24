@@ -7,7 +7,6 @@
 
 import { Utils } from '@iota/sdk';
 
-// In this example we will generate a new random mnemonic.
 async function run() {
     try {
         // Set the generated mnemonic as env variable MNEMONIC so it can be used in the next examples.
