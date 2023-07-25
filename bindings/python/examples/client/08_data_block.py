@@ -12,7 +12,10 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 # Create and post a block with a tagged data payload
-block = client.submit_payload(TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data")))
+block = client.submit_payload(
+    TaggedDataPayload(
+        utf8_to_hex("tag"),
+        utf8_to_hex("data")))
 
 print(f'Data block sent: {os.environ["EXPLORER_URL"]}/block/{block[0]}')
 
