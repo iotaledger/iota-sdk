@@ -11,9 +11,8 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::parent::{ShallowLikeParents, WeakParents};
 use crate::types::block::{
-    parent::StrongParents,
+    parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     BlockId, Error, PROTOCOL_VERSION,
