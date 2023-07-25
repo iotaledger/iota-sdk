@@ -42,6 +42,12 @@ impl RegularTransactionEssenceBuilder {
         }
     }
 
+    /// Adds creation time to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_creation_time(mut self, creation_time: impl Into<Option<u64>>) -> Self {
+        self.creation_time = creation_time.into();
+        self
+    }
+
     /// Adds inputs to a [`RegularTransactionEssenceBuilder`].
     pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
         self.inputs = inputs.into();
@@ -69,11 +75,6 @@ impl RegularTransactionEssenceBuilder {
     /// Add a payload to a [`RegularTransactionEssenceBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
-        self
-    }
-
-    fn with_creation_time(mut self, creation_time: u64) -> Self {
-        self.creation_time = creation_time.into();
         self
     }
 
@@ -114,15 +115,16 @@ impl RegularTransactionEssenceBuilder {
 
         let creation_time = self.creation_time.unwrap_or_else(|| {
             #[cfg(feature = "std")]
-            let t = std::time::SystemTime::now()
+            let creation_time = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .expect("Time went backwards")
                 .as_nanos() as u64;
             // TODO no_std way to have a nanosecond timestamp
             // https://github.com/iotaledger/iota-sdk/issues/647
             #[cfg(not(feature = "std"))]
-            let t = 0;
-            t
+            let creation_time = 0;
+
+            creation_time
         });
 
         Ok(RegularTransactionEssence {
@@ -360,21 +362,20 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let network_id = dto
+                .network_id
+                .parse::<u64>()
+                .map_err(|_| Error::InvalidField("network_id"))?;
             let outputs = dto
                 .outputs
                 .into_iter()
                 .map(|o| Output::try_from_dto_with_params(o, &params))
                 .collect::<Result<Vec<Output>, Error>>()?;
 
-            let network_id = dto
-                .network_id
-                .parse::<u64>()
-                .map_err(|_| Error::InvalidField("network_id"))?;
-
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
+                .with_creation_time(dto.creation_time)
                 .with_inputs(dto.inputs)
-                .with_outputs(outputs)
-                .with_creation_time(dto.creation_time);
+                .with_outputs(outputs);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
