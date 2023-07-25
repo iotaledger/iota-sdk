@@ -48,6 +48,7 @@ pub enum AccountMethod {
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
@@ -66,6 +67,7 @@ pub enum AccountMethod {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
@@ -93,6 +95,7 @@ pub enum AccountMethod {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
