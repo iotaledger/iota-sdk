@@ -26,7 +26,6 @@ pub struct Parents<const MIN: u8, const MAX: u8>(
     #[packable(verify_with = verify_parents)] BoxedSlicePrefix<BlockId, BoundedU8<MIN, MAX>>,
 );
 
-#[allow(clippy::len_without_is_empty)]
 impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     /// The range representing the valid number of parents.
     pub const COUNT_RANGE: RangeInclusive<u8> = MIN..=MAX;
@@ -55,9 +54,19 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
         ))
     }
 
+    /// Returns the unique, ordered set of parents.
+    pub fn to_set(&self) -> BTreeSet<BlockId> {
+        self.0.iter().copied().collect()
+    }
+
     /// Returns the number of parents.
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    /// Returns whether the parents list is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     /// Returns an iterator over the parents.
@@ -71,6 +80,12 @@ fn verify_parents<const VERIFY: bool>(parents: &[BlockId], _: &()) -> Result<(),
         Err(Error::ParentsNotUniqueSorted)
     } else {
         Ok(())
+    }
+}
+
+impl<const MAX: u8> Default for Parents<0, MAX> {
+    fn default() -> Self {
+        Self(Default::default())
     }
 }
 
