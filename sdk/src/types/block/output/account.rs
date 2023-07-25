@@ -121,7 +121,7 @@ impl AccountOutputBuilder {
         self
     }
 
-    /// Sets the mana to the provided value. (∩ ͡° ͜ʖ ͡°)⊃━☆ﾟ. *
+    /// Sets the mana to the provided value.
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
@@ -631,6 +631,7 @@ impl Packable for AccountOutput {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
+        self.mana.pack(packer)?;
         self.native_tokens.pack(packer)?;
         self.account_id.pack(packer)?;
         self.state_index.pack(packer)?;

@@ -74,7 +74,7 @@ impl BasicOutputBuilder {
         self
     }
 
-    /// Sets the mana to the provided value. (∩ ͡° ͜ʖ ͡°)⊃━☆ﾟ. *
+    /// Sets the mana to the provided value.
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
