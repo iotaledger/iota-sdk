@@ -48,7 +48,7 @@ pub enum AccountMethod {
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        #[serde(with = "string")]
+        #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
@@ -93,7 +93,7 @@ pub enum AccountMethod {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        #[serde(with = "string")]
+        #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
