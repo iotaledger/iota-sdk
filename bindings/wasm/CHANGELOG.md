@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `destroyClient` is not a function;
+- Runtime error when importing from `sdk-wasm` due to `destroyClient` not being exported;
 
 ## 1.0.0 - 2023-07-24
 
