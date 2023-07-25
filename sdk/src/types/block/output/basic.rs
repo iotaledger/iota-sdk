@@ -374,7 +374,8 @@ pub(crate) mod dto {
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
         pub amount: String,
-        pub mana: String,
+        #[serde(with = "crate::utils::serde::string")]
+        pub mana: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
@@ -388,7 +389,7 @@ pub(crate) mod dto {
             Self {
                 kind: BasicOutput::KIND,
                 amount: value.amount().to_string(),
-                mana: value.mana().to_string(),
+                mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().iter().map(Into::into).collect::<_>(),
@@ -404,9 +405,7 @@ pub(crate) mod dto {
             let mut builder =
                 BasicOutputBuilder::new_with_amount(dto.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
 
-            builder = builder
-                .with_native_tokens(dto.native_tokens)
-                .with_mana(dto.mana.parse().map_err(|_| Error::InvalidField("mana"))?);
+            builder = builder.with_native_tokens(dto.native_tokens).with_mana(dto.mana);
 
             for b in dto.features {
                 builder = builder.add_feature(Feature::try_from(b)?);
