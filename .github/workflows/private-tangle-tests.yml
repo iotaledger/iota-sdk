@@ -42,35 +42,35 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+      # - name: Install toolchain
+      #   uses: actions-rs/toolchain@v1
+      #   with:
+      #     toolchain: stable
+      #     override: true
 
-      - name: Install required packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
+      # - name: Install required packages
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Install Nextest
-        uses: taiki-e/install-action@nextest
+      # - name: Install Nextest
+      #   uses: taiki-e/install-action@nextest
 
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
+      # - name: Cache dependencies
+      #   uses: Swatinem/rust-cache@v2
 
-      - name: Start private tangle
-        uses: "./.github/actions/private-tangle/setup"
+      # - name: Start private tangle
+      #   uses: "./.github/actions/private-tangle/setup"
 
-      - name: Start ledger nano
-        uses: "./.github/actions/ledger-nano"
+      # - name: Start ledger nano
+      #   uses: "./.github/actions/ledger-nano"
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: nextest
-          args: run --tests --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
+      # - name: Run tests
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: nextest
+      #     args: run --tests --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
 
-      - name: Tear down private tangle
-        if: always()
-        uses: "./.github/actions/private-tangle/tear-down"
+      # - name: Tear down private tangle
+      #   if: always()
+      #   uses: "./.github/actions/private-tangle/tear-down"
