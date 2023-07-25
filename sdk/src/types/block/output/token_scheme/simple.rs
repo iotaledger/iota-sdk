@@ -117,6 +117,8 @@ fn verify_supply(minted_tokens: &U256, melted_tokens: &U256, maximum_supply: &U2
 }
 
 mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

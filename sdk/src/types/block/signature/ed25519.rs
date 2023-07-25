@@ -128,7 +128,7 @@ impl Packable for Ed25519Signature {
 }
 
 mod dto {
-    use alloc::string::String;
+    use alloc::{format, string::String};
 
     use serde::{Deserialize, Serialize};
 

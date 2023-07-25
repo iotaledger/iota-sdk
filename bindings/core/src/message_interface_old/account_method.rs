@@ -23,7 +23,7 @@ use iota_sdk::{
         payload::transaction::TransactionId,
         signature::Ed25519Signature,
     },
-    utils::serde::{bip44::Bip44Def, option_string, string},
+    utils::serde::{bip44::Bip44Def, option_string},
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
@@ -392,7 +392,7 @@ pub enum AccountMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     IncreaseVotingPower {
-        #[serde(with = "string")]
+        #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
     },
     /// Reduces an account's "voting power" by a given amount.
@@ -401,7 +401,7 @@ pub enum AccountMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     DecreaseVotingPower {
-        #[serde(with = "string")]
+        #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
     },
     /// Stores participation information locally and returns the event.

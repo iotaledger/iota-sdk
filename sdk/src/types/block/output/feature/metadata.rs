@@ -75,7 +75,7 @@ impl core::fmt::Debug for MetadataFeature {
 }
 
 mod dto {
-    use alloc::borrow::Cow;
+    use alloc::{borrow::Cow, format};
 
     use serde::{Deserialize, Serialize};
 

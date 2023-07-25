@@ -17,7 +17,6 @@ use iota_sdk::{
         output::{dto::OutputDto, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
-    utils::serde::string,
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
@@ -163,7 +162,7 @@ pub enum AccountMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     PrepareDecreaseVotingPower {
-        #[serde(with = "string")]
+        #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
     },
     /// Designates a given amount of tokens towards an account's "voting power" by creating a
@@ -174,7 +173,7 @@ pub enum AccountMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     PrepareIncreaseVotingPower {
-        #[serde(with = "string")]
+        #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
     },
     /// Prepare to melt native tokens. This happens with the foundry output which minted them, by increasing it's
