@@ -136,7 +136,7 @@ impl ClientInner {
 
                 self.network_info.write().await.local_pow = true;
 
-                let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
+                let block_res = self.finish_basic_block_builder(None, block.payload().cloned()).await;
                 let block_with_local_pow = match block_res {
                     Ok(block) => {
                         // reset local PoW state
@@ -190,7 +190,7 @@ impl ClientInner {
 
                 self.network_info.write().await.local_pow = true;
 
-                let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
+                let block_res = self.finish_basic_block_builder(None, block.payload().cloned()).await;
                 let block_with_local_pow = match block_res {
                     Ok(block) => {
                         // reset local PoW state

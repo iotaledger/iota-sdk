@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with custom parents.
     let block = client
-        .finish_block_builder(Some(StrongParents::from_vec(tips)?), None)
+        .finish_basic_block_builder(Some(StrongParents::from_vec(tips)?), None)
         .await?;
 
     println!("{block:#?}");

@@ -9,13 +9,15 @@ use crate::pow::miner::{Miner, MinerBuilder, MinerCancel};
 use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
     client::{ClientInner, Error, Result},
-    types::block::{parent::StrongParents, payload::Payload, Block, BlockBuilder, Error as BlockError},
+    types::block::{
+        basic::BasicBlock, parent::StrongParents, payload::Payload, Block, BlockBuilder, Error as BlockError,
+    },
 };
 
 impl ClientInner {
     /// Finishes the block with local PoW if needed.
     /// Without local PoW, it will finish the block with a 0 nonce.
-    pub async fn finish_block_builder(
+    pub async fn finish_basic_block_builder(
         &self,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
@@ -29,7 +31,9 @@ impl ClientInner {
                 None => StrongParents::from_vec(self.get_tips().await?)?,
             };
 
-            Ok(BlockBuilder::new(strong_parents).with_payload(payload).finish()?)
+            Ok(BlockBuilder::<BasicBlock>::new(strong_parents)
+                .with_payload(payload)
+                .finish()?)
         }
     }
 
@@ -133,7 +137,7 @@ fn do_pow(
     payload: Option<Payload>,
     strong_parents: StrongParents,
 ) -> Result<Block> {
-    Ok(BlockBuilder::new(strong_parents)
+    Ok(BlockBuilder::<BasicBlock>::new(strong_parents)
         .with_payload(payload)
         .finish_nonce(|bytes| miner.nonce(bytes, min_pow_score))?)
 }

@@ -4,6 +4,7 @@
 use alloc::vec::Vec;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
+use derive_more::From;
 use packable::{
     error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -11,6 +12,7 @@ use packable::{
     Packable, PackableExt,
 };
 
+use super::{basic::BasicBlock, validation::ValidationBlock};
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
@@ -21,58 +23,19 @@ use crate::types::block::{
 /// A builder to build a [`Block`].
 #[derive(Clone)]
 #[must_use]
-pub struct BlockBuilder {
+pub struct BlockBuilder<B> {
     protocol_version: Option<u8>,
-    strong_parents: StrongParents,
-    weak_parents: WeakParents,
-    shallow_like_parents: ShallowLikeParents,
-    payload: OptionalPayload,
+    inner: B,
     nonce: Option<u64>,
-    burned_mana: u64,
 }
 
-impl BlockBuilder {
+impl<B> BlockBuilder<B> {
     const DEFAULT_NONCE: u64 = 0;
-
-    /// Creates a new [`BlockBuilder`].
-    #[inline(always)]
-    pub fn new(strong_parents: StrongParents) -> Self {
-        Self {
-            protocol_version: None,
-            strong_parents,
-            weak_parents: Default::default(),
-            shallow_like_parents: Default::default(),
-            payload: OptionalPayload::default(),
-            nonce: None,
-            burned_mana: Default::default(),
-        }
-    }
 
     /// Adds a protocol version to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_protocol_version(mut self, protocol_version: impl Into<Option<u8>>) -> Self {
         self.protocol_version = protocol_version.into();
-        self
-    }
-
-    /// Adds weak parents to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.weak_parents = weak_parents.into();
-        self
-    }
-
-    /// Adds shallow like parents to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.shallow_like_parents = shallow_like_parents.into();
-        self
-    }
-
-    /// Adds a payload to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
-        self.payload = payload.into();
         self
     }
 
@@ -82,24 +45,112 @@ impl BlockBuilder {
         self.nonce = nonce.into();
         self
     }
+}
+
+impl BlockBuilder<BasicBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
+    #[inline(always)]
+    pub fn new(strong_parents: StrongParents) -> Self {
+        Self {
+            protocol_version: None,
+            inner: BasicBlock {
+                strong_parents,
+                weak_parents: Default::default(),
+                shallow_like_parents: Default::default(),
+                payload: OptionalPayload::default(),
+                burned_mana: Default::default(),
+            },
+            nonce: None,
+        }
+    }
+
+    /// Adds weak parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.inner.weak_parents = weak_parents.into();
+        self
+    }
+
+    /// Adds shallow like parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.inner.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+
+    /// Adds a payload to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.inner.payload = payload.into();
+        self
+    }
 
     /// Adds burned mana to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
-        self.burned_mana = burned_mana;
+        self.inner.burned_mana = burned_mana;
+        self
+    }
+}
+
+impl BlockBuilder<ValidationBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn new(
+        strong_parents: StrongParents,
+        highest_supported_version: u8,
+        protocol_parameters: &ProtocolParameters,
+    ) -> Self {
+        Self {
+            protocol_version: None,
+            inner: ValidationBlock {
+                strong_parents,
+                weak_parents: Default::default(),
+                shallow_like_parents: Default::default(),
+                highest_supported_version,
+                protocol_parameters_hash: protocol_parameters.hash(),
+            },
+            nonce: None,
+        }
+    }
+
+    /// Adds weak parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.inner.weak_parents = weak_parents.into();
         self
     }
 
+    /// Adds shallow like parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.inner.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+}
+
+impl<B: Into<BlockType>> From<B> for BlockBuilder<B> {
+    fn from(inner: B) -> Self {
+        Self {
+            protocol_version: None,
+            inner,
+            nonce: None,
+        }
+    }
+}
+
+impl<B: Into<BlockType>> BlockBuilder<B> {
     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-        verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
+        let inner = self.inner.into();
+        verify_parents(
+            inner.strong_parents(),
+            inner.weak_parents(),
+            inner.shallow_like_parents(),
+        )?;
 
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
-            strong_parents: self.strong_parents,
-            weak_parents: self.weak_parents,
-            shallow_like_parents: self.shallow_like_parents,
-            payload: self.payload,
-            burned_mana: self.burned_mana,
+            inner,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
@@ -128,22 +179,87 @@ impl BlockBuilder {
     }
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, From)]
+pub enum BlockType {
+    Basic(BasicBlock),
+    Validation(ValidationBlock),
+}
+
+impl Packable for BlockType {
+    type UnpackError = Error;
+    type UnpackVisitor = ProtocolParameters;
+
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        match self {
+            Self::Basic(block) => {
+                BasicBlock::KIND.pack(packer)?;
+                block.pack(packer)
+            }
+            Self::Validation(block) => {
+                ValidationBlock::KIND.pack(packer)?;
+                block.pack(packer)
+            }
+        }?;
+
+        Ok(())
+    }
+
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
+            BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+        })
+    }
+}
+
+impl BlockType {
+    /// Returns the strong parents of a [`BlockType`].
+    #[inline(always)]
+    pub fn strong_parents(&self) -> &StrongParents {
+        match self {
+            Self::Basic(b) => b.strong_parents(),
+            Self::Validation(b) => b.strong_parents(),
+        }
+    }
+
+    /// Returns the weak parents of a [`BlockType`].
+    #[inline(always)]
+    pub fn weak_parents(&self) -> &WeakParents {
+        match self {
+            Self::Basic(b) => b.weak_parents(),
+            Self::Validation(b) => b.weak_parents(),
+        }
+    }
+
+    /// Returns the shallow like parents of a [`BlockType`].
+    #[inline(always)]
+    pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
+        match self {
+            Self::Basic(b) => b.shallow_like_parents(),
+            Self::Validation(b) => b.shallow_like_parents(),
+        }
+    }
+
+    /// Returns the optional payload of a [`Block`].
+    #[inline(always)]
+    pub fn payload(&self) -> Option<&Payload> {
+        match self {
+            Self::Basic(b) => b.payload(),
+            Self::Validation(_) => None,
+        }
+    }
+}
+
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Block {
     /// Protocol version of the block.
     protocol_version: u8,
-    /// Blocks that are strongly directly approved.
-    strong_parents: StrongParents,
-    /// Blocks that are weakly directly approved.
-    weak_parents: WeakParents,
-    /// Blocks that are directly referenced to adjust opinion.
-    shallow_like_parents: ShallowLikeParents,
-    /// The optional [Payload] of the block.
-    payload: OptionalPayload,
-    /// The amount of mana the Account identified by [`IssuerId`](super::IssuerId) is at most
-    /// willing to burn for this block.
-    burned_mana: u64,
+    pub(crate) inner: BlockType,
     /// The result of the Proof of Work in order for the block to be accepted into the tangle.
     nonce: u64,
 }
@@ -154,10 +270,20 @@ impl Block {
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
 
-    /// Creates a new [`BlockBuilder`] to construct an instance of a [`Block`].
+    /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
-    pub fn build(strong_parents: StrongParents) -> BlockBuilder {
-        BlockBuilder::new(strong_parents)
+    pub fn build_basic(strong_parents: StrongParents) -> BlockBuilder<BasicBlock> {
+        BlockBuilder::<BasicBlock>::new(strong_parents)
+    }
+
+    /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn build_validation(
+        strong_parents: StrongParents,
+        highest_supported_version: u8,
+        protocol_parameters: &ProtocolParameters,
+    ) -> BlockBuilder<ValidationBlock> {
+        BlockBuilder::<ValidationBlock>::new(strong_parents, highest_supported_version, protocol_parameters)
     }
 
     /// Returns the protocol version of a [`Block`].
@@ -169,25 +295,25 @@ impl Block {
     /// Returns the strong parents of a [`Block`].
     #[inline(always)]
     pub fn strong_parents(&self) -> &StrongParents {
-        &self.strong_parents
+        self.inner.strong_parents()
     }
 
     /// Returns the weak parents of a [`Block`].
     #[inline(always)]
     pub fn weak_parents(&self) -> &WeakParents {
-        &self.weak_parents
+        self.inner.weak_parents()
     }
 
     /// Returns the shallow like parents of a [`Block`].
     #[inline(always)]
     pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
-        &self.shallow_like_parents
+        self.inner.shallow_like_parents()
     }
 
     /// Returns the optional payload of a [`Block`].
     #[inline(always)]
     pub fn payload(&self) -> Option<&Payload> {
-        self.payload.as_ref()
+        self.inner.payload()
     }
 
     /// Returns the nonce of a [`Block`].
@@ -196,22 +322,16 @@ impl Block {
         self.nonce
     }
 
-    /// Returns the burned mana of a [`Block`].
+    /// Returns the inner block type of a [`Block`].
     #[inline(always)]
-    pub fn burned_mana(&self) -> u64 {
-        self.burned_mana
+    pub fn inner(&self) -> &BlockType {
+        &self.inner
     }
 
     /// Computes the identifier of the block.
     #[inline(always)]
     pub fn id(&self) -> BlockId {
         BlockId::new(Blake2b256::digest(self.pack_to_vec()).into())
-    }
-
-    /// Consumes the [`Block`], and returns ownership over its [`StrongParents`].
-    #[inline(always)]
-    pub fn into_strong_parents(self) -> StrongParents {
-        self.strong_parents
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
@@ -238,11 +358,7 @@ impl Packable for Block {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.protocol_version.pack(packer)?;
-        self.strong_parents.pack(packer)?;
-        self.weak_parents.pack(packer)?;
-        self.shallow_like_parents.pack(packer)?;
-        self.payload.pack(packer)?;
-        self.burned_mana.pack(packer)?;
+        self.inner.pack(packer)?;
         self.nonce.pack(packer)?;
 
         Ok(())
@@ -263,27 +379,13 @@ impl Packable for Block {
             }));
         }
 
-        let strong_parents = StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let weak_parents = WeakParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_parents(&strong_parents, &weak_parents, &shallow_like_parents).map_err(UnpackError::Packable)?;
-        }
-
-        let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
-
-        let burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let inner = BlockType::unpack::<_, VERIFY>(unpacker, visitor)?;
 
         let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let block = Self {
             protocol_version,
-            strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            payload,
-            burned_mana,
+            inner,
             nonce,
         };
 
@@ -303,7 +405,7 @@ impl Packable for Block {
     }
 }
 
-fn verify_parents(
+pub(crate) fn verify_parents(
     strong_parents: &StrongParents,
     weak_parents: &WeakParents,
     shallow_like_parents: &ShallowLikeParents,
@@ -320,35 +422,90 @@ fn verify_parents(
 }
 
 pub(crate) mod dto {
-    use alloc::{
-        collections::BTreeSet,
-        string::{String, ToString},
-    };
+    use alloc::string::{String, ToString};
 
     use serde::{Deserialize, Serialize};
+    use serde_json::Value;
 
     use super::*;
     use crate::types::{
-        block::{payload::dto::PayloadDto, Error},
+        block::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto, Error},
         TryFromDto, ValidationParams,
     };
+
+    #[derive(Clone, Debug, Eq, PartialEq, From)]
+    pub enum BlockTypeDto {
+        Basic(BasicBlockDto),
+        Validation(ValidationBlockDto),
+    }
+
+    impl From<&BlockType> for BlockTypeDto {
+        fn from(value: &BlockType) -> Self {
+            match value {
+                BlockType::Basic(b) => Self::Basic(b.into()),
+                BlockType::Validation(b) => Self::Validation(b.into()),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for BlockTypeDto {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let value = Value::deserialize(d)?;
+            Ok(
+                match value
+                    .get("type")
+                    .and_then(Value::as_u64)
+                    .ok_or_else(|| serde::de::Error::custom("invalid block type"))? as u8
+                {
+                    BasicBlock::KIND => Self::Basic(
+                        BasicBlockDto::deserialize(value)
+                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic block: {e}")))?,
+                    ),
+                    ValidationBlock::KIND => {
+                        Self::Validation(ValidationBlockDto::deserialize(value).map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize validation block: {e}"))
+                        })?)
+                    }
+                    _ => return Err(serde::de::Error::custom("invalid output type")),
+                },
+            )
+        }
+    }
+
+    impl Serialize for BlockTypeDto {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            #[derive(Serialize)]
+            #[serde(untagged)]
+            enum BlockTypeDto_<'a> {
+                T0(&'a BasicBlockDto),
+                T1(&'a ValidationBlockDto),
+            }
+            #[derive(Serialize)]
+            struct TypedBlock<'a> {
+                #[serde(flatten)]
+                kind: BlockTypeDto_<'a>,
+            }
+            let output = match self {
+                Self::Basic(o) => TypedBlock {
+                    kind: BlockTypeDto_::T0(o),
+                },
+                Self::Validation(o) => TypedBlock {
+                    kind: BlockTypeDto_::T1(o),
+                },
+            };
+            output.serialize(serializer)
+        }
+    }
 
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct BlockDto {
-        ///
         pub protocol_version: u8,
-        ///
-        pub strong_parents: BTreeSet<BlockId>,
-        pub weak_parents: BTreeSet<BlockId>,
-        pub shallow_like_parents: BTreeSet<BlockId>,
-        ///
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub payload: Option<PayloadDto>,
-        #[serde(with = "crate::utils::serde::string")]
-        pub burned_mana: u64,
-        ///
+        pub inner: BlockTypeDto,
         pub nonce: String,
     }
 
@@ -356,11 +513,7 @@ pub(crate) mod dto {
         fn from(value: &Block) -> Self {
             Self {
                 protocol_version: value.protocol_version(),
-                strong_parents: value.strong_parents().to_set(),
-                weak_parents: value.weak_parents().to_set(),
-                shallow_like_parents: value.shallow_like_parents().to_set(),
-                payload: value.payload().map(Into::into),
-                burned_mana: value.burned_mana(),
+                inner: value.inner().into(),
                 nonce: value.nonce().to_string(),
             }
         }
@@ -371,20 +524,23 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let strong_parents = StrongParents::from_set(dto.strong_parents)?;
-
-            let mut builder = BlockBuilder::new(strong_parents)
-                .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
-                .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+            let inner = BlockType::try_from_dto_with_params_inner(dto.inner, params)?;
+            BlockBuilder::from(inner)
                 .with_protocol_version(dto.protocol_version)
-                .with_burned_mana(dto.burned_mana)
-                .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
+                .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?)
+                .finish()
+        }
+    }
 
-            if let Some(p) = dto.payload {
-                builder = builder.with_payload(Payload::try_from_dto_with_params_inner(p, params)?);
-            }
+    impl TryFromDto for BlockType {
+        type Dto = BlockTypeDto;
+        type Error = Error;
 
-            builder.finish()
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(match dto {
+                BlockTypeDto::Basic(b) => Self::Basic(BasicBlock::try_from_dto_with_params(b, &params)?),
+                BlockTypeDto::Validation(b) => Self::Validation(ValidationBlock::try_from_dto_with_params(b, &params)?),
+            })
         }
     }
 }

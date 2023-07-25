@@ -69,7 +69,7 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_block_builder(None, Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
+                    .finish_basic_block_builder(None, Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
                     .await?
                     .id(),
             };
@@ -109,7 +109,7 @@ where
                         } else if block_metadata.should_reattach.unwrap_or(false) {
                             let reattached_block = self
                                 .client()
-                                .finish_block_builder(
+                                .finish_basic_block_builder(
                                     None,
                                     Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                                 )

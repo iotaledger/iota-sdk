@@ -4,6 +4,7 @@
 use alloc::vec::Vec;
 
 use crate::types::block::{
+    basic::BasicBlock,
     parent::StrongParents,
     rand::{
         bytes::rand_bytes_array, number::rand_number, parents::rand_strong_parents, payload::rand_payload_for_block,
@@ -23,9 +24,9 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
     parents
 }
 
-/// Generates a random block with given parents.
-pub fn rand_block_with_strong_parents(strong_parents: StrongParents) -> Block {
-    BlockBuilder::new(strong_parents)
+/// Generates a random basic block with given parents.
+pub fn rand_basic_block_with_strong_parents(strong_parents: StrongParents) -> Block {
+    BlockBuilder::<BasicBlock>::new(strong_parents)
         .with_payload(rand_payload_for_block())
         .with_nonce(rand_number::<u64>())
         .finish()
@@ -34,5 +35,5 @@ pub fn rand_block_with_strong_parents(strong_parents: StrongParents) -> Block {
 
 /// Generates a random block.
 pub fn rand_block() -> Block {
-    rand_block_with_strong_parents(rand_strong_parents())
+    rand_basic_block_with_strong_parents(rand_strong_parents())
 }

@@ -173,7 +173,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow().await),
         ClientMethod::PostBlockPayload { payload } => {
             let block = client
-                .finish_block_builder(
+                .finish_basic_block_builder(
                     None,
                     Some(Payload::try_from_dto_with_params(
                         payload,

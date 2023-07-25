@@ -34,7 +34,7 @@ where
         }
         let block = self
             .client()
-            .finish_block_builder(None, Some(Payload::from(transaction_payload)))
+            .finish_basic_block_builder(None, Some(Payload::from(transaction_payload)))
             .await?;
 
         #[cfg(feature = "events")]

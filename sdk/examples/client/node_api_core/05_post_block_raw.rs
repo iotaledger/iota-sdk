@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create the block.
-    let block = client.finish_block_builder(None, None).await?;
+    let block = client.finish_basic_block_builder(None, None).await?;
     // Post the block as raw bytes.
     let block_id = client.post_block_raw(&block).await?;
 

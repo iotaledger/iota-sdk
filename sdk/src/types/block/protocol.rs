@@ -4,7 +4,8 @@
 use alloc::string::String;
 use core::borrow::Borrow;
 
-use packable::{prefix::StringPrefix, Packable};
+use crypto::hashes::{blake2b::Blake2b256, Digest};
+use packable::{prefix::StringPrefix, Packable, PackableExt};
 
 use super::address::Hrp;
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
@@ -143,6 +144,10 @@ impl ProtocolParameters {
     pub fn slot_duration_in_seconds(&self) -> u8 {
         self.slot_duration_in_seconds
     }
+
+    pub fn hash(&self) -> ProtocolParametersHash {
+        ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
+    }
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.
@@ -161,3 +166,12 @@ pub fn protocol_parameters() -> ProtocolParameters {
     )
     .unwrap()
 }
+
+impl_id!(
+    pub ProtocolParametersHash,
+    32,
+    "The hash of the protocol parameters for the Highest Supported Version."
+);
+
+#[cfg(feature = "serde")]
+string_serde_impl!(ProtocolParametersHash);

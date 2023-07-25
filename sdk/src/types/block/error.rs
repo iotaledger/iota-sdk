@@ -65,6 +65,7 @@ pub enum Error {
     InvalidParentCount,
     InvalidPayloadKind(u32),
     InvalidPayloadLength { expected: usize, actual: usize },
+    InvalidProtocolParametersHash { expected: String, actual: String },
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -192,6 +193,12 @@ impl fmt::Display for Error {
             Self::InvalidPayloadKind(k) => write!(f, "invalid payload kind: {k}"),
             Self::InvalidPayloadLength { expected, actual } => {
                 write!(f, "invalid payload length: expected {expected} but got {actual}")
+            }
+            Self::InvalidProtocolParametersHash { expected, actual } => {
+                write!(
+                    f,
+                    "invalid protocol parameters hash: expected {expected} but got {actual}"
+                )
             }
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),

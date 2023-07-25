@@ -4,6 +4,7 @@
 use iota_sdk::{
     pow::{miner::get_miner, score::PowScorer},
     types::block::{
+        basic::BasicBlock,
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
         protocol::protocol_parameters,
@@ -17,7 +18,7 @@ use packable::{error::UnpackError, PackableExt};
 
 #[test]
 fn default_finish_zero_nonce() {
-    let block = BlockBuilder::new(rand_strong_parents()).finish().unwrap();
+    let block = BlockBuilder::<BasicBlock>::new(rand_strong_parents()).finish().unwrap();
 
     assert!(block.nonce() == 0);
 }
@@ -25,7 +26,7 @@ fn default_finish_zero_nonce() {
 #[test]
 fn pow_provider() {
     let min_pow_score = protocol_parameters().min_pow_score();
-    let block = BlockBuilder::new(rand_strong_parents())
+    let block = BlockBuilder::<BasicBlock>::new(rand_strong_parents())
         .finish_nonce(get_miner(min_pow_score))
         .unwrap();
 
@@ -37,7 +38,7 @@ fn pow_provider() {
 
 #[test]
 fn invalid_length() {
-    let res = BlockBuilder::new(Parents::from_vec(rand_block_ids(2)).unwrap())
+    let res = BlockBuilder::<BasicBlock>::new(Parents::from_vec(rand_block_ids(2)).unwrap())
         .with_nonce(42)
         .with_payload(TaggedDataPayload::new(vec![42], vec![0u8; Block::LENGTH_MAX - Block::LENGTH_MIN - 9]).unwrap())
         .finish();
@@ -83,7 +84,7 @@ fn unpack_invalid_remaining_bytes() {
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = BlockBuilder::new(rand_strong_parents()).finish().unwrap();
+    let block = BlockBuilder::<BasicBlock>::new(rand_strong_parents()).finish().unwrap();
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -100,7 +101,7 @@ fn getters() {
     let payload = Payload::from(rand_tagged_data_payload());
     let nonce: u64 = rand_number();
 
-    let block = BlockBuilder::new(parents.clone())
+    let block = BlockBuilder::<BasicBlock>::new(parents.clone())
         .with_payload(payload.clone())
         .with_nonce(nonce)
         .finish()
@@ -115,7 +116,7 @@ fn getters() {
 #[test]
 fn build_into_parents() {
     let parents = rand_strong_parents();
-    let block = Block::build(parents.clone()).finish().unwrap();
+    let block = Block::build_basic(parents.clone()).finish().unwrap();
 
-    assert_eq!(block.into_strong_parents(), parents);
+    assert_eq!(block.strong_parents(), &parents);
 }
