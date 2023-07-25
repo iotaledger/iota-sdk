@@ -22,6 +22,7 @@ use crate::types::{
 #[must_use]
 pub struct RegularTransactionEssenceBuilder {
     network_id: u64,
+    creation_time: Option<u64>,
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
@@ -33,11 +34,18 @@ impl RegularTransactionEssenceBuilder {
     pub fn new(network_id: u64, inputs_commitment: InputsCommitment) -> Self {
         Self {
             network_id,
+            creation_time: None,
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
             payload: OptionalPayload::default(),
         }
+    }
+
+    /// Adds creation time to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_creation_time(mut self, creation_time: impl Into<Option<u64>>) -> Self {
+        self.creation_time = creation_time.into();
+        self
     }
 
     /// Adds inputs to a [`RegularTransactionEssenceBuilder`].
@@ -105,15 +113,19 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
-        #[cfg(feature = "std")]
-        let creation_time = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_nanos() as u64;
-        // TODO no_std way to have a nanosecond timestamp
-        // https://github.com/iotaledger/iota-sdk/issues/647
-        #[cfg(not(feature = "std"))]
-        let creation_time = 0;
+        let creation_time = self.creation_time.unwrap_or_else(|| {
+            #[cfg(feature = "std")]
+            let creation_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos() as u64;
+            // TODO no_std way to have a nanosecond timestamp
+            // https://github.com/iotaledger/iota-sdk/issues/647
+            #[cfg(not(feature = "std"))]
+            let creation_time = 0;
+
+            creation_time
+        });
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
@@ -349,12 +361,6 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let outputs = dto
-                .outputs
-                .into_iter()
-                .map(|o| Output::try_from_dto_with_params(o, &params))
-                .collect::<Result<Vec<Output>, Error>>()?;
-
             let network_id = dto
                 .network_id
                 .parse::<u64>()
@@ -364,8 +370,14 @@ pub(crate) mod dto {
                 .into_iter()
                 .map(TryInto::try_into)
                 .collect::<Result<Vec<Input>, Error>>()?;
+            let outputs = dto
+                .outputs
+                .into_iter()
+                .map(|o| Output::try_from_dto_with_params(o, &params))
+                .collect::<Result<Vec<Output>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
+                .with_creation_time(dto.creation_time)
                 .with_inputs(inputs)
                 .with_outputs(outputs);
 
