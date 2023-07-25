@@ -62,11 +62,7 @@ export class Account {
         this.methodHandler = methodHandler;
     }
 
-    /**
-     * Build an `AliasOutput`.
-     * @param data Options for building an `AliasOutput`.
-     * @returns The built `AliasOutput`.
-     */
+    /** @deprecated use Client::buildAliasOutput() instead. */
     async buildAliasOutput(data: BuildAliasOutputData): Promise<AliasOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -78,11 +74,7 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
-    /**
-     * Build a `BasicOutput`.
-     * @param data Options for building a `BasicOutput`.
-     * @returns The built `BasicOutput`.
-     */
+    /** @deprecated use Client::buildBasicOutput() instead. */
     async buildBasicOutput(data: BuildBasicOutputData): Promise<BasicOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -94,11 +86,7 @@ export class Account {
         return Output.parse(JSON.parse(response).payload) as BasicOutput;
     }
 
-    /**
-     * Build a `FoundryOutput`.
-     * @param data Options for building a `FoundryOutput`.
-     * @returns The built `FoundryOutput`.
-     */
+    /** @deprecated use Client::buildFoundryOutput() instead. */
     async buildFoundryOutput(
         data: BuildFoundryOutputData,
     ): Promise<FoundryOutput> {
@@ -112,11 +100,7 @@ export class Account {
         return Output.parse(JSON.parse(response).payload) as FoundryOutput;
     }
 
-    /**
-     * Build an `NftOutput`.
-     * @param data Options for building an `NftOutput`.
-     * @returns The built `NftOutput`.
-     */
+    /** @deprecated use Client::buildNftOutput() instead. */
     async buildNftOutput(data: BuildNftOutputData): Promise<NftOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,

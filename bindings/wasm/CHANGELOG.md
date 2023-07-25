@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.1 - 2023-07-25
 
+Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.
+
 ### Fixed
 
 - Runtime error when importing from `sdk-wasm` due to `destroyClient` not being exported;
