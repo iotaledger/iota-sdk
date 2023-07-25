@@ -171,7 +171,7 @@ mod dto {
             let dto = Ed25519SignatureDto::deserialize(d)?;
             if dto.kind != Self::KIND {
                 return Err(serde::de::Error::custom(format!(
-                    "invalid account unlock type: expected {}, found {}",
+                    "invalid signature type: expected {}, found {}",
                     Self::KIND,
                     dto.kind
                 )));
