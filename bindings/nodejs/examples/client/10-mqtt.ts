@@ -1,13 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    Block,
-    Client,
-    initLogger,
-    MilestonePayload,
-    parsePayload,
-} from '@iota/sdk';
+import { Block, Client, initLogger } from '@iota/sdk';
 import { plainToInstance } from 'class-transformer';
 
 require('dotenv').config({ path: '.env' });
@@ -15,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/10-mqtt.ts
 
-// In this example we will listen to MQTT topics and print the block and milestone payloads.
+// In this example we will listen to MQTT topics and print the block payloads.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
@@ -39,19 +33,7 @@ async function run() {
         }
 
         const parsed = JSON.parse(data);
-        if (parsed.topic == 'milestone') {
-            const payload = parsePayload(
-                JSON.parse(parsed.payload),
-            ) as MilestonePayload;
-            const index = payload.index;
-            const previousMilestone = payload.previousMilestoneId;
-            console.log(
-                'New milestone index' +
-                    index +
-                    ', previous ID: ' +
-                    previousMilestone,
-            );
-        } else if (parsed.topic == 'blocks') {
+        if (parsed.topic == 'blocks') {
             const block = plainToInstance(Block, JSON.parse(parsed.payload));
             console.log('payload:', block.payload);
         }
