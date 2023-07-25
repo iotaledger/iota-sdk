@@ -55,7 +55,10 @@ print(f'  message converted to hex: {message_hex}')
 
 # Create and post a block with a tagged data payload
 # The client returns your block data (blockIdAndBlock)
-blockIdAndBlock = client.submit_payload(TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data")))
+blockIdAndBlock = client.submit_payload(
+    TaggedDataPayload(
+        utf8_to_hex("tag"),
+        utf8_to_hex("data")))
 
 block_id = blockIdAndBlock[0]
 block = blockIdAndBlock[1]
