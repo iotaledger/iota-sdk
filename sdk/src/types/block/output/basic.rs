@@ -201,7 +201,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
     fn from(output: &BasicOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
-            mana: output.mana.into(),
+            mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
             features: output.features.iter().cloned().collect(),
