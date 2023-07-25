@@ -454,7 +454,7 @@ fn not_enough_storage_deposit_for_remainder() {
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_001,
-            required: 1_213_000,
+            required: 1_217_000,
         })
     ));
 }
@@ -917,11 +917,13 @@ fn remainder_lower_than_rent() {
     )
     .select();
 
+    println!("{selected:?}");
+
     assert!(matches!(
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_000,
-            required: 1_013_000,
+            required: 1_017_000,
         })
     ));
 }
@@ -957,7 +959,7 @@ fn remainder_lower_than_rent_2() {
         selected,
         Err(Error::InsufficientAmount {
             found: 3_000_000,
-            required: 3_013_000,
+            required: 3_017_000,
         })
     ));
 }

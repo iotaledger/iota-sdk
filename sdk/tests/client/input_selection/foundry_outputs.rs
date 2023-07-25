@@ -68,7 +68,7 @@ fn existing_input_account_for_foundry_account() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([Account(
-        1_251_500,
+        1_255_500,
         account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,

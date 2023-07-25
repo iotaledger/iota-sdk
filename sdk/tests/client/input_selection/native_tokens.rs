@@ -823,11 +823,13 @@ fn insufficient_amount_for_remainder() {
     )
     .select();
 
+    println!("{selected:?}");
+
     assert!(matches!(
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_000,
-            required: 1_248_000,
+            required: 1_252_000,
         })
     ));
 }

@@ -141,12 +141,14 @@ fn input_amount_lt_output_amount() {
     )
     .select();
 
+    println!("{selected:?}");
+
     assert!(matches!(
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_000,
             // Amount we want to send + storage deposit for nft remainder
-            required: 2_229_500,
+            required: 2_233_500,
         })
     ));
 }
@@ -157,7 +159,7 @@ fn basic_output_with_nft_input() {
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs([Nft(
-        2_229_500,
+        2_233_500,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -322,7 +324,7 @@ fn not_enough_storage_deposit_for_remainder() {
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_001,
-            required: 1_213_000,
+            required: 1_217_000,
         })
     ));
 }

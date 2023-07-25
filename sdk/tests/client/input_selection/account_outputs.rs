@@ -149,7 +149,7 @@ fn input_amount_lt_output_amount() {
         Err(Error::InsufficientAmount {
             found: 1_000_000,
             // Amount we want to send + storage deposit for account remainder
-            required: 2_251_500,
+            required: 2_255_500,
         })
     ));
 }
@@ -192,12 +192,14 @@ fn input_amount_lt_output_amount_2() {
     )
     .select();
 
+    println!("{selected:?}");
+
     assert!(matches!(
         selected,
         Err(Error::InsufficientAmount {
             found: 3_000_000,
             // Amount we want to send + storage deposit for account remainder
-            required: 3_251_501
+            required: 3_255_501
         })
     ));
 }
@@ -208,7 +210,7 @@ fn basic_output_with_account_input() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([Account(
-        2_251_500,
+        2_255_500,
         account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,
@@ -373,7 +375,7 @@ fn not_enough_storage_deposit_for_remainder() {
         selected,
         Err(Error::InsufficientAmount {
             found: 1_000_001,
-            required: 1_213_000,
+            required: 1_217_000,
         })
     ));
 }
