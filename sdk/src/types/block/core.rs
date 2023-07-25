@@ -29,6 +29,7 @@ pub struct BlockBuilder {
     shallow_like_parents: ShallowLikeParents,
     payload: OptionalPayload,
     nonce: Option<u64>,
+    burned_mana: u64,
 }
 
 impl BlockBuilder {
@@ -44,6 +45,7 @@ impl BlockBuilder {
             shallow_like_parents: Default::default(),
             payload: OptionalPayload::default(),
             nonce: None,
+            burned_mana: Default::default(),
         }
     }
 
@@ -82,6 +84,13 @@ impl BlockBuilder {
         self
     }
 
+    /// Adds burned mana to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
+        self.burned_mana = burned_mana;
+        self
+    }
+
     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
         verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
@@ -91,6 +100,7 @@ impl BlockBuilder {
             weak_parents: self.weak_parents,
             shallow_like_parents: self.shallow_like_parents,
             payload: self.payload,
+            burned_mana: self.burned_mana,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
@@ -132,6 +142,9 @@ pub struct Block {
     shallow_like_parents: ShallowLikeParents,
     /// The optional [Payload] of the block.
     payload: OptionalPayload,
+    /// The amount of mana the Account identified by [`IssuerId`](super::IssuerId) is at most
+    /// willing to burn for this block.
+    burned_mana: u64,
     /// The result of the Proof of Work in order for the block to be accepted into the tangle.
     nonce: u64,
 }
@@ -184,6 +197,12 @@ impl Block {
         self.nonce
     }
 
+    /// Returns the burned mana of a [`Block`].
+    #[inline(always)]
+    pub fn burned_mana(&self) -> u64 {
+        self.burned_mana
+    }
+
     /// Computes the identifier of the block.
     #[inline(always)]
     pub fn id(&self) -> BlockId {
@@ -224,6 +243,7 @@ impl Packable for Block {
         self.weak_parents.pack(packer)?;
         self.shallow_like_parents.pack(packer)?;
         self.payload.pack(packer)?;
+        self.burned_mana.pack(packer)?;
         self.nonce.pack(packer)?;
 
         Ok(())
@@ -254,6 +274,8 @@ impl Packable for Block {
 
         let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
 
+        let burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
         let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let block = Self {
@@ -262,6 +284,7 @@ impl Packable for Block {
             weak_parents,
             shallow_like_parents,
             payload,
+            burned_mana,
             nonce,
         };
 
@@ -324,6 +347,8 @@ pub(crate) mod dto {
         ///
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
+        #[serde(with = "crate::utils::serde::string")]
+        pub burned_mana: u64,
         ///
         pub nonce: String,
     }
@@ -336,6 +361,7 @@ pub(crate) mod dto {
                 weak_parents: value.weak_parents().to_set(),
                 shallow_like_parents: value.shallow_like_parents().to_set(),
                 payload: value.payload().map(Into::into),
+                burned_mana: value.burned_mana(),
                 nonce: value.nonce().to_string(),
             }
         }
@@ -352,6 +378,7 @@ pub(crate) mod dto {
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
                 .with_protocol_version(dto.protocol_version)
+                .with_burned_mana(dto.burned_mana)
                 .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 
             if let Some(p) = dto.payload {
