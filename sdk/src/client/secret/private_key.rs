@@ -14,6 +14,7 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
+use zeroize::Zeroize;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
@@ -94,19 +95,26 @@ impl SecretManage for PrivateKeySecretManager {
     }
 }
 
-// impl PrivateKeySecretManager {
-//     /// Create a new [`PrivateKeySecretManager`] from a BIP-39 mnemonic in English.
-//     ///
-//     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-//     pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
-//         Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?.into()))
-//     }
+impl PrivateKeySecretManager {
+    /// Create a new [`PrivateKeySecretManager`] from a base 58 encoded private key.
+    pub fn try_from_b58<T: AsRef<[u8]>>(b58: T) -> Result<Self, Error> {
+        let mut bytes = [0u8; ed25519::SecretKey::LENGTH];
 
-//     /// Create a new [`PrivateKeySecretManager`] from a hex-encoded raw seed string.
-//     pub fn try_from_hex_seed(hex: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
-//         let hex = hex.into();
-//         let bytes = Zeroizing::new(prefix_hex::decode::<Vec<u8>>(hex.as_str())?);
-//         let seed = Seed::from_bytes(bytes.as_ref());
-//         Ok(Self(seed))
-//     }
-// }
+        if bs58::decode(b58.as_ref()).onto(bytes).unwrap() != ed25519::SecretKey::LENGTH {
+            panic!();
+        }
+
+        let private_key = Self(ed25519::SecretKey::from_bytes(&bytes));
+
+        bytes.zeroize();
+
+        Ok(private_key)
+    }
+
+    /// Create a new [`PrivateKeySecretManager`] from an hex encoded private key.
+    pub fn try_from_hex<T: AsRef<str>>(hex: T) -> Result<Self, Error> {
+        let bytes = prefix_hex::decode(hex)?;
+
+        Ok(Self(ed25519::SecretKey::from_bytes(&bytes)))
+    }
+}
