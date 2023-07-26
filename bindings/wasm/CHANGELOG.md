@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.2 - 2023-MM-DD
+
+Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.
+
+### Fixed
+
+- Runtime serializtion error of `BigInt` when working with native token amounts;
+
 ## 1.0.1 - 2023-07-25
 
 Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.
