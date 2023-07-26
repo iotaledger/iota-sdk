@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Constrcutor types in `RegularTransactionEssence`;
+- Constructor types in `RegularTransactionEssence`;
 
 
 ## 1.0.1 - 2023-07-25
