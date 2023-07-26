@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::ToString;
+
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,

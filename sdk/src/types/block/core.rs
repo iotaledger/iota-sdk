@@ -422,7 +422,10 @@ pub(crate) fn verify_parents(
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
+    use alloc::{
+        format,
+        string::{String, ToString},
+    };
 
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
