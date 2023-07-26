@@ -1658,7 +1658,6 @@ dependencies = [
  "iterator-sorted",
  "lazy_static",
  "log",
- "num_cpus",
  "once_cell",
  "packable",
  "prefix-hex",
