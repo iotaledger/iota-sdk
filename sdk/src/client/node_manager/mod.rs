@@ -30,7 +30,6 @@ use crate::{
 // will send the requests for some endpoints to multiple nodes and compares the results.
 pub struct NodeManager {
     pub(crate) primary_node: Option<Node>,
-    primary_pow_node: Option<Node>,
     pub(crate) nodes: HashSet<Node>,
     permanodes: HashSet<Node>,
     pub(crate) ignore_node_health: bool,
@@ -46,7 +45,6 @@ impl std::fmt::Debug for NodeManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("NodeManager");
         d.field("primary_node", &self.primary_node);
-        d.field("primary_pow_node", &self.primary_pow_node);
         d.field("nodes", &self.nodes);
         d.field("permanodes", &self.permanodes);
         d.field("ignore_node_health", &self.ignore_node_health);
@@ -63,27 +61,13 @@ impl NodeManager {
         NodeManagerBuilder::new()
     }
 
-    fn get_nodes(
-        &self,
-        path: &str,
-        query: Option<&str>,
-        use_pow_nodes: bool,
-        prefer_permanode: bool,
-    ) -> Result<Vec<Node>> {
+    fn get_nodes(&self, path: &str, query: Option<&str>, prefer_permanode: bool) -> Result<Vec<Node>> {
         let mut nodes_with_modified_url: Vec<Node> = Vec::new();
 
         if prefer_permanode || (path == "api/core/v3/blocks" && query.is_some()) {
             for permanode in &self.permanodes {
                 if !nodes_with_modified_url.iter().any(|n| n.url == permanode.url) {
                     nodes_with_modified_url.push(permanode.clone());
-                }
-            }
-        }
-
-        if use_pow_nodes {
-            if let Some(pow_node) = &self.primary_pow_node {
-                if !nodes_with_modified_url.iter().any(|n| n.url == pow_node.url) {
-                    nodes_with_modified_url.push(pow_node.clone());
                 }
             }
         }
@@ -102,20 +86,7 @@ impl NodeManager {
                     .read()
                     .map_err(|_| crate::client::Error::PoisonError)?
                     .iter()
-                    .filter_map(|(n, info)| {
-                        // Only add nodes with pow feature enabled, when remote PoW is used
-                        if use_pow_nodes {
-                            let pow_feature = String::from("pow");
-
-                            if info.features.contains(&pow_feature) {
-                                Some(n.clone())
-                            } else {
-                                None
-                            }
-                        } else {
-                            Some(n.clone())
-                        }
-                    })
+                    .filter_map(|(n, info)| Some(n.clone()))
                     .collect()
             }
             #[cfg(target_family = "wasm")]
@@ -137,11 +108,6 @@ impl NodeManager {
         nodes_with_modified_url.retain(|n| !n.disabled);
 
         if nodes_with_modified_url.is_empty() {
-            if use_pow_nodes {
-                return Err(crate::client::Error::Node(
-                    crate::client::node_api::error::Error::UnavailablePow,
-                ));
-            }
             return Err(crate::client::Error::HealthyNodePoolEmpty);
         }
 
