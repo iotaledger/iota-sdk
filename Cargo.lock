@@ -1648,7 +1648,6 @@ dependencies = [
  "gloo-storage",
  "gloo-timers",
  "hashbrown 0.14.0",
- "heck",
  "hex",
  "instant",
  "iota-crypto",
