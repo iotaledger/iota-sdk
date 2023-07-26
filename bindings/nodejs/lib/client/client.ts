@@ -33,7 +33,6 @@ import {
     UnlockCondition,
     Payload,
     TransactionPayload,
-    Output,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
