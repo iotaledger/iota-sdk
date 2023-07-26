@@ -92,10 +92,8 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
     let client_options = client_options
         .as_object_mut()
         .ok_or(Error::Storage("malformatted client options".to_owned()))?;
-    check_omitted_opt("powWorkerCount", client_options);
     check_omitted_opt("latestMilestoneTimestamp", client_options);
     check_omitted_opt("primaryNode", client_options);
-    check_omitted_opt("primaryPowNode", client_options);
     check_omitted_list("nodes", client_options);
     check_omitted_list("permanodes", client_options);
     if let Some(nodes) = client_options.get_mut("nodes") {

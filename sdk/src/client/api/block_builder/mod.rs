@@ -11,8 +11,6 @@ use crate::{
 };
 
 impl ClientInner {
-    /// Finishes the block with local PoW if needed.
-    /// Without local PoW, it will finish the block with a 0 nonce.
     pub async fn finish_block_builder(
         &self,
         strong_parents: Option<StrongParents>,
