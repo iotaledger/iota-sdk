@@ -17,6 +17,7 @@ use iota_sdk::{
         payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
     },
+    utils::serde::string,
 };
 use serde::{Deserialize, Serialize};
 
@@ -33,6 +34,9 @@ pub enum ClientMethod {
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         state_index: Option<u32>,
@@ -49,6 +53,9 @@ pub enum ClientMethod {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
@@ -74,6 +81,9 @@ pub enum ClientMethod {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,

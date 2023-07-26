@@ -397,6 +397,7 @@ impl WalletMessageHandler {
         match method {
             AccountMethod::BuildAccountOutput {
                 amount,
+                mana,
                 native_tokens,
                 account_id,
                 state_index,
@@ -412,6 +413,7 @@ impl WalletMessageHandler {
                     } else {
                         OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
+                    mana,
                     native_tokens,
                     &account_id,
                     state_index,
@@ -427,6 +429,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::BuildBasicOutput {
                 amount,
+                mana,
                 native_tokens,
                 unlock_conditions,
                 features,
@@ -437,6 +440,7 @@ impl WalletMessageHandler {
                     } else {
                         OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
+                    mana,
                     native_tokens,
                     unlock_conditions,
                     features,
@@ -473,6 +477,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::BuildNftOutput {
                 amount,
+                mana,
                 native_tokens,
                 nft_id,
                 unlock_conditions,
@@ -485,6 +490,7 @@ impl WalletMessageHandler {
                     } else {
                         OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
+                    mana,
                     native_tokens,
                     &nft_id,
                     unlock_conditions,

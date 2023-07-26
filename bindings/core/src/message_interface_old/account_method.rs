@@ -25,7 +25,7 @@ use iota_sdk::{
         payload::transaction::TransactionId,
         signature::dto::Ed25519SignatureDto,
     },
-    utils::serde::bip44::Bip44Def,
+    utils::serde::{bip44::Bip44Def, string},
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
@@ -48,6 +48,9 @@ pub enum AccountMethod {
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         state_index: Option<u32>,
@@ -64,6 +67,9 @@ pub enum AccountMethod {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
@@ -89,6 +95,9 @@ pub enum AccountMethod {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
