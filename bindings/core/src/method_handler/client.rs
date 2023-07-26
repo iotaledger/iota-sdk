@@ -59,6 +59,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
     let response = match method {
         ClientMethod::BuildAccountOutput {
             amount,
+            mana,
             native_tokens,
             account_id,
             state_index,
@@ -74,6 +75,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 } else {
                     OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
+                mana,
                 native_tokens,
                 &account_id,
                 state_index,
@@ -89,6 +91,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::BuildBasicOutput {
             amount,
+            mana,
             native_tokens,
             unlock_conditions,
             features,
@@ -99,6 +102,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 } else {
                     OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
+                mana,
                 native_tokens,
                 unlock_conditions,
                 features,
@@ -135,6 +139,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::BuildNftOutput {
             amount,
+            mana,
             native_tokens,
             nft_id,
             unlock_conditions,
@@ -147,6 +152,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 } else {
                     OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
+                mana,
                 native_tokens,
                 &nft_id,
                 unlock_conditions,

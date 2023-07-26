@@ -466,7 +466,7 @@ pub(crate) mod dto {
                             serde::de::Error::custom(format!("cannot deserialize validation block: {e}"))
                         })?)
                     }
-                    _ => return Err(serde::de::Error::custom("invalid output type")),
+                    _ => return Err(serde::de::Error::custom("invalid block type")),
                 },
             )
         }
@@ -489,11 +489,11 @@ pub(crate) mod dto {
                 kind: BlockTypeDto_<'a>,
             }
             let output = match self {
-                Self::Basic(o) => TypedBlock {
-                    kind: BlockTypeDto_::T0(o),
+                Self::Basic(b) => TypedBlock {
+                    kind: BlockTypeDto_::T0(b),
                 },
-                Self::Validation(o) => TypedBlock {
-                    kind: BlockTypeDto_::T1(o),
+                Self::Validation(b) => TypedBlock {
+                    kind: BlockTypeDto_::T1(b),
                 },
             };
             output.serialize(serializer)
