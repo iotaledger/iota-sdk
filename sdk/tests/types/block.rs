@@ -4,16 +4,13 @@
 use iota_sdk::{
     pow::{miner::get_miner, score::PowScorer},
     types::block::{
-        parent::Parents,
-        payload::{Payload, TaggedDataPayload},
+        payload::Payload,
         protocol::protocol_parameters,
-        rand::{
-            block::rand_block_ids, number::rand_number, parents::rand_strong_parents, payload::rand_tagged_data_payload,
-        },
-        Block, BlockBuilder, Error,
+        rand::{number::rand_number, parents::rand_strong_parents, payload::rand_tagged_data_payload},
+        Block, BlockBuilder,
     },
 };
-use packable::{error::UnpackError, PackableExt};
+use packable::PackableExt;
 
 #[test]
 fn default_finish_zero_nonce() {
