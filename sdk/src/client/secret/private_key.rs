@@ -14,7 +14,7 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use zeroize::Zeroize;
+use zeroize::{Zeroize, Zeroizing};
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
@@ -112,8 +112,8 @@ impl PrivateKeySecretManager {
     }
 
     /// Create a new [`PrivateKeySecretManager`] from an hex encoded private key.
-    pub fn try_from_hex<T: AsRef<str>>(hex: T) -> Result<Self, Error> {
-        let mut bytes = prefix_hex::decode(hex)?;
+    pub fn try_from_hex(hex: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+        let mut bytes = prefix_hex::decode(hex.into())?;
 
         let private_key = Self(ed25519::SecretKey::from_bytes(&bytes));
 

@@ -3,13 +3,15 @@
 
 //! Secret manager module enabling address generation and transaction essence signing.
 
+/// Module for ledger nano based secret management.
 #[cfg(feature = "ledger_nano")]
 #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
 pub mod ledger_nano;
-/// Module for signing with a mnemonic or seed
+/// Module for mnemonic based secret management.
 pub mod mnemonic;
+/// Module for single private key based secret management.
 pub mod private_key;
-/// Module for signing with a Stronghold vault
+/// Module for stronghold based secret management.
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 pub mod stronghold;
@@ -138,7 +140,8 @@ pub enum SecretManager {
     /// LedgerNano or Stronghold instead.
     Mnemonic(MnemonicSecretManager),
 
-    PrivateKey(PrivateKeySecretManager),
+    /// Secret manager that uses a single private key.
+    PrivateKey(Box<PrivateKeySecretManager>),
 
     /// Secret manager that's just a placeholder, so it can be provided to an online wallet, but can't be used for
     /// signing.
@@ -222,9 +225,8 @@ impl TryFrom<SecretManagerDto> for SecretManager {
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
 
-            SecretManagerDto::PrivateKey(_private_key) => {
-                panic!()
-                // Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(private_key.as_str().to_owned())?)
+            SecretManagerDto::PrivateKey(private_key) => {
+                Self::PrivateKey(Box::new(PrivateKeySecretManager::try_from_hex(private_key)?))
             }
 
             SecretManagerDto::HexSeed(hex_seed) => {
@@ -440,10 +442,9 @@ impl SecretManagerConfig for SecretManager {
             SecretManagerDto::Mnemonic(mnemonic) => {
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
-            SecretManagerDto::PrivateKey(_private_key) => panic!(),
-            //  Self::Mnemonic(PrivateKeySecretManager::try_from_base58(
-            //     private_key.as_str().to_owned(),
-            // )?),
+            SecretManagerDto::PrivateKey(private_key) => {
+                Self::PrivateKey(Box::new(PrivateKeySecretManager::try_from_hex(private_key.to_owned())?))
+            }
             SecretManagerDto::Placeholder => Self::Placeholder,
         })
     }
