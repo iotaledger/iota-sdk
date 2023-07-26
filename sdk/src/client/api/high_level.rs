@@ -247,13 +247,8 @@ impl Client {
 
         // Post the modified
         let block_id = self.post_block_raw(&reattach_block).await?;
-        // Get block if we use remote Pow, because the node will change parents and nonce
-        let block = if self.get_local_pow().await {
-            reattach_block
-        } else {
-            self.get_block(&block_id).await?
-        };
-        Ok((block_id, block))
+
+        Ok((block_id, reattach_block))
     }
 
     /// Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
@@ -290,7 +285,7 @@ impl Client {
 
         let block_id = self.post_block_raw(&promote_block).await?;
 
-        Ok((block_id, block))
+        Ok((block_id, promote_block))
     }
 
     /// Returns the local time checked with the timestamp of the latest milestone, if the difference is larger than 5

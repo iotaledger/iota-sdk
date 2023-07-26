@@ -11,7 +11,7 @@ use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
         node_manager::node::{Node, NodeAuth},
-        Client, ClientInner, Error, Result,
+        Client, ClientInner, Result,
     },
     types::{
         api::core::response::{
@@ -112,61 +112,15 @@ impl ClientInner {
     /// POST JSON to /api/core/v3/blocks
     pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
         let path = "api/core/v3/blocks";
-        let local_pow = self.get_local_pow().await;
-        let timeout = if local_pow {
-            self.get_timeout().await
-        } else {
-            self.get_remote_pow_timeout().await
-        };
+        let timeout = self.get_timeout().await;
         let block_dto = BlockDto::from(block);
 
-        // fallback to local PoW if remote PoW fails
-        let response = match self
+        let response = self
             .node_manager
             .read()
             .await
-            .post_request_json::<SubmitBlockResponse>(path, timeout, serde_json::to_value(block_dto)?, local_pow)
-            .await
-        {
-            Ok(res) => res,
-            Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow)) => {
-                if !self.get_fallback_to_local_pow().await {
-                    return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
-                }
-
-                self.network_info.write().await.local_pow = true;
-
-                let block_res = self
-                    .finish_basic_block_builder(
-                        block.issuer_id(),
-                        *block.signature(),
-                        None,
-                        None,
-                        block.payload().cloned(),
-                    )
-                    .await;
-                let block_with_local_pow = match block_res {
-                    Ok(block) => {
-                        // reset local PoW state
-                        self.network_info.write().await.local_pow = false;
-                        block
-                    }
-                    Err(e) => {
-                        // reset local PoW state
-                        self.network_info.write().await.local_pow = false;
-                        return Err(e);
-                    }
-                };
-                let block_dto = BlockDto::from(&block_with_local_pow);
-
-                self.node_manager
-                    .read()
-                    .await
-                    .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
-                    .await?
-            }
-            Err(e) => return Err(e),
-        };
+            .post_request_json::<SubmitBlockResponse>(path, timeout, serde_json::to_value(block_dto)?)
+            .await?;
 
         Ok(response.block_id)
     }
@@ -175,58 +129,14 @@ impl ClientInner {
     /// POST /api/core/v3/blocks
     pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
         let path = "api/core/v3/blocks";
-        let local_pow = self.get_local_pow().await;
-        let timeout = if local_pow {
-            self.get_timeout().await
-        } else {
-            self.get_remote_pow_timeout().await
-        };
+        let timeout = self.get_timeout().await;
 
-        // fallback to local Pow if remote Pow fails
-        let response = match self
+        let response = self
             .node_manager
             .read()
             .await
-            .post_request_bytes::<SubmitBlockResponse>(path, timeout, &block.pack_to_vec(), local_pow)
-            .await
-        {
-            Ok(res) => res,
-            Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow)) => {
-                if !self.get_fallback_to_local_pow().await {
-                    return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
-                }
-
-                self.network_info.write().await.local_pow = true;
-
-                let block_res = self
-                    .finish_basic_block_builder(
-                        block.issuer_id(),
-                        *block.signature(),
-                        None,
-                        None,
-                        block.payload().cloned(),
-                    )
-                    .await;
-                let block_with_local_pow = match block_res {
-                    Ok(block) => {
-                        // reset local PoW state
-                        self.network_info.write().await.local_pow = false;
-                        block
-                    }
-                    Err(e) => {
-                        // reset local PoW state
-                        self.network_info.write().await.local_pow = false;
-                        return Err(e);
-                    }
-                };
-                self.node_manager
-                    .read()
-                    .await
-                    .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
-                    .await?
-            }
-            Err(e) => return Err(e),
-        };
+            .post_request_bytes::<SubmitBlockResponse>(path, timeout, &block.pack_to_vec())
+            .await?;
 
         Ok(response.block_id)
     }

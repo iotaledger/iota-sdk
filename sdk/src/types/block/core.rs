@@ -1,8 +1,6 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
-
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
 use packable::{
@@ -38,23 +36,13 @@ pub struct BlockBuilder<B> {
     issuer_id: IssuerId,
     inner: B,
     signature: Ed25519Signature,
-    nonce: Option<u64>,
 }
 
 impl<B> BlockBuilder<B> {
-    const DEFAULT_NONCE: u64 = 0;
-
     /// Adds a protocol version to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_protocol_version(mut self, protocol_version: impl Into<Option<u8>>) -> Self {
         self.protocol_version = protocol_version.into();
-        self
-    }
-
-    /// Adds a nonce to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_nonce(mut self, nonce: impl Into<Option<u64>>) -> Self {
-        self.nonce = nonce.into();
         self
     }
 }
@@ -86,7 +74,6 @@ impl BlockBuilder<BasicBlock> {
                 burned_mana: Default::default(),
             },
             signature,
-            nonce: Default::default(),
         }
     }
 
@@ -148,7 +135,6 @@ impl BlockBuilder<ValidationBlock> {
                 protocol_parameters_hash: protocol_parameters.hash(),
             },
             signature,
-            nonce: Default::default(),
         }
     }
 
@@ -186,7 +172,6 @@ impl<B: Into<BlockType>> BlockBuilder<B> {
             issuer_id,
             inner,
             signature,
-            nonce: Default::default(),
         }
     }
 
@@ -207,7 +192,6 @@ impl<B: Into<BlockType>> BlockBuilder<B> {
             issuer_id: self.issuer_id,
             inner,
             signature: self.signature,
-            nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
         let block_bytes = block.pack_to_vec();
@@ -222,16 +206,6 @@ impl<B: Into<BlockType>> BlockBuilder<B> {
     /// Finishes the [`BlockBuilder`] into a [`Block`].
     pub fn finish(self) -> Result<Block, Error> {
         self._finish().map(|res| res.0)
-    }
-
-    /// Finishes the [`BlockBuilder`] into a [`Block`], computing the nonce with a given provider.
-    pub fn finish_nonce<F: Fn(&[u8]) -> Option<u64>>(self, nonce_provider: F) -> Result<Block, Error> {
-        let (mut block, block_bytes) = self._finish()?;
-
-        block.nonce = nonce_provider(&block_bytes[..block_bytes.len() - core::mem::size_of::<u64>()])
-            .ok_or(Error::NonceNotFound)?;
-
-        Ok(block)
     }
 }
 
@@ -329,8 +303,6 @@ pub struct Block {
     pub(crate) inner: BlockType,
     ///
     signature: Ed25519Signature,
-    /// The result of the Proof of Work in order for the block to be accepted into the tangle.
-    nonce: u64,
 }
 
 impl Block {
@@ -453,12 +425,6 @@ impl Block {
         &self.signature
     }
 
-    /// Returns the nonce of a [`Block`].
-    #[inline(always)]
-    pub fn nonce(&self) -> u64 {
-        self.nonce
-    }
-
     /// Returns the inner block type of a [`Block`].
     #[inline(always)]
     pub fn inner(&self) -> &BlockType {
@@ -496,7 +462,6 @@ impl Packable for Block {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.protocol_version.pack(packer)?;
         self.inner.pack(packer)?;
-        self.nonce.pack(packer)?;
 
         Ok(())
     }
@@ -530,8 +495,6 @@ impl Packable for Block {
 
         let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-        let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
         let block = Self {
             protocol_version,
             network_id,
@@ -541,7 +504,6 @@ impl Packable for Block {
             issuer_id,
             inner,
             signature,
-            nonce,
         };
 
         if VERIFY {
@@ -577,10 +539,7 @@ pub(crate) fn verify_parents(
 }
 
 pub(crate) mod dto {
-    use alloc::{
-        format,
-        string::{String, ToString},
-    };
+    use alloc::format;
 
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
@@ -678,7 +637,6 @@ pub(crate) mod dto {
         pub issuer_id: IssuerId,
         pub inner: BlockTypeDto,
         pub signature: Ed25519SignatureDto,
-        pub nonce: String,
     }
 
     impl From<&Block> for BlockDto {
@@ -692,7 +650,6 @@ pub(crate) mod dto {
                 issuer_id: value.issuer_id(),
                 inner: value.inner().into(),
                 signature: value.signature().into(),
-                nonce: value.nonce().to_string(),
             }
         }
     }
@@ -713,7 +670,6 @@ pub(crate) mod dto {
                 Ed25519Signature::try_from(dto.signature)?,
             )
             .with_protocol_version(dto.protocol_version)
-            .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?)
             .finish()
         }
     }

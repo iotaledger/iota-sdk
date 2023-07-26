@@ -28,7 +28,6 @@ async fn main() -> Result<()> {
                       "disabled":false
                    }
                 ],
-                "localPow":true,
                 "apiTimeout":{
                    "secs":20,
                    "nanos":0
