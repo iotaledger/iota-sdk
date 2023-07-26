@@ -616,7 +616,6 @@ fn serialize() {
         2,
         String::from("testnet"),
         "rms",
-        1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),
         1_813_620_509_061_365,

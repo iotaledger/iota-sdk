@@ -47,11 +47,6 @@ pub struct ClientInner {
     pub(crate) network_info: RwLock<NetworkInfo>,
     /// HTTP request timeout.
     pub(crate) api_timeout: RwLock<Duration>,
-    /// HTTP request timeout for remote PoW API call.
-    pub(crate) remote_pow_timeout: RwLock<Duration>,
-    /// pow_worker_count for local PoW.
-    #[cfg(not(target_family = "wasm"))]
-    pub(crate) pow_worker_count: RwLock<Option<usize>>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
 }
@@ -96,12 +91,11 @@ impl Client {
 }
 
 impl ClientInner {
-    /// Gets the network related information such as network_id and min_pow_score
-    /// and if it's the default one, sync it first and set the NetworkInfo.
+    /// Gets the network related information such as network_id and if it's the default one, sync it first and set the
+    /// NetworkInfo.
     pub async fn get_network_info(&self) -> Result<NetworkInfo> {
-        // For WASM we don't have the node syncing process, which updates the network_info every 60 seconds, but the Pow
-        // difficulty or the byte cost could change via a milestone, so we request the node info every time, so we don't
-        // create invalid transactions/blocks.
+        // For WASM we don't have the node syncing process, which updates the network_info every 60 seconds, so we
+        // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
             lazy_static::lazy_static! {
@@ -148,11 +142,6 @@ impl ClientInner {
         Ok(*self.get_network_info().await?.protocol_parameters.bech32_hrp())
     }
 
-    /// Gets the minimum pow score of the node we're connecting to.
-    pub async fn get_min_pow_score(&self) -> Result<u32> {
-        Ok(self.get_network_info().await?.protocol_parameters.min_pow_score())
-    }
-
     /// Gets the below maximum depth of the node we're connecting to.
     pub async fn get_below_max_depth(&self) -> Result<u8> {
         Ok(self.get_network_info().await?.protocol_parameters.below_max_depth())
@@ -168,27 +157,8 @@ impl ClientInner {
         Ok(self.get_network_info().await?.protocol_parameters.token_supply())
     }
 
-    /// returns the tips interval
-    pub async fn get_tips_interval(&self) -> u64 {
-        self.network_info.read().await.tips_interval
-    }
-
-    /// returns if local pow should be used or not
-    pub async fn get_local_pow(&self) -> bool {
-        self.network_info.read().await.local_pow
-    }
-
     pub(crate) async fn get_timeout(&self) -> Duration {
         *self.api_timeout.read().await
-    }
-
-    pub(crate) async fn get_remote_pow_timeout(&self) -> Duration {
-        *self.remote_pow_timeout.read().await
-    }
-
-    /// returns the fallback_to_local_pow
-    pub async fn get_fallback_to_local_pow(&self) -> bool {
-        self.network_info.read().await.fallback_to_local_pow
     }
 
     /// Validates if a bech32 HRP matches the one from the connected network.

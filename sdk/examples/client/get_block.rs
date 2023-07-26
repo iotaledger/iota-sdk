@@ -18,7 +18,6 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder()
         .with_node(&std::env::var("NODE_URL").unwrap())?
-        .with_pow_worker_count(1)
         .finish()
         .await?;
 

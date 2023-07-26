@@ -11,7 +11,7 @@ use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
     client::{
-        constants::{DEFAULT_API_TIMEOUT, DEFAULT_REMOTE_POW_API_TIMEOUT, DEFAULT_TIPS_INTERVAL},
+        constants::DEFAULT_API_TIMEOUT,
         error::Result,
         node_manager::{
             builder::validate_url,
@@ -41,34 +41,10 @@ pub struct ClientBuilder {
     /// Timeout for API requests
     #[serde(default = "default_api_timeout")]
     pub api_timeout: Duration,
-    /// Timeout when sending a block that requires remote proof of work
-    #[serde(default = "default_remote_pow_timeout")]
-    pub remote_pow_timeout: Duration,
-    /// The amount of threads to be used for proof of work
-    #[cfg(not(target_family = "wasm"))]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pow_worker_count: Option<usize>,
 }
 
 fn default_api_timeout() -> Duration {
     DEFAULT_API_TIMEOUT
-}
-
-fn default_remote_pow_timeout() -> Duration {
-    DEFAULT_REMOTE_POW_API_TIMEOUT
-}
-
-impl Default for NetworkInfo {
-    fn default() -> Self {
-        Self {
-            // TODO do we really want a default?
-            protocol_parameters: ProtocolParameters::default(),
-            local_pow: default_local_pow(),
-            fallback_to_local_pow: true,
-            tips_interval: DEFAULT_TIPS_INTERVAL,
-            latest_milestone_timestamp: None,
-        }
-    }
 }
 
 impl Default for ClientBuilder {
@@ -79,9 +55,6 @@ impl Default for ClientBuilder {
             broker_options: Default::default(),
             network_info: NetworkInfo::default(),
             api_timeout: DEFAULT_API_TIMEOUT,
-            remote_pow_timeout: DEFAULT_REMOTE_POW_API_TIMEOUT,
-            #[cfg(not(target_family = "wasm"))]
-            pow_worker_count: None,
         }
     }
 }
@@ -98,10 +71,6 @@ impl ClientBuilder {
         self = serde_json::from_str::<Self>(client_config)?;
         // validate URLs
         if let Some(node_dto) = &self.node_manager_builder.primary_node {
-            let node: Node = node_dto.into();
-            validate_url(node.url)?;
-        }
-        if let Some(node_dto) = &self.node_manager_builder.primary_pow_node {
             let node: Node = node_dto.into();
             validate_url(node.url)?;
         }
@@ -125,13 +94,6 @@ impl ClientBuilder {
     /// Adds an IOTA node by its URL to be used as primary node, with optional jwt and or basic authentication
     pub fn with_primary_node(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
         self.node_manager_builder = self.node_manager_builder.with_primary_node(url, auth)?;
-        Ok(self)
-    }
-
-    /// Adds an IOTA node by its URL to be used as primary PoW node (for remote Pow), with optional jwt and or basic
-    /// authentication
-    pub fn with_primary_pow_node(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
-        self.node_manager_builder = self.node_manager_builder.with_primary_pow_node(url, auth)?;
         Ok(self)
     }
 
@@ -193,40 +155,9 @@ impl ClientBuilder {
         self
     }
 
-    /// Sets whether the PoW should be done locally or remotely.
-    pub fn with_local_pow(mut self, local: bool) -> Self {
-        self.network_info.local_pow = local;
-        self
-    }
-
-    /// Sets the amount of workers that should be used for PoW, default is num_cpus::get().
-    #[cfg(not(target_family = "wasm"))]
-    pub fn with_pow_worker_count(mut self, worker_count: impl Into<Option<usize>>) -> Self {
-        self.pow_worker_count = worker_count.into();
-        self
-    }
-
-    /// Sets whether the PoW should be done locally in case a node doesn't support remote PoW.
-    pub fn with_fallback_to_local_pow(mut self, fallback_to_local_pow: bool) -> Self {
-        self.network_info.fallback_to_local_pow = fallback_to_local_pow;
-        self
-    }
-
-    /// Sets after how many seconds new tips will be requested during PoW
-    pub fn with_tips_interval(mut self, tips_interval: u64) -> Self {
-        self.network_info.tips_interval = tips_interval;
-        self
-    }
-
     /// Sets the default request timeout.
     pub fn with_api_timeout(mut self, timeout: Duration) -> Self {
         self.api_timeout = timeout;
-        self
-    }
-
-    /// Sets the request timeout for API usage.
-    pub fn with_remote_pow_timeout(mut self, timeout: Duration) -> Self {
-        self.remote_pow_timeout = timeout;
         self
     }
 
@@ -259,8 +190,6 @@ impl ClientBuilder {
             node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
             network_info: RwLock::new(self.network_info),
             api_timeout: RwLock::new(self.api_timeout),
-            remote_pow_timeout: RwLock::new(self.remote_pow_timeout),
-            pow_worker_count: RwLock::new(self.pow_worker_count),
             #[cfg(feature = "mqtt")]
             mqtt: super::MqttInner {
                 client: Default::default(),
@@ -301,7 +230,6 @@ impl ClientBuilder {
                 node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
                 network_info: RwLock::new(self.network_info),
                 api_timeout: RwLock::new(self.api_timeout),
-                remote_pow_timeout: RwLock::new(self.remote_pow_timeout),
                 #[cfg(feature = "mqtt")]
                 mqtt: super::MqttInner {
                     client: Default::default(),
@@ -323,29 +251,18 @@ impl ClientBuilder {
             broker_options: *client.mqtt.broker_options.read().await,
             network_info: client.network_info.read().await.clone(),
             api_timeout: client.get_timeout().await,
-            remote_pow_timeout: client.get_remote_pow_timeout().await,
-            #[cfg(not(target_family = "wasm"))]
-            pow_worker_count: *client.pow_worker_count.read().await,
         }
     }
 }
 
-/// Struct containing network and PoW related information
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// Struct containing network related information
+// TODO do we really want a default?
+#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
-    /// Local proof of work.
-    #[serde(default = "default_local_pow")]
-    pub local_pow: bool,
-    /// Fallback to local proof of work if the node doesn't support remote PoW.
-    #[serde(default = "default_fallback_to_local_pow")]
-    pub fallback_to_local_pow: bool,
-    /// Tips request interval during PoW in seconds.
-    #[serde(default = "default_tips_interval")]
-    pub tips_interval: u64,
     /// The latest cached milestone timestamp.
     #[serde(skip)]
     pub latest_milestone_timestamp: Option<u32>,
@@ -357,42 +274,8 @@ impl NetworkInfo {
         self
     }
 
-    pub fn with_local_pow(mut self, local_pow: bool) -> Self {
-        self.local_pow = local_pow;
-        self
-    }
-
-    pub fn with_fallback_to_local_pow(mut self, fallback_to_local_pow: bool) -> Self {
-        self.fallback_to_local_pow = fallback_to_local_pow;
-        self
-    }
-
-    pub fn with_tips_interval(mut self, tips_interval: u64) -> Self {
-        self.tips_interval = tips_interval;
-        self
-    }
-
     pub fn with_latest_milestone_timestamp(mut self, latest_milestone_timestamp: impl Into<Option<u32>>) -> Self {
         self.latest_milestone_timestamp = latest_milestone_timestamp.into();
         self
     }
-}
-
-fn default_local_pow() -> bool {
-    #[cfg(not(target_family = "wasm"))]
-    {
-        true
-    }
-    #[cfg(target_family = "wasm")]
-    {
-        false
-    }
-}
-
-fn default_fallback_to_local_pow() -> bool {
-    true
-}
-
-fn default_tips_interval() -> u64 {
-    DEFAULT_TIPS_INTERVAL
 }
