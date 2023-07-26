@@ -5,6 +5,7 @@
 
 pub mod routes;
 
+use futures::{future::BoxFuture, FutureExt};
 use packable::PackableExt;
 
 #[cfg(not(target_family = "wasm"))]
@@ -28,19 +29,28 @@ impl Client {
         Ok(OutputWithMetadata::new(output, metadata))
     }
 
-    /// Request outputs by their output ID in parallel
-    pub async fn get_outputs(&self, output_ids: &[OutputId]) -> Result<Vec<Output>> {
-        #[cfg(target_family = "wasm")]
-        let outputs = futures::future::try_join_all(output_ids.iter().map(|id| self.get_output(id))).await?;
-
-        #[cfg(not(target_family = "wasm"))]
-        let outputs =
+    async fn chunk_requests<T, F>(&self, output_ids: &[OutputId], ignore_errors: bool, f: F) -> Result<Vec<T>>
+    where
+        T: Send + 'static,
+        for<'a> F: Fn(&'a Client, &'a OutputId) -> BoxFuture<'a, Result<T>> + Send + Sync + Copy + 'static,
+    {
+        Ok(
             futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
                 let client = self.clone();
                 let output_ids_chunk = output_ids_chunk.to_vec();
                 async move {
                     tokio::spawn(async move {
-                        futures::future::try_join_all(output_ids_chunk.iter().map(|id| client.get_output(id))).await
+                        let mut res = Vec::with_capacity(output_ids_chunk.len());
+                        for id in output_ids_chunk {
+                            match f(&client, &id).await {
+                                Ok(t) => res.push(t),
+                                e if !ignore_errors => {
+                                    e?;
+                                }
+                                _ => (),
+                            }
+                        }
+                        Result::Ok(res)
                     })
                     .await?
                 }
@@ -48,7 +58,21 @@ impl Client {
             .await?
             .into_iter()
             .flatten()
-            .collect();
+            .collect(),
+        )
+    }
+
+    /// Request outputs by their output ID in parallel
+    pub async fn get_outputs(&self, output_ids: &[OutputId]) -> Result<Vec<Output>> {
+        #[cfg(target_family = "wasm")]
+        let outputs = futures::future::try_join_all(output_ids.iter().map(|id| self.get_output(id))).await?;
+
+        #[cfg(not(target_family = "wasm"))]
+        let outputs = self
+            .chunk_requests(output_ids, false, |client, id| {
+                async { client.get_output(id).await }.boxed()
+            })
+            .await?;
 
         Ok(outputs)
     }
@@ -60,24 +84,11 @@ impl Client {
             futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id))).await?;
 
         #[cfg(not(target_family = "wasm"))]
-        let outputs =
-            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
-                let client = self.clone();
-                let output_ids_chunk = output_ids_chunk.to_vec();
-                async move {
-                    tokio::spawn(async move {
-                        futures::future::try_join_all(
-                            output_ids_chunk.iter().map(|id| client.get_output_with_metadata(id)),
-                        )
-                        .await
-                    })
-                    .await?
-                }
-            }))
-            .await?
-            .into_iter()
-            .flatten()
-            .collect();
+        let outputs = self
+            .chunk_requests(output_ids, false, |client, id| {
+                async { client.get_output_with_metadata(id).await }.boxed()
+            })
+            .await?;
 
         Ok(outputs)
     }
@@ -93,22 +104,11 @@ impl Client {
             .collect();
 
         #[cfg(not(target_family = "wasm"))]
-        let outputs =
-            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
-                let client = self.clone();
-                let output_ids_chunk = output_ids_chunk.to_vec();
-                tokio::spawn(async move {
-                    futures::future::join_all(output_ids_chunk.iter().map(|id| client.get_output(id)))
-                        .await
-                        .into_iter()
-                        .filter_map(Result::ok)
-                        .collect::<Vec<_>>()
-                })
-            }))
-            .await?
-            .into_iter()
-            .flatten()
-            .collect();
+        let outputs = self
+            .chunk_requests(output_ids, true, |client, id| {
+                async { client.get_output(id).await }.boxed()
+            })
+            .await?;
 
         Ok(outputs)
     }
@@ -127,22 +127,11 @@ impl Client {
             .collect();
 
         #[cfg(not(target_family = "wasm"))]
-        let outputs =
-            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
-                let client = self.clone();
-                let output_ids_chunk = output_ids_chunk.to_vec();
-                tokio::spawn(async move {
-                    futures::future::join_all(output_ids_chunk.iter().map(|id| client.get_output_with_metadata(id)))
-                        .await
-                        .into_iter()
-                        .filter_map(Result::ok)
-                        .collect::<Vec<_>>()
-                })
-            }))
-            .await?
-            .into_iter()
-            .flatten()
-            .collect();
+        let outputs = self
+            .chunk_requests(output_ids, true, |client, id| {
+                async { client.get_output_with_metadata(id).await }.boxed()
+            })
+            .await?;
 
         Ok(outputs)
     }
@@ -157,22 +146,11 @@ impl Client {
             .collect();
 
         #[cfg(not(target_family = "wasm"))]
-        let metadata =
-            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
-                let client = self.clone();
-                let output_ids_chunk = output_ids_chunk.to_vec();
-                tokio::spawn(async move {
-                    futures::future::join_all(output_ids_chunk.iter().map(|id| client.get_output_metadata(id)))
-                        .await
-                        .into_iter()
-                        .filter_map(Result::ok)
-                        .collect::<Vec<_>>()
-                })
-            }))
-            .await?
-            .into_iter()
-            .flatten()
-            .collect();
+        let metadata = self
+            .chunk_requests(output_ids, true, |client, id| {
+                async { client.get_output_metadata(id).await }.boxed()
+            })
+            .await?;
 
         Ok(metadata)
     }
