@@ -235,7 +235,15 @@ impl Client {
     pub async fn reattach_unchecked(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
         // Get the Block object by the BlockID.
         let block = self.get_block(block_id).await?;
-        let reattach_block = self.finish_basic_block_builder(None, block.payload().cloned()).await?;
+        let reattach_block = self
+            .finish_basic_block_builder(
+                block.issuer_id(),
+                *block.signature(),
+                None,
+                None,
+                block.payload().cloned(),
+            )
+            .await?;
 
         // Post the modified
         let block_id = self.post_block_raw(&reattach_block).await?;
@@ -267,17 +275,21 @@ impl Client {
             *tip = *block_id;
         }
 
+        // Get block if we use remote Pow, because the node will change parents and nonce.
+        let block = self.get_block(&block_id).await?;
+
         let promote_block = self
-            .finish_basic_block_builder(Some(Parents::from_vec(tips)?), None)
+            .finish_basic_block_builder(
+                block.issuer_id(),
+                *block.signature(),
+                None,
+                Some(Parents::from_vec(tips)?),
+                None,
+            )
             .await?;
 
         let block_id = self.post_block_raw(&promote_block).await?;
-        // Get block if we use remote Pow, because the node will change parents and nonce.
-        let block = if self.get_local_pow().await {
-            promote_block
-        } else {
-            self.get_block(&block_id).await?
-        };
+
         Ok((block_id, block))
     }
 

@@ -6,4 +6,5 @@
 
 pub mod error;
 pub mod responses;
+#[allow(non_camel_case_types)]
 pub mod types;

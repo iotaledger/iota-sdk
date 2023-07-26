@@ -10,7 +10,8 @@ use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
     client::{ClientInner, Error, Result},
     types::block::{
-        basic::BasicBlock, parent::StrongParents, payload::Payload, Block, BlockBuilder, Error as BlockError,
+        basic::BasicBlock, parent::StrongParents, payload::Payload, signature::Ed25519Signature, Block, BlockBuilder,
+        Error as BlockError, IssuerId,
     },
 };
 
@@ -19,6 +20,9 @@ impl ClientInner {
     /// Without local PoW, it will finish the block with a 0 nonce.
     pub async fn finish_basic_block_builder(
         &self,
+        issuer_id: IssuerId,
+        signature: Ed25519Signature,
+        issuing_time: Option<u64>,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
     ) -> Result<Block> {
@@ -31,28 +35,29 @@ impl ClientInner {
                 None => StrongParents::from_vec(self.get_tips().await?)?,
             };
 
-            #[cfg(feature = "std")]
-            let issuing_time = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_nanos() as u64;
-            // TODO no_std way to have a nanosecond timestamp
-            // https://github.com/iotaledger/iota-sdk/issues/647
-            #[cfg(not(feature = "std"))]
-            let issuing_time = 0;
+            let issuing_time = issuing_time.unwrap_or_else(|| {
+                #[cfg(feature = "std")]
+                let issuing_time = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .expect("Time went backwards")
+                    .as_nanos() as u64;
+                // TODO no_std way to have a nanosecond timestamp
+                // https://github.com/iotaledger/iota-sdk/issues/647
+                #[cfg(not(feature = "std"))]
+                let issuing_time = 0;
+                issuing_time
+            });
 
             let node_info = self.get_info().await?.node_info;
             let latest_finalized_slot = node_info.status.latest_finalized_slot;
             let slot_commitment_id = self.get_slot_commitment_by_index(latest_finalized_slot).await?.id();
-
-            let signature = todo!();
 
             Ok(Block::build_basic(
                 self.get_network_id().await?,
                 issuing_time,
                 slot_commitment_id,
                 latest_finalized_slot,
-                node_info.issuer_id,
+                issuer_id,
                 strong_parents,
                 signature,
             )
