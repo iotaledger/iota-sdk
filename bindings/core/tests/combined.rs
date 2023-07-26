@@ -7,7 +7,7 @@ use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
-use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
+use iota_sdk_bindings_core::{AccountMethod, CallMethod, Response, Result, WalletMethod, WalletOptions};
 
 #[tokio::test]
 async fn create_account() -> Result<()> {

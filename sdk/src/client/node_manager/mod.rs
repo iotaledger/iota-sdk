@@ -86,7 +86,7 @@ impl NodeManager {
                     .read()
                     .map_err(|_| crate::client::Error::PoisonError)?
                     .iter()
-                    .filter_map(|(n, info)| Some(n.clone()))
+                    .filter_map(|(n, _info)| Some(n.clone()))
                     .collect()
             }
             #[cfg(target_family = "wasm")]
