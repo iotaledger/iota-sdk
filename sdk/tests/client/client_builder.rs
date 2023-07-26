@@ -50,7 +50,7 @@ async fn client_builder() {
         "apiTimeout":{
             "secs":15,
             "nanos":0
-        },
+        }
     }"#;
 
     let _client_builder = serde_json::from_str::<ClientBuilder>(client_builder_json).unwrap();
