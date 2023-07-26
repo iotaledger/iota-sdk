@@ -30,11 +30,10 @@ use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
-use self::mnemonic::MnemonicSecretManager;
-use self::private_key::PrivateKeySecretManager;
 #[cfg(feature = "stronghold")]
 use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
+use self::{mnemonic::MnemonicSecretManager, private_key::PrivateKeySecretManager};
 #[cfg(feature = "stronghold")]
 use crate::client::secret::types::StrongholdDto;
 use crate::{

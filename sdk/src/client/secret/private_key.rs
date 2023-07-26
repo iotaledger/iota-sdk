@@ -113,8 +113,12 @@ impl PrivateKeySecretManager {
 
     /// Create a new [`PrivateKeySecretManager`] from an hex encoded private key.
     pub fn try_from_hex<T: AsRef<str>>(hex: T) -> Result<Self, Error> {
-        let bytes = prefix_hex::decode(hex)?;
+        let mut bytes = prefix_hex::decode(hex)?;
 
-        Ok(Self(ed25519::SecretKey::from_bytes(&bytes)))
+        let private_key = Self(ed25519::SecretKey::from_bytes(&bytes));
+
+        bytes.zeroize();
+
+        Ok(private_key)
     }
 }
