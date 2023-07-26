@@ -26,12 +26,9 @@ pub struct BlockBuilder {
     protocol_version: Option<u8>,
     strong_parents: StrongParents,
     payload: OptionalPayload,
-    nonce: Option<u64>,
 }
 
 impl BlockBuilder {
-    const DEFAULT_NONCE: u64 = 0;
-
     /// Creates a new [`BlockBuilder`].
     #[inline(always)]
     pub fn new(strong_parents: StrongParents) -> Self {
@@ -39,7 +36,6 @@ impl BlockBuilder {
             protocol_version: None,
             strong_parents,
             payload: OptionalPayload::default(),
-            nonce: None,
         }
     }
 
@@ -57,21 +53,14 @@ impl BlockBuilder {
         self
     }
 
-    /// Adds a nonce to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_nonce(mut self, nonce: impl Into<Option<u64>>) -> Self {
-        self.nonce = nonce.into();
-        self
-    }
-
-    fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
+    /// Finishes the [`BlockBuilder`] into a [`Block`].
+    pub fn finish(self) -> Result<Block, Error> {
         verify_payload(self.payload.as_ref())?;
 
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
             strong_parents: self.strong_parents,
             payload: self.payload,
-            nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
         let block_bytes = block.pack_to_vec();
@@ -79,21 +68,6 @@ impl BlockBuilder {
         if block_bytes.len() > Block::LENGTH_MAX {
             return Err(Error::InvalidBlockLength(block_bytes.len()));
         }
-
-        Ok((block, block_bytes))
-    }
-
-    /// Finishes the [`BlockBuilder`] into a [`Block`].
-    pub fn finish(self) -> Result<Block, Error> {
-        self._finish().map(|res| res.0)
-    }
-
-    /// Finishes the [`BlockBuilder`] into a [`Block`], computing the nonce with a given provider.
-    pub fn finish_nonce<F: Fn(&[u8]) -> Option<u64>>(self, nonce_provider: F) -> Result<Block, Error> {
-        let (mut block, block_bytes) = self._finish()?;
-
-        block.nonce = nonce_provider(&block_bytes[..block_bytes.len() - core::mem::size_of::<u64>()])
-            .ok_or(Error::NonceNotFound)?;
 
         Ok(block)
     }
@@ -108,8 +82,6 @@ pub struct Block {
     strong_parents: StrongParents,
     /// The optional [Payload] of the block.
     payload: OptionalPayload,
-    /// The result of the Proof of Work in order for the block to be accepted into the tangle.
-    nonce: u64,
 }
 
 impl Block {
@@ -140,12 +112,6 @@ impl Block {
     #[inline(always)]
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
-    }
-
-    /// Returns the nonce of a [`Block`].
-    #[inline(always)]
-    pub fn nonce(&self) -> u64 {
-        self.nonce
     }
 
     /// Computes the identifier of the block.
@@ -186,7 +152,6 @@ impl Packable for Block {
         self.protocol_version.pack(packer)?;
         self.strong_parents.pack(packer)?;
         self.payload.pack(packer)?;
-        self.nonce.pack(packer)?;
 
         Ok(())
     }
@@ -213,13 +178,10 @@ impl Packable for Block {
             verify_payload(payload.deref().as_ref()).map_err(UnpackError::Packable)?;
         }
 
-        let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
         let block = Self {
             protocol_version,
             strong_parents,
             payload,
-            nonce,
         };
 
         if VERIFY {
@@ -273,8 +235,6 @@ pub(crate) mod dto {
         ///
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
-        ///
-        pub nonce: String,
     }
 
     impl From<&Block> for BlockDto {
@@ -283,7 +243,6 @@ pub(crate) mod dto {
                 protocol_version: value.protocol_version(),
                 strong_parents: value.strong_parents().iter().map(BlockId::to_string).collect(),
                 payload: value.payload().map(Into::into),
-                nonce: value.nonce().to_string(),
             }
         }
     }
@@ -300,9 +259,7 @@ pub(crate) mod dto {
                     .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
-            let mut builder = BlockBuilder::new(strong_parents)
-                .with_protocol_version(dto.protocol_version)
-                .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
+            let mut builder = BlockBuilder::new(strong_parents).with_protocol_version(dto.protocol_version);
 
             if let Some(p) = dto.payload {
                 builder = builder.with_payload(Payload::try_from_dto_with_params_inner(p, params)?);
