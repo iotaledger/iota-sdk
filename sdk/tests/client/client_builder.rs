@@ -37,7 +37,6 @@ async fn client_builder() {
             "version":2,
             "networkName":"shimmer",
             "bech32Hrp":"smr",
-            "minPowScore":1500,
             "belowMaxDepth":15,
             "rentStructure":{
                 "vByteCost":100,
@@ -48,17 +47,11 @@ async fn client_builder() {
             "genesisUnixTimestamp":1582328545,
             "slotDurationInSeconds":10
         },
-        "localPow":true,
-        "fallbackToLocalPow":true,
         "tipsInterval":5,
         "apiTimeout":{
             "secs":15,
             "nanos":0
         },
-        "remotePowTimeout":{
-            "secs":100,
-            "nanos":0
-        }
     }"#;
 
     let _client_builder = serde_json::from_str::<ClientBuilder>(client_builder_json).unwrap();

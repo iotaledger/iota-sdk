@@ -71,9 +71,6 @@ pub enum Response {
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
     Bech32Hrp(Hrp),
     /// Response for:
-    /// - [`GetMinPowScore`](crate::method::ClientMethod::GetMinPowScore)
-    MinPowScore(u32),
-    /// Response for:
     /// - [`GetTipsInterval`](crate::method::ClientMethod::GetTipsInterval)
     TipsInterval(u64),
     /// Response for:
@@ -232,8 +229,6 @@ pub enum Response {
     /// - [`RetryTransactionUntilIncluded`](crate::method::AccountMethod::RetryTransactionUntilIncluded)
     BlockId(BlockId),
     /// Response for:
-    /// - [`GetLocalPow`](crate::method::ClientMethod::GetLocalPow)
-    /// - [`GetFallbackToLocalPow`](crate::method::ClientMethod::GetFallbackToLocalPow)
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
     /// - [`IsAddressValid`](crate::method::UtilsMethod::IsAddressValid)
     /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
