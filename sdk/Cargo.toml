@@ -60,7 +60,6 @@ fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [
     "thread-pool",
 ], optional = true }
-heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0-rc.2", default-features = false, optional = true }
@@ -168,7 +167,6 @@ storage = [
     "dep:time",
     "dep:anymap",
     "dep:once_cell",
-    "dep:heck",
 ]
 stronghold = [
     "iota_stronghold",
@@ -177,7 +175,6 @@ stronghold = [
     "dep:time",
     "dep:anymap",
     "dep:once_cell",
-    "dep:heck",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
 

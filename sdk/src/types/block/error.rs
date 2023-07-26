@@ -91,6 +91,7 @@ pub enum Error {
     NativeTokensNullAmount,
     NativeTokensOverflow,
     NetworkIdMismatch { expected: u64, actual: u64 },
+    NonDisjointParents,
     NonZeroStateIndexOrFoundryCounter,
     ParentsNotUniqueSorted,
     ProtocolVersionMismatch { expected: u8, actual: u8 },
@@ -232,6 +233,9 @@ impl fmt::Display for Error {
             Self::NativeTokensOverflow => write!(f, "native tokens overflow"),
             Self::NetworkIdMismatch { expected, actual } => {
                 write!(f, "network ID mismatch: expected {expected} but got {actual}")
+            }
+            Self::NonDisjointParents => {
+                write!(f, "weak parents are not disjoint to strong or shallow like parents")
             }
             Self::NonZeroStateIndexOrFoundryCounter => {
                 write!(
