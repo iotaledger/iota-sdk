@@ -77,7 +77,7 @@ const listenWalletAsync = (
 ): Promise<void> => {
     listenWallet(
         eventTypes,
-        function(err: any, data: string) {
+        function (err: any, data: string) {
             const parsed = JSON.parse(data);
             callback(err, new Event(parsed.accountIndex, parsed.event));
         },

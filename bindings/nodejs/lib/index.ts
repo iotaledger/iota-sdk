@@ -5,14 +5,13 @@
 import 'reflect-metadata';
 import { bigIntToHex } from './utils';
 
-
 // Allow bigint to be serialized as hex string.
 //
 // Note:
 // Serializing `bigint` to a different format, e.g. to decimal number string
 // must be done manually.
-(BigInt.prototype as any).toJSON = function() {
-  return bigIntToHex(this);
+(BigInt.prototype as any).toJSON = function () {
+    return bigIntToHex(this);
 };
 
 export * from './client';
