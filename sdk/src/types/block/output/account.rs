@@ -69,6 +69,7 @@ impl core::fmt::Display for AccountTransition {
 #[must_use]
 pub struct AccountOutputBuilder {
     amount: OutputBuilderAmount,
+    mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     account_id: AccountId,
     state_index: Option<u32>,
@@ -94,6 +95,7 @@ impl AccountOutputBuilder {
     fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
         Self {
             amount,
+            mana: Default::default(),
             native_tokens: BTreeSet::new(),
             account_id,
             state_index: None,
@@ -116,6 +118,13 @@ impl AccountOutputBuilder {
     #[inline(always)]
     pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
         self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+        self
+    }
+
+    /// Sets the mana to the provided value.
+    #[inline(always)]
+    pub fn with_mana(mut self, mana: u64) -> Self {
+        self.mana = mana;
         self
     }
 
@@ -272,6 +281,7 @@ impl AccountOutputBuilder {
 
         let mut output = AccountOutput {
             amount: 1,
+            mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
             state_index,
@@ -316,6 +326,7 @@ impl From<&AccountOutput> for AccountOutputBuilder {
     fn from(output: &AccountOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
+            mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             account_id: output.account_id,
             state_index: Some(output.state_index),
@@ -335,6 +346,7 @@ pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METAD
 pub struct AccountOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
+    mana: u64,
     // Native tokens held by the output.
     native_tokens: NativeTokens,
     // Unique identifier of the account.
@@ -385,6 +397,11 @@ impl AccountOutput {
     #[inline(always)]
     pub fn amount(&self) -> u64 {
         self.amount
+    }
+
+    #[inline(always)]
+    pub fn mana(&self) -> u64 {
+        self.mana
     }
 
     ///
@@ -614,6 +631,7 @@ impl Packable for AccountOutput {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
+        self.mana.pack(packer)?;
         self.native_tokens.pack(packer)?;
         self.account_id.pack(packer)?;
         self.state_index.pack(packer)?;
@@ -633,6 +651,8 @@ impl Packable for AccountOutput {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
+
+        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -667,6 +687,7 @@ impl Packable for AccountOutput {
 
         Ok(Self {
             amount,
+            mana,
             native_tokens,
             account_id,
             state_index,
@@ -735,6 +756,8 @@ pub(crate) mod dto {
         // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
+        #[serde(with = "crate::utils::serde::string")]
+        pub mana: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
@@ -762,6 +785,7 @@ pub(crate) mod dto {
             Self {
                 kind: AccountOutput::KIND,
                 amount: value.amount(),
+                mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 account_id: *value.account_id(),
                 state_index: value.state_index(),
@@ -779,27 +803,14 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id);
-
-            builder = builder.with_state_index(dto.state_index);
-
-            if !dto.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(dto.state_metadata);
-            }
-
-            builder = builder.with_foundry_counter(dto.foundry_counter);
-
-            for t in dto.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in dto.features {
-                builder = builder.add_feature(b);
-            }
-
-            for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(b);
-            }
+            let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
+                .with_mana(dto.mana)
+                .with_state_index(dto.state_index)
+                .with_foundry_counter(dto.foundry_counter)
+                .with_native_tokens(dto.native_tokens)
+                .with_features(dto.features)
+                .with_immutable_features(dto.immutable_features)
+                .with_state_metadata(dto.state_metadata);
 
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
@@ -813,6 +824,7 @@ pub(crate) mod dto {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
+            mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             account_id: &AccountId,
             state_index: Option<u32>,
@@ -829,7 +841,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *account_id)
                 }
-            };
+            }
+            .with_mana(mana);
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
@@ -982,6 +995,7 @@ mod tests {
 
         let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
+            output.mana(),
             Some(output.native_tokens().to_vec()),
             output.account_id(),
             output.state_index().into(),
@@ -1003,6 +1017,7 @@ mod tests {
         let test_split_dto = |builder: AccountOutputBuilder| {
             let output_split = AccountOutput::try_from_dtos(
                 builder.amount,
+                builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.account_id,
                 builder.state_index,

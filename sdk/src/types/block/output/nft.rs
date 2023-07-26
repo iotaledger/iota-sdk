@@ -35,6 +35,7 @@ use crate::types::{
 #[must_use]
 pub struct NftOutputBuilder {
     amount: OutputBuilderAmount,
+    mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     nft_id: NftId,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -57,6 +58,7 @@ impl NftOutputBuilder {
     fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Self {
         Self {
             amount,
+            mana: Default::default(),
             native_tokens: BTreeSet::new(),
             nft_id,
             unlock_conditions: BTreeSet::new(),
@@ -76,6 +78,13 @@ impl NftOutputBuilder {
     #[inline(always)]
     pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
         self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+        self
+    }
+
+    /// Sets the mana to the provided value.
+    #[inline(always)]
+    pub fn with_mana(mut self, mana: u64) -> Self {
+        self.mana = mana;
         self
     }
 
@@ -200,6 +209,7 @@ impl NftOutputBuilder {
 
         let mut output = NftOutput {
             amount: 1u64,
+            mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             nft_id: self.nft_id,
             unlock_conditions,
@@ -238,6 +248,7 @@ impl From<&NftOutput> for NftOutputBuilder {
     fn from(output: &NftOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
+            mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             nft_id: output.nft_id,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -252,6 +263,7 @@ impl From<&NftOutput> for NftOutputBuilder {
 pub struct NftOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
+    mana: u64,
     // Native tokens held by the output.
     native_tokens: NativeTokens,
     // Unique identifier of the NFT.
@@ -293,6 +305,11 @@ impl NftOutput {
     #[inline(always)]
     pub fn amount(&self) -> u64 {
         self.amount
+    }
+
+    #[inline(always)]
+    pub fn mana(&self) -> u64 {
+        self.mana
     }
 
     ///
@@ -420,6 +437,7 @@ impl Packable for NftOutput {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
+        self.mana.pack(packer)?;
         self.native_tokens.pack(packer)?;
         self.nft_id.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
@@ -436,6 +454,8 @@ impl Packable for NftOutput {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
+
+        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let nft_id = NftId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -460,6 +480,7 @@ impl Packable for NftOutput {
 
         Ok(Self {
             amount,
+            mana,
             native_tokens,
             nft_id,
             unlock_conditions,
@@ -504,6 +525,8 @@ pub(crate) mod dto {
         // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
+        #[serde(with = "crate::utils::serde::string")]
+        pub mana: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
@@ -521,6 +544,7 @@ pub(crate) mod dto {
             Self {
                 kind: NftOutput::KIND,
                 amount: value.amount(),
+                mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 nft_id: *value.nft_id(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -535,19 +559,11 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id);
-
-            for t in dto.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in dto.features {
-                builder = builder.add_feature(b);
-            }
-
-            for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(b);
-            }
+            let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
+                .with_mana(dto.mana)
+                .with_native_tokens(dto.native_tokens)
+                .with_features(dto.features)
+                .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
@@ -558,8 +574,10 @@ pub(crate) mod dto {
     }
 
     impl NftOutput {
+        #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
+            mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
@@ -573,7 +591,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
                 }
-            };
+            }
+            .with_mana(mana);
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
@@ -688,6 +707,7 @@ mod tests {
 
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
+            output.mana(),
             Some(output.native_tokens().to_vec()),
             output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
@@ -701,6 +721,7 @@ mod tests {
         let test_split_dto = |builder: NftOutputBuilder| {
             let output_split = NftOutput::try_from_dtos(
                 builder.amount,
+                builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.nft_id,
                 builder.unlock_conditions.iter().map(Into::into).collect(),

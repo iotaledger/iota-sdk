@@ -30,6 +30,7 @@ use crate::types::{
 #[must_use]
 pub struct BasicOutputBuilder {
     amount: OutputBuilderAmount,
+    mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     unlock_conditions: BTreeSet<UnlockCondition>,
     features: BTreeSet<Feature>,
@@ -52,6 +53,7 @@ impl BasicOutputBuilder {
     fn new(amount: OutputBuilderAmount) -> Self {
         Self {
             amount,
+            mana: Default::default(),
             native_tokens: BTreeSet::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
@@ -69,6 +71,13 @@ impl BasicOutputBuilder {
     #[inline(always)]
     pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
         self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+        self
+    }
+
+    /// Sets the mana to the provided value.
+    #[inline(always)]
+    pub fn with_mana(mut self, mana: u64) -> Self {
+        self.mana = mana;
         self
     }
 
@@ -155,6 +164,7 @@ impl BasicOutputBuilder {
 
         let mut output = BasicOutput {
             amount: 1u64,
+            mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             unlock_conditions,
             features,
@@ -191,6 +201,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
     fn from(output: &BasicOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
+            mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
             features: output.features.iter().cloned().collect(),
@@ -206,6 +217,7 @@ pub struct BasicOutput {
     // Amount of IOTA tokens held by the output.
     #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
+    mana: u64,
     // Native tokens held by the output.
     native_tokens: NativeTokens,
     #[packable(verify_with = verify_unlock_conditions_packable)]
@@ -245,6 +257,11 @@ impl BasicOutput {
     #[inline(always)]
     pub fn amount(&self) -> u64 {
         self.amount
+    }
+
+    #[inline(always)]
+    pub fn mana(&self) -> u64 {
+        self.mana
     }
 
     ///
@@ -354,6 +371,8 @@ pub(crate) mod dto {
         // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
+        #[serde(with = "crate::utils::serde::string")]
+        pub mana: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
@@ -367,6 +386,7 @@ pub(crate) mod dto {
             Self {
                 kind: BasicOutput::KIND,
                 amount: value.amount(),
+                mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().to_vec(),
@@ -379,13 +399,10 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = BasicOutputBuilder::new_with_amount(dto.amount);
-
-            builder = builder.with_native_tokens(dto.native_tokens);
-
-            for b in dto.features {
-                builder = builder.add_feature(b);
-            }
+            let mut builder = BasicOutputBuilder::new_with_amount(dto.amount)
+                .with_native_tokens(dto.native_tokens)
+                .with_mana(dto.mana)
+                .with_features(dto.features);
 
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
@@ -398,6 +415,7 @@ pub(crate) mod dto {
     impl BasicOutput {
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
+            mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
@@ -409,7 +427,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 }
-            };
+            }
+            .with_mana(mana);
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
@@ -516,6 +535,7 @@ mod tests {
 
         let output_split = BasicOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
+            output.mana(),
             Some(output.native_tokens().to_vec()),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
@@ -530,6 +550,7 @@ mod tests {
         let test_split_dto = |builder: BasicOutputBuilder| {
             let output_split = BasicOutput::try_from_dtos(
                 builder.amount,
+                builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),

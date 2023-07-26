@@ -214,7 +214,7 @@ impl Output {
             Self::Account(output) => Some(output.immutable_features()),
             Self::Foundry(output) => Some(output.immutable_features()),
             Self::Nft(output) => Some(output.immutable_features()),
-            Self::Delegation(output) => Some(output.immutable_features()),
+            Self::Delegation(_) => None,
         }
     }
 

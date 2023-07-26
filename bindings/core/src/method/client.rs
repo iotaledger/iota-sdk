@@ -15,7 +15,7 @@ use iota_sdk::{
         payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
     },
-    utils::serde::option_string,
+    utils::serde::{option_string, string},
 };
 use serde::{Deserialize, Serialize};
 
@@ -31,8 +31,11 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
-        #[serde(with = "option_string")]
+        #[serde(default, with = "option_string")]
         amount: Option<u64>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         state_index: Option<u32>,
@@ -48,8 +51,11 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
-        #[serde(with = "option_string")]
+        #[serde(default, with = "option_string")]
         amount: Option<u64>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
@@ -60,7 +66,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
-        #[serde(with = "option_string")]
+        #[serde(default, with = "option_string")]
         amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
@@ -75,8 +81,11 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
-        #[serde(with = "option_string")]
+        #[serde(default, with = "option_string")]
         amount: Option<u64>,
+        // TODO: Determine if `default` is wanted here
+        #[serde(default, with = "string")]
+        mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
