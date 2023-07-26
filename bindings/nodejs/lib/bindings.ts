@@ -77,7 +77,7 @@ const listenWalletAsync = (
 ): Promise<void> => {
     listenWallet(
         eventTypes,
-        function (err: any, data: string) {
+        function(err: any, data: string) {
             const parsed = JSON.parse(data);
             callback(err, new Event(parsed.accountIndex, parsed.event));
         },
@@ -99,15 +99,6 @@ const callWalletMethodAsync = (
             }
         });
     });
-
-// Allow bigint to be serialized as hex string.
-//
-// Note:
-// Serializing `bigint` to a different format, e.g. to decimal number string
-// must be done manually.
-(BigInt.prototype as any).toJSON = function () {
-    return bigIntToHex(this);
-};
 
 export {
     initLogger,

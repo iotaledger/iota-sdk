@@ -20,15 +20,6 @@ const callUtilsMethod = (method: __UtilsMethods__): any => {
     }
 };
 
-// Allow bigint to be serialized as hex string.
-//
-// Note:
-// Serializing `bigint` to a different format, e.g. to decimal number string
-// must be done manually.
-(BigInt.prototype as any).toJSON = function () {
-    return '0x' + this.toString(16);
-};
-
 export {
     initLogger,
     createClient,
