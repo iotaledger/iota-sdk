@@ -47,19 +47,15 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    pub last_accepted_block_id: BlockId,
-    pub last_confirmed_block_id: BlockId,
-    pub finalized_slot: SlotIndex,
-    #[cfg_attr(feature = "serde", serde(rename = "ATT"))]
-    pub att: u64,
-    #[cfg_attr(feature = "serde", serde(rename = "RATT"))]
-    pub ratt: u64,
-    #[cfg_attr(feature = "serde", serde(rename = "CTT"))]
-    pub ctt: u64,
-    #[cfg_attr(feature = "serde", serde(rename = "RCTT"))]
-    pub rctt: u64,
+    pub accepted_tangle_time: u64,
+    pub relative_accepted_tangle_time: u64,
+    pub confirmed_tangle_time: u64,
+    pub relative_confirmed_tangle_time: u64,
     pub latest_committed_slot: SlotIndex,
+    pub latest_finalized_slot: SlotIndex,
     pub pruning_slot: SlotIndex,
+    pub latest_accepted_block_id: BlockId,
+    pub latest_confirmed_block_id: BlockId,
 }
 
 /// Returned in [`InfoResponse`].

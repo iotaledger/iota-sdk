@@ -12,7 +12,13 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{basic::BasicBlock, validation::ValidationBlock};
+use super::{
+    basic::BasicBlock,
+    signature::Ed25519Signature,
+    slot::{SlotCommitmentId, SlotIndex},
+    validation::ValidationBlock,
+    IssuerId,
+};
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
@@ -25,7 +31,13 @@ use crate::types::block::{
 #[must_use]
 pub struct BlockBuilder<B> {
     protocol_version: Option<u8>,
+    network_id: u64,
+    issuing_time: u64,
+    slot_commitment_id: SlotCommitmentId,
+    latest_finalized_slot: SlotIndex,
+    issuer_id: IssuerId,
     inner: B,
+    signature: Ed25519Signature,
     nonce: Option<u64>,
 }
 
@@ -50,9 +62,22 @@ impl<B> BlockBuilder<B> {
 impl BlockBuilder<BasicBlock> {
     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents) -> Self {
+    pub fn new(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        strong_parents: StrongParents,
+        signature: Ed25519Signature,
+    ) -> Self {
         Self {
-            protocol_version: None,
+            protocol_version: Default::default(),
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
             inner: BasicBlock {
                 strong_parents,
                 weak_parents: Default::default(),
@@ -60,7 +85,8 @@ impl BlockBuilder<BasicBlock> {
                 payload: OptionalPayload::default(),
                 burned_mana: Default::default(),
             },
-            nonce: None,
+            signature,
+            nonce: Default::default(),
         }
     }
 
@@ -97,12 +123,23 @@ impl BlockBuilder<ValidationBlock> {
     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
     #[inline(always)]
     pub fn new(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
         strong_parents: StrongParents,
         highest_supported_version: u8,
         protocol_parameters: &ProtocolParameters,
+        signature: Ed25519Signature,
     ) -> Self {
         Self {
-            protocol_version: None,
+            protocol_version: Default::default(),
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
             inner: ValidationBlock {
                 strong_parents,
                 weak_parents: Default::default(),
@@ -110,7 +147,8 @@ impl BlockBuilder<ValidationBlock> {
                 highest_supported_version,
                 protocol_parameters_hash: protocol_parameters.hash(),
             },
-            nonce: None,
+            signature,
+            nonce: Default::default(),
         }
     }
 
@@ -129,17 +167,29 @@ impl BlockBuilder<ValidationBlock> {
     }
 }
 
-impl<B: Into<BlockType>> From<B> for BlockBuilder<B> {
-    fn from(inner: B) -> Self {
+impl<B: Into<BlockType>> BlockBuilder<B> {
+    pub fn from_block_type(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        inner: B,
+        signature: Ed25519Signature,
+    ) -> Self {
         Self {
-            protocol_version: None,
+            protocol_version: Default::default(),
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
             inner,
-            nonce: None,
+            signature,
+            nonce: Default::default(),
         }
     }
-}
 
-impl<B: Into<BlockType>> BlockBuilder<B> {
     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
         let inner = self.inner.into();
         verify_parents(
@@ -150,7 +200,13 @@ impl<B: Into<BlockType>> BlockBuilder<B> {
 
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
+            network_id: self.network_id,
+            issuing_time: self.issuing_time,
+            slot_commitment_id: self.slot_commitment_id,
+            latest_finalized_slot: self.latest_finalized_slot,
+            issuer_id: self.issuer_id,
             inner,
+            signature: self.signature,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
@@ -259,7 +315,20 @@ impl BlockType {
 pub struct Block {
     /// Protocol version of the block.
     protocol_version: u8,
+    /// Network identifier.
+    network_id: u64,
+    /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
+    issuing_time: u64,
+    /// The identifier of the slot to which this block commits.
+    slot_commitment_id: SlotCommitmentId,
+    /// The slot index of the latest finalized slot.
+    latest_finalized_slot: SlotIndex,
+    /// The identifier of the account that issued this block.
+    issuer_id: IssuerId,
+    /// The inner block variant, either [`BasicBlock`] or [`ValidationBlock`].
     pub(crate) inner: BlockType,
+    ///
+    signature: Ed25519Signature,
     /// The result of the Proof of Work in order for the block to be accepted into the tangle.
     nonce: u64,
 }
@@ -272,24 +341,86 @@ impl Block {
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: StrongParents) -> BlockBuilder<BasicBlock> {
-        BlockBuilder::<BasicBlock>::new(strong_parents)
+    pub fn build_basic(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        strong_parents: StrongParents,
+        signature: Ed25519Signature,
+    ) -> BlockBuilder<BasicBlock> {
+        BlockBuilder::<BasicBlock>::new(
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            strong_parents,
+            signature,
+        )
     }
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
     #[inline(always)]
     pub fn build_validation(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
         strong_parents: StrongParents,
         highest_supported_version: u8,
         protocol_parameters: &ProtocolParameters,
+        signature: Ed25519Signature,
     ) -> BlockBuilder<ValidationBlock> {
-        BlockBuilder::<ValidationBlock>::new(strong_parents, highest_supported_version, protocol_parameters)
+        BlockBuilder::<ValidationBlock>::new(
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            strong_parents,
+            highest_supported_version,
+            protocol_parameters,
+            signature,
+        )
     }
 
     /// Returns the protocol version of a [`Block`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
         self.protocol_version
+    }
+
+    /// Returns the network id of a [`Block`].
+    #[inline(always)]
+    pub fn network_id(&self) -> u64 {
+        self.network_id
+    }
+
+    /// Returns the issuing time of a [`Block`].
+    #[inline(always)]
+    pub fn issuing_time(&self) -> u64 {
+        self.issuing_time
+    }
+
+    /// Returns the slot commitment ID of a [`Block`].
+    #[inline(always)]
+    pub fn slot_commitment_id(&self) -> SlotCommitmentId {
+        self.slot_commitment_id
+    }
+
+    /// Returns the latest finalized slot of a [`Block`].
+    #[inline(always)]
+    pub fn latest_finalized_slot(&self) -> SlotIndex {
+        self.latest_finalized_slot
+    }
+
+    /// Returns the issuer ID of a [`Block`].
+    #[inline(always)]
+    pub fn issuer_id(&self) -> IssuerId {
+        self.issuer_id
     }
 
     /// Returns the strong parents of a [`Block`].
@@ -314,6 +445,12 @@ impl Block {
     #[inline(always)]
     pub fn payload(&self) -> Option<&Payload> {
         self.inner.payload()
+    }
+
+    /// Returns the signature of a [`Block`].
+    #[inline(always)]
+    pub fn signature(&self) -> &Ed25519Signature {
+        &self.signature
     }
 
     /// Returns the nonce of a [`Block`].
@@ -379,13 +516,31 @@ impl Packable for Block {
             }));
         }
 
+        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
         let inner = BlockType::unpack::<_, VERIFY>(unpacker, visitor)?;
+
+        let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let block = Self {
             protocol_version,
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
             inner,
+            signature,
             nonce,
         };
 
@@ -431,9 +586,15 @@ pub(crate) mod dto {
     use serde_json::Value;
 
     use super::*;
-    use crate::types::{
-        block::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto, Error},
-        TryFromDto, ValidationParams,
+    use crate::{
+        types::{
+            block::{
+                basic::dto::BasicBlockDto, signature::dto::Ed25519SignatureDto, validation::dto::ValidationBlockDto,
+                Error,
+            },
+            TryFromDto, ValidationParams,
+        },
+        utils::serde::string,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -508,7 +669,15 @@ pub(crate) mod dto {
     #[serde(rename_all = "camelCase")]
     pub struct BlockDto {
         pub protocol_version: u8,
+        #[serde(with = "string")]
+        pub network_id: u64,
+        #[serde(with = "string")]
+        pub issuing_time: u64,
+        pub slot_commitment_id: SlotCommitmentId,
+        pub latest_finalized_slot: SlotIndex,
+        pub issuer_id: IssuerId,
         pub inner: BlockTypeDto,
+        pub signature: Ed25519SignatureDto,
         pub nonce: String,
     }
 
@@ -516,7 +685,13 @@ pub(crate) mod dto {
         fn from(value: &Block) -> Self {
             Self {
                 protocol_version: value.protocol_version(),
+                network_id: value.network_id(),
+                issuing_time: value.issuing_time(),
+                slot_commitment_id: value.slot_commitment_id(),
+                latest_finalized_slot: value.latest_finalized_slot(),
+                issuer_id: value.issuer_id(),
                 inner: value.inner().into(),
+                signature: value.signature().into(),
                 nonce: value.nonce().to_string(),
             }
         }
@@ -528,10 +703,18 @@ pub(crate) mod dto {
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             let inner = BlockType::try_from_dto_with_params_inner(dto.inner, params)?;
-            BlockBuilder::from(inner)
-                .with_protocol_version(dto.protocol_version)
-                .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?)
-                .finish()
+            BlockBuilder::from_block_type(
+                dto.network_id,
+                dto.issuing_time,
+                dto.slot_commitment_id,
+                dto.latest_finalized_slot,
+                dto.issuer_id,
+                inner,
+                Ed25519Signature::try_from(dto.signature)?,
+            )
+            .with_protocol_version(dto.protocol_version)
+            .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?)
+            .finish()
         }
     }
 

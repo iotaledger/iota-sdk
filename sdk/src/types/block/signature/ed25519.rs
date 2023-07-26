@@ -17,7 +17,7 @@ use packable::{
 use crate::types::block::{address::Ed25519Address, Error};
 
 /// An Ed25519 signature.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
     public_key: PublicKey,
     signature: Signature,

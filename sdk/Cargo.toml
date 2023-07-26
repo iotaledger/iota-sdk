@@ -22,6 +22,7 @@ bech32 = { version = "0.9.1", default-features = false }
 bitflags = { version = "2.3.3", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [
     "from",
+    "from_str",
     "as_ref",
     "deref",
     "deref_mut",

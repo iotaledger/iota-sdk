@@ -31,9 +31,33 @@ impl ClientInner {
                 None => StrongParents::from_vec(self.get_tips().await?)?,
             };
 
-            Ok(BlockBuilder::<BasicBlock>::new(strong_parents)
-                .with_payload(payload)
-                .finish()?)
+            #[cfg(feature = "std")]
+            let issuing_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos() as u64;
+            // TODO no_std way to have a nanosecond timestamp
+            // https://github.com/iotaledger/iota-sdk/issues/647
+            #[cfg(not(feature = "std"))]
+            let issuing_time = 0;
+
+            let node_info = self.get_info().await?.node_info;
+            let latest_finalized_slot = node_info.status.latest_finalized_slot;
+            let slot_commitment_id = self.get_slot_commitment_by_index(latest_finalized_slot).await?.id();
+
+            let signature = todo!();
+
+            Ok(Block::build_basic(
+                self.get_network_id().await?,
+                issuing_time,
+                slot_commitment_id,
+                latest_finalized_slot,
+                node_info.issuer_id,
+                strong_parents,
+                signature,
+            )
+            .with_payload(payload)
+            .finish()?)
         }
     }
 
