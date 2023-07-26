@@ -8,6 +8,7 @@
 pub mod ledger_nano;
 /// Module for signing with a mnemonic or seed
 pub mod mnemonic;
+pub mod private_key;
 /// Module for signing with a Stronghold vault
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
@@ -30,6 +31,7 @@ use zeroize::Zeroizing;
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
 use self::mnemonic::MnemonicSecretManager;
+use self::private_key::PrivateKeySecretManager;
 #[cfg(feature = "stronghold")]
 use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
@@ -137,6 +139,8 @@ pub enum SecretManager {
     /// LedgerNano or Stronghold instead.
     Mnemonic(MnemonicSecretManager),
 
+    PrivateKey(PrivateKeySecretManager),
+
     /// Secret manager that's just a placeholder, so it can be provided to an online wallet, but can't be used for
     /// signing.
     Placeholder,
@@ -150,6 +154,7 @@ impl Debug for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(_) => f.debug_tuple("LedgerNano").field(&"...").finish(),
             Self::Mnemonic(_) => f.debug_tuple("Mnemonic").field(&"...").finish(),
+            Self::PrivateKey(_) => f.debug_tuple("PrivateKey").field(&"...").finish(),
             Self::Placeholder => f.debug_struct("Placeholder").finish(),
         }
     }
@@ -180,6 +185,9 @@ pub enum SecretManagerDto {
     /// Mnemonic
     #[serde(alias = "mnemonic")]
     Mnemonic(Zeroizing<String>),
+    /// Private Key
+    #[serde(alias = "privateKey")]
+    PrivateKey(Zeroizing<String>),
     /// Hex seed
     #[serde(alias = "hexSeed")]
     HexSeed(Zeroizing<String>),
@@ -215,6 +223,11 @@ impl TryFrom<SecretManagerDto> for SecretManager {
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
 
+            SecretManagerDto::PrivateKey(_private_key) => {
+                panic!()
+                // Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(private_key.as_str().to_owned())?)
+            }
+
             SecretManagerDto::HexSeed(hex_seed) => {
                 // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?)
@@ -247,6 +260,9 @@ impl From<&SecretManager> for SecretManagerDto {
             // the client/wallet we also don't need to convert it in this direction with the mnemonic/seed, we only need
             // to know the type
             SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string().into()),
+
+            SecretManager::PrivateKey(_private_key) => Self::PrivateKey("...".to_string().into()),
+
             SecretManager::Placeholder => Self::Placeholder,
         }
     }
@@ -277,6 +293,11 @@ impl SecretManage for SecretManager {
                     .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
+            Self::PrivateKey(secret_manager) => {
+                secret_manager
+                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .await
+            }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -302,6 +323,11 @@ impl SecretManage for SecretManager {
                     .generate_evm_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
+            Self::PrivateKey(secret_manager) => {
+                secret_manager
+                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+                    .await
+            }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -313,6 +339,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+            Self::PrivateKey(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -328,6 +355,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
+            Self::PrivateKey(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -351,6 +379,11 @@ impl SecretManage for SecretManager {
                     .sign_transaction_essence(prepared_transaction_data, time)
                     .await
             }
+            Self::PrivateKey(secret_manager) => {
+                secret_manager
+                    .sign_transaction_essence(prepared_transaction_data, time)
+                    .await
+            }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -365,6 +398,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
+            Self::PrivateKey(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -390,6 +424,7 @@ impl SecretManagerConfig for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
             Self::Mnemonic(_) => None,
+            Self::PrivateKey(_) => None,
             Self::Placeholder => None,
         }
     }
@@ -406,6 +441,10 @@ impl SecretManagerConfig for SecretManager {
             SecretManagerDto::Mnemonic(mnemonic) => {
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
             }
+            SecretManagerDto::PrivateKey(_private_key) => panic!(),
+            //  Self::Mnemonic(PrivateKeySecretManager::try_from_base58(
+            //     private_key.as_str().to_owned(),
+            // )?),
             SecretManagerDto::Placeholder => Self::Placeholder,
         })
     }

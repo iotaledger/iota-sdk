@@ -109,6 +109,16 @@ impl Wallet {
                     )
                     .await?
             }
+            SecretManager::PrivateKey(private_key) => {
+                private_key
+                    .generate_ed25519_addresses(
+                        self.coin_type.load(Ordering::Relaxed),
+                        account_index,
+                        address_index..address_index + 1,
+                        options,
+                    )
+                    .await?
+            }
             SecretManager::Placeholder => return Err(crate::client::Error::PlaceholderSecretManager.into()),
         };
 
