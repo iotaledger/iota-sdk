@@ -54,14 +54,8 @@ impl HttpClient {
             Ok(Response(response))
         } else {
             let text = response.text().await?;
-            // Different urls, nodes and versions give different replies
-            if text == *"no available nodes with remote Pow"
-                || text.contains("proof of work is not available on this node")
-                || text.contains("proof of work is not enabled")
-                || text.contains("`Pow` not enabled")
-            {
-                Err(Error::UnavailablePow)
-            } else if status.as_u16() == 404 {
+
+            if status.as_u16() == 404 {
                 Err(Error::NotFound(url.to_string()))
             } else {
                 Err(Error::ResponseError {

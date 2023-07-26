@@ -7,14 +7,10 @@ use std::time::Duration;
 
 use crate::types::block::address::Hrp;
 
-/// Default timeout for all API requests apart from post_block with remote PoW
+/// Default timeout for all API requests
 pub(crate) const DEFAULT_API_TIMEOUT: Duration = Duration::from_secs(15);
-pub(crate) const DEFAULT_REMOTE_POW_API_TIMEOUT: Duration = Duration::from_secs(100);
 pub(crate) const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 pub(crate) const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
-/// Interval in seconds when new tips will be requested during PoW, so the final block always will be attached to a
-/// new part of the Tangle
-pub(crate) const DEFAULT_TIPS_INTERVAL: u64 = 5;
 /// Interval in which the node info will be requested and healthy nodes will be added to the healthy node pool
 pub(crate) const NODE_SYNC_INTERVAL: Duration = Duration::from_secs(60);
 pub(crate) const DEFAULT_MIN_QUORUM_SIZE: usize = 3;

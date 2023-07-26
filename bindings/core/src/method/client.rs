@@ -100,22 +100,14 @@ pub enum ClientMethod {
     },
     /// Get a node candidate from the healthy node pool.
     GetNode,
-    /// Gets the network related information such as network_id and min_pow_score
+    /// Gets the network related information such as network_id.
     GetNetworkInfo,
     /// Gets the network id of the node we're connecting to.
     GetNetworkId,
     /// Returns the bech32_hrp
     GetBech32Hrp,
-    /// Returns the min pow score
-    GetMinPowScore,
-    /// Returns the tips interval
-    GetTipsInterval,
     /// Returns the protocol parameters
     GetProtocolParameters,
-    /// Returns if local pow should be used or not
-    GetLocalPow,
-    /// Get fallback to local proof of work timeout
-    GetFallbackToLocalPow,
     /// Returns the unhealthy nodes.
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes,

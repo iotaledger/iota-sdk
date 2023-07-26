@@ -39,20 +39,12 @@ where
             broker_options,
             network_info,
             api_timeout,
-            remote_pow_timeout,
-            #[cfg(not(target_family = "wasm"))]
-            pow_worker_count,
         } = client_options;
         self.client
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
         *self.client.network_info.write().await = network_info;
         *self.client.api_timeout.write().await = api_timeout;
-        *self.client.remote_pow_timeout.write().await = remote_pow_timeout;
-        #[cfg(not(target_family = "wasm"))]
-        {
-            *self.client.pow_worker_count.write().await = pow_worker_count;
-        }
         #[cfg(feature = "mqtt")]
         {
             *self.client.mqtt.broker_options.write().await = broker_options;
@@ -80,21 +72,6 @@ where
 
             if node_url == &url {
                 node_manager_builder.primary_node = Some(NodeDto::Node(Node {
-                    url: url.clone(),
-                    auth: auth.clone(),
-                    disabled,
-                }));
-            }
-        }
-
-        if let Some(primary_pow_node) = &node_manager_builder.primary_pow_node {
-            let (node_url, disabled) = match &primary_pow_node {
-                NodeDto::Url(node_url) => (node_url, false),
-                NodeDto::Node(node) => (&node.url, node.disabled),
-            };
-
-            if node_url == &url {
-                node_manager_builder.primary_pow_node = Some(NodeDto::Node(Node {
                     url: url.clone(),
                     auth: auth.clone(),
                     disabled,

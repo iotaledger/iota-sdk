@@ -116,9 +116,5 @@ fn wallet_events_serde() {
         TransactionProgressEvent::SigningTransaction,
     ));
 
-    assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::PerformingPow,
-    ));
-
     assert_serde_eq(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting));
 }
