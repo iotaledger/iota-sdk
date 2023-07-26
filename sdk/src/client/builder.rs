@@ -47,16 +47,6 @@ fn default_api_timeout() -> Duration {
     DEFAULT_API_TIMEOUT
 }
 
-impl Default for NetworkInfo {
-    fn default() -> Self {
-        Self {
-            // TODO do we really want a default?
-            protocol_parameters: ProtocolParameters::default(),
-            latest_milestone_timestamp: None,
-        }
-    }
-}
-
 impl Default for ClientBuilder {
     fn default() -> Self {
         Self {
@@ -266,7 +256,8 @@ impl ClientBuilder {
 }
 
 /// Struct containing network related information
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+// TODO do we really want a default?
+#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
     /// Protocol parameters.
