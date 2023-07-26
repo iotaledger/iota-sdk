@@ -47,7 +47,6 @@ async fn client_builder() {
             "genesisUnixTimestamp":1582328545,
             "slotDurationInSeconds":10
         },
-        "tipsInterval":5,
         "apiTimeout":{
             "secs":15,
             "nanos":0

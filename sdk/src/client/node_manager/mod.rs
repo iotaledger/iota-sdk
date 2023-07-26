@@ -139,9 +139,8 @@ impl NodeManager {
         prefer_permanode: bool,
     ) -> Result<T> {
         let mut result: HashMap<String, usize> = HashMap::new();
-        // primary_pow_node should only be used for post request with remote PoW
         // Get node urls and set path
-        let nodes = self.get_nodes(path, query, false, prefer_permanode)?;
+        let nodes = self.get_nodes(path, query, prefer_permanode)?;
         if self.quorum && need_quorum && nodes.len() < self.min_quorum_size {
             return Err(Error::QuorumPoolSizeError {
                 available_nodes: nodes.len(),
@@ -255,9 +254,8 @@ impl NodeManager {
         query: Option<&str>,
         timeout: Duration,
     ) -> Result<Vec<u8>> {
-        // primary_pow_node should only be used for post request with remote Pow
         // Get node urls and set path
-        let nodes = self.get_nodes(path, query, false, false)?;
+        let nodes = self.get_nodes(path, query, false)?;
         let mut error = None;
         // Send requests
         for node in nodes {
@@ -283,10 +281,8 @@ impl NodeManager {
         path: &str,
         timeout: Duration,
         body: &[u8],
-        local_pow: bool,
     ) -> Result<T> {
-        // primary_pow_node should only be used for post request with remote PoW
-        let nodes = self.get_nodes(path, None, !local_pow, false)?;
+        let nodes = self.get_nodes(path, None, false)?;
         let mut error = None;
         // Send requests
         for node in nodes {
@@ -312,10 +308,8 @@ impl NodeManager {
         path: &str,
         timeout: Duration,
         json: Value,
-        local_pow: bool,
     ) -> Result<T> {
-        // primary_pow_node should only be used for post request with remote PoW
-        let nodes = self.get_nodes(path, None, !local_pow, false)?;
+        let nodes = self.get_nodes(path, None, false)?;
         let mut error = None;
         // Send requests
         for node in nodes {

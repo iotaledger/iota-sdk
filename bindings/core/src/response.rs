@@ -71,9 +71,6 @@ pub enum Response {
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
     Bech32Hrp(Hrp),
     /// Response for:
-    /// - [`GetTipsInterval`](crate::method::ClientMethod::GetTipsInterval)
-    TipsInterval(u64),
-    /// Response for:
     /// - [`GetProtocolParameters`](crate::method::ClientMethod::GetProtocolParameters)
     ProtocolParameters(ProtocolParameters),
     /// Response for:

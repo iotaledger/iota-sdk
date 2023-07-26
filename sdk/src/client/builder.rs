@@ -11,7 +11,7 @@ use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
     client::{
-        constants::{DEFAULT_API_TIMEOUT, DEFAULT_TIPS_INTERVAL},
+        constants::DEFAULT_API_TIMEOUT,
         error::Result,
         node_manager::{
             builder::validate_url,
@@ -52,7 +52,6 @@ impl Default for NetworkInfo {
         Self {
             // TODO do we really want a default?
             protocol_parameters: ProtocolParameters::default(),
-            tips_interval: DEFAULT_TIPS_INTERVAL,
             latest_milestone_timestamp: None,
         }
     }
@@ -166,12 +165,6 @@ impl ClientBuilder {
         self
     }
 
-    /// Sets after how many seconds new tips will be requested during PoW
-    pub fn with_tips_interval(mut self, tips_interval: u64) -> Self {
-        self.network_info.tips_interval = tips_interval;
-        self
-    }
-
     /// Sets the default request timeout.
     pub fn with_api_timeout(mut self, timeout: Duration) -> Self {
         self.api_timeout = timeout;
@@ -279,9 +272,6 @@ pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
-    /// Tips request interval during PoW in seconds.
-    #[serde(default = "default_tips_interval")]
-    pub tips_interval: u64,
     /// The latest cached milestone timestamp.
     #[serde(skip)]
     pub latest_milestone_timestamp: Option<u32>,
@@ -293,17 +283,8 @@ impl NetworkInfo {
         self
     }
 
-    pub fn with_tips_interval(mut self, tips_interval: u64) -> Self {
-        self.tips_interval = tips_interval;
-        self
-    }
-
     pub fn with_latest_milestone_timestamp(mut self, latest_milestone_timestamp: impl Into<Option<u32>>) -> Self {
         self.latest_milestone_timestamp = latest_milestone_timestamp.into();
         self
     }
-}
-
-fn default_tips_interval() -> u64 {
-    DEFAULT_TIPS_INTERVAL
 }

@@ -166,7 +166,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
-        ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval().await),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
             let block = client

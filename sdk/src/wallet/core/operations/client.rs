@@ -79,21 +79,6 @@ where
             }
         }
 
-        if let Some(primary_pow_node) = &node_manager_builder.primary_pow_node {
-            let (node_url, disabled) = match &primary_pow_node {
-                NodeDto::Url(node_url) => (node_url, false),
-                NodeDto::Node(node) => (&node.url, node.disabled),
-            };
-
-            if node_url == &url {
-                node_manager_builder.primary_pow_node = Some(NodeDto::Node(Node {
-                    url: url.clone(),
-                    auth: auth.clone(),
-                    disabled,
-                }));
-            }
-        }
-
         node_manager_builder.permanodes = node_manager_builder
             .permanodes
             .into_iter()

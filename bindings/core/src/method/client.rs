@@ -96,8 +96,6 @@ pub enum ClientMethod {
     GetNetworkId,
     /// Returns the bech32_hrp
     GetBech32Hrp,
-    /// Returns the tips interval
-    GetTipsInterval,
     /// Returns the protocol parameters
     GetProtocolParameters,
     /// Returns the unhealthy nodes.
