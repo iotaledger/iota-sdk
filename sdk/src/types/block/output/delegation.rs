@@ -16,7 +16,7 @@ use crate::types::{
         output::{
             account_id::AccountId,
             chain_id::ChainId,
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            feature::FeatureFlags,
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
@@ -58,7 +58,6 @@ pub struct DelegationOutputBuilder {
     start_epoch: u64,
     end_epoch: u64,
     unlock_conditions: BTreeSet<UnlockCondition>,
-    immutable_features: BTreeSet<Feature>,
 }
 
 impl DelegationOutputBuilder {
@@ -107,7 +106,6 @@ impl DelegationOutputBuilder {
             start_epoch: 0,
             end_epoch: 0,
             unlock_conditions: BTreeSet::new(),
-            immutable_features: BTreeSet::new(),
         }
     }
 
@@ -174,39 +172,11 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Adds an immutable [`Feature`] to the builder, if one does not already exist of that type.
-    pub fn add_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        self.immutable_features.insert(immutable_feature.into());
-        self
-    }
-
-    /// Sets the immutable [`Feature`]s in the builder, overwriting any existing values.
-    pub fn with_immutable_features(mut self, immutable_features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
-        self.immutable_features = immutable_features.into_iter().map(Into::into).collect();
-        self
-    }
-
-    /// Replaces an immutable [`Feature`] of the builder with a new one, or adds it.
-    pub fn replace_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        self.immutable_features.replace(immutable_feature.into());
-        self
-    }
-
-    /// Clears all immutable [`Feature`]s from the builder.
-    pub fn clear_immutable_features(mut self) -> Self {
-        self.immutable_features.clear();
-        self
-    }
-
     /// Finishes the builder into a [`DelegationOutput`] without amount verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
-
-        let immutable_features = Features::from_set(self.immutable_features)?;
-
-        verify_allowed_features(&immutable_features, DelegationOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = DelegationOutput {
             amount: 1u64,
@@ -216,7 +186,6 @@ impl DelegationOutputBuilder {
             start_epoch: self.start_epoch,
             end_epoch: self.end_epoch,
             unlock_conditions,
-            immutable_features,
         };
 
         output.amount = match self.amount {
@@ -259,7 +228,6 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
             start_epoch: output.start_epoch,
             end_epoch: output.end_epoch,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
-            immutable_features: output.immutable_features.iter().cloned().collect(),
         }
     }
 }
@@ -280,7 +248,6 @@ pub struct DelegationOutput {
     /// The index of the last epoch for which this output delegates.
     end_epoch: u64,
     unlock_conditions: UnlockConditions,
-    immutable_features: Features,
 }
 
 impl DelegationOutput {
@@ -357,11 +324,6 @@ impl DelegationOutput {
         &self.unlock_conditions
     }
 
-    /// Returns the immutable features of the [`DelegationOutput`].
-    pub fn immutable_features(&self) -> &Features {
-        &self.immutable_features
-    }
-
     /// Returns the address of the [`DelegationOutput`].
     pub fn address(&self) -> &Address {
         // An DelegationOutput must have an AddressUnlockCondition.
@@ -403,7 +365,6 @@ impl Packable for DelegationOutput {
         self.start_epoch.pack(packer)?;
         self.end_epoch.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
-        self.immutable_features.pack(packer)?;
 
         Ok(())
     }
@@ -427,13 +388,6 @@ impl Packable for DelegationOutput {
 
         verify_unlock_conditions::<VERIFY>(&unlock_conditions).map_err(UnpackError::Packable)?;
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
-                .map_err(UnpackError::Packable)?;
-        }
-
         Ok(Self {
             amount,
             delegated_amount,
@@ -442,7 +396,6 @@ impl Packable for DelegationOutput {
             start_epoch,
             end_epoch,
             unlock_conditions,
-            immutable_features,
         })
     }
 }
@@ -467,9 +420,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{
-            output::{
-                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
-            },
+            output::{dto::OutputBuilderAmountDto, unlock_condition::dto::UnlockConditionDto},
             Error,
         },
         TryFromDto,
@@ -487,8 +438,6 @@ pub(crate) mod dto {
         start_epoch: u64,
         end_epoch: u64,
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
     }
 
     impl From<&DelegationOutput> for DelegationOutputDto {
@@ -502,7 +451,6 @@ pub(crate) mod dto {
                 start_epoch: value.start_epoch(),
                 end_epoch: value.end_epoch(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
             }
         }
     }
@@ -527,10 +475,6 @@ pub(crate) mod dto {
             builder = builder.with_start_epoch(dto.start_epoch);
             builder = builder.with_end_epoch(dto.end_epoch);
 
-            for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
@@ -549,7 +493,6 @@ pub(crate) mod dto {
             start_epoch: u64,
             end_epoch: u64,
             unlock_conditions: Vec<UnlockConditionDto>,
-            immutable_features: Option<Vec<FeatureDto>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
@@ -582,14 +525,6 @@ pub(crate) mod dto {
                 .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
-                builder = builder.with_immutable_features(immutable_features);
-            }
 
             builder.finish_with_params(params)
         }
