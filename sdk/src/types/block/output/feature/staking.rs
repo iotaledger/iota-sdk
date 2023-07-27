@@ -53,18 +53,20 @@ impl StakingFeature {
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
+    use crate::utils::serde::string;
+
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct StakingFeatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
         pub staked_amount: u64,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
         pub fixed_cost: u64,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
         pub start_epoch: u64,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
         pub end_epoch: u64,
     }
 }
