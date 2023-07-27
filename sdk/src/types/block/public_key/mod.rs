@@ -46,12 +46,10 @@ impl PublicKey {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use super::ed25519::dto::Ed25519PublicKeyDto;
-    use super::*;
+    use super::{ed25519::dto::Ed25519PublicKeyDto, *};
     use crate::types::block::Error;
 
     /// Describes all the different public key types.
