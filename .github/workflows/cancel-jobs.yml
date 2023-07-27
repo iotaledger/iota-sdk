@@ -2,7 +2,7 @@ name: Cancel jobs from merged/closed pull request
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [closed]
 
 jobs:
   merge_job:
@@ -12,4 +12,4 @@ jobs:
         with:
           ignore_sha: true
           access_token: ${{ github.token }}
-          workflow_id: "bindings-nodejs.yml, bindings-python.yml, bindings-wallet-nodejs.yml, bindings-wasm.yml, build-and-test.yml, coverage.yml, lint.yml, private-tangle-tests.yml"
+          workflow_id: all
