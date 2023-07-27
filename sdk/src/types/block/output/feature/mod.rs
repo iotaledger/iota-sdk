@@ -440,7 +440,7 @@ pub mod dto {
                     tag: v.tag().into(),
                 }),
                 Feature::Staking(v) => Self::Staking(StakingFeatureDto {
-                    kind: TagFeature::KIND,
+                    kind: StakingFeature::KIND,
                     staked_amount: v.staked_amount(),
                     fixed_cost: v.fixed_cost(),
                     start_epoch: v.start_epoch(),
