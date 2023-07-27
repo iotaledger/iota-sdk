@@ -58,9 +58,13 @@ pub(crate) mod dto {
     pub struct StakingFeatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
+        #[serde(with = "crate::utils::serde::string")]
         pub staked_amount: u64,
+        #[serde(with = "crate::utils::serde::string")]
         pub fixed_cost: u64,
+        #[serde(with = "crate::utils::serde::string")]
         pub start_epoch: u64,
+        #[serde(with = "crate::utils::serde::string")]
         pub end_epoch: u64,
     }
 }
