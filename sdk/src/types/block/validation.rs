@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::string::ToString;
-
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -116,8 +114,8 @@ fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &Protoco
     let params_hash = params.hash();
     if hash != &params_hash {
         return Err(Error::InvalidProtocolParametersHash {
-            expected: params_hash.to_string(),
-            actual: hash.to_string(),
+            expected: params_hash,
+            actual: *hash,
         });
     }
     Ok(())

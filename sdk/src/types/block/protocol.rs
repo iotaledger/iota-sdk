@@ -159,7 +159,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
 impl_id!(
     pub ProtocolParametersHash,
     32,
-    "The hash of the protocol parameters for the Highest Supported Version."
+    "The hash of the protocol parameters."
 );
 
 #[cfg(feature = "serde")]
