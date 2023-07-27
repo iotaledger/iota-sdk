@@ -10,7 +10,7 @@ use crate::types::block::Error;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidSignatureKind)]
+#[packable(tag_type = u8, with_error = Error::InvalidPublicKeyKind)]
 pub enum PublicKey {
     /// An Ed25519 public key.
     #[packable(tag = Ed25519PublicKey::KIND)]
