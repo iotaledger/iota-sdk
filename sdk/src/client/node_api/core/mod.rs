@@ -77,22 +77,6 @@ impl Client {
         Ok(outputs)
     }
 
-    /// Requests outputs and their metadata by their output ID in parallel.
-    pub async fn get_outputs_with_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadata>> {
-        #[cfg(target_family = "wasm")]
-        let outputs =
-            futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id))).await?;
-
-        #[cfg(not(target_family = "wasm"))]
-        let outputs = self
-            .chunk_requests(output_ids, false, |client, id| {
-                async { client.get_output_with_metadata(id).await }.boxed()
-            })
-            .await?;
-
-        Ok(outputs)
-    }
-
     /// Requests outputs by their output ID in parallel, ignoring failed requests.
     /// Useful to get data about spent outputs, that might not be pruned yet.
     pub async fn get_outputs_ignore_errors(&self, output_ids: &[OutputId]) -> Result<Vec<Output>> {
@@ -107,6 +91,22 @@ impl Client {
         let outputs = self
             .chunk_requests(output_ids, true, |client, id| {
                 async { client.get_output(id).await }.boxed()
+            })
+            .await?;
+
+        Ok(outputs)
+    }
+
+    /// Requests outputs and their metadata by their output ID in parallel.
+    pub async fn get_outputs_with_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadata>> {
+        #[cfg(target_family = "wasm")]
+        let outputs =
+            futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id))).await?;
+
+        #[cfg(not(target_family = "wasm"))]
+        let outputs = self
+            .chunk_requests(output_ids, false, |client, id| {
+                async { client.get_output_with_metadata(id).await }.boxed()
             })
             .await?;
 
@@ -134,6 +134,21 @@ impl Client {
             .await?;
 
         Ok(outputs)
+    }
+
+    /// Requests metadata for outputs by their output ID in parallel.
+    pub async fn get_outputs_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputMetadata>> {
+        #[cfg(target_family = "wasm")]
+        let metadata = futures::future::join_all(output_ids.iter().map(|id| self.get_output_metadata(id))).await?;
+
+        #[cfg(not(target_family = "wasm"))]
+        let metadata = self
+            .chunk_requests(output_ids, false, |client, id| {
+                async { client.get_output_metadata(id).await }.boxed()
+            })
+            .await?;
+
+        Ok(metadata)
     }
 
     /// Requests metadata for outputs by their output ID in parallel, ignoring failed requests.
