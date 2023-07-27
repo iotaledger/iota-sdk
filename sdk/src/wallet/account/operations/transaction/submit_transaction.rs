@@ -22,16 +22,6 @@ where
         #[cfg(feature = "events")]
         let account_index = self.details().await.index;
 
-        let local_pow = self.client().get_local_pow().await;
-        if local_pow {
-            log::debug!("[TRANSACTION] doing local pow");
-            #[cfg(feature = "events")]
-            self.emit(
-                account_index,
-                WalletEvent::TransactionProgress(TransactionProgressEvent::PerformingPow),
-            )
-            .await;
-        }
         let block = self
             .client()
             .finish_block_builder(None, Some(Payload::from(transaction_payload)))

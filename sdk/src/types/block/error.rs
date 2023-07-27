@@ -95,7 +95,6 @@ pub enum Error {
     NonZeroStateIndexOrFoundryCounter,
     ParentsNotUniqueSorted,
     ProtocolVersionMismatch { expected: u8, actual: u8 },
-    NonceNotFound,
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
@@ -249,9 +248,6 @@ impl fmt::Display for Error {
             }
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
-            }
-            Self::NonceNotFound => {
-                write!(f, "nonce miner could not find a nonce")
             }
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")

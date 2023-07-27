@@ -27,8 +27,6 @@ pub struct ProtocolParameters {
     network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
     bech32_hrp: Hrp,
-    // The minimum pow score of the network.
-    min_pow_score: u32,
     // The below max depth parameter of the network.
     below_max_depth: u8,
     // The rent structure used by given node/network.
@@ -58,7 +56,6 @@ impl Default for ProtocolParameters {
             PROTOCOL_VERSION,
             String::from("iota-core-testnet"),
             "smr",
-            1500,
             15,
             RentStructure::default(),
             1_813_620_509_061_365,
@@ -76,7 +73,6 @@ impl ProtocolParameters {
         protocol_version: u8,
         network_name: String,
         bech32_hrp: impl ConvertTo<Hrp>,
-        min_pow_score: u32,
         below_max_depth: u8,
         rent_structure: RentStructure,
         token_supply: u64,
@@ -87,7 +83,6 @@ impl ProtocolParameters {
             protocol_version,
             network_name: <StringPrefix<u8>>::try_from(network_name).map_err(Error::InvalidStringPrefix)?,
             bech32_hrp: bech32_hrp.convert()?,
-            min_pow_score,
             below_max_depth,
             rent_structure,
             token_supply,
@@ -114,11 +109,6 @@ impl ProtocolParameters {
     /// Returns the bech32 HRP of the [`ProtocolParameters`].
     pub fn bech32_hrp(&self) -> &Hrp {
         &self.bech32_hrp
-    }
-
-    /// Returns the minimum PoW score of the [`ProtocolParameters`].
-    pub fn min_pow_score(&self) -> u32 {
-        self.min_pow_score
     }
 
     /// Returns the below max depth of the [`ProtocolParameters`].
@@ -152,7 +142,6 @@ pub fn protocol_parameters() -> ProtocolParameters {
         2,
         String::from("testnet"),
         "rms",
-        1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),
         1_813_620_509_061_365,

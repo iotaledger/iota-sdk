@@ -219,8 +219,6 @@ pub enum TransactionProgressEvent {
     PreparedTransactionEssenceHash(String),
     /// Signing the transaction.
     SigningTransaction,
-    /// Performing PoW.
-    PerformingPow,
     /// Broadcasting.
     Broadcasting,
 }
@@ -244,7 +242,6 @@ impl Serialize for TransactionProgressEvent {
             T3(PreparedTransactionEssenceHash_<'a>),
             T4,
             T5,
-            T6,
         }
         #[derive(Serialize)]
         struct TypedTransactionProgressEvent_<'a> {
@@ -274,13 +271,9 @@ impl Serialize for TransactionProgressEvent {
                 kind: 4,
                 event: TransactionProgressEvent_::T4,
             },
-            Self::PerformingPow => TypedTransactionProgressEvent_ {
+            Self::Broadcasting => TypedTransactionProgressEvent_ {
                 kind: 5,
                 event: TransactionProgressEvent_::T5,
-            },
-            Self::Broadcasting => TypedTransactionProgressEvent_ {
-                kind: 6,
-                event: TransactionProgressEvent_::T6,
             },
         };
         event.serialize(serializer)
@@ -317,8 +310,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                         .hash,
                 ),
                 4 => Self::SigningTransaction,
-                5 => Self::PerformingPow,
-                6 => Self::Broadcasting,
+                5 => Self::Broadcasting,
                 _ => return Err(serde::de::Error::custom("invalid transaction progress event type")),
             },
         )

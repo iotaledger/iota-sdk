@@ -1,8 +1,6 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
-
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
@@ -27,13 +25,10 @@ pub struct BlockBuilder {
     weak_parents: WeakParents,
     shallow_like_parents: ShallowLikeParents,
     payload: OptionalPayload,
-    nonce: Option<u64>,
     burned_mana: u64,
 }
 
 impl BlockBuilder {
-    const DEFAULT_NONCE: u64 = 0;
-
     /// Creates a new [`BlockBuilder`].
     #[inline(always)]
     pub fn new(strong_parents: StrongParents) -> Self {
@@ -43,7 +38,6 @@ impl BlockBuilder {
             weak_parents: Default::default(),
             shallow_like_parents: Default::default(),
             payload: OptionalPayload::default(),
-            nonce: None,
             burned_mana: Default::default(),
         }
     }
@@ -76,13 +70,6 @@ impl BlockBuilder {
         self
     }
 
-    /// Adds a nonce to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_nonce(mut self, nonce: impl Into<Option<u64>>) -> Self {
-        self.nonce = nonce.into();
-        self
-    }
-
     /// Adds burned mana to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
@@ -90,7 +77,7 @@ impl BlockBuilder {
         self
     }
 
-    fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
+    pub fn finish(self) -> Result<Block, Error> {
         verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
         let block = Block {
@@ -100,7 +87,6 @@ impl BlockBuilder {
             shallow_like_parents: self.shallow_like_parents,
             payload: self.payload,
             burned_mana: self.burned_mana,
-            nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
         let block_bytes = block.pack_to_vec();
@@ -108,21 +94,6 @@ impl BlockBuilder {
         if block_bytes.len() > Block::LENGTH_MAX {
             return Err(Error::InvalidBlockLength(block_bytes.len()));
         }
-
-        Ok((block, block_bytes))
-    }
-
-    /// Finishes the [`BlockBuilder`] into a [`Block`].
-    pub fn finish(self) -> Result<Block, Error> {
-        self._finish().map(|res| res.0)
-    }
-
-    /// Finishes the [`BlockBuilder`] into a [`Block`], computing the nonce with a given provider.
-    pub fn finish_nonce<F: Fn(&[u8]) -> Option<u64>>(self, nonce_provider: F) -> Result<Block, Error> {
-        let (mut block, block_bytes) = self._finish()?;
-
-        block.nonce = nonce_provider(&block_bytes[..block_bytes.len() - core::mem::size_of::<u64>()])
-            .ok_or(Error::NonceNotFound)?;
 
         Ok(block)
     }
@@ -144,8 +115,6 @@ pub struct Block {
     /// The amount of mana the Account identified by [`IssuerId`](super::IssuerId) is at most
     /// willing to burn for this block.
     burned_mana: u64,
-    /// The result of the Proof of Work in order for the block to be accepted into the tangle.
-    nonce: u64,
 }
 
 impl Block {
@@ -188,12 +157,6 @@ impl Block {
     #[inline(always)]
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
-    }
-
-    /// Returns the nonce of a [`Block`].
-    #[inline(always)]
-    pub fn nonce(&self) -> u64 {
-        self.nonce
     }
 
     /// Returns the burned mana of a [`Block`].
@@ -243,7 +206,6 @@ impl Packable for Block {
         self.shallow_like_parents.pack(packer)?;
         self.payload.pack(packer)?;
         self.burned_mana.pack(packer)?;
-        self.nonce.pack(packer)?;
 
         Ok(())
     }
@@ -275,8 +237,6 @@ impl Packable for Block {
 
         let burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
         let block = Self {
             protocol_version,
             strong_parents,
@@ -284,7 +244,6 @@ impl Packable for Block {
             shallow_like_parents,
             payload,
             burned_mana,
-            nonce,
         };
 
         if VERIFY {
@@ -320,10 +279,7 @@ fn verify_parents(
 }
 
 pub(crate) mod dto {
-    use alloc::{
-        collections::BTreeSet,
-        string::{String, ToString},
-    };
+    use alloc::collections::BTreeSet;
 
     use serde::{Deserialize, Serialize};
 
@@ -348,8 +304,6 @@ pub(crate) mod dto {
         pub payload: Option<PayloadDto>,
         #[serde(with = "crate::utils::serde::string")]
         pub burned_mana: u64,
-        ///
-        pub nonce: String,
     }
 
     impl From<&Block> for BlockDto {
@@ -361,7 +315,6 @@ pub(crate) mod dto {
                 shallow_like_parents: value.shallow_like_parents().to_set(),
                 payload: value.payload().map(Into::into),
                 burned_mana: value.burned_mana(),
-                nonce: value.nonce().to_string(),
             }
         }
     }
@@ -377,8 +330,7 @@ pub(crate) mod dto {
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
                 .with_protocol_version(dto.protocol_version)
-                .with_burned_mana(dto.burned_mana)
-                .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
+                .with_burned_mana(dto.burned_mana);
 
             if let Some(p) = dto.payload {
                 builder = builder.with_payload(Payload::try_from_dto_with_params_inner(p, params)?);
