@@ -13,7 +13,7 @@ impl AddressUnlockCondition {
     /// The [`UnlockCondition`](crate::types::block::output::UnlockCondition) kind of an [`AddressUnlockCondition`].
     pub const KIND: u8 = 0;
 
-    /// Creates a new [`AddressUnlockCondition`].
+    /// Creates a new [`AddressUnloikCondition`].
     #[inline(always)]
     pub fn new(address: impl Into<Address>) -> Self {
         Self(address.into())

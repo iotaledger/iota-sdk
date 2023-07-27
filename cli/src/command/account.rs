@@ -25,7 +25,11 @@ use iota_sdk::{
     U256,
 };
 
-use crate::{error::Error, helper::to_utc_date_time, println_log_info};
+use crate::{
+    error::Error,
+    helper::{get_output_type_str, to_utc_date_time},
+    println_log_info,
+};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -627,10 +631,15 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
-        let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        println_log_info!("Outputs: {output_ids:#?}");
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            println_log_info!(
+                "{i}\t{output_id}\t{output_type}",
+                i = i,
+                output_id = &output_data.output_id,
+                output_type = get_output_type_str(&output_data.output)
+            );
+        }
     }
-
     Ok(())
 }
 
