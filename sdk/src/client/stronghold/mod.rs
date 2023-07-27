@@ -59,7 +59,7 @@ use std::{
     time::Duration,
 };
 
-use iota_stronghold::{ClientError, KeyProvider, SnapshotPath, Stronghold};
+use iota_stronghold::{KeyProvider, SnapshotPath, Stronghold};
 use log::{debug, error, warn};
 use tokio::{
     sync::{Mutex, MutexGuard},
@@ -97,7 +97,7 @@ pub struct StrongholdAdapter {
     timeout: Option<Duration>,
 
     /// A handle to the timeout task.
-    timeout_task: Arc<Mutex<Option<JoinHandle<Result<(), ClientError>>>>>,
+    timeout_task: Arc<Mutex<Option<TaskHandle>>>,
 
     /// The path to a Stronghold snapshot file.
     pub(crate) snapshot_path: PathBuf,
@@ -162,11 +162,8 @@ impl StrongholdAdapterBuilder {
 
     /// Use an user-input password string to derive a key to use Stronghold.
     pub fn password(mut self, password: impl Into<Password>) -> Self {
-        let password = password.into();
-
-        // Note that derive_builder always adds another layer of Option<T>.
-        self.key_provider = Some(self::common::key_provider_from_password(password));
-
+        self.key_provider
+            .replace(self::common::key_provider_from_password(password.into()));
         self
     }
 
@@ -198,12 +195,12 @@ impl StrongholdAdapterBuilder {
         let has_key_provider = self.key_provider.is_some();
         let key_provider = Arc::new(Mutex::new(self.key_provider));
         let stronghold = Arc::new(Mutex::new(stronghold));
-        let mut timeout_task = Arc::new(Mutex::new(None));
+        let timeout_task = Arc::new(Mutex::new(None));
 
         // If both `key` and `timeout` are set, then we spawn the task and keep its join handle.
         if let (true, Some(timeout)) = (has_key_provider, self.timeout) {
             let weak = Arc::downgrade(&timeout_task);
-            *Arc::get_mut(&mut timeout_task).unwrap().get_mut() = Some(tokio::spawn(task_key_clear(
+            *timeout_task.try_lock().unwrap() = Some(tokio::spawn(task_key_clear(
                 weak,
                 stronghold.clone(),
                 key_provider.clone(),
@@ -528,13 +525,15 @@ impl StrongholdAdapter {
     }
 }
 
+type TaskHandle = JoinHandle<()>;
+
 /// The asynchronous key clearing task purging `key` after `timeout` spent in Tokio.
 async fn task_key_clear(
-    task: Weak<Mutex<Option<JoinHandle<Result<(), ClientError>>>>>,
+    task: Weak<Mutex<Option<TaskHandle>>>,
     stronghold: Arc<Mutex<Stronghold>>,
     key_provider: Arc<Mutex<Option<KeyProvider>>>,
     timeout: Duration,
-) -> Result<(), ClientError> {
+) {
     tokio::time::sleep(timeout).await;
 
     // If the weak pointer cannot upgrade, that means the secret manager has been dropped,
@@ -547,12 +546,12 @@ async fn task_key_clear(
         debug!("StrongholdAdapter is purging the key");
         key_provider.lock().await.take();
 
-        stronghold.lock().await.clear()?;
+        if let Err(e) = stronghold.lock().await.clear() {
+            log::error!("Failed to clear stronghold keys: {e}");
+        }
 
         drop(lock);
     }
-
-    Ok(())
 }
 
 #[cfg(test)]
