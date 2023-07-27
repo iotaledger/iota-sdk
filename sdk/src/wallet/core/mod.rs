@@ -99,8 +99,7 @@ where
         let accounts = self.accounts.read().await;
         let mut account_aliases = Vec::with_capacity(accounts.len());
         for handle in accounts.iter() {
-            let details = &*handle.details().await;
-            account_aliases.push(details.alias().clone());
+            account_aliases.push(handle.details().await.alias().clone());
         }
         Ok(account_aliases)
     }
