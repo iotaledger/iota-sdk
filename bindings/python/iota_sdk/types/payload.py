@@ -81,6 +81,7 @@ class Payload():
 
         return config
 
+
 class TaggedDataPayload(Payload):
     """A tagged data payload.
 
