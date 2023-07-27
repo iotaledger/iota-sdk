@@ -5,6 +5,7 @@
 
 pub mod routes;
 
+#[cfg(not(target_family = "wasm"))]
 use futures::{future::BoxFuture, FutureExt};
 use packable::PackableExt;
 
@@ -16,6 +17,7 @@ use crate::{
 };
 
 impl Client {
+    #[cfg(not(target_family = "wasm"))]
     async fn chunk_requests<T, F>(&self, output_ids: &[OutputId], ignore_errors: bool, f: F) -> Result<Vec<T>>
     where
         T: Send + 'static,
@@ -100,7 +102,7 @@ impl Client {
     /// Requests metadata for outputs by their output ID in parallel.
     pub async fn get_outputs_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputMetadata>> {
         #[cfg(target_family = "wasm")]
-        let metadata = futures::future::join_all(output_ids.iter().map(|id| self.get_output_metadata(id))).await?;
+        let metadata = futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_metadata(id))).await?;
 
         #[cfg(not(target_family = "wasm"))]
         let metadata = self
