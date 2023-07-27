@@ -1,31 +1,27 @@
 [workspace]
 resolver = "2"
 members = [
+	"bindings/core",
+	"bindings/nodejs",
+	"bindings/nodejs-old",
+	"bindings/python",
+	"bindings/wasm",
 	"cli",
-	"client",
-	"client/bindings/java/lib/native",
-	"client/bindings/nodejs",
-	"client/bindings/python",
-	"client/bindings/wasm",
-	"pow",
-	"types",
-	"wallet",
-	"wallet/bindings/java/lib/native",
-	"wallet/bindings/nodejs",
-	"wallet/bindings/python",
-	"wallet/bindings/swift",
-	"wallet/bindings/wasm",
+	"sdk",
 ]
 
-[profile.dev]
-panic = "abort"
+# Necessary to get coverage to work as for some reason using a custom profile breaks it
+[profile.test]
+debug = 0
+incremental = false
 
-[profile.release]
-panic = "abort"
+[profile.ci]
+inherits = "dev"
+debug = 0
+incremental = false
 
 [profile.production]
 codegen-units = 1
 inherits = "release"
 lto = true
-panic = "abort"
 strip = "symbols"

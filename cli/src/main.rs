@@ -2,58 +2,57 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account;
+mod account_completion;
 mod account_history;
-mod account_manager;
 mod command;
 mod error;
 mod helper;
+mod wallet;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
-use log::LevelFilter;
 
-use self::{
-    account_manager::new_account_manager, command::account_manager::AccountManagerCli, error::Error,
-    helper::pick_account,
-};
+use self::{command::wallet::WalletCli, error::Error, wallet::new_wallet};
 
-fn logger_init(cli: &AccountManagerCli) -> Result<(), Error> {
-    let stdout_level_filter = if let Some(log_level) = cli.log_level {
-        log_level
-    } else {
-        LevelFilter::Info
+#[macro_export]
+macro_rules! println_log_info {
+    ($($arg:tt)+) => {
+        println!($($arg)+);
+        log::info!($($arg)+);
     };
-    let stdout = LoggerOutputConfigBuilder::default()
-        .name("stdout")
-        .level_filter(stdout_level_filter)
-        .target_exclusions(&["rustls"])
-        .color_enabled(true);
+}
+
+#[macro_export]
+macro_rules! println_log_error {
+    ($($arg:tt)+) => {
+        println!($($arg)+);
+        log::error!($($arg)+);
+    };
+}
+
+fn logger_init(cli: &WalletCli) -> Result<(), Error> {
+    std::panic::set_hook(Box::new(move |panic_info| {
+        println_log_error!("{panic_info}");
+    }));
+
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
-        .level_filter(LevelFilter::Debug)
+        .level_filter(cli.log_level)
         .target_exclusions(&["rustls"])
         .color_enabled(false);
-    let config = LoggerConfigBuilder::default()
-        .with_output(stdout)
-        .with_output(archive)
-        .finish();
+    let config = LoggerConfigBuilder::default().with_output(archive).finish();
 
     fern_logger::logger_init(config)?;
 
     Ok(())
 }
 
-async fn run(cli: AccountManagerCli) -> Result<(), Error> {
-    let (account_manager, account) = new_account_manager(cli.clone()).await?;
+async fn run(cli: WalletCli) -> Result<(), Error> {
+    let (wallet, account) = new_wallet(cli).await?;
 
-    if let Some(account_manager) = account_manager {
-        match cli.account.or(account) {
-            Some(account) => account::account_prompt(account_manager.get_account(account).await?).await?,
-            None => {
-                if let Some(account) = pick_account(&account_manager).await? {
-                    account::account_prompt(account_manager.get_account(account).await?).await?;
-                }
-            }
+    if let Some(wallet) = wallet {
+        if let Some(account) = account {
+            account::account_prompt(wallet.get_account(account).await?).await?;
         }
     }
 
@@ -62,7 +61,9 @@ async fn run(cli: AccountManagerCli) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    let cli = match AccountManagerCli::try_parse() {
+    dotenvy::dotenv().ok();
+
+    let cli = match WalletCli::try_parse() {
         Ok(cli) => cli,
         Err(e) => {
             println!("{e}");
@@ -75,7 +76,13 @@ async fn main() {
         return;
     }
 
+    log::info!(
+        "Starting {} v{}",
+        std::env!("CARGO_PKG_NAME"),
+        std::env!("CARGO_PKG_VERSION")
+    );
+
     if let Err(e) = run(cli).await {
-        log::error!("{e}");
+        println_log_error!("{e}");
     }
 }

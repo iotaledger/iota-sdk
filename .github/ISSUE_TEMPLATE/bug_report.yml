@@ -11,7 +11,7 @@ body:
     - type: markdown
       attributes:
           value: |
-              Thank you for helping us make iota.rs better, by reporting a bug you have found. This issue may already be reported! Please search on the [issue tracker](https://github.com/iotaledger/iota.rs/issues?q=is%3Aopen+is%3Aissue+label%3A%22bug+report%22) before creating one. This form is for bugs only and not for help or support using this application. Please join our [discord](https://discord.iota.org/) for help.
+              Thank you for helping us to make the iota-sdk better by reporting a bug you have found. This issue may have been reported already! Please search the [issue tracker](https://github.com/iotaledger/iota-sdk/issues) before creating one. This form is for bugs only and not for help or support using this application. Please join our [discord](https://discord.iota.org/) for help.
 
     - type: textarea
       id: description
@@ -80,14 +80,5 @@ body:
           description: Please confirm that you are not creating a duplicate issue.
           options:
               - label: I have searched the issues tracker this issue and there is none
-                required: true
-
-    - type: checkboxes
-      id: terms
-      attributes:
-          label: Code of Conduct
-          description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/iotaledger/iota.rs/blob/develop/CODE_OF_CONDUCT.md).
-          options:
-              - label: I agree to follow this project's Code of Conduct
                 required: true
                 

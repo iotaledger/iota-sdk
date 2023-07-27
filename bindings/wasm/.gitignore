@@ -1,0 +1,11 @@
+target/
+**/*~
+**/node_modules
+**/.DS_Store
+build/
+out/
+**/dist
+stronghold
+web/
+node/
+lib/bindings.js

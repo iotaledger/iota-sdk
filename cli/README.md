@@ -2,7 +2,7 @@
 
 ![cli-wallet](./documentation/static/img/cli-wallet.gif)
 
-Command line interface application for the [IOTA wallet library](https://github.com/iotaledger/wallet.rs).
+Command line interface application for the [IOTA sdk wallet](https://github.com/iotaledger/iota-sdk).
 
 ## Usage
 
@@ -18,9 +18,9 @@ blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rall
 Then create a new account
 
 ```
-./wallet new ALIAS
+./wallet new-account ALIAS
 // Example:
-./wallet new Alice
+./wallet new-account Alice
 ```
 
 If you already created an account, you can just run the CLI without args to get to the account selector:
@@ -29,10 +29,10 @@ If you already created an account, you can just run the CLI without args to get 
 ./wallet
 ```
 
-Alternatively, you can select an existing account by it's alias, to use with the `account` command:
+Alternatively, you can select an existing account by its alias:
 
 ```
-./wallet account Alice
+./wallet Alice
 ```
 
 ## Commands
@@ -55,7 +55,7 @@ export WALLET_DATABASE_PATH=/path/to/database # or add it to your .bashrc, .zshr
 To run the CLI from source, install Rust (usually through [Rustup](https://rustup.rs/)) and run the following commands:
 
 ```
-git clone https://github.com/iotaledger/wallet.rs
+git clone --depth 1 https://github.com/iotaledger/iota-sdk
 cd cli
 cargo run -- [COMMAND] [OPTIONS]
 ```

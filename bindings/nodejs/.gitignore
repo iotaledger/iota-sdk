@@ -1,0 +1,10 @@
+index.node
+**/node_modules
+**/.DS_Store
+*.log
+build/
+prebuilds/
+out/
+**/dist
+offline_signing*.json
+docs

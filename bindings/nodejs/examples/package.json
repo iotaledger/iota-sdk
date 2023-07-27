@@ -1,0 +1,25 @@
+{
+    "name": "examples",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "run-example": "ts-node"
+    },
+    "dependencies": {
+        "@iota/sdk": "link:../",
+        "class-transformer": "^0.5.1",
+        "dotenv": "^16.0.0",
+        "ts-node": "^10.9.1"
+    },
+    "devDependencies": {
+        "@ethereumjs/common": "^3.1.2",
+        "@ethereumjs/rlp": "^4.0.1",
+        "@ethereumjs/tx": "^4.1.2",
+        "@ethereumjs/util": "^8.0.6",
+        "@types/": "ethereumjs/rlp",
+        "typescript": "^4.6.3",
+        "web3": "^1.10.0"
+    }
+}

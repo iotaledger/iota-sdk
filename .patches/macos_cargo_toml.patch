@@ -1,0 +1,17 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index e00fa5df9..209f94d6c 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -25,3 +25,12 @@ codegen-units = 1
+ inherits = "release"
+ lto = true
+ strip = "symbols"
++
++[workspace.metadata.patch.librocksdb-sys]
++version = "0.11.0+8.1.1"
++patches = [
++    { path = "rocksdb_faligned_allocation.patch", source = "GithubPrDiff" },
++]
++
++[patch.crates-io]
++librocksdb-sys = { path = "./target/patch/librocksdb-sys-0.11.0+8.1.1"}

@@ -1,8 +1,0 @@
-.gradle
-gradle.properties
-lib/build
-lib/bin
-examples/build/
-examples/bin/
-examples/walletdb
-examples/example-wallet

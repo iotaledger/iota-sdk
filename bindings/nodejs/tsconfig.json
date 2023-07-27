@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "lib": ["es2019", "DOM"],
+        "declaration": true,
+        "declarationMap": true,
+        "target": "es2019",
+        "module": "commonjs",
+        "sourceMap": true,
+        "strict": true,
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "outDir": "out",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    },
+    "include": ["lib/**/*", "test"]
+}

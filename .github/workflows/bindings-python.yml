@@ -1,67 +1,99 @@
 name: Python bindings checks
+
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-python.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!client/bindings/**" # Exclude all bindings
-      - "client/bindings/python/**" # Re-include python bindings
+      - "!cli/**" # Exclude CLI
+      - "!**/bindings/**" # Exclude all bindings
+      - "bindings/python/**"
+      - ".github/workflows/bindings-python.yml"
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-python.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!client/bindings/**" # Exclude all bindings
-      - "client/bindings/python/**" # Re-include python bindings
+      - "!cli/**" # Exclude CLI
+      - "!**/bindings/**" # Exclude all bindings
+      - "bindings/python/**"
+      - ".github/workflows/bindings-python.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
+env:
+  CARGO_INCREMENTAL: 0
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test
-    if: ${{ ! github.event.schedule }}
-    runs-on: ${{ matrix.os }}
+  lint:
+    name: PEP8 style check
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, macos-latest, ubuntu-latest]
         python-version: ["3.10"]
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
-        uses: ./.github/actions/setup-rust
-        with:
-          toolchain: nightly
-          cache: true
-          cache-root: client/bindings/python
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.python }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-python.yml') }}
-
-      - name: Set Up Python ${{ matrix.python }} and Pip Cache
+      - name: Set up Python ${{ matrix.python-version }} and Pip Cache
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-          cache-dependency-path: client/bindings/python/requirements-dev.txt
+          cache-dependency-path: bindings/python/requirements-dev.txt
+
+      - name: Install Dependencies for Python Binding Lint
+        run: |
+          python3 -m pip install --upgrade setuptools pip wheel
+          python3 -m pip install tox-gh-actions
+
+      - name: Run Tox
+        working-directory: bindings/python
+        run: tox -e lint
+
+  test:
+    name: Test
+    needs: lint
+    if: ${{ ! github.event.schedule }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
+        python-version: ["3.10"]
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          cache-root: bindings/python
+
+      - name: Set Up Python ${{ matrix.python-version }} and Pip Cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: bindings/python/requirements-dev.txt
 
       # This step is required for bindgen to work on Windows.
       - name: Set Up Clang/LLVM (Windows)
@@ -80,5 +112,5 @@ jobs:
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
       - name: Run Tox
-        working-directory: client/bindings/python
+        working-directory: bindings/python
         run: tox

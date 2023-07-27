@@ -10,27 +10,23 @@
 *.ipynb
 
 # Storages/databases
-storage
-alice-database
+/storage
 test-storage
 wallet/test-storage
-*/walletdb
-offline_walletdb
-online_walletdb
-/pingdb
-/pongdb
+**/*walletdb
 backup
 
 # JSON files
 address.json
-addresses.json
-prepared_transaction.json
-signed_transaction.json
+*addresses.json
+*prepared_transaction.json
+*signed_transaction.json
 
 # Miscellaneous
 *.log
 .env
 *.stronghold
+!**/tests/**/**.stronghold
 .DS_Store
 book
 

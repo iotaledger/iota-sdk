@@ -1,0 +1,12 @@
+{
+    "name": "examples",
+    "dependencies": {
+        "@ethereumjs/common": "^3.1.2",
+        "@ethereumjs/rlp": "^4.0.1",
+        "@ethereumjs/tx": "^4.1.2",
+        "@ethereumjs/util": "^8.0.6",
+        "@iota/wallet": "../",
+        "dotenv": "^16.0.1",
+        "web3": "^1.10.0"
+    }
+}

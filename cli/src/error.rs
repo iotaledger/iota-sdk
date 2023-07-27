@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use fern_logger::Error as LoggerError;
-use iota_wallet::{
-    error::Error as WalletError,
-    iota_client::{block::Error as BlockError, error::Error as ClientError},
+use iota_sdk::{
+    client::error::Error as ClientError, types::block::Error as BlockError, wallet::error::Error as WalletError,
 };
 use serde_json::Error as SerdeJsonError;
 
@@ -31,5 +30,11 @@ pub enum Error {
 impl From<ClientError> for Error {
     fn from(error: ClientError) -> Self {
         Error::Client(Box::new(error))
+    }
+}
+
+impl From<iota_sdk::client::stronghold::Error> for Error {
+    fn from(error: iota_sdk::client::stronghold::Error) -> Self {
+        Self::Client(Box::new(iota_sdk::client::Error::Stronghold(error)))
     }
 }

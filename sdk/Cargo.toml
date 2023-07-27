@@ -1,0 +1,865 @@
+[package]
+name = "iota-sdk"
+version = "1.0.1"
+authors = ["IOTA Stiftung"]
+edition = "2021"
+description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
+documentation = "https://wiki.iota.org"
+homepage = "https://www.iota.org/"
+repository = "https://github.com/iotaledger/iota-sdk"
+readme = "README.md"
+license = "Apache-2.0"
+keywords = ["iota", "tangle", "sdk", "client", "wallet"]
+categories = ["cryptography::cryptocurrencies"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+# Mandatory dependencies
+bech32 = { version = "0.9.1", default-features = false }
+bitflags = { version = "2.3.3", default-features = false }
+bytemuck = { version = "1.13.1", default-features = false }
+derive_more = { version = "0.99.17", default-features = false, features = [
+    "from",
+    "as_ref",
+    "deref",
+    "deref_mut",
+] }
+getset = { version = "0.1.2", default-features = false }
+hashbrown = { version = "0.14.0", default-features = false, features = [
+    "ahash",
+    "inline-more",
+] }
+hex = { version = "0.4.3", default-features = false }
+iota-crypto = { version = "0.23.0", default-features = false, features = [
+    "blake2b",
+    "ed25519",
+    "secp256k1",
+    "ternary_encoding",
+] }
+iterator-sorted = { version = "0.1.0", default-features = false }
+itertools = { version = "0.11.0", default-features = false, features = [
+    "use_alloc",
+] }
+packable = { version = "0.8.1", default-features = false, features = [
+    "primitive-types",
+] }
+prefix-hex = { version = "0.7.1", default-features = false, features = [
+    "primitive-types",
+] }
+primitive-types = { version = "0.12.1", default-features = false }
+serde = { version = "1.0.175", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.103", default-features = false, features = [
+    "alloc",
+] }
+
+# Optional dependencies
+anymap = { version = "0.12.1", default-features = false, optional = true }
+async-trait = { version = "0.1.72", default-features = false, optional = true }
+derive_builder = { version = "0.12.0", default-features = false, optional = true }
+fern-logger = { version = "0.5.0", default-features = false, optional = true }
+futures = { version = "0.3.28", default-features = false, features = [
+    "thread-pool",
+], optional = true }
+heck = { version = "0.4.1", default-features = false, optional = true }
+instant = { version = "0.1.12", default-features = false, optional = true }
+iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
+iota_stronghold = { version = "2.0.0-rc.2", default-features = false, optional = true }
+log = { version = "0.4.19", default-features = false, optional = true }
+num_cpus = { version = "1.16.0", default-features = false, optional = true }
+once_cell = { version = "1.18.0", default-features = false, optional = true }
+rand = { version = "0.8.5", default-features = false, features = [
+    "min_const_gen",
+], optional = true }
+regex = { version = "1.9.1", default-features = false, features = [
+    "unicode-perl",
+], optional = true }
+reqwest = { version = "0.11.18", default-features = false, features = [
+    "json",
+], optional = true }
+rocksdb = { version = "0.21.0", default-features = false, features = [
+    "lz4",
+], optional = true }
+rumqttc = { version = "0.22.0", default-features = false, features = [
+    "websocket",
+], optional = true }
+serde_repr = { version = "0.1.15", default-features = false, optional = true }
+thiserror = { version = "1.0.44", default-features = false, optional = true }
+time = { version = "0.3.23", default-features = false, features = [
+    "serde",
+    "macros",
+], optional = true }
+url = { version = "2.4.0", default-features = false, features = [
+    "serde",
+], optional = true }
+zeroize = { version = "1.6.0", default-features = false, features = [
+    "zeroize_derive",
+], optional = true }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+tokio = { version = "1.29.1", default-features = false, features = [
+    "macros",
+    "rt-multi-thread",
+    "time",
+    "sync",
+], optional = true }
+
+[target.'cfg(target_family = "wasm")'.dependencies]
+gloo-storage = { version = "0.2.2", default-features = false, optional = true }
+gloo-timers = { version = "0.2.6", default-features = false, features = [
+    "futures",
+] }
+instant = { version = "0.1.12", default-features = false, features = [
+    "wasm-bindgen",
+], optional = true }
+lazy_static = { version = "1.4.0", default-features = false }
+tokio = { version = "1.29.1", default-features = false, features = [
+    "macros",
+    "rt",
+    "time",
+    "sync",
+], optional = true }
+wasm-bindgen-futures = { version = "0.4.37", default-features = false, optional = true }
+
+[dev-dependencies]
+iota-sdk = { path = ".", default-features = false, features = ["rand"] }
+
+dotenvy = { version = "0.15.7", default-features = false }
+fern-logger = { version = "0.5.0", default-features = false }
+tokio = { version = "1.29.1", default-features = false, features = [
+    "macros",
+    "rt",
+    "rt-multi-thread",
+    "time",
+    "sync",
+    "fs",
+] }
+
+[features]
+default = ["client", "wallet", "tls"]
+
+events = []
+ledger_nano = ["iota-ledger-nano"]
+mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
+participation = ["storage"]
+pow = ["std", "num_cpus", "iota-crypto/curl-p"]
+rand = ["dep:rand"]
+rocksdb = ["dep:rocksdb", "storage"]
+serde = [
+    "serde_repr",
+    "hashbrown/serde",
+    "packable/serde",
+    "primitive-types/serde_no_std",
+    "zeroize?/serde",
+]
+std = [
+    "packable/std",
+    "prefix-hex/std",
+    "primitive-types/std",
+    "bech32/std",
+    "bitflags/std",
+    "rand?/std_rng",
+    "regex?/std",
+    "derive_builder?/std",
+    "iota_stronghold?/std",
+    "iota-crypto/std",
+    "once_cell?/std",
+    "itertools/use_std",
+]
+storage = [
+    "iota-crypto/chacha",
+    "dep:time",
+    "dep:anymap",
+    "dep:once_cell",
+    "dep:heck",
+]
+stronghold = [
+    "iota_stronghold",
+    "derive_builder",
+    "iota-crypto/chacha",
+    "dep:time",
+    "dep:anymap",
+    "dep:once_cell",
+    "dep:heck",
+]
+tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
+
+client = [
+    "pow",
+    "tokio",
+    "zeroize",
+    "url",
+    "reqwest",
+    "async-trait",
+    "log",
+    "thiserror",
+    "futures",
+    "serde",
+    "instant",
+    "iota-crypto/bip39",
+    "iota-crypto/bip39-en",
+    "iota-crypto/slip10",
+    "iota-crypto/keccak",
+    "iota-crypto/bip44",
+    "iota-crypto/random",
+]
+wallet = ["client"]
+
+# Ed25519 Examples
+
+[[example]]
+name = "sign_and_verify_ed25519"
+path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "verify_ed25519_signature"
+path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
+
+# Accounts and Addresses Examples
+
+[[example]]
+name = "create_mnemonic"
+path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+required-features = ["client"]
+
+[[example]]
+name = "create_account"
+path = "examples/how_tos/accounts_and_addresses/create_account.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "list_accounts"
+path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "check_balance"
+path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "list_addresses"
+path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "create_address"
+path = "examples/how_tos/accounts_and_addresses/create_address.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "list_transactions"
+path = "examples/how_tos/accounts_and_addresses/list_transactions.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "list_outputs"
+path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "consolidate_outputs"
+path = "examples/how_tos/accounts_and_addresses/consolidate_outputs.rs"
+required-features = ["wallet", "stronghold"]
+
+# Simple Transaction Examples
+
+[[example]]
+name = "request_funds"
+path = "examples/how_tos/simple_transaction/request_funds.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "simple_transaction"
+path = "examples/how_tos/simple_transaction/simple_transaction.rs"
+required-features = ["rocksdb", "stronghold"]
+
+# Advanced Transactions Examples
+
+[[example]]
+name = "send_micro_transaction"
+path = "examples/how_tos/advanced_transactions/send_micro_transaction.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "advanced_transaction"
+path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "claim_transaction"
+path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
+required-features = ["rocksdb", "stronghold"]
+
+# NFT Collection Examples
+
+[[example]]
+name = "mint_issuer_nft"
+path = "examples/how_tos/nft_collection/00_mint_issuer_nft.rs"
+required-features = ["wallet", "storage", "stronghold"]
+
+[[example]]
+name = "mint_collection_nft"
+path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
+required-features = ["wallet", "stronghold"]
+
+# Native Tokens Examples
+
+[[example]]
+name = "create_native_token"
+path = "examples/how_tos/native_tokens/create.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "destroy_foundry"
+path = "examples/how_tos/native_tokens/destroy_foundry.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "burn_native_token"
+path = "examples/how_tos/native_tokens/burn.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "melt_native_token"
+path = "examples/how_tos/native_tokens/melt.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "mint_native_token"
+path = "examples/how_tos/native_tokens/mint.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "send_native_tokens"
+path = "examples/how_tos/native_tokens/send.rs"
+required-features = ["rocksdb", "stronghold"]
+
+# Alias wallet example
+
+[[example]]
+name = "alias_wallet_request_funds"
+path = "examples/how_tos/alias_wallet/request_funds.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "alias_wallet_transaction"
+path = "examples/how_tos/alias_wallet/transaction.rs"
+required-features = ["rocksdb", "stronghold"]
+
+[[example]]
+name = "create_alias"
+path = "examples/how_tos/alias/create.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "destroy_alias"
+path = "examples/how_tos/alias/destroy.rs"
+required-features = ["wallet", "stronghold"]
+
+# Outputs
+
+[[example]]
+name = "output_unlock_conditions"
+path = "examples/how_tos/outputs/unlock_conditions.rs"
+required-features = ["client"]
+
+[[example]]
+name = "output_features"
+path = "examples/how_tos/outputs/features.rs"
+required-features = ["client"]
+
+# Client Examples
+
+[[example]]
+name = "get_health"
+path = "examples/how_tos/client/get_health.rs"
+
+[[example]]
+name = "get_info"
+path = "examples/how_tos/client/get_info.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "get_outputs"
+path = "examples/how_tos/client/get_outputs.rs"
+
+# Block examples
+
+[[example]]
+name = "block_no_payload"
+path = "examples/client/block/00_block_no_payload.rs"
+required-features = ["client"]
+
+[[example]]
+name = "block_confirmation_time"
+path = "examples/client/block/01_block_confirmation_time.rs"
+required-features = ["client"]
+
+[[example]]
+name = "block_custom_parents"
+path = "examples/client/block/02_block_custom_parents.rs"
+required-features = ["client"]
+
+[[example]]
+name = "block_custom_payload"
+path = "examples/client/block/03_block_custom_payload.rs"
+required-features = ["client"]
+
+[[example]]
+name = "block_tagged_data"
+path = "examples/client/block/04_block_tagged_data.rs"
+required-features = ["client"]
+
+[[example]]
+name = "custom_inputs"
+path = "examples/client/block/custom_inputs.rs"
+required-features = ["client"]
+
+[[example]]
+name = "output"
+path = "examples/client/block/output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "transaction"
+path = "examples/client/block/transaction.rs"
+required-features = ["client"]
+
+# High Level examples
+
+[[example]]
+name = "address_consolidation"
+path = "examples/client/high_level/consolidation.rs"
+required-features = ["client"]
+
+[[example]]
+name = "inputs_from_transaction_id"
+path = "examples/client/high_level/inputs_from_transaction_id.rs"
+required-features = ["client"]
+
+[[example]]
+name = "search_address"
+path = "examples/client/high_level/search_address.rs"
+required-features = ["client"]
+
+# Node API core examples
+
+[[example]]
+name = "node_api_core_get_routes"
+path = "examples/client/node_api_core/01_get_routes.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_tips"
+path = "examples/client/node_api_core/03_get_tips.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_post_block"
+path = "examples/client/node_api_core/04_post_block.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_post_block_raw"
+path = "examples/client/node_api_core/05_post_block_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_block"
+path = "examples/client/node_api_core/06_get_block.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_block_raw"
+path = "examples/client/node_api_core/07_get_block_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_block_metadata"
+path = "examples/client/node_api_core/08_get_block_metadata.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_output"
+path = "examples/client/node_api_core/09_get_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_output_raw"
+path = "examples/client/node_api_core/10_get_output_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_output_metadata"
+path = "examples/client/node_api_core/11_get_output_metadata.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_receipts"
+path = "examples/client/node_api_core/12_get_receipts.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_receipts_migrated_at"
+path = "examples/client/node_api_core/13_get_receipts_migrated_at.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_treasury"
+path = "examples/client/node_api_core/14_get_treasury.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_included_block"
+path = "examples/client/node_api_core/15_get_included_block.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_included_block_raw"
+path = "examples/client/node_api_core/16_get_included_block_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_milestone_by_id"
+path = "examples/client/node_api_core/17_get_milestone_by_id.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_milestone_by_id_raw"
+path = "examples/client/node_api_core/18_get_milestone_by_id_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_utxo_changes_by_id"
+path = "examples/client/node_api_core/19_get_utxo_changes_by_id.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_milestone_by_index"
+path = "examples/client/node_api_core/20_get_milestone_by_index.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_milestone_by_index_raw"
+path = "examples/client/node_api_core/21_get_milestone_by_index_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_utxo_changes_by_index"
+path = "examples/client/node_api_core/22_get_utxo_changes_by_index.rs"
+required-features = ["client"]
+
+# Node API indexer examples
+
+[[example]]
+name = "node_api_indexer_get_alias_output"
+path = "examples/client/node_api_indexer/01_get_alias_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_indexer_get_alias_outputs"
+path = "examples/client/node_api_indexer/02_get_alias_outputs.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_indexer_get_foundry_output"
+path = "examples/client/node_api_indexer/03_get_foundry_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_indexer_get_foundry_outputs"
+path = "examples/client/node_api_indexer/04_get_foundry_outputs.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_indexer_get_nft_output"
+path = "examples/client/node_api_indexer/05_get_nft_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_indexer_get_nft_outputs"
+path = "examples/client/node_api_indexer/06_get_nft_outputs.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_indexer_get_random_basic_outputs"
+path = "examples/client/node_api_indexer/07_get_random_basic_outputs.rs"
+required-features = ["client"]
+
+#######
+
+[[example]]
+name = "01_generate_addresses"
+path = "examples/client/01_generate_addresses.rs"
+required-features = ["client"]
+
+[[example]]
+name = "02_address_balance"
+path = "examples/client/02_address_balance.rs"
+required-features = ["client"]
+
+[[example]]
+name = "07_mqtt"
+path = "examples/client/07_mqtt.rs"
+required-features = ["client", "mqtt"]
+
+[[example]]
+name = "client_config"
+path = "examples/client/client_config.rs"
+required-features = ["client"]
+
+[[example]]
+name = "custom_remainder_address"
+path = "examples/client/custom_remainder_address.rs"
+required-features = ["client"]
+
+[[example]]
+name = "get_block"
+path = "examples/client/get_block.rs"
+required-features = ["client"]
+
+[[example]]
+name = "ledger_nano"
+path = "examples/client/ledger_nano.rs"
+required-features = ["client", "ledger_nano"]
+
+[[example]]
+name = "ledger_nano_transaction"
+path = "examples/client/ledger_nano_transaction.rs"
+required-features = ["client", "ledger_nano"]
+
+[[example]]
+name = "client_logger"
+path = "examples/client/logger.rs"
+required-features = ["client"]
+
+[[example]]
+name = "stronghold"
+path = "examples/client/stronghold.rs"
+required-features = ["client", "stronghold"]
+
+[[example]]
+name = "0_address_generation"
+path = "examples/client/offline_signing/0_address_generation.rs"
+required-features = ["client"]
+
+[[example]]
+name = "1_transaction_preparation"
+path = "examples/client/offline_signing/1_transaction_preparation.rs"
+required-features = ["client"]
+
+[[example]]
+name = "2_transaction_signing"
+path = "examples/client/offline_signing/2_transaction_signing.rs"
+required-features = ["client"]
+
+[[example]]
+name = "3_send_block"
+path = "examples/client/offline_signing/3_send_block.rs"
+required-features = ["client"]
+
+[[example]]
+name = "all"
+path = "examples/client/output/all.rs"
+required-features = ["client"]
+
+[[example]]
+name = "all_automatic_input_selection"
+path = "examples/client/output/all_automatic_input_selection.rs"
+required-features = ["client"]
+
+[[example]]
+name = "alias"
+path = "examples/client/output/alias.rs"
+required-features = ["client"]
+
+[[example]]
+name = "build_alias_output"
+path = "examples/client/output/build_alias_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "build_nft_output"
+path = "examples/client/output/build_nft_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "recursive_alias"
+path = "examples/client/output/recursive_alias.rs"
+required-features = ["client"]
+
+[[example]]
+name = "basic"
+path = "examples/client/output/basic.rs"
+required-features = ["client"]
+
+[[example]]
+name = "build_basic_output"
+path = "examples/client/output/build_basic_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "expiration"
+path = "examples/client/output/expiration.rs"
+required-features = ["client"]
+
+[[example]]
+name = "foundry"
+path = "examples/client/output/foundry.rs"
+required-features = ["client"]
+
+[[example]]
+name = "micro_transaction"
+path = "examples/client/output/micro_transaction.rs"
+required-features = ["client"]
+
+[[example]]
+name = "native_tokens"
+path = "examples/client/output/native_tokens.rs"
+required-features = ["client"]
+
+[[example]]
+name = "nft"
+path = "examples/client/output/nft.rs"
+required-features = ["client"]
+
+[[example]]
+name = "participation"
+path = "examples/client/participation.rs"
+required-features = ["client", "participation"]
+
+[[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = ["client"]
+
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = ["client"]
+
+[[example]]
+name = "client_split_funds"
+path = "examples/client/split_funds.rs"
+required-features = ["client"]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
+required-features = ["client"]
+
+### Wallet
+
+[[example]]
+name = "wallet_getting_started"
+path = "examples/wallet/getting_started.rs"
+required-features = ["stronghold"]
+
+[[example]]
+name = "0_generate_addresses"
+path = "examples/wallet/offline_signing/0_generate_addresses.rs"
+required-features = ["wallet", "storage", "stronghold"]
+
+[[example]]
+name = "1_prepare_transaction"
+path = "examples/wallet/offline_signing/1_prepare_transaction.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "2_sign_transaction"
+path = "examples/wallet/offline_signing/2_sign_transaction.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "3_send_transaction"
+path = "examples/wallet/offline_signing/3_send_transaction.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "mint_nft"
+path = "examples/how_tos/nfts/mint_nft.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "send_nft"
+path = "examples/how_tos/nfts/send_nft.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "burn_nft"
+path = "examples/how_tos/nfts/burn_nft.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "check_unlock_conditions"
+path = "examples/wallet/17_check_unlock_conditions.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "accounts"
+path = "examples/wallet/accounts.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "background_syncing"
+path = "examples/wallet/background_syncing.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "events"
+path = "examples/wallet/events.rs"
+required-features = ["wallet", "events"]
+
+[[example]]
+name = "wallet_ledger_nano"
+path = "examples/wallet/ledger_nano.rs"
+required-features = ["wallet", "ledger_nano"]
+
+[[example]]
+name = "wallet_participation"
+path = "examples/wallet/participation.rs"
+required-features = ["wallet", "participation"]
+
+[[example]]
+name = "logger"
+path = "examples/wallet/logger.rs"
+required-features = ["wallet"]
+
+[[example]]
+name = "recover_accounts"
+path = "examples/wallet/recover_accounts.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "spammer"
+path = "examples/wallet/spammer.rs"
+required-features = ["wallet"]
+
+[[example]]
+name = "split_funds"
+path = "examples/wallet/split_funds.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "storage"
+path = "examples/wallet/storage.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "update_alias_output"
+path = "examples/wallet/update_alias_output.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "wallet"
+path = "examples/wallet/wallet.rs"
+required-features = ["wallet", "storage"]
+
+[[example]]
+name = "migrate_stronghold_snapshot_v2_to_v3"
+path = "examples/wallet/migrate_stronghold_snapshot_v2_to_v3.rs"
+required-features = ["stronghold"]
