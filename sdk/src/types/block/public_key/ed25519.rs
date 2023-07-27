@@ -31,18 +31,7 @@ impl Ed25519PublicKey {
 
 impl core::fmt::Debug for Ed25519PublicKey {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        #[repr(transparent)]
-        struct UnquotedStr<'a>(&'a str);
-
-        impl<'a> core::fmt::Debug for UnquotedStr<'a> {
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                write!(f, "{}", self.0)
-            }
-        }
-
-        f.debug_struct("Ed25519PublicKey")
-            .field("public_key", &UnquotedStr(&prefix_hex::encode(self.0.as_slice())))
-            .finish()
+        write!(f, "{}", prefix_hex::encode(self.0.as_slice()))
     }
 }
 
