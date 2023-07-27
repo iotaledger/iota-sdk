@@ -46,6 +46,8 @@ pub struct WalletCli {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum WalletCommand {
+    /// List all accounts.
+    Accounts,
     /// Create a stronghold backup file.
     Backup {
         /// Path of the created stronghold backup file.
@@ -55,8 +57,6 @@ pub enum WalletCommand {
     ChangePassword,
     /// Initialize the wallet.
     Init(InitParameters),
-    /// List all accounts.
-    Accounts,
     /// Migrate a stronghold snapshot v2 to v3.
     MigrateStrongholdSnapshotV2ToV3 {
         /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.

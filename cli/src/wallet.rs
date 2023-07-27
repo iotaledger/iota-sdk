@@ -22,6 +22,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
 
     let (wallet, account) = if let Some(command) = cli.command {
         match command {
+            WalletCommand::Accounts => {
+                list_accounts_command(storage_path, snapshot_path).await?;
+                return Ok((None, None));
+            }
             WalletCommand::Init(init_parameters) => {
                 let wallet = init_command(storage_path, snapshot_path, init_parameters).await?;
                 (Some(wallet), None)
@@ -37,10 +41,6 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             WalletCommand::ChangePassword => {
                 let wallet = change_password_command(storage_path, snapshot_path).await?;
                 (Some(wallet), None)
-            }
-            WalletCommand::Accounts => {
-                list_accounts_command(storage_path, snapshot_path).await?;
-                return Ok((None, None));
             }
             WalletCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
                 migrate_stronghold_snapshot_v2_to_v3_command(path).await?;
@@ -112,7 +112,7 @@ async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Optio
     if get_decision("Create initial account?")? {
         let alias = get_account_alias("New account alias", &wallet).await?;
         let alias = add_account(&wallet, Some(alias)).await?;
-        println_log_info!("Created initial account. Type `help` to see all available commands.");
+        println_log_info!("Created initial account.\nType `help` to see all available account commands.");
         Ok((Some(wallet), Some(alias)))
     } else {
         Ok((Some(wallet), None))

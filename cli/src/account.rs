@@ -4,7 +4,7 @@
 use clap::Parser;
 use colored::Colorize;
 use dialoguer::Input;
-use iota_sdk::wallet::Wallet;
+use iota_sdk::wallet::{Account, Wallet};
 
 use crate::{
     account_completion::ACCOUNT_COMPLETION,
@@ -25,10 +25,10 @@ use crate::{
 };
 
 // loop on the account prompt
-pub async fn account_prompt(wallet: Wallet, account: String) -> Result<(), Error> {
+pub async fn account_prompt(wallet: &Wallet, account: &Account) -> Result<(), Error> {
     let mut history = AccountHistory::default();
     loop {
-        match account_prompt_internal(&wallet, &account, &mut history).await {
+        match account_prompt_internal(wallet, account, &mut history).await {
             Ok(true) => {
                 return Ok(());
             }
@@ -43,10 +43,9 @@ pub async fn account_prompt(wallet: Wallet, account: String) -> Result<(), Error
 // loop on the account prompt
 pub async fn account_prompt_internal(
     wallet: &Wallet,
-    account: &str,
+    account: &Account,
     history: &mut AccountHistory,
 ) -> Result<bool, Error> {
-    let account = wallet.get_account(account).await?;
     let alias = {
         let account = account.details().await;
         account.alias().clone()
@@ -78,16 +77,16 @@ pub async fn account_prompt_internal(
                 }
             };
             if let Err(err) = match account_cli.command {
-                AccountCommand::Addresses => addresses_command(&account).await,
-                AccountCommand::Balance { addresses } => balance_command(&account, addresses).await,
+                AccountCommand::Addresses => addresses_command(account).await,
+                AccountCommand::Balance { addresses } => balance_command(account, addresses).await,
                 AccountCommand::BurnNativeToken { token_id, amount } => {
-                    burn_native_token_command(&account, token_id, amount).await
+                    burn_native_token_command(account, token_id, amount).await
                 }
-                AccountCommand::BurnNft { nft_id } => burn_nft_command(&account, nft_id).await,
-                AccountCommand::Claim { output_id } => claim_command(&account, output_id).await,
-                AccountCommand::ClaimableOutputs => claimable_outputs_command(&account).await,
-                AccountCommand::Consolidate => consolidate_command(&account).await,
-                AccountCommand::CreateAliasOutput => create_alias_outputs_command(&account).await,
+                AccountCommand::BurnNft { nft_id } => burn_nft_command(account, nft_id).await,
+                AccountCommand::Claim { output_id } => claim_command(account, output_id).await,
+                AccountCommand::ClaimableOutputs => claimable_outputs_command(account).await,
+                AccountCommand::Consolidate => consolidate_command(account).await,
+                AccountCommand::CreateAliasOutput => create_alias_outputs_command(account).await,
                 AccountCommand::CreateNativeToken {
                     circulating_supply,
                     maximum_supply,
@@ -95,24 +94,24 @@ pub async fn account_prompt_internal(
                     foundry_metadata_file,
                 } => {
                     create_native_token_command(
-                        &account,
+                        account,
                         circulating_supply,
                         maximum_supply,
                         bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
                     )
                     .await
                 }
-                AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(&account, alias_id).await,
-                AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(&account, foundry_id).await,
+                AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(account, alias_id).await,
+                AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(account, foundry_id).await,
                 AccountCommand::Exit => {
                     return Ok(true);
                 }
-                AccountCommand::Faucet { address, url } => faucet_command(&account, address, url).await,
+                AccountCommand::Faucet { address, url } => faucet_command(account, address, url).await,
                 AccountCommand::MeltNativeToken { token_id, amount } => {
-                    melt_native_token_command(&account, token_id, amount).await
+                    melt_native_token_command(account, token_id, amount).await
                 }
                 AccountCommand::MintNativeToken { token_id, amount } => {
-                    mint_native_token(&account, token_id, amount).await
+                    mint_native_token(account, token_id, amount).await
                 }
                 AccountCommand::MintNft {
                     address,
@@ -125,7 +124,7 @@ pub async fn account_prompt_internal(
                     issuer,
                 } => {
                     mint_nft_command(
-                        &account,
+                        account,
                         address,
                         bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
                         bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
@@ -135,10 +134,10 @@ pub async fn account_prompt_internal(
                     )
                     .await
                 }
-                AccountCommand::NewAddress => new_address_command(&account).await,
-                AccountCommand::NodeInfo => node_info_command(&account).await,
-                AccountCommand::Output { output_id } => output_command(&account, output_id).await,
-                AccountCommand::Outputs => outputs_command(&account).await,
+                AccountCommand::NewAddress => new_address_command(account).await,
+                AccountCommand::NodeInfo => node_info_command(account).await,
+                AccountCommand::Output { output_id } => output_command(account, output_id).await,
+                AccountCommand::Outputs => outputs_command(account).await,
                 AccountCommand::Send {
                     address,
                     amount,
@@ -152,7 +151,7 @@ pub async fn account_prompt_internal(
                         allow_micro_amount
                     };
                     send_command(
-                        &account,
+                        account,
                         address,
                         amount,
                         return_address,
@@ -166,22 +165,22 @@ pub async fn account_prompt_internal(
                     token_id,
                     amount,
                     gift_storage_deposit,
-                } => send_native_token_command(&account, address, token_id, amount, gift_storage_deposit).await,
-                AccountCommand::SendNft { address, nft_id } => send_nft_command(&account, address, nft_id).await,
-                AccountCommand::Sync => sync_command(&account).await,
-                AccountCommand::Transaction { transaction_id } => transaction_command(&account, &transaction_id).await,
-                AccountCommand::Transactions { show_details } => transactions_command(&account, show_details).await,
-                AccountCommand::UnspentOutputs => unspent_outputs_command(&account).await,
-                AccountCommand::Vote { event_id, answers } => vote_command(&account, event_id, answers).await,
-                AccountCommand::StopParticipating { event_id } => stop_participating_command(&account, event_id).await,
+                } => send_native_token_command(account, address, token_id, amount, gift_storage_deposit).await,
+                AccountCommand::SendNft { address, nft_id } => send_nft_command(account, address, nft_id).await,
+                AccountCommand::Sync => sync_command(account).await,
+                AccountCommand::Transaction { transaction_id } => transaction_command(account, &transaction_id).await,
+                AccountCommand::Transactions { show_details } => transactions_command(account, show_details).await,
+                AccountCommand::UnspentOutputs => unspent_outputs_command(account).await,
+                AccountCommand::Vote { event_id, answers } => vote_command(account, event_id, answers).await,
+                AccountCommand::StopParticipating { event_id } => stop_participating_command(account, event_id).await,
                 AccountCommand::ParticipationOverview { event_ids } => {
                     let event_ids = (!event_ids.is_empty()).then_some(event_ids);
-                    participation_overview_command(&account, event_ids).await
+                    participation_overview_command(account, event_ids).await
                 }
-                AccountCommand::VotingPower => voting_power_command(&account).await,
-                AccountCommand::IncreaseVotingPower { amount } => increase_voting_power_command(&account, amount).await,
-                AccountCommand::DecreaseVotingPower { amount } => decrease_voting_power_command(&account, amount).await,
-                AccountCommand::VotingOutput => voting_output_command(&account).await,
+                AccountCommand::VotingPower => voting_power_command(account).await,
+                AccountCommand::IncreaseVotingPower { amount } => increase_voting_power_command(account, amount).await,
+                AccountCommand::DecreaseVotingPower { amount } => decrease_voting_power_command(account, amount).await,
+                AccountCommand::VotingOutput => voting_output_command(account).await,
             } {
                 println_log_error!("{err}");
             }
