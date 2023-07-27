@@ -9,6 +9,7 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
+use super::protocol::ProtocolParametersHash;
 use crate::types::block::{
     input::UtxoInput,
     output::{
@@ -32,19 +33,35 @@ pub enum Error {
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
     FeaturesNotUniqueSorted,
-    InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
+    InputUnlockCountMismatch {
+        input_count: usize,
+        unlock_count: usize,
+    },
     InvalidAddress,
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
-    InsufficientStorageDepositAmount { amount: u64, required: u64 },
-    StorageDepositReturnExceedsOutputAmount { deposit: u64, amount: u64 },
-    InsufficientStorageDepositReturnAmount { deposit: u64, required: u64 },
+    InsufficientStorageDepositAmount {
+        amount: u64,
+        required: u64,
+    },
+    StorageDepositReturnExceedsOutputAmount {
+        deposit: u64,
+        amount: u64,
+    },
+    InsufficientStorageDepositReturnAmount {
+        deposit: u64,
+        required: u64,
+    },
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
-    InvalidFoundryOutputSupply { minted: U256, melted: U256, max: U256 },
+    InvalidFoundryOutputSupply {
+        minted: U256,
+        melted: U256,
+        max: U256,
+    },
     Hex(HexError),
     InvalidInputKind(u8),
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
@@ -64,8 +81,14 @@ pub enum Error {
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
     InvalidParentCount,
     InvalidPayloadKind(u32),
-    InvalidPayloadLength { expected: usize, actual: usize },
-    InvalidProtocolParametersHash { expected: String, actual: String },
+    InvalidPayloadLength {
+        expected: usize,
+        actual: usize,
+    },
+    InvalidProtocolParametersHash {
+        expected: ProtocolParametersHash,
+        actual: ProtocolParametersHash,
+    },
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -91,19 +114,34 @@ pub enum Error {
     NativeTokensNotUniqueSorted,
     NativeTokensNullAmount,
     NativeTokensOverflow,
-    NetworkIdMismatch { expected: u64, actual: u64 },
+    NetworkIdMismatch {
+        expected: u64,
+        actual: u64,
+    },
     NonDisjointParents,
     NonZeroStateIndexOrFoundryCounter,
     ParentsNotUniqueSorted,
-    ProtocolVersionMismatch { expected: u8, actual: u8 },
+    ProtocolVersionMismatch {
+        expected: u8,
+        actual: u8,
+    },
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
-    SignaturePublicKeyMismatch { expected: String, actual: String },
+    SignaturePublicKeyMismatch {
+        expected: String,
+        actual: String,
+    },
     StorageDepositReturnOverflow,
     TimelockUnlockConditionZero,
-    UnallowedFeature { index: usize, kind: u8 },
-    UnallowedUnlockCondition { index: usize, kind: u8 },
+    UnallowedFeature {
+        index: usize,
+        kind: u8,
+    },
+    UnallowedUnlockCondition {
+        index: usize,
+        kind: u8,
+    },
     UnlockConditionsNotUniqueSorted,
     UnsupportedOutputKind(u8),
     DuplicateOutputChain(ChainId),
