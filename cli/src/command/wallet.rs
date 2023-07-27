@@ -56,7 +56,7 @@ pub enum WalletCommand {
     /// Initialize the wallet.
     Init(InitParameters),
     /// List all accounts.
-    ListAccounts,
+    Accounts,
     /// Migrate a stronghold snapshot v2 to v3.
     MigrateStrongholdSnapshotV2ToV3 {
         /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.

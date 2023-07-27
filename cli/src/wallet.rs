@@ -38,7 +38,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 let wallet = change_password_command(storage_path, snapshot_path).await?;
                 (Some(wallet), None)
             }
-            WalletCommand::ListAccounts => {
+            WalletCommand::Accounts => {
                 list_accounts_command(storage_path, snapshot_path).await?;
                 return Ok((None, None));
             }

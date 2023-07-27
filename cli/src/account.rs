@@ -21,14 +21,14 @@ use crate::{
     },
     error::Error,
     helper::{bytes_from_hex_or_file, print_account_help},
-    println_log_error, println_log_info,
+    println_log_error,
 };
 
 // loop on the account prompt
 pub async fn account_prompt(wallet: Wallet, account: String) -> Result<(), Error> {
     let mut history = AccountHistory::default();
     loop {
-        match account_prompt_internal(wallet.clone(), account.clone(), &mut history).await {
+        match account_prompt_internal(&wallet, &account, &mut history).await {
             Ok(true) => {
                 return Ok(());
             }
@@ -42,8 +42,8 @@ pub async fn account_prompt(wallet: Wallet, account: String) -> Result<(), Error
 
 // loop on the account prompt
 pub async fn account_prompt_internal(
-    wallet: Wallet,
-    account: String,
+    wallet: &Wallet,
+    account: &str,
     history: &mut AccountHistory,
 ) -> Result<bool, Error> {
     let account = wallet.get_account(account).await?;
@@ -62,10 +62,10 @@ pub async fn account_prompt_internal(
             // Clear console
             let _ = std::process::Command::new("clear").status();
         }
-        "l" | "list" => {
+        "accounts" => {
             // List all accounts
             let aliases = wallet.get_account_aliases().await?;
-            println_log_info!("{aliases:?}");
+            println!("{aliases:?}");
         }
         _ => {
             // Prepend `Account: ` so the parsing will be correct
