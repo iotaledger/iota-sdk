@@ -329,7 +329,7 @@ impl SecretManage for LedgerSecretManager {
                                     }
                                 }
                             } else {
-                                log::debug!("[LEDGER] unsupported output");
+                                log::warn!("[LEDGER] unsupported output");
                                 return Err(Error::MiscError.into());
                             }
 
@@ -338,7 +338,7 @@ impl SecretManage for LedgerSecretManager {
 
                         // was index found?
                         if remainder_index as usize == essence.outputs().len() {
-                            log::debug!("[LEDGER] remainder_index not found");
+                            log::warn!("[LEDGER] remainder_index not found");
                             return Err(Error::MiscError.into());
                         }
                     }

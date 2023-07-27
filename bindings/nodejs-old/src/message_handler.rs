@@ -63,7 +63,7 @@ impl MessageHandler {
                 (msg, is_err)
             }
             Err(e) => {
-                log::debug!("{:?}", e);
+                log::error!("{:?}", e);
                 (
                     serde_json::to_string(&Response::Error(e.into()))
                         .expect("the response is generated manually, so unwrap is safe."),

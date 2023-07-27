@@ -519,7 +519,7 @@ where
     let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
 
     if conflict != ConflictReason::None {
-        log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
+        log::warn!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
         return Err(Error::TransactionSemantic(conflict));
     }
 
