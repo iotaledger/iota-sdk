@@ -16,23 +16,10 @@ use crate::{
 };
 
 impl Client {
-    // Finds output and its metadata by output ID.
-    /// GET /api/core/v3/outputs/{outputId}
-    /// + GET /api/core/v3/outputs/{outputId}/metadata
-    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
-        let output = Output::unpack_verified(
-            self.get_output_raw(output_id).await?,
-            &self.get_protocol_parameters().await?,
-        )?;
-        let metadata = self.get_output_metadata(output_id).await?;
-
-        Ok(OutputWithMetadata::new(output, metadata))
-    }
-
     async fn chunk_requests<T, F>(&self, output_ids: &[OutputId], ignore_errors: bool, f: F) -> Result<Vec<T>>
     where
         T: Send + 'static,
-        for<'a> F: Fn(&'a Client, &'a OutputId) -> BoxFuture<'a, Result<T>> + Send + Sync + Copy + 'static,
+        for<'a> F: Fn(&'a Self, &'a OutputId) -> BoxFuture<'a, Result<T>> + Send + Sync + Copy + 'static,
     {
         Ok(
             futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
@@ -60,6 +47,19 @@ impl Client {
             .flatten()
             .collect(),
         )
+    }
+
+    // Finds output and its metadata by output ID.
+    /// GET /api/core/v3/outputs/{outputId}
+    /// + GET /api/core/v3/outputs/{outputId}/metadata
+    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+        let output = Output::unpack_verified(
+            self.get_output_raw(output_id).await?,
+            &self.get_protocol_parameters().await?,
+        )?;
+        let metadata = self.get_output_metadata(output_id).await?;
+
+        Ok(OutputWithMetadata::new(output, metadata))
     }
 
     /// Request outputs by their output ID in parallel
