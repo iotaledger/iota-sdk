@@ -41,7 +41,7 @@ impl core::fmt::Debug for Ed25519PublicKey {
         }
 
         f.debug_struct("Ed25519PublicKey")
-            .field("public_key", &UnquotedStr(&prefix_hex::encode(self.public_key)))
+            .field("public_key", &UnquotedStr(&prefix_hex::encode(self.0.as_slice())))
             .finish()
     }
 }
@@ -64,8 +64,7 @@ impl Packable for Ed25519PublicKey {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
+pub(crate) mod dto {
     use alloc::string::String;
 
     use serde::{Deserialize, Serialize};
@@ -86,7 +85,7 @@ pub mod dto {
         fn from(value: &Ed25519PublicKey) -> Self {
             Self {
                 kind: Ed25519PublicKey::KIND,
-                public_key: prefix_hex::encode(value.public_key),
+                public_key: prefix_hex::encode(value.0.as_slice()),
             }
         }
     }
@@ -95,9 +94,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519PublicKeyDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
-                prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
-            ))
+            Self::try_from_bytes(prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?)
         }
     }
 }
