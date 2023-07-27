@@ -37,6 +37,18 @@ impl PublicKey {
             Self::Ed25519(_) => Ed25519PublicKey::KIND,
         }
     }
+
+    /// Checks whether the public key is an [`Ed25519PublicKey`].
+    pub fn is_ed25519(&self) -> bool {
+        matches!(self, Self::Ed25519(_))
+    }
+
+    /// Gets the public key as an actual [`Ed25519PublicKey`].
+    /// NOTE: Will panic if the public key is not a [`Ed25519PublicKey`].
+    pub fn as_ed25519(&self) -> &Ed25519PublicKey {
+        let Self::Ed25519(public_key) = self;
+        public_key
+    }
 }
 
 #[allow(missing_docs)]
