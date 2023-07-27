@@ -171,9 +171,12 @@ pub async fn init_command(
 pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
     let password = get_password("Stronghold password", false)?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
-
     let accounts = wallet.get_account_ids().await?;
-    println!("{accounts:?}");
+
+    println!("INDEX\tALIAS");
+    for (index, alias) in accounts {
+        println!("{index}\t{alias}");
+    }
 
     Ok(())
 }

@@ -64,7 +64,11 @@ pub async fn account_prompt_internal(
         "accounts" => {
             // List all accounts
             let accounts = wallet.get_account_ids().await?;
-            println!("{accounts:?}");
+
+            println!("INDEX\tALIAS");
+            for (index, alias) in accounts {
+                println!("{index}\t{alias}");
+            }
         }
         _ => {
             // Prepend `Account: ` so the parsing will be correct
