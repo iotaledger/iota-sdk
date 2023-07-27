@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Constructor types in `RegularTransactionEssence`;
+- `SenderFeature.getSender()` and `IssuerFeature.getIssuer()` now return the correct types;
 
 
 ## 1.0.1 - 2023-07-25
