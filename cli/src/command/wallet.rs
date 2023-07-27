@@ -172,7 +172,7 @@ pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Resu
     let password = get_password("Stronghold password", false)?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
 
-    let accounts = wallet.get_account_aliases().await?;
+    let accounts = wallet.get_account_ids().await?;
     println!("{accounts:?}");
 
     Ok(())
