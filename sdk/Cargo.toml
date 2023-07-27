@@ -172,22 +172,23 @@ stronghold = [
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
 events = []
 client = [
-    "tokio",
-    "zeroize",
-    "url",
-    "reqwest",
     "async-trait",
-    "log",
-    "thiserror",
     "futures",
-    "serde",
     "instant",
     "iota-crypto/bip39",
     "iota-crypto/bip39-en",
-    "iota-crypto/slip10",
-    "iota-crypto/keccak",
     "iota-crypto/bip44",
+    "iota-crypto/keccak",
     "iota-crypto/random",
+    "iota-crypto/slip10",
+    "log",
+    "reqwest",
+    "serde",
+    "std",
+    "thiserror",
+    "tokio",
+    "url",
+    "zeroize",
 ]
 wallet = ["client"]
 
