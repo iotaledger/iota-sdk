@@ -633,10 +633,10 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
     } else {
         for (i, output_data) in outputs.into_iter().enumerate() {
             println_log_info!(
-                "{i}\t{output_id}\t{output_type}",
-                i = i,
-                output_id = &output_data.output_id,
-                output_type = get_output_type_str(&output_data.output)
+                "{}\t{}\t{}",
+                i,
+                &output_data.output_id,
+                get_output_type_str(&output_data.output),
             );
         }
     }
