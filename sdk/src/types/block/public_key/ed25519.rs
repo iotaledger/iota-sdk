@@ -94,7 +94,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519PublicKeyDto) -> Result<Self, Self::Error> {
-            Self::try_from_bytes(prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?)
+            Self::try_from_bytes(prefix_hex::decode(value.public_key).map_err(|_| Error::InvalidField("publicKey"))?)
         }
     }
 }
