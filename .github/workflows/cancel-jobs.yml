@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [closed]
   workflow_run:
+    workflows: ["*"]
     types: [requested]
 
 jobs:
