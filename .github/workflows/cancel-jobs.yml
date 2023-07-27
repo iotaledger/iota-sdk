@@ -3,6 +3,8 @@ name: Cancel jobs from merged/closed pull request
 on:
   pull_request:
     types: [closed]
+  workflow_run:
+    types: [requested]
 
 jobs:
   merge_job:
