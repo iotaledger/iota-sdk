@@ -7,7 +7,7 @@ use iota_sdk::wallet::Wallet;
 
 use crate::{
     command::wallet::{
-        add_account, backup_command, change_password_command, init_command, list_accounts_command,
+        accounts_command, add_account, backup_command, change_password_command, init_command,
         migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_account_command, node_info_command,
         restore_command, set_node_url_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
@@ -23,7 +23,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
     let (wallet, account) = if let Some(command) = cli.command {
         match command {
             WalletCommand::Accounts => {
-                list_accounts_command(storage_path, snapshot_path).await?;
+                accounts_command(storage_path, snapshot_path).await?;
                 return Ok((None, None));
             }
             WalletCommand::Init(init_parameters) => {

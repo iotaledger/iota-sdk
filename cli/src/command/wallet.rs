@@ -168,7 +168,7 @@ pub async fn init_command(
         .await?)
 }
 
-pub async fn list_accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
+pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
     let password = get_password("Stronghold password", false)?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
 
