@@ -29,6 +29,8 @@ const {
     migrateStrongholdSnapshotV2ToV3,
 } = addon;
 
+const test = 1
+
 const callClientMethodAsync = (
     method: string,
     handler: ClientMethodHandler,
