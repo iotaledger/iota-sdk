@@ -4,7 +4,7 @@
 use clap::Parser;
 use colored::Colorize;
 use dialoguer::Input;
-use iota_sdk::wallet::Account;
+use iota_sdk::wallet::Wallet;
 
 use crate::{
     account_completion::ACCOUNT_COMPLETION,
@@ -21,14 +21,14 @@ use crate::{
     },
     error::Error,
     helper::{bytes_from_hex_or_file, print_account_help},
-    println_log_error,
+    println_log_error, println_log_info,
 };
 
 // loop on the account prompt
-pub async fn account_prompt(account: Account) -> Result<(), Error> {
+pub async fn account_prompt(wallet: Wallet, account: String) -> Result<(), Error> {
     let mut history = AccountHistory::default();
     loop {
-        match account_prompt_internal(account.clone(), &mut history).await {
+        match account_prompt_internal(wallet.clone(), account.clone(), &mut history).await {
             Ok(true) => {
                 return Ok(());
             }
@@ -41,7 +41,8 @@ pub async fn account_prompt(account: Account) -> Result<(), Error> {
 }
 
 // loop on the account prompt
-pub async fn account_prompt_internal(account: Account, history: &mut AccountHistory) -> Result<bool, Error> {
+pub async fn account_prompt_internal(wallet: Wallet, account: String, history: &mut AccountHistory) -> Result<bool, Error> {
+    let account = wallet.get_account(account).await?;
     let alias = {
         let account = account.details().await;
         account.alias().clone()
@@ -52,10 +53,15 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
         .completion_with(&ACCOUNT_COMPLETION)
         .interact_text()?;
     match command.as_str() {
-        "h" => print_account_help(),
-        "clear" => {
+        "h" | "help" => print_account_help(),
+        "c" | "clear" => {
             // Clear console
             let _ = std::process::Command::new("clear").status();
+        }
+        "l" | "list" => {
+            // List all accounts
+            let aliases = wallet.get_account_aliases().await?;
+            println_log_info!("{aliases:?}");
         }
         _ => {
             // Prepend `Account: ` so the parsing will be correct
