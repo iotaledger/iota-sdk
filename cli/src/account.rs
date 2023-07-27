@@ -41,7 +41,11 @@ pub async fn account_prompt(wallet: Wallet, account: String) -> Result<(), Error
 }
 
 // loop on the account prompt
-pub async fn account_prompt_internal(wallet: Wallet, account: String, history: &mut AccountHistory) -> Result<bool, Error> {
+pub async fn account_prompt_internal(
+    wallet: Wallet,
+    account: String,
+    history: &mut AccountHistory,
+) -> Result<bool, Error> {
     let account = wallet.get_account(account).await?;
     let alias = {
         let account = account.details().await;
