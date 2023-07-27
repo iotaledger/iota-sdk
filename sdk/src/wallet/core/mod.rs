@@ -94,15 +94,15 @@ where
         Ok(self.accounts.read().await.clone())
     }
 
-    /// Get all account identifiers
-    pub async fn get_account_ids(&self) -> crate::wallet::Result<Vec<(u32, String)>> {
+    /// Get all account aliases
+    pub async fn get_account_aliases(&self) -> crate::wallet::Result<Vec<String>> {
         let accounts = self.accounts.read().await;
-        let mut account_ids = Vec::with_capacity(accounts.len());
+        let mut account_aliases = Vec::with_capacity(accounts.len());
         for handle in accounts.iter() {
             let details = &*handle.details().await;
-            account_ids.push((*details.index(), details.alias().clone()));
+            account_aliases.push(details.alias().clone());
         }
-        Ok(account_ids)
+        Ok(account_aliases)
     }
 
     /// Removes the latest account (account with the largest account index).

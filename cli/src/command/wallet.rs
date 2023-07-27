@@ -109,6 +109,20 @@ impl Default for InitParameters {
     }
 }
 
+pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
+    let password = get_password("Stronghold password", false)?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    let accounts = wallet.get_accounts().await?;
+
+    println!("INDEX\tALIAS");
+    for account in accounts {
+        let details = &*account.details().await;
+        println!("{}\t{}", details.index(), details.alias());
+    }
+
+    Ok(())
+}
+
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password.clone()).await?;
@@ -166,19 +180,6 @@ pub async fn init_command(
         .with_coin_type(parameters.coin_type)
         .finish()
         .await?)
-}
-
-pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
-    let password = get_password("Stronghold password", false)?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
-    let accounts = wallet.get_account_ids().await?;
-
-    println!("INDEX\tALIAS");
-    for (index, alias) in accounts {
-        println!("{index}\t{alias}");
-    }
-
-    Ok(())
 }
 
 pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {
