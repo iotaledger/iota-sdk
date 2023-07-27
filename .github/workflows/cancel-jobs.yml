@@ -1,0 +1,15 @@
+name: Cancel jobs from merged/closed pull request
+
+on:
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  merge_job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          ignore_sha: true
+          access_token: ${{ github.token }}
+          workflow_id: "bindings-nodejs.yml, bindings-python.yml, bindings-wallet-nodejs.yml, bindings-wasm.yml, build-and-test.yml, coverage.yml, lint.yml, private-tangle-tests.yml"
