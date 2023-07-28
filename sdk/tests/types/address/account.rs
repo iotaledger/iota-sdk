@@ -101,7 +101,7 @@ fn bech32_roundtrip() {
 #[test]
 fn serde_fields() {
     let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let account_address_ser = serde_json::to_value(&account_address).unwrap();
+    let account_address_ser = serde_json::to_value(account_address).unwrap();
 
     assert_eq!(
         account_address_ser,
@@ -112,7 +112,7 @@ fn serde_fields() {
     );
 
     let address = Address::from(account_address);
-    let address_ser = serde_json::to_value(&address).unwrap();
+    let address_ser = serde_json::to_value(address).unwrap();
 
     assert_eq!(address_ser, account_address_ser);
 }

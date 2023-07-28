@@ -101,7 +101,7 @@ fn bech32_roundtrip() {
 #[test]
 fn serde_fields() {
     let nft_address = NftAddress::from_str(NFT_ID).unwrap();
-    let nft_address_ser = serde_json::to_value(&nft_address).unwrap();
+    let nft_address_ser = serde_json::to_value(nft_address).unwrap();
 
     assert_eq!(
         nft_address_ser,
@@ -112,7 +112,7 @@ fn serde_fields() {
     );
 
     let address = Address::from(nft_address);
-    let address_ser = serde_json::to_value(&address).unwrap();
+    let address_ser = serde_json::to_value(address).unwrap();
 
     assert_eq!(address_ser, nft_address_ser);
 }
