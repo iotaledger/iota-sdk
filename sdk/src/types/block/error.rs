@@ -15,7 +15,7 @@ use crate::types::block::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
-    payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
+    payload::{AllotmentCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -28,6 +28,7 @@ pub enum Error {
     CreatedAmountOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
+    DuplicateAllotment(AccountId),
     DuplicateSignatureUnlock(u16),
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
@@ -59,6 +60,7 @@ pub enum Error {
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
     InvalidOutputKind(u8),
+    InvalidAllotmentCount(<AllotmentCount as TryFrom<usize>>::Error),
     // TODO this would now need to be generic, not sure if possible.
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
@@ -76,6 +78,7 @@ pub enum Error {
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
+    InvalidAllotmentManaSum(u128),
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
@@ -120,6 +123,7 @@ impl fmt::Display for Error {
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
+            Self::DuplicateAllotment(id) => write!(f, "duplicate allotment, account ID: {id}"),
             Self::DuplicateSignatureUnlock(index) => {
                 write!(f, "duplicate signature unlock at index: {index}")
             }
@@ -185,6 +189,7 @@ impl fmt::Display for Error {
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
             Self::InvalidOutputKind(k) => write!(f, "invalid output kind: {k}"),
+            Self::InvalidAllotmentCount(count) => write!(f, "invalid allotment count: {count}"),
             Self::InvalidParentCount => {
                 write!(f, "invalid parents count")
             }
@@ -211,6 +216,7 @@ impl fmt::Display for Error {
             Self::InvalidTransactionNativeTokensCount(count) => {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
+            Self::InvalidAllotmentManaSum(value) => write!(f, "invalid allotment mana sum: {value}"),
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {

@@ -18,6 +18,8 @@ pub mod core;
 pub mod helper;
 /// A module that provides types and syntactic validations of inputs.
 pub mod input;
+/// A module that provides types and syntactic validations of mana.
+pub mod mana;
 /// A module that provides types and syntactic validations of outputs.
 pub mod output;
 /// A module that provides types and syntactic validations of parents.
