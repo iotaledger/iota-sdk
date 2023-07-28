@@ -73,7 +73,9 @@ pub mod prefix_hex_bytes {
         D: Deserializer<'de>,
         T: FromHexPrefixed,
     {
-        prefix_hex::decode(String::deserialize(deserializer)?).map_err(de::Error::custom)
+        prefix_hex::decode(String::deserialize(deserializer)?)
+            .map_err(crate::types::block::Error::Hex)
+            .map_err(de::Error::custom)
     }
 }
 

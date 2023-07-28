@@ -8,9 +8,11 @@ use iota_sdk::types::block::{
     output::NftId,
 };
 use packable::PackableExt;
+use serde_json::json;
 
 const NFT_ID: &str = "0xa9ede98a7f0223fa7a49fbc586f7a88bb4f0d152f282b19bcebd05c9e8a02370";
 const NFT_BECH32: &str = "rms1zz57m6v20upz87n6f8autphh4z9mfux32teg9vvme67stj0g5q3hqd6l53z";
+const NFT_ID_INVALID: &str = "0xb0c800965d7511f5fb4406274d4e607f87d5c5970bc05e896f841a700e86e";
 
 #[test]
 fn kind() {
@@ -94,6 +96,54 @@ fn bech32_roundtrip() {
         Bech32Address::try_from_str(bech32),
         Bech32Address::try_new("rms", address)
     );
+}
+
+#[test]
+fn serde_fields() {
+    let nft_address = NftAddress::from_str(NFT_ID).unwrap();
+    let nft_address_ser = serde_json::to_value(&nft_address).unwrap();
+
+    assert_eq!(
+        nft_address_ser,
+        json!({
+            "type": NftAddress::KIND,
+            "nftId": NFT_ID,
+        })
+    );
+
+    let address = Address::from(nft_address);
+    let address_ser = serde_json::to_value(&address).unwrap();
+
+    assert_eq!(address_ser, nft_address_ser);
+}
+
+#[test]
+fn serde_roundtrip() {
+    let nft_address = NftAddress::from_str(NFT_ID).unwrap();
+    let nft_address_ser = serde_json::to_string(&nft_address).unwrap();
+
+    assert_eq!(
+        serde_json::from_str::<NftAddress>(&nft_address_ser).unwrap(),
+        nft_address
+    );
+
+    let address = Address::from(nft_address);
+    let address_ser = serde_json::to_string(&address).unwrap();
+
+    assert_eq!(serde_json::from_str::<Address>(&address_ser).unwrap(), address);
+}
+
+#[test]
+fn serde_invalid_account_id() {
+    let nft_address_ser = json!({
+        "type": NftAddress::KIND,
+        "nftId": NFT_ID_INVALID,
+    });
+
+    assert!(matches!(
+        serde_json::from_value::<NftAddress>(nft_address_ser),
+        Err(e) if e.to_string() == "hex error: Invalid hex string length for slice: expected 64 got 61"
+    ));
 }
 
 #[test]
