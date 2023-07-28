@@ -35,7 +35,7 @@ class SenderFeature extends Feature {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
-    
+
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
@@ -55,7 +55,7 @@ class IssuerFeature extends Feature {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
-    
+
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;
@@ -89,7 +89,7 @@ class MetadataFeature extends Feature {
  */
 class TagFeature extends Feature {
     readonly tag: string;
-    
+
     constructor(tag: string) {
         super(FeatureType.Tag);
         this.tag = tag;

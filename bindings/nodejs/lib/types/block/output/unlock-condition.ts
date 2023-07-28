@@ -216,7 +216,7 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements 
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
-    
+
     constructor(address: AliasAddress) {
         super(UnlockConditionType.ImmutableAliasAddress);
         this.address = address;
