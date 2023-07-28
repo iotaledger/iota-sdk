@@ -46,6 +46,8 @@ pub struct WalletCli {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum WalletCommand {
+    /// List all accounts.
+    Accounts,
     /// Create a stronghold backup file.
     Backup {
         /// Path of the created stronghold backup file.
@@ -105,6 +107,20 @@ impl Default for InitParameters {
             coin_type: SHIMMER_COIN_TYPE,
         }
     }
+}
+
+pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
+    let password = get_password("Stronghold password", false)?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    let accounts = wallet.get_accounts().await?;
+
+    println!("INDEX\tALIAS");
+    for account in accounts {
+        let details = &*account.details().await;
+        println!("{}\t{}", details.index(), details.alias());
+    }
+
+    Ok(())
 }
 
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
