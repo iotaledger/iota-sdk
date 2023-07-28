@@ -103,7 +103,7 @@ impl SecretManage for MnemonicSecretManager {
         let public_key = private_key.public_key();
         let signature = private_key.sign(msg);
 
-        Ok(Ed25519Signature::new(public_key, signature))
+        Ok(Ed25519Signature::new(public_key.into(), signature))
     }
 
     async fn sign_secp256k1_ecdsa(
