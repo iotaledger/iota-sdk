@@ -13,8 +13,53 @@ use super::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
-    Error,
+    BlockBuilder, Error,
 };
+
+impl BlockBuilder<BasicBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
+    #[inline(always)]
+    pub fn new(strong_parents: StrongParents) -> Self {
+        Self {
+            protocol_version: None,
+            inner: BasicBlock {
+                strong_parents,
+                weak_parents: Default::default(),
+                shallow_like_parents: Default::default(),
+                payload: OptionalPayload::default(),
+                burned_mana: Default::default(),
+            },
+        }
+    }
+
+    /// Adds weak parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.inner.weak_parents = weak_parents.into();
+        self
+    }
+
+    /// Adds shallow like parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.inner.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+
+    /// Adds a payload to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.inner.payload = payload.into();
+        self
+    }
+
+    /// Adds burned mana to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
+        self.inner.burned_mana = burned_mana;
+        self
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicBlock {
@@ -118,7 +163,7 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// The block object that nodes gossip around in the network.
+    /// A basic block.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct BasicBlockDto {

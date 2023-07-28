@@ -12,8 +12,43 @@ use super::{
     core::verify_parents,
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    Error,
+    BlockBuilder, Error,
 };
+
+impl BlockBuilder<ValidationBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn new(
+        strong_parents: StrongParents,
+        highest_supported_version: u8,
+        protocol_parameters: &ProtocolParameters,
+    ) -> Self {
+        Self {
+            protocol_version: None,
+            inner: ValidationBlock {
+                strong_parents,
+                weak_parents: Default::default(),
+                shallow_like_parents: Default::default(),
+                highest_supported_version,
+                protocol_parameters_hash: protocol_parameters.hash(),
+            },
+        }
+    }
+
+    /// Adds weak parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.inner.weak_parents = weak_parents.into();
+        self
+    }
+
+    /// Adds shallow like parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.inner.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ValidationBlock {
@@ -93,7 +128,6 @@ impl Packable for ValidationBlock {
 
         let protocol_parameters_hash = ProtocolParametersHash::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        // TODO: Is this actually right/needed?
         if VERIFY {
             validate_protocol_params_hash(&protocol_parameters_hash, visitor).map_err(UnpackError::Packable)?;
         }
@@ -132,7 +166,7 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// The block object that nodes gossip around in the network.
+    /// A special type of block used by validators to secure the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct ValidationBlockDto {
