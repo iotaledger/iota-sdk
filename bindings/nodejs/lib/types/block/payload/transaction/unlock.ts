@@ -15,7 +15,7 @@ enum UnlockType {
 }
 
 abstract class Unlock {
-    private type: UnlockType;
+    readonly type: UnlockType;
 
     constructor(type: UnlockType) {
         this.type = type;
@@ -37,7 +37,7 @@ class SignatureUnlock extends Unlock {
      * The signature.
      */
     @Type(() => Ed25519Signature)
-    signature: Ed25519Signature;
+    readonly signature: Ed25519Signature;
 
     constructor(signature: Ed25519Signature) {
         super(UnlockType.Signature);

@@ -14,7 +14,7 @@ enum InputType {
 }
 
 abstract class Input {
-    private type: InputType;
+    readonly type: InputType;
 
     constructor(type: InputType) {
         this.type = type;
@@ -35,7 +35,7 @@ class TreasuryInput extends Input {
     /**
      * The milestone id of the input.
      */
-    milestoneId: HexEncodedString;
+    readonly milestoneId: HexEncodedString;
 
     constructor(milestoneId: HexEncodedString) {
         super(InputType.Treasury);
@@ -50,11 +50,11 @@ class UTXOInput extends Input {
     /**
      * The transaction Id.
      */
-    transactionId: HexEncodedString;
+    readonly transactionId: HexEncodedString;
     /**
      * The output index.
      */
-    transactionOutputIndex: number;
+    readonly transactionOutputIndex: number;
 
     constructor(
         transactionId: HexEncodedString,

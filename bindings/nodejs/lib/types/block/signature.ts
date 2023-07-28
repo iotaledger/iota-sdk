@@ -12,7 +12,7 @@ enum SignatureType {
 }
 
 abstract class Signature {
-    private type: SignatureType;
+    readonly type: SignatureType;
 
     constructor(type: SignatureType) {
         this.type = type;
@@ -33,11 +33,11 @@ class Ed25519Signature extends Signature {
     /**
      * The public key.
      */
-    publicKey: HexEncodedString;
+    readonly publicKey: HexEncodedString;
     /**
      * The signature.
      */
-    signature: HexEncodedString;
+    readonly signature: HexEncodedString;
 
     constructor(publicKey: HexEncodedString, signature: HexEncodedString) {
         super(SignatureType.Ed25519);

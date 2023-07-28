@@ -18,7 +18,7 @@ enum UnlockConditionType {
 }
 
 abstract class UnlockCondition {
-    private type: UnlockConditionType;
+    readonly type: UnlockConditionType;
 
     constructor(type: UnlockConditionType) {
         this.type = type;
@@ -75,7 +75,8 @@ class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlock
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private address: Address;
+    readonly address: Address;
+
     constructor(address: Address) {
         super(UnlockConditionType.Address);
         this.address = address;
@@ -92,12 +93,12 @@ class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlock
  * Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements IStorageDepositReturnUnlockCondition*/ {
-    private amount: string;
+    readonly amount: string;
 
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private returnAddress: Address;
+    readonly returnAddress: Address;
 
     constructor(returnAddress: Address, amount: bigint | string) {
         super(UnlockConditionType.StorageDepositReturn);
@@ -126,7 +127,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
  * Timelock Unlock Condition.
  */
 class TimelockUnlockCondition extends UnlockCondition /*implements ITimelockUnlockCondition*/ {
-    private unixTime: number;
+    readonly unixTime: number;
 
     constructor(unixTime: number) {
         super(UnlockConditionType.Timelock);
@@ -144,8 +145,8 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private returnAddress: Address;
-    private unixTime: number;
+    readonly returnAddress: Address;
+    readonly unixTime: number;
 
     constructor(returnAddress: Address, unixTime: number) {
         super(UnlockConditionType.Expiration);
@@ -174,7 +175,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private address: Address;
+    readonly address: Address;
     constructor(address: Address) {
         super(UnlockConditionType.StateControllerAddress);
         this.address = address;
@@ -194,7 +195,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private address: Address;
+    readonly address: Address;
     constructor(address: Address) {
         super(UnlockConditionType.GovernorAddress);
         this.address = address;
@@ -214,7 +215,8 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements 
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private address: Address;
+    readonly address: Address;
+    
     constructor(address: AliasAddress) {
         super(UnlockConditionType.ImmutableAliasAddress);
         this.address = address;

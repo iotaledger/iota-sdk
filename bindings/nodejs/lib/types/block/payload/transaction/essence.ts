@@ -16,7 +16,7 @@ enum TransactionEssenceType {
 }
 
 abstract class TransactionEssence {
-    private type: TransactionEssenceType;
+    readonly type: TransactionEssenceType;
 
     constructor(type: TransactionEssenceType) {
         this.type = type;
@@ -35,23 +35,23 @@ abstract class TransactionEssence {
  */
 class RegularTransactionEssence extends TransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
-    networkId: number;
-    inputsCommitment: HexEncodedString;
+    readonly networkId: number;
+    readonly inputsCommitment: HexEncodedString;
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
-    inputs: [Input];
+    readonly inputs: [Input];
 
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
-    outputs: [Output];
+    readonly outputs: [Output];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    payload: Payload | undefined;
+    readonly payload: Payload | undefined;
 
     constructor(
         networkId: number,
