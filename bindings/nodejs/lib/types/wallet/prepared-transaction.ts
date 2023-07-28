@@ -49,7 +49,7 @@ export class PreparedTransaction {
     }
 
     /**
-     * This function signs a prepared transaction essence using the account's readonly key and returns
+     * This function signs a prepared transaction essence using the account's private key and returns
      * the signed transaction essence.
      *
      * Returns:
