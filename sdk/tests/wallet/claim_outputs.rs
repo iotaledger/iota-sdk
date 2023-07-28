@@ -128,7 +128,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let token_supply = account_0.client().get_token_supply().await?;
     let rent_structure = account_0.client().get_rent_structure().await?;
-    let expiration_time = account_0.client().get_time_checked().await? + 86400; // 1 Day from now
+    let expiration_time = account_0.client().get_slot_index().await? + 86400; // 1 Day from now
 
     let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -405,7 +405,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     *accounts[1].addresses().await?[0].address().as_ref(),
-                    accounts[1].client().get_time_checked().await? + 5000,
+                    accounts[1].client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
@@ -416,7 +416,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     *accounts[1].addresses().await?[0].address().as_ref(),
-                    accounts[1].client().get_time_checked().await? + 5000,
+                    accounts[1].client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
@@ -466,7 +466,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     *account_0.addresses().await?[0].address().as_ref(),
-                    account_0.client().get_time_checked().await? + 5000,
+                    account_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
@@ -477,7 +477,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     *account_0.addresses().await?[0].address().as_ref(),
-                    account_0.client().get_time_checked().await? + 5000,
+                    account_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,

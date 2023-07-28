@@ -70,7 +70,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     account_1_address,
                     // Already expired
-                    account_0.client().get_time_checked().await? - 5000,
+                    account_0.client().get_slot_index().await? - 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
@@ -80,7 +80,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     account_1_address,
                     // Not expired
-                    account_0.client().get_time_checked().await? + 5000,
+                    account_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
@@ -102,7 +102,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     account_1_address,
-                    account_0.client().get_time_checked().await? + 5000,
+                    account_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,

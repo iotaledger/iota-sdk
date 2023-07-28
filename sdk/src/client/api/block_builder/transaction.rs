@@ -28,8 +28,9 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
-    slot_index: SlotIndex,
+    slot_index: impl Into<SlotIndex>,
 ) -> crate::client::Result<ConflictReason> {
+    let slot_index = slot_index.into();
     let transaction_id = transaction.id();
     let TransactionEssence::Regular(essence) = transaction.essence();
     let inputs = input_signing_data

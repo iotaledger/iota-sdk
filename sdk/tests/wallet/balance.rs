@@ -109,7 +109,7 @@ async fn balance_expiration() -> Result<()> {
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                 *account_2.addresses().await?[0].address().as_ref(),
                 // Current time + 20s
-                account_0.client().get_time_checked().await? + seconds_until_expired,
+                account_0.client().get_slot_index().await? + seconds_until_expired,
             )?),
         ])
         .with_features([SenderFeature::new(*account_0.addresses().await?[0].address().as_ref())])

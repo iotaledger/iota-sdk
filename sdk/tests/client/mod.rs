@@ -68,8 +68,8 @@ enum Build<'a> {
         Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
         Option<(&'a str, u64)>,
-        Option<u32>,
-        Option<(&'a str, u32)>,
+        Option<u64>,
+        Option<(&'a str, u64)>,
         Option<Bip44>,
     ),
     Nft(
@@ -80,7 +80,7 @@ enum Build<'a> {
         Option<&'a str>,
         Option<&'a str>,
         Option<(&'a str, u64)>,
-        Option<(&'a str, u32)>,
+        Option<(&'a str, u64)>,
         Option<Bip44>,
     ),
     Account(
@@ -103,8 +103,8 @@ fn build_basic_output(
     native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<Bech32Address>,
     sdruc: Option<(Bech32Address, u64)>,
-    timelock: Option<u32>,
-    expiration: Option<(Bech32Address, u32)>,
+    timelock: Option<u64>,
+    expiration: Option<(Bech32Address, u64)>,
 ) -> Output {
     let mut builder =
         BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(bech32_address));
@@ -146,7 +146,7 @@ fn build_nft_output(
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
     sdruc: Option<(Bech32Address, u64)>,
-    expiration: Option<(Bech32Address, u32)>,
+    expiration: Option<(Bech32Address, u64)>,
 ) -> Output {
     let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
         .add_unlock_condition(AddressUnlockCondition::new(bech32_address));

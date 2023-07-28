@@ -88,7 +88,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(0))
+        .sign_transaction_essence(&prepared_transaction_data, Some(SlotIndex::from(0)))
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -98,9 +98,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let slot_index = SlotIndex::from(100);
-
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, 100)?;
 
     if conflict != ConflictReason::None {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -190,7 +188,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(0))
+        .sign_transaction_essence(&prepared_transaction_data, Some(SlotIndex::from(0)))
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -302,7 +300,7 @@ async fn two_signature_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(0))
+        .sign_transaction_essence(&prepared_transaction_data, Some(SlotIndex::from(0)))
         .await?;
 
     assert_eq!(unlocks.len(), 2);
