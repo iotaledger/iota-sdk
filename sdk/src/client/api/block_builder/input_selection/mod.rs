@@ -415,7 +415,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         Ok(Selected {
-            inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, Some(self.timestamp))?,
+            inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, Some(self.slot_index))?,
             outputs: self.outputs,
             remainder,
         })

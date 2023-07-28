@@ -396,7 +396,7 @@ impl SecretManage for LedgerSecretManager {
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
         // Account/Nft/Reference unlocks
         if blind_signing {
-            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), time)?;
+            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), slot_index)?;
         }
 
         Ok(Unlocks::new(unlocks)?)
@@ -519,6 +519,7 @@ fn merge_unlocks(
     let hashed_essence = prepared_transaction_data.essence.hash();
 
     // TODO ???
+    let slot_index = slot_index.unwrap_or_else(|| SlotIndex::from(0));
     // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
 
     let mut merged_unlocks = Vec::new();

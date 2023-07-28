@@ -84,7 +84,7 @@ struct AmountSelection {
     outputs_sdr: HashMap<Address, u64>,
     remainder_amount: u64,
     native_tokens_remainder: bool,
-    timestamp: u32,
+    slot_index: SlotIndex,
 }
 
 impl AmountSelection {
@@ -92,7 +92,7 @@ impl AmountSelection {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = amount_sums(
             &input_selection.selected_inputs,
             &input_selection.outputs,
-            input_selection.timestamp,
+            input_selection.slot_index,
         );
         let (remainder_amount, native_tokens_remainder) = input_selection.remainder_amount()?;
 
@@ -104,7 +104,7 @@ impl AmountSelection {
             outputs_sdr,
             remainder_amount,
             native_tokens_remainder,
-            timestamp: input_selection.timestamp,
+            slot_index: input_selection.slot_index,
         })
     }
 
@@ -133,7 +133,7 @@ impl AmountSelection {
                 continue;
             }
 
-            if let Some(sdruc) = sdruc_not_expired(&input.output, self.timestamp) {
+            if let Some(sdruc) = sdruc_not_expired(&input.output, self.slot_index) {
                 // Skip if no additional amount is made available
                 if input.output.amount() == sdruc.amount() {
                     continue;
@@ -176,7 +176,7 @@ impl InputSelection {
         // No native tokens, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.timestamp).is_none()
+                && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
         if amount_selection.fulfil(inputs) {
@@ -186,7 +186,7 @@ impl InputSelection {
         // No native tokens, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.timestamp).is_some()
+                && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
         if amount_selection.fulfil(inputs) {
@@ -196,7 +196,7 @@ impl InputSelection {
         // Native tokens, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             !input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.timestamp).is_none()
+                && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
         if amount_selection.fulfil(inputs) {
@@ -206,7 +206,7 @@ impl InputSelection {
         // Native tokens, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             !input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.timestamp).is_some()
+                && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
         if amount_selection.fulfil(inputs) {
@@ -356,7 +356,7 @@ impl InputSelection {
             if let Output::Basic(output) = &input.output {
                 output
                     .unlock_conditions()
-                    .locked_address(output.address(), self.timestamp)
+                    .locked_address(output.address(), self.slot_index)
                     .is_ed25519()
             } else {
                 false
@@ -371,7 +371,7 @@ impl InputSelection {
             if let Output::Basic(output) = &input.output {
                 !output
                     .unlock_conditions()
-                    .locked_address(output.address(), self.timestamp)
+                    .locked_address(output.address(), self.slot_index)
                     .is_ed25519()
             } else {
                 false
