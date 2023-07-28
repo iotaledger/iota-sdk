@@ -53,7 +53,6 @@ use crate::{
         slot::SlotIndex,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
-    utils::unix_timestamp_now,
 };
 
 /// The secret manager interface.
@@ -101,7 +100,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
+        slot_index: Option<SlotIndex>,
     ) -> Result<Unlocks, Self::Error>;
 
     async fn sign_transaction(
@@ -336,20 +335,20 @@ impl SecretManage for SecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
+        slot_index: Option<SlotIndex>,
     ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data, time)
+                .sign_transaction_essence(prepared_transaction_data, slot_index)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data, time)
+                .sign_transaction_essence(prepared_transaction_data, slot_index)
                 .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .sign_transaction_essence(prepared_transaction_data, time)
+                    .sign_transaction_essence(prepared_transaction_data, slot_index)
                     .await
             }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
@@ -427,7 +426,7 @@ impl SecretManager {
 pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
-    time: Option<SlotIndex>,
+    slot_index: Option<SlotIndex>,
 ) -> crate::client::Result<Unlocks>
 where
     crate::client::Error: From<M::Error>,
@@ -442,8 +441,11 @@ where
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        // TODO !!!
+        let slot_index = slot_index.unwrap_or_else(|| SlotIndex::from(0));
+        // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
         let (input_address, _) = input.output.required_and_unlocked_address(
-            time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
+            slot_index,
             input.output_metadata.output_id(),
             account_transition,
         )?;
@@ -504,10 +506,12 @@ where
     crate::client::Error: From<M::Error>,
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
-    let current_time = unix_timestamp_now().as_secs() as u32;
+    // TODO !!!
+    let slot_index = SlotIndex::from(0);
+    // let current_time = unix_timestamp_now().as_secs() as u32;
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
+        .sign_transaction_essence(&prepared_transaction_data, Some(slot_index))
         .await?;
 
     let PreparedTransactionData {
@@ -517,7 +521,7 @@ where
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, slot_index)?;
 
     if conflict != ConflictReason::None {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

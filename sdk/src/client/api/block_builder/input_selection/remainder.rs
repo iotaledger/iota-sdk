@@ -86,7 +86,7 @@ impl InputSelection {
         &self,
     ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) =
-            amount_sums(&self.selected_inputs, &self.outputs, self.timestamp);
+            amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
 
         for (address, amount) in inputs_sdr {

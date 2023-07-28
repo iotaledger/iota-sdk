@@ -221,9 +221,9 @@ impl InputSelection {
         self
     }
 
-    /// Sets the timestamp of an [`InputSelection`].
-    pub fn timestamp(mut self, timestamp: u32) -> Self {
-        self.timestamp = timestamp;
+    /// Sets the slot index of an [`InputSelection`].
+    pub fn slot_index(mut self, slot_index: SlotIndex) -> Self {
+        self.slot_index = slot_index;
         self
     }
 
@@ -265,6 +265,7 @@ impl InputSelection {
         slot_index: Option<SlotIndex>,
     ) -> Result<Vec<InputSigningData>, Error> {
         // TODO ????
+        let slot_index = slot_index.unwrap_or_else(|| SlotIndex::from(0));
         // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
@@ -340,7 +341,7 @@ impl InputSelection {
                             );
                             let (input_address, _) = input_signing_data
                                 .output
-                                .required_and_unlocked_address(time, input.output_id(), account_transition)
+                                .required_and_unlocked_address(slot_index, input.output_id(), account_transition)
                                 // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 

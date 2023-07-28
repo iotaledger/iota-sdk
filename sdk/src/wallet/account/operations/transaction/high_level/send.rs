@@ -14,6 +14,7 @@ use crate::{
             },
             BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
+        slot::SlotIndex,
         ConvertTo,
     },
     wallet::{
@@ -37,11 +38,11 @@ pub struct SendParams {
     /// default to the first address of the account.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+    /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
     /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
     /// expiration is needed but not provided, it will default to one day.
     #[getset(get = "pub")]
-    expiration: Option<u32>,
+    expiration: Option<SlotIndex>,
 }
 
 impl SendParams {
@@ -67,7 +68,7 @@ impl SendParams {
         self
     }
 
-    pub fn with_expiration(mut self, expiration: impl Into<Option<u32>>) -> Self {
+    pub fn with_expiration(mut self, expiration: impl Into<Option<SlotIndex>>) -> Self {
         self.expiration = expiration.into();
         self
     }
@@ -148,7 +149,7 @@ where
             address,
             amount,
             return_address,
-            expiration,
+            expiration: _,
         } in params
         {
             self.client().bech32_hrp_matches(address.hrp()).await?;

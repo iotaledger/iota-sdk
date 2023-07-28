@@ -15,6 +15,7 @@ use crate::{
             },
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
+        slot::SlotIndex,
         ConvertTo,
     },
     wallet::{
@@ -37,10 +38,10 @@ pub struct SendNativeTokensParams {
     /// first address of the account
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+    /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
     #[getset(get = "pub")]
-    expiration: Option<u32>,
+    expiration: Option<SlotIndex>,
 }
 
 impl SendNativeTokensParams {
@@ -70,8 +71,8 @@ impl SendNativeTokensParams {
     }
 
     /// Set the expiration in seconds
-    pub fn with_expiration(mut self, expiration_secs: Option<u32>) -> Self {
-        self.expiration = expiration_secs;
+    pub fn with_expiration(mut self, expiration: Option<SlotIndex>) -> Self {
+        self.expiration = expiration;
         self
     }
 }
@@ -139,7 +140,7 @@ where
             address,
             native_tokens,
             return_address,
-            expiration,
+            expiration: _,
         } in params
         {
             self.client().bech32_hrp_matches(address.hrp()).await?;
