@@ -6,7 +6,10 @@ use iota_sdk::{
         api::PreparedTransactionData,
         secret::{SecretManage, SecretManager},
     },
-    types::block::{signature::dto::Ed25519SignatureDto, unlock::Unlock},
+    types::{
+        block::{signature::dto::Ed25519SignatureDto, unlock::Unlock},
+        TryFromDto,
+    },
 };
 use tokio::sync::RwLock;
 
@@ -39,9 +42,7 @@ pub(crate) async fn call_secret_manager_method_internal(
             prepared_transaction_data,
         } => {
             let transaction = &secret_manager
-                .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-                    prepared_transaction_data,
-                )?)
+                .sign_transaction(PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                 .await?;
             Response::SignedTransaction(transaction.into())
         }

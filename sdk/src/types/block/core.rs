@@ -12,11 +12,14 @@ use packable::{
     Packable, PackableExt,
 };
 
-use crate::types::block::{
-    parent::Parents,
-    payload::{OptionalPayload, Payload},
-    protocol::ProtocolParameters,
-    BlockId, Error, PROTOCOL_VERSION,
+use super::protocol::ProtocolParameters;
+use crate::types::{
+    block::{
+        parent::Parents,
+        payload::{OptionalPayload, Payload},
+        BlockId, Error, PROTOCOL_VERSION,
+    },
+    ValidationParams,
 };
 
 /// A builder to build a [`Block`].
@@ -256,7 +259,10 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{payload::dto::PayloadDto, protocol::ProtocolParameters, Error};
+    use crate::types::{
+        block::{payload::dto::PayloadDto, Error},
+        TryFromDto,
+    };
 
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -284,42 +290,24 @@ pub(crate) mod dto {
         }
     }
 
-    impl Block {
-        pub fn try_from_dto(value: BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
+    impl TryFromDto for Block {
+        type Dto = BlockDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             let parents = Parents::from_vec(
-                value
-                    .parents
+                dto.parents
                     .into_iter()
                     .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
             let mut builder = BlockBuilder::new(parents)
-                .with_protocol_version(value.protocol_version)
-                .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
+                .with_protocol_version(dto.protocol_version)
+                .with_nonce(dto.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 
-            if let Some(p) = value.payload {
-                builder = builder.with_payload(Payload::try_from_dto(p, protocol_parameters)?);
-            }
-
-            builder.finish()
-        }
-
-        pub fn try_from_dto_unverified(value: BlockDto) -> Result<Self, Error> {
-            let parents = Parents::from_vec(
-                value
-                    .parents
-                    .into_iter()
-                    .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
-                    .collect::<Result<Vec<BlockId>, Error>>()?,
-            )?;
-
-            let mut builder = BlockBuilder::new(parents)
-                .with_protocol_version(value.protocol_version)
-                .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
-
-            if let Some(p) = value.payload {
-                builder = builder.with_payload(Payload::try_from_dto_unverified(p)?);
+            if let Some(p) = dto.payload {
+                builder = builder.with_payload(Payload::try_from_dto_with_params_inner(p, params)?);
             }
 
             builder.finish()

@@ -13,7 +13,6 @@ use crate::types::block::Error;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SimpleTokenScheme {
     // Amount of tokens minted by a foundry.
     minted_tokens: U256,

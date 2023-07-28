@@ -16,7 +16,7 @@ use iota_sdk::{
         },
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    types::block::payload::TransactionPayload,
+    types::{block::payload::TransactionPayload, TryFromDto},
     wallet::Result,
 };
 
@@ -64,9 +64,9 @@ async fn read_prepared_transaction_from_file() -> Result<PreparedTransactionData
     let mut json = String::new();
     file.read_to_string(&mut json).await?;
 
-    Ok(PreparedTransactionData::try_from_dto_unverified(
-        serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
-    )?)
+    Ok(PreparedTransactionData::try_from_dto(serde_json::from_str::<
+        PreparedTransactionDataDto,
+    >(&json)?)?)
 }
 
 async fn write_signed_transaction_to_file(signed_transaction_data: &SignedTransactionData) -> Result<()> {

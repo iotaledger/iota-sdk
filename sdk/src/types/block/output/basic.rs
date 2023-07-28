@@ -5,18 +5,24 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use packable::Packable;
 
-use crate::types::block::{
-    address::Address,
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, verify_output_amount_packable, NativeToken, NativeTokens, Output, OutputBuilderAmount,
-        OutputId, Rent, RentStructure,
+use super::verify_output_amount_packable;
+use crate::types::{
+    block::{
+        address::Address,
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent,
+            RentStructure,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    ValidationParams,
 };
 
 ///
@@ -138,7 +144,7 @@ impl BasicOutputBuilder {
     }
 
     ///
-    pub fn finish_unverified(self) -> Result<BasicOutput, Error> {
+    pub fn finish(self) -> Result<BasicOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
@@ -165,17 +171,19 @@ impl BasicOutputBuilder {
     }
 
     ///
-    pub fn finish(self, token_supply: u64) -> Result<BasicOutput, Error> {
-        let output = self.finish_unverified()?;
+    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<BasicOutput, Error> {
+        let output = self.finish()?;
 
-        verify_output_amount::<true>(&output.amount, &token_supply)?;
+        if let Some(token_supply) = params.into().token_supply() {
+            verify_output_amount(&output.amount, &token_supply)?;
+        }
 
         Ok(output)
     }
 
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Basic(self.finish(token_supply)?))
+    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
+        Ok(Output::Basic(self.finish_with_params(params)?))
     }
 }
 
@@ -192,7 +200,6 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 
 /// Describes a basic output with optional features.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
@@ -332,9 +339,14 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{
-        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
-        Error,
+    use crate::types::{
+        block::{
+            output::{
+                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
+            },
+            Error,
+        },
+        TryFromDto,
     };
 
     /// Describes a basic output.
@@ -365,48 +377,37 @@ pub(crate) mod dto {
         }
     }
 
+    impl TryFromDto for BasicOutput {
+        type Dto = BasicOutputDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let mut builder =
+                BasicOutputBuilder::new_with_amount(dto.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
+
+            builder = builder.with_native_tokens(dto.native_tokens);
+
+            for b in dto.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for u in dto.unlock_conditions {
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+            }
+
+            builder.finish_with_params(params)
+        }
+    }
+
     impl BasicOutput {
-        pub fn try_from_dto(value: BasicOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder =
-                BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
-
-            builder = builder.with_native_tokens(value.native_tokens);
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: BasicOutputDto) -> Result<Self, Error> {
-            let mut builder =
-                BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
-
-            builder = builder.with_native_tokens(value.native_tokens);
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
-        pub fn try_from_dtos(
+        pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeToken>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
+            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
+            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => {
                     BasicOutputBuilder::new_with_amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
@@ -422,7 +423,7 @@ pub(crate) mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
+                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
@@ -434,7 +435,7 @@ pub(crate) mod dto {
                 builder = builder.with_features(features);
             }
 
-            builder.finish(token_supply)
+            builder.finish_with_params(params)
         }
     }
 }
@@ -444,20 +445,23 @@ mod tests {
     use packable::PackableExt;
 
     use super::*;
-    use crate::types::block::{
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            FoundryId, SimpleTokenScheme, TokenId,
-        },
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_alias_address,
+    use crate::types::{
+        block::{
             output::{
-                feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
-                rand_basic_output,
-                unlock_condition::rand_address_unlock_condition,
+                dto::{OutputBuilderAmountDto, OutputDto},
+                FoundryId, SimpleTokenScheme, TokenId,
+            },
+            protocol::protocol_parameters,
+            rand::{
+                address::rand_alias_address,
+                output::{
+                    feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
+                    rand_basic_output,
+                    unlock_condition::rand_address_unlock_condition,
+                },
             },
         },
+        TryFromDto,
     };
 
     #[test]
@@ -475,7 +479,7 @@ mod tests {
             .add_feature(sender_1)
             .replace_feature(sender_2);
 
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().address(), Some(&address_1));
         assert_eq!(output.features().sender(), Some(&sender_2));
 
@@ -483,7 +487,7 @@ mod tests {
             .clear_unlock_conditions()
             .clear_features()
             .replace_unlock_condition(address_2);
-        let output = builder.clone().finish_unverified().unwrap();
+        let output = builder.clone().finish().unwrap();
         assert_eq!(output.unlock_conditions().address(), Some(&address_2));
         assert!(output.features().is_empty());
 
@@ -493,7 +497,7 @@ mod tests {
             .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .with_features([Feature::from(metadata.clone()), sender_1.into()])
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
             .unwrap();
 
         assert_eq!(
@@ -518,9 +522,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_basic_output(protocol_parameters.token_supply());
         let dto = OutputDto::Basic((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
+        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_basic());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
         assert_eq!(&output, output_ver.as_basic());
 
         let output_split = BasicOutput::try_from_dtos(
@@ -546,7 +550,7 @@ mod tests {
             )
             .unwrap();
             assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                builder.finish_with_params(protocol_parameters.token_supply()).unwrap(),
                 output_split
             );
         };

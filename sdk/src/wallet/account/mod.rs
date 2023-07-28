@@ -67,8 +67,8 @@ use crate::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
             },
-            protocol::ProtocolParameters,
         },
+        TryFromDto,
     },
     wallet::{account::types::InclusionState, Result},
 };
@@ -500,6 +500,53 @@ pub struct AccountDetailsDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
+impl TryFromDto for AccountDetails {
+    type Dto = AccountDetailsDto;
+    type Error = crate::wallet::Error;
+
+    fn try_from_dto_with_params_inner(
+        dto: Self::Dto,
+        params: crate::types::ValidationParams<'_>,
+    ) -> core::result::Result<Self, Self::Error> {
+        Ok(Self {
+            index: dto.index,
+            coin_type: dto.coin_type,
+            alias: dto.alias,
+            public_addresses: dto.public_addresses,
+            internal_addresses: dto.internal_addresses,
+            addresses_with_unspent_outputs: dto.addresses_with_unspent_outputs,
+            outputs: dto
+                .outputs
+                .into_iter()
+                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            locked_outputs: dto.locked_outputs,
+            unspent_outputs: dto
+                .unspent_outputs
+                .into_iter()
+                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            transactions: dto
+                .transactions
+                .into_iter()
+                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            pending_transactions: dto.pending_transactions,
+            incoming_transactions: dto
+                .incoming_transactions
+                .into_iter()
+                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+            inaccessible_incoming_transactions: Default::default(),
+            native_token_foundries: dto
+                .native_token_foundries
+                .into_iter()
+                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, &params)?)))
+                .collect::<crate::wallet::Result<_>>()?,
+        })
+    }
+}
+
 impl From<&AccountDetails> for AccountDetailsDto {
     fn from(value: &AccountDetails) -> Self {
         Self {
@@ -537,89 +584,6 @@ impl From<&AccountDetails> for AccountDetailsDto {
                 .map(|(id, foundry)| (*id, FoundryOutputDto::from(foundry)))
                 .collect(),
         }
-    }
-}
-
-impl AccountDetails {
-    pub fn try_from_dto(
-        dto: AccountDetailsDto,
-        protocol_parameters: &ProtocolParameters,
-    ) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            index: dto.index,
-            coin_type: dto.coin_type,
-            alias: dto.alias,
-            public_addresses: dto.public_addresses,
-            internal_addresses: dto.internal_addresses,
-            addresses_with_unspent_outputs: dto.addresses_with_unspent_outputs,
-            outputs: dto
-                .outputs
-                .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto(o, protocol_parameters.token_supply())?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            locked_outputs: dto.locked_outputs,
-            unspent_outputs: dto
-                .unspent_outputs
-                .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto(o, protocol_parameters.token_supply())?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            transactions: dto
-                .transactions
-                .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto(o, protocol_parameters)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            pending_transactions: dto.pending_transactions,
-            incoming_transactions: dto
-                .incoming_transactions
-                .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto(o, protocol_parameters)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            inaccessible_incoming_transactions: Default::default(),
-            native_token_foundries: dto
-                .native_token_foundries
-                .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto(o, protocol_parameters.token_supply())?)))
-                .collect::<crate::wallet::Result<_>>()?,
-        })
-    }
-
-    pub fn try_from_dto_unverified(dto: AccountDetailsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            index: dto.index,
-            coin_type: dto.coin_type,
-            alias: dto.alias,
-            public_addresses: dto.public_addresses,
-            internal_addresses: dto.internal_addresses,
-            addresses_with_unspent_outputs: dto.addresses_with_unspent_outputs,
-            outputs: dto
-                .outputs
-                .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_unverified(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            locked_outputs: dto.locked_outputs,
-            unspent_outputs: dto
-                .unspent_outputs
-                .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_unverified(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            transactions: dto
-                .transactions
-                .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto_unverified(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            pending_transactions: dto.pending_transactions,
-            incoming_transactions: dto
-                .incoming_transactions
-                .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto_unverified(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-            inaccessible_incoming_transactions: Default::default(),
-            native_token_foundries: dto
-                .native_token_foundries
-                .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_unverified(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
-        })
     }
 }
 
@@ -665,14 +629,14 @@ fn serialize() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.clone())
             .unwrap(),
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
-            .finish(&protocol_parameters)
+            .finish_with_params(protocol_parameters)
             .unwrap(),
     );
 
@@ -721,7 +685,7 @@ fn serialize() {
         native_token_foundries: HashMap::new(),
     };
 
-    let deser_account = AccountDetails::try_from_dto_unverified(
+    let deser_account = AccountDetails::try_from_dto(
         serde_json::from_str::<AccountDetailsDto>(&serde_json::to_string(&AccountDetailsDto::from(&account)).unwrap())
             .unwrap(),
     )

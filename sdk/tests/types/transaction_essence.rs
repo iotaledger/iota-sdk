@@ -27,14 +27,14 @@ fn essence_kind() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
+            .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
             .with_inputs([input1, input2])
             .add_output(output)
-            .finish(&protocol_parameters)
+            .finish_with_params(&protocol_parameters)
             .unwrap(),
     );
 

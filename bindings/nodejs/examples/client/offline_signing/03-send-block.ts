@@ -11,7 +11,7 @@ require('dotenv').config({ path: '.env' });
 
 const SIGNED_TRANSACTION_FILE_NAME = 'offline-signing-signed-transaction.json';
 
-// In this example we will send the signed transaction in a block
+// In this example we will send the signed transaction in a block.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {

@@ -109,7 +109,7 @@ pub enum UtilsMethod {
         /// Serial number
         serial_number: u32,
         /// Token scheme kind
-        token_scheme_kind: u8,
+        token_scheme_type: u8,
     },
     /// Computes the NFT ID
     #[serde(rename_all = "camelCase")]

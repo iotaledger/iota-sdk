@@ -18,7 +18,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/15-build-nft-output.ts
 
-// Build an nft output
+// In this example we will build an NFT output.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
@@ -26,6 +26,7 @@ async function run() {
     }
 
     const client = new Client({
+        // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL],
     });
 

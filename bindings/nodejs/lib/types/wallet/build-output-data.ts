@@ -3,7 +3,7 @@
 
 import { Feature, INativeToken, TokenScheme, UnlockCondition } from '../';
 
-/** An alias output */
+/** @deprecated use AliasOutputBuilderParams instead. */
 export interface BuildAliasOutputData extends BuildBasicOutputData {
     aliasId: string;
     stateIndex?: number;
@@ -12,7 +12,7 @@ export interface BuildAliasOutputData extends BuildBasicOutputData {
     immutableFeatures?: Feature[];
 }
 
-/** A basic output */
+/** @deprecated use BasicOutputBuilderParams instead. */
 export interface BuildBasicOutputData {
     /** If not provided, minimum storage deposit will be used */
     amount?: string;
@@ -21,14 +21,14 @@ export interface BuildBasicOutputData {
     features?: Feature[];
 }
 
-/** A foundry output */
+/** @deprecated use FoundryOutputBuilderParams instead. */
 export interface BuildFoundryOutputData extends BuildBasicOutputData {
     serialNumber: number;
     tokenScheme: TokenScheme;
     immutableFeatures?: Feature[];
 }
 
-/** An nft output */
+/** @deprecated use NftOutputBuilderParams instead. */
 export interface BuildNftOutputData extends BuildBasicOutputData {
     nftId: string;
     immutableFeatures?: Feature[];

@@ -7,15 +7,11 @@ use std::collections::{HashMap, HashSet};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{
-    output::{AliasId, FoundryId, NativeToken, NftId, TokenId},
-    Error,
-};
+use crate::types::block::output::{AliasId, FoundryId, NativeToken, NftId, TokenId};
 
 /// A type to specify what needs to be burned during input selection.
 /// Nothing will be burned that has not been explicitly set with this struct.
-#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct Burn {
     /// Aliases to burn.
     pub(crate) aliases: HashSet<AliasId>,
@@ -163,15 +159,13 @@ impl From<&Burn> for BurnDto {
     }
 }
 
-impl TryFrom<BurnDto> for Burn {
-    type Error = Error;
-
-    fn try_from(value: BurnDto) -> Result<Self, Self::Error> {
-        Ok(Self {
+impl From<BurnDto> for Burn {
+    fn from(value: BurnDto) -> Self {
+        Self {
             aliases: value.aliases.unwrap_or_default(),
             nfts: value.nfts.unwrap_or_default(),
             foundries: value.foundries.unwrap_or_default(),
             native_tokens: value.native_tokens.unwrap_or_default(),
-        })
+        }
     }
 }

@@ -29,15 +29,13 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
+use crate::types::{
+    block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error},
+    ValidationParams,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     Address(AddressUnlockCondition),
@@ -302,7 +300,6 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MA
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockConditionCount(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct UnlockConditions(
@@ -513,7 +510,7 @@ pub mod dto {
         storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
     };
     use super::*;
-    use crate::types::block::Error;
+    use crate::types::{block::Error, TryFromDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum UnlockConditionDto {
@@ -660,33 +657,16 @@ pub mod dto {
         }
     }
 
-    impl UnlockCondition {
-        pub fn try_from_dto(value: UnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(match value {
-                UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StorageDepositReturn(v) => {
-                    Self::StorageDepositReturn(StorageDepositReturnUnlockCondition::try_from_dto(v, token_supply)?)
-                }
-                UnlockConditionDto::Timelock(v) => Self::Timelock(TimelockUnlockCondition::try_from(v)?),
-                UnlockConditionDto::Expiration(v) => Self::Expiration(ExpirationUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StateControllerAddress(v) => {
-                    Self::StateControllerAddress(StateControllerAddressUnlockCondition::try_from(v)?)
-                }
-                UnlockConditionDto::GovernorAddress(v) => {
-                    Self::GovernorAddress(GovernorAddressUnlockCondition::try_from(v)?)
-                }
-                UnlockConditionDto::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition::try_from(v)?)
-                }
-            })
-        }
+    impl TryFromDto for UnlockCondition {
+        type Dto = UnlockConditionDto;
+        type Error = Error;
 
-        pub fn try_from_dto_unverified(value: UnlockConditionDto) -> Result<Self, Error> {
-            Ok(match value {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(match dto {
                 UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StorageDepositReturn(v) => {
-                    Self::StorageDepositReturn(StorageDepositReturnUnlockCondition::try_from_dto_unverified(v)?)
-                }
+                UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(
+                    StorageDepositReturnUnlockCondition::try_from_dto_with_params_inner(v, params)?,
+                ),
                 UnlockConditionDto::Timelock(v) => Self::Timelock(TimelockUnlockCondition::try_from(v)?),
                 UnlockConditionDto::Expiration(v) => Self::Expiration(ExpirationUnlockCondition::try_from(v)?),
                 UnlockConditionDto::StateControllerAddress(v) => {

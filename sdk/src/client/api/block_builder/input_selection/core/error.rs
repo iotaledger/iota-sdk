@@ -3,23 +3,18 @@
 
 //! Error handling for input selection.
 
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 
 use primitive_types::U256;
-use serde::{Serialize, Serializer};
 
-use crate::{
-    client::api::input_selection::Requirement,
-    types::block::output::{ChainId, OutputId, TokenId},
-};
+use super::Requirement;
+use crate::types::block::output::{ChainId, OutputId, TokenId};
 
 /// Errors related to input selection.
-#[derive(Debug, Eq, PartialEq, thiserror::Error, Serialize)]
-#[serde(tag = "type", content = "error", rename_all = "camelCase")]
+#[derive(Debug, Eq, PartialEq, thiserror::Error)]
 pub enum Error {
     /// Block error.
     #[error("{0}")]
-    #[serde(serialize_with = "display_string")]
     Block(#[from] crate::types::block::Error),
     /// Can't burn and transition an output at the same time.
     #[error("can't burn and transition an output at the same time, chain ID: {0}")]
@@ -63,13 +58,4 @@ pub enum Error {
     /// Unfulfillable requirement.
     #[error("unfulfillable requirement {0:?}")]
     UnfulfillableRequirement(Requirement),
-}
-
-/// Use this to serialize Error variants that implements Debug but not Serialize
-pub(crate) fn display_string<T, S>(value: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
-where
-    T: Display,
-    S: Serializer,
-{
-    value.to_string().serialize(serializer)
 }

@@ -1,19 +1,21 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "ledger_nano")]
 use std::sync::{Arc, Mutex};
 
+#[cfg(feature = "stronghold")]
 use crypto::keys::bip39::Mnemonic;
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
+#[cfg(feature = "ledger_nano")]
+use iota_sdk::client::secret::{ledger_nano::LedgerSecretManager, GenerateAddressOptions};
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Error as ClientError,
     },
     types::block::address::ToBech32Ext,

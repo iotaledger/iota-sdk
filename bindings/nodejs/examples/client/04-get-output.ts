@@ -7,7 +7,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/04-get-output.ts
 
-// In this example we will get output from a known outputId
+// In this example we will get output from a known outputId.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
@@ -19,10 +19,9 @@ async function run() {
         nodes: [process.env.NODE_URL],
         localPow: true,
     });
-
     try {
         const output = await client.getOutput(
-            '0xa0b9ad3f5aa2bfcaed30cde6e1d572e93b7e8bb5a417f5a7ef3502889b5dbcb40000',
+            '0x022aefa73dff09b35b21ab5493412b0d354ad07a970a12b71e8087c6f3a7b8660000',
         );
         console.log('Output: ', output);
     } catch (error) {

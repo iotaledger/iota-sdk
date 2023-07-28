@@ -41,12 +41,12 @@ class RegularTransactionEssence extends TransactionEssence {
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
-    readonly inputs: [Input];
+    readonly inputs: Input[];
 
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
-    readonly outputs: [Output];
+    readonly outputs: Output[];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
@@ -56,8 +56,8 @@ class RegularTransactionEssence extends TransactionEssence {
     constructor(
         networkId: number,
         inputsCommitment: HexEncodedString,
-        inputs: [Input],
-        outputs: [Output],
+        inputs: Input[],
+        outputs: Output[],
         payload: Payload | undefined,
     ) {
         super(TransactionEssenceType.Regular);

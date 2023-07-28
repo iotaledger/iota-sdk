@@ -17,7 +17,6 @@ pub(crate) type BinaryParametersLength = BoundedU16<
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct ParametersMilestoneOption {
     // The milestone index at which these protocol parameters become active.

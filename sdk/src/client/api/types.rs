@@ -6,18 +6,20 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::secret::types::{InputSigningData, InputSigningDataDto},
-    types::block::{
-        address::{dto::AddressDto, Address},
-        output::{dto::OutputDto, Output},
-        payload::{
-            transaction::{
-                dto::{TransactionEssenceDto, TransactionPayloadDto},
-                TransactionEssence,
+    types::{
+        block::{
+            address::{dto::AddressDto, Address},
+            output::{dto::OutputDto, Output},
+            payload::{
+                transaction::{
+                    dto::{TransactionEssenceDto, TransactionPayloadDto},
+                    TransactionEssence,
+                },
+                TransactionPayload,
             },
-            TransactionPayload,
+            Error,
         },
-        protocol::ProtocolParameters,
-        Error,
+        TryFromDto, ValidationParams,
     },
     utils::serde::bip44::option_bip44,
 };
@@ -55,45 +57,24 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     }
 }
 
-impl PreparedTransactionData {
-    /// Conversion from [`PreparedTransactionDataDto`] to [`PreparedTransactionData`].
-    pub fn try_from_dto(
-        value: PreparedTransactionDataDto,
-        protocol_parameters: &ProtocolParameters,
-    ) -> Result<Self, Error> {
+impl TryFromDto for PreparedTransactionData {
+    type Dto = PreparedTransactionDataDto;
+    type Error = Error;
+
+    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            essence: TransactionEssence::try_from_dto(value.essence, protocol_parameters)
+            essence: TransactionEssence::try_from_dto_with_params(dto.essence, &params)
                 .map_err(|_| Error::InvalidField("essence"))?,
-            inputs_data: value
+            inputs_data: dto
                 .inputs_data
                 .into_iter()
-                .map(|i| InputSigningData::try_from_dto(i, protocol_parameters.token_supply()))
+                .map(|i| InputSigningData::try_from_dto_with_params(i, &params))
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
                 .map_err(|_| Error::InvalidField("input_data"))?,
-            remainder: match value.remainder {
+            remainder: match dto.remainder {
                 Some(remainder) => Some(
-                    RemainderData::try_from_dto(remainder, protocol_parameters.token_supply())
+                    RemainderData::try_from_dto_with_params(remainder, &params)
                         .map_err(|_| Error::InvalidField("remainder"))?,
-                ),
-                None => None,
-            },
-        })
-    }
-
-    /// Unverified conversion from [`PreparedTransactionDataDto`] to [`PreparedTransactionData`].
-    pub fn try_from_dto_unverified(value: PreparedTransactionDataDto) -> Result<Self, Error> {
-        Ok(Self {
-            essence: TransactionEssence::try_from_dto_unverified(value.essence)
-                .map_err(|_| Error::InvalidField("essence"))?,
-            inputs_data: value
-                .inputs_data
-                .into_iter()
-                .map(InputSigningData::try_from_dto_unverified)
-                .collect::<crate::client::Result<Vec<InputSigningData>>>()
-                .map_err(|_| Error::InvalidField("inputs_data"))?,
-            remainder: match value.remainder {
-                Some(remainder) => Some(
-                    RemainderData::try_from_dto_unverified(remainder).map_err(|_| Error::InvalidField("remainder"))?,
                 ),
                 None => None,
             },
@@ -129,33 +110,18 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
     }
 }
 
-impl SignedTransactionData {
-    /// Conversion from [`SignedTransactionDataDto`] to [`SignedTransactionData`].
-    pub fn try_from_dto(
-        value: SignedTransactionDataDto,
-        protocol_parameters: &ProtocolParameters,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            transaction_payload: TransactionPayload::try_from_dto(value.transaction_payload, protocol_parameters)
-                .map_err(|_| Error::InvalidField("transaction_payload"))?,
-            inputs_data: value
-                .inputs_data
-                .into_iter()
-                .map(|i| InputSigningData::try_from_dto(i, protocol_parameters.token_supply()))
-                .collect::<crate::client::Result<Vec<InputSigningData>>>()
-                .map_err(|_| Error::InvalidField("input_data"))?,
-        })
-    }
+impl TryFromDto for SignedTransactionData {
+    type Dto = SignedTransactionDataDto;
+    type Error = Error;
 
-    /// Unverified conversion from [`SignedTransactionDataDto`] to [`SignedTransactionData`].
-    pub fn try_from_dto_unverified(value: SignedTransactionDataDto) -> Result<Self, Error> {
+    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            transaction_payload: TransactionPayload::try_from_dto_unverified(value.transaction_payload)
+            transaction_payload: TransactionPayload::try_from_dto_with_params(dto.transaction_payload, &params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
-            inputs_data: value
+            inputs_data: dto
                 .inputs_data
                 .into_iter()
-                .map(InputSigningData::try_from_dto_unverified)
+                .map(|i| InputSigningData::try_from_dto_with_params(i, &params))
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
                 .map_err(|_| Error::InvalidField("inputs_data"))?,
         })
@@ -185,24 +151,18 @@ pub struct RemainderDataDto {
     pub address: AddressDto,
 }
 
-impl RemainderData {
-    pub(crate) fn try_from_dto(remainder: RemainderDataDto, token_supply: u64) -> crate::client::Result<Self> {
-        Ok(Self {
-            output: Output::try_from_dto(remainder.output, token_supply)?,
-            chain: remainder.chain,
-            address: Address::try_from(remainder.address)?,
-        })
-    }
+impl TryFromDto for RemainderData {
+    type Dto = RemainderDataDto;
+    type Error = Error;
 
-    pub(crate) fn try_from_dto_unverified(remainder: RemainderDataDto) -> crate::client::Result<Self> {
+    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            output: Output::try_from_dto_unverified(remainder.output)?,
-            chain: remainder.chain,
-            address: Address::try_from(remainder.address)?,
+            output: Output::try_from_dto_with_params_inner(dto.output, params)?,
+            chain: dto.chain,
+            address: Address::try_from(dto.address)?,
         })
     }
 }
-
 impl From<&RemainderData> for RemainderDataDto {
     fn from(remainder: &RemainderData) -> Self {
         Self {

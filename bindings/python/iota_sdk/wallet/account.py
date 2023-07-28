@@ -403,7 +403,7 @@ class Account:
         """
         return Transaction.from_dict(self._call_account_method(
             'send', {
-                'amount': amount,
+                'amount': str(amount),
                 'address': address,
                 'options': options
             }

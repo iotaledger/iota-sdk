@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Address } from '../address';
+import { Type } from 'class-transformer';
+import { Address, AddressDiscriminator } from '../address';
 
 /**
  * All of the feature block types.
@@ -30,8 +31,11 @@ abstract class Feature {
  * Sender feature.
  */
 class SenderFeature extends Feature {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     readonly address: Address;
-
+    
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
@@ -47,8 +51,11 @@ class SenderFeature extends Feature {
  * Issuer feature.
  */
 class IssuerFeature extends Feature {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     readonly address: Address;
-
+    
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;

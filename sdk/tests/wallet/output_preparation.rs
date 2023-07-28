@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{NativeToken, NftId, TokenId},
+        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, TokenId},
     },
     wallet::{
         account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
@@ -16,13 +16,14 @@ use iota_sdk::{
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
+#[ignore]
 #[tokio::test]
 async fn output_preparation() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = wallet.create_account().finish().await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
@@ -98,7 +99,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -111,8 +112,8 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.amount(), 300000);
     // only address condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
-    // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    // metadata and tag features
+    assert_eq!(output.features().unwrap().len(), 2);
 
     // only send 1 with metadata feature
     let output = account
@@ -123,7 +124,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -133,15 +134,15 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 48200);
+    assert_eq!(output.amount(), 49000);
     let unlock_conditions = output.unlock_conditions().unwrap();
     // address + sdr
     assert_eq!(unlock_conditions.len(), 2);
     let storage_deposit_return = unlock_conditions.storage_deposit_return().unwrap();
     // output amount -1
-    assert_eq!(storage_deposit_return.amount(), 48199);
-    // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    assert_eq!(storage_deposit_return.amount(), 48999);
+    // metadata and tag features
+    assert_eq!(output.features().unwrap().len(), 2);
 
     let output = account
         .prepare_output(
@@ -151,7 +152,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -165,8 +166,8 @@ async fn output_preparation() -> Result<()> {
     // address and storage deposit unlock condition, because of the metadata feature block, 12000 is not enough for the
     // required storage deposit
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    // metadata and tag features
+    assert_eq!(output.features().unwrap().len(), 2);
 
     let output = account
         .prepare_output(
@@ -176,7 +177,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(prefix_hex::encode(b"Hello world")),
-                    tag: None,
+                    tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
                 }),
@@ -186,15 +187,15 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 48200);
+    assert_eq!(output.amount(), 49000);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 48199);
+    assert_eq!(sdr.amount(), 48999);
 
     // address and storage deposit unlock condition, because of the metadata feature block, 213000 is not enough for the
     // required storage deposit
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    // metadata feature
-    assert_eq!(output.features().unwrap().len(), 1);
+    // metadata and tag features
+    assert_eq!(output.features().unwrap().len(), 2);
 
     // Error if this NftId is not in the account
     let error = account
@@ -327,7 +328,10 @@ async fn output_preparation() -> Result<()> {
                     issuer: Some(issuer_and_sender_address),
                     sender: Some(issuer_and_sender_address),
                 }),
-                unlocks: None,
+                unlocks: Some(Unlocks {
+                    expiration_unix_time: Some(1),
+                    timelock_unix_time: Some(1),
+                }),
                 storage_deposit: None,
             },
             None,
@@ -345,6 +349,10 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(issuer_feature.address(), issuer_and_sender_address.inner());
     let sender_feature = features.sender().unwrap();
     assert_eq!(sender_feature.address(), issuer_and_sender_address.inner());
+    // Unlocks
+    let conditions = output.unlock_conditions().unwrap();
+    assert!(conditions.is_time_locked(0));
+    assert!(conditions.is_expired(2));
 
     // nft with expiration
     let output = account
@@ -381,13 +389,14 @@ async fn output_preparation() -> Result<()> {
     tear_down(storage_path)
 }
 
+#[ignore]
 #[tokio::test]
 async fn output_preparation_sdr() -> Result<()> {
     let storage_path = "test-storage/output_preparation_sdr";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = wallet.create_account().finish().await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let rent_structure = account.client().get_rent_structure().await?;
     let token_supply = account.client().get_token_supply().await?;
@@ -554,6 +563,206 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         nft.immutable_features().issuer().unwrap().address(),
         accounts[0].addresses().await?[0].address().as_ref()
     );
+
+    tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
+async fn prepare_output_remainder_dust() -> Result<()> {
+    let storage_path = "test-storage/prepare_output_remainder_dust";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let accounts = &create_accounts_with_funds(&wallet, 2).await?;
+    let account = &accounts[0];
+    let addresses = &accounts[1].addresses().await?;
+    let address = addresses[0].address();
+
+    let rent_structure = account.client().get_rent_structure().await?;
+    let token_supply = account.client().get_token_supply().await?;
+
+    let balance = account.sync(None).await?;
+    let minimum_required_storage_deposit =
+        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+
+    // Send away most balance so we can test with leaving dust
+    let output = account
+        .prepare_output(
+            OutputParams {
+                recipient_address: *address,
+                amount: balance.base_coin().available() - 63900,
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: None,
+            },
+            None,
+        )
+        .await?;
+    let transaction = account.send_outputs(vec![output], None).await?;
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+    let balance = account.sync(None).await?;
+
+    // 63900 left
+    let output = account
+        .prepare_output(
+            OutputParams {
+                recipient_address: *address,
+                amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Gift),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await?;
+
+    // Check if the output has enough amount to cover the storage deposit
+    output.verify_storage_deposit(rent_structure, token_supply)?;
+    // The left over 21299 is too small to keep, so we donate it
+    assert_eq!(output.amount(), balance.base_coin().available());
+    // storage deposit gifted, only address unlock condition
+    assert_eq!(output.unlock_conditions().unwrap().len(), 1);
+
+    let result = account
+        .prepare_output(
+            OutputParams {
+                recipient_address: *address,
+                amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Return),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await;
+    assert!(
+        matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == 85199)
+    );
+
+    let output = account
+        .prepare_output(
+            OutputParams {
+                recipient_address: *address,
+                amount: 100, // leave more behind than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Gift),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await?;
+
+    // Check if the output has enough amount to cover the storage deposit
+    output.verify_storage_deposit(rent_structure, token_supply)?;
+    // We use excess if leftover is too small, so amount == all available balance
+    assert_eq!(output.amount(), 63900);
+    // storage deposit gifted, only address unlock condition
+    assert_eq!(output.unlock_conditions().unwrap().len(), 1);
+
+    let output = account
+        .prepare_output(
+            OutputParams {
+                recipient_address: *address,
+                amount: 100, // leave more behind than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Return),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await?;
+
+    // Check if the output has enough amount to cover the storage deposit
+    output.verify_storage_deposit(rent_structure, token_supply)?;
+    // We use excess if leftover is too small, so amount == all available balance
+    assert_eq!(output.amount(), 63900);
+    // storage deposit returned, address and SDR unlock condition
+    assert_eq!(output.unlock_conditions().unwrap().len(), 2);
+    // We have ReturnStrategy::Return, so leftover amount gets returned
+    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    assert_eq!(sdr.amount(), 63900 - 100);
+
+    tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
+async fn prepare_output_only_single_nft() -> Result<()> {
+    let storage_path = "test-storage/prepare_output_only_single_nft";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    // Create second account without funds, so it only gets the NFT
+    let account_1 = wallet.create_account().finish().await?;
+    let addresses = &account_0.addresses().await?;
+    let account_0_address = addresses[0].address();
+    let addresses = &account_1.addresses().await?;
+    let account_1_address = addresses[0].address();
+
+    // Send NFT to second account
+    let tx = account_0
+        .mint_nfts([MintNftParams::new().try_with_address(account_1_address)?], None)
+        .await?;
+    account_0
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    let balance = account_1.sync(None).await?;
+    assert_eq!(balance.nfts().len(), 1);
+
+    let nft_data = &account_1.unspent_outputs(None).await?[0];
+    let nft_id = *balance.nfts().first().unwrap();
+    // Send NFT back to first account
+    let output = account_1
+        .prepare_output(
+            OutputParams {
+                recipient_address: *account_0_address,
+                amount: nft_data.output.amount(),
+                assets: Some(Assets {
+                    native_tokens: None,
+                    nft_id: Some(nft_id),
+                }),
+                features: None,
+                unlocks: None,
+                storage_deposit: None,
+            },
+            None,
+        )
+        .await?;
+    let tx = account_1.send_outputs([output], None).await?;
+    account_1
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    // account_0 now has the NFT
+    let balance_0 = account_0.sync(None).await?;
+    assert_eq!(*balance_0.nfts().first().unwrap(), nft_id);
+
+    // account_1 has no NFT and also no base coin amount
+    let balance_1 = account_1.sync(None).await?;
+    assert!(balance_1.nfts().is_empty());
+    assert_eq!(balance_1.base_coin().total(), 0);
 
     tear_down(storage_path)
 }

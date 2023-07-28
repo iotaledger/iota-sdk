@@ -24,9 +24,9 @@ use crate::{
             address::{dto::AddressDto, Address},
             output::{dto::OutputDto, AliasTransition, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
-            protocol::ProtocolParameters,
             BlockId, Error as BlockError,
         },
+        TryFromDto,
     },
     utils::serde::bip44::option_bip44,
     wallet::account::AccountDetails,
@@ -130,28 +130,18 @@ impl From<&OutputData> for OutputDataDto {
     }
 }
 
-impl OutputData {
-    pub fn try_from_dto(dto: OutputDataDto, token_supply: u64) -> Result<Self, BlockError> {
-        Ok(Self {
-            output_id: dto.output_id,
-            metadata: dto.metadata,
-            output: Output::try_from_dto(dto.output, token_supply)?,
-            is_spent: dto.is_spent,
-            address: dto.address.try_into()?,
-            network_id: dto
-                .network_id
-                .parse()
-                .map_err(|_| BlockError::InvalidField("network id"))?,
-            remainder: dto.remainder,
-            chain: dto.chain,
-        })
-    }
+impl TryFromDto for OutputData {
+    type Dto = OutputDataDto;
+    type Error = BlockError;
 
-    pub fn try_from_dto_unverified(dto: OutputDataDto) -> Result<Self, BlockError> {
+    fn try_from_dto_with_params_inner(
+        dto: Self::Dto,
+        params: crate::types::ValidationParams<'_>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
             output_id: dto.output_id,
             metadata: dto.metadata,
-            output: Output::try_from_dto_unverified(dto.output)?,
+            output: Output::try_from_dto_with_params(dto.output, params)?,
             is_spent: dto.is_spent,
             address: dto.address.try_into()?,
             network_id: dto
@@ -223,30 +213,16 @@ impl From<&Transaction> for TransactionDto {
     }
 }
 
-impl Transaction {
-    pub fn try_from_dto(dto: TransactionDto, protocol_parameters: &ProtocolParameters) -> Result<Self, BlockError> {
-        Ok(Self {
-            payload: TransactionPayload::try_from_dto(dto.payload, protocol_parameters)?,
-            block_id: dto.block_id,
-            inclusion_state: dto.inclusion_state,
-            timestamp: dto
-                .timestamp
-                .parse()
-                .map_err(|_| BlockError::InvalidField("timestamp"))?,
-            transaction_id: dto.transaction_id,
-            network_id: dto
-                .network_id
-                .parse()
-                .map_err(|_| BlockError::InvalidField("network id"))?,
-            incoming: dto.incoming,
-            note: dto.note,
-            inputs: dto.inputs,
-        })
-    }
+impl TryFromDto for Transaction {
+    type Dto = TransactionDto;
+    type Error = BlockError;
 
-    pub fn try_from_dto_unverified(dto: TransactionDto) -> Result<Self, BlockError> {
+    fn try_from_dto_with_params_inner(
+        dto: Self::Dto,
+        params: crate::types::ValidationParams<'_>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: TransactionPayload::try_from_dto_unverified(dto.payload)?,
+            payload: TransactionPayload::try_from_dto_with_params(dto.payload, params)?,
             block_id: dto.block_id,
             inclusion_state: dto.inclusion_state,
             timestamp: dto

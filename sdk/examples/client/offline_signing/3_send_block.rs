@@ -15,7 +15,10 @@ use iota_sdk::{
         api::{verify_semantic, SignedTransactionData, SignedTransactionDataDto},
         Client, Error, Result,
     },
-    types::block::{payload::Payload, semantic::ConflictReason},
+    types::{
+        block::{payload::Payload, semantic::ConflictReason},
+        TryFromDto,
+    },
 };
 
 const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/signed_transaction.json";
@@ -70,5 +73,5 @@ async fn read_signed_transaction_from_file(path: impl AsRef<std::path::Path>) ->
 
     let dto = serde_json::from_str::<SignedTransactionDataDto>(&json)?;
 
-    Ok(SignedTransactionData::try_from_dto_unverified(dto)?)
+    Ok(SignedTransactionData::try_from_dto(dto)?)
 }

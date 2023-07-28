@@ -19,7 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.4 - 2023-MM-DD
+## 1.0.2 - 2023-MM-DD
+
+### Fixed
+
+- Constructor types in `RegularTransactionEssence`;
+- `SenderFeature.getSender()` and `IssuerFeature.getIssuer()` now return the correct types;
+
+
+## 1.0.1 - 2023-07-25
+
+### Changed
+
+- Deprecate `Account::{buildAliasOutput(), buildBasicOutput(), buildFoundryOutput(), buildNftOutput()}` and their `BuildAliasOutputData, BuildBasicOutputData, BuildFoundryOutputData, BuildNftOutputData` parameter types;
+
+## 1.0.0 - 2023-07-24
 
 ### Added
 
@@ -34,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Utils.computeStorageDeposit()`;
-- `Utils.computeTokenId()`
+- `Utils.computeTokenId()`;
+- `Utils.computeFoundryId` 's parameter `tokenSchemeKind` renamed to `tokenSchemeType`;
 
 ## 1.0.0-rc.3 - 2023-07-21
 

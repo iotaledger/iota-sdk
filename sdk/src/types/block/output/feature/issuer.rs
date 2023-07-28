@@ -7,7 +7,6 @@ use crate::types::block::address::Address;
 
 /// Identifies the validated issuer of the UTXO state machine.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IssuerFeature(Address);
 
 impl IssuerFeature {

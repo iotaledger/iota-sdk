@@ -19,7 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.1 - 2023-07-DD
+## 1.0.1 - 2023-07-25
+
+### Fixed
+
+- `Client::{update_node_manager, update_node_manager}` use the correct `Result` type from `client` and not `wallet`;
+
+## 1.0.0 - 2023-07-24
 
 ### Added
 
@@ -28,10 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Account::{consolidate_outputs, prepare_consolidate_outputs}` take a `ConsolidationParams`;
+- Dto validation conversions unified with `TryFromDto` trait;
+- Output builder `finish` methods refactored using `ValidationParams`;
 
 ### Fixed
 
 - Add serde default to `{RemainderDataDto, InputSigningDto, OutputDataDto}::chain`;
+- `Account::prepare_output()` for low amounts;
 
 ## 1.0.0-rc.0 - 2023-07-21
 
