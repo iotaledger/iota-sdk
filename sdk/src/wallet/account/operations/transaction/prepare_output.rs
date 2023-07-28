@@ -16,6 +16,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
             RentStructure, UnlockCondition,
         },
+        slot::SlotIndex,
         Error,
     },
     wallet::account::{
@@ -84,15 +85,17 @@ where
         }
 
         if let Some(unlocks) = params.unlocks {
-            if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
+            if let Some(expiration_slot_index) = unlocks.expiration_slot_index {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder
-                    .add_unlock_condition(ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?);
+                first_output_builder = first_output_builder.add_unlock_condition(ExpirationUnlockCondition::new(
+                    remainder_address,
+                    expiration_slot_index,
+                )?);
             }
-            if let Some(timelock_unix_time) = unlocks.timelock_unix_time {
+            if let Some(timelock_slot_index) = unlocks.timelock_slot_index {
                 first_output_builder =
-                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_unix_time)?);
+                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_slot_index)?);
             }
         }
 
@@ -343,8 +346,8 @@ pub struct Features {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Unlocks {
-    pub expiration_unix_time: Option<u32>,
-    pub timelock_unix_time: Option<u32>,
+    pub expiration_slot_index: Option<SlotIndex>,
+    pub timelock_slot_index: Option<SlotIndex>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]

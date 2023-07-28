@@ -14,6 +14,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
             Output, OutputId,
         },
+        slot::SlotIndex,
     },
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
@@ -201,7 +202,7 @@ where
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
-        let current_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
@@ -252,7 +253,7 @@ where
                 }
                 new_native_tokens.add_native_tokens(native_tokens.clone())?;
             }
-            if let Some(sdr) = sdr_not_expired(&output_data.output, current_time) {
+            if let Some(sdr) = sdr_not_expired(&output_data.output, slot_index) {
                 // for own output subtract the return amount
                 available_amount += output_data.output.amount() - sdr.amount();
 
@@ -412,7 +413,7 @@ pub(crate) fn sdr_not_expired(output: &Output, slot_index: SlotIndex) -> Option<
         unlock_conditions.storage_deposit_return().and_then(|sdr| {
             let expired = unlock_conditions
                 .expiration()
-                .map_or(false, |expiration| current_time >= expiration.slot_index());
+                .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
             // We only have to send the storage deposit return back if the output is not expired
             (!expired).then_some(sdr)

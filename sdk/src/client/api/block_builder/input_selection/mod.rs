@@ -68,7 +68,7 @@ impl InputSelection {
             is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
-            .required_and_unlocked_address(self.timestamp, input.output_id(), account_transition)?
+            .required_and_unlocked_address(self.slot_index, input.output_id(), account_transition)?
             .0;
 
         match required_address {
@@ -191,7 +191,7 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            timestamp: unix_timestamp_now().as_secs() as u32,
+            slot_index: unix_timestamp_now().as_secs() as u32,
             requirements: Vec::new(),
             automatically_transitioned: HashMap::new(),
         }
@@ -242,14 +242,14 @@ impl InputSelection {
             // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
-            if unlock_conditions.is_time_locked(self.timestamp) {
+            if unlock_conditions.is_time_locked(self.slot_index) {
                 return false;
             }
 
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_and_unlocked_address(self.timestamp, input.output_id(), None)
+                .required_and_unlocked_address(self.slot_index, input.output_id(), None)
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
@@ -262,9 +262,10 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         outputs: &[Output],
-        time: Option<u32>,
+        slot_index: Option<SlotIndex>,
     ) -> Result<Vec<InputSigningData>, Error> {
-        let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
+        // TODO ????
+        // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
         // might be a more efficient way to do this
@@ -280,7 +281,7 @@ impl InputSelection {
                 );
                 let (input_address, _) = input_signing_data
                     .output
-                    .required_and_unlocked_address(time, input_signing_data.output_id(), account_transition)
+                    .required_and_unlocked_address(slot_index, input_signing_data.output_id(), account_transition)
                     // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
@@ -292,7 +293,7 @@ impl InputSelection {
             let (input_address, _) =
                 input
                     .output
-                    .required_and_unlocked_address(time, input.output_id(), account_transition)?;
+                    .required_and_unlocked_address(slot_index, input.output_id(), account_transition)?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Account(unlock_address) => {

@@ -18,9 +18,7 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        account::{
-            constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
-        },
+        account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error, Result,
     },
 };
@@ -134,7 +132,7 @@ where
         let account_addresses = self.addresses().await?;
         let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
-        let local_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
 
         let mut outputs = Vec::new();
         for SendNativeTokensParams {
@@ -176,9 +174,11 @@ where
                 .with_expiration()?
                 .finish()?;
 
-            let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-                local_time + expiration_time
-            });
+            // TODO !!!
+            // let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
+            //     local_time + expiration_time
+            // });
+            let expiration_slot_index = slot_index;
 
             outputs.push(
                 BasicOutputBuilder::new_with_amount(storage_deposit_amount)
@@ -189,7 +189,7 @@ where
                         // sent
                         StorageDepositReturnUnlockCondition::new(return_address, storage_deposit_amount, token_supply)?,
                     )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .finish_output(token_supply)?,
             )
         }

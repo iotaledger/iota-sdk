@@ -31,9 +31,9 @@ use crate::{
         output::Output,
         payload::transaction::{TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
+        slot::SlotIndex,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
-    utils::unix_timestamp_now,
 };
 
 /// Ledger nano errors.
@@ -513,12 +513,13 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
-    time: Option<u32>,
+    slot_index: Option<SlotIndex>,
 ) -> Result<Vec<Unlock>, Error> {
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
 
-    let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
+    // TODO ???
+    // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
 
     let mut merged_unlocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
@@ -528,10 +529,11 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
-        let (input_address, _) =
-            input
-                .output
-                .required_and_unlocked_address(time, input.output_metadata.output_id(), account_transition)?;
+        let (input_address, _) = input.output.required_and_unlocked_address(
+            slot_index,
+            input.output_metadata.output_id(),
+            account_transition,
+        )?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {

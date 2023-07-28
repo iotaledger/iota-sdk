@@ -132,12 +132,12 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let local_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
 
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.transaction_payload,
-            local_time,
+            slot_index,
         )?;
 
         if conflict != ConflictReason::None {

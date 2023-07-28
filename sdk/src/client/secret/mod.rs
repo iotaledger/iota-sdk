@@ -50,6 +50,7 @@ use crate::{
         payload::{transaction::TransactionEssence, TransactionPayload},
         semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
+        slot::SlotIndex,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
     utils::unix_timestamp_now,
@@ -426,7 +427,7 @@ impl SecretManager {
 pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
-    time: Option<u32>,
+    time: Option<SlotIndex>,
 ) -> crate::client::Result<Unlocks>
 where
     crate::client::Error: From<M::Error>,

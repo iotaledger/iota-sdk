@@ -17,9 +17,7 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        account::{
-            constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
-        },
+        account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error,
     },
 };
@@ -143,7 +141,7 @@ where
         let account_addresses = self.addresses().await?;
         let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
-        let local_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
 
         let mut outputs = Vec::new();
         for SendParams {
@@ -179,9 +177,11 @@ where
                         .finish_output(token_supply)?,
                 )
             } else {
-                let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-                    local_time + expiration_time
-                });
+                // TODO !!!
+                // let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
+                //     local_time + expiration_time
+                // });
+                let expiration_slot_index = slot_index;
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
@@ -210,7 +210,7 @@ where
                                 token_supply,
                             )?,
                         )
-                        .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                        .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                         .finish_output(token_supply)?,
                 )
             }

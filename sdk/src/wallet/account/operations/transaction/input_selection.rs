@@ -48,7 +48,7 @@ where
         )
         .await;
 
-        let slot_index = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
         #[allow(unused_mut)]
         let mut forbidden_inputs = account_details.locked_outputs.clone();
 

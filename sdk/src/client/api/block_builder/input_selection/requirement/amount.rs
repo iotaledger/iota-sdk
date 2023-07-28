@@ -13,18 +13,22 @@ use crate::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AccountTransition,
             FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, Rent,
         },
+        slot::SlotIndex,
     },
 };
 
 /// Get the `StorageDepositReturnUnlockCondition`, if not expired.
-pub(crate) fn sdruc_not_expired(output: &Output, current_time: u32) -> Option<&StorageDepositReturnUnlockCondition> {
+pub(crate) fn sdruc_not_expired(
+    output: &Output,
+    slot_index: SlotIndex,
+) -> Option<&StorageDepositReturnUnlockCondition> {
     // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
     let unlock_conditions = output.unlock_conditions().unwrap();
 
     unlock_conditions.storage_deposit_return().and_then(|sdr| {
         let expired = unlock_conditions
             .expiration()
-            .map_or(false, |expiration| current_time >= expiration.timestamp());
+            .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
         // We only have to send the storage deposit return back if the output is not expired
         if !expired { Some(sdr) } else { None }
@@ -34,7 +38,7 @@ pub(crate) fn sdruc_not_expired(output: &Output, current_time: u32) -> Option<&S
 pub(crate) fn amount_sums(
     selected_inputs: &[InputSigningData],
     outputs: &[Output],
-    timestamp: u32,
+    slot_index: SlotIndex,
 ) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
     let mut inputs_sum = 0;
     let mut outputs_sum = 0;
@@ -44,7 +48,7 @@ pub(crate) fn amount_sums(
     for selected_input in selected_inputs {
         inputs_sum += selected_input.output.amount();
 
-        if let Some(sdruc) = sdruc_not_expired(&selected_input.output, timestamp) {
+        if let Some(sdruc) = sdruc_not_expired(&selected_input.output, slot_index) {
             *inputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
         }
     }
