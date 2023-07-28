@@ -6,8 +6,6 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.payload import MilestonePayload
-from iota_sdk.types.utxo_changes import UtxoChanges
 from typing import List
 from dacite import from_dict
 
