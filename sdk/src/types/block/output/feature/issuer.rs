@@ -33,7 +33,7 @@ mod dto {
 
     use super::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     struct IssuerFeatureDto {
         #[serde(rename = "type")]
         kind: u8,
