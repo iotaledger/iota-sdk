@@ -7,7 +7,7 @@ pub mod transaction;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
-    types::block::{parent::StrongParents, payload::Payload, signature::Ed25519Signature, Block, IssuerId},
+    types::block::{core::Block, parent::StrongParents, payload::Payload, signature::Ed25519Signature, IssuerId},
 };
 
 impl ClientInner {

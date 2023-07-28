@@ -13,10 +13,10 @@ use packable::{
 };
 
 use super::{
-    basic::BasicBlock,
+    basic::{BasicBlock, BasicBlockData},
     signature::Ed25519Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    validation::ValidationBlock,
+    validation::{ValidationBlock, ValidationBlockData},
     IssuerId,
 };
 use crate::types::block::{
@@ -36,7 +36,7 @@ pub struct BlockBuilder<B> {
     slot_commitment_id: SlotCommitmentId,
     latest_finalized_slot: SlotIndex,
     issuer_id: IssuerId,
-    inner: B,
+    data: B,
     signature: Ed25519Signature,
 }
 
@@ -49,7 +49,7 @@ impl<B> BlockBuilder<B> {
     }
 }
 
-impl BlockBuilder<BasicBlock> {
+impl BlockBuilder<BasicBlockData> {
     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
     #[inline(always)]
     pub fn new(
@@ -68,7 +68,7 @@ impl BlockBuilder<BasicBlock> {
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
-            inner: BasicBlock {
+            data: BasicBlockData {
                 strong_parents,
                 weak_parents: Default::default(),
                 shallow_like_parents: Default::default(),
@@ -82,33 +82,33 @@ impl BlockBuilder<BasicBlock> {
     /// Adds weak parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.inner.weak_parents = weak_parents.into();
+        self.data.weak_parents = weak_parents.into();
         self
     }
 
     /// Adds shallow like parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.inner.shallow_like_parents = shallow_like_parents.into();
+        self.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
 
     /// Adds a payload to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
-        self.inner.payload = payload.into();
+        self.data.payload = payload.into();
         self
     }
 
     /// Adds burned mana to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
-        self.inner.burned_mana = burned_mana;
+        self.data.burned_mana = burned_mana;
         self
     }
 }
 
-impl BlockBuilder<ValidationBlock> {
+impl BlockBuilder<ValidationBlockData> {
     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
     #[inline(always)]
     pub fn new(
@@ -129,7 +129,7 @@ impl BlockBuilder<ValidationBlock> {
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
-            inner: ValidationBlock {
+            data: ValidationBlockData {
                 strong_parents,
                 weak_parents: Default::default(),
                 shallow_like_parents: Default::default(),
@@ -143,26 +143,26 @@ impl BlockBuilder<ValidationBlock> {
     /// Adds weak parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.inner.weak_parents = weak_parents.into();
+        self.data.weak_parents = weak_parents.into();
         self
     }
 
     /// Adds shallow like parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.inner.shallow_like_parents = shallow_like_parents.into();
+        self.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
 }
 
-impl<B: Into<BlockType>> BlockBuilder<B> {
-    pub fn from_block_type(
+impl<B> BlockBuilder<B> {
+    pub fn from_block_data(
         network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
-        inner: B,
+        data: B,
         signature: Ed25519Signature,
     ) -> Self {
         Self {
@@ -172,29 +172,34 @@ impl<B: Into<BlockType>> BlockBuilder<B> {
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
-            inner,
+            data,
             signature,
         }
     }
+}
 
+impl<B> BlockBuilder<B>
+where
+    BlockWrapper<B>: Packable,
+    Block: From<BlockWrapper<B>>,
+{
     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-        let inner = self.inner.into();
-        verify_parents(
-            inner.strong_parents(),
-            inner.weak_parents(),
-            inner.shallow_like_parents(),
-        )?;
-
-        let block = Block {
+        let block = Block::from(BlockWrapper {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
             network_id: self.network_id,
             issuing_time: self.issuing_time,
             slot_commitment_id: self.slot_commitment_id,
             latest_finalized_slot: self.latest_finalized_slot,
             issuer_id: self.issuer_id,
-            inner,
+            data: self.data,
             signature: self.signature,
-        };
+        });
+
+        verify_parents(
+            block.strong_parents(),
+            block.weak_parents(),
+            block.shallow_like_parents(),
+        )?;
 
         let block_bytes = block.pack_to_vec();
 
@@ -212,25 +217,19 @@ impl<B: Into<BlockType>> BlockBuilder<B> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, From)]
-pub enum BlockType {
+pub enum Block {
     Basic(BasicBlock),
     Validation(ValidationBlock),
 }
 
-impl Packable for BlockType {
+impl Packable for Block {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         match self {
-            Self::Basic(block) => {
-                BasicBlock::KIND.pack(packer)?;
-                block.pack(packer)
-            }
-            Self::Validation(block) => {
-                ValidationBlock::KIND.pack(packer)?;
-                block.pack(packer)
-            }
+            Self::Basic(block) => block.pack(packer),
+            Self::Validation(block) => block.pack(packer),
         }?;
 
         Ok(())
@@ -240,127 +239,100 @@ impl Packable for BlockType {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidBlockKind(k)).map_err(UnpackError::Packable),
-        })
-    }
-}
+        let start_opt = unpacker.read_bytes();
 
-impl BlockType {
-    /// Returns the strong parents of a [`BlockType`].
-    #[inline(always)]
-    pub fn strong_parents(&self) -> &StrongParents {
-        match self {
-            Self::Basic(b) => b.strong_parents(),
-            Self::Validation(b) => b.strong_parents(),
-        }
-    }
+        let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-    /// Returns the weak parents of a [`BlockType`].
-    #[inline(always)]
-    pub fn weak_parents(&self) -> &WeakParents {
-        match self {
-            Self::Basic(b) => b.weak_parents(),
-            Self::Validation(b) => b.weak_parents(),
+        if VERIFY && protocol_version != visitor.protocol_version() {
+            return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
+                expected: visitor.protocol_version(),
+                actual: protocol_version,
+            }));
         }
-    }
 
-    /// Returns the shallow like parents of a [`BlockType`].
-    #[inline(always)]
-    pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
-        match self {
-            Self::Basic(b) => b.shallow_like_parents(),
-            Self::Validation(b) => b.shallow_like_parents(),
-        }
-    }
+        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-    /// Returns the optional payload of a [`Block`].
-    #[inline(always)]
-    pub fn payload(&self) -> Option<&Payload> {
-        match self {
-            Self::Basic(b) => b.payload(),
-            Self::Validation(_) => None,
+        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let block = match kind {
+            BasicBlock::KIND => {
+                let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
+                let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+                Block::from(BlockWrapper {
+                    protocol_version,
+                    network_id,
+                    issuing_time,
+                    slot_commitment_id,
+                    latest_finalized_slot,
+                    issuer_id,
+                    data,
+                    signature,
+                })
+            }
+            ValidationBlock::KIND => {
+                let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
+                let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+                Block::from(BlockWrapper {
+                    protocol_version,
+                    network_id,
+                    issuing_time,
+                    slot_commitment_id,
+                    latest_finalized_slot,
+                    issuer_id,
+                    data,
+                    signature,
+                })
+            }
+        };
+
+        if VERIFY {
+            let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+                end - start
+            } else {
+                block.packed_len()
+            };
+
+            if block_len > Block::LENGTH_MAX {
+                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
+            }
         }
+
+        Ok(block)
     }
 }
 
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Block {
+pub struct BlockWrapper<B> {
     /// Protocol version of the block.
-    protocol_version: u8,
+    pub(crate) protocol_version: u8,
     /// Network identifier.
-    network_id: u64,
+    pub(crate) network_id: u64,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
-    issuing_time: u64,
+    pub(crate) issuing_time: u64,
     /// The identifier of the slot to which this block commits.
-    slot_commitment_id: SlotCommitmentId,
+    pub(crate) slot_commitment_id: SlotCommitmentId,
     /// The slot index of the latest finalized slot.
-    latest_finalized_slot: SlotIndex,
+    pub(crate) latest_finalized_slot: SlotIndex,
     /// The identifier of the account that issued this block.
-    issuer_id: IssuerId,
-    /// The inner block variant, either [`BasicBlock`] or [`ValidationBlock`].
-    pub(crate) inner: BlockType,
+    pub(crate) issuer_id: IssuerId,
+    /// The inner block data, either [`BasicBlock`] or [`ValidationBlock`].
+    pub(crate) data: B,
     ///
-    signature: Ed25519Signature,
+    pub(crate) signature: Ed25519Signature,
 }
 
-impl Block {
-    /// The minimum number of bytes in a block.
-    pub const LENGTH_MIN: usize = 46;
-    /// The maximum number of bytes in a block.
-    pub const LENGTH_MAX: usize = 32768;
-
-    /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
-    #[inline(always)]
-    pub fn build_basic(
-        network_id: u64,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        strong_parents: StrongParents,
-        signature: Ed25519Signature,
-    ) -> BlockBuilder<BasicBlock> {
-        BlockBuilder::<BasicBlock>::new(
-            network_id,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            strong_parents,
-            signature,
-        )
-    }
-
-    /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
-    #[inline(always)]
-    pub fn build_validation(
-        network_id: u64,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        strong_parents: StrongParents,
-        highest_supported_version: u8,
-        protocol_parameters: &ProtocolParameters,
-        signature: Ed25519Signature,
-    ) -> BlockBuilder<ValidationBlock> {
-        BlockBuilder::<ValidationBlock>::new(
-            network_id,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            strong_parents,
-            highest_supported_version,
-            protocol_parameters,
-            signature,
-        )
-    }
-
+impl<B> BlockWrapper<B> {
     /// Returns the protocol version of a [`Block`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
@@ -397,40 +369,194 @@ impl Block {
         self.issuer_id
     }
 
-    /// Returns the strong parents of a [`Block`].
-    #[inline(always)]
-    pub fn strong_parents(&self) -> &StrongParents {
-        self.inner.strong_parents()
-    }
-
-    /// Returns the weak parents of a [`Block`].
-    #[inline(always)]
-    pub fn weak_parents(&self) -> &WeakParents {
-        self.inner.weak_parents()
-    }
-
-    /// Returns the shallow like parents of a [`Block`].
-    #[inline(always)]
-    pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
-        self.inner.shallow_like_parents()
-    }
-
-    /// Returns the optional payload of a [`Block`].
-    #[inline(always)]
-    pub fn payload(&self) -> Option<&Payload> {
-        self.inner.payload()
-    }
-
     /// Returns the signature of a [`Block`].
     #[inline(always)]
     pub fn signature(&self) -> &Ed25519Signature {
         &self.signature
     }
+}
 
-    /// Returns the inner block type of a [`Block`].
+impl Block {
+    /// The minimum number of bytes in a block.
+    pub const LENGTH_MIN: usize = 46;
+    /// The maximum number of bytes in a block.
+    pub const LENGTH_MAX: usize = 32768;
+
+    /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
-    pub fn inner(&self) -> &BlockType {
-        &self.inner
+    pub fn build_basic(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        strong_parents: StrongParents,
+        signature: Ed25519Signature,
+    ) -> BlockBuilder<BasicBlockData> {
+        BlockBuilder::<BasicBlockData>::new(
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            strong_parents,
+            signature,
+        )
+    }
+
+    /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn build_validation(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        strong_parents: StrongParents,
+        highest_supported_version: u8,
+        protocol_parameters: &ProtocolParameters,
+        signature: Ed25519Signature,
+    ) -> BlockBuilder<ValidationBlockData> {
+        BlockBuilder::<ValidationBlockData>::new(
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            strong_parents,
+            highest_supported_version,
+            protocol_parameters,
+            signature,
+        )
+    }
+
+    /// Returns the protocol version of a [`Block`].
+    #[inline(always)]
+    pub fn protocol_version(&self) -> u8 {
+        match self {
+            Self::Basic(b) => b.protocol_version(),
+            Self::Validation(b) => b.protocol_version(),
+        }
+    }
+
+    /// Returns the network id of a [`Block`].
+    #[inline(always)]
+    pub fn network_id(&self) -> u64 {
+        match self {
+            Self::Basic(b) => b.network_id(),
+            Self::Validation(b) => b.network_id(),
+        }
+    }
+
+    /// Returns the issuing time of a [`Block`].
+    #[inline(always)]
+    pub fn issuing_time(&self) -> u64 {
+        match self {
+            Self::Basic(b) => b.issuing_time(),
+            Self::Validation(b) => b.issuing_time(),
+        }
+    }
+
+    /// Returns the slot commitment ID of a [`Block`].
+    #[inline(always)]
+    pub fn slot_commitment_id(&self) -> SlotCommitmentId {
+        match self {
+            Self::Basic(b) => b.slot_commitment_id(),
+            Self::Validation(b) => b.slot_commitment_id(),
+        }
+    }
+
+    /// Returns the latest finalized slot of a [`Block`].
+    #[inline(always)]
+    pub fn latest_finalized_slot(&self) -> SlotIndex {
+        match self {
+            Self::Basic(b) => b.latest_finalized_slot(),
+            Self::Validation(b) => b.latest_finalized_slot(),
+        }
+    }
+
+    /// Returns the issuer ID of a [`Block`].
+    #[inline(always)]
+    pub fn issuer_id(&self) -> IssuerId {
+        match self {
+            Self::Basic(b) => b.issuer_id(),
+            Self::Validation(b) => b.issuer_id(),
+        }
+    }
+
+    /// Returns the strong parents of a [`BlockType`].
+    #[inline(always)]
+    pub fn strong_parents(&self) -> &StrongParents {
+        match self {
+            Self::Basic(b) => b.strong_parents(),
+            Self::Validation(b) => b.strong_parents(),
+        }
+    }
+
+    /// Returns the weak parents of a [`BlockType`].
+    #[inline(always)]
+    pub fn weak_parents(&self) -> &WeakParents {
+        match self {
+            Self::Basic(b) => b.weak_parents(),
+            Self::Validation(b) => b.weak_parents(),
+        }
+    }
+
+    /// Returns the shallow like parents of a [`BlockType`].
+    #[inline(always)]
+    pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
+        match self {
+            Self::Basic(b) => b.shallow_like_parents(),
+            Self::Validation(b) => b.shallow_like_parents(),
+        }
+    }
+
+    /// Returns the optional payload of a [`Block`].
+    #[inline(always)]
+    pub fn payload(&self) -> Option<&Payload> {
+        match self {
+            Self::Basic(b) => b.payload(),
+            Self::Validation(_) => None,
+        }
+    }
+
+    /// Returns the signature of a [`Block`].
+    #[inline(always)]
+    pub fn signature(&self) -> &Ed25519Signature {
+        match self {
+            Self::Basic(b) => b.signature(),
+            Self::Validation(b) => b.signature(),
+        }
+    }
+
+    /// Gets the block as an actual [`BasicBlock`].
+    /// PANIC: do not call on a non-basic block.
+    pub fn as_basic(&self) -> &BasicBlock {
+        if let Self::Basic(block) = self {
+            block
+        } else {
+            panic!("as_basic called on a non-basic block");
+        }
+    }
+
+    /// Checks whether the block is a [`BasicBlock`].
+    pub fn is_basic(&self) -> bool {
+        matches!(self, Self::Basic(_))
+    }
+
+    /// Gets the block as an actual [`BasicBlock`].
+    /// PANIC: do not call on a non-basic block.
+    pub fn as_validation(&self) -> &ValidationBlock {
+        if let Self::Validation(block) = self {
+            block
+        } else {
+            panic!("as_validation called on a non-validation block");
+        }
+    }
+
+    /// Checks whether the block is a [`ValidationBlock`].
+    pub fn is_validation(&self) -> bool {
+        matches!(self, Self::Validation(_))
     }
 
     /// Computes the identifier of the block.
@@ -451,73 +577,6 @@ impl Block {
         // When parsing the block is complete, there should not be any trailing bytes left that were not parsed.
         if u8::unpack::<_, true>(&mut unpacker, &()).is_ok() {
             return Err(UnpackError::Packable(Error::RemainingBytesAfterBlock));
-        }
-
-        Ok(block)
-    }
-}
-
-impl Packable for Block {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version.pack(packer)?;
-        self.inner.pack(packer)?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let start_opt = unpacker.read_bytes();
-
-        let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if VERIFY && protocol_version != visitor.protocol_version() {
-            return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: visitor.protocol_version(),
-                actual: protocol_version,
-            }));
-        }
-
-        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let inner = BlockType::unpack::<_, VERIFY>(unpacker, visitor)?;
-
-        let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
-
-        let block = Self {
-            protocol_version,
-            network_id,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            inner,
-            signature,
-        };
-
-        if VERIFY {
-            let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
-                end - start
-            } else {
-                block.packed_len()
-            };
-
-            if block_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
-            }
         }
 
         Ok(block)
@@ -550,8 +609,8 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{
-                basic::dto::BasicBlockDto, signature::dto::Ed25519SignatureDto, validation::dto::ValidationBlockDto,
-                Error,
+                basic::dto::BasicBlockDataDto, signature::dto::Ed25519SignatureDto,
+                validation::dto::ValidationBlockDataDto, Error,
             },
             TryFromDto, ValidationParams,
         },
@@ -559,21 +618,24 @@ pub(crate) mod dto {
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum BlockTypeDto {
-        Basic(BasicBlockDto),
-        Validation(ValidationBlockDto),
+    pub enum BlockDataDto {
+        Basic(BasicBlockDataDto),
+        Validation(ValidationBlockDataDto),
     }
 
-    impl From<&BlockType> for BlockTypeDto {
-        fn from(value: &BlockType) -> Self {
-            match value {
-                BlockType::Basic(b) => Self::Basic(b.into()),
-                BlockType::Validation(b) => Self::Validation(b.into()),
-            }
+    impl From<&BasicBlockData> for BlockDataDto {
+        fn from(value: &BasicBlockData) -> Self {
+            Self::Basic(value.into())
         }
     }
 
-    impl<'de> Deserialize<'de> for BlockTypeDto {
+    impl From<&ValidationBlockData> for BlockDataDto {
+        fn from(value: &ValidationBlockData) -> Self {
+            Self::Validation(value.into())
+        }
+    }
+
+    impl<'de> Deserialize<'de> for BlockDataDto {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
             Ok(
@@ -583,11 +645,11 @@ pub(crate) mod dto {
                     .ok_or_else(|| serde::de::Error::custom("invalid block type"))? as u8
                 {
                     BasicBlock::KIND => Self::Basic(
-                        BasicBlockDto::deserialize(value)
+                        BasicBlockDataDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic block: {e}")))?,
                     ),
                     ValidationBlock::KIND => {
-                        Self::Validation(ValidationBlockDto::deserialize(value).map_err(|e| {
+                        Self::Validation(ValidationBlockDataDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize validation block: {e}"))
                         })?)
                     }
@@ -597,7 +659,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl Serialize for BlockTypeDto {
+    impl Serialize for BlockDataDto {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer,
@@ -605,8 +667,8 @@ pub(crate) mod dto {
             #[derive(Serialize)]
             #[serde(untagged)]
             enum BlockTypeDto_<'a> {
-                T0(&'a BasicBlockDto),
-                T1(&'a ValidationBlockDto),
+                T0(&'a BasicBlockDataDto),
+                T1(&'a ValidationBlockDataDto),
             }
             #[derive(Serialize)]
             struct TypedBlock<'a> {
@@ -637,21 +699,34 @@ pub(crate) mod dto {
         pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
-        pub inner: BlockTypeDto,
+        #[serde(flatten)]
+        pub data: BlockDataDto,
         pub signature: Ed25519SignatureDto,
     }
 
     impl From<&Block> for BlockDto {
         fn from(value: &Block) -> Self {
-            Self {
-                protocol_version: value.protocol_version(),
-                network_id: value.network_id(),
-                issuing_time: value.issuing_time(),
-                slot_commitment_id: value.slot_commitment_id(),
-                latest_finalized_slot: value.latest_finalized_slot(),
-                issuer_id: value.issuer_id(),
-                inner: value.inner().into(),
-                signature: value.signature().into(),
+            match value {
+                Block::Basic(b) => Self {
+                    protocol_version: b.protocol_version(),
+                    network_id: b.network_id(),
+                    issuing_time: b.issuing_time(),
+                    slot_commitment_id: b.slot_commitment_id(),
+                    latest_finalized_slot: b.latest_finalized_slot(),
+                    issuer_id: b.issuer_id(),
+                    data: (&b.data).into(),
+                    signature: b.signature().into(),
+                },
+                Block::Validation(b) => Self {
+                    protocol_version: b.protocol_version(),
+                    network_id: b.network_id(),
+                    issuing_time: b.issuing_time(),
+                    slot_commitment_id: b.slot_commitment_id(),
+                    latest_finalized_slot: b.latest_finalized_slot(),
+                    issuer_id: b.issuer_id(),
+                    data: (&b.data).into(),
+                    signature: b.signature().into(),
+                },
             }
         }
     }
@@ -661,30 +736,30 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let inner = BlockType::try_from_dto_with_params_inner(dto.inner, params)?;
-            BlockBuilder::from_block_type(
-                dto.network_id,
-                dto.issuing_time,
-                dto.slot_commitment_id,
-                dto.latest_finalized_slot,
-                dto.issuer_id,
-                inner,
-                Ed25519Signature::try_from(dto.signature)?,
-            )
-            .with_protocol_version(dto.protocol_version)
-            .finish()
-        }
-    }
-
-    impl TryFromDto for BlockType {
-        type Dto = BlockTypeDto;
-        type Error = Error;
-
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Ok(match dto {
-                BlockTypeDto::Basic(b) => Self::Basic(BasicBlock::try_from_dto_with_params(b, &params)?),
-                BlockTypeDto::Validation(b) => Self::Validation(ValidationBlock::try_from_dto_with_params(b, &params)?),
-            })
+            match dto.data {
+                BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
+                    dto.network_id,
+                    dto.issuing_time,
+                    dto.slot_commitment_id,
+                    dto.latest_finalized_slot,
+                    dto.issuer_id,
+                    BasicBlockData::try_from_dto_with_params_inner(b, params)?,
+                    Ed25519Signature::try_from(dto.signature)?,
+                )
+                .with_protocol_version(dto.protocol_version)
+                .finish(),
+                BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
+                    dto.network_id,
+                    dto.issuing_time,
+                    dto.slot_commitment_id,
+                    dto.latest_finalized_slot,
+                    dto.issuer_id,
+                    ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
+                    Ed25519Signature::try_from(dto.signature)?,
+                )
+                .with_protocol_version(dto.protocol_version)
+                .finish(),
+            }
         }
     }
 }

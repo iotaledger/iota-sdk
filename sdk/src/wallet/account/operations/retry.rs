@@ -6,8 +6,9 @@ use crate::{
     types::{
         api::core::response::LedgerInclusionState,
         block::{
+            core::Block,
             payload::{transaction::TransactionId, Payload},
-            Block, BlockId,
+            BlockId,
         },
     },
     wallet::{

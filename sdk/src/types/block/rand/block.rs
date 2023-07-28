@@ -5,12 +5,13 @@ use alloc::vec::Vec;
 
 use super::signature::rand_ed25519_signature;
 use crate::types::block::{
-    basic::BasicBlock,
+    basic::BasicBlockData,
+    core::Block,
     parent::StrongParents,
     rand::{
         bytes::rand_bytes_array, number::rand_number, parents::rand_strong_parents, payload::rand_payload_for_block,
     },
-    Block, BlockBuilder, BlockId,
+    BlockBuilder, BlockId,
 };
 
 /// Generates a random block id.
@@ -34,7 +35,7 @@ pub fn rand_basic_block_with_strong_parents(strong_parents: StrongParents) -> Bl
 }
 
 /// Generates a random basic block builder with given parents.
-pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BlockBuilder<BasicBlock> {
+pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BlockBuilder<BasicBlockData> {
     Block::build_basic(
         rand_number(),
         rand_number(),

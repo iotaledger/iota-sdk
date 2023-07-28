@@ -19,6 +19,7 @@ use crate::{
         api::core::response::LedgerInclusionState,
         block::{
             address::Bech32Address,
+            core::Block,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::OutputWithMetadata,
             parent::Parents,
@@ -26,7 +27,7 @@ use crate::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload,
             },
-            Block, BlockId,
+            BlockId,
         },
     },
     utils::unix_timestamp_now,
