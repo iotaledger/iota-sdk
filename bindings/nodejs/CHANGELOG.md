@@ -25,8 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Constructor types in `RegularTransactionEssence`;
 - `SenderFeature.getSender()` and `IssuerFeature.getIssuer()` now return the correct types;
-- Private properties on classes are now readonly.
 
+### Changed
+
+- Private properties on classes are now readonly.
 
 ## 1.0.1 - 2023-07-25
 
