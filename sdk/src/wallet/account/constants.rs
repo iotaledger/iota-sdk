@@ -1,10 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Amount at which outputs on a single addresses will get consolidated by default if consolidatioin is enabled
+/// Amount at which outputs on a single addresses will get consolidated by default if consolidation is enabled
 pub(crate) const DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD: usize = 100;
 /// Amount at which outputs on a single addresses will get consolidated by default with a ledger secret_manager if
-/// consolidatioin is enabled, needs to be smaller because the memory of the ledger nano s is limited
+/// consolidation is enabled, needs to be smaller because the memory of the ledger nano s is limited
 #[cfg(feature = "ledger_nano")]
 pub(crate) const DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD: usize = 15;
 
@@ -15,5 +15,6 @@ pub(crate) const PARALLEL_REQUESTS_AMOUNT: usize = 500;
 /// this is done to prevent unnecessary simultaneous synchronizations
 pub(crate) const MIN_SYNC_INTERVAL: u128 = 5;
 
-// Default expiration time for [ExpirationUnlockCondition] when sending native tokens, one day in seconds
-pub(crate) const DEFAULT_EXPIRATION_TIME: u32 = 86400;
+// TODO
+// // Default expiration time for [ExpirationUnlockCondition] when sending native tokens, one day in seconds
+// pub(crate) const DEFAULT_EXPIRATION_TIME: u32 = 86400;

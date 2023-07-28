@@ -333,7 +333,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     ))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         *account_0.addresses().await?[0].address().as_ref(),
-                        account_0.client().get_time_checked().await? + 5000,
+                        account_0.client().get_slot_index().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
@@ -343,7 +343,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     ))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         *account_0.addresses().await?[0].address().as_ref(),
-                        account_0.client().get_time_checked().await? + 5000,
+                        account_0.client().get_slot_index().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,

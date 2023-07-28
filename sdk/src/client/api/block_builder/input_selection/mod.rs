@@ -32,7 +32,6 @@ use crate::{
         protocol::ProtocolParameters,
         slot::SlotIndex,
     },
-    utils::unix_timestamp_now,
 };
 
 /// Working state for the input selection algorithm.
@@ -191,7 +190,9 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            slot_index: unix_timestamp_now().as_secs() as u32,
+            // TODO !!!
+            slot_index: SlotIndex::from(0),
+            // slot_index: unix_timestamp_now().as_secs() as u32,
             requirements: Vec::new(),
             automatically_transitioned: HashMap::new(),
         }
@@ -222,8 +223,8 @@ impl InputSelection {
     }
 
     /// Sets the slot index of an [`InputSelection`].
-    pub fn slot_index(mut self, slot_index: SlotIndex) -> Self {
-        self.slot_index = slot_index;
+    pub fn slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
+        self.slot_index = slot_index.into();
         self
     }
 

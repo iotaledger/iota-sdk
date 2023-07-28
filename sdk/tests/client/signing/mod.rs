@@ -28,6 +28,7 @@ use iota_sdk::{
         },
         protocol::protocol_parameters,
         semantic::ConflictReason,
+        slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -353,7 +354,7 @@ async fn all_combined() -> Result<()> {
         ),
     ]);
 
-    let current_time = 100;
+    let slot_index = SlotIndex::from(100);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -365,7 +366,7 @@ async fn all_combined() -> Result<()> {
         ],
         protocol_parameters.clone(),
     )
-    .timestamp(current_time)
+    .slot_index(slot_index)
     .select()
     .unwrap();
 
@@ -392,7 +393,7 @@ async fn all_combined() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
+        .sign_transaction_essence(&prepared_transaction_data, Some(slot_index))
         .await?;
 
     assert_eq!(unlocks.len(), 15);
@@ -477,7 +478,7 @@ async fn all_combined() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
 
     if conflict != ConflictReason::None {
         panic!("{conflict:?}, with {tx_payload:#?}");

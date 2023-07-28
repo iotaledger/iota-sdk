@@ -430,14 +430,18 @@ impl UnlockConditions {
 
     /// Returns whether a time lock exists and is still relevant.
     #[inline(always)]
-    pub fn is_time_locked(&self, slot_index: SlotIndex) -> bool {
+    pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        let slot_index = slot_index.into();
+
         self.timelock()
             .map_or(false, |timelock| slot_index < timelock.slot_index())
     }
 
     /// Returns whether an expiration exists and is expired.
     #[inline(always)]
-    pub fn is_expired(&self, slot_index: SlotIndex) -> bool {
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        let slot_index = slot_index.into();
+
         self.expiration()
             .map_or(false, |expiration| slot_index >= expiration.slot_index())
     }

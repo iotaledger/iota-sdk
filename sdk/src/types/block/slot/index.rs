@@ -22,3 +22,9 @@ impl PartialEq<u64> for SlotIndex {
         self.0 == *other
     }
 }
+
+impl core::ops::AddAssign<u64> for SlotIndex {
+    fn add_assign(&mut self, other: u64) {
+        self.0 += other;
+    }
+}

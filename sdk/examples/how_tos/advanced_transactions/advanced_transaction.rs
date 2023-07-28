@@ -13,6 +13,7 @@ use iota_sdk::{
             unlock_condition::{AddressUnlockCondition, TimelockUnlockCondition},
             BasicOutputBuilder,
         },
+        slot::SlotIndex,
     },
     wallet::Result,
     Wallet,
@@ -37,18 +38,20 @@ async fn main() -> Result<()> {
             .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        // Create an ouput with amount 1_000_000 and a timelock of 1 hour
-        let in_an_hour = (std::time::SystemTime::now() + std::time::Duration::from_secs(3600))
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("clock went backwards")
-            .as_secs()
-            .try_into()
-            .unwrap();
+        // // Create an output with amount 1_000_000 and a timelock of 1 hour
+        // let in_an_hour = (std::time::SystemTime::now() + std::time::Duration::from_secs(3600))
+        //     .duration_since(std::time::UNIX_EPOCH)
+        //     .expect("clock went backwards")
+        //     .as_secs()
+        //     .try_into()
+        //     .unwrap();
+        // TODO !!!
+        let slot_index = SlotIndex::from(1000);
         let basic_output = BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(Bech32Address::try_from_str(
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             )?))
-            .add_unlock_condition(TimelockUnlockCondition::new(in_an_hour)?)
+            .add_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
             .finish_output(account.client().get_token_supply().await?)?;
 
         let transaction = account.send_outputs(vec![basic_output], None).await?;

@@ -22,6 +22,7 @@ use iota_sdk::{
         },
         protocol::protocol_parameters,
         semantic::ConflictReason,
+        slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -97,9 +98,9 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let current_time = 100;
+    let slot_index = SlotIndex::from(100);
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
 
     if conflict != ConflictReason::None {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -211,9 +212,9 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let current_time = 100;
+    let slot_index = 100;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
 
     if conflict != ConflictReason::None {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -312,9 +313,9 @@ async fn two_signature_unlocks() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let current_time = 100;
+    let slot_index = 100;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
 
     if conflict != ConflictReason::None {
         panic!("{conflict:?}, with {tx_payload:#?}");
