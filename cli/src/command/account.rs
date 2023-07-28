@@ -25,11 +25,7 @@ use iota_sdk::{
     U256,
 };
 
-use crate::{
-    error::Error,
-    helper::{get_output_type_str, to_utc_date_time},
-    println_log_info,
-};
+use crate::{error::Error, helper::to_utc_date_time, println_log_info};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
