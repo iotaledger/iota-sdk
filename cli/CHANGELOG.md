@@ -23,7 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-`WalletCommand::Accounts` variant to list all available accounts in a wallet;
+- `WalletCommand::Accounts` variant to list all available accounts in a wallet;
+- `addresses` now additionally prints the hex version of the address;
 
 ## 1.0.0 - 2023-07-27
 
