@@ -1,5 +1,11 @@
 # Changelog
 
+## \[2.0.3-rc.42]
+
+- [`5972a23df`](https://github.com/iotaledger/iota-sdk/commit/5972a23dffcde0d10278006af9625914a907419b)([#845](https://github.com/iotaledger/iota-sdk/pull/845)) Add `ConsolidationParams`.
+  `Account::consolidateOutputs` take `ConsolidationParams`.
+- [`9b5adfb23`](https://github.com/iotaledger/iota-sdk/commit/9b5adfb236ec74192f99f4a1e3c9c7398b83153a)([#957](https://github.com/iotaledger/iota-sdk/pull/957)) Bump stronghold to 2.0.
+
 ## \[2.0.3-rc.41]
 
 - [`feef5577`](https://github.com/iotaledger/iota-sdk/commit/feef557757f4b6ad6d4e4a9a57b1b692387eb7ea)([#816](https://github.com/iotaledger/iota-sdk/pull/816)) Add `TransactionProgressWalletEvent::getProgress` method.
