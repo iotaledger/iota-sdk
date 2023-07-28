@@ -77,11 +77,11 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
         1 => Ok(Some(accounts.swap_remove(0))),
         _ => {
             // fetch all available account aliases to display to the user
-            let aliases = wallet.get_account_aliases().await?;
+            let account_aliases = wallet.get_account_aliases().await?;
 
             let index = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select an account:")
-                .items(&aliases)
+                .items(&account_aliases)
                 .default(0)
                 .interact_on(&Term::stderr())?;
 

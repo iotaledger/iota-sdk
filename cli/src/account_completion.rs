@@ -4,11 +4,12 @@
 use dialoguer::Completion;
 
 pub(crate) struct AccountCompletion<'a> {
-    options: [&'a str; 37],
+    options: [&'a str; 38],
 }
 
 pub(crate) const ACCOUNT_COMPLETION: AccountCompletion = AccountCompletion {
     options: [
+        "accounts",
         "addresses",
         "balance",
         "burn-native-token",
