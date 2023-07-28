@@ -164,7 +164,7 @@ impl Output {
         }
     }
 
-    /// Return the output kind of an [`Output`] as a string.
+    /// Returns the output kind of an [`Output`] as a string.
     pub fn kind_str(&self) -> &str {
         match self {
             Self::Alias(_) => "Alias",
