@@ -8,7 +8,7 @@ enum TokenSchemeType {
 }
 
 abstract class TokenScheme {
-    private type: TokenSchemeType;
+    readonly type: TokenSchemeType;
 
     constructor(type: TokenSchemeType) {
         this.type = type;
@@ -26,9 +26,9 @@ abstract class TokenScheme {
  * Simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: bigint;
-    private meltedTokens: bigint;
-    private maximumSupply: bigint;
+    readonly mintedTokens: bigint;
+    readonly meltedTokens: bigint;
+    readonly maximumSupply: bigint;
 
     constructor(
         mintedTokens: bigint,

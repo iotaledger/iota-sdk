@@ -12,7 +12,7 @@ enum SignatureType {
 }
 
 abstract class Signature {
-    private type: SignatureType;
+    readonly type: SignatureType;
 
     constructor(type: SignatureType) {
         this.type = type;

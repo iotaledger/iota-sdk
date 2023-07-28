@@ -15,8 +15,8 @@ import {
  * the transaction and sign+submit/send the transaction.
  */
 export class PreparedTransaction {
-    private _preparedData: PreparedTransactionData;
-    private _account: Account;
+    readonly _preparedData: PreparedTransactionData;
+    readonly _account: Account;
 
     constructor(preparedData: PreparedTransactionData, account: Account) {
         this._preparedData = preparedData;

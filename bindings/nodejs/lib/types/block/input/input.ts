@@ -14,7 +14,7 @@ enum InputType {
 }
 
 abstract class Input {
-    private type: InputType;
+    readonly type: InputType;
 
     constructor(type: InputType) {
         this.type = type;

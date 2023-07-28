@@ -16,7 +16,7 @@ enum TransactionEssenceType {
 }
 
 abstract class TransactionEssence {
-    private type: TransactionEssenceType;
+    readonly type: TransactionEssenceType;
 
     constructor(type: TransactionEssenceType) {
         this.type = type;

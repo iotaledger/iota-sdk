@@ -16,7 +16,7 @@ enum PayloadType {
 }
 
 abstract class Payload {
-    private type: PayloadType;
+    readonly type: PayloadType;
 
     constructor(type: PayloadType) {
         this.type = type;
