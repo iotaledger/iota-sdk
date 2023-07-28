@@ -15,10 +15,76 @@ use super::{
     protocol::ProtocolParameters,
     signature::Ed25519Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    Block, Error, IssuerId,
+    Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
 };
 
 pub type BasicBlock = BlockWrapper<BasicBlockData>;
+
+impl BlockBuilder<BasicBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
+    #[inline(always)]
+    pub fn new(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        strong_parents: StrongParents,
+        signature: Ed25519Signature,
+    ) -> Self {
+        Self(BlockWrapper {
+            protocol_version: PROTOCOL_VERSION,
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            data: BasicBlockData {
+                strong_parents,
+                weak_parents: Default::default(),
+                shallow_like_parents: Default::default(),
+                payload: OptionalPayload::default(),
+                burned_mana: Default::default(),
+            },
+            signature,
+        })
+    }
+
+    /// Adds a protocol version to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
+        self.0.protocol_version = protocol_version;
+        self
+    }
+
+    /// Adds weak parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.0.data.weak_parents = weak_parents.into();
+        self
+    }
+
+    /// Adds shallow like parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.0.data.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+
+    /// Adds a payload to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.0.data.payload = payload.into();
+        self
+    }
+
+    /// Adds burned mana to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
+        self.0.data.burned_mana = burned_mana;
+        self
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicBlockData {
@@ -199,7 +265,7 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// The block object that nodes gossip around in the network.
+    /// A basic block.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct BasicBlockDataDto {

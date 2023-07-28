@@ -226,7 +226,7 @@ impl SecretManage for StrongholdAdapter {
             .delete_secret(derive_location.record_path())
             .map_err(Error::from)?;
 
-        Ok(Ed25519Signature::new(public_key, signature))
+        Ok(Ed25519Signature::new(public_key.into(), signature))
     }
 
     async fn sign_secp256k1_ecdsa(

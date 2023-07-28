@@ -14,10 +14,64 @@ use super::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
     signature::Ed25519Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    Block, Error, IssuerId,
+    Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
 };
 
 pub type ValidationBlock = BlockWrapper<ValidationBlockData>;
+
+impl BlockBuilder<ValidationBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn new(
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        strong_parents: StrongParents,
+        highest_supported_version: u8,
+        protocol_parameters: &ProtocolParameters,
+        signature: Ed25519Signature,
+    ) -> Self {
+        Self(BlockWrapper {
+            protocol_version: PROTOCOL_VERSION,
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            data: ValidationBlockData {
+                strong_parents,
+                weak_parents: Default::default(),
+                shallow_like_parents: Default::default(),
+                highest_supported_version,
+                protocol_parameters_hash: protocol_parameters.hash(),
+            },
+            signature,
+        })
+    }
+
+    /// Adds a protocol version to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
+        self.0.protocol_version = protocol_version;
+        self
+    }
+
+    /// Adds weak parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.0.data.weak_parents = weak_parents.into();
+        self
+    }
+
+    /// Adds shallow like parents to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.0.data.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ValidationBlockData {
@@ -96,7 +150,6 @@ impl Packable for ValidationBlockData {
 
         let protocol_parameters_hash = ProtocolParametersHash::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        // TODO: Is this actually right/needed?
         if VERIFY {
             validate_protocol_params_hash(&protocol_parameters_hash, visitor).map_err(UnpackError::Packable)?;
         }
@@ -212,7 +265,7 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// The block object that nodes gossip around in the network.
+    /// A special type of block used by validators to secure the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct ValidationBlockDataDto {
