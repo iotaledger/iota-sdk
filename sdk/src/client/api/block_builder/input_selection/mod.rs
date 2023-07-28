@@ -30,6 +30,7 @@ use crate::{
             OUTPUT_COUNT_RANGE,
         },
         protocol::ProtocolParameters,
+        slot::SlotIndex,
     },
     utils::unix_timestamp_now,
 };
@@ -45,7 +46,7 @@ pub struct InputSelection {
     burn: Option<Burn>,
     remainder_address: Option<Address>,
     protocol_parameters: ProtocolParameters,
-    timestamp: u32,
+    slot_index: SlotIndex,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashMap<ChainId, Option<AccountTransition>>,
 }

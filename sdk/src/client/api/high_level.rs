@@ -26,6 +26,7 @@ use crate::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload,
             },
+            slot::SlotIndex,
             Block, BlockId,
         },
     },
@@ -289,5 +290,10 @@ impl Client {
         }
 
         Ok(current_time)
+    }
+
+    // TODO !!!
+    pub async fn get_slot_index(&self) -> Result<SlotIndex> {
+        todo!()
     }
 }

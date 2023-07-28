@@ -12,6 +12,7 @@ use crate::{
         payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionPayload},
         semantic::{semantic_validation, ConflictReason, ValidationContext},
         signature::Ed25519Signature,
+        slot::SlotIndex,
         Block, BlockId,
     },
 };
@@ -27,7 +28,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
-    current_time: u32,
+    slot_index: SlotIndex,
 ) -> crate::client::Result<ConflictReason> {
     let transaction_id = transaction.id();
     let TransactionEssence::Regular(essence) = transaction.essence();
@@ -41,7 +42,7 @@ pub fn verify_semantic(
         essence,
         inputs.iter().map(|(id, input)| (*id, *input)),
         transaction.unlocks(),
-        current_time,
+        slot_index,
     );
 
     Ok(semantic_validation(context, inputs.as_slice(), transaction.unlocks())?)

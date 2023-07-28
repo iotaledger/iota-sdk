@@ -301,7 +301,7 @@ impl BasicOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.milestone_timestamp)
+            .locked_address(self.address(), context.slot_index)
             .unlock(unlock, inputs, context)
     }
 

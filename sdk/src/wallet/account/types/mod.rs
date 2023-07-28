@@ -24,6 +24,7 @@ use crate::{
             address::{dto::AddressDto, Address},
             output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+            slot::SlotIndex,
             BlockId, Error as BlockError,
         },
         TryFromDto,
@@ -55,12 +56,12 @@ impl OutputData {
     pub fn input_signing_data(
         &self,
         account: &AccountDetails,
-        current_time: u32,
+        slot_index: SlotIndex,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let (unlock_address, _unlocked_account_or_nft_address) =
             self.output
-                .required_and_unlocked_address(current_time, &self.output_id, account_transition)?;
+                .required_and_unlocked_address(slot_index, &self.output_id, account_transition)?;
 
         let chain = if unlock_address == self.address {
             self.chain

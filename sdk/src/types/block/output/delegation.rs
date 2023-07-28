@@ -43,7 +43,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -348,7 +352,7 @@ impl DelegationOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), ConflictReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.milestone_timestamp)
+            .locked_address(self.address(), context.slot_index)
             .unlock(unlock, inputs, context)
     }
 }
