@@ -29,27 +29,9 @@ use crate::types::block::{
 /// A builder to build a [`Block`].
 #[derive(Clone)]
 #[must_use]
-pub struct BlockBuilder<B> {
-    protocol_version: Option<u8>,
-    network_id: u64,
-    issuing_time: u64,
-    slot_commitment_id: SlotCommitmentId,
-    latest_finalized_slot: SlotIndex,
-    issuer_id: IssuerId,
-    data: B,
-    signature: Ed25519Signature,
-}
+pub struct BlockBuilder<B>(B);
 
-impl<B> BlockBuilder<B> {
-    /// Adds a protocol version to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: impl Into<Option<u8>>) -> Self {
-        self.protocol_version = protocol_version.into();
-        self
-    }
-}
-
-impl BlockBuilder<BasicBlockData> {
+impl BlockBuilder<BasicBlock> {
     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
     #[inline(always)]
     pub fn new(
@@ -61,8 +43,8 @@ impl BlockBuilder<BasicBlockData> {
         strong_parents: StrongParents,
         signature: Ed25519Signature,
     ) -> Self {
-        Self {
-            protocol_version: Default::default(),
+        Self(BlockWrapper {
+            protocol_version: PROTOCOL_VERSION,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -76,39 +58,46 @@ impl BlockBuilder<BasicBlockData> {
                 burned_mana: Default::default(),
             },
             signature,
-        }
+        })
+    }
+
+    /// Adds a protocol version to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
+        self.0.protocol_version = protocol_version;
+        self
     }
 
     /// Adds weak parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.data.weak_parents = weak_parents.into();
+        self.0.data.weak_parents = weak_parents.into();
         self
     }
 
     /// Adds shallow like parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.data.shallow_like_parents = shallow_like_parents.into();
+        self.0.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
 
     /// Adds a payload to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
-        self.data.payload = payload.into();
+        self.0.data.payload = payload.into();
         self
     }
 
     /// Adds burned mana to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
-        self.data.burned_mana = burned_mana;
+        self.0.data.burned_mana = burned_mana;
         self
     }
 }
 
-impl BlockBuilder<ValidationBlockData> {
+impl BlockBuilder<ValidationBlock> {
     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
     #[inline(always)]
     pub fn new(
@@ -122,8 +111,8 @@ impl BlockBuilder<ValidationBlockData> {
         protocol_parameters: &ProtocolParameters,
         signature: Ed25519Signature,
     ) -> Self {
-        Self {
-            protocol_version: Default::default(),
+        Self(BlockWrapper {
+            protocol_version: PROTOCOL_VERSION,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -137,25 +126,32 @@ impl BlockBuilder<ValidationBlockData> {
                 protocol_parameters_hash: protocol_parameters.hash(),
             },
             signature,
-        }
+        })
+    }
+
+    /// Adds a protocol version to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
+        self.0.protocol_version = protocol_version;
+        self
     }
 
     /// Adds weak parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.data.weak_parents = weak_parents.into();
+        self.0.data.weak_parents = weak_parents.into();
         self
     }
 
     /// Adds shallow like parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.data.shallow_like_parents = shallow_like_parents.into();
+        self.0.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
 }
 
-impl<B> BlockBuilder<B> {
+impl<B> BlockBuilder<BlockWrapper<B>> {
     pub fn from_block_data(
         network_id: u64,
         issuing_time: u64,
@@ -165,8 +161,8 @@ impl<B> BlockBuilder<B> {
         data: B,
         signature: Ed25519Signature,
     ) -> Self {
-        Self {
-            protocol_version: Default::default(),
+        Self(BlockWrapper {
+            protocol_version: PROTOCOL_VERSION,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -174,26 +170,17 @@ impl<B> BlockBuilder<B> {
             issuer_id,
             data,
             signature,
-        }
+        })
     }
 }
 
 impl<B> BlockBuilder<B>
 where
-    BlockWrapper<B>: Packable,
-    Block: From<BlockWrapper<B>>,
+    B: Packable,
+    Block: From<B>,
 {
     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-        let block = Block::from(BlockWrapper {
-            protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
-            network_id: self.network_id,
-            issuing_time: self.issuing_time,
-            slot_commitment_id: self.slot_commitment_id,
-            latest_finalized_slot: self.latest_finalized_slot,
-            issuer_id: self.issuer_id,
-            data: self.data,
-            signature: self.signature,
-        });
+        let block = Block::from(self.0);
 
         verify_parents(
             block.strong_parents(),
@@ -392,8 +379,8 @@ impl Block {
         issuer_id: IssuerId,
         strong_parents: StrongParents,
         signature: Ed25519Signature,
-    ) -> BlockBuilder<BasicBlockData> {
-        BlockBuilder::<BasicBlockData>::new(
+    ) -> BlockBuilder<BasicBlock> {
+        BlockBuilder::<BasicBlock>::new(
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -416,8 +403,8 @@ impl Block {
         highest_supported_version: u8,
         protocol_parameters: &ProtocolParameters,
         signature: Ed25519Signature,
-    ) -> BlockBuilder<ValidationBlockData> {
-        BlockBuilder::<ValidationBlockData>::new(
+    ) -> BlockBuilder<ValidationBlock> {
+        BlockBuilder::<ValidationBlock>::new(
             network_id,
             issuing_time,
             slot_commitment_id,
