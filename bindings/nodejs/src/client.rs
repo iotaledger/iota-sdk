@@ -53,7 +53,7 @@ impl ClientMethodHandler {
                 (msg, is_err)
             }
             Err(e) => {
-                log::debug!("{:?}", e);
+                log::error!("{:?}", e);
                 (format!("Couldn't parse to method with error - {e:?}"), true)
             }
         }
