@@ -4,7 +4,11 @@
 impl_id!(
     pub BlockId,
     40,
-    "A block identifier, the BLAKE2b-256 hash of the block bytes. See <https://www.blake2.net/> for more information."
+    "A Block ID denotes an identifier of a block.
+    It created using the concatenation of the following:
+    - The BLAKE2b-256 hash of concatenating the Block header hash, Block Hash and Serialized Signature
+    - Serialized Slot Index
+    See <https://www.blake2.net/> for more information."
 );
 
 #[cfg(feature = "serde")]
