@@ -417,6 +417,17 @@ impl Output {
 
         Ok(())
     }
+
+    /// Return the output kind string of an [`Output`].
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Output::Alias(_) => "Alias",
+            Output::Basic(_) => "Basic",
+            Output::Foundry(_) => "Foundry",
+            Output::Nft(_) => "Nft",
+            Output::Treasury(_) => "Treasury",
+        }
+    }
 }
 
 impl Packable for Output {

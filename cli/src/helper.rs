@@ -268,13 +268,3 @@ pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
     }
     Ok(())
 }
-
-pub fn get_output_type_str(output: &Output) -> &str {
-    match output {
-        Output::Alias(_) => "Alias",
-        Output::Basic(_) => "Basic",
-        Output::Foundry(_) => "Foundry",
-        Output::Nft(_) => "Nft",
-        Output::Treasury(_) => "Treasury",
-    }
-}

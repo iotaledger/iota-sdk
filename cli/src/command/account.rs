@@ -632,12 +632,7 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
         println_log_info!("No outputs found");
     } else {
         for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!(
-                "{}\t{}\t{}",
-                i,
-                &output_data.output_id,
-                get_output_type_str(&output_data.output),
-            );
+            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
         }
     }
     Ok(())
