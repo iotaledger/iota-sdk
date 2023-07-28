@@ -1,6 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod block_issuer;
 mod issuer;
 mod metadata;
 mod sender;

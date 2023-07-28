@@ -6,7 +6,7 @@ use derive_more::{Deref, Display, From};
 /// Timeline is divided into slots, and each slot has a corresponding slot index.
 /// To calculate the slot index of a timestamp, `genesisTimestamp` and the duration of a slot are needed.
 /// The slot index of timestamp `ts` is `(ts - genesisTimestamp)/duration + 1`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, From, Deref, Display, packable::Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, From, Deref, Display, PartialOrd, Ord, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SlotIndex(u64);
 
