@@ -142,7 +142,7 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 0);
 
     // Wait until expired
-    tokio::time::sleep(std::time::Duration::from_secs(seconds_until_expired.into())).await;
+    tokio::time::sleep(std::time::Duration::from_secs(seconds_until_expired)).await;
 
     // Account 1 balance after expiration
     let balance = account_1.sync(None).await?;

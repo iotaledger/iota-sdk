@@ -24,10 +24,10 @@ impl PartialEq<u64> for SlotIndex {
 }
 
 impl core::ops::Add<u64> for SlotIndex {
-    type Output = SlotIndex;
+    type Output = Self;
 
     fn add(self, other: u64) -> Self {
-        SlotIndex(self.0 + other)
+        Self(self.0 + other)
     }
 }
 
@@ -38,10 +38,10 @@ impl core::ops::AddAssign<u64> for SlotIndex {
 }
 
 impl core::ops::Sub<u64> for SlotIndex {
-    type Output = SlotIndex;
+    type Output = Self;
 
     fn sub(self, other: u64) -> Self {
-        SlotIndex(self.0 - other)
+        Self(self.0 - other)
     }
 }
 
