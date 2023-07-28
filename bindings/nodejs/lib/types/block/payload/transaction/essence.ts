@@ -35,23 +35,23 @@ abstract class TransactionEssence {
  */
 class RegularTransactionEssence extends TransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
-    readonly networkId: number;
-    readonly inputsCommitment: HexEncodedString;
+    networkId: number;
+    inputsCommitment: HexEncodedString;
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
-    readonly inputs: Input[];
+    inputs: Input[];
 
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
-    readonly outputs: Output[];
+    outputs: Output[];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    readonly payload: Payload | undefined;
+    payload: Payload | undefined;
 
     constructor(
         networkId: number,

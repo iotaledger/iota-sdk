@@ -35,7 +35,7 @@ class TreasuryInput extends Input {
     /**
      * The milestone id of the input.
      */
-    readonly milestoneId: HexEncodedString;
+    milestoneId: HexEncodedString;
 
     constructor(milestoneId: HexEncodedString) {
         super(InputType.Treasury);
@@ -50,11 +50,11 @@ class UTXOInput extends Input {
     /**
      * The transaction Id.
      */
-    readonly transactionId: HexEncodedString;
+    transactionId: HexEncodedString;
     /**
      * The output index.
      */
-    readonly transactionOutputIndex: number;
+    transactionOutputIndex: number;
 
     constructor(
         transactionId: HexEncodedString,
