@@ -136,8 +136,6 @@ tokio = { version = "1.29.1", default-features = false, features = [
 
 [features]
 default = ["client", "wallet", "tls"]
-
-events = []
 ledger_nano = ["iota-ledger-nano"]
 mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
@@ -163,12 +161,7 @@ std = [
     "iota-crypto/std",
     "once_cell?/std",
 ]
-storage = [
-    "iota-crypto/chacha",
-    "dep:time",
-    "dep:anymap",
-    "dep:once_cell",
-]
+storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
     "iota_stronghold",
     "derive_builder",
@@ -178,7 +171,7 @@ stronghold = [
     "dep:once_cell",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
-
+events = []
 client = [
     "async-trait",
     "futures",

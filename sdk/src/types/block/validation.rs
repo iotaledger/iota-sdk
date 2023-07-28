@@ -50,7 +50,7 @@ impl ValidationBlock {
         &self.shallow_like_parents
     }
 
-    /// Returns the shallow like parents of a [`ValidationBlock`].
+    /// Returns the highest supported protocol version of a [`ValidationBlock`].
     #[inline(always)]
     pub fn highest_supported_version(&self) -> u8 {
         self.highest_supported_version
