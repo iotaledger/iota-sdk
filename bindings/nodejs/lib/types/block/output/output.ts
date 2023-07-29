@@ -19,18 +19,27 @@ export type OutputId = string;
  * All of the output types.
  */
 enum OutputType {
+    /** TODO. */
     Treasury = 2,
+    /** TODO. */
     Basic = 3,
+    /** TODO. */
     Alias = 4,
+    /** TODO. */
     Foundry = 5,
+    /** TODO. */
     Nft = 6,
 }
 
+/**
+ * TODO.
+ */
 abstract class Output /*implements ICommonOutput*/ {
     readonly amount: string;
 
     readonly type: OutputType;
 
+    /** TODO. */
     constructor(type: OutputType, amount: bigint | string) {
         this.type = type;
         if (typeof amount == 'bigint') {
@@ -41,19 +50,22 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * The type of output.
+     * Get the type of output.
      */
     getType(): OutputType {
         return this.type;
     }
 
     /**
-     * The amount of the output.
+     * Get the amount of the output.
      */
     getAmount(): bigint {
         return BigInt(this.amount);
     }
 
+    /**
+     * TODO.
+     */
     public static parse(data: any): Output {
         if (data.type == OutputType.Treasury) {
             return plainToInstance(
@@ -89,6 +101,9 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     })
     readonly features?: Feature[];
 
+    /**
+     * TODO.
+     */
     constructor(
         type: OutputType,
         amount: bigint,
@@ -122,7 +137,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * Features contained by the output.
+     * Get the features contained by the output.
      */
     getFeatures(): Feature[] | undefined {
         return this.features;
@@ -132,6 +147,9 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
  * Treasury Output.
  */
 class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
+    /**
+     * TODO.
+     */
     constructor(amount: bigint) {
         super(OutputType.Treasury, amount);
     }
@@ -140,6 +158,9 @@ class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
  * Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
+    /**
+     * TODO.
+     */
     constructor(amount: bigint, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
     }
@@ -151,6 +172,9 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     })
     readonly immutableFeatures?: Feature[];
 
+    /**
+     * TODO.
+     */
     constructor(
         type: OutputType,
         amount: bigint,
@@ -169,6 +193,9 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
     readonly stateMetadata?: HexEncodedString;
 
+    /**
+     * TODO.
+     */
     constructor(
         type: OutputType,
         amount: bigint,
@@ -189,6 +216,9 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     readonly stateIndex: number;
     readonly foundryCounter: number;
 
+    /**
+     * TODO.
+     */
     constructor(
         unlockConditions: UnlockCondition[],
         amount: bigint,
@@ -227,6 +257,9 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     readonly nftId: HexEncodedString;
 
+    /**
+     * TODO.
+     */
     constructor(
         amount: bigint,
         nftId: HexEncodedString,
@@ -254,6 +287,9 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     })
     readonly tokenScheme: TokenScheme;
 
+    /**
+     * TODO.
+     */
     constructor(
         amount: bigint,
         serialNumber: number,

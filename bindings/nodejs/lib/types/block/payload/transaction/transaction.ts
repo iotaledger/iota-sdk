@@ -29,6 +29,9 @@ class TransactionPayload extends Payload {
     })
     unlocks: Unlock[];
 
+    /**
+     * TODO.
+     */
     constructor(essence: TransactionEssence, unlocks: Unlock[]) {
         super(PayloadType.Transaction);
         this.essence = essence;

@@ -6,14 +6,19 @@ import { Burn } from '../client';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {
+    /** TODO */
     remainderValueStrategy?: RemainderValueStrategy;
+    /** TODO */
     taggedDataPayload?: TaggedDataPayload;
     /** Custom inputs that should be used for the transaction */
     customInputs?: string[];
+    /** TODO */
     mandatoryInputs?: string[];
+    /** TODO */
     burn?: Burn;
     /** Optional note, that is only stored locally */
     note?: string;
+    /** TODO */
     allowMicroAmount: boolean;
 }
 
@@ -25,24 +30,31 @@ export type RemainderValueStrategy =
 
 /** ChangeAddress variant of RemainderValueStrategy */
 export type ChangeAddress = {
+    /** TODO */
     strategy: 'ChangeAddress';
+    /** TODO */
     value: null;
 };
 
 /** ReuseAddress variant of RemainderValueStrategy */
 export type ReuseAddress = {
+    /** TODO */
     strategy: 'ReuseAddress';
+    /** TODO */
     value: null;
 };
 
 /** CustomAddress variant of RemainderValueStrategy */
 export type CustomAddress = {
+    /** TODO */
     strategy: 'CustomAddress';
+    /** TODO */
     value: string;
 };
 
 /** Native token options for creating */
 export interface CreateNativeTokenParams {
+    /** TODO */
     aliasId?: string;
     /** Hex encoded number */
     circulatingSupply: bigint;

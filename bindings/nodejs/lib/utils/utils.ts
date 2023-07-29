@@ -33,6 +33,8 @@ export class Utils {
 
     /**
      * Returns a hex encoded seed for a mnemonic.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static mnemonicToHexSeed(mnemonic: string): HexEncodedString {
         return callUtilsMethod({
@@ -45,6 +47,8 @@ export class Utils {
 
     /**
      * Computes the alias id for the given alias output id.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static computeAliasId(outputId: string): AliasId {
         return callUtilsMethod({
@@ -57,6 +61,8 @@ export class Utils {
 
     /**
      * Computes the foundry id.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static computeFoundryId(
         aliasId: AliasId,
@@ -75,6 +81,8 @@ export class Utils {
 
     /**
      * Computes the NFT id for the given NFT output id.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static computeNftId(outputId: string): NftId {
         return callUtilsMethod({
@@ -156,6 +164,8 @@ export class Utils {
 
     /**
      * Returns a valid Address parsed from a String.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static parseBech32Address(address: string): Address {
         const addr = callUtilsMethod({
@@ -169,6 +179,8 @@ export class Utils {
 
     /**
      * Returns a block ID (Blake2b256 hash of the block bytes)
+     * @param todo TODO.
+     * @returns TODO.
      */
     static blockId(block: Block): BlockId {
         return callUtilsMethod({
@@ -181,6 +193,8 @@ export class Utils {
 
     /**
      * Returns a Milestone ID (Blake2b256 hash of the milestone essence)
+     * @param todo TODO.
+     * @returns TODO.
      */
     static milestoneId(payload: MilestonePayload): MilestoneId {
         return callUtilsMethod({
@@ -207,6 +221,8 @@ export class Utils {
 
     /**
      * Transforms bech32 to hex.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static bech32ToHex(bech32: string): string {
         return callUtilsMethod({
@@ -219,6 +235,8 @@ export class Utils {
 
     /**
      * Transforms a hex encoded address to a bech32 encoded address.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static hexToBech32(hex: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -232,6 +250,8 @@ export class Utils {
 
     /**
      * Transforms an alias id to a bech32 encoded address.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static aliasIdToBech32(aliasId: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -245,6 +265,8 @@ export class Utils {
 
     /**
      * Transforms an nft id to a bech32 encoded address.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static nftIdToBech32(nftId: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -258,6 +280,8 @@ export class Utils {
 
     /**
      * Transforms a hex encoded public key to a bech32 encoded address.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static hexPublicKeyToBech32Address(hex: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -271,6 +295,8 @@ export class Utils {
 
     /**
      * Checks if a String is a valid bech32 encoded address.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static isAddressValid(address: string): boolean {
         return callUtilsMethod({
@@ -283,6 +309,8 @@ export class Utils {
 
     /**
      * Compute the hash of a transaction essence.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static hashTransactionEssence(
         essence: TransactionEssence,
@@ -297,6 +325,8 @@ export class Utils {
 
     /**
      * Verifies an ed25519 signature against a message.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static verifyEd25519Signature(
         signature: Ed25519Signature,
@@ -313,6 +343,8 @@ export class Utils {
 
     /**
      * Verifies a Secp256k1Ecdsa signature against a message.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static verifySecp256k1EcdsaSignature(
         publicKey: HexEncodedString,
@@ -331,6 +363,8 @@ export class Utils {
 
     /**
      * Verify if a mnemonic is a valid BIP39 mnemonic.
+     * @param todo TODO.
+     * @returns TODO.
      */
     static verifyMnemonic(mnemonic: string): void {
         return callUtilsMethod({

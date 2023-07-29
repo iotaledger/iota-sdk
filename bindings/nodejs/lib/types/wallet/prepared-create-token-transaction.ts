@@ -11,6 +11,9 @@ import { PreparedTransaction } from './prepared-transaction';
 export class PreparedCreateNativeTokenTransaction extends PreparedTransaction {
     readonly _tokenId: string;
 
+    /**
+     * TODO.
+     */
     constructor(
         preparedData: PreparedCreateNativeTokenTransactionData,
         account: Account,

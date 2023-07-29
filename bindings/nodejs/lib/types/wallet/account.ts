@@ -47,17 +47,25 @@ export interface BaseCoinBalance {
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
+    /** TODO */
     alias: bigint;
+    /** TODO */
     basic: bigint;
+    /** TODO */
     foundry: bigint;
+    /** TODO */
     nft: bigint;
 }
 
 /** The balance of a native token */
 export interface NativeTokenBalance {
+    /** TODO */
     tokenId: HexEncodedString;
+    /** TODO */
     metadata?: string;
+    /** TODO */
     total: bigint;
+    /** TODO */
     available: bigint;
 }
 
@@ -103,38 +111,57 @@ export interface SyncOptions {
 
 /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
 export interface AccountSyncOptions {
+    /** TODO */
     basicOutputs?: boolean;
+    /** TODO */
     aliasOutputs?: boolean;
+    /** TODO */
     nftOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an alias output. */
 export interface AliasSyncOptions {
+    /** TODO */
     basicOutputs?: boolean;
+    /** TODO */
     aliasOutputs?: boolean;
+    /** TODO */
     nftOutputs?: boolean;
+    /** TODO */
     foundryOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an nft output. */
 export interface NftSyncOptions {
+    /** TODO */
     basicOutputs?: boolean;
+    /** TODO */
     aliasOutputs?: boolean;
+    /** TODO */
     nftOutputs?: boolean;
 }
 
 /** The account object */
 export interface AccountMeta {
+    /** TODO */
     index: number;
+    /** TODO */
     coinType: CoinType;
+    /** TODO */
     alias: string;
+    /** TODO */
     publicAddresses: AccountAddress[];
+    /** TODO */
     internalAddresses: AccountAddress[];
+    /** TODO */
     addressesWithUnspentOutputs: AddressWithUnspentOutputs[];
+    /** TODO */
     outputs: { [outputId: string]: OutputData };
     /** Output IDs of unspent outputs that are currently used as input for transactions */
     lockedOutputs: Set<string>;
+    /** TODO */
     unspentOutputs: { [outputId: string]: OutputData };
+    /** TODO */
     transactions: { [transactionId: string]: Transaction };
     /** Transaction IDs of pending transactions */
     pendingTransactions: Set<string>;
@@ -156,8 +183,11 @@ export interface AccountMetadata {
 
 /** Options for account creation */
 export interface CreateAccountPayload {
+    /** TODO */
     alias?: string;
+    /** TODO */
     bech32Hrp?: string;
+    /** TODO */
     addresses?: AccountAddress[];
 }
 

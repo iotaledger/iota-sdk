@@ -8,20 +8,26 @@ import { Address, AddressDiscriminator } from '../address';
  * All of the feature block types.
  */
 enum FeatureType {
+    /** TODO. */
     Sender = 0,
+    /** TODO. */
     Issuer = 1,
+    /** TODO. */
     Metadata = 2,
+    /** TODO. */
     Tag = 3,
 }
 
+/** TODO. */
 abstract class Feature {
     readonly type: FeatureType;
 
+    /** TODO. */
     constructor(type: FeatureType) {
         this.type = type;
     }
     /**
-     * The type of feature.
+     * Get the type of feature.
      */
     getType(): FeatureType {
         return this.type;
@@ -36,12 +42,13 @@ class SenderFeature extends Feature {
     })
     readonly address: Address;
 
+    /** TODO. */
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
     }
     /**
-     * The address.
+     * Get the sender address.
      */
     getSender(): Address {
         return this.address;
@@ -56,12 +63,13 @@ class IssuerFeature extends Feature {
     })
     readonly address: Address;
 
+    /** TODO. */
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;
     }
     /**
-     * The address.
+     * Get the Issuer address.
      */
     getIssuer(): Address {
         return this.address;
@@ -71,14 +79,15 @@ class IssuerFeature extends Feature {
  * Metadata feature.
  */
 class MetadataFeature extends Feature {
+    /** Defines metadata (arbitrary binary data) that will be stored in the output. */
     readonly data: string;
-
+    /** TODO. */
     constructor(data: string) {
         super(FeatureType.Metadata);
         this.data = data;
     }
     /**
-     * Defines metadata (arbitrary binary data) that will be stored in the output.
+     * Get the metadata.
      */
     getData(): string {
         return this.data;
@@ -88,14 +97,15 @@ class MetadataFeature extends Feature {
  * Tag feature.
  */
 class TagFeature extends Feature {
+    /** Defines a tag for the data. */
     readonly tag: string;
-
+    /** TODO. */
     constructor(tag: string) {
         super(FeatureType.Tag);
         this.tag = tag;
     }
     /**
-     * Defines a tag for the data.
+     * Get the tag.
      */
     getTag(): string {
         return this.tag;

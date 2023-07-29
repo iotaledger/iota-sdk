@@ -8,18 +8,26 @@ import { Address, AddressDiscriminator, AliasAddress } from '../address';
  * All of the unlock condition types.
  */
 enum UnlockConditionType {
+    /** TODO */
     Address = 0,
+    /** TODO */
     StorageDepositReturn = 1,
+    /** TODO */
     Timelock = 2,
+    /** TODO */
     Expiration = 3,
+    /** TODO */
     StateControllerAddress = 4,
+    /** TODO */
     GovernorAddress = 5,
+    /** TODO */
     ImmutableAliasAddress = 6,
 }
 
 abstract class UnlockCondition {
     readonly type: UnlockConditionType;
 
+    /** TODO */
     constructor(type: UnlockConditionType) {
         this.type = type;
     }
@@ -30,6 +38,9 @@ abstract class UnlockCondition {
         return this.type;
     }
 
+    /**
+     * TODO.
+     */
     public static parse(data: any): UnlockCondition {
         if (data.type == UnlockConditionType.Address) {
             return plainToInstance(
@@ -71,12 +82,17 @@ abstract class UnlockCondition {
     }
 }
 
+/**
+ * TODO.
+ */
 class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlockCondition*/ {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
-
+    /**
+     * TODO.
+     */
     constructor(address: Address) {
         super(UnlockConditionType.Address);
         this.address = address;
@@ -100,6 +116,9 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
     })
     readonly returnAddress: Address;
 
+    /**
+     * TODO.
+     */
     constructor(returnAddress: Address, amount: bigint | string) {
         super(UnlockConditionType.StorageDepositReturn);
         if (typeof amount == 'bigint') {
@@ -129,18 +148,24 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
 class TimelockUnlockCondition extends UnlockCondition /*implements ITimelockUnlockCondition*/ {
     readonly unixTime: number;
 
+    /**
+     * TODO.
+     */
     constructor(unixTime: number) {
         super(UnlockConditionType.Timelock);
         this.unixTime = unixTime;
     }
     /**
-     * Unix time (seconds since Unix epoch) starting from which the output can be consumed.
+     * Get the Unix time (seconds since Unix epoch) starting from which the output can be consumed.
      */
     getUnixTime(): number {
         return this.unixTime;
     }
 }
 
+/**
+ * TODO.
+ */
 class ExpirationUnlockCondition extends UnlockCondition /*implements IExpirationUnlockCondition*/ {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
@@ -148,13 +173,16 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
     readonly returnAddress: Address;
     readonly unixTime: number;
 
+    /**
+     * TODO.
+     */
     constructor(returnAddress: Address, unixTime: number) {
         super(UnlockConditionType.Expiration);
         this.returnAddress = returnAddress;
         this.unixTime = unixTime;
     }
     /**
-     * Before this unix time, the condition is allowed to unlock the output,
+     * Get the Unix time. Before this unix time, the condition is allowed to unlock the output,
      * after that only the address defined in return address.
      */
     getUnixTime(): number {
@@ -162,7 +190,7 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
     }
 
     /**
-     * The return address.
+     * Get the return address.
      */
     getReturnAddress(): Address {
         return this.returnAddress;
@@ -176,13 +204,16 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+    /**
+     * TODO.
+     */
     constructor(address: Address) {
         super(UnlockConditionType.StateControllerAddress);
         this.address = address;
     }
 
     /**
-     * The address.
+     * Get the address.
      */
     getAddress(): Address {
         return this.address;
@@ -196,13 +227,16 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+    /**
+     * TODO.
+     */
     constructor(address: Address) {
         super(UnlockConditionType.GovernorAddress);
         this.address = address;
     }
 
     /**
-     * The address.
+     * Get the address.
      */
     getAddress(): Address {
         return this.address;
@@ -216,14 +250,16 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements 
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
-
+    /**
+     * TODO.
+     */
     constructor(address: AliasAddress) {
         super(UnlockConditionType.ImmutableAliasAddress);
         this.address = address;
     }
 
     /**
-     * The address.
+     * Get the address.
      */
     getAddress(): Address {
         return this.address;

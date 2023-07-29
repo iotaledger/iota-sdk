@@ -16,6 +16,9 @@ class TaggedDataPayload extends Payload {
      * The index data.
      */
     data: HexEncodedString;
+    /**
+     * TODO.
+     */
     constructor(tag: HexEncodedString, data: HexEncodedString) {
         super(PayloadType.TaggedData);
         this.tag = tag;

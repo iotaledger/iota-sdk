@@ -18,6 +18,9 @@ export class PreparedTransaction {
     readonly _preparedData: PreparedTransactionData;
     readonly _account: Account;
 
+    /**
+     * TODO.
+     */
     constructor(preparedData: PreparedTransactionData, account: Account) {
         this._preparedData = preparedData;
         this._account = account;

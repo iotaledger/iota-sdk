@@ -13,6 +13,7 @@ import type { IClientOptions, __ClientMethods__ } from '../types/client';
 export class ClientMethodHandler {
     methodHandler: ClientMethodHandler;
 
+    /** TODO  */
     constructor(options: IClientOptions | ClientMethodHandler) {
         // The rust client object is not extensible
         if (Object.isExtensible(options)) {
@@ -22,10 +23,15 @@ export class ClientMethodHandler {
         }
     }
 
+    /** TODO  */
     async destroy() {
         return destroyClient(this.methodHandler);
     }
 
+    /** TODO
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async callMethod(method: __ClientMethods__): Promise<string> {
         return callClientMethodAsync(
             JSON.stringify(method),
@@ -33,7 +39,10 @@ export class ClientMethodHandler {
         );
     }
 
-    // MQTT
+    /** TODO MQTT
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async listen(
         topics: string[],
         callback: (error: Error, result: string) => void,

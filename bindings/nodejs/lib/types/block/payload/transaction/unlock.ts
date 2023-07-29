@@ -8,21 +8,39 @@ import { Ed25519Signature } from '../../signature';
  * All of the unlock types.
  */
 enum UnlockType {
+    /**
+     * TODO.
+     */
     Signature = 0,
+    /**
+     * TODO.
+     */
     Reference = 1,
+    /**
+     * TODO.
+     */
     Alias = 2,
+    /**
+     * TODO.
+     */
     Nft = 3,
 }
 
+/**
+ * TODO.
+ */
 abstract class Unlock {
     readonly type: UnlockType;
 
+    /**
+     * TODO.
+     */
     constructor(type: UnlockType) {
         this.type = type;
     }
 
     /**
-     * The type of unlock.
+     * Get the type of unlock.
      */
     getType(): UnlockType {
         return this.type;
@@ -39,6 +57,9 @@ class SignatureUnlock extends Unlock {
     @Type(() => Ed25519Signature)
     signature: Ed25519Signature;
 
+    /**
+     * TODO.
+     */
     constructor(signature: Ed25519Signature) {
         super(UnlockType.Signature);
         this.signature = signature;
@@ -55,6 +76,9 @@ class ReferenceUnlock extends Unlock {
      */
     reference: number;
 
+    /**
+     * TODO.
+     */
     constructor(reference: number) {
         super(UnlockType.Reference);
         this.reference = reference;
@@ -70,6 +94,9 @@ class AliasUnlock extends Unlock {
      */
     reference: number;
 
+    /**
+     * TODO.
+     */
     constructor(reference: number) {
         super(UnlockType.Alias);
         this.reference = reference;
@@ -85,6 +112,9 @@ class NftUnlock extends Unlock {
      */
     reference: number;
 
+    /**
+     * TODO.
+     */
     constructor(reference: number) {
         super(UnlockType.Nft);
         this.reference = reference;

@@ -18,6 +18,9 @@ class TreasuryTransactionPayload extends Payload {
     @Type(() => TreasuryOutput)
     output: TreasuryOutput;
 
+    /**
+     * TODO.
+     */
     constructor(input: TreasuryInput, output: TreasuryOutput) {
         super(PayloadType.Transaction);
         this.input = input;

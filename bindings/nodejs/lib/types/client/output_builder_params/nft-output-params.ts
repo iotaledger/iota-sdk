@@ -7,6 +7,12 @@ import type { BasicOutputBuilderParams } from './basic-output-params';
  * Options for building an Nft Output
  */
 export interface NftOutputBuilderParams extends BasicOutputBuilderParams {
+    /**
+     * TODO.
+     */
     nftId: HexEncodedString;
+    /**
+     * TODO.
+     */
     immutableFeatures?: Feature[];
 }

@@ -20,6 +20,9 @@ export class ProtocolParamsMilestoneOption extends MilestoneOption {
      */
     params: string;
 
+    /**
+     * TODO.
+     */
     constructor(
         targetMilestoneIndex: number,
         protocolVersion: number,

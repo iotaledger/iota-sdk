@@ -57,6 +57,9 @@ export class Account {
     private meta: AccountMeta;
     private methodHandler: WalletMethodHandler;
 
+    /**
+     * TODO.
+     */
     constructor(accountMeta: AccountMeta, methodHandler: WalletMethodHandler) {
         this.meta = accountMeta;
         this.methodHandler = methodHandler;
@@ -317,6 +320,9 @@ export class Account {
         );
     }
 
+    /**
+     * TODO.
+     */
     async deregisterParticipationEvent(
         eventId: ParticipationEventId,
     ): Promise<void> {
@@ -486,6 +492,9 @@ export class Account {
         return plainToInstance(OutputData, parsed.payload);
     }
 
+    /**
+     * TODO.
+     */
     async getParticipationEvent(
         eventId: ParticipationEventId,
     ): Promise<ParticipationEventWithNodes> {
@@ -501,6 +510,9 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * TODO.
+     */
     async getParticipationEventIds(
         node: INode,
         eventType?: ParticipationEventType,
@@ -518,6 +530,9 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * TODO.
+     */
     async getParticipationEvents(): Promise<ParticipationEventMap> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -528,6 +543,9 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * TODO.
+     */
     async getParticipationEventStatus(
         eventId: ParticipationEventId,
     ): Promise<ParticipationEventStatus> {
@@ -946,6 +964,9 @@ export class Account {
         );
     }
 
+    /**
+     * TODO.
+     */
     async registerParticipationEvents(
         options: ParticipationEventRegistrationOptions,
     ): Promise<ParticipationEventMap> {
@@ -1245,6 +1266,9 @@ export class Account {
         return this.adjustBalancePayload(payload);
     }
 
+    /**
+     * TODO.
+     */
     async prepareVote(
         eventId?: ParticipationEventId,
         answers?: number[],
@@ -1268,6 +1292,9 @@ export class Account {
         );
     }
 
+    /**
+     * TODO.
+     */
     async prepareStopParticipating(
         eventId: ParticipationEventId,
     ): Promise<PreparedTransaction> {
@@ -1309,6 +1336,9 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * TODO.
+     */
     async prepareVotingPower(amount: string): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -1328,6 +1358,9 @@ export class Account {
         );
     }
 
+    /**
+     * TODO.
+     */
     async prepareDecreaseVotingPower(
         amount: string,
     ): Promise<PreparedTransaction> {

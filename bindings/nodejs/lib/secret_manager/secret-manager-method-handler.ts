@@ -15,6 +15,7 @@ import {
 export class SecretManagerMethodHandler {
     methodHandler: SecretManagerMethodHandler;
 
+    /** TODO. */
     constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         // The rust secret manager object is not extensible
         if (Object.isExtensible(options)) {
@@ -24,6 +25,10 @@ export class SecretManagerMethodHandler {
         }
     }
 
+    /** TODO.
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async callMethod(method: __SecretManagerMethods__): Promise<string> {
         return callSecretManagerMethodAsync(
             JSON.stringify(method),

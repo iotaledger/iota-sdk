@@ -12,18 +12,24 @@ import { Payload } from '../payload';
  * All of the essence types.
  */
 enum TransactionEssenceType {
+    /**
+     * TODO.
+     */
     Regular = 1,
 }
 
 abstract class TransactionEssence {
     readonly type: TransactionEssenceType;
 
+    /**
+     * TODO.
+     */
     constructor(type: TransactionEssenceType) {
         this.type = type;
     }
 
     /**
-     * The type of essence.
+     * Get the type of essence.
      */
     getType(): TransactionEssenceType {
         return this.type;
@@ -53,6 +59,9 @@ class RegularTransactionEssence extends TransactionEssence {
     })
     payload: Payload | undefined;
 
+    /**
+     * TODO.
+     */
     constructor(
         networkId: number,
         inputsCommitment: HexEncodedString,

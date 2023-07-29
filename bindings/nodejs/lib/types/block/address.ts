@@ -9,19 +9,34 @@ import { AliasId, NftId } from './id';
  * Address type variants.
  */
 enum AddressType {
+    /**
+     * TODO.
+     */
     Ed25519 = 0,
+    /**
+     * TODO.
+     */
     Alias = 8,
+    /**
+     * TODO.
+     */
     Nft = 16,
 }
 
+/**
+ * TODO.
+ */
 abstract class Address {
     readonly type: AddressType;
 
+    /**
+     * TODO.
+     */
     constructor(type: AddressType) {
         this.type = type;
     }
     /**
-     * The type of address.
+     * Get the type of address.
      */
     getType(): AddressType {
         return this.type;
@@ -29,6 +44,9 @@ abstract class Address {
 
     abstract toString(): string;
 
+    /**
+     * TODO.
+     */
     public static parse(data: any): Address {
         if (data.type == AddressType.Ed25519) {
             return plainToInstance(
@@ -49,6 +67,9 @@ abstract class Address {
 class Ed25519Address extends Address {
     readonly pubKeyHash: HexEncodedString;
 
+    /**
+     * TODO.
+     */
     constructor(address: HexEncodedString) {
         super(AddressType.Ed25519);
         this.pubKeyHash = address;
@@ -65,8 +86,14 @@ class Ed25519Address extends Address {
     }
 }
 
+/**
+ * TODO.
+ */
 class AliasAddress extends Address {
     readonly aliasId: AliasId;
+    /**
+     * TODO.
+     */
     constructor(address: AliasId) {
         super(AddressType.Alias);
         this.aliasId = address;
@@ -87,6 +114,9 @@ class AliasAddress extends Address {
  */
 class NftAddress extends Address {
     readonly nftId: NftId;
+    /**
+     * TODO.
+     */
     constructor(address: NftId) {
         super(AddressType.Nft);
         this.nftId = address;

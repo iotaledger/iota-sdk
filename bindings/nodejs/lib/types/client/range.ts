@@ -3,6 +3,8 @@
 
 /** A range with start and end values. */
 export interface IRange {
+    /** TODO. */
     start: number;
+    /** TODO. */
     end: number;
 }

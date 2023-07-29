@@ -36,6 +36,7 @@ export class Transaction {
     incoming!: boolean;
     /** Note that can be set when sending a transaction and is only stored locally */
     note?: string;
+    /** TODO */
     @Type(() => OutputResponse)
     inputs!: OutputResponse[];
 }

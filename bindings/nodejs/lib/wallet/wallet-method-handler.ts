@@ -24,6 +24,9 @@ import { SecretManager } from '../secret_manager';
 export class WalletMethodHandler {
     methodHandler: any;
 
+    /**
+     * TODO.
+     */
     constructor(options?: WalletOptions) {
         const walletOptions = {
             storagePath: options?.storagePath,
@@ -35,6 +38,9 @@ export class WalletMethodHandler {
         this.methodHandler = createWallet(JSON.stringify(walletOptions));
     }
 
+    /**
+     * TODO.
+     */
     async callMethod(method: __Method__): Promise<string> {
         return callWalletMethodAsync(
             // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
@@ -60,6 +66,9 @@ export class WalletMethodHandler {
         });
     }
 
+    /**
+     * TODO.
+     */
     async callAccountMethod(
         accountIndex: AccountId,
         method: __AccountMethod__,
@@ -73,6 +82,9 @@ export class WalletMethodHandler {
         });
     }
 
+    /**
+     * TODO.
+     */
     async listen(
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
@@ -80,10 +92,16 @@ export class WalletMethodHandler {
         return listenWalletAsync(eventTypes, callback, this.methodHandler);
     }
 
+    /**
+     * TODO.
+     */
     async destroy(): Promise<void> {
         return destroyWallet(this.methodHandler);
     }
 
+    /**
+     * TODO.
+     */
     async getClient(): Promise<Client> {
         return new Promise((resolve, reject) => {
             getClientFromWallet(this.methodHandler).then((result: any) => {
@@ -96,6 +114,9 @@ export class WalletMethodHandler {
         });
     }
 
+    /**
+     * TODO.
+     */
     async getSecretManager(): Promise<SecretManager> {
         return new Promise((resolve, reject) => {
             getSecretManagerFromWallet(this.methodHandler).then(

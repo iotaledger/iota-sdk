@@ -53,6 +53,9 @@ export class InputSigningData {
     chain?: Bip44;
 }
 
+/**
+ * TODO.
+ */
 export class Remainder {
     /**
      * The remainder output

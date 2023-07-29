@@ -29,6 +29,9 @@ export class ReceiptMilestoneOption extends MilestoneOption {
     @Type(() => TreasuryTransactionPayload)
     transaction: TreasuryTransactionPayload;
 
+    /**
+     * TODO.
+     */
     constructor(
         migratedAt: number,
         final: boolean,

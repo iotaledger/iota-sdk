@@ -3,19 +3,29 @@
 
 import { hexToBigInt } from '../../utils/hex-encoding';
 
+/**
+ * TODO.
+ */
 enum TokenSchemeType {
+    /** TODO */
     Simple = 0,
 }
 
+/**
+ * TODO.
+ */
 abstract class TokenScheme {
     readonly type: TokenSchemeType;
 
+    /**
+     * TODO.
+     */
     constructor(type: TokenSchemeType) {
         this.type = type;
     }
 
     /**
-     * The type of token scheme.
+     * Get the type of token scheme.
      */
     getType(): TokenSchemeType {
         return this.type;
@@ -30,6 +40,9 @@ class SimpleTokenScheme extends TokenScheme {
     readonly meltedTokens: bigint;
     readonly maximumSupply: bigint;
 
+    /**
+     * TODO.
+     */
     constructor(
         mintedTokens: bigint,
         meltedTokens: bigint,

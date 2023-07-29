@@ -9,19 +9,25 @@ import { OutputId } from '../output';
  * All of the input types.
  */
 enum InputType {
+    /** TODO. */
     UTXO = 0,
+    /** TODO. */
     Treasury = 1,
 }
 
+/**
+ * TODO.
+ */
 abstract class Input {
     readonly type: InputType;
 
+    /** TODO. */
     constructor(type: InputType) {
         this.type = type;
     }
 
     /**
-     * The type of input.
+     * Get the type of input.
      */
     getType(): InputType {
         return this.type;
@@ -56,6 +62,7 @@ class UTXOInput extends Input {
      */
     transactionOutputIndex: number;
 
+    /** TODO. */
     constructor(
         transactionId: HexEncodedString,
         transactionOutputIndex: number,

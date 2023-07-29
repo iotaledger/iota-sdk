@@ -26,11 +26,15 @@ import { plainToInstance } from 'class-transformer';
 export class SecretManager {
     private methodHandler: SecretManagerMethodHandler;
 
+    /** TODO. */
     constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 
-    /** Generate ed25519 addresses */
+    /** Generate ed25519 addresses.
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async generateEd25519Addresses(
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string[]> {
@@ -44,7 +48,10 @@ export class SecretManager {
         return JSON.parse(response).payload;
     }
 
-    /** Generate EVM addresses */
+    /** Generate EVM addresses.
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async generateEvmAddresses(
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string[]> {
@@ -59,7 +66,9 @@ export class SecretManager {
     }
 
     /**
-     * Store a mnemonic in the Stronghold vault
+     * Store a mnemonic in the Stronghold vault.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async storeMnemonic(mnemonic: string): Promise<void> {
         const response = await this.methodHandler.callMethod({
@@ -73,7 +82,9 @@ export class SecretManager {
     }
 
     /**
-     * Sign a transaction
+     * Sign a transaction.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async signTransaction(
         preparedTransactionData: PreparedTransactionData,
@@ -91,6 +102,8 @@ export class SecretManager {
 
     /**
      * Create a signature unlock using the provided `secretManager`.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async signatureUnlock(
         transactionEssenceHash: HexEncodedString,
@@ -109,6 +122,8 @@ export class SecretManager {
 
     /**
      * Signs a message with an Ed25519 private key.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async signEd25519(
         message: HexEncodedString,
@@ -126,6 +141,8 @@ export class SecretManager {
 
     /**
      * Signs a message with an Secp256k1Ecdsa private key.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async signSecp256k1Ecdsa(
         message: HexEncodedString,
@@ -142,7 +159,9 @@ export class SecretManager {
     }
 
     /**
-     * Get the status of a Ledger Nano
+     * Get the status of a Ledger Nano.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getLedgerNanoStatus(): Promise<LedgerNanoStatus> {
         const response = await this.methodHandler.callMethod({

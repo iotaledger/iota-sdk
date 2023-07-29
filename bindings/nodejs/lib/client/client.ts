@@ -61,10 +61,12 @@ import { plainToInstance } from 'class-transformer';
 export class Client {
     private methodHandler: ClientMethodHandler;
 
+    /** TODO  */
     constructor(options: IClientOptions | ClientMethodHandler) {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
+    /** TODO  */
     async destroy() {
         return this.methodHandler.destroy();
     }
@@ -83,6 +85,8 @@ export class Client {
 
     /**
      * Gets the network related information such as network_id and min_pow_score
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getNetworkInfo(): Promise<INetworkInfo> {
         const response = await this.methodHandler.callMethod({
@@ -92,7 +96,11 @@ export class Client {
         return JSON.parse(response).payload;
     }
 
-    /** Fetch basic output IDs based on query parameters */
+    /** 
+     * Fetch basic output IDs based on query parameters
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async basicOutputIds(
         queryParameters: QueryParameter[],
     ): Promise<IOutputsResponse> {
@@ -106,7 +114,10 @@ export class Client {
         return JSON.parse(response).payload;
     }
 
-    /** Get output from a known outputID */
+    /** Get output from a known outputID 
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async getOutput(outputId: OutputId): Promise<OutputResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutput',
@@ -119,7 +130,10 @@ export class Client {
         return plainToInstance(OutputResponse, parsed.payload);
     }
 
-    /** Fetch OutputResponse from provided OutputIds (requests are sent in parallel) */
+    /** Fetch OutputResponse from provided OutputIds (requests are sent in parallel)
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async getOutputs(outputIds: OutputId[]): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutputs',
@@ -132,7 +146,10 @@ export class Client {
         return plainToInstance(OutputResponse, parsed.payload);
     }
 
-    /** Build and post a block */
+    /** Build and post a block
+     * @param TODO TODO.
+     * @returns TODO.
+     */
     async buildAndPostBlock(
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
@@ -166,6 +183,7 @@ export class Client {
     /**
      * Returns tips that are ideal for attaching a block.
      * The tips can be considered as non-lazy and are therefore ideal for attaching a block.
+     * @returns TODO.
      */
     async getTips(): Promise<BlockId[]> {
         const response = await this.methodHandler.callMethod({
@@ -177,6 +195,8 @@ export class Client {
 
     /**
      * Post block in JSON format, returns the block ID.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async postBlock(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
@@ -191,6 +211,8 @@ export class Client {
 
     /**
      * Get block as JSON.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getBlock(blockId: BlockId): Promise<Block> {
         const response = await this.methodHandler.callMethod({
@@ -206,6 +228,8 @@ export class Client {
 
     /**
      * Get block metadata.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getBlockMetadata(blockId: BlockId): Promise<IBlockMetadata> {
         const response = await this.methodHandler.callMethod({
@@ -220,6 +244,8 @@ export class Client {
 
     /**
      * Find inputs from addresses for a provided amount (useful for offline signing)
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async findInputs(
         addresses: string[],
@@ -239,6 +265,8 @@ export class Client {
 
     /**
      * Prepare a transaction for signing
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async prepareTransaction(
         secretManager?: SecretManagerType,
@@ -260,6 +288,8 @@ export class Client {
 
     /**
      * Sign a transaction
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async signTransaction(
         secretManager: SecretManagerType,
@@ -279,6 +309,8 @@ export class Client {
 
     /**
      * Create a signature unlock using the provided `secretManager`.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async signatureUnlock(
         secretManager: SecretManagerType,
@@ -299,6 +331,8 @@ export class Client {
 
     /**
      * Submit a payload in a block
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async postBlockPayload(payload: Payload): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
@@ -314,6 +348,8 @@ export class Client {
 
     /**
      * Get a node candidate from the healthy node pool.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getNode(): Promise<INode> {
         const response = await this.methodHandler.callMethod({
@@ -325,6 +361,8 @@ export class Client {
 
     /**
      * Get the network id of the node we're connecting to.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getNetworkId(): Promise<number> {
         const response = await this.methodHandler.callMethod({
@@ -336,6 +374,8 @@ export class Client {
 
     /**
      * Returns the bech32_hrp.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getBech32Hrp(): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -347,6 +387,8 @@ export class Client {
 
     /**
      * Returns the min PoW score.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getMinPowScore(): Promise<number> {
         const response = await this.methodHandler.callMethod({
@@ -358,6 +400,8 @@ export class Client {
 
     /**
      * Returns the tips interval.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getTipsInterval(): Promise<number> {
         const response = await this.methodHandler.callMethod({
@@ -369,6 +413,8 @@ export class Client {
 
     /**
      * Returns the token supply.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getTokenSupply(): Promise<string> {
         return (await this.getProtocolParameters()).tokenSupply;
@@ -376,6 +422,8 @@ export class Client {
 
     /**
      * Returns the protocol parameters.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getProtocolParameters(): Promise<INodeInfoProtocol> {
         const response = await this.methodHandler.callMethod({
@@ -387,6 +435,8 @@ export class Client {
 
     /**
      * Returns if local pow should be used or not.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getLocalPow(): Promise<boolean> {
         const response = await this.methodHandler.callMethod({
@@ -398,6 +448,8 @@ export class Client {
 
     /**
      * Get fallback to local proof of work timeout.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getFallbackToLocalPow(): Promise<boolean> {
         const response = await this.methodHandler.callMethod({
@@ -409,6 +461,8 @@ export class Client {
 
     /**
      * Get health of node by input url.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getHealth(url: string): Promise<boolean> {
         const response = await this.methodHandler.callMethod({
@@ -423,6 +477,8 @@ export class Client {
 
     /**
      * Get info of node with input url.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getNodeInfo(url: string, auth?: IAuth): Promise<INodeInfo> {
         const response = await this.methodHandler.callMethod({
@@ -438,6 +494,8 @@ export class Client {
 
     /**
      * Get peers.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getPeers(): Promise<IPeer[]> {
         const response = await this.methodHandler.callMethod({
@@ -449,6 +507,8 @@ export class Client {
 
     /**
      * Post block as raw bytes, returns the block ID.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async postBlockRaw(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
@@ -463,6 +523,8 @@ export class Client {
 
     /**
      * Get block as raw bytes.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getBlockRaw(blockId: BlockId): Promise<Uint8Array> {
         const response = await this.methodHandler.callMethod({
@@ -477,6 +539,8 @@ export class Client {
 
     /**
      * Look up a milestone by a given milestone index.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getMilestoneById(milestoneId: string): Promise<MilestonePayload> {
         const response = await this.methodHandler.callMethod({
@@ -491,6 +555,8 @@ export class Client {
 
     /**
      * Returns all UTXO changes that happened at a specific milestone.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getUtxoChangesById(
         milestoneId: string,
@@ -506,6 +572,8 @@ export class Client {
     }
     /**
      * Look up a milestone by a given milestone index.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getMilestoneByIndex(index: number): Promise<MilestonePayload> {
         const response = await this.methodHandler.callMethod({
@@ -520,6 +588,8 @@ export class Client {
 
     /**
      * Returns all UTXO changes that happened at a specific milestone.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getUtxoChangesByIndex(
         index: number,
@@ -536,6 +606,8 @@ export class Client {
 
     /**
      * Get receipts.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getReceipts(): Promise<ReceiptsResponse> {
         const response = await this.methodHandler.callMethod({
@@ -547,6 +619,8 @@ export class Client {
 
     /**
      * Get the receipts by the given milestone index.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getReceiptsMigratedAt(
         milestoneIndex: number,
@@ -563,6 +637,8 @@ export class Client {
 
     /**
      * Get the treasury output.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getTreasury(): Promise<TreasuryOutput> {
         const response = await this.methodHandler.callMethod({
@@ -574,6 +650,8 @@ export class Client {
 
     /**
      * Returns the included block of the transaction.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getIncludedBlock(transactionId: string): Promise<Block> {
         const response = await this.methodHandler.callMethod({
@@ -588,6 +666,8 @@ export class Client {
 
     /**
      * Returns the metadata of the included block of the transaction.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getIncludedBlockMetadata(transactionId: string): Promise<Block> {
         const response = await this.methodHandler.callMethod({
@@ -602,6 +682,8 @@ export class Client {
 
     /**
      * Transforms a hex encoded address to a bech32 encoded address.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async hexToBech32(hex: string, bech32Hrp?: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -617,6 +699,8 @@ export class Client {
 
     /**
      * Transforms an alias id to a bech32 encoded address.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async aliasIdToBech32(
         aliasId: string,
@@ -635,6 +719,8 @@ export class Client {
 
     /**
      * Transforms an nft id to a bech32 encoded address.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async nftIdToBech32(nftId: string, bech32Hrp?: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -650,6 +736,8 @@ export class Client {
 
     /**
      * Transforms a hex encoded public key to a bech32 encoded address.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async hexPublicKeyToBech32Address(
         hex: string,
@@ -668,6 +756,8 @@ export class Client {
 
     /**
      * Fetch alias output IDs
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async aliasOutputIds(
         queryParameters: AliasQueryParameter[],
@@ -684,6 +774,8 @@ export class Client {
 
     /**
      * Fetch alias output ID
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async aliasOutputId(aliasId: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -698,6 +790,8 @@ export class Client {
 
     /**
      * Fetch NFT output IDs
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async nftOutputIds(
         queryParameters: NftQueryParameter[],
@@ -714,6 +808,8 @@ export class Client {
 
     /**
      * Fetch NFT output ID
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async nftOutputId(nftId: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -728,6 +824,8 @@ export class Client {
 
     /**
      * Fetch Foundry Output IDs
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async foundryOutputIds(
         queryParameters: FoundryQueryParameter[],
@@ -744,6 +842,8 @@ export class Client {
 
     /**
      * Fetch Foundry Output ID
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async foundryOutputId(foundryId: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -759,6 +859,8 @@ export class Client {
     /**
      * Try to get OutputResponse from provided OutputIds (requests are sent
      * in parallel and errors are ignored, can be useful for spent outputs)
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async getOutputsIgnoreErrors(
         outputIds: string[],
@@ -775,6 +877,8 @@ export class Client {
 
     /**
      * Find all blocks by provided block IDs.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async findBlocks(blockIds: BlockId[]): Promise<Block[]> {
         const response = await this.methodHandler.callMethod({
@@ -790,6 +894,8 @@ export class Client {
     /**
      * Retries (promotes or reattaches) a block for provided block id. Block should be
      * retried only if they are valid and haven't been confirmed for a while.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async retry(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
@@ -807,6 +913,8 @@ export class Client {
      * Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
      * milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
      * position and additional reattached blocks
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async retryUntilIncluded(
         blockId: BlockId,
@@ -833,6 +941,8 @@ export class Client {
     /**
      * Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
      * Returns the address to which the funds got consolidated, if any were available
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async consolidateFunds(
         secretManager: SecretManagerType,
@@ -852,6 +962,8 @@ export class Client {
     /**
      * Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
      * confirmed for a while.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async reattach(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
@@ -867,6 +979,8 @@ export class Client {
 
     /**
      * Reattach a block without checking if it should be reattached
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async reattachUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
@@ -883,6 +997,8 @@ export class Client {
     /**
      * Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
      * method should error out and should not allow unnecessary promotions.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async promote(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
@@ -897,6 +1013,8 @@ export class Client {
     }
     /**
      * Promote a block without checking if it should be promoted
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async promoteUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
@@ -912,6 +1030,8 @@ export class Client {
 
     /**
      * Returns the unhealthy nodes.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async unhealthyNodes(): Promise<Set<INode>> {
         const response = await this.methodHandler.callMethod({
@@ -923,6 +1043,8 @@ export class Client {
 
     /**
      * Build a Basic Output.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async buildBasicOutput(
         params: BasicOutputBuilderParams,
@@ -941,6 +1063,8 @@ export class Client {
 
     /**
      * Build an Alias Output.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async buildAliasOutput(
         params: AliasOutputBuilderParams,
@@ -959,6 +1083,8 @@ export class Client {
 
     /**
      * Build a Foundry Output.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async buildFoundryOutput(
         params: FoundryOutputBuilderParams,
@@ -977,6 +1103,8 @@ export class Client {
 
     /**
      * Build an Nft Output.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
         if (params.amount && typeof params.amount === 'bigint') {
@@ -993,6 +1121,8 @@ export class Client {
 
     /**
      * Listen to MQTT topics.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async listenMqtt(
         topics: string[],
@@ -1003,6 +1133,8 @@ export class Client {
 
     /**
      * Stop listening for provided MQTT topics.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async clearMqttListeners(topics: string[]): Promise<void> {
         await this.methodHandler.callMethod({
@@ -1030,6 +1162,8 @@ export class Client {
 
     /**
      * Request funds from a faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
+     * @param TODO TODO.
+     * @returns TODO.
      */
     async requestFundsFromFaucet(
         url: string,
