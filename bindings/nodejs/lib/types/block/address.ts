@@ -5,6 +5,9 @@ import { plainToInstance } from 'class-transformer';
 import { HexEncodedString } from '../utils';
 import { AliasId, NftId } from './id';
 
+/**
+ * Address type variants.
+ */
 enum AddressType {
     Ed25519 = 0,
     Alias = 8,
