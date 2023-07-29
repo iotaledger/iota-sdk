@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Address } from '../address';
+import { Type } from 'class-transformer';
+import { Address, AddressDiscriminator } from '../address';
 
 /**
  * All of the feature block types.
@@ -14,7 +15,8 @@ enum FeatureType {
 }
 
 abstract class Feature {
-    private type: FeatureType;
+    readonly type: FeatureType;
+
     constructor(type: FeatureType) {
         this.type = type;
     }
@@ -29,7 +31,11 @@ abstract class Feature {
  * Sender feature.
  */
 class SenderFeature extends Feature {
-    private address: Address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
@@ -45,7 +51,11 @@ class SenderFeature extends Feature {
  * Issuer feature.
  */
 class IssuerFeature extends Feature {
-    private address: Address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;
@@ -61,7 +71,8 @@ class IssuerFeature extends Feature {
  * Metadata feature.
  */
 class MetadataFeature extends Feature {
-    private data: string;
+    readonly data: string;
+
     constructor(data: string) {
         super(FeatureType.Metadata);
         this.data = data;
@@ -77,7 +88,8 @@ class MetadataFeature extends Feature {
  * Tag feature.
  */
 class TagFeature extends Feature {
-    private tag: string;
+    readonly tag: string;
+
     constructor(tag: string) {
         super(FeatureType.Tag);
         this.tag = tag;

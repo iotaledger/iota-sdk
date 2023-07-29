@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "description": "Node.js binding to the IOTA SDK library",
     "main": "out/index.js",
     "types": "out/index.d.ts",

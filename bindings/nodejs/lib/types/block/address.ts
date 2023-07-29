@@ -15,7 +15,7 @@ enum AddressType {
 }
 
 abstract class Address {
-    private type: AddressType;
+    readonly type: AddressType;
 
     constructor(type: AddressType) {
         this.type = type;
@@ -47,7 +47,7 @@ abstract class Address {
  * Ed25519 Address.
  */
 class Ed25519Address extends Address {
-    private pubKeyHash: HexEncodedString;
+    readonly pubKeyHash: HexEncodedString;
 
     constructor(address: HexEncodedString) {
         super(AddressType.Ed25519);
@@ -66,7 +66,7 @@ class Ed25519Address extends Address {
 }
 
 class AliasAddress extends Address {
-    private aliasId: AliasId;
+    readonly aliasId: AliasId;
     constructor(address: AliasId) {
         super(AddressType.Alias);
         this.aliasId = address;
@@ -86,7 +86,7 @@ class AliasAddress extends Address {
  * NFT address.
  */
 class NftAddress extends Address {
-    private nftId: NftId;
+    readonly nftId: NftId;
     constructor(address: NftId) {
         super(AddressType.Nft);
         this.nftId = address;

@@ -10,7 +10,7 @@ enum MilestoneOptionType {
 }
 
 abstract class MilestoneOption {
-    private type: MilestoneOptionType;
+    readonly type: MilestoneOptionType;
 
     constructor(type: MilestoneOptionType) {
         this.type = type;

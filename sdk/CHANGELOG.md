@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.2 - 2023-07-28
+
+### Changed
+
+- Bump `iota_stronghold` dependency to `2.0.0`;
+
+## 1.0.1 - 2023-07-25
+
+### Fixed
+
+- `Client::{update_node_manager, update_node_manager}` use the correct `Result` type from `client` and not `wallet`;
+
 ## 1.0.0 - 2023-07-24
 
 ### Added

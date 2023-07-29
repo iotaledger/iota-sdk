@@ -15,7 +15,7 @@ enum UnlockType {
 }
 
 abstract class Unlock {
-    private type: UnlockType;
+    readonly type: UnlockType;
 
     constructor(type: UnlockType) {
         this.type = type;

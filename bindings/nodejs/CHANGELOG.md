@@ -19,6 +19,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.2 - 2023-07-28
+
+### Changed
+
+- Private properties on classes are now readonly;
+
+### Fixed
+
+- Constructor types in `RegularTransactionEssence`;
+- `SenderFeature.getSender()` and `IssuerFeature.getIssuer()` now return the correct types;
+
+## 1.0.1 - 2023-07-25
+
+### Changed
+
+- Deprecate `Account::{buildAliasOutput(), buildBasicOutput(), buildFoundryOutput(), buildNftOutput()}` and their `BuildAliasOutputData, BuildBasicOutputData, BuildFoundryOutputData, BuildNftOutputData` parameter types;
+
 ## 1.0.0 - 2023-07-24
 
 ### Added

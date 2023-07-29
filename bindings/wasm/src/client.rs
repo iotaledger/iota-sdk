@@ -37,6 +37,12 @@ pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsVal
     Ok(ClientMethodHandler { client })
 }
 
+/// Necessary for compatibility with the node.js bindings.
+#[wasm_bindgen(js_name = destroyClient)]
+pub async fn destroy_client(_client_method_handler: &ClientMethodHandler) -> Result<(), JsValue> {
+    Ok(())
+}
+
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.

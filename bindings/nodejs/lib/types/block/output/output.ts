@@ -27,9 +27,9 @@ enum OutputType {
 }
 
 abstract class Output /*implements ICommonOutput*/ {
-    private amount: string;
+    readonly amount: string;
 
-    private type: OutputType;
+    readonly type: OutputType;
 
     constructor(type: OutputType, amount: bigint | string) {
         this.type = type;
@@ -80,14 +80,14 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     @Type(() => UnlockCondition, {
         discriminator: UnlockConditionDiscriminator,
     })
-    private unlockConditions: UnlockCondition[];
+    readonly unlockConditions: UnlockCondition[];
 
-    private nativeTokens?: INativeToken[];
+    readonly nativeTokens?: INativeToken[];
 
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
-    private features?: Feature[];
+    readonly features?: Feature[];
 
     constructor(
         type: OutputType,
@@ -149,7 +149,7 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
-    private immutableFeatures?: Feature[];
+    readonly immutableFeatures?: Feature[];
 
     constructor(
         type: OutputType,
@@ -167,7 +167,7 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
 }
 
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
-    private stateMetadata?: HexEncodedString;
+    readonly stateMetadata?: HexEncodedString;
 
     constructor(
         type: OutputType,
@@ -185,9 +185,9 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
 }
 
 class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
-    private aliasId: HexEncodedString;
-    private stateIndex: number;
-    private foundryCounter: number;
+    readonly aliasId: HexEncodedString;
+    readonly stateIndex: number;
+    readonly foundryCounter: number;
 
     constructor(
         unlockConditions: UnlockCondition[],
@@ -225,7 +225,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
  * NFT output.
  */
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
-    private nftId: HexEncodedString;
+    readonly nftId: HexEncodedString;
 
     constructor(
         amount: bigint,
@@ -247,12 +247,12 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
  * Foundry output.
  */
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
-    private serialNumber: number;
+    readonly serialNumber: number;
 
     @Type(() => TokenScheme, {
         discriminator: TokenSchemeDiscriminator,
     })
-    private tokenScheme: TokenScheme;
+    readonly tokenScheme: TokenScheme;
 
     constructor(
         amount: bigint,

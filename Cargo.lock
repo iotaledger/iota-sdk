@@ -520,7 +520,7 @@ checksum = "2da6da31387c7e4ef160ffab6d5e7f00c42626fe39aea70a7b0f1773f7dd6c1b"
 
 [[package]]
 name = "cli-wallet"
-version = "1.0.0-rc.2"
+version = "1.0.0"
 dependencies = [
  "chrono",
  "clap",
@@ -1645,7 +1645,7 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk"
-version = "1.0.0"
+version = "1.0.2"
 dependencies = [
  "anymap",
  "async-trait",
@@ -1770,9 +1770,9 @@ dependencies = [
 
 [[package]]
 name = "iota_stronghold"
-version = "2.0.0-rc.2"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "073d65d06cb5bb352871d2285c44fc0d0e1a654f1bf109fca515ba8229fd1e12"
+checksum = "04436fca4c5e566318aa3da37b97cd833d1f2f794a2fe373b05a85b68454a212"
 dependencies = [
  "bincode",
  "hkdf",
@@ -2983,9 +2983,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.103"
+version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d03b412469450d4404fe8499a268edd7f8b79fecb074b0d812ad64ca21f4031b"
+checksum = "076066c5f1078eac5b722a31827a8832fe108bed65dfa75e233c89f8206e976c"
 dependencies = [
  "itoa",
  "ryu",
