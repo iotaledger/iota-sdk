@@ -26,14 +26,18 @@ import { plainToInstance } from 'class-transformer';
 export class SecretManager {
     private methodHandler: SecretManagerMethodHandler;
 
-    /** TODO. */
+    /**
+     * @param options A secret manager type or method handler.
+     */
     constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 
-    /** Generate ed25519 addresses.
-     * @param TODO TODO.
-     * @returns TODO.
+    /** 
+     * Generate Ed25519 addresses.
+     * 
+     * @param generateAddressesOptions Options to generate addresses.
+     * @returns An array of generated addresses.
      */
     async generateEd25519Addresses(
         generateAddressesOptions: IGenerateAddressesOptions,
@@ -48,9 +52,11 @@ export class SecretManager {
         return JSON.parse(response).payload;
     }
 
-    /** Generate EVM addresses.
-     * @param TODO TODO.
-     * @returns TODO.
+    /** 
+     * Generate EVM addresses.
+     * 
+     * @param generateAddressesOptions Options to generate addresses.
+     * @returns An array of generated addresses.
      */
     async generateEvmAddresses(
         generateAddressesOptions: IGenerateAddressesOptions,
@@ -67,8 +73,8 @@ export class SecretManager {
 
     /**
      * Store a mnemonic in the Stronghold vault.
-     * @param TODO TODO.
-     * @returns TODO.
+     * 
+     * @param mnemonic The mnemonic to store.
      */
     async storeMnemonic(mnemonic: string): Promise<void> {
         const response = await this.methodHandler.callMethod({
@@ -83,8 +89,9 @@ export class SecretManager {
 
     /**
      * Sign a transaction.
-     * @param TODO TODO.
-     * @returns TODO.
+     * 
+     * @param preparedTransactionData An instance of `PreparedTransactionData`.
+     * @returns The corresponding transaction payload.
      */
     async signTransaction(
         preparedTransactionData: PreparedTransactionData,
@@ -102,8 +109,10 @@ export class SecretManager {
 
     /**
      * Create a signature unlock using the provided `secretManager`.
-     * @param TODO TODO.
-     * @returns TODO.
+     * 
+     * @param transactionEssenceHash The hash of the transaction essence.
+     * @param chain A BIP44 chain.
+     * @returns The corresponding unlock.
      */
     async signatureUnlock(
         transactionEssenceHash: HexEncodedString,
@@ -122,8 +131,10 @@ export class SecretManager {
 
     /**
      * Signs a message with an Ed25519 private key.
-     * @param TODO TODO.
-     * @returns TODO.
+     * 
+     * @param message The message to sign.
+     * @param chain A BIP44 chain.
+     * @returns The corresponding signature.
      */
     async signEd25519(
         message: HexEncodedString,
@@ -141,8 +152,10 @@ export class SecretManager {
 
     /**
      * Signs a message with an Secp256k1Ecdsa private key.
-     * @param TODO TODO.
-     * @returns TODO.
+     * 
+     * @param message The message to sign.
+     * @param chain A BIP44 chain.
+     * @returns The corresponding signature.
      */
     async signSecp256k1Ecdsa(
         message: HexEncodedString,
@@ -160,8 +173,6 @@ export class SecretManager {
 
     /**
      * Get the status of a Ledger Nano.
-     * @param TODO TODO.
-     * @returns TODO.
      */
     async getLedgerNanoStatus(): Promise<LedgerNanoStatus> {
         const response = await this.methodHandler.callMethod({
