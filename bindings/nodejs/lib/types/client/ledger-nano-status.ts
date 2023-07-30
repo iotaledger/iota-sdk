@@ -1,33 +1,33 @@
 /** The status of a Ledger Nano */
 export interface LedgerNanoStatus {
-    /** TODO */
+    /** Ledger is available and ready to be used. */
     connected: boolean;
-    /** TODO */
+    /** Ledger is connected and locked, true/false for IOTA/Shimmer, undefined for the rest. */
     locked?: boolean;
-    /** TODO */
+    /** Ledger blind signing enabled */
     blindSigningEnabled: boolean;
-    /** TODO */
+    /** Ledger opened app. */
     app?: LedgerApp;
-    /** TODO */
+    /** Ledger device */
     device?: LedgerDeviceType;
-    /** TODO */
+    /** Buffer size on device */
     bufferSize?: number;
 }
 
 /** The current opened app */
 export interface LedgerApp {
-    /** TODO */
+    /** Opened app name. */
     name: string;
-    /** TODO */
+    /** Opened app version. */
     version: string;
 }
 
 /** The Ledger Device Type */
 export enum LedgerDeviceType {
-    /** TODO */
+    /** Device Type Nano S */
     LedgerNanoS = 'ledgerNanoS',
-    /** TODO */
+    /** Device Type Nano X */
     LedgerNanoX = 'ledgerNanoX',
-    /** TODO */
+    /** Device Type Nano S Plus */
     LedgerNanoSPlus = 'ledgerNanoSPlus',
 }

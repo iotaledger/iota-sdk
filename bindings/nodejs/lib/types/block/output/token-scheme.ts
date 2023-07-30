@@ -4,21 +4,21 @@
 import { hexToBigInt } from '../../utils/hex-encoding';
 
 /**
- * TODO.
+ * All of the token scheme types.
  */
 enum TokenSchemeType {
-    /** TODO */
+    /** A simple token scheme. */
     Simple = 0,
 }
 
 /**
- * TODO.
+ * The base class for token schemes.
  */
 abstract class TokenScheme {
     readonly type: TokenSchemeType;
 
     /**
-     * TODO.
+     * @param type The type of token scheme.
      */
     constructor(type: TokenSchemeType) {
         this.type = type;
@@ -33,7 +33,7 @@ abstract class TokenScheme {
 }
 
 /**
- * Simple token scheme.
+ * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
     readonly mintedTokens: bigint;
@@ -41,7 +41,9 @@ class SimpleTokenScheme extends TokenScheme {
     readonly maximumSupply: bigint;
 
     /**
-     * TODO.
+     * @param mintedTokens The number of tokens that were minted.
+     * @param meltedTokens The number of tokens that were melted.
+     * @param maximumSupply The maximum supply of the token.
      */
     constructor(
         mintedTokens: bigint,
@@ -75,21 +77,21 @@ class SimpleTokenScheme extends TokenScheme {
     }
 
     /**
-     * Amount of tokens minted.
+     * Get the amount of tokens minted.
      */
     getMintedTokens(): bigint {
         return this.mintedTokens;
     }
 
     /**
-     * Amount of tokens melted.
+     * Get the amount of tokens melted.
      */
     getMeltedTokens(): bigint {
         return this.meltedTokens;
     }
 
     /**
-     * Maximum supply of tokens controlled.
+     * Get the maximum supply of tokens.
      */
     getMaximumSupply(): bigint {
         return this.maximumSupply;

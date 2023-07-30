@@ -11,7 +11,7 @@ import { Ed25519Signature } from '../../signature';
 import { Payload, PayloadType } from '../payload';
 
 /**
- * TODO.
+ * A milestone payload.
  */
 class MilestonePayload extends Payload {
     /**

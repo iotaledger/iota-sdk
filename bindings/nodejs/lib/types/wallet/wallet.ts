@@ -1,14 +1,14 @@
 import { IClientOptions, CoinType } from '../client';
 import { SecretManagerType } from '../secret_manager/secret-manager';
 
-/** Options for the Wallet builder */
+/** Options for the Wallet builder. */
 export interface WalletOptions {
-    /** TODO */
+    /** The path to the wallet database. */
     storagePath?: string;
-    /** TODO */
+    /** The node client options. */
     clientOptions?: IClientOptions;
-    /** TODO */
+    /** The type of coin stored with the wallet. */
     coinType?: CoinType;
-    /** TODO */
+    /** The secret manager to use. */
     secretManager?: SecretManagerType;
 }

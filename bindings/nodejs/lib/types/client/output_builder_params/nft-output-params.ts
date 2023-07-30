@@ -8,11 +8,11 @@ import type { BasicOutputBuilderParams } from './basic-output-params';
  */
 export interface NftOutputBuilderParams extends BasicOutputBuilderParams {
     /**
-     * TODO.
+     * A unique ID for the new NFT.
      */
     nftId: HexEncodedString;
     /**
-     * TODO.
+     * Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
      */
     immutableFeatures?: Feature[];
 }

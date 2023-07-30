@@ -4,7 +4,7 @@
 import { MilestoneOption, MilestoneOptionType } from './milestone-options';
 
 /**
- * Protocol Parameters Milestone Option.
+ * A Protocol Parameters Milestone Option.
  */
 export class ProtocolParamsMilestoneOption extends MilestoneOption {
     /**
@@ -21,7 +21,9 @@ export class ProtocolParamsMilestoneOption extends MilestoneOption {
     params: string;
 
     /**
-     * TODO.
+     * @param targetMilestoneIndex The milestone index at which these protocol parameters become active.
+     * @param protocolVersion The to be applied protocol version.
+     * @param params The protocol parameters in binary form. Hex-encoded with 0x prefix.
      */
     constructor(
         targetMilestoneIndex: number,

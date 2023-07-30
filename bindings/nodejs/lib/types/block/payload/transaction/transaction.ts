@@ -30,7 +30,8 @@ class TransactionPayload extends Payload {
     unlocks: Unlock[];
 
     /**
-     * TODO.
+     * @param essence The transaction essence.
+     * @param unlocks The unlocks of the transaction.
      */
     constructor(essence: TransactionEssence, unlocks: Unlock[]) {
         super(PayloadType.Transaction);

@@ -13,16 +13,19 @@ import { Payload } from '../payload';
  */
 enum TransactionEssenceType {
     /**
-     * TODO.
+     * A regular transaction essence.
      */
     Regular = 1,
 }
 
+/**
+ * The base class for transaction essences.
+ */
 abstract class TransactionEssence {
     readonly type: TransactionEssenceType;
 
     /**
-     * TODO.
+     * @param type The type of transaction essence.
      */
     constructor(type: TransactionEssenceType) {
         this.type = type;
@@ -60,7 +63,12 @@ class RegularTransactionEssence extends TransactionEssence {
     payload: Payload | undefined;
 
     /**
-     * TODO.
+     * @param networkId The ID of the network the transaction was issued to.
+     * @param inputsCommitment The hash of all inputs.
+     * @param inputs The inputs of the transaction.
+     * @param outputs The outputs of the transaction.
+     * @param payload An optional Tagged Data payload.
+     * 
      */
     constructor(
         networkId: number,

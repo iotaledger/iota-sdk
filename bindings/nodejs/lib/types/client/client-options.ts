@@ -8,9 +8,9 @@ export interface IClientOptions {
     primaryNode?: string | INode;
     /** Node which will be tried first when using remote PoW, even before the primary_node */
     primaryPowNode?: string | INode;
-    /** TODO */
+    /** A list of nodes. */
     nodes?: Array<string | INode>;
-    /** TODO */
+    /** A lsit of permanodes. */
     permanodes?: Array<string | INode>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;
@@ -40,8 +40,8 @@ export interface IClientOptions {
 
 /** Time duration */
 export interface IDuration {
-    /** TODO */
+    /** Seconds. */
     secs: number;
-    /** TODO */
+    /** Nanoseconds. */
     nanos: number;
 }

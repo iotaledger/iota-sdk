@@ -8,38 +8,40 @@ import { Address, AddressDiscriminator, AliasAddress } from '../address';
  * All of the unlock condition types.
  */
 enum UnlockConditionType {
-    /** TODO */
+    /** An address unlock condition. */
     Address = 0,
-    /** TODO */
+    /** A storage deposit return unlock condition. */
     StorageDepositReturn = 1,
-    /** TODO */
+    /** A timelock unlock condition. */
     Timelock = 2,
-    /** TODO */
+    /** An expiration unlock condition */
     Expiration = 3,
-    /** TODO */
+    /** A state controller address unlock condition. */
     StateControllerAddress = 4,
-    /** TODO */
+    /** A governor address unlock condition. */
     GovernorAddress = 5,
-    /** TODO */
+    /** An immutable alias address unlock condition. */
     ImmutableAliasAddress = 6,
 }
 
 abstract class UnlockCondition {
     readonly type: UnlockConditionType;
 
-    /** TODO */
+    /** 
+     * @param type The type of the unlock condition.
+     */
     constructor(type: UnlockConditionType) {
         this.type = type;
     }
     /**
-     * The type of unlock condition.
+     * Get the type of unlock condition.
      */
     getType(): UnlockConditionType {
         return this.type;
     }
 
     /**
-     * TODO.
+     * Parse an unlock condition from a JSON string.
      */
     public static parse(data: any): UnlockCondition {
         if (data.type == UnlockConditionType.Address) {
@@ -83,15 +85,19 @@ abstract class UnlockCondition {
 }
 
 /**
- * TODO.
+ * An address unlock condition.
  */
 class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlockCondition*/ {
+    /**
+     * An address unlocked with a private key.
+     */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+
     /**
-     * TODO.
+     * @param address The address that needs to be unlocked with a private key.
      */
     constructor(address: Address) {
         super(UnlockConditionType.Address);
@@ -99,25 +105,32 @@ class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlock
     }
 
     /**
-     * The address.
+     * Get the address.
      */
     getAddress(): Address {
         return this.address;
     }
 }
 /**
- * Storage Deposit Return Unlock Condition.
+ * A Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements IStorageDepositReturnUnlockCondition*/ {
+    /**
+     * The amount the consuming transaction must deposit to `returnAddress`.
+     */
     readonly amount: string;
 
+    /**
+     * The address to return the amount to.
+     */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly returnAddress: Address;
 
     /**
-     * TODO.
+     * @param returnAddress The address to return the amount to.
+     * @param amount The amount the consuming transaction must deposit to `returnAddress`.
      */
     constructor(returnAddress: Address, amount: bigint | string) {
         super(UnlockConditionType.StorageDepositReturn);
@@ -129,34 +142,37 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
         this.returnAddress = returnAddress;
     }
     /**
-     * Amount of tokens the consuming transaction must deposit to the address defined in return address.
+     * Get the amount.
      */
     getAmount(): bigint {
         return BigInt(this.amount);
     }
 
     /**
-     * The return address.
+     * Get the return address.
      */
     getReturnAddress(): Address {
         return this.returnAddress;
     }
 }
 /**
- * Timelock Unlock Condition.
+ * A Timelock Unlock Condition.
  */
 class TimelockUnlockCondition extends UnlockCondition /*implements ITimelockUnlockCondition*/ {
+    /**
+     * The Unix time (seconds since Unix epoch) starting from which the output can be consumed.
+     */
     readonly unixTime: number;
 
     /**
-     * TODO.
+     * @param unixTime The Unix timestamp marking the end of the timelock.
      */
     constructor(unixTime: number) {
         super(UnlockConditionType.Timelock);
         this.unixTime = unixTime;
     }
     /**
-     * Get the Unix time (seconds since Unix epoch) starting from which the output can be consumed.
+     * Get the end of the timelock as Unix time.
      */
     getUnixTime(): number {
         return this.unixTime;
@@ -164,17 +180,25 @@ class TimelockUnlockCondition extends UnlockCondition /*implements ITimelockUnlo
 }
 
 /**
- * TODO.
+ * An Expiration Unlock Condition.
  */
 class ExpirationUnlockCondition extends UnlockCondition /*implements IExpirationUnlockCondition*/ {
+    /**
+     * The return address if the output was not claimed in time.
+     */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly returnAddress: Address;
+    /**
+     * Before this timestamp, the condition is allowed to unlock the output,
+     * after that only the address defined in return address.
+     */
     readonly unixTime: number;
 
     /**
-     * TODO.
+     * @param returnAddress The address to return the amount to.
+     * @param unixTime The Unix timestamp marking the end of the expiration period of the claim.
      */
     constructor(returnAddress: Address, unixTime: number) {
         super(UnlockConditionType.Expiration);
@@ -182,8 +206,7 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
         this.unixTime = unixTime;
     }
     /**
-     * Get the Unix time. Before this unix time, the condition is allowed to unlock the output,
-     * after that only the address defined in return address.
+     * Get the end of the expiration period as Unix time.
      */
     getUnixTime(): number {
         return this.unixTime;
@@ -197,7 +220,7 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
     }
 }
 /**
- * State Controller Address Unlock Condition.
+ * A State Controller Address Unlock Condition.
  */
 class StateControllerAddressUnlockCondition extends UnlockCondition /*implements IStateControllerAddressUnlockCondition*/ {
     @Type(() => Address, {
@@ -205,7 +228,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
     })
     readonly address: Address;
     /**
-     * TODO.
+     * @param address The State Controller address that owns the output.
      */
     constructor(address: Address) {
         super(UnlockConditionType.StateControllerAddress);
@@ -213,14 +236,14 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
     }
 
     /**
-     * Get the address.
+     * Get the State Controller address.
      */
     getAddress(): Address {
         return this.address;
     }
 }
 /**
- * Governor Unlock Condition.
+ * A Governor Address Unlock Condition.
  */
 class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGovernorAddressUnlockCondition*/ {
     @Type(() => Address, {
@@ -228,7 +251,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
     })
     readonly address: Address;
     /**
-     * TODO.
+     * @param address The governor address that owns the output.
      */
     constructor(address: Address) {
         super(UnlockConditionType.GovernorAddress);
@@ -236,14 +259,14 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
     }
 
     /**
-     * Get the address.
+     * Get the Governor address.
      */
     getAddress(): Address {
         return this.address;
     }
 }
 /**
- * Immutable Alias Unlock Condition.
+ * An Immutable Alias Address Unlock Condition.
  */
 class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements IImmutableAliasAddressUnlockCondition*/ {
     @Type(() => Address, {
@@ -251,7 +274,7 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements 
     })
     readonly address: Address;
     /**
-     * TODO.
+     * @param address The Immutable Alias address that owns the output.
      */
     constructor(address: AliasAddress) {
         super(UnlockConditionType.ImmutableAliasAddress);
@@ -259,7 +282,7 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements 
     }
 
     /**
-     * Get the address.
+     * Get the Immutable Alias address.
      */
     getAddress(): Address {
         return this.address;

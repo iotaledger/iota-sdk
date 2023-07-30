@@ -8,23 +8,23 @@ import type { BasicOutputBuilderParams } from './basic-output-params';
  */
 export interface AliasOutputBuilderParams extends BasicOutputBuilderParams {
     /**
-     * TODO.
+     * A unique ID for the new alias.
      */
     aliasId: HexEncodedString;
     /**
-     * TODO.
+     * A counter that must increase by 1 every time the alias is state transitioned.
      */
     stateIndex?: number;
     /**
-     * TODO.
+     * Metadata that can only be changed by the state controller.
      */
     stateMetadata?: HexEncodedString;
     /**
-     * TODO.
+     * A counter that denotes the number of foundries created by this alias account.
      */
     foundryCounter?: number;
     /**
-     * TODO.
+     * A list of immutable features.
      */
     immutableFeatures?: Feature[];
 }

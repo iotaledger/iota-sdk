@@ -9,31 +9,31 @@ import { Ed25519Signature } from '../../signature';
  */
 enum UnlockType {
     /**
-     * TODO.
+     * A signature unlock.
      */
     Signature = 0,
     /**
-     * TODO.
+     * A reference unlock.
      */
     Reference = 1,
     /**
-     * TODO.
+     * An Alias unlock.
      */
     Alias = 2,
     /**
-     * TODO.
+     * An NFT unlock.
      */
     Nft = 3,
 }
 
 /**
- * TODO.
+ * The base class for unlocks.
  */
 abstract class Unlock {
     readonly type: UnlockType;
 
     /**
-     * TODO.
+     * @param type The type of unlock.
      */
     constructor(type: UnlockType) {
         this.type = type;
@@ -58,7 +58,7 @@ class SignatureUnlock extends Unlock {
     signature: Ed25519Signature;
 
     /**
-     * TODO.
+     * @param signature An Ed25519 signature.
      */
     constructor(signature: Ed25519Signature) {
         super(UnlockType.Signature);
@@ -77,7 +77,7 @@ class ReferenceUnlock extends Unlock {
     reference: number;
 
     /**
-     * TODO.
+     * @param reference An index referencing a previous unlock.
      */
     constructor(reference: number) {
         super(UnlockType.Reference);
@@ -95,7 +95,7 @@ class AliasUnlock extends Unlock {
     reference: number;
 
     /**
-     * TODO.
+     * @param reference An index referencing a previous unlock.
      */
     constructor(reference: number) {
         super(UnlockType.Alias);
@@ -113,7 +113,7 @@ class NftUnlock extends Unlock {
     reference: number;
 
     /**
-     * TODO.
+     * @param reference An index referencing a previous unlock.
      */
     constructor(reference: number) {
         super(UnlockType.Nft);

@@ -11,13 +11,13 @@ export interface LedgerNanoSecretManager {
 
 /** Secret manager that uses a mnemonic. */
 export interface MnemonicSecretManager {
-    /** TODO */
+    /** The underlying mnemonic. */
     mnemonic: string;
 }
 
 /** Secret manager that uses a seed. */
 export interface SeedSecretManager {
-    /** TODO */
+    /** The underlying seed. */
     hexSeed: string;
 }
 
@@ -26,7 +26,7 @@ export type PlaceholderSecretManager = 'placeholder';
 
 /** Secret manager that uses Stronghold. */
 export interface StrongholdSecretManager {
-    /** TODO */
+    /** The underlying Stronghold snapshot. */
     stronghold: {
         password?: string;
         snapshotPath?: string;
@@ -51,14 +51,14 @@ export interface Secp256k1EcdsaSignature {
     signature: HexEncodedString;
 }
 
-/** TODO */
+/** A BIP44 chain. */
 export interface Bip44 {
-    /** TODO */
+    /** The coin type segment. */
     coinType?: number;
-    /** TODO */
+    /** The account segment. */
     account?: number;
-    /** TODO */
+    /** The change segment. */
     change?: number;
-    /** TODO */
+    /** The address index segment. */
     addressIndex?: number;
 }

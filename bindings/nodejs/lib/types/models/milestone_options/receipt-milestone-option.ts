@@ -7,7 +7,7 @@ import { MigratedFunds } from '../migrated-funds';
 import { MilestoneOption, MilestoneOptionType } from './milestone-options';
 
 /**
- * Receipt milestone option.
+ * A Receipt milestone option.
  */
 export class ReceiptMilestoneOption extends MilestoneOption {
     /**
@@ -19,18 +19,21 @@ export class ReceiptMilestoneOption extends MilestoneOption {
      */
     final: boolean;
     /**
-     * The index data.
+     * The funds which were migrated.
      */
     @Type(() => MigratedFunds)
     funds: MigratedFunds[];
     /**
-     * The TreasuryTransaction used to fund the funds.
+     * The Treasury Transaction used to provide the funds.
      */
     @Type(() => TreasuryTransactionPayload)
     transaction: TreasuryTransactionPayload;
 
     /**
-     * TODO.
+     * @param migratedAt The milestone index at which the funds were migrated in the legacy network.
+     * @param final Whether this Receipt is the final one for a given migrated at index.
+     * @param funds The funds which were migrated.
+     * @param transaction The Treasury Transaction used to provide the funds.
      */
     constructor(
         migratedAt: number,

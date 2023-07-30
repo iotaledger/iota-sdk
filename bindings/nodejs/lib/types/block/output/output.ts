@@ -19,27 +19,30 @@ export type OutputId = string;
  * All of the output types.
  */
 enum OutputType {
-    /** TODO. */
+    /** A Treasure output. */
     Treasury = 2,
-    /** TODO. */
+    /** A Basic output. */
     Basic = 3,
-    /** TODO. */
+    /** An Alias output. */
     Alias = 4,
-    /** TODO. */
+    /** A Foundry output. */
     Foundry = 5,
-    /** TODO. */
+    /** An NFT output. */
     Nft = 6,
 }
 
 /**
- * TODO.
+ * The base class for outputs.
  */
 abstract class Output /*implements ICommonOutput*/ {
     readonly amount: string;
 
     readonly type: OutputType;
 
-    /** TODO. */
+    /** 
+     * @param type The type of output.
+     * @param amount The amount of the output as big-integer or string.
+     */
     constructor(type: OutputType, amount: bigint | string) {
         this.type = type;
         if (typeof amount == 'bigint') {
@@ -64,7 +67,7 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * TODO.
+     * Parse an output from a JSON string.
      */
     public static parse(data: any): Output {
         if (data.type == OutputType.Treasury) {
@@ -86,7 +89,7 @@ abstract class Output /*implements ICommonOutput*/ {
 }
 
 /**
- * Common output properties.
+ * The base class for common outputs.
  */
 abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     @Type(() => UnlockCondition, {
@@ -102,7 +105,9 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     readonly features?: Feature[];
 
     /**
-     * TODO.
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions Conditions to unlock the output.
      */
     constructor(
         type: OutputType,
@@ -144,28 +149,32 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     }
 }
 /**
- * Treasury Output.
+ * A Treasury output.
  */
 class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
     /**
-     * TODO.
+     * @param amount The amount of the output.
      */
     constructor(amount: bigint) {
         super(OutputType.Treasury, amount);
     }
 }
 /**
- * Basic output.
+ * A Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
     /**
-     * TODO.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
      */
     constructor(amount: bigint, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
     }
 }
 
+/**
+ * Base class for immutable feature outputs.
+ */
 abstract class ImmutableFeaturesOutput extends CommonOutput {
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
@@ -173,7 +182,9 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     readonly immutableFeatures?: Feature[];
 
     /**
-     * TODO.
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
      */
     constructor(
         type: OutputType,
@@ -190,11 +201,16 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     }
 }
 
+/**
+ * Base class for state metadata outputs.
+ */
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
     readonly stateMetadata?: HexEncodedString;
 
     /**
-     * TODO.
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
      */
     constructor(
         type: OutputType,
@@ -211,13 +227,30 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     }
 }
 
+/**
+ * An Alias output.
+ */
 class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
+    /** 
+     * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unless its a newly created alias, then the id is zeroed.
+     */
     readonly aliasId: HexEncodedString;
+    /**
+     * A counter that must increase by 1 every time the alias is state transitioned.
+     */
     readonly stateIndex: number;
+    /**
+     * A counter that denotes the number of foundries created by this alias account.
+     */
     readonly foundryCounter: number;
 
     /**
-     * TODO.
+     * @param unlockConditions The unlock conditions of the output.
+     * @param amount The amount of the output.
+     * @param aliasId The Alias ID as hex-encoded string.
+     * @param stateIndex A counter that must increase by 1 every time the alias is state transitioned.
+     * @param foundryCounter A counter that denotes the number of foundries created by this alias account.
      */
     constructor(
         unlockConditions: UnlockCondition[],
@@ -232,33 +265,38 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
         this.foundryCounter = foundryCounter;
     }
     /**
-     * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its a newly created alias, then the id is zeroed.
+     * Get the Alias ID of the output.
      */
     getAliasId(): HexEncodedString {
         return this.aliasId;
     }
     /**
-     * A counter that must increase by 1 every time the alias is state transitioned.
+     * Get the state index of the output.
      */
     getStateIndex(): number {
         return this.stateIndex;
     }
     /**
-     * A counter that denotes the number of foundries created by this alias account.
+     * Get the Foundry counter of the output.
      */
     getFoundryCounter(): number {
         return this.foundryCounter;
     }
 }
 /**
- * NFT output.
+ * An NFT output.
  */
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
+    /**
+     * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unless its newly minted, then the id is zeroed.
+     */
     readonly nftId: HexEncodedString;
 
     /**
-     * TODO.
+     * @param amount The amount of the output.
+     * @param nftId The NFT ID as hex-encoded string.
+     * @param unlockConditions The unlock conditions of the output.
      */
     constructor(
         amount: bigint,
@@ -269,26 +307,34 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
         this.nftId = nftId;
     }
     /**
-     * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its newly minted, then the id is zeroed.
+     * Get the NFT ID of the output.
      */
     getNftId(): HexEncodedString {
         return this.nftId;
     }
 }
 /**
- * Foundry output.
+ * A Foundry output.
  */
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
+    /**
+     * The serial number of the Foundry with respect to the controlling alias.
+     */
     readonly serialNumber: number;
 
+    /**
+     * The token scheme for the Foundry.
+     */
     @Type(() => TokenScheme, {
         discriminator: TokenSchemeDiscriminator,
     })
     readonly tokenScheme: TokenScheme;
 
     /**
-     * TODO.
+     * @param amount The amount of the output.
+     * @param serialNumber The serial number of the Foundry with respect to the controlling alias.
+     * @param unlockConditions The unlock conditions of the output.
+     * @param tokenScheme The token scheme for the Foundry.
      */
     constructor(
         amount: bigint,
@@ -301,13 +347,13 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
         this.tokenScheme = tokenScheme;
     }
     /**
-     * The serial number of the foundry with respect to the controlling alias.
+     * Get the serial number of the Foundry.
      */
     getSerialNumber(): number {
         return this.serialNumber;
     }
     /**
-     * The token scheme for the foundry.
+     * Get the token scheme for the Foundry.
      */
     getTokenScheme(): TokenScheme {
         return this.tokenScheme;

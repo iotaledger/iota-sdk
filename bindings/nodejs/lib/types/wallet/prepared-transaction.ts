@@ -19,7 +19,8 @@ export class PreparedTransaction {
     readonly _account: Account;
 
     /**
-     * TODO.
+     * @param preparedData Prepared data to sign and submit a transaction.
+     * @param account A wallet account.
      */
     constructor(preparedData: PreparedTransactionData, account: Account) {
         this._preparedData = preparedData;

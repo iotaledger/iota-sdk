@@ -12,11 +12,13 @@ export interface FoundryOutputBuilderParams extends BasicOutputBuilderParams {
      */
     serialNumber: number;
     /**
-     * TODO.
+     * Defines the supply control scheme of the tokens controlled by the foundry.
+     * Currently only a simple scheme is supported.
      */
     tokenScheme: SimpleTokenScheme;
     /**
-     * TODO.
+     * Features that add utility to the output but do not impose unlocking conditions.
+     * These features need to be kept in future transitions of the UTXO state machine.
      */
     immutableFeatures?: Feature[];
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * All of the payload types.
+ * All of the block payload types.
  */
 enum PayloadType {
     /** A milestone payload. */
@@ -16,13 +16,13 @@ enum PayloadType {
 }
 
 /**
- * TODO.
+ * The base class for block payloads.
  */
 abstract class Payload {
     readonly type: PayloadType;
 
     /**
-     * TODO.
+     * @param type The type of payload.
      */
     constructor(type: PayloadType) {
         this.type = type;

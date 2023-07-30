@@ -5,9 +5,9 @@
  * All of the milestone option types.
  */
 enum MilestoneOptionType {
-    /** TODO. */
+    /** The Receipt milestone option. */
     Receipt = 0,
-    /** TODO. */
+    /** The ProtocolParams milestone option. */
     ProtocolParams = 1,
 }
 
@@ -15,7 +15,7 @@ abstract class MilestoneOption {
     readonly type: MilestoneOptionType;
 
     /**
-     * TODO.
+     * @param type The type of milestone option.
      */
     constructor(type: MilestoneOptionType) {
         this.type = type;

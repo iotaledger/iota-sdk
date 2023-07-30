@@ -5,15 +5,14 @@ import type { INode } from '../client';
 import type { OutputId } from '../block/output';
 
 /**
- * TODO.
+ * An object containing an account's entire participation overview.
  */
 export interface ParticipationOverview {
-    /** TODO */
     participations: Participations;
 }
 
 /**
- * TODO.
+ * Output participations for events..
  */
 export interface Participations {
     [eventId: ParticipationEventId]: {
@@ -22,200 +21,198 @@ export interface Participations {
 }
 
 /**
- * TODO.
+ * TrackedParticipation holds the information for each tracked participation.
  */
 export interface TrackedParticipationOverview {
-    /** TODO */
+    /** Amount of tokens that were included in the output the participation was made. */
     amount: string;
-    /** TODO */
+    /** IDs of the answers to the questions of a ballot, in the same order. */
     answers: number[];
-    /** TODO */
+    /** ID of the block that included the transaction that created the output the participation was made. */
     blockId: string;
-    /** TODO */
+    /** Milestone index the participation ended. 0 if the participation is still active. */
     endMilestoneIndex: number;
-    /** TODO */
+    /** Milestone index the participation started. */
     startMilestoneIndex: number;
 }
 
 /**
- * TODO.
+ * A participation event.
  */
 export interface ParticipationEvent {
-    /** TODO */
+    /** The event ID. */
     id: ParticipationEventId;
-    /** TODO */
+    /** Information about a voting or staking event. */
     data: ParticipationEventData;
 }
 
 /**
- * TODO.
+ * Options when registering participation events.
  */
 export interface ParticipationEventRegistrationOptions {
-    /** TODO */
+    /** The node to register participation events. */
     node: INode;
-    /** TODO */
+    /**
+     * The events to register.
+     * If empty, then every event being tracked by the node will be registered. */
     eventsToRegister?: ParticipationEventId[];
-    /** TODO */
+    /** The events to ignore. */
     eventsToIgnore?: ParticipationEventId[];
 }
 
 /**
- * TODO.
+ * A participation event with the provided client nodes.
  */
 export interface ParticipationEventWithNodes {
-    /** TODO */
+    /** The event id */
     id: ParticipationEventId;
-    /** TODO */
+    /** Information about a voting or staking event */
     data: ParticipationEventData;
-    /** TODO */
+    /** Provided client nodes for this event. */
     nodes: INode[];
 }
 
 /**
- * TODO.
+ * A participation event ID represented as hex-encoded string.
  */
 export type ParticipationEventId = string;
 
 /**
- * TODO.
+ * Maps participation event IDs to their corresponding event data with nodes.
  */
 export type ParticipationEventMap = {
     [id: ParticipationEventId]: ParticipationEventWithNodes;
 };
 
 /**
- * TODO.
+ * The participation event status.
  */
 export interface ParticipationEventStatus {
-    /** TODO */
+    /** The milestone index the status was calculated for. */
     milestoneIndex: number;
-    /** TODO */
+    /** The overall status of the event. */
     status: EventStatus;
-    /** TODO */
+    /** The answer status of the different questions of the event. */
     questions?: QuestionStatus[];
-    /** TODO */
+    /** Checksum is the SHA256 checksum of all the question and answer status or the staking amount and rewards calculated for this milestone index. */
     checksum: string;
 }
 
 /**
- * TODO.
+ * All possible event status.
  */
 export enum EventStatus {
-    /** TODO */
     Upcoming = 'upcoming',
-    /** TODO */
     Commencing = 'commencing',
-    /** TODO */
     Holding = 'holding',
-    /** TODO */
     Ended = 'ended',
 }
 
 /**
- * TODO.
+ * Metadata about a participation event.
  */
 export interface ParticipationEventData {
-    /** TODO */
+    /** The name of the event. */
     name: string;
-    /** TODO */
+    /** The milestone index the commencing period starts. */
     milestoneIndexCommence: number;
-    /** TODO */
+    /** The milestone index the holding period starts. */
     milestoneIndexStart: number;
-    /** TODO */
+    /** The milestone index the event ends. */
     milestoneIndexEnd: number;
-    /** TODO */
+    /** The payload of the event (voting or staking). */
     payload: ParticipationEventPayload;
-    /** TODO */
+    /** Some additional description text about the event. */
     additionalInfo: string;
 }
 
 /**
- * TODO.
+ * Possible participation event payloads (voting or staking).
  */
 export type ParticipationEventPayload =
     | VotingEventPayload
     | StakingEventPayload;
 
 /**
- * TODO.
+ * A voting event payload.
  */
 export interface VotingEventPayload {
-    /** TODO */
+    /** The type of the event (voting). */
     type: ParticipationEventType.Voting;
-    /** TODO */
+    /** The questions to vote on. */
     questions: Question[];
 }
 
 /**
- * TODO.
+ * A staking event payload.
  */
 export interface StakingEventPayload {
-    /** TODO */
+    /** The type of the event (statking). */
     type: ParticipationEventType.Staking;
-    /** TODO */
+    /** The description text of the staking event. */
     text: string;
-    /** TODO */
+    /** The symbol of the rewarded tokens. */
     symbol: string;
-    /** TODO */
+    /** Used in combination with Denominator to calculate the rewards per milestone per staked tokens. */
     numerator: string;
-    /** TODO */
+    /** Used in combination with Numerator to calculate the rewards per milestone per staked tokens. */
     denominator: string;
-    /** TODO */
+    /** The minimum rewards required to be included in the staking results. */
     requiredMinimumRewards: string;
-    /** TODO */
+    /** Additional description text about the staking event. */
     additionalInfo: string;
 }
 
 /**
- * TODO.
+ * Defines a single question inside a Ballot that can have multiple answers.
  */
 export interface Question {
-    /** TODO */
+    /** The text of the question. */
     text: string;
-    /** TODO */
+    /** The possible answers to the question. */
     answers: Answer[];
-    /** TODO */
+    /** Some additional description text about the question. */
     additionalInfo: string;
 }
 
 /**
- * TODO.
+ * The answer in a voting event.
  */
 export interface Answer {
-    /** TODO */
+    /** The value that should be used to pick this answer. It must be unique for each answer in a given question. Reserved values are 0 and 255. */
     value: number;
-    /** TODO */
+    /** The text of the answer. */
     text: string;
-    /** TODO */
+    /** Some additional description text about the answer. */
     additionalInfo: string;
 }
 
 /**
- * TODO.
+ * The question status.
  */
 export interface QuestionStatus {
-    /** TODO */
+    /** The status of the answers. */
     answers: AnswerStatus[];
 }
 
 /**
- * TODO.
+ * The answer status.
  */
 export interface AnswerStatus {
-    /** TODO */
+    /** The value that identifies this answer. */
     value: number;
-    /** TODO */
+    /** The current voting weight of the answer. */
     current: number;
-    /** TODO */
+    /** The accumulated voting weight of the answer. */
     accumulated: number;
 }
 
 /**
- * TODO.
+ * The types of participation events.
  */
 export enum ParticipationEventType {
-    /** TODO */
+    /** A voting event. */
     Voting = 0,
-    /** TODO */
+    /** A staking event. */
     Staking = 1,
 }

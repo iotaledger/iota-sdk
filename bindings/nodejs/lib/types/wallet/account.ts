@@ -47,25 +47,25 @@ export interface BaseCoinBalance {
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
-    /** TODO */
+    /** The required amount for Alias outputs. */
     alias: bigint;
-    /** TODO */
+    /** The required amount for Basic outputs. */
     basic: bigint;
-    /** TODO */
+    /** The required amount for Foundry outputs. */
     foundry: bigint;
-    /** TODO */
+    /** The required amount for NFT outputs. */
     nft: bigint;
 }
 
 /** The balance of a native token */
 export interface NativeTokenBalance {
-    /** TODO */
+    /** The native token id. */
     tokenId: HexEncodedString;
-    /** TODO */
+    /** Some metadata of the native token. */
     metadata?: string;
-    /** TODO */
+    /** The total native token balance. */
     total: bigint;
-    /** TODO */
+    /** The available amount of the total native token balance. */
     available: bigint;
 }
 
@@ -111,67 +111,67 @@ export interface SyncOptions {
 
 /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
 export interface AccountSyncOptions {
-    /** TODO */
+    /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync Alias outputs. */
     aliasOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an alias output. */
 export interface AliasSyncOptions {
-    /** TODO */
+    /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync Alias outputs. */
     aliasOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync foundry outputs. */
     foundryOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an nft output. */
 export interface NftSyncOptions {
-    /** TODO */
+    /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync Alias outputs. */
     aliasOutputs?: boolean;
-    /** TODO */
+    /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
 }
 
-/** The account object */
+/** The account object. */
 export interface AccountMeta {
-    /** TODO */
+    /** The account index. */
     index: number;
-    /** TODO */
+    /** The type of coin managed with the account. */
     coinType: CoinType;
-    /** TODO */
+    /** The alias name of the account. */
     alias: string;
-    /** TODO */
+    /** All public addresses. */
     publicAddresses: AccountAddress[];
-    /** TODO */
+    /** All internal addresses. */
     internalAddresses: AccountAddress[];
-    /** TODO */
+    /** All addresses with unspent outputs. */
     addressesWithUnspentOutputs: AddressWithUnspentOutputs[];
-    /** TODO */
+    /** All outputs of the account. */
     outputs: { [outputId: string]: OutputData };
-    /** Output IDs of unspent outputs that are currently used as input for transactions */
+    /** All IDs of unspent outputs that are currently used as inputs for transactions. */
     lockedOutputs: Set<string>;
-    /** TODO */
+    /** All unspent outputs of the account. */
     unspentOutputs: { [outputId: string]: OutputData };
-    /** TODO */
+    /** All transactions of the account. */
     transactions: { [transactionId: string]: Transaction };
-    /** Transaction IDs of pending transactions */
+    /** All pending transactions of the account. */
     pendingTransactions: Set<string>;
-    /** Incoming transactions with their inputs if available and not already pruned */
+    /** All incoming transactions of the account (with their inputs if available and not already pruned). */
     incomingTransactions: {
         [transactionId: string]: [Transaction];
     };
 }
 
-/** The account metadata */
+/** The account metadata. */
 export interface AccountMetadata {
     /** The account alias */
     alias: string;
@@ -181,13 +181,13 @@ export interface AccountMetadata {
     index: number;
 }
 
-/** Options for account creation */
+/** Options for account creation. */
 export interface CreateAccountPayload {
-    /** TODO */
+    /** An account alias name. */
     alias?: string;
-    /** TODO */
+    /** The Bech32 HRP (human readable part) to use. */
     bech32Hrp?: string;
-    /** TODO */
+    /** Account addresses to use. */
     addresses?: AccountAddress[];
 }
 

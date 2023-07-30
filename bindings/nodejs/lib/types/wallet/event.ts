@@ -8,12 +8,12 @@ import { TransactionEssence, TransactionPayload } from '../block';
 import { OutputResponse } from '../models';
 
 /**
- * TODO.
+ * A Transaction ID represented as hex-encoded string.
  */
 export type TransactionId = string;
 
 /**
- * TODO.
+ * An wallet account event.
  */
 class Event {
     /**
@@ -21,12 +21,13 @@ class Event {
      */
     accountIndex: number;
     /**
-     * TODO.
+     * The wallet event.
      */
     event: WalletEvent;
 
     /**
-     * TODO.
+     * @param accountIndex The account index.
+     * @param event The wallet event.
      */
     constructor(accountIndex: number, event: WalletEvent) {
         this.accountIndex = accountIndex;
@@ -38,28 +39,28 @@ class Event {
  * All of the wallet event types.
  */
 enum WalletEventType {
-    /** TODO */
+    /** Consolidation is required. */
     ConsolidationRequired = 0,
-    /** TODO */
+    /** Nano Ledger has generated an address. */
     LedgerAddressGeneration = 1,
-    /** TODO */
+    /** A new output was created. */
     NewOutput = 2,
-    /** TODO */
+    /** An output was spent. */
     SpentOutput = 3,
-    /** TODO */
+    /** A transaction was included into the ledger. */
     TransactionInclusion = 4,
-    /** TODO */
+    /** A progress update while submitting a transaction. */
     TransactionProgress = 5,
 }
 
 /**
- * TODO.
+ * The base class for wallet events.
  */
 abstract class WalletEvent {
     type: WalletEventType;
 
     /**
-     * TODO.
+     * @param type The type of wallet event.
      */
     constructor(type: WalletEventType) {
         this.type = type;
@@ -67,25 +68,22 @@ abstract class WalletEvent {
 }
 
 /**
- * TODO.
+ * A 'consolidation required' wallet event.
  */
 class ConsolidationRequiredWalletEvent extends WalletEvent {
-    /**
-     * TODO.
-     */
     constructor() {
         super(WalletEventType.ConsolidationRequired);
     }
 }
 
 /**
- * TODO.
+ * A 'ledger address generation' wallet event.
  */
 class LedgerAddressGenerationWalletEvent extends WalletEvent {
     address: string;
 
     /**
-     * TODO.
+     * @param address The generated address.
      */
     constructor(address: string) {
         super(WalletEventType.LedgerAddressGeneration);
@@ -94,18 +92,17 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
 }
 
 /**
- * TODO.
+ * A 'new output' wallet event.
  */
 class NewOutputWalletEvent extends WalletEvent {
-    /** TODO */
     output: OutputData;
-    /** TODO */
     transaction?: TransactionPayload;
-    /** TODO */
     transactionInputs?: OutputResponse[];
 
     /**
-     * TODO.
+     * @param output The new output.
+     * @param transaction The transaction that created the output. Might be pruned and not available.
+     * @param transactionInputs The inputs for the transaction that created the output. Might be pruned and not available.
      */
     constructor(
         output: OutputData,
@@ -120,14 +117,13 @@ class NewOutputWalletEvent extends WalletEvent {
 }
 
 /**
- * TODO.
+ * A 'spent output' wallet event.
  */
 class SpentOutputWalletEvent extends WalletEvent {
-    /** TODO */
     output: OutputData;
 
     /**
-     * TODO.
+     * @param output The spent output.
      */
     constructor(output: OutputData) {
         super(WalletEventType.SpentOutput);
@@ -136,16 +132,15 @@ class SpentOutputWalletEvent extends WalletEvent {
 }
 
 /**
- * TODO.
+ * A 'transaction inclusion' wallet event.
  */
 class TransactionInclusionWalletEvent extends WalletEvent {
-    /** TODO */
     transactionId: TransactionId;
-    /** TODO */
     inclusionState: InclusionState;
 
     /**
-     * TODO.
+     * @param transactionId The transaction ID.
+     * @param inclusionState The inclusion state of the transaction.
      */
     constructor(transactionId: TransactionId, inclusionState: InclusionState) {
         super(WalletEventType.TransactionInclusion);
@@ -158,29 +153,31 @@ class TransactionInclusionWalletEvent extends WalletEvent {
  * All of the transaction progress types.
  */
 enum TransactionProgressType {
-    /** TODO */
+    /** Performing input selection. */
     SelectingInputs = 0,
-    /** TODO */
+    /** Generating remainder value deposit address. */
     GeneratingRemainderDepositAddress = 1,
-    /** TODO */
+    /** Prepared transaction. */
     PreparedTransaction = 2,
-    /** TODO */
+    /** Prepared transaction essence hash hex encoded, required for blindsigning with a Ledger Nano. */
     PreparedTransactionEssenceHash = 3,
-    /** TODO */
+    /** Signing the transaction. */
     SigningTransaction = 4,
-    /** TODO */
+    /** Performing PoW. */
     PerformingPow = 5,
-    /** TODO */
+    /** Broadcasting. */
     Broadcasting = 6,
 }
 
 /**
- * TODO.
+ * A 'transaction progress' wallet event.
  */
 class TransactionProgressWalletEvent extends WalletEvent {
-    /** TODO */
     progress: TransactionProgress;
 
+    /**
+     * @param progress The progress of the transaction.
+     */
     constructor(progress: TransactionProgress) {
         super(WalletEventType.TransactionProgress);
         this.progress = progress;
@@ -188,14 +185,13 @@ class TransactionProgressWalletEvent extends WalletEvent {
 }
 
 /**
- * TODO.
+ * The base class for transaction progresses.
  */
 abstract class TransactionProgress {
-    /** TODO */
     type: TransactionProgressType;
 
     /**
-     * TODO.
+     * @param type The type of transaction progress.
      */
     constructor(type: TransactionProgressType) {
         this.type = type;
@@ -203,26 +199,22 @@ abstract class TransactionProgress {
 }
 
 /**
- * TODO.
+ * A 'selecting inputs' progress.
  */
 class SelectingInputsProgress extends TransactionProgress {
-    /**
-     * TODO.
-     */
     constructor() {
         super(TransactionProgressType.SelectingInputs);
     }
 }
 
 /**
- * TODO.
+ * A 'generating remainder deposit address' progress.
  */
 class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
-    /** TODO */
     address: string;
 
     /**
-     * TODO.
+     * @param address The generated remainder deposit address.
      */
     constructor(address: string) {
         super(TransactionProgressType.GeneratingRemainderDepositAddress);
@@ -231,18 +223,17 @@ class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
 }
 
 /**
- * TODO.
+ * A 'prepared transaction' progress.
  */
 class PreparedTransactionProgress extends TransactionProgress {
-    /** TODO */
     essence: TransactionEssence;
-    /** TODO */
     inputsData: InputSigningData[];
-    /** TODO */
     remainder?: Remainder;
 
     /**
-     * TODO.
+     * @param essence The essence of the prepared transaction.
+     * @param inputsData Input signing parameters.
+     * @param remainder Remainder output parameters.
      */
     constructor(
         essence: TransactionEssence,
@@ -257,14 +248,13 @@ class PreparedTransactionProgress extends TransactionProgress {
 }
 
 /**
- * TODO.
+ * A 'prepared transaction essence hash' progress.
  */
 class PreparedTransactionEssenceHashProgress extends TransactionProgress {
-    /** TODO */
     hash: string;
 
     /**
-     * TODO.
+     * @param hash The hash of the transaction essence.
      */
     constructor(hash: string) {
         super(TransactionProgressType.PreparedTransactionEssenceHash);
@@ -273,36 +263,27 @@ class PreparedTransactionEssenceHashProgress extends TransactionProgress {
 }
 
 /**
- * TODO.
+ * A 'signing transaction' progress.
  */
 class SigningTransactionProgress extends TransactionProgress {
-    /**
-     * TODO.
-     */
     constructor() {
         super(TransactionProgressType.SigningTransaction);
     }
 }
 
 /**
- * TODO.
+ * A 'performing PoW' progress.
  */
 class PerformingPowProgress extends TransactionProgress {
-    /**
-     * TODO.
-     */
     constructor() {
         super(TransactionProgressType.PerformingPow);
     }
 }
 
 /**
- * TODO.
+ * A 'broadcasting' progress.
  */
 class BroadcastingProgress extends TransactionProgress {
-    /**
-     * TODO.
-     */
     constructor() {
         super(TransactionProgressType.Broadcasting);
     }

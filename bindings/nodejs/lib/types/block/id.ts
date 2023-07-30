@@ -4,26 +4,26 @@
 import { HexEncodedString } from '../utils';
 
 /**
- * TODO.
+ * An Alias ID represented as hex-encoded string.
  */
 export type AliasId = HexEncodedString;
 
 /**
- * TODO.
+ * An NFT ID represented as hex-encoded string.
  */
 export type NftId = HexEncodedString;
 
 /**
- * TODO.
+ * A Block ID represented as hex-encoded string.
  */
 export type BlockId = HexEncodedString;
 
 /**
- * TODO.
+ * A Token ID represented as hex-encoded string.
  */
 export type TokenId = HexEncodedString;
 
 /**
- * TODO.
+ * A Foundry ID represented as hex-encoded string.
  */
 export type FoundryId = HexEncodedString;

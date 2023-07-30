@@ -8,15 +8,10 @@ import { IOutputMetadataResponse } from '../models/api';
 
 /** Output to claim */
 export enum OutputsToClaim {
-    /** TODO */
     MicroTransactions = 'MicroTransactions',
-    /** TODO */
     NativeTokens = 'NativeTokens',
-    /** TODO */
     Nfts = 'Nfts',
-    /** TODO */
     Amount = 'Amount',
-    /** TODO */
     All = 'All',
 }
 
@@ -48,8 +43,8 @@ export class OutputData {
 
 /** A Segment of the BIP32 path*/
 export interface Segment {
-    /** TODO */
+    /** Whether the segment is hardened. */
     hardened: boolean;
-    /** TODO */
+    /** The bytes of the segment. */
     bs: Uint8Array;
 }

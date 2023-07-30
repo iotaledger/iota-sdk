@@ -3,64 +3,78 @@
 
 /** An Address of the Account */
 export interface AccountAddress {
-    /** TODO */
+    /** The Bech32 address. */
     address: string;
-    /** TODO */
+    /** The address key index. */
     keyIndex: number;
-    /** TODO */
+    /** Whether the address is a public or an internal (change) address. */
     internal: boolean;
-    /** TODO */
+    /** Whether the address was already used before. */
     used: boolean;
 }
 
 /** Address with a base token amount */
 export interface SendParams {
-    /** TODO */
+    /** The Bech32 address to send the amount to. */
     address: string;
-    /** TODO */
+    /** The amount to send. */
     amount: bigint | string;
-    /** TODO */
+    /** 
+     * Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
+     * given the provided amount. If a storage deposit is needed and a return address is not provided, it will
+     * default to the first address of the account.
+     */
     returnAddress?: string;
-    /** TODO */
+    /**
+     * Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+     * receiver already. The expiration will only be used if one is necessary given the provided amount. If an
+     * expiration is needed but not provided, it will default to one day.
+     */
     expiration?: number;
 }
 
 /** Address with unspent outputs */
 export interface AddressWithUnspentOutputs {
-    /** TODO */
+    /** The Bech32 address. */
     address: string;
-    /** TODO */
+    /** The address key index. */
     keyIndex: number;
-    /** TODO */
+    /** Whether the address is a public or an internal (change) address. */
     internal: boolean;
-    /** TODO */
+    /** The IDs of associated unspent outputs. */
     outputIds: string[];
 }
 
 /** Address with native tokens */
 export interface SendNativeTokensParams {
-    /** TODO */
+    /** The Bech32 address. */
     address: string;
-    /** TODO */
+    /** The Native Tokens to send. */
     nativeTokens: [string, bigint][];
-    /** TODO */
+    /**
+     * Bech32 encoded address return address, to which the storage deposit will be returned.
+     * Default will use the first address of the account.
+     */
     returnAddress?: string;
-    /** TODO */
+    /**
+     * Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+     * receiver before. Default is 1 day.
+     */
     expiration?: number;
 }
 
 /** Address with an NftId */
 export interface SendNftParams {
-    /** TODO */
+    /** The Bech32 address. */
     address: string;
-    /** TODO */
+    /** The ID of the NFT to send. */
     nftId: string;
 }
 
 /** Options for address generation, useful with a Ledger Nano SecretManager */
 export interface GenerateAddressOptions {
-    /** TODO */
+    /** Whether to generate a public or an internal (change) address. */
     internal: boolean;
-    /** TODO */
+    /** Whether to display the generated address on Ledger Nano devices. */
     ledgerNanoPrompt: boolean;
 }

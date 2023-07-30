@@ -4,62 +4,67 @@
 import { INativeToken } from '../models';
 import { HexEncodedString } from '../utils/hex-encoding';
 
-/** Options for the creation of an output */
+/** Options for the creation of an output. */
 export interface OutputParams {
-    /** TODO */
+    /** A recipient address. */
     recipientAddress: string;
-    /** TODO */
+    /** An amount. */
     amount: bigint | string;
-    /** TODO */
+    /** Assets to include. */
     assets?: Assets;
-    /** TODO */
+    /** Features to include. */
     features?: Features;
-    /** TODO */
+    /** Unlocks to include. */
     unlocks?: Unlocks;
-    /** TODO */
+    /** The storage deposit strategy to use. */
     storageDeposit?: StorageDeposit;
 }
 
-/** Assets to include in the output */
+/** Assets to include in the output. */
 export interface Assets {
-    /** TODO */
+    /** Native Token assets to include. */
     nativeTokens?: INativeToken[];
-    /** TODO */
+    /** The NFT to include. */
     nftId?: HexEncodedString;
 }
 
-/** Features to include in the output */
+/** Features to include in the output. */
 export interface Features {
-    /** TODO */
+    /** A Tag feature to include. */
     tag?: HexEncodedString;
-    /** TODO */
+    /** A Metadata feature to include. */
     metadata?: HexEncodedString;
-    /** TODO */
+    /** A Sender feature to include. */
     sender?: string;
-    /** TODO */
+    /** An Issuer feature to include. */
     issuer?: string;
 }
 
-/** Time unlocks to include in the output */
+/** Time unlocks to include in the output. */
 export interface Unlocks {
-    /** TODO */
+    /** The expiration Unix timestamp that marks the end of the expiration period. */
     expirationUnixTime?: number;
-    /** TODO */
+    /** The timelock Unix timestamp that marks the end of the locking period. */
     timelockUnixTime?: number;
 }
 
-/** Storage deposit strategy to be used for the output */
+/** Storage deposit strategy to be used for the output. */
 export interface StorageDeposit {
-    /** TODO */
+    /** 
+     * The return strategy.
+     */
     returnStrategy?: ReturnStrategy;
-    /** TODO */
+    /** 
+     * If account has 2 Mi, min storage deposit is 1 Mi and one wants to send 1.5 Mi, it wouldn't be possible with a
+     * 0.5 Mi remainder. To still send a transaction, the 0.5 can be added to the output automatically, if set to true.
+     */
     useExcessIfLow?: boolean;
 }
 
-/** Return strategy for the storage deposit */
+/** Return strategy for the storage deposit. */
 export enum ReturnStrategy {
-    /** TODO */
+    /** A storage deposit return unlock condition will be added with the required minimum storage deposit. */
     Return = 'Return',
-    /** TODO */
+    /** The recipient address will get the additional amount to reach the minimum storage deposit gifted. */
     Gift = 'Gift',
 }
