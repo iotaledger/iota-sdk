@@ -13,9 +13,8 @@ import type { IClientOptions, __ClientMethods__ } from '../types/client';
 export class ClientMethodHandler {
     methodHandler: ClientMethodHandler;
 
-    // TODO: Is that description good enough?
     /**
-     * @param options A secret manager type or method handler.
+     * @param options client options or a client method handler.
      */
     constructor(options: IClientOptions | ClientMethodHandler) {
         // The rust client object is not extensible

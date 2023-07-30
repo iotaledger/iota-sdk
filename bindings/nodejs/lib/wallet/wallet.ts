@@ -23,7 +23,7 @@ export class Wallet {
     private methodHandler: WalletMethodHandler;
 
     /**
-     * TODO.
+     * @param options Wallet options.
      */
     constructor(options: WalletOptions) {
         this.methodHandler = new WalletMethodHandler(options);

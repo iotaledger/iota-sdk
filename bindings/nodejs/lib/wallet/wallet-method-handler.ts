@@ -25,7 +25,7 @@ export class WalletMethodHandler {
     methodHandler: any;
 
     /**
-     * TODO.
+     * @param options The wallet options.
      */
     constructor(options?: WalletOptions) {
         const walletOptions = {
@@ -39,7 +39,9 @@ export class WalletMethodHandler {
     }
 
     /**
-     * TODO.
+     * Call a wallet method on the Rust backend.
+     * 
+     * @param method The wallet method to call.
      */
     async callMethod(method: __Method__): Promise<string> {
         return callWalletMethodAsync(
@@ -67,7 +69,10 @@ export class WalletMethodHandler {
     }
 
     /**
-     * TODO.
+     * Call an account method on the Rust backend.
+     * 
+     * @param accountIndex The account index.
+     * @param method The account method to call.
      */
     async callAccountMethod(
         accountIndex: AccountId,
@@ -83,7 +88,10 @@ export class WalletMethodHandler {
     }
 
     /**
-     * TODO.
+     * Listen to wallet events.
+     * 
+     * @param eventTypes The wallet event types to listen for.
+     * @param callback The callback function to call when an event is received.
      */
     async listen(
         eventTypes: WalletEventType[],
@@ -92,15 +100,12 @@ export class WalletMethodHandler {
         return listenWalletAsync(eventTypes, callback, this.methodHandler);
     }
 
-    /**
-     * TODO.
-     */
     async destroy(): Promise<void> {
         return destroyWallet(this.methodHandler);
     }
 
     /**
-     * TODO.
+     * Get the client associated with the wallet.
      */
     async getClient(): Promise<Client> {
         return new Promise((resolve, reject) => {
@@ -115,7 +120,7 @@ export class WalletMethodHandler {
     }
 
     /**
-     * TODO.
+     * Get the secret manager associated with the wallet.
      */
     async getSecretManager(): Promise<SecretManager> {
         return new Promise((resolve, reject) => {

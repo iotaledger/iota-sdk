@@ -23,7 +23,7 @@ import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 /** Utils class for utils. */
 export class Utils {
     /**
-     * Generates a new mnemonic.
+     * Generate a new mnemonic.
      */
     static generateMnemonic(): string {
         return callUtilsMethod({
@@ -32,9 +32,10 @@ export class Utils {
     }
 
     /**
-     * Returns a hex encoded seed for a mnemonic.
-     * @param todo TODO.
-     * @returns TODO.
+     * Convert a mnemonic to a hex encoded seed.
+     * 
+     * @param mnemonic A mnemonic string.
+     * @returns The seed as hex-encoded string.
      */
     static mnemonicToHexSeed(mnemonic: string): HexEncodedString {
         return callUtilsMethod({
@@ -46,9 +47,10 @@ export class Utils {
     }
 
     /**
-     * Computes the alias id for the given alias output id.
-     * @param todo TODO.
-     * @returns TODO.
+     * Compute the alias ID from a given Alias output ID.
+     * 
+     * @param outputId The output ID as hex-encoded string.
+     * @returns The Alias ID.
      */
     static computeAliasId(outputId: string): AliasId {
         return callUtilsMethod({
@@ -60,9 +62,12 @@ export class Utils {
     }
 
     /**
-     * Computes the foundry id.
-     * @param todo TODO.
-     * @returns TODO.
+     * Compute the Foundry ID.
+     * 
+     * @param aliasId The Alias ID associated with the Foundry.
+     * @param serialNumber The serial number of the Foundry.
+     * @param tokenSchemeType The Token scheme type. Currently only a simple scheme is supported.
+     * @returns The Foundry ID.
      */
     static computeFoundryId(
         aliasId: AliasId,
@@ -80,9 +85,10 @@ export class Utils {
     }
 
     /**
-     * Computes the NFT id for the given NFT output id.
-     * @param todo TODO.
-     * @returns TODO.
+     * Compute the NFT ID from the given NFT output ID.
+     * 
+     * @param outputId The output ID as hex-encoded string.
+     * @returns The NFT ID.
      */
     static computeNftId(outputId: string): NftId {
         return callUtilsMethod({
@@ -94,9 +100,10 @@ export class Utils {
     }
 
     /**
-     * Computes the inputCommitment from the output objects that are used as inputs to fund the transaction.
+     * Compute the input commitment from the output objects that are used as inputs to fund the transaction.
+     * 
      * @param inputs The output objects used as inputs for the transaction.
-     * @returns The inputs commitment.
+     * @returns The inputs commitment hash as hex-encoded string.
      */
     static computeInputsCommitment(inputs: Output[]): HexEncodedString {
         return callUtilsMethod({
@@ -108,10 +115,11 @@ export class Utils {
     }
 
     /**
-     * Computes the output ID from transaction id and output index.
-     * @param transactionId The id of the transaction.
+     * Compute the output ID from transaction ID and output index.
+     * 
+     * @param transactionId The ID of the transaction.
      * @param outputIndex The index of the output.
-     * @returns The output id.
+     * @returns The output ID.
      */
     static computeOutputId(id: TransactionId, index: number): OutputId {
         return callUtilsMethod({
@@ -124,7 +132,8 @@ export class Utils {
     }
 
     /**
-     * Computes the required storage deposit of an output.
+     * Compute the required storage deposit of an output.
+     * 
      * @param output The output.
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
@@ -141,7 +150,8 @@ export class Utils {
     }
 
     /**
-     * Computes a tokenId from the aliasId, serial number and token scheme type.
+     * Compute a Token iD from the aliasId, serial number and token scheme type.
+     * 
      * @param aliasId The alias that controls the foundry.
      * @param serialNumber The serial number of the foundry.
      * @param tokenSchemeType The tokenSchemeType of the foundry.
@@ -163,9 +173,10 @@ export class Utils {
     }
 
     /**
-     * Returns a valid Address parsed from a String.
-     * @param todo TODO.
-     * @returns TODO.
+     * Parse a Bech32 address from a string.
+     * 
+     * @param address An Bech32 address as string.
+     * @returns A Bech32 address.
      */
     static parseBech32Address(address: string): Address {
         const addr = callUtilsMethod({
@@ -178,9 +189,10 @@ export class Utils {
     }
 
     /**
-     * Returns a block ID (Blake2b256 hash of the block bytes)
-     * @param todo TODO.
-     * @returns TODO.
+     * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
+     * 
+     * @param block A block.
+     * @returns The corresponding block ID.
      */
     static blockId(block: Block): BlockId {
         return callUtilsMethod({
@@ -192,9 +204,10 @@ export class Utils {
     }
 
     /**
-     * Returns a Milestone ID (Blake2b256 hash of the milestone essence)
-     * @param todo TODO.
-     * @returns TODO.
+     * Compute the milestone ID (Blake2b256 hash of the milestone essence) of a milestone payload.
+     * 
+     * @param payload A milestone payload.
+     * @returns The milestone ID.
      */
     static milestoneId(payload: MilestonePayload): MilestoneId {
         return callUtilsMethod({
@@ -206,9 +219,10 @@ export class Utils {
     }
 
     /**
-     * Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
-     * @param payload The transaction payload.
-     * @returns The transaction id.
+     * Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
+     * 
+     * @param payload A transaction payload.
+     * @returns The transaction ID.
      */
     static transactionId(payload: TransactionPayload): TransactionId {
         return callUtilsMethod({
@@ -220,9 +234,10 @@ export class Utils {
     }
 
     /**
-     * Transforms bech32 to hex.
-     * @param todo TODO.
-     * @returns TODO.
+     * Convert a Bech32 address to a hex-encoded string.
+     * 
+     * @param bech32 A Bech32 address.
+     * @returns The hex-encoded string.
      */
     static bech32ToHex(bech32: string): string {
         return callUtilsMethod({
@@ -234,9 +249,11 @@ export class Utils {
     }
 
     /**
-     * Transforms a hex encoded address to a bech32 encoded address.
-     * @param todo TODO.
-     * @returns TODO.
+     * Convert a hex-encoded address string to a Bech32-encoded address string.
+     * 
+     * @param hex A hex-encoded address string.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
      */
     static hexToBech32(hex: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -249,9 +266,11 @@ export class Utils {
     }
 
     /**
-     * Transforms an alias id to a bech32 encoded address.
-     * @param todo TODO.
-     * @returns TODO.
+     * Convert an Alias ID to a Bech32-encoded address string.
+     * 
+     * @param aliasId An Alias ID.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
      */
     static aliasIdToBech32(aliasId: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -264,9 +283,11 @@ export class Utils {
     }
 
     /**
-     * Transforms an nft id to a bech32 encoded address.
-     * @param todo TODO.
-     * @returns TODO.
+     * Convert an NFT ID to a Bech32-encoded address string.
+     * 
+     * @param nftId An NFT ID.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
      */
     static nftIdToBech32(nftId: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -279,9 +300,11 @@ export class Utils {
     }
 
     /**
-     * Transforms a hex encoded public key to a bech32 encoded address.
-     * @param todo TODO.
-     * @returns TODO.
+     * Convert a hex-encoded public key to a Bech32-encoded address string.
+     * 
+     * @param hex A hex-encoded public key.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
      */
     static hexPublicKeyToBech32Address(hex: string, bech32Hrp: string): string {
         return callUtilsMethod({
@@ -294,9 +317,9 @@ export class Utils {
     }
 
     /**
-     * Checks if a String is a valid bech32 encoded address.
-     * @param todo TODO.
-     * @returns TODO.
+     * Checks whether an address string is a valid Bech32-encoded address.
+     * 
+     * @param address An address string.
      */
     static isAddressValid(address: string): boolean {
         return callUtilsMethod({
@@ -309,8 +332,9 @@ export class Utils {
 
     /**
      * Compute the hash of a transaction essence.
-     * @param todo TODO.
-     * @returns TODO.
+     * 
+     * @param essence A transaction essence.
+     * @returns The hash of the transaction essence as a hex-encoded string.
      */
     static hashTransactionEssence(
         essence: TransactionEssence,
@@ -324,9 +348,10 @@ export class Utils {
     }
 
     /**
-     * Verifies an ed25519 signature against a message.
-     * @param todo TODO.
-     * @returns TODO.
+     * Verify an Ed25519 signature against a message.
+     * 
+     * @param signature An Ed25519 signature.
+     * @param message A hex-encoded message.
      */
     static verifyEd25519Signature(
         signature: Ed25519Signature,
@@ -342,9 +367,10 @@ export class Utils {
     }
 
     /**
-     * Verifies a Secp256k1Ecdsa signature against a message.
-     * @param todo TODO.
-     * @returns TODO.
+     * Verify a Secp256k1Ecdsa signature against a message.
+     * @param publicKey A hex-encoded public key.
+     * @param signature A hex-encoded signature.
+     * @param message A hex-encoded message.
      */
     static verifySecp256k1EcdsaSignature(
         publicKey: HexEncodedString,
@@ -363,8 +389,8 @@ export class Utils {
 
     /**
      * Verify if a mnemonic is a valid BIP39 mnemonic.
-     * @param todo TODO.
-     * @returns TODO.
+     * 
+     * @param mnemonic A mnemonic string.
      */
     static verifyMnemonic(mnemonic: string): void {
         return callUtilsMethod({

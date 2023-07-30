@@ -16,7 +16,7 @@ export class SecretManagerMethodHandler {
     methodHandler: SecretManagerMethodHandler;
 
     /**
-     * @param options A secret manager type or method handler.
+     * @param options A secret manager type or a secret manager method handler.
      */
     constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         // The rust secret manager object is not extensible

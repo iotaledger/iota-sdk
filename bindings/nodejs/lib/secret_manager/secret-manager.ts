@@ -27,7 +27,7 @@ export class SecretManager {
     private methodHandler: SecretManagerMethodHandler;
 
     /**
-     * @param options A secret manager type or method handler.
+     * @param options A secret manager type or a secret manager method handler.
      */
     constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         this.methodHandler = new SecretManagerMethodHandler(options);
