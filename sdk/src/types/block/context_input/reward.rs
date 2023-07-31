@@ -3,7 +3,7 @@
 
 use derive_more::From;
 
-/// A Reward Context Input is an input that indicates which transaction Input is claiming Mana rewards.
+/// A Reward Context Input indicates which transaction Input is claiming Mana rewards.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct RewardContextInput(u16);
 
