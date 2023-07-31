@@ -29,20 +29,20 @@ impl core::fmt::Debug for ContextInput {
 }
 
 impl ContextInput {
-    /// Returns the input kind of an `ContextInput`.
+    /// Returns the context input kind of an `ContextInput`.
     pub fn kind(&self) -> u8 {
         match self {
             Self::Reward(_) => RewardContextInput::KIND,
         }
     }
 
-    /// Checks whether the input is a [`RewardContextInput`].
+    /// Checks whether the context input is a [`RewardContextInput`].
     pub fn is_reward(&self) -> bool {
         matches!(self, Self::Reward(_))
     }
 
     /// Gets the input as an actual [`RewardContextInput`].
-    /// PANIC: do not call on a non-reward input.
+    /// PANIC: do not call on a non-reward context input.
     pub fn as_reward(&self) -> &RewardContextInput {
         let Self::Reward(input) = self;
         input
