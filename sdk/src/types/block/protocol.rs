@@ -21,26 +21,26 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 pub struct ProtocolParameters {
     // The version of the protocol running.
     #[cfg_attr(feature = "serde", serde(rename = "version"))]
-    protocol_version: u8,
+    pub(crate) protocol_version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
-    network_name: StringPrefix<u8>,
+    pub(crate) network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
-    bech32_hrp: Hrp,
+    pub(crate) bech32_hrp: Hrp,
     // The below max depth parameter of the network.
-    below_max_depth: u8,
+    pub(crate) below_max_depth: u8,
     // The rent structure used by given node/network.
-    rent_structure: RentStructure,
+    pub(crate) rent_structure: RentStructure,
     // TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    token_supply: u64,
+    pub(crate) token_supply: u64,
     // Genesis timestamp at which the slots start to count.
     #[cfg_attr(feature = "serde", serde(alias = "genesisUnixTimestamp"))]
-    genesis_unix_timestamp: u32,
+    pub(crate) genesis_unix_timestamp: u32,
     // Duration of each slot in seconds.
     #[cfg_attr(feature = "serde", serde(alias = "slotDurationInSeconds"))]
-    slot_duration_in_seconds: u8,
+    pub(crate) slot_duration_in_seconds: u8,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -136,12 +136,20 @@ impl ProtocolParameters {
     }
 
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
-        (1 + (timestamp - self.genesis_unix_timestamp() as u64) / self.slot_duration_in_seconds() as u64).into()
+        slot_index(
+            timestamp,
+            self.genesis_unix_timestamp(),
+            self.slot_duration_in_seconds(),
+        )
     }
 
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
+}
+
+pub fn slot_index(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
+    (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.

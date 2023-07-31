@@ -369,4 +369,9 @@ pub enum ClientMethod {
         /// The address for request funds
         address: Bech32Address,
     },
+    /// Returns a block ID (Blake2b256 hash of block bytes) from a block
+    BlockId {
+        /// Block
+        block: BlockDto,
+    },
 }

@@ -1,10 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
-    packer::{Packer, SlicePacker},
+    packer::Packer,
     unpacker::Unpacker,
     Packable, PackableExt,
 };

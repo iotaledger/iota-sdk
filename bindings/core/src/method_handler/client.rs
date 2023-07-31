@@ -341,6 +341,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?;
             Response::CustomJson(data)
         }
+        ClientMethod::BlockId { block } => {
+            let protocol_params = client.get_protocol_parameters().await?;
+            Response::BlockId(Block::try_from_dto_with_params(block, &protocol_params)?.id(&protocol_params))
+        }
     };
     Ok(response)
 }

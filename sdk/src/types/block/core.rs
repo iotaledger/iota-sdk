@@ -15,6 +15,7 @@ use packable::{
 
 use super::{
     basic::{BasicBlock, BasicBlockData},
+    block_id::BlockHash,
     signature::Ed25519Signature,
     slot::{SlotCommitmentId, SlotIndex},
     validation::{ValidationBlock, ValidationBlockData},
@@ -464,19 +465,21 @@ impl Block {
         matches!(self, Self::Validation(_))
     }
 
-    /// Computes the identifier of the block.
-    #[inline(always)]
-    pub fn id(&self, protocol_parameters: &ProtocolParameters) -> BlockId {
-        let mut res = [0u8; 40];
+    /// Computes the block hash.
+    pub fn hash(&self) -> BlockHash {
         let id = [
             &self.header_hash()[..],
             &self.block_hash()[..],
             &self.signature_bytes()[..],
         ]
         .concat();
-        res[..32].copy_from_slice(&*Blake2b256::digest(id));
-        res[32..].copy_from_slice(&self.slot_index_bytes(protocol_parameters));
-        BlockId::new(res)
+        BlockHash::new(Blake2b256::digest(id).into())
+    }
+
+    /// Computes the identifier of the block.
+    pub fn id(&self, protocol_parameters: &ProtocolParameters) -> BlockId {
+        self.hash()
+            .with_slot_index(protocol_parameters.slot_index(self.issuing_time()))
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
@@ -515,10 +518,6 @@ impl Block {
         let mut bytes = [0u8; Block::SIGNATURE_LENGTH];
         self.signature().pack(&mut SlicePacker::new(&mut bytes)).unwrap();
         bytes
-    }
-
-    pub(crate) fn slot_index_bytes(&self, protocol_parameters: &ProtocolParameters) -> [u8; 8] {
-        protocol_parameters.slot_index(self.issuing_time()).to_le_bytes()
     }
 }
 
