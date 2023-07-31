@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{boxed::Box, vec::Vec};
+use core::mem::size_of;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
 use packable::{
     error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
-    packer::Packer,
+    packer::{Packer, SlicePacker},
     unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
     Packable, PackableExt,
 };
@@ -254,6 +255,22 @@ impl<B> BlockWrapper<B> {
     pub fn signature(&self) -> &Ed25519Signature {
         &self.signature
     }
+
+    pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.protocol_version.pack(packer)?;
+        self.network_id.pack(packer)?;
+        self.issuing_time.pack(packer)?;
+        self.slot_commitment_id.pack(packer)?;
+        self.latest_finalized_slot.pack(packer)?;
+        self.issuer_id.pack(packer)?;
+        Ok(())
+    }
+
+    pub(crate) fn header_hash(&self) -> [u8; 32] {
+        let mut bytes = [0u8; Block::HEADER_LENGTH];
+        self.pack_header(&mut SlicePacker::new(&mut bytes)).unwrap();
+        Blake2b256::digest(bytes).into()
+    }
 }
 
 impl Block {
@@ -261,6 +278,14 @@ impl Block {
     pub const LENGTH_MIN: usize = 46;
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
+    /// The length of the block header.
+    pub const HEADER_LENGTH: usize = size_of::<u8>()
+        + 2 * size_of::<u64>()
+        + size_of::<SlotCommitmentId>()
+        + size_of::<SlotIndex>()
+        + size_of::<IssuerId>();
+    /// The length of the block signature.
+    pub const SIGNATURE_LENGTH: usize = Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
@@ -441,8 +466,17 @@ impl Block {
 
     /// Computes the identifier of the block.
     #[inline(always)]
-    pub fn id(&self) -> BlockId {
-        BlockId::new(Blake2b256::digest(self.pack_to_vec()).into())
+    pub fn id(&self, protocol_parameters: &ProtocolParameters) -> BlockId {
+        let mut res = [0u8; 40];
+        let id = [
+            &self.header_hash()[..],
+            &self.block_hash()[..],
+            &self.signature_bytes()[..],
+        ]
+        .concat();
+        res[..32].copy_from_slice(&*Blake2b256::digest(id));
+        res[32..].copy_from_slice(&self.slot_index_bytes(protocol_parameters));
+        BlockId::new(res)
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
@@ -460,6 +494,31 @@ impl Block {
         }
 
         Ok(block)
+    }
+
+    pub(crate) fn header_hash(&self) -> [u8; 32] {
+        match self {
+            Block::Basic(b) => b.header_hash(),
+            Block::Validation(b) => b.header_hash(),
+        }
+    }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let bytes = match self {
+            Block::Basic(b) => b.data.pack_to_vec(),
+            Block::Validation(b) => b.data.pack_to_vec(),
+        };
+        Blake2b256::digest(bytes).into()
+    }
+
+    pub(crate) fn signature_bytes(&self) -> [u8; Block::SIGNATURE_LENGTH] {
+        let mut bytes = [0u8; Block::SIGNATURE_LENGTH];
+        self.signature().pack(&mut SlicePacker::new(&mut bytes)).unwrap();
+        bytes
+    }
+
+    pub(crate) fn slot_index_bytes(&self, protocol_parameters: &ProtocolParameters) -> [u8; 8] {
+        protocol_parameters.slot_index(self.issuing_time()).to_le_bytes()
     }
 }
 

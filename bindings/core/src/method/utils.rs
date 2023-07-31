@@ -10,7 +10,6 @@ use iota_sdk::types::block::{
         TransactionId,
     },
     signature::dto::Ed25519SignatureDto,
-    BlockDto,
 };
 use serde::{Deserialize, Serialize};
 
@@ -77,11 +76,11 @@ pub enum UtilsMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
-    /// Returns a block ID (Blake2b256 hash of block bytes) from a block
-    BlockId {
-        /// Block
-        block: BlockDto,
-    },
+    // /// Returns a block ID (Blake2b256 hash of block bytes) from a block
+    // BlockId {
+    //     /// Block
+    //     block: BlockDto,
+    // },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
         /// Transaction Payload

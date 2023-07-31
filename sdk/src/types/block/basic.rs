@@ -1,9 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
+    packer::{Packer, SlicePacker},
     unpacker::Unpacker,
     Packable, PackableExt,
 };
@@ -180,12 +181,7 @@ impl Packable for BasicBlock {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version.pack(packer)?;
-        self.network_id.pack(packer)?;
-        self.issuing_time.pack(packer)?;
-        self.slot_commitment_id.pack(packer)?;
-        self.latest_finalized_slot.pack(packer)?;
-        self.issuer_id.pack(packer)?;
+        self.pack_header(packer)?;
         Self::KIND.pack(packer)?;
         self.data.pack(packer)?;
         self.signature.pack(packer)?;

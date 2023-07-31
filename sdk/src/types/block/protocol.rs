@@ -7,7 +7,7 @@ use core::borrow::Borrow;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 
-use super::address::Hrp;
+use super::{address::Hrp, slot::SlotIndex};
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
@@ -133,6 +133,10 @@ impl ProtocolParameters {
 
     pub fn slot_duration_in_seconds(&self) -> u8 {
         self.slot_duration_in_seconds
+    }
+
+    pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
+        (1 + (timestamp - self.genesis_unix_timestamp() as u64) / self.slot_duration_in_seconds() as u64).into()
     }
 
     pub fn hash(&self) -> ProtocolParametersHash {

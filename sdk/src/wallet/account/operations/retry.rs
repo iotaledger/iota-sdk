@@ -78,7 +78,7 @@ where
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                     )
                     .await?
-                    .id(),
+                    .id(&self.client().get_protocol_parameters().await?),
             };
 
             // Attachments of the Block to check inclusion state
@@ -124,7 +124,7 @@ where
                                     Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                                 )
                                 .await?;
-                            block_ids.push(reattached_block.id());
+                            block_ids.push(reattached_block.id(&self.client().get_protocol_parameters().await?));
                         }
                     }
                 }
@@ -139,7 +139,7 @@ where
                             e
                         }
                     })?;
-                    return Ok(included_block.id());
+                    return Ok(included_block.id(&self.client().get_protocol_parameters().await?));
                 }
             }
             Err(ClientError::TangleInclusion(block_id.to_string()).into())
