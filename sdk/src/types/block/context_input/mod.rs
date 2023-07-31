@@ -5,7 +5,7 @@ mod reward;
 
 use derive_more::From;
 
-use self::reward::RewardInput;
+use self::reward::RewardContextInput;
 use crate::types::block::Error;
 
 /// A generic input supporting different input kinds.
@@ -14,8 +14,8 @@ use crate::types::block::Error;
 #[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
 pub enum ContextInput {
     /// A reward input.
-    #[packable(tag = RewardInput::KIND)]
-    Reward(RewardInput),
+    #[packable(tag = RewardContextInput::KIND)]
+    Reward(RewardContextInput),
     // TODO: Commitment Input https://github.com/iotaledger/iota-sdk/issues/901 and Block Issuance Credit Input https://github.com/iotaledger/iota-sdk/issues/906
 }
 
@@ -31,18 +31,18 @@ impl ContextInput {
     /// Returns the input kind of an `ContextInput`.
     pub fn kind(&self) -> u8 {
         match self {
-            Self::Reward(_) => RewardInput::KIND,
+            Self::Reward(_) => RewardContextInput::KIND,
         }
     }
 
-    /// Checks whether the input is a [`RewardInput`].
+    /// Checks whether the input is a [`RewardContextInput`].
     pub fn is_utxo(&self) -> bool {
         matches!(self, Self::Reward(_))
     }
 
-    /// Gets the input as an actual [`RewardInput`].
+    /// Gets the input as an actual [`RewardContextInput`].
     /// PANIC: do not call on a non-reward input.
-    pub fn as_reward(&self) -> &RewardInput {
+    pub fn as_reward(&self) -> &RewardContextInput {
         let Self::Reward(input) = self;
         input
     }
@@ -51,7 +51,7 @@ impl ContextInput {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use super::reward::dto::RewardInputDto;
+    pub use super::reward::dto::RewardContextInputDto;
     use super::*;
     use crate::types::block::Error;
 
@@ -59,7 +59,7 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
     pub enum ContextInputDto {
-        Reward(RewardInputDto),
+        Reward(RewardContextInputDto),
     }
 
     impl From<&ContextInput> for ContextInputDto {

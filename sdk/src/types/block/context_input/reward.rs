@@ -9,9 +9,9 @@ use crate::types::block::Error;
 
 /// A Reward Input is an input that indicates which transaction Input is claiming Mana rewards.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
-pub struct RewardInput(u16);
+pub struct RewardContextInput(u16);
 
-impl RewardInput {
+impl RewardContextInput {
     /// The context input kind of a [`RewardInput`].
     pub const KIND: u8 = 2;
 
@@ -27,9 +27,9 @@ impl RewardInput {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(RewardInput);
+string_serde_impl!(RewardContextInput);
 
-impl FromStr for RewardInput {
+impl FromStr for RewardContextInput {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -37,13 +37,13 @@ impl FromStr for RewardInput {
     }
 }
 
-impl core::fmt::Display for RewardInput {
+impl core::fmt::Display for RewardContextInput {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl core::fmt::Debug for RewardInput {
+impl core::fmt::Debug for RewardContextInput {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "RewardInput({})", self.0)
     }
@@ -57,25 +57,25 @@ pub(crate) mod dto {
 
     /// A Reward Input is an input that indicates which transaction Input is claiming Mana rewards.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct RewardInputDto {
+    pub struct RewardContextInputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub index: u16,
     }
 
-    impl From<&RewardInput> for RewardInputDto {
-        fn from(value: &RewardInput) -> Self {
+    impl From<&RewardContextInput> for RewardContextInputDto {
+        fn from(value: &RewardContextInput) -> Self {
             Self {
-                kind: RewardInput::KIND,
+                kind: RewardContextInput::KIND,
                 index: value.index(),
             }
         }
     }
 
-    impl TryFrom<RewardInputDto> for RewardInput {
+    impl TryFrom<RewardContextInputDto> for RewardContextInput {
         type Error = Error;
 
-        fn try_from(value: RewardInputDto) -> Result<Self, Self::Error> {
+        fn try_from(value: RewardContextInputDto) -> Result<Self, Self::Error> {
             Ok(Self::new(value.index))
         }
     }
