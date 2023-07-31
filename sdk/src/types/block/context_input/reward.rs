@@ -1,10 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::From;
+use derive_more::{Display, From};
 
 /// A Reward Context Input indicates which transaction Input is claiming Mana rewards.
-#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
+#[derive(Clone, Copy, Debug, Display, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct RewardContextInput(u16);
 
 impl RewardContextInput {
@@ -19,18 +19,6 @@ impl RewardContextInput {
     /// Returns the index of a [`RewardContextInput`].
     pub fn index(&self) -> u16 {
         self.0
-    }
-}
-
-impl core::fmt::Display for RewardContextInput {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl core::fmt::Debug for RewardContextInput {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "RewardContextInput({})", self.0)
     }
 }
 
