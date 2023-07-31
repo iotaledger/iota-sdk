@@ -29,7 +29,7 @@ impl core::fmt::Debug for ContextInput {
 }
 
 impl ContextInput {
-    /// Returns the context input kind of an `ContextInput`.
+    /// Returns the context input kind of a `ContextInput`.
     pub fn kind(&self) -> u8 {
         match self {
             Self::Reward(_) => RewardContextInput::KIND,
