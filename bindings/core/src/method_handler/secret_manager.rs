@@ -6,10 +6,7 @@ use iota_sdk::{
         api::PreparedTransactionData,
         secret::{SecretManage, SecretManager},
     },
-    types::{
-        block::{signature::dto::Ed25519SignatureDto, unlock::Unlock},
-        TryFromDto,
-    },
+    types::{block::unlock::Unlock, TryFromDto},
 };
 use tokio::sync::RwLock;
 
@@ -55,12 +52,12 @@ pub(crate) async fn call_secret_manager_method_internal(
                 .signature_unlock(&transaction_essence_hash, chain)
                 .await?;
 
-            Response::SignatureUnlock((&unlock).into())
+            Response::SignatureUnlock(unlock)
         }
         SecretManagerMethod::SignEd25519 { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
             let signature = secret_manager.sign_ed25519(&msg, chain).await?;
-            Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
+            Response::Ed25519Signature(signature)
         }
         SecretManagerMethod::SignSecp256k1Ecdsa { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;

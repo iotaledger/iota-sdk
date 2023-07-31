@@ -22,11 +22,11 @@ use crate::types::{
 #[must_use]
 pub struct RegularTransactionEssenceBuilder {
     network_id: u64,
-    creation_time: Option<u64>,
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
     payload: OptionalPayload,
+    creation_time: Option<u64>,
 }
 
 impl RegularTransactionEssenceBuilder {
@@ -34,11 +34,11 @@ impl RegularTransactionEssenceBuilder {
     pub fn new(network_id: u64, inputs_commitment: InputsCommitment) -> Self {
         Self {
             network_id,
-            creation_time: None,
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
             payload: OptionalPayload::default(),
+            creation_time: None,
         }
     }
 
@@ -309,18 +309,18 @@ fn verify_payload_packable<const VERIFY: bool>(
 }
 
 pub(crate) mod dto {
-    use alloc::{
-        boxed::Box,
-        string::{String, ToString},
-    };
+    use alloc::string::{String, ToString};
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
-        TryFromDto,
+    use crate::{
+        types::{
+            block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
+            TryFromDto,
+        },
+        utils::serde::string,
     };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
@@ -330,8 +330,9 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub network_id: String,
+        #[serde(with = "string")]
         pub creation_time: u64,
-        pub inputs: Vec<InputDto>,
+        pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -344,11 +345,11 @@ pub(crate) mod dto {
                 kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
                 creation_time: value.creation_time(),
-                inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
+                inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
                 payload: match value.payload() {
-                    Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
+                    Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
                     None => None,
                 },
@@ -365,11 +366,6 @@ pub(crate) mod dto {
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let inputs = dto
-                .inputs
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<Input>, Error>>()?;
             let outputs = dto
                 .outputs
                 .into_iter()
@@ -378,12 +374,12 @@ pub(crate) mod dto {
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
                 .with_creation_time(dto.creation_time)
-                .with_inputs(inputs)
+                .with_inputs(dto.inputs)
                 .with_outputs(outputs);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
+                    builder.with_payload(*i)
                 } else {
                     return Err(Error::InvalidField("payload"));
                 }

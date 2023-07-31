@@ -73,7 +73,9 @@ pub mod prefix_hex_bytes {
         D: Deserializer<'de>,
         T: FromHexPrefixed,
     {
-        prefix_hex::decode(String::deserialize(deserializer)?).map_err(de::Error::custom)
+        prefix_hex::decode(String::deserialize(deserializer)?)
+            .map_err(crate::types::block::Error::Hex)
+            .map_err(de::Error::custom)
     }
 }
 
@@ -126,6 +128,53 @@ pub mod string_prefix {
         String::deserialize(deserializer)
             .map_err(de::Error::custom)
             .and_then(|s| s.try_into().map_err(de::Error::custom))
+    }
+}
+
+pub mod boxed_slice_prefix {
+    use alloc::boxed::Box;
+
+    use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
+    use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
+    use serde::{de, Deserializer, Serializer};
+
+    pub fn serialize<S, T, B: Bounded>(value: &BoxedSlicePrefix<T, B>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        for<'a> &'a Box<[T]>: ToHexPrefixed,
+    {
+        super::prefix_hex_bytes::serialize(&**value, serializer)
+    }
+
+    pub fn deserialize<'de, D, T, B: Bounded>(deserializer: D) -> Result<BoxedSlicePrefix<T, B>, D::Error>
+    where
+        D: Deserializer<'de>,
+        Box<[T]>: FromHexPrefixed,
+        <B as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        super::prefix_hex_bytes::deserialize::<_, Box<[T]>>(deserializer)?
+            .try_into()
+            .map_err(de::Error::custom)
+    }
+}
+
+pub mod cow_boxed_slice_prefix {
+    use alloc::{borrow::Cow, boxed::Box};
+
+    use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
+    use prefix_hex::FromHexPrefixed;
+    use serde::Deserializer;
+
+    pub use super::boxed_slice_prefix::serialize;
+
+    pub fn deserialize<'de, 'a, D, B>(deserializer: D) -> Result<Cow<'a, BoxedSlicePrefix<u8, B>>, D::Error>
+    where
+        D: Deserializer<'de>,
+        B: Bounded + Clone,
+        Box<[u8]>: FromHexPrefixed,
+        <B as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        Ok(Cow::Owned(super::boxed_slice_prefix::deserialize(deserializer)?))
     }
 }
 

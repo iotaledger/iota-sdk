@@ -368,7 +368,7 @@ impl FoundryOutput {
         // A FoundryOutput must have an ImmutableAccountAddressUnlockCondition.
         self.unlock_conditions
             .immutable_account_address()
-            .map(|unlock_condition| unlock_condition.account_address())
+            .map(|unlock_condition| unlock_condition.address())
             .unwrap()
     }
 
@@ -614,20 +614,15 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{
-                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
-                unlock_condition::dto::UnlockConditionDto,
-            },
-            Error,
+    use crate::{
+        types::{
+            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+            TryFromDto,
         },
-        TryFromDto,
+        utils::serde::string,
     };
 
     /// Describes a foundry output that is controlled by an account.
@@ -637,31 +632,32 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
-        pub amount: String,
+        #[serde(with = "string")]
+        pub amount: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
-        pub token_scheme: TokenSchemeDto,
+        pub token_scheme: TokenScheme,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub immutable_features: Vec<Feature>,
     }
 
     impl From<&FoundryOutput> for FoundryOutputDto {
         fn from(value: &FoundryOutput) -> Self {
             Self {
                 kind: FoundryOutput::KIND,
-                amount: value.amount().to_string(),
+                amount: value.amount(),
                 native_tokens: value.native_tokens().to_vec(),
                 serial_number: value.serial_number(),
-                token_scheme: value.token_scheme().into(),
+                token_scheme: value.token_scheme().clone(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
+                features: value.features().to_vec(),
+                immutable_features: value.immutable_features().to_vec(),
             }
         }
     }
@@ -671,22 +667,18 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = FoundryOutputBuilder::new_with_amount(
-                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                dto.serial_number,
-                dto.token_scheme.try_into()?,
-            );
+            let mut builder = FoundryOutputBuilder::new_with_amount(dto.amount, dto.serial_number, dto.token_scheme);
 
             for t in dto.native_tokens {
                 builder = builder.add_native_token(t);
             }
 
             for b in dto.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
+                builder = builder.add_feature(b);
             }
 
             for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+                builder = builder.add_immutable_feature(b);
             }
 
             for u in dto.unlock_conditions {
@@ -700,25 +692,22 @@ pub(crate) mod dto {
     impl FoundryOutput {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
-            amount: OutputBuilderAmountDto,
+            amount: OutputBuilderAmount,
             native_tokens: Option<Vec<NativeToken>>,
             serial_number: u32,
-            token_scheme: TokenSchemeDto,
+            token_scheme: TokenScheme,
             unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
-            immutable_features: Option<Vec<FeatureDto>>,
+            features: Option<Vec<Feature>>,
+            immutable_features: Option<Vec<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
-            let token_scheme = TokenScheme::try_from(token_scheme)?;
 
             let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => FoundryOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    serial_number,
-                    token_scheme,
-                ),
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
+                OutputBuilderAmount::Amount(amount) => {
+                    FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
+                }
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
                 }
             };
@@ -734,18 +723,10 @@ pub(crate) mod dto {
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
             if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
@@ -846,13 +827,13 @@ mod tests {
 
         let test_split_dto = |builder: FoundryOutputBuilder| {
             let output_split = FoundryOutput::try_from_dtos(
-                (&builder.amount).into(),
+                builder.amount,
                 Some(builder.native_tokens.iter().copied().collect()),
                 builder.serial_number,
-                (&builder.token_scheme).into(),
+                builder.token_scheme.clone(),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
-                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                Some(builder.features.iter().cloned().collect()),
+                Some(builder.immutable_features.iter().cloned().collect()),
                 protocol_parameters.clone(),
             )
             .unwrap();

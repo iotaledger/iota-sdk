@@ -21,13 +21,13 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address, Hrp},
-            input::dto::UtxoInputDto,
+            address::{Address, Bech32Address, Hrp},
+            input::UtxoInput,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
-            signature::dto::Ed25519SignatureDto,
-            unlock::dto::UnlockDto,
+            signature::Ed25519Signature,
+            unlock::Unlock,
             BlockDto, BlockId,
         },
     },
@@ -78,10 +78,10 @@ pub enum Response {
     SignedTransaction(TransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
-    SignatureUnlock(UnlockDto),
+    SignatureUnlock(Unlock),
     /// Response for:
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
-    Ed25519Signature(Ed25519SignatureDto),
+    Ed25519Signature(Ed25519Signature),
     /// Response for:
     /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
@@ -147,10 +147,10 @@ pub enum Response {
     RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
-    Inputs(Vec<UtxoInputDto>),
+    Inputs(Vec<UtxoInput>),
     /// Response for:
     /// [`OutputIdToUtxoInput`](crate::method::UtilsMethod::OutputIdToUtxoInput)
-    Input(UtxoInputDto),
+    Input(UtxoInput),
     /// Response for:
     /// - [`Reattach`](crate::method::ClientMethod::Reattach)
     /// - [`ReattachUnchecked`](crate::method::ClientMethod::ReattachUnchecked)
@@ -164,7 +164,7 @@ pub enum Response {
     Bech32ToHex(String),
     /// Response for:
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
-    ParsedBech32Address(AddressDto),
+    ParsedBech32Address(Address),
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),

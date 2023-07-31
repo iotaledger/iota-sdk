@@ -33,16 +33,39 @@ impl ReferenceUnlock {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
+
+    use super::*;
 
     /// References a previous unlock in order to substitute the duplication of the same unlock data for inputs which
     /// unlock through the same data.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct ReferenceUnlockDto {
+    #[derive(Serialize, Deserialize)]
+    struct ReferenceUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(rename = "reference")]
-        pub index: u16,
+        index: u16,
     }
+
+    impl From<&ReferenceUnlock> for ReferenceUnlockDto {
+        fn from(value: &ReferenceUnlock) -> Self {
+            Self {
+                kind: ReferenceUnlock::KIND,
+                index: value.0.get(),
+            }
+        }
+    }
+
+    impl TryFrom<ReferenceUnlockDto> for ReferenceUnlock {
+        type Error = Error;
+
+        fn try_from(value: ReferenceUnlockDto) -> Result<Self, Self::Error> {
+            Self::new(value.index)
+        }
+    }
+
+    impl_serde_typed_dto!(ReferenceUnlock, ReferenceUnlockDto, "reference unlock");
 }
