@@ -223,7 +223,9 @@ impl SecretManage for LedgerSecretManager {
 
         // Unpack and return signature.
         return match Unlock::unpack::<_, true>(&mut unpacker, &())? {
-            Unlock::Signature(SignatureUnlock(Signature::Ed25519(signature))) => Ok(*signature),
+            Unlock::Signature(s) => match *s {
+                SignatureUnlock(Signature::Ed25519(signature)) => Ok(signature),
+            },
             _ => Err(Error::UnsupportedOperation.into()),
         };
     }

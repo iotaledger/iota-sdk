@@ -488,10 +488,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::{
         types::{
-            block::{
-                basic::dto::BasicBlockDataDto, signature::dto::Ed25519SignatureDto,
-                validation::dto::ValidationBlockDataDto, Error,
-            },
+            block::{basic::dto::BasicBlockDataDto, validation::dto::ValidationBlockDataDto, Error},
             TryFromDto, ValidationParams,
         },
         utils::serde::string,
@@ -581,7 +578,7 @@ pub(crate) mod dto {
         pub issuer_id: IssuerId,
         #[serde(flatten)]
         pub data: BlockDataDto,
-        pub signature: Ed25519SignatureDto,
+        pub signature: Ed25519Signature,
     }
 
     impl From<&Block> for BlockDto {
@@ -595,7 +592,7 @@ pub(crate) mod dto {
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     data: (&b.data).into(),
-                    signature: b.signature().into(),
+                    signature: *b.signature(),
                 },
                 Block::Validation(b) => Self {
                     protocol_version: b.protocol_version(),
@@ -605,7 +602,7 @@ pub(crate) mod dto {
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     data: (&b.data).into(),
-                    signature: b.signature().into(),
+                    signature: *b.signature(),
                 },
             }
         }

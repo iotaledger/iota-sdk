@@ -8,7 +8,7 @@ use crate::{
     client::secret::types::{InputSigningData, InputSigningDataDto},
     types::{
         block::{
-            address::{dto::AddressDto, Address},
+            address::Address,
             output::{dto::OutputDto, Output},
             payload::{
                 transaction::{
@@ -148,7 +148,7 @@ pub struct RemainderDataDto {
     #[serde(with = "option_bip44", default)]
     pub chain: Option<Bip44>,
     /// The remainder address
-    pub address: AddressDto,
+    pub address: Address,
 }
 
 impl TryFromDto for RemainderData {
@@ -159,7 +159,7 @@ impl TryFromDto for RemainderData {
         Ok(Self {
             output: Output::try_from_dto_with_params_inner(dto.output, params)?,
             chain: dto.chain,
-            address: Address::try_from(dto.address)?,
+            address: dto.address,
         })
     }
 }
@@ -168,7 +168,7 @@ impl From<&RemainderData> for RemainderDataDto {
         Self {
             output: OutputDto::from(&remainder.output),
             chain: remainder.chain,
-            address: AddressDto::from(&remainder.address),
+            address: remainder.address,
         }
     }
 }

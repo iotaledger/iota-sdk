@@ -4,14 +4,11 @@
 use std::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{
-        dto::{AccountAddressDto, AddressDto},
-        AccountAddress, Address, Bech32Address, ToBech32Ext,
-    },
+    address::{AccountAddress, Address, Bech32Address, ToBech32Ext},
     output::AccountId,
-    Error,
 };
 use packable::PackableExt;
+use serde_json::json;
 
 const ACCOUNT_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
 const ACCOUNT_BECH32: &str = "rms1pr5m4q9dz4s7gdakvwslrmal4025fvxhmfamx0s2vt5ekg8wg597um6lcnn";
@@ -102,42 +99,50 @@ fn bech32_roundtrip() {
 }
 
 #[test]
-fn dto_fields() {
+fn serde_fields() {
     let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let account_dto = AccountAddressDto::from(&account_address);
+    let account_address_ser = serde_json::to_value(account_address).unwrap();
 
-    assert_eq!(account_dto.kind, AccountAddress::KIND);
-    assert_eq!(account_dto.account_id, ACCOUNT_ID.to_string());
+    assert_eq!(
+        account_address_ser,
+        json!({
+            "type": AccountAddress::KIND,
+            "accountId": ACCOUNT_ID,
+        })
+    );
 
     let address = Address::from(account_address);
-    let dto = AddressDto::from(&address);
+    let address_ser = serde_json::to_value(address).unwrap();
 
-    assert_eq!(dto, AddressDto::Account(account_dto));
+    assert_eq!(address_ser, account_address_ser);
 }
 
 #[test]
-fn dto_roundtrip() {
+fn serde_roundtrip() {
     let account_address = AccountAddress::from_str(ACCOUNT_ID).unwrap();
-    let account_dto = AccountAddressDto::from(&account_address);
+    let account_address_ser = serde_json::to_string(&account_address).unwrap();
 
-    assert_eq!(AccountAddress::try_from(account_dto).unwrap(), account_address);
+    assert_eq!(
+        serde_json::from_str::<AccountAddress>(&account_address_ser).unwrap(),
+        account_address
+    );
 
     let address = Address::from(account_address);
-    let dto = AddressDto::from(&address);
+    let address_ser = serde_json::to_string(&address).unwrap();
 
-    assert_eq!(Address::try_from(dto).unwrap(), address);
+    assert_eq!(serde_json::from_str::<Address>(&address_ser).unwrap(), address);
 }
 
 #[test]
-fn dto_invalid_account_id() {
-    let dto = AccountAddressDto {
-        kind: AccountAddress::KIND,
-        account_id: ACCOUNT_ID_INVALID.to_string(),
-    };
+fn serde_invalid_account_id() {
+    let account_address_ser = json!({
+        "type": AccountAddress::KIND,
+        "accountId": ACCOUNT_ID_INVALID,
+    });
 
     assert!(matches!(
-        AccountAddress::try_from(dto),
-        Err(Error::InvalidField("accountId"))
+        serde_json::from_value::<AccountAddress>(account_address_ser),
+        Err(e) if e.to_string() == "hex error: Invalid hex string length for slice: expected 64 got 61"
     ));
 }
 

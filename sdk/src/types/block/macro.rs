@@ -169,3 +169,32 @@ macro_rules! create_bitflags {
     };
 }
 pub(crate) use create_bitflags;
+
+#[macro_export]
+macro_rules! impl_serde_typed_dto {
+    ($base:ty, $dto:ty, $type_str:literal) => {
+        impl<'de> Deserialize<'de> for $base {
+            fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+                let dto = <$dto>::deserialize(d)?;
+                if dto.kind != Self::KIND {
+                    return Err(serde::de::Error::custom(format!(
+                        "invalid {} type: expected {}, found {}",
+                        $type_str,
+                        Self::KIND,
+                        dto.kind
+                    )));
+                }
+                dto.try_into().map_err(serde::de::Error::custom)
+            }
+        }
+
+        impl Serialize for $base {
+            fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                <$dto>::from(self).serialize(s)
+            }
+        }
+    };
+}

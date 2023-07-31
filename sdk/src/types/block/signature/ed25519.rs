@@ -127,8 +127,8 @@ impl Packable for Ed25519Signature {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::String;
+mod dto {
+    use alloc::{format, string::String};
 
     use serde::{Deserialize, Serialize};
 
@@ -136,13 +136,13 @@ pub(crate) mod dto {
     use crate::types::block::Error;
 
     /// Defines an Ed25519 signature.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519SignatureDto {
+    struct Ed25519SignatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub public_key: String,
-        pub signature: String,
+        kind: u8,
+        public_key: String,
+        signature: String,
     }
 
     impl From<&Ed25519Signature> for Ed25519SignatureDto {
@@ -165,4 +165,6 @@ pub(crate) mod dto {
             )
         }
     }
+
+    impl_serde_typed_dto!(Ed25519Signature, Ed25519SignatureDto, "ed25519 signature");
 }

@@ -16,6 +16,7 @@ use crate::{
         },
         ConvertTo,
     },
+    utils::serde::string,
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
@@ -28,7 +29,7 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 pub struct SendParams {
     /// Amount
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     #[getset(get = "pub")]
     amount: u64,
     /// Bech32 encoded address

@@ -34,10 +34,12 @@ pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNL
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidUnlockKind)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 pub enum Unlock {
     /// A signature unlock.
     #[packable(tag = SignatureUnlock::KIND)]
-    Signature(SignatureUnlock),
+    #[from(ignore)]
+    Signature(Box<SignatureUnlock>),
     /// A reference unlock.
     #[packable(tag = ReferenceUnlock::KIND)]
     Reference(ReferenceUnlock),
@@ -47,6 +49,12 @@ pub enum Unlock {
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
+}
+
+impl From<SignatureUnlock> for Unlock {
+    fn from(value: SignatureUnlock) -> Self {
+        Self::Signature(value.into())
+    }
 }
 
 impl core::fmt::Debug for Unlock {
@@ -135,141 +143,4 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
     }
 
     Ok(())
-}
-
-pub mod dto {
-    use alloc::format;
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    use super::*;
-    pub use super::{
-        account::dto::AccountUnlockDto, nft::dto::NftUnlockDto, reference::dto::ReferenceUnlockDto,
-        signature::dto::SignatureUnlockDto,
-    };
-    use crate::types::block::{
-        signature::{dto::SignatureDto, Ed25519Signature, Signature},
-        Error,
-    };
-
-    /// Describes all the different unlock types.
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum UnlockDto {
-        Signature(SignatureUnlockDto),
-        Reference(ReferenceUnlockDto),
-        Account(AccountUnlockDto),
-        Nft(NftUnlockDto),
-    }
-
-    impl From<&Unlock> for UnlockDto {
-        fn from(value: &Unlock) -> Self {
-            match value {
-                Unlock::Signature(signature) => match signature.signature() {
-                    Signature::Ed25519(ed) => Self::Signature(SignatureUnlockDto {
-                        kind: SignatureUnlock::KIND,
-                        signature: SignatureDto::Ed25519(Box::new(ed.as_ref().into())),
-                    }),
-                },
-                Unlock::Reference(r) => Self::Reference(ReferenceUnlockDto {
-                    kind: ReferenceUnlock::KIND,
-                    index: r.index(),
-                }),
-                Unlock::Account(a) => Self::Account(AccountUnlockDto {
-                    kind: AccountUnlock::KIND,
-                    index: a.index(),
-                }),
-                Unlock::Nft(n) => Self::Nft(NftUnlockDto {
-                    kind: NftUnlock::KIND,
-                    index: n.index(),
-                }),
-            }
-        }
-    }
-
-    impl TryFrom<UnlockDto> for Unlock {
-        type Error = Error;
-
-        fn try_from(value: UnlockDto) -> Result<Self, Self::Error> {
-            match value {
-                UnlockDto::Signature(s) => match s.signature {
-                    SignatureDto::Ed25519(ed) => Ok(Self::Signature(SignatureUnlock::from(Signature::Ed25519(
-                        Ed25519Signature::try_from(*ed)?.into(),
-                    )))),
-                },
-                UnlockDto::Reference(r) => Ok(Self::Reference(ReferenceUnlock::new(r.index)?)),
-                UnlockDto::Account(a) => Ok(Self::Account(AccountUnlock::new(a.index)?)),
-                UnlockDto::Nft(n) => Ok(Self::Nft(NftUnlock::new(n.index)?)),
-            }
-        }
-    }
-
-    impl<'de> Deserialize<'de> for UnlockDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid unlock type"))? as u8
-                {
-                    SignatureUnlock::KIND => {
-                        Self::Signature(SignatureUnlockDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize signature unlock: {e}"))
-                        })?)
-                    }
-                    ReferenceUnlock::KIND => {
-                        Self::Reference(ReferenceUnlockDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize reference unlock: {e}"))
-                        })?)
-                    }
-                    AccountUnlock::KIND => Self::Account(
-                        AccountUnlockDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize account unlock: {e}")))?,
-                    ),
-                    NftUnlock::KIND => Self::Nft(
-                        NftUnlockDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT unlock: {e}")))?,
-                    ),
-                    _ => return Err(serde::de::Error::custom("invalid unlock type")),
-                },
-            )
-        }
-    }
-
-    impl Serialize for UnlockDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum UnlockDto_<'a> {
-                T1(&'a SignatureUnlockDto),
-                T2(&'a ReferenceUnlockDto),
-                T3(&'a AccountUnlockDto),
-                T4(&'a NftUnlockDto),
-            }
-            #[derive(Serialize)]
-            struct TypedUnlock<'a> {
-                #[serde(flatten)]
-                unlock: UnlockDto_<'a>,
-            }
-            let unlock = match self {
-                Self::Signature(o) => TypedUnlock {
-                    unlock: UnlockDto_::T1(o),
-                },
-                Self::Reference(o) => TypedUnlock {
-                    unlock: UnlockDto_::T2(o),
-                },
-                Self::Account(o) => TypedUnlock {
-                    unlock: UnlockDto_::T3(o),
-                },
-                Self::Nft(o) => TypedUnlock {
-                    unlock: UnlockDto_::T4(o),
-                },
-            };
-            unlock.serialize(serializer)
-        }
-    }
 }
