@@ -16,12 +16,13 @@ use crate::{
         },
         ConvertTo,
     },
+    utils::serde::string,
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
         },
         Error,
-    }, utils::serde::string,
+    },
 };
 
 /// Parameters for `send()`

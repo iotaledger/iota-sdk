@@ -18,9 +18,10 @@ use crate::{
         },
         Error,
     },
+    utils::serde::string,
     wallet::account::{
         operations::transaction::RemainderValueStrategy, types::OutputData, Account, TransactionOptions,
-    }, utils::serde::string,
+    },
 };
 
 impl<S: 'static + SecretManage> Account<S>
