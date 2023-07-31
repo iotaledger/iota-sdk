@@ -1,5 +1,9 @@
 # Changelog
 
+## \[2.0.3-rc.43]
+
+- [`38f301303`](https://github.com/iotaledger/iota-sdk/commit/38f301303f03087e3e4b4649329f5d4539e52803)([#978](https://github.com/iotaledger/iota-sdk/pull/978)) Fixed missing production profile when no prebuild binary is available;
+
 ## \[2.0.3-rc.42]
 
 - [`5972a23df`](https://github.com/iotaledger/iota-sdk/commit/5972a23dffcde0d10278006af9625914a907419b)([#845](https://github.com/iotaledger/iota-sdk/pull/845)) Add `ConsolidationParams`.
