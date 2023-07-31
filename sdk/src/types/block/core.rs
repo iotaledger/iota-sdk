@@ -85,8 +85,20 @@ where
 
 #[derive(Clone, Debug, Eq, PartialEq, From)]
 pub enum Block {
-    Basic(BasicBlock),
-    Validation(ValidationBlock),
+    Basic(Box<BasicBlock>),
+    Validation(Box<ValidationBlock>),
+}
+
+impl From<BasicBlock> for Block {
+    fn from(value: BasicBlock) -> Self {
+        Self::Basic(value.into())
+    }
+}
+
+impl From<ValidationBlock> for Block {
+    fn from(value: ValidationBlock) -> Self {
+        Self::Validation(value.into())
+    }
 }
 
 impl Packable for Block {
@@ -134,7 +146,7 @@ impl Packable for Block {
                 let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
                 let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-                Block::from(BlockWrapper {
+                Self::from(BlockWrapper {
                     protocol_version,
                     network_id,
                     issuing_time,
@@ -149,7 +161,7 @@ impl Packable for Block {
                 let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
                 let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-                Block::from(BlockWrapper {
+                Self::from(BlockWrapper {
                     protocol_version,
                     network_id,
                     issuing_time,
@@ -170,7 +182,7 @@ impl Packable for Block {
                 block.packed_len()
             };
 
-            if block_len > Block::LENGTH_MAX {
+            if block_len > Self::LENGTH_MAX {
                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
             }
         }

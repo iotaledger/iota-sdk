@@ -208,7 +208,7 @@ impl Packable for ValidationBlock {
 
         let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if kind != ValidationBlock::KIND {
+        if kind != Self::KIND {
             return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
         }
 

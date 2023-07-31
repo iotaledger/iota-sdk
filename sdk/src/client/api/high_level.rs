@@ -272,7 +272,7 @@ impl Client {
         }
 
         // Get block if we use remote Pow, because the node will change parents and nonce.
-        let block = self.get_block(&block_id).await?;
+        let block = self.get_block(block_id).await?;
 
         let promote_block = self
             .finish_basic_block_builder(
