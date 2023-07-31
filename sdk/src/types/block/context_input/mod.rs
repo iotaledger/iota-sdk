@@ -12,7 +12,7 @@ use crate::types::block::Error;
 /// functionality related to accounts, commitments, or Mana rewards. A Context Input does not need to be unlocked.
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
+#[packable(tag_type = u8, with_error = Error::InvalidContextInputKind)]
 pub enum ContextInput {
     /// A [`RewardContextInput`].
     #[packable(tag = RewardContextInput::KIND)]

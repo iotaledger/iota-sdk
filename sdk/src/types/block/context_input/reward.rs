@@ -3,7 +3,7 @@
 
 use derive_more::From;
 
-/// A Reward Input is an input that indicates which transaction Input is claiming Mana rewards.
+/// A Reward Context Input is an input that indicates which transaction Input is claiming Mana rewards.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct RewardContextInput(u16);
 
@@ -38,9 +38,8 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
-    /// A Reward Input is an input that indicates which transaction Input is claiming Mana rewards.
+    /// A Reward Context Input is an input that indicates which transaction Input is claiming Mana rewards.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct RewardContextInputDto {
         #[serde(rename = "type")]
@@ -57,11 +56,9 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFrom<RewardContextInputDto> for RewardContextInput {
-        type Error = Error;
-
-        fn try_from(value: RewardContextInputDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(value.index))
+    impl From<RewardContextInputDto> for RewardContextInput {
+        fn from(value: RewardContextInputDto) -> Self {
+            Self::new(value.index)
         }
     }
 }
