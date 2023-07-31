@@ -79,26 +79,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for Ed25519Address {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = Ed25519AddressDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid ed25519 address type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for Ed25519Address {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            Ed25519AddressDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(Ed25519Address, Ed25519AddressDto, "ed25519 address");
 }

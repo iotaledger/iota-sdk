@@ -57,26 +57,9 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for GovernorAddressUnlockCondition {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = GovernorAddressUnlockConditionDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid governor address unlock condition type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for GovernorAddressUnlockCondition {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            GovernorAddressUnlockConditionDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(
+        GovernorAddressUnlockCondition,
+        GovernorAddressUnlockConditionDto,
+        "governor address unlock condition"
+    );
 }

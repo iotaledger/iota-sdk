@@ -21,14 +21,14 @@ use crate::{
             constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
         },
         Error,
-    },
+    }, utils::serde::string,
 };
 
 /// Parameters for `send()`
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 pub struct SendParams {
     /// Amount
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     #[getset(get = "pub")]
     amount: u64,
     /// Bech32 encoded address

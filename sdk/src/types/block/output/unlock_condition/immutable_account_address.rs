@@ -55,26 +55,9 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for ImmutableAccountAddressUnlockCondition {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = ImmutableAccountAddressUnlockConditionDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid immutable account adress unlock condition type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for ImmutableAccountAddressUnlockCondition {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            ImmutableAccountAddressUnlockConditionDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(
+        ImmutableAccountAddressUnlockCondition,
+        ImmutableAccountAddressUnlockConditionDto,
+        "immutable account adress unlock condition"
+    );
 }

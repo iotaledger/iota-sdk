@@ -67,26 +67,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for ReferenceUnlock {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = ReferenceUnlockDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid reference unlock type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            dto.try_into().map_err(serde::de::Error::custom)
-        }
-    }
-
-    impl Serialize for ReferenceUnlock {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            ReferenceUnlockDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(ReferenceUnlock, ReferenceUnlockDto, "reference unlock");
 }

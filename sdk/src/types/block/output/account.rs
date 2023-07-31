@@ -756,7 +756,7 @@ pub(crate) mod dto {
         // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
         pub mana: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]

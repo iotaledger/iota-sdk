@@ -82,26 +82,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for UtxoInput {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = UtxoInputDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid UTXO input type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            dto.try_into().map_err(serde::de::Error::custom)
-        }
-    }
-
-    impl Serialize for UtxoInput {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            UtxoInputDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(UtxoInput, UtxoInputDto, "UTXO input");
 }

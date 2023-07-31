@@ -166,26 +166,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for Ed25519Signature {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = Ed25519SignatureDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid signature type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            dto.try_into().map_err(serde::de::Error::custom)
-        }
-    }
-
-    impl Serialize for Ed25519Signature {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            Ed25519SignatureDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(Ed25519Signature, Ed25519SignatureDto, "ed25519 signature");
 }

@@ -55,26 +55,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for SenderFeature {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = SenderFeatureDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid sender feature type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for SenderFeature {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            SenderFeatureDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(SenderFeature, SenderFeatureDto, "sender feature");
 }

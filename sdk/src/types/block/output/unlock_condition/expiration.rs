@@ -101,26 +101,9 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for ExpirationUnlockCondition {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = ExpirationUnlockConditionDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid expiration unlock condition type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            dto.try_into().map_err(serde::de::Error::custom)
-        }
-    }
-
-    impl Serialize for ExpirationUnlockCondition {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            ExpirationUnlockConditionDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(
+        ExpirationUnlockCondition,
+        ExpirationUnlockConditionDto,
+        "expiration unlock condition"
+    );
 }

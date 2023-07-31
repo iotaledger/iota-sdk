@@ -20,7 +20,7 @@ use crate::{
     },
     wallet::account::{
         operations::transaction::RemainderValueStrategy, types::OutputData, Account, TransactionOptions,
-    },
+    }, utils::serde::string,
 };
 
 impl<S: 'static + SecretManage> Account<S>
@@ -313,7 +313,7 @@ where
 #[serde(rename_all = "camelCase")]
 pub struct OutputParams {
     pub recipient_address: Bech32Address,
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub amount: u64,
     #[serde(default)]
     pub assets: Option<Assets>,

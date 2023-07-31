@@ -105,26 +105,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for MetadataFeature {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = MetadataFeatureDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid metadata feature type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for MetadataFeature {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            MetadataFeatureDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(MetadataFeature, MetadataFeatureDto<'_>, "metadata feature");
 }

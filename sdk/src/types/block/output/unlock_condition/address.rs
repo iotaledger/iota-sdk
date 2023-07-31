@@ -55,26 +55,9 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for AddressUnlockCondition {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = AddressUnlockConditionDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid address unlock condition type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for AddressUnlockCondition {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            AddressUnlockConditionDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(
+        AddressUnlockCondition,
+        AddressUnlockConditionDto,
+        "address unlock condition"
+    );
 }

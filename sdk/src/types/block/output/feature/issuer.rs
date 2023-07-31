@@ -55,26 +55,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for IssuerFeature {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = IssuerFeatureDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid issuer feature type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            Ok(dto.into())
-        }
-    }
-
-    impl Serialize for IssuerFeature {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            IssuerFeatureDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(IssuerFeature, IssuerFeatureDto, "issuer feature");
 }

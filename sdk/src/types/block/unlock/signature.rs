@@ -57,26 +57,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for SignatureUnlock {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = SignatureUnlockDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid signature unlock type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            dto.try_into().map_err(serde::de::Error::custom)
-        }
-    }
-
-    impl Serialize for SignatureUnlock {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            SignatureUnlockDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(SignatureUnlock, SignatureUnlockDto, "signature unlock");
 }

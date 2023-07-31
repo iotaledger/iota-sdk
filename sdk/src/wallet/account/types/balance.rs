@@ -7,7 +7,10 @@ use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::output::{feature::MetadataFeature, AccountId, FoundryId, NftId, OutputId, TokenId};
+use crate::{
+    types::block::output::{feature::MetadataFeature, AccountId, FoundryId, NftId, OutputId, TokenId},
+    utils::serde::string,
+};
 
 /// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
 /// [`crate::wallet::account::Account::balance()`].
@@ -63,14 +66,14 @@ impl std::ops::AddAssign for Balance {
 #[getset(get_copy = "pub")]
 pub struct BaseCoinBalance {
     /// Total amount
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) total: u64,
     /// Balance that can currently be spent
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) available: u64,
     /// Voting power
     #[cfg(feature = "participation")]
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) voting_power: u64,
 }
 
@@ -88,13 +91,13 @@ impl std::ops::AddAssign for BaseCoinBalance {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) account: u64,
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) basic: u64,
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) foundry: u64,
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub(crate) nft: u64,
 }
 

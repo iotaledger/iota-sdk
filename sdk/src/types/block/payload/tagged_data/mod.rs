@@ -104,26 +104,5 @@ mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for TaggedDataPayload {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let dto = TaggedDataPayloadDto::deserialize(d)?;
-            if dto.kind != Self::KIND {
-                return Err(serde::de::Error::custom(format!(
-                    "invalid tagged data payload type: expected {}, found {}",
-                    Self::KIND,
-                    dto.kind
-                )));
-            }
-            dto.try_into().map_err(serde::de::Error::custom)
-        }
-    }
-
-    impl Serialize for TaggedDataPayload {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            TaggedDataPayloadDto::from(self).serialize(s)
-        }
-    }
+    impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
 }
