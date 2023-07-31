@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.2 - 2023-07-31
+
+### Fixed
+
+- `Balance::{baseCoin, requiredStorageDeposit}` amounts;
+- `Utils::computeStorageDeposit()` return amount;
+
 ## 1.0.2 - 2023-07-28
 
 ### Changed
