@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::string::{FromUtf8Error, String};
-use core::{convert::Infallible, fmt};
+use core::{convert::Infallible, fmt, num::ParseIntError};
 
 use crypto::Error as CryptoError;
 // use packable::bounded::BoundedU8;
@@ -95,6 +95,7 @@ pub enum Error {
     NonDisjointParents,
     NonZeroStateIndexOrFoundryCounter,
     ParentsNotUniqueSorted,
+    ParseInt(ParseIntError),
     ProtocolVersionMismatch { expected: u8, actual: u8 },
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
@@ -248,6 +249,9 @@ impl fmt::Display for Error {
             Self::ParentsNotUniqueSorted => {
                 write!(f, "parents are not unique and/or sorted")
             }
+            Self::ParseInt(e) => {
+                write!(f, "parse int error: {e}")
+            }
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
             }
@@ -295,5 +299,11 @@ impl From<CryptoError> for Error {
 impl From<Infallible> for Error {
     fn from(error: Infallible) -> Self {
         match error {}
+    }
+}
+
+impl From<ParseIntError> for Error {
+    fn from(error: ParseIntError) -> Self {
+        Self::ParseInt(error)
     }
 }
