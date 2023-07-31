@@ -5,7 +5,7 @@ mod reward;
 
 use derive_more::From;
 
-use self::reward::RewardContextInput;
+pub use self::reward::RewardContextInput;
 use crate::types::block::Error;
 
 /// A Context Input provides additional contextual information for the execution of a transaction, such as for different
