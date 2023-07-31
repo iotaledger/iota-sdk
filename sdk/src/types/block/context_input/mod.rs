@@ -8,7 +8,8 @@ use derive_more::From;
 use self::reward::RewardContextInput;
 use crate::types::block::Error;
 
-/// A generic input supporting different input kinds.
+/// A Context Input provides additional contextual information for the execution of a transaction, such as for different
+/// functionality related to accounts, commitments, or Mana rewards. A Context Input does not need to be unlocked.
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
@@ -36,7 +37,7 @@ impl ContextInput {
     }
 
     /// Checks whether the input is a [`RewardContextInput`].
-    pub fn is_utxo(&self) -> bool {
+    pub fn is_reward(&self) -> bool {
         matches!(self, Self::Reward(_))
     }
 
