@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         dto::{TransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
     },
-    signature::dto::Ed25519SignatureDto,
+    signature::Ed25519Signature,
 };
 use serde::{Deserialize, Serialize};
 
@@ -134,7 +134,7 @@ pub enum UtilsMethod {
     },
     /// Verify an ed25519 signature against a message.
     VerifyEd25519Signature {
-        signature: Ed25519SignatureDto,
+        signature: Ed25519Signature,
         message: String,
     },
     /// Verify a Secp256k1Ecdsa signature against a message.

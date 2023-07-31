@@ -38,18 +38,20 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
     }
 }
 
-pub(crate) mod dto {
+mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TimelockUnlockConditionDto {
+    struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(rename = "unixTime")]
-        pub timestamp: u32,
+        timestamp: u32,
     }
 
     impl From<&TimelockUnlockCondition> for TimelockUnlockConditionDto {
@@ -68,4 +70,10 @@ pub(crate) mod dto {
             Self::new(value.timestamp).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
+
+    impl_serde_typed_dto!(
+        TimelockUnlockCondition,
+        TimelockUnlockConditionDto,
+        "timelock unlock condition"
+    );
 }

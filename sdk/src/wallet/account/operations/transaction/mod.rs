@@ -10,7 +10,7 @@ mod prepare_transaction;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
-pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionOptionsDto};
+pub use self::options::{RemainderValueStrategy, TransactionOptions};
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},

@@ -28,15 +28,34 @@ impl SignatureUnlock {
 }
 
 pub(crate) mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
-    use crate::types::block::signature::dto::SignatureDto;
+    use super::*;
 
     /// Defines an unlock containing signature(s) unlocking input(s).
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct SignatureUnlockDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub signature: SignatureDto,
+        pub signature: Signature,
     }
+
+    impl From<&SignatureUnlock> for SignatureUnlockDto {
+        fn from(value: &SignatureUnlock) -> Self {
+            Self {
+                kind: SignatureUnlock::KIND,
+                signature: value.0,
+            }
+        }
+    }
+
+    impl From<SignatureUnlockDto> for SignatureUnlock {
+        fn from(value: SignatureUnlockDto) -> Self {
+            Self::new(value.signature)
+        }
+    }
+
+    impl_serde_typed_dto!(SignatureUnlock, SignatureUnlockDto, "signature unlock");
 }

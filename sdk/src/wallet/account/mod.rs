@@ -48,7 +48,7 @@ pub use self::{
                 },
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
+            RemainderValueStrategy, TransactionOptions,
         },
     },
     types::OutputDataDto,
@@ -647,8 +647,8 @@ fn serialize() {
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
     let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
-    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
-    let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
+    let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
+    let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();

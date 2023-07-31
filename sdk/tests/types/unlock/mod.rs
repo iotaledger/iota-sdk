@@ -73,7 +73,7 @@ fn new_invalid_duplicate_signature() {
             ReferenceUnlock::new(0).unwrap().into(),
             ReferenceUnlock::new(0).unwrap().into(),
             SignatureUnlock::from(rand_signature()).into(),
-            SignatureUnlock::from(dup.clone()).into(),
+            SignatureUnlock::from(dup).into(),
             SignatureUnlock::from(dup).into(),
             SignatureUnlock::from(rand_signature()).into(),
             ReferenceUnlock::new(3).unwrap().into()
