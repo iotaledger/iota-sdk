@@ -176,6 +176,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::PostBlockPayload { payload } => {
             let block = client
                 .finish_basic_block_builder(
+                    todo!("issuer id"),
+                    todo!("block signature"),
+                    todo!("issuing time"),
                     None,
                     Some(Payload::try_from_dto_with_params(
                         payload,

@@ -21,7 +21,15 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create and send a block.
-    let block = client.finish_basic_block_builder(None, None).await?;
+    let block = client
+        .finish_basic_block_builder(
+            todo!("issuer id"),
+            todo!("block signature"),
+            todo!("issuing time"),
+            None,
+            None,
+        )
+        .await?;
     let block_id = block.id();
 
     println!("{block:#?}");

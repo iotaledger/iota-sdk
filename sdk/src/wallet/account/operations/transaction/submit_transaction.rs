@@ -24,7 +24,13 @@ where
 
         let block = self
             .client()
-            .finish_basic_block_builder(None, Some(Payload::from(transaction_payload)))
+            .finish_basic_block_builder(
+                todo!("issuer id"),
+                todo!("block signature"),
+                todo!("issuing time"),
+                None,
+                Some(Payload::from(transaction_payload)),
+            )
             .await?;
 
         #[cfg(feature = "events")]

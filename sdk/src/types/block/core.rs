@@ -160,6 +160,7 @@ impl Packable for Block {
                     signature,
                 })
             }
+            _ => return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable),
         };
 
         if VERIFY {

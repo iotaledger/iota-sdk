@@ -70,7 +70,13 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_basic_block_builder(None, Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
+                    .finish_basic_block_builder(
+                        todo!("issuer id"),
+                        todo!("block signature"),
+                        todo!("issuing time"),
+                        None,
+                        Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                    )
                     .await?
                     .id(),
             };
@@ -111,6 +117,9 @@ where
                             let reattached_block = self
                                 .client()
                                 .finish_basic_block_builder(
+                                    todo!("issuer id"),
+                                    todo!("block signature"),
+                                    todo!("issuing time"),
                                     None,
                                     Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                                 )

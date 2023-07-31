@@ -4,8 +4,11 @@
 use iota_sdk::types::block::{
     payload::Payload,
     protocol::protocol_parameters,
-    rand::{block::rand_block, parents::rand_strong_parents, payload::rand_tagged_data_payload},
-    Block, BlockBuilder,
+    rand::{
+        block::{rand_basic_block_builder_with_strong_parents, rand_basic_block_with_strong_parents, rand_block},
+        parents::rand_strong_parents,
+        payload::rand_tagged_data_payload,
+    },
 };
 use packable::PackableExt;
 
@@ -84,7 +87,7 @@ use packable::PackableExt;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_block().finish().unwrap();
+    let block = rand_block();
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
