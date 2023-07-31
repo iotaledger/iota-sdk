@@ -14,7 +14,7 @@ use crate::types::block::Error;
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
 pub enum ContextInput {
-    /// A reward input.
+    /// A [`RewardContextInput`].
     #[packable(tag = RewardContextInput::KIND)]
     Reward(RewardContextInput),
     // TODO: Commitment Input https://github.com/iotaledger/iota-sdk/issues/901 and Block Issuance Credit Input https://github.com/iotaledger/iota-sdk/issues/906
