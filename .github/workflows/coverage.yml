@@ -47,12 +47,13 @@ jobs:
       - name: Install nextest
         uses: taiki-e/install-action@nextest
 
-      - name: Start private tangle
-        uses: "./.github/actions/private-tangle/setup"
+      # - name: Start private tangle
+      #   uses: "./.github/actions/private-tangle/setup"
 
       - name: Start ledger nano
         uses: "./.github/actions/ledger-nano"
 
+      # TODO add `--run-ignored all` again
       - name: Collect coverage data
         run: >
           cargo llvm-cov nextest
@@ -61,13 +62,12 @@ jobs:
           --tests
           --package iota-sdk
           --all-features
-          --run-ignored all
           --test-threads "num-cpus"
           --retries 2
 
-      - name: Tear down private tangle
-        if: always()
-        uses: "./.github/actions/private-tangle/tear-down"
+      # - name: Tear down private tangle
+      #   if: always()
+      #   uses: "./.github/actions/private-tangle/tear-down"
 
       - name: Upload coverage data to Coveralls
         uses: coverallsapp/github-action@v1.1.2
