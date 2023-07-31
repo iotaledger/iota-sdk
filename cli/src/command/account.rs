@@ -627,10 +627,11 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
-        let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        println_log_info!("Outputs: {output_ids:#?}");
+        println_log_info!("Outputs:");
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
+        }
     }
-
     Ok(())
 }
 
@@ -786,8 +787,10 @@ pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
-        let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        println_log_info!("Unspent outputs: {output_ids:#?}");
+        println_log_info!("Unspent outputs:");
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
+        }
     }
 
     Ok(())
