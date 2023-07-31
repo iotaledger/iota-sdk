@@ -175,6 +175,7 @@ impl Packable for ValidationBlock {
         self.slot_commitment_id.pack(packer)?;
         self.latest_finalized_slot.pack(packer)?;
         self.issuer_id.pack(packer)?;
+        Self::KIND.pack(packer)?;
         self.data.pack(packer)?;
         self.signature.pack(packer)?;
 
