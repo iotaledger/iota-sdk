@@ -448,19 +448,19 @@ export class Account {
                 payload.nativeTokens[i].available,
             );
         }
-        payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
-        payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
+        payload.baseCoin.total = BigInt(payload.baseCoin.total);
+        payload.baseCoin.available = BigInt(payload.baseCoin.available);
 
-        payload.requiredStorageDeposit.alias = hexToBigInt(
+        payload.requiredStorageDeposit.alias = BigInt(
             payload.requiredStorageDeposit.alias,
         );
-        payload.requiredStorageDeposit.basic = hexToBigInt(
+        payload.requiredStorageDeposit.basic = BigInt(
             payload.requiredStorageDeposit.basic,
         );
-        payload.requiredStorageDeposit.foundry = hexToBigInt(
+        payload.requiredStorageDeposit.foundry = BigInt(
             payload.requiredStorageDeposit.foundry,
         );
-        payload.requiredStorageDeposit.nft = hexToBigInt(
+        payload.requiredStorageDeposit.nft = BigInt(
             payload.requiredStorageDeposit.nft,
         );
 
