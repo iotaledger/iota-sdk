@@ -198,6 +198,7 @@ impl fmt::Display for Error {
             Self::InvalidPayloadLength { expected, actual } => {
                 write!(f, "invalid payload length: expected {expected} but got {actual}")
             }
+            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
@@ -219,7 +220,6 @@ impl fmt::Display for Error {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
-            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {
                 write!(f, "invalid unlock reference: {index}")
