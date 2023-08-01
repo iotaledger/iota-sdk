@@ -5,13 +5,13 @@ mod block_issuance_credit;
 mod commitment;
 mod reward;
 
-pub use self::block_issuance_credit::BlockIssuanceCreditContextInput;
-pub use self::commitment::CommitmentContextInput;
-pub use self::reward::RewardContextInput;
+use derive_more::{Display, From};
 
+pub use self::{
+    block_issuance_credit::BlockIssuanceCreditContextInput, commitment::CommitmentContextInput,
+    reward::RewardContextInput,
+};
 use crate::types::block::Error;
-use derive_more::Display;
-use derive_more::From;
 
 /// A Context Input provides additional contextual information for the execution of a transaction, such as for different
 /// functionality related to accounts, commitments, or Mana rewards. A Context Input does not need to be unlocked.
@@ -140,11 +140,12 @@ pub mod dto {
 
 #[cfg(test)]
 mod tests {
+    use core::str::FromStr;
+
     use super::{CommitmentContextInput, ContextInput, RewardContextInput};
     use crate::types::block::{
         context_input::BlockIssuanceCreditContextInput, output::AccountId, slot::SlotCommitmentId,
     };
-    use core::str::FromStr;
 
     #[test]
     fn test_context_input() {
