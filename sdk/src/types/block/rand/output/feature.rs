@@ -5,12 +5,14 @@ use alloc::vec::Vec;
 
 use crate::types::block::{
     output::feature::{
-        Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature,
+        block_issuer::BlockIssuerFeature, Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature,
+        StakingFeature, TagFeature,
     },
     rand::{
         address::rand_address,
         bytes::rand_bytes,
         number::{rand_number, rand_number_range},
+        public_key::rand_public_key,
     },
 };
 
@@ -41,6 +43,11 @@ pub fn rand_staking_feature() -> StakingFeature {
     StakingFeature::new(rand_number(), rand_number(), rand_number(), rand_number())
 }
 
+/// Generates a random [`BlockIssuerFeature`].
+pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
+    BlockIssuerFeature::new(rand_number::<u64>(), vec![rand_public_key()]).unwrap()
+}
+
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
     match *flag {
         FeatureFlags::SENDER => Feature::Sender(rand_sender_feature()),
@@ -48,6 +55,7 @@ fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
         FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
+        FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
         _ => unreachable!(),
     }
 }

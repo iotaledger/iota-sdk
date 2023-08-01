@@ -7,8 +7,6 @@ use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
 
 pub type PublicKeyCount = BoundedU8<0, { u8::MAX }>;
 
-// type PublicKey = Vec<u8>;
-
 /// This feature defines the public keys with which a signature to burn Mana from
 /// the containing account's Block Issuance Credit can be verified.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -30,11 +28,11 @@ impl BlockIssuerFeature {
 
     /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]
-    pub fn new(expiry_slot: SlotIndex, keys: impl Into<Box<[PublicKey]>>) -> Result<Self, Error> {
+    pub fn new(expiry_slot: impl Into<SlotIndex>, keys: impl Into<Box<[PublicKey]>>) -> Result<Self, Error> {
         let keys: Box<[PublicKey]> = keys.into();
 
         Ok(Self {
-            expiry_slot,
+            expiry_slot: expiry_slot.into(),
             keys_count: keys.len() as u8,
             keys: keys.try_into().map_err(Error::InvalidPublicKeyCount)?,
         })
@@ -107,7 +105,9 @@ pub(crate) mod dto {
                 )));
             }
 
-            Self::new(value.expiry_slot.into(), keys)
+            Self::new(value.expiry_slot, keys)
         }
     }
+
+    impl_serde_typed_dto!(BlockIssuerFeature, BlockIssuerFeatureDto, "block issuer feature");
 }
