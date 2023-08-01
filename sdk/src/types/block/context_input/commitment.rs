@@ -24,17 +24,18 @@ impl CommitmentContextInput {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
 
     /// A Commitment Input indicates that the input references a commitment to a certain slot.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct CommitmentContextInputDto {
+    #[serde(rename_all = "camelCase")]
+    struct CommitmentContextInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub commitment_id: SlotCommitmentId,
+        kind: u8,
+        commitment_id: SlotCommitmentId,
     }
 
     impl From<&CommitmentContextInput> for CommitmentContextInputDto {
@@ -51,4 +52,5 @@ pub(crate) mod dto {
             Self::new(value.commitment_id)
         }
     }
+    impl_serde_typed_dto!(CommitmentContextInput, CommitmentContextInputDto, "commitment input");
 }

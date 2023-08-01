@@ -22,17 +22,17 @@ impl RewardContextInput {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
 
     /// A Reward Context Input is an input that indicates which transaction Input is claiming Mana rewards.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct RewardContextInputDto {
+    struct RewardContextInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub index: u16,
+        kind: u8,
+        index: u16,
     }
 
     impl From<&RewardContextInput> for RewardContextInputDto {
@@ -49,4 +49,6 @@ pub(crate) mod dto {
             Self::new(value.index)
         }
     }
+
+    impl_serde_typed_dto!(RewardContextInput, RewardContextInputDto, "reward input");
 }

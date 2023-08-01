@@ -18,6 +18,7 @@ use crate::types::block::Error;
 #[derive(Clone, Eq, Display, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidContextInputKind)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 pub enum ContextInput {
     /// A [`CommitmentContextInput`].
     #[packable(tag = CommitmentContextInput::KIND)]
@@ -96,76 +97,92 @@ impl ContextInput {
     }
 }
 
-pub mod dto {
-    use serde::{Deserialize, Serialize};
-
-    pub use super::reward::dto::RewardContextInputDto;
-    use super::{
-        block_issuance_credit::dto::BlockIssuanceCreditContextInputDto, commitment::dto::CommitmentContextInputDto, *,
-    };
-    use crate::types::block::Error;
-
-    /// Describes all the different context input types.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
-    #[serde(untagged)]
-    pub enum ContextInputDto {
-        Commitment(CommitmentContextInputDto),
-        BlockIssuanceCredit(BlockIssuanceCreditContextInputDto),
-        Reward(RewardContextInputDto),
-    }
-
-    impl From<&ContextInput> for ContextInputDto {
-        fn from(value: &ContextInput) -> Self {
-            match value {
-                ContextInput::Commitment(u) => Self::Commitment(u.into()),
-                ContextInput::BlockIssuanceCredit(u) => Self::BlockIssuanceCredit(u.into()),
-                ContextInput::Reward(u) => Self::Reward(u.into()),
-            }
-        }
-    }
-
-    impl TryFrom<ContextInputDto> for ContextInput {
-        type Error = Error;
-
-        fn try_from(value: ContextInputDto) -> Result<Self, Self::Error> {
-            match value {
-                ContextInputDto::Commitment(u) => Ok(Self::Commitment(u.try_into()?)),
-                ContextInputDto::BlockIssuanceCredit(u) => Ok(Self::BlockIssuanceCredit(u.try_into()?)),
-                ContextInputDto::Reward(u) => Ok(Self::Reward(u.try_into()?)),
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use core::str::FromStr;
 
-    use super::{CommitmentContextInput, ContextInput, RewardContextInput};
-    use crate::types::block::{
-        context_input::BlockIssuanceCreditContextInput, output::AccountId, slot::SlotCommitmentId,
-    };
+    use super::ContextInput;
 
     #[test]
-    fn test_context_input() {
-        let reward = ContextInput::Reward(RewardContextInput::new(10));
-        assert!(reward.is_reward());
-        let reward: &RewardContextInput = reward.as_reward();
-        assert_eq!(reward.to_string(), "10");
-
-        let slot_commitment_id_str =
-            "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689";
-        let slot_commitment_id = SlotCommitmentId::from_str(slot_commitment_id_str).unwrap();
-        let commitment = ContextInput::Commitment(CommitmentContextInput::new(slot_commitment_id));
+    fn test_commitment() {
+        let commitment: ContextInput = serde_json::from_str(
+            r#"
+            {
+                "type": 0,
+                "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
+            }
+            "#,
+        )
+        .unwrap();
         assert!(commitment.is_commitment());
-        let commitment: &CommitmentContextInput = commitment.as_commitment();
-        assert_eq!(commitment.to_string(), slot_commitment_id_str);
+        assert_eq!(
+            commitment.as_commitment().commitment_id().to_string(),
+            "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
+        );
 
-        let account_id_str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
-        let account_id = AccountId::from_str(account_id_str).unwrap();
-        let block_issuance_credit = ContextInput::BlockIssuanceCredit(BlockIssuanceCreditContextInput::new(account_id));
-        assert!(block_issuance_credit.is_block_issuance_credit());
-        let block_issuance_credit: &BlockIssuanceCreditContextInput = block_issuance_credit.as_block_issuance_credit();
-        assert_eq!(block_issuance_credit.to_string(), account_id_str);
+        // Test wrong type returns error.
+        let commitment_deserialization_result: Result<ContextInput, _> = serde_json::from_str(
+            r#"
+            {
+                "type": 2,
+                "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
+            }
+            "#,
+        );
+        assert!(commitment_deserialization_result.is_err());
+    }
+
+    #[test]
+    fn test_block_issuance_credit() {
+        let bic: ContextInput = serde_json::from_str(
+            r#"
+            {
+                "type": 1,
+                "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
+            }
+            "#,
+        )
+        .unwrap();
+        assert!(bic.is_block_issuance_credit());
+        assert_eq!(
+            bic.as_block_issuance_credit().account_id().to_string(),
+            "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
+        );
+
+        // Test wrong type returns error.
+        let bic_deserialization_result: Result<ContextInput, _> = serde_json::from_str(
+            r#"
+            {
+                "type": 2,
+                "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
+            }
+            "#,
+        );
+        assert!(bic_deserialization_result.is_err());
+    }
+
+    #[test]
+    fn test_reward() {
+        let reward: ContextInput = serde_json::from_str(
+            r#"
+            {
+                "type": 2,
+                "index": 10 
+            }
+            "#,
+        )
+        .unwrap();
+        assert!(reward.is_reward());
+        assert_eq!(reward.as_reward().index(), 10);
+
+        // Test wrong type returns error.
+        let reward_serialization_result: Result<ContextInput, _> = serde_json::from_str(
+            r#"
+            {
+                "type": 0,
+                "index": 10 
+            }
+            "#,
+        );
+        assert!(reward_serialization_result.is_err())
     }
 }

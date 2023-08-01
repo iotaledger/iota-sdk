@@ -5,7 +5,7 @@ use derive_more::{Display, From};
 
 use crate::types::block::output::AccountId;
 
-/// A Block Issuance Credit Input provides the VM with context for the value of
+/// A Block Issuance Credit Input (BIC Input) provides the VM with context for the value of
 /// the BIC vector of a specific slot.
 #[derive(Clone, Copy, Debug, Display, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct BlockIssuanceCreditContextInput(AccountId);
@@ -25,7 +25,7 @@ impl BlockIssuanceCreditContextInput {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -33,10 +33,11 @@ pub(crate) mod dto {
     /// A Block Issuance Credit Input provides the VM with context for the value of
     /// the BIC vector of a specific slot.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct BlockIssuanceCreditContextInputDto {
+    #[serde(rename_all = "camelCase")]
+    struct BlockIssuanceCreditContextInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub account_id: AccountId,
+        kind: u8,
+        account_id: AccountId,
     }
 
     impl From<&BlockIssuanceCreditContextInput> for BlockIssuanceCreditContextInputDto {
@@ -53,4 +54,10 @@ pub(crate) mod dto {
             Self::new(value.account_id)
         }
     }
+
+    impl_serde_typed_dto!(
+        BlockIssuanceCreditContextInput,
+        BlockIssuanceCreditContextInputDto,
+        "block issuance credit input"
+    );
 }
