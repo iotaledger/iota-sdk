@@ -50,11 +50,6 @@ impl ContextInput {
         }
     }
 
-    /// Checks whether the context input is a [`RewardContextInput`].
-    pub fn is_reward(&self) -> bool {
-        matches!(self, Self::Reward(_))
-    }
-
     /// Checks whether the context input is a [`CommitmentContextInput`].
     pub fn is_commitment(&self) -> bool {
         matches!(self, Self::Commitment(_))
@@ -65,14 +60,9 @@ impl ContextInput {
         matches!(self, Self::BlockIssuanceCredit(_))
     }
 
-    /// Gets the input as an actual [`RewardContextInput`].
-    /// PANIC: do not call on a non-reward context input.
-    pub fn as_reward(&self) -> &RewardContextInput {
-        if let Self::Reward(input) = self {
-            input
-        } else {
-            panic!("context input is not of type reward: {:?}", self);
-        }
+    /// Checks whether the context input is a [`RewardContextInput`].
+    pub fn is_reward(&self) -> bool {
+        matches!(self, Self::Reward(_))
     }
 
     /// Gets the input as an actual [`CommitmentContextInput`].
@@ -91,6 +81,16 @@ impl ContextInput {
             input
         } else {
             panic!("context input is not of type block issuance credit: {:?}", self);
+        }
+    }
+
+    /// Gets the input as an actual [`RewardContextInput`].
+    /// PANIC: do not call on a non-reward context input.
+    pub fn as_reward(&self) -> &RewardContextInput {
+        if let Self::Reward(input) = self {
+            input
+        } else {
+            panic!("context input is not of type reward: {:?}", self);
         }
     }
 }
