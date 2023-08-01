@@ -54,5 +54,9 @@ mod dto {
             Self::new(value.commitment_id)
         }
     }
-    impl_serde_typed_dto!(CommitmentContextInput, CommitmentContextInputDto, "commitment input");
+    impl_serde_typed_dto!(
+        CommitmentContextInput,
+        CommitmentContextInputDto,
+        "commitment context input"
+    );
 }

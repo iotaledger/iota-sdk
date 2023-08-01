@@ -60,6 +60,6 @@ mod dto {
     impl_serde_typed_dto!(
         BlockIssuanceCreditContextInput,
         BlockIssuanceCreditContextInputDto,
-        "block issuance credit input"
+        "block issuance credit context input"
     );
 }
