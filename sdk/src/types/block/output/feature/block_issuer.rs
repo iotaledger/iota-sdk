@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::boxed::Box;
+
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
 use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
