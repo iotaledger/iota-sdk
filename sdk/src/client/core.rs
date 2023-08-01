@@ -54,6 +54,8 @@ pub struct ClientInner {
     pub(crate) pow_worker_count: RwLock<Option<usize>>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
+    #[cfg(target_family = "wasm")]
+    pub(crate) last_sync: std::sync::Mutex<Option<u32>>,
 }
 
 #[derive(Default)]
@@ -104,11 +106,8 @@ impl ClientInner {
         // create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
-            lazy_static::lazy_static! {
-                static ref LAST_SYNC: std::sync::Mutex<Option<u32>> = std::sync::Mutex::new(None);
-            };
             let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
-            if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
+            if let Some(last_sync) = *self.last_sync.lock().unwrap() {
                 if current_time < last_sync {
                     return Ok(self.network_info.read().await.clone());
                 }
@@ -116,8 +115,7 @@ impl ClientInner {
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self.network_info.write().await;
             client_network_info.protocol_parameters = info.protocol.clone();
-
-            *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
+            *self.last_sync.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
 
         Ok(self.network_info.read().await.clone())
