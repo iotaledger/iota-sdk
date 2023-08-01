@@ -149,6 +149,7 @@ mod tests {
     #[test]
     fn test_context_input() {
         let reward = ContextInput::Reward(RewardContextInput::new(10));
+        assert!(reward.is_reward());
         let reward: &RewardContextInput = reward.as_reward();
         assert_eq!(reward.to_string(), "10");
 
@@ -156,12 +157,14 @@ mod tests {
             "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689";
         let slot_commitment_id = SlotCommitmentId::from_str(slot_commitment_id_str).unwrap();
         let commitment = ContextInput::Commitment(CommitmentContextInput::new(slot_commitment_id));
+        assert!(commitment.is_commitment());
         let commitment: &CommitmentContextInput = commitment.as_commitment();
         assert_eq!(commitment.to_string(), slot_commitment_id_str);
 
         let account_id_str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
         let account_id = AccountId::from_str(account_id_str).unwrap();
         let block_issuance_credit = ContextInput::BlockIssuanceCredit(BlockIssuanceCreditContextInput::new(account_id));
+        assert!(block_issuance_credit.is_block_issuance_credit());
         let block_issuance_credit: &BlockIssuanceCreditContextInput = block_issuance_credit.as_block_issuance_credit();
         assert_eq!(block_issuance_credit.to_string(), account_id_str);
     }
