@@ -5,7 +5,7 @@ use derive_more::{Display, From};
 
 use crate::types::block::slot::SlotCommitmentId;
 
-/// A Commitment Context indicates that the input references a commitment to a certain slot.
+/// A Commitment Input indicates that the input references a commitment to a certain slot.
 #[derive(Clone, Copy, Display, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct CommitmentContextInput(SlotCommitmentId);
 
@@ -29,7 +29,7 @@ pub(crate) mod dto {
 
     use super::*;
 
-    /// A Commitment Context indicates that the input references a commitment to a certain slot.
+    /// A Commitment Input indicates that the input references a commitment to a certain slot.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct CommitmentContextInputDto {
         #[serde(rename = "type")]
