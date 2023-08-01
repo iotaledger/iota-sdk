@@ -55,16 +55,6 @@ impl ContextInput {
         matches!(self, Self::Commitment(_))
     }
 
-    /// Checks whether the context input is a [`BlockIssuanceCreditContextInput`].
-    pub fn is_block_issuance_credit(&self) -> bool {
-        matches!(self, Self::BlockIssuanceCredit(_))
-    }
-
-    /// Checks whether the context input is a [`RewardContextInput`].
-    pub fn is_reward(&self) -> bool {
-        matches!(self, Self::Reward(_))
-    }
-
     /// Gets the input as an actual [`CommitmentContextInput`].
     /// PANIC: do not call on a non-commitment context input.
     pub fn as_commitment(&self) -> &CommitmentContextInput {
@@ -74,6 +64,12 @@ impl ContextInput {
             panic!("invalid downcast of non-CommitmentContextInput");
         }
     }
+
+    /// Checks whether the context input is a [`BlockIssuanceCreditContextInput`].
+    pub fn is_block_issuance_credit(&self) -> bool {
+        matches!(self, Self::BlockIssuanceCredit(_))
+    }
+
     /// Gets the input as an actual [`BlockIssuanceCreditContextInput`].
     /// PANIC: do not call on a non-block-issuance-credit context input.
     pub fn as_block_issuance_credit(&self) -> &BlockIssuanceCreditContextInput {
@@ -82,6 +78,11 @@ impl ContextInput {
         } else {
             panic!("invalid downcast of non-BlockIssuanceCreditContextInput");
         }
+    }
+
+    /// Checks whether the context input is a [`RewardContextInput`].
+    pub fn is_reward(&self) -> bool {
+        matches!(self, Self::Reward(_))
     }
 
     /// Gets the input as an actual [`RewardContextInput`].
