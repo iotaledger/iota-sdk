@@ -14,6 +14,8 @@ mod issuer_id;
 pub mod address;
 /// A module that provides types and syntactic validations of basic blocks.
 pub mod basic;
+/// A module that provides types and syntactic validations of context inputs.
+pub mod context_input;
 /// A module that provides types and syntactic validations of blocks.
 pub mod core;
 /// A module that contains helper functions and types.
