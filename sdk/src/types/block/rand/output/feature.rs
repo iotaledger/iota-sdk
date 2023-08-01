@@ -38,14 +38,14 @@ pub fn rand_tag_feature() -> TagFeature {
     TagFeature::new(bytes).unwrap()
 }
 
-/// Generates a random [`StakingFeature`].
-pub fn rand_staking_feature() -> StakingFeature {
-    StakingFeature::new(rand_number(), rand_number(), rand_number(), rand_number())
-}
-
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
     BlockIssuerFeature::new(rand_number::<u64>(), vec![rand_public_key()]).unwrap()
+}
+
+/// Generates a random [`StakingFeature`].
+pub fn rand_staking_feature() -> StakingFeature {
+    StakingFeature::new(rand_number(), rand_number(), rand_number(), rand_number())
 }
 
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
