@@ -19,6 +19,7 @@ impl BlockIssuanceCreditContextInput {
         Self(account_id)
     }
 
+    /// Returns the account id of the [`BlockIssuanceCreditContextInput`].
     pub fn account_id(&self) -> AccountId {
         self.0
     }

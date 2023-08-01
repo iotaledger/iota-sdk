@@ -18,6 +18,7 @@ impl CommitmentContextInput {
         Self(commitment_id)
     }
 
+    /// Returns the commitment id of the [`CommitmentContextInput`].
     pub fn commitment_id(&self) -> SlotCommitmentId {
         self.0
     }
