@@ -46,9 +46,13 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub accepted_tangle_time: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub relative_accepted_tangle_time: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub confirmed_tangle_time: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub relative_confirmed_tangle_time: u64,
     pub latest_committed_slot: SlotIndex,
     pub latest_finalized_slot: SlotIndex,
