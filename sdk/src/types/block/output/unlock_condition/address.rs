@@ -26,35 +26,38 @@ impl AddressUnlockCondition {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct AddressUnlockConditionDto {
+    #[derive(Serialize, Deserialize)]
+    struct AddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        kind: u8,
+        address: Address,
     }
 
     impl From<&AddressUnlockCondition> for AddressUnlockConditionDto {
         fn from(value: &AddressUnlockCondition) -> Self {
             Self {
                 kind: AddressUnlockCondition::KIND,
-                address: value.address().into(),
+                address: value.0,
             }
         }
     }
 
-    impl TryFrom<AddressUnlockConditionDto> for AddressUnlockCondition {
-        type Error = Error;
-
-        fn try_from(value: AddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(
-                Address::try_from(value.address).map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
-            ))
+    impl From<AddressUnlockConditionDto> for AddressUnlockCondition {
+        fn from(value: AddressUnlockConditionDto) -> Self {
+            Self(value.address)
         }
     }
+
+    impl_serde_typed_dto!(
+        AddressUnlockCondition,
+        AddressUnlockConditionDto,
+        "address unlock condition"
+    );
 }

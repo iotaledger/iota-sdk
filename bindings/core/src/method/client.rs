@@ -9,15 +9,13 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::{OutputDto, TokenSchemeDto},
-            feature::dto::FeatureDto,
-            unlock_condition::dto::UnlockConditionDto,
-            AccountId, FoundryId, NativeToken, NftId, OutputId,
+            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
+            NativeToken, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
     },
-    utils::serde::string,
+    utils::serde::{option_string, string},
 };
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +31,8 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildAccountOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(default, with = "option_string")]
+        amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
@@ -43,8 +42,8 @@ pub enum ClientMethod {
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -52,13 +51,14 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(default, with = "option_string")]
+        amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -66,13 +66,14 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(default, with = "option_string")]
+        amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
-        token_scheme: TokenSchemeDto,
+        token_scheme: TokenScheme,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -80,15 +81,16 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
-        amount: Option<String>,
+        #[serde(default, with = "option_string")]
+        amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Removes all listeners for the provided topics.
     /// Expected response: [`Ok`](crate::Response::Ok)

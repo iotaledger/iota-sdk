@@ -37,9 +37,6 @@ impl NftAddress {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(NftAddress);
-
 impl FromStr for NftAddress {
     type Err = Error;
 
@@ -60,37 +57,36 @@ impl core::fmt::Debug for NftAddress {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::{String, ToString};
+mod dto {
+    use alloc::format;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Describes an NFT address.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct NftAddressDto {
+    struct NftAddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub nft_id: String,
+        kind: u8,
+        nft_id: NftId,
     }
 
     impl From<&NftAddress> for NftAddressDto {
         fn from(value: &NftAddress) -> Self {
             Self {
                 kind: NftAddress::KIND,
-                nft_id: value.to_string(),
+                nft_id: value.0,
             }
         }
     }
 
-    impl TryFrom<NftAddressDto> for NftAddress {
-        type Error = Error;
-
-        fn try_from(value: NftAddressDto) -> Result<Self, Self::Error> {
-            value.nft_id.parse::<Self>().map_err(|_| Error::InvalidField("nftId"))
+    impl From<NftAddressDto> for NftAddress {
+        fn from(value: NftAddressDto) -> Self {
+            Self(value.nft_id)
         }
     }
+
+    impl_serde_typed_dto!(NftAddress, NftAddressDto, "nft address");
 }

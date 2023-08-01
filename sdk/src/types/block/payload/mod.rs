@@ -175,8 +175,8 @@ impl Packable for OptionalPayload {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
+    pub use super::transaction::dto::TransactionPayloadDto;
     use super::*;
-    pub use super::{tagged_data::dto::TaggedDataPayloadDto, transaction::dto::TransactionPayloadDto};
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different payload types.
@@ -184,7 +184,7 @@ pub mod dto {
     #[serde(untagged)]
     pub enum PayloadDto {
         Transaction(Box<TransactionPayloadDto>),
-        TaggedData(Box<TaggedDataPayloadDto>),
+        TaggedData(Box<TaggedDataPayload>),
     }
 
     impl From<TransactionPayloadDto> for PayloadDto {
@@ -193,8 +193,8 @@ pub mod dto {
         }
     }
 
-    impl From<TaggedDataPayloadDto> for PayloadDto {
-        fn from(payload: TaggedDataPayloadDto) -> Self {
+    impl From<TaggedDataPayload> for PayloadDto {
+        fn from(payload: TaggedDataPayload) -> Self {
             Self::TaggedData(Box::new(payload))
         }
     }
@@ -203,7 +203,7 @@ pub mod dto {
         fn from(value: &Payload) -> Self {
             match value {
                 Payload::Transaction(p) => Self::Transaction(Box::new(TransactionPayloadDto::from(p.as_ref()))),
-                Payload::TaggedData(p) => Self::TaggedData(Box::new(TaggedDataPayloadDto::from(p.as_ref()))),
+                Payload::TaggedData(p) => Self::TaggedData(p.clone()),
             }
         }
     }
@@ -217,7 +217,7 @@ pub mod dto {
                 PayloadDto::Transaction(p) => {
                     Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)
                 }
-                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
+                PayloadDto::TaggedData(p) => Self::from(*p),
             })
         }
     }

@@ -36,15 +36,38 @@ impl AccountUnlock {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
+    use super::*;
+
     /// Points to the unlock of a consumed account output.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct AccountUnlockDto {
+    #[derive(Serialize, Deserialize)]
+    struct AccountUnlockDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(rename = "reference")]
-        pub index: u16,
+        index: u16,
     }
+
+    impl From<&AccountUnlock> for AccountUnlockDto {
+        fn from(value: &AccountUnlock) -> Self {
+            Self {
+                kind: AccountUnlock::KIND,
+                index: value.0.get(),
+            }
+        }
+    }
+
+    impl TryFrom<AccountUnlockDto> for AccountUnlock {
+        type Error = Error;
+
+        fn try_from(value: AccountUnlockDto) -> Result<Self, Self::Error> {
+            Self::new(value.index)
+        }
+    }
+
+    impl_serde_typed_dto!(AccountUnlock, AccountUnlockDto, "account unlock");
 }

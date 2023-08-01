@@ -1,9 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "participation")]
-use std::str::FromStr;
-
 use iota_sdk::{
     client::api::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
@@ -12,9 +9,7 @@ use iota_sdk::{
         block::output::{dto::OutputDto, Output},
         TryFromDto,
     },
-    wallet::account::{
-        types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions,
-    },
+    wallet::account::{types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto},
 };
 
 use crate::{method::AccountMethod, Response, Result};
@@ -110,9 +105,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::PrepareBurn { burn, options } => {
-            let data = account
-                .prepare_burn(burn, options.map(TransactionOptions::try_from_dto).transpose()?)
-                .await?;
+            let data = account.prepare_burn(burn, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareConsolidateOutputs { params } => {
@@ -120,9 +113,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareCreateAccountOutput { params, options } => {
-            let data = account
-                .prepare_create_account_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                .await?;
+            let data = account.prepare_create_account_output(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareMeltNativeToken {
@@ -131,21 +122,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             options,
         } => {
             let data = account
-                .prepare_melt_native_token(
-                    token_id,
-                    melt_amount,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_melt_native_token(token_id, melt_amount, options)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
         AccountMethod::PrepareDecreaseVotingPower { amount } => {
-            let data = account
-                .prepare_decrease_voting_power(
-                    u64::from_str(&amount).map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
-                )
-                .await?;
+            let data = account.prepare_decrease_voting_power(amount).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareMintNativeToken {
@@ -154,69 +137,40 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             options,
         } => {
             let data = account
-                .prepare_mint_native_token(
-                    token_id,
-                    mint_amount,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_mint_native_token(token_id, mint_amount, options)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
         AccountMethod::PrepareIncreaseVotingPower { amount } => {
-            let data = account
-                .prepare_increase_voting_power(
-                    u64::from_str(&amount).map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
-                )
-                .await?;
+            let data = account.prepare_increase_voting_power(amount).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareMintNfts { params, options } => {
-            let data = account
-                .prepare_mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                .await?;
+            let data = account.prepare_mint_nfts(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareCreateNativeToken { params, options } => {
-            let data = account
-                .prepare_create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                .await?;
+            let data = account.prepare_create_native_token(params, options).await?;
             Response::PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareOutput {
             params,
             transaction_options,
         } => {
-            let output = account
-                .prepare_output(
-                    *params,
-                    transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
+            let output = account.prepare_output(*params, transaction_options).await?;
             Response::Output(OutputDto::from(&output))
         }
         AccountMethod::PrepareSend { params, options } => {
-            let data = account
-                .prepare_send(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                .await?;
+            let data = account.prepare_send(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareSendNativeTokens { params, options } => {
-            let data = account
-                .prepare_send_native_tokens(
-                    params.clone(),
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
+            let data = account.prepare_send_native_tokens(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareSendNft { params, options } => {
-            let data = account
-                .prepare_send_nft(
-                    params.clone(),
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
+            let data = account.prepare_send_nft(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
@@ -232,7 +186,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                         .into_iter()
                         .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
                         .collect::<Result<Vec<Output>>>()?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
+                    options,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -262,19 +216,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             address,
             options,
         } => {
-            let transaction = account
-                .send(
-                    amount,
-                    address,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
+            let transaction = account.send(amount, address, options).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendWithParams { params, options } => {
-            let transaction = account
-                .send_with_params(params, options.map(TransactionOptions::try_from_dto).transpose()?)
-                .await?;
+            let transaction = account.send_with_params(params, options).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendOutputs { outputs, options } => {
@@ -285,7 +231,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                         .into_iter()
                         .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
                         .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
+                    options,
                 )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))

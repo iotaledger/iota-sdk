@@ -3,14 +3,9 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{
-    address::{
-        dto::{AddressDto, Ed25519AddressDto},
-        Address, Bech32Address, Ed25519Address, ToBech32Ext,
-    },
-    Error,
-};
+use iota_sdk::types::block::address::{Address, Bech32Address, Ed25519Address, ToBech32Ext};
 use packable::PackableExt;
+use serde_json::json;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";
 const ED25519_BECH32: &str = "rms1qr47gz3xxjqpjrwd0yu5glhqrth6w0t08npney8000ust2lcw2r92j5a8rt";
@@ -93,42 +88,50 @@ fn bech32_roundtrip() {
 }
 
 #[test]
-fn dto_fields() {
+fn serde_fields() {
     let ed25519_address = Ed25519Address::from_str(ED25519_ADDRESS).unwrap();
-    let ed25519_dto = Ed25519AddressDto::from(&ed25519_address);
+    let ed25519_address_ser = serde_json::to_value(ed25519_address).unwrap();
 
-    assert_eq!(ed25519_dto.kind, Ed25519Address::KIND);
-    assert_eq!(ed25519_dto.pub_key_hash, ED25519_ADDRESS.to_string());
+    assert_eq!(
+        ed25519_address_ser,
+        json!({
+            "type": Ed25519Address::KIND,
+            "pubKeyHash": ED25519_ADDRESS,
+        })
+    );
 
     let address = Address::from(ed25519_address);
-    let dto = AddressDto::from(&address);
+    let address_ser = serde_json::to_value(address).unwrap();
 
-    assert_eq!(dto, AddressDto::Ed25519(ed25519_dto));
+    assert_eq!(address_ser, ed25519_address_ser);
 }
 
 #[test]
-fn dto_roundtrip() {
+fn serde_roundtrip() {
     let ed25519_address = Ed25519Address::from_str(ED25519_ADDRESS).unwrap();
-    let ed25519_dto = Ed25519AddressDto::from(&ed25519_address);
+    let ed25519_address_ser = serde_json::to_string(&ed25519_address).unwrap();
 
-    assert_eq!(Ed25519Address::try_from(ed25519_dto).unwrap(), ed25519_address);
+    assert_eq!(
+        serde_json::from_str::<Ed25519Address>(&ed25519_address_ser).unwrap(),
+        ed25519_address
+    );
 
     let address = Address::from(ed25519_address);
-    let dto = AddressDto::from(&address);
+    let address_ser = serde_json::to_string(&address).unwrap();
 
-    assert_eq!(Address::try_from(dto).unwrap(), address);
+    assert_eq!(serde_json::from_str::<Address>(&address_ser).unwrap(), address);
 }
 
 #[test]
-fn dto_invalid_pub_key_hash() {
-    let dto = Ed25519AddressDto {
-        kind: Ed25519Address::KIND,
-        pub_key_hash: ED25519_ADDRESS_INVALID.to_string(),
-    };
+fn serde_invalid_ed25519_address() {
+    let ed25519_address_ser = json!({
+        "type": Ed25519Address::KIND,
+        "pubKeyHash": ED25519_ADDRESS_INVALID,
+    });
 
     assert!(matches!(
-        Ed25519Address::try_from(dto),
-        Err(Error::InvalidField("pubKeyHash"))
+        serde_json::from_value::<Ed25519Address>(ed25519_address_ser),
+        Err(e) if e.to_string() == "hex error: Invalid hex string length for slice: expected 64 got 63"
     ));
 }
 

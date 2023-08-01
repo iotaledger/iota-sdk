@@ -284,9 +284,12 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{payload::dto::PayloadDto, Error},
-        TryFromDto, ValidationParams,
+    use crate::{
+        types::{
+            block::{payload::dto::PayloadDto, Error},
+            TryFromDto, ValidationParams,
+        },
+        utils::serde::string,
     };
 
     /// The block object that nodes gossip around in the network.
@@ -302,7 +305,7 @@ pub(crate) mod dto {
         ///
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
         pub burned_mana: u64,
     }
 
