@@ -52,5 +52,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(RewardContextInput, RewardContextInputDto, "reward input");
+    impl_serde_typed_dto!(RewardContextInput, RewardContextInputDto, "reward context input");
 }
