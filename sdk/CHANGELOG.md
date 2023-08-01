@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.3 - 2023-MM-DD
+
+### Fixed
+
+- `Clients` returning the default protocol parameters when multiple `Client` instances are used;
+
 ## 1.0.2 - 2023-07-28
 
 ### Changed
