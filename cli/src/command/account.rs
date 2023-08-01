@@ -182,7 +182,8 @@ pub enum AccountCommand {
         token_id: String,
         /// Amount to send, e.g. 1000000.
         amount: String,
-        /// Whether to gift the storage deposit for the output or not, e.g. ` true`.
+        /// Whether to gift the storage deposit for the output or not, e.g. `true`.
+        #[arg(value_parser = clap::builder::BoolishValueParser::new())]
         gift_storage_deposit: Option<bool>,
     },
     /// Send an NFT.

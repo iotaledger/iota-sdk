@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{builder::BoolishValueParser, Args, Parser, Subcommand};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -63,7 +63,14 @@ pub enum WalletCommand {
         path: Option<String>,
     },
     /// Generate a random mnemonic.
-    Mnemonic,
+    Mnemonic {
+        // Output the mnemonic to the specified file.
+        #[arg(long)]
+        output_file_name: Option<String>,
+        // Output the mnemonic to the stdout.
+        #[arg(long, num_args = 0..2, default_missing_value = Some("true"), value_parser = BoolishValueParser::new())]
+        output_stdout: Option<bool>,
+    },
     /// Create a new account.
     NewAccount {
         /// Account alias, next available account index if not provided.
@@ -194,9 +201,8 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
     Ok(())
 }
 
-pub async fn mnemonic_command() -> Result<(), Error> {
-    generate_mnemonic().await?;
-
+pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: Option<bool>) -> Result<(), Error> {
+    generate_mnemonic(output_file_name, output_stdout).await?;
     Ok(())
 }
 
