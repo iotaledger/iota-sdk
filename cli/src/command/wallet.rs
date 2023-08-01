@@ -68,7 +68,7 @@ pub enum WalletCommand {
         #[arg(long)]
         output_file_name: Option<String>,
         // Output the mnemonic to the stdout.
-        #[arg(long, num_args = 0..2, default_missing_value = Some("true"), value_parser = BoolishValueParser::new())]
+        #[arg(long, num_args = 0..=1, default_missing_value = Some("true"), value_parser = BoolishValueParser::new())]
         output_stdout: Option<bool>,
     },
     /// Create a new account.
