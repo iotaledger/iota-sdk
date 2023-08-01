@@ -23,7 +23,7 @@ pub enum ContextInput {
     #[packable(tag = CommitmentContextInput::KIND)]
     Commitment(CommitmentContextInput),
 
-    /// A [`CommitmentContextInput`].
+    /// A [`BlockIssuanceCreditContextInput`].
     #[packable(tag = BlockIssuanceCreditContextInput::KIND)]
     BlockIssuanceCredit(BlockIssuanceCreditContextInput),
 
