@@ -9,6 +9,7 @@ pub use self::ed25519::Ed25519PublicKey;
 use crate::types::block::Error;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidPublicKeyKind)]
 pub enum PublicKey {

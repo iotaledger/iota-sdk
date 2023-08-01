@@ -16,3 +16,9 @@ impl SlotIndex {
         Self::from(index)
     }
 }
+
+impl From<SlotIndex> for u64 {
+    fn from(slot_index: SlotIndex) -> Self {
+        *slot_index
+    }
+}

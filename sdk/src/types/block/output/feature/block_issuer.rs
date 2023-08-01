@@ -1,33 +1,43 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::From;
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
-use crate::types::block::{address::Address, slot::SlotIndex};
+use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
 
-type PublicKey = Vec<u8>;
+pub type PublicKeyCount = BoundedU8<0, { u8::MAX }>;
 
-/// Identifies the validated issuer of the UTXO state machine.
+// type PublicKey = Vec<u8>;
+
+/// This feature defines the public keys with which a signature to burn Mana from
+/// the containing account's Block Issuance Credit can be verified.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[packable(unpack_error = Error)]
 pub struct BlockIssuerFeature {
     /// The slot index at which the Block Issuer Feature expires and can be removed.
     expiry_slot: SlotIndex,
     /// The number of Block Issuer Keys.
-    block_issuer_keys_count: u8,
+    keys_count: u8,
     /// The Block Issuer Keys.
-    block_issuer_keys: Vec<PublicKey>,
+    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidPublicKeyCount(p.into())))]
+    keys: BoxedSlicePrefix<PublicKey, PublicKeyCount>,
 }
 
 impl BlockIssuerFeature {
-    /// The [`Feature`](crate::types::block::output::Feature) kind of an [`IssuerFeature`].
+    /// The [`Feature`](crate::types::block::output::Feature) kind of an [`BlockIssuerFeature`].
     pub const KIND: u8 = 4;
 
-    /// Creates a new [`IssuerFeature`].
+    /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]
-    pub fn new(address: impl Into<Address>) -> Self {
-        todo!()
-        // Self(address.into())
+    pub fn new(expiry_slot: SlotIndex, keys: impl Into<Box<[PublicKey]>>) -> Result<Self, Error> {
+        let keys: Box<[PublicKey]> = keys.into();
+
+        Ok(Self {
+            expiry_slot,
+            keys_count: keys.len() as u8,
+            keys: keys.try_into().map_err(Error::InvalidPublicKeyCount)?,
+        })
     }
 
     /// Returns the Slot Index at which the Block Issuer Feature expires and can be removed.
@@ -36,30 +46,68 @@ impl BlockIssuerFeature {
     }
 
     /// Returns the number of Block Issuer Keys.
-    pub fn block_issuer_keys_count(&self) -> u8 {
-        self.block_issuer_keys_count
+    pub fn keys_count(&self) -> u8 {
+        self.keys_count
     }
 
     /// Returns the Block Issuer Keys.
-    fn block_issuer_keys(&self) -> &Vec<PublicKey> {
-        &self.block_issuer_keys
+    pub fn keys(&self) -> &[PublicKey] {
+        &self.keys
     }
 }
 
 pub(crate) mod dto {
-    use crate::utils::serde::string;
+    use crate::{
+        types::block::{
+            public_key::{dto::PublicKeyDto, PublicKey},
+            Error,
+        },
+        utils::serde::string,
+    };
+    use packable::bounded::TryIntoBoundedU8Error;
     use serde::{Deserialize, Serialize};
 
-    // use crate::types::block::address::dto::AddressDto;
-    use super::PublicKey;
+    use super::BlockIssuerFeature;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct BlockIssuerFeatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
-        expiry_slot: u64,
-        block_issuer_keys_count: u8,
-        block_issuer_keys: Vec<PublicKey>,
+        pub expiry_slot: u64,
+        pub keys_count: u8,
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        pub keys: Vec<PublicKeyDto>,
+    }
+
+    impl From<&BlockIssuerFeature> for BlockIssuerFeatureDto {
+        fn from(value: &BlockIssuerFeature) -> Self {
+            Self {
+                kind: BlockIssuerFeature::KIND,
+                expiry_slot: value.expiry_slot.into(),
+                keys_count: value.keys_count,
+                keys: value.keys.iter().map(|key| key.into()).collect(),
+            }
+        }
+    }
+
+    impl TryFrom<BlockIssuerFeatureDto> for BlockIssuerFeature {
+        type Error = Error;
+
+        fn try_from(value: BlockIssuerFeatureDto) -> Result<Self, Self::Error> {
+            let keys = value
+                .keys
+                .into_iter()
+                .map(|key| PublicKey::try_from(key))
+                .collect::<Result<Vec<PublicKey>, Error>>()?;
+
+            if value.keys_count != keys.len() as u8 {
+                return Err(Error::InvalidPublicKeyCount(TryIntoBoundedU8Error::Invalid(
+                    value.keys_count,
+                )));
+            }
+
+            Self::new(value.expiry_slot.into(), keys)
+        }
     }
 }

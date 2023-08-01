@@ -12,8 +12,9 @@ use primitive_types::U256;
 use crate::types::block::{
     input::UtxoInput,
     output::{
-        feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
-        NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
+        feature::block_issuer::PublicKeyCount, feature::FeatureCount, unlock_condition::UnlockConditionCount,
+        AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
+        TagFeatureLength,
     },
     payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
@@ -65,6 +66,7 @@ pub enum Error {
     InvalidParentCount,
     InvalidPayloadKind(u32),
     InvalidPayloadLength { expected: usize, actual: usize },
+    InvalidPublicKeyCount(<PublicKeyCount as TryFrom<usize>>::Error),
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -214,6 +216,7 @@ impl fmt::Display for Error {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
+            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {
                 write!(f, "invalid unlock reference: {index}")

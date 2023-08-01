@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod block_issuer;
+pub mod block_issuer;
 mod issuer;
 mod metadata;
 mod sender;
@@ -15,6 +15,7 @@ use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
+use self::block_issuer::BlockIssuerFeature;
 pub use self::{
     issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, staking::StakingFeature, tag::TagFeature,
 };
@@ -42,6 +43,9 @@ pub enum Feature {
     /// A staking feature.
     #[packable(tag = StakingFeature::KIND)]
     Staking(StakingFeature),
+    /// A block issuer feature.
+    #[packable(tag = BlockIssuerFeature::KIND)]
+    BlockIssuer(BlockIssuerFeature),
 }
 
 impl PartialOrd for Feature {
@@ -64,6 +68,7 @@ impl core::fmt::Debug for Feature {
             Self::Metadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
             Self::Staking(feature) => feature.fmt(f),
+            Self::BlockIssuer(feature) => feature.fmt(f),
         }
     }
 }
@@ -77,6 +82,7 @@ impl Feature {
             Self::Metadata(_) => MetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
             Self::Staking(_) => StakingFeature::KIND,
+            Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
         }
     }
 
@@ -88,6 +94,7 @@ impl Feature {
             Self::Metadata(_) => FeatureFlags::METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
             Self::Staking(_) => FeatureFlags::STAKING,
+            Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
         }
     }
 
@@ -165,6 +172,21 @@ impl Feature {
             panic!("invalid downcast of non-StakingFeature");
         }
     }
+
+    /// Checks whether the feature is a [`BlockIssuerFeature`].
+    pub fn is_block_issuer(&self) -> bool {
+        matches!(self, Self::BlockIssuer(_))
+    }
+
+    /// Gets the feature as an actual [`BlockIssuerFeature`].
+    /// NOTE: Will panic if the feature is not a [`BlockIssuerFeature`].
+    pub fn as_block_issuer(&self) -> &BlockIssuerFeature {
+        if let Self::BlockIssuer(feature) = self {
+            feature
+        } else {
+            panic!("invalid downcast of non-BlockIssuerFeature");
+        }
+    }
 }
 
 create_bitflags!(
@@ -177,6 +199,7 @@ create_bitflags!(
         (METADATA, MetadataFeature),
         (TAG, TagFeature),
         (STAKING, StakingFeature),
+        (BLOCK_ISSUER, BlockIssuerFeature),
     ]
 );
 
@@ -275,6 +298,11 @@ impl Features {
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
     }
+
+    /// Gets a reference to a [`BlockIssuerFeature`], if any.
+    pub fn block_issuer(&self) -> Option<&BlockIssuerFeature> {
+        self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
+    }
 }
 
 #[inline]
@@ -312,7 +340,8 @@ mod test {
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
                 FeatureFlags::TAG,
-                FeatureFlags::STAKING
+                FeatureFlags::STAKING,
+                FeatureFlags::BLOCK_ISSUER
             ]
         );
     }
