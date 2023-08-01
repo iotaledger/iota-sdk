@@ -5,8 +5,8 @@ use alloc::vec::Vec;
 
 use crate::types::block::{
     output::feature::{
-        block_issuer::BlockIssuerFeature, Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature,
-        StakingFeature, TagFeature,
+        BlockIssuerFeature, Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature, StakingFeature,
+        TagFeature,
     },
     rand::{
         address::rand_address,

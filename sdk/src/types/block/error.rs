@@ -12,7 +12,8 @@ use primitive_types::U256;
 use crate::types::block::{
     input::UtxoInput,
     output::{
-        feature::block_issuer::PublicKeyCount, feature::FeatureCount, unlock_condition::UnlockConditionCount,
+        feature::{FeatureCount, PublicKeyCount},
+        unlock_condition::UnlockConditionCount,
         AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
         TagFeatureLength,
     },

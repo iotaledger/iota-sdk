@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-pub mod block_issuer;
+mod block_issuer;
 mod issuer;
 mod metadata;
 mod sender;
@@ -15,11 +15,11 @@ use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
-use self::block_issuer::BlockIssuerFeature;
 pub use self::{
-    issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, staking::StakingFeature, tag::TagFeature,
+    block_issuer::BlockIssuerFeature, issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature,
+    staking::StakingFeature, tag::TagFeature,
 };
-pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
+pub(crate) use self::{block_issuer::PublicKeyCount, metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
 
 ///
@@ -40,12 +40,12 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
-    /// A staking feature.
-    #[packable(tag = StakingFeature::KIND)]
-    Staking(StakingFeature),
     /// A block issuer feature.
     #[packable(tag = BlockIssuerFeature::KIND)]
     BlockIssuer(BlockIssuerFeature),
+    /// A staking feature.
+    #[packable(tag = StakingFeature::KIND)]
+    Staking(StakingFeature),
 }
 
 impl PartialOrd for Feature {

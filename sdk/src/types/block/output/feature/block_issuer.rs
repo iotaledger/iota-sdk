@@ -5,18 +5,18 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
 use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
 
-pub type PublicKeyCount = BoundedU8<0, { u8::MAX }>;
+const KEY_COUNT_MIN: u8 = 1;
+const KEY_COUNT_MAX: u8 = 128;
+
+pub(crate) type PublicKeyCount = BoundedU8<KEY_COUNT_MIN, KEY_COUNT_MAX>;
 
 /// This feature defines the public keys with which a signature to burn Mana from
 /// the containing account's Block Issuance Credit can be verified.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct BlockIssuerFeature {
     /// The slot index at which the Block Issuer Feature expires and can be removed.
     expiry_slot: SlotIndex,
-    /// The number of Block Issuer Keys.
-    keys_count: u8,
     /// The Block Issuer Keys.
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidPublicKeyCount(p.into())))]
     keys: BoxedSlicePrefix<PublicKey, PublicKeyCount>,
@@ -33,7 +33,6 @@ impl BlockIssuerFeature {
 
         Ok(Self {
             expiry_slot: expiry_slot.into(),
-            keys_count: keys.len() as u8,
             keys: keys.try_into().map_err(Error::InvalidPublicKeyCount)?,
         })
     }
@@ -45,7 +44,7 @@ impl BlockIssuerFeature {
 
     /// Returns the number of Block Issuer Keys.
     pub fn keys_count(&self) -> u8 {
-        self.keys_count
+        self.keys.len() as u8
     }
 
     /// Returns the Block Issuer Keys.
@@ -55,6 +54,10 @@ impl BlockIssuerFeature {
 }
 
 pub(crate) mod dto {
+    use packable::bounded::TryIntoBoundedU8Error;
+    use serde::{Deserialize, Serialize};
+
+    use super::BlockIssuerFeature;
     use crate::{
         types::block::{
             public_key::{dto::PublicKeyDto, PublicKey},
@@ -62,10 +65,6 @@ pub(crate) mod dto {
         },
         utils::serde::string,
     };
-    use packable::bounded::TryIntoBoundedU8Error;
-    use serde::{Deserialize, Serialize};
-
-    use super::BlockIssuerFeature;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct BlockIssuerFeatureDto {
@@ -83,7 +82,7 @@ pub(crate) mod dto {
             Self {
                 kind: BlockIssuerFeature::KIND,
                 expiry_slot: value.expiry_slot.into(),
-                keys_count: value.keys_count,
+                keys_count: value.keys_count(),
                 keys: value.keys.iter().map(|key| key.into()).collect(),
             }
         }
@@ -96,7 +95,7 @@ pub(crate) mod dto {
             let keys = value
                 .keys
                 .into_iter()
-                .map(|key| PublicKey::try_from(key))
+                .map(PublicKey::try_from)
                 .collect::<Result<Vec<PublicKey>, Error>>()?;
 
             if value.keys_count != keys.len() as u8 {
