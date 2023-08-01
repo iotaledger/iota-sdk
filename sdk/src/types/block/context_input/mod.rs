@@ -71,7 +71,7 @@ impl ContextInput {
         if let Self::Commitment(input) = self {
             input
         } else {
-            panic!("context input is not of type commitment: {:?}", self);
+            panic!("invalid downcast of non-CommitmentContextInput");
         }
     }
     /// Gets the input as an actual [`BlockIssuanceCreditContextInput`].
@@ -80,7 +80,7 @@ impl ContextInput {
         if let Self::BlockIssuanceCredit(input) = self {
             input
         } else {
-            panic!("context input is not of type block issuance credit: {:?}", self);
+            panic!("invalid downcast of non-BlockIssuanceCreditContextInput");
         }
     }
 
@@ -90,7 +90,7 @@ impl ContextInput {
         if let Self::Reward(input) = self {
             input
         } else {
-            panic!("context input is not of type reward: {:?}", self);
+            panic!("invalid downcast of non-RewardContextInput");
         }
     }
 }
