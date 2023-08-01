@@ -42,11 +42,6 @@ impl BlockIssuerFeature {
         self.expiry_slot
     }
 
-    /// Returns the number of Block Issuer Keys.
-    pub fn keys_count(&self) -> u8 {
-        self.keys.len() as u8
-    }
-
     /// Returns the Block Issuer Keys.
     pub fn keys(&self) -> &[PublicKey] {
         &self.keys
@@ -54,7 +49,6 @@ impl BlockIssuerFeature {
 }
 
 pub(crate) mod dto {
-    use packable::bounded::TryIntoBoundedU8Error;
     use serde::{Deserialize, Serialize};
 
     use super::BlockIssuerFeature;
@@ -72,9 +66,8 @@ pub(crate) mod dto {
         pub kind: u8,
         #[serde(with = "string")]
         pub expiry_slot: u64,
-        pub keys_count: u8,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub keys: Vec<PublicKeyDto>,
+        #[serde(skip_serializing_if = "alloc::vec::Vec::is_empty", default)]
+        pub keys: alloc::vec::Vec<PublicKeyDto>,
     }
 
     impl From<&BlockIssuerFeature> for BlockIssuerFeatureDto {
@@ -82,7 +75,6 @@ pub(crate) mod dto {
             Self {
                 kind: BlockIssuerFeature::KIND,
                 expiry_slot: value.expiry_slot.into(),
-                keys_count: value.keys_count(),
                 keys: value.keys.iter().map(|key| key.into()).collect(),
             }
         }
@@ -96,13 +88,7 @@ pub(crate) mod dto {
                 .keys
                 .into_iter()
                 .map(PublicKey::try_from)
-                .collect::<Result<Vec<PublicKey>, Error>>()?;
-
-            if value.keys_count != keys.len() as u8 {
-                return Err(Error::InvalidPublicKeyCount(TryIntoBoundedU8Error::Invalid(
-                    value.keys_count,
-                )));
-            }
+                .collect::<Result<alloc::vec::Vec<PublicKey>, Error>>()?;
 
             Self::new(value.expiry_slot, keys)
         }

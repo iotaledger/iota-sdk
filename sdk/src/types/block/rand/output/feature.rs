@@ -54,8 +54,8 @@ fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
-        FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
         FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
+        FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
         _ => unreachable!(),
     }
 }
