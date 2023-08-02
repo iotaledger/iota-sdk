@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Clients` returning the default protocol parameters when multiple `Client` instances are used;
+- Ledger Nano events properly created when preparing transactions using a `SecretManager`;
 
 ## 1.0.2 - 2023-07-28
 

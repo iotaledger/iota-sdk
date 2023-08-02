@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Missing production profile when no prebuild binary is available;
+- Ledger Nano events properly created when preparing transactions;
 
 ## 1.0.3 - 2023-07-31
 
