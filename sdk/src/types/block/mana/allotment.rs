@@ -74,7 +74,7 @@ mod dto {
             #[serde(rename_all = "camelCase")]
             struct AllotmentDto {
                 account_id: AccountId,
-                #[cfg_attr(feature = "serde", serde(with = "string"))]
+                #[serde(with = "string")]
                 mana: u64,
             }
 
