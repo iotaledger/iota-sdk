@@ -64,27 +64,29 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
     }
 }
 
-pub(crate) mod dto {
+mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::Error;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct ExpirationUnlockConditionDto {
+    struct ExpirationUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: AddressDto,
+        kind: u8,
+        return_address: Address,
         #[serde(rename = "unixTime")]
-        pub timestamp: u32,
+        timestamp: u32,
     }
 
     impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {
         fn from(value: &ExpirationUnlockCondition) -> Self {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
-                return_address: value.return_address().into(),
+                return_address: *value.return_address(),
                 timestamp: value.timestamp(),
             }
         }
@@ -94,12 +96,14 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(
-                Address::try_from(value.return_address)
-                    .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
-                value.timestamp,
-            )
-            .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
+            Self::new(value.return_address, value.timestamp)
+                .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
         }
     }
+
+    impl_serde_typed_dto!(
+        ExpirationUnlockCondition,
+        ExpirationUnlockConditionDto,
+        "expiration unlock condition"
+    );
 }

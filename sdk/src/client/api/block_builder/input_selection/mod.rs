@@ -15,11 +15,7 @@ use std::collections::{HashMap, HashSet};
 use packable::PackableExt;
 pub(crate) use requirement::is_account_transition;
 
-pub use self::{
-    burn::{Burn, BurnDto},
-    error::Error,
-    requirement::Requirement,
-};
+pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{

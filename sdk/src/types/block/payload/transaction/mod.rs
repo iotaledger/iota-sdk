@@ -100,14 +100,14 @@ fn verify_essence_unlocks(essence: &TransactionEssence, unlocks: &Unlocks) -> Re
 }
 
 pub mod dto {
-    use alloc::{boxed::Box, vec::Vec};
+    use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};
     use super::*;
     use crate::types::{
-        block::{unlock::dto::UnlockDto, Error},
+        block::{unlock::Unlock, Error},
         TryFromDto,
     };
 
@@ -117,7 +117,7 @@ pub mod dto {
         #[serde(rename = "type")]
         pub kind: u32,
         pub essence: TransactionEssenceDto,
-        pub unlocks: Vec<UnlockDto>,
+        pub unlocks: Vec<Unlock>,
     }
 
     impl From<&TransactionPayload> for TransactionPayloadDto {
@@ -125,7 +125,7 @@ pub mod dto {
             Self {
                 kind: TransactionPayload::KIND,
                 essence: value.essence().into(),
-                unlocks: value.unlocks().iter().map(Into::into).collect::<Vec<_>>(),
+                unlocks: value.unlocks().to_vec(),
             }
         }
     }
@@ -137,12 +137,7 @@ pub mod dto {
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             Self::new(
                 TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?,
-                Unlocks::new(
-                    dto.unlocks
-                        .into_iter()
-                        .map(TryInto::try_into)
-                        .collect::<Result<Box<[_]>, _>>()?,
-                )?,
+                Unlocks::new(dto.unlocks)?,
             )
         }
     }

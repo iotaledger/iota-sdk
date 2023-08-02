@@ -43,6 +43,7 @@ pub enum Error {
     InsufficientStorageDepositAmount { amount: u64, required: u64 },
     StorageDepositReturnExceedsOutputAmount { deposit: u64, amount: u64 },
     InsufficientStorageDepositReturnAmount { deposit: u64, required: u64 },
+    InvalidContextInputKind(u8),
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
@@ -170,6 +171,7 @@ impl fmt::Display for Error {
                 f,
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
+            Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidEssenceKind(k) => write!(f, "invalid essence kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),

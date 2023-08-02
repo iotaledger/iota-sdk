@@ -13,7 +13,7 @@ use packable::{
 use crate::types::block::Error;
 
 /// An Ed25519 public key.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ed25519PublicKey(PublicKey);

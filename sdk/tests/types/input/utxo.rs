@@ -4,18 +4,12 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    input::{
-        dto::{InputDto, UtxoInputDto},
-        Input, UtxoInput,
-    },
+    input::{Input, UtxoInput},
     output::OutputId,
-    Error,
 };
-use packable::{bounded::InvalidBoundedU16, PackableExt};
+use packable::PackableExt;
 
 const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00";
-const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
-const TRANSACTION_ID_INVALID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6";
 
 #[test]
 fn kind() {
@@ -76,60 +70,6 @@ fn from_str() {
         *UtxoInput::from_str(OUTPUT_ID).unwrap().output_id(),
         OutputId::from_str(OUTPUT_ID).unwrap()
     );
-}
-
-#[test]
-fn dto_fields() {
-    let output_id = OutputId::from_str(OUTPUT_ID).unwrap();
-    let utxo_input = UtxoInput::from(output_id);
-    let utxo_dto = UtxoInputDto::from(&utxo_input);
-
-    assert_eq!(utxo_dto.kind, UtxoInput::KIND);
-    assert_eq!(utxo_dto.transaction_id, output_id.transaction_id().to_string());
-    assert_eq!(utxo_dto.transaction_output_index, output_id.index());
-
-    let input = Input::from(utxo_input);
-    let dto = InputDto::from(&input);
-
-    assert_eq!(dto, InputDto::Utxo(utxo_dto));
-}
-
-#[test]
-fn dto_roundtrip() {
-    let utxo_input = UtxoInput::from_str(OUTPUT_ID).unwrap();
-    let utxo_dto = UtxoInputDto::from(&utxo_input);
-
-    assert_eq!(UtxoInput::try_from(utxo_dto).unwrap(), utxo_input);
-
-    let input = Input::from(utxo_input);
-    let dto = InputDto::from(&input);
-
-    assert_eq!(Input::try_from(dto).unwrap(), input);
-}
-
-#[test]
-fn dto_invalid() {
-    let dto = UtxoInputDto {
-        kind: UtxoInput::KIND,
-        transaction_id: TRANSACTION_ID_INVALID.to_string(),
-        transaction_output_index: 0,
-    };
-
-    assert!(matches!(
-        UtxoInput::try_from(dto),
-        Err(Error::InvalidField("transactionId"))
-    ));
-
-    let dto = UtxoInputDto {
-        kind: UtxoInput::KIND,
-        transaction_id: TRANSACTION_ID.to_string(),
-        transaction_output_index: 1000,
-    };
-
-    assert!(matches!(
-        UtxoInput::try_from(dto),
-        Err(Error::InvalidInputOutputIndex(InvalidBoundedU16(1000)))
-    ));
 }
 
 #[test]

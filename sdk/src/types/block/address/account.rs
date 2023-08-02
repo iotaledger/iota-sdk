@@ -37,9 +37,6 @@ impl AccountAddress {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(AccountAddress);
-
 impl FromStr for AccountAddress {
     type Err = Error;
 
@@ -60,40 +57,36 @@ impl core::fmt::Debug for AccountAddress {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::{String, ToString};
+mod dto {
+    use alloc::format;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Describes an account address.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AccountAddressDto {
+    struct AccountAddressDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub account_id: String,
+        kind: u8,
+        account_id: AccountId,
     }
 
     impl From<&AccountAddress> for AccountAddressDto {
         fn from(value: &AccountAddress) -> Self {
             Self {
                 kind: AccountAddress::KIND,
-                account_id: value.to_string(),
+                account_id: value.0,
             }
         }
     }
 
-    impl TryFrom<AccountAddressDto> for AccountAddress {
-        type Error = Error;
-
-        fn try_from(value: AccountAddressDto) -> Result<Self, Self::Error> {
-            value
-                .account_id
-                .parse::<Self>()
-                .map_err(|_| Error::InvalidField("accountId"))
+    impl From<AccountAddressDto> for AccountAddress {
+        fn from(value: AccountAddressDto) -> Self {
+            Self(value.account_id)
         }
     }
+
+    impl_serde_typed_dto!(AccountAddress, AccountAddressDto, "account address");
 }
