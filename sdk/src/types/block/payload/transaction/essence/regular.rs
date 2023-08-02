@@ -373,7 +373,7 @@ pub(crate) mod dto {
                 inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
-                allotments: value.allotments().iter().copied().collect(),
+                allotments: value.allotments().to_vec(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),

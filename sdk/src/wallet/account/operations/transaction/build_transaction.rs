@@ -13,8 +13,10 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
+        mana::Allotment,
         output::{InputsCommitment, Output},
         payload::transaction::{RegularTransactionEssence, TransactionEssence},
+        rand::output::rand_account_id,
     },
     wallet::account::{operations::transaction::TransactionOptions, Account},
 };
@@ -51,9 +53,10 @@ where
             .collect::<Vec<Output>>();
         let inputs_commitment = InputsCommitment::new(input_outputs.iter());
         let mut essence_builder =
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), inputs_commitment);
-        essence_builder = essence_builder.with_inputs(inputs_for_essence);
-        essence_builder = essence_builder.with_outputs(selected_transaction_data.outputs);
+            RegularTransactionEssence::builder(protocol_parameters.network_id(), inputs_commitment)
+                .with_inputs(inputs_for_essence)
+                .with_outputs(selected_transaction_data.outputs)
+                .add_allotment(Allotment::new(rand_account_id(), 10).unwrap());
 
         // Optional add a tagged payload
         if let Some(options) = options.into() {
