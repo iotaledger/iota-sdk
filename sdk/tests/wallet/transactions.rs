@@ -260,8 +260,6 @@ async fn conflicting_transaction() -> Result<()> {
 #[cfg(all(feature = "ledger_nano", feature = "events"))]
 #[ignore = "requires ledger nano instance"]
 async fn prepare_transaction_ledger() -> Result<()> {
-    use std::sync::{Arc, Mutex};
-
     use iota_sdk::wallet::events::{types::TransactionProgressEvent, WalletEvent, WalletEventType};
 
     let storage_path = "test-storage/wallet_address_generation_ledger";
@@ -274,15 +272,18 @@ async fn prepare_transaction_ledger() -> Result<()> {
 
     let amount = 1_000_000;
 
-    let prepared_event = Arc::new(Mutex::new(None));
-    let prepared_event_clone = prepared_event.clone();
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(1);
 
     wallet
         .listen([WalletEventType::TransactionProgress], move |event| {
             if let WalletEvent::TransactionProgress(progress) = &event.event {
-                *prepared_event_clone.lock().unwrap() = Some(progress.clone());
+                if let TransactionProgressEvent::PreparedTransaction(data) = progress {
+                    sender
+                        .try_send(data.as_ref().clone())
+                        .expect("too many PreparedTransaction events");
+                }
             } else {
-                panic!("expected TransactionProgress")
+                panic!("expected TransactionProgress event")
             }
         })
         .await;
@@ -294,16 +295,13 @@ async fn prepare_transaction_ledger() -> Result<()> {
         )
         .await?;
 
-    if let TransactionProgressEvent::PreparedTransaction(data) = prepared_event.lock().unwrap().as_ref().unwrap() {
-        assert_eq!(data.essence, tx.payload.essence().into());
-        for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {
-            assert_eq!(sign.output, input.output);
-            assert_eq!(sign.output_metadata, input.metadata);
-        }
-        assert!(data.remainder.is_none());
-    } else {
-        panic!("expected PreparedTransaction event");
+    let data = receiver.recv().await.expect("never recieved event");
+    assert_eq!(data.essence, tx.payload.essence().into());
+    for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {
+        assert_eq!(sign.output, input.output);
+        assert_eq!(sign.output_metadata, input.metadata);
     }
+    assert!(data.remainder.is_none());
 
     tear_down(storage_path)
 }
