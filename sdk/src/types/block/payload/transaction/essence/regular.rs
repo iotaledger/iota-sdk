@@ -45,7 +45,7 @@ impl RegularTransactionEssenceBuilder {
         }
     }
 
-    /// Adds creation time to a [`RegularTransactionEssenceBuilder`].
+    /// Adds creation slot to a [`RegularTransactionEssenceBuilder`].
     pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<u64>>) -> Self {
         self.creation_slot = creation_slot.into();
         self
@@ -173,7 +173,7 @@ pub struct RegularTransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
-    /// The slot at which this transaction was created by the client.
+    /// The slot index of the block in which the transaction was created.
     creation_slot: u64,
     #[packable(verify_with = verify_context_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
@@ -204,7 +204,7 @@ impl RegularTransactionEssence {
         self.network_id
     }
 
-    /// Returns the creation time of a [`RegularTransactionEssence`].
+    /// Returns the slot index of the block in which the transaction was created. [`RegularTransactionEssence`].
     pub fn creation_slot(&self) -> u64 {
         self.creation_slot
     }

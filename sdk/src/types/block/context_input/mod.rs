@@ -13,13 +13,14 @@ use crate::types::block::Error;
 /// The maximum number of context inputs of a transaction.
 pub const CONTEXT_INPUT_COUNT_MAX: u16 = 128;
 /// The range of valid numbers of context inputs of a transaction.
-pub const CONTEXT_INPUT_COUNT_RANGE: RangeInclusive<u16> = 0..=CONTEXT_INPUT_COUNT_MAX; // [1..128]
+pub const CONTEXT_INPUT_COUNT_RANGE: RangeInclusive<u16> = 0..=CONTEXT_INPUT_COUNT_MAX; // [0..128]
 
 /// A Context Input provides additional contextual information for the execution of a transaction, such as for different
 /// functionality related to accounts, commitments, or Mana rewards. A Context Input does not need to be unlocked.
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidContextInputKind)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 pub enum ContextInput {
     /// A [`RewardContextInput`].
     #[packable(tag = RewardContextInput::KIND)]
