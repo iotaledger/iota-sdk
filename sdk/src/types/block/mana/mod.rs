@@ -86,9 +86,9 @@ impl Allotments {
     #[inline(always)]
     pub fn get(&self, account_id: &AccountId) -> Option<&Allotment> {
         self.0
-            .binary_search_by(|a| a.account_id().cmp(account_id))
+            .iter()
+            .position(|a| a.account_id() == account_id)
             // PANIC: indexation is fine since the index has been found.
             .map(|index| &self.0[index])
-            .ok()
     }
 }
