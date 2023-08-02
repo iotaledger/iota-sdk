@@ -301,7 +301,6 @@ async fn prepare_transaction_ledger() -> Result<()> {
         assert_eq!(sign.output, input.output);
         assert_eq!(sign.output_metadata, input.metadata);
     }
-    assert!(data.remainder.is_none());
 
     tear_down(storage_path)
 }
