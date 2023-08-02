@@ -255,3 +255,54 @@ async fn conflicting_transaction() -> Result<()> {
     tear_down(storage_path_0).ok();
     tear_down(storage_path_1)
 }
+
+#[tokio::test]
+#[cfg(all(feature = "ledger_nano", feature = "events"))]
+#[ignore = "requires ledger nano instance"]
+async fn prepare_transaction_ledger() -> Result<()> {
+    use std::sync::{Arc, Mutex};
+
+    use iota_sdk::wallet::events::{types::TransactionProgressEvent, WalletEvent, WalletEventType};
+
+    let storage_path = "test-storage/wallet_address_generation_ledger";
+    setup(storage_path)?;
+
+    let wallet = crate::wallet::common::make_ledger_nano_wallet(storage_path, None).await?;
+
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
+
+    let amount = 1_000_000;
+    let tx = account_0
+        .send_with_params(
+            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
+            None,
+        )
+        .await?;
+
+    let prepared_event = Arc::new(Mutex::new(None));
+    let prepared_event_clone = prepared_event.clone();
+
+    wallet
+        .listen([WalletEventType::TransactionProgress], move |event| {
+            if let WalletEvent::TransactionProgress(progress) = &event.event {
+                *prepared_event_clone.lock().unwrap() = Some(progress.clone());
+            } else {
+                panic!("expected TransactionProgress")
+            }
+        })
+        .await;
+
+    if let TransactionProgressEvent::PreparedTransaction(data) = prepared_event.lock().unwrap().as_ref().unwrap() {
+        assert_eq!(data.essence, tx.payload.essence().into());
+        for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {
+            assert_eq!(sign.output, input.output);
+            assert_eq!(sign.output_metadata, input.metadata);
+        }
+        assert!(data.remainder.is_none());
+    } else {
+        panic!("expected PreparedTransaction event");
+    }
+
+    tear_down(storage_path)
+}
