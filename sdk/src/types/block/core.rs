@@ -208,7 +208,7 @@ pub struct BlockWrapper<B> {
     pub(crate) issuer_id: IssuerId,
     /// The inner block data, either [`BasicBlock`] or [`ValidationBlock`].
     pub(crate) data: B,
-    ///
+    /// The block signature, used to validate issuance capabilities.
     pub(crate) signature: Ed25519Signature,
 }
 
@@ -424,8 +424,8 @@ impl Block {
         matches!(self, Self::Basic(_))
     }
 
-    /// Gets the block as an actual [`BasicBlock`].
-    /// PANIC: do not call on a non-basic block.
+    /// Gets the block as an actual [`ValidationBlock`].
+    /// PANIC: do not call on a non-validation block.
     pub fn as_validation(&self) -> &ValidationBlock {
         if let Self::Validation(block) = self {
             block
