@@ -3,19 +3,20 @@
 
 mod allotment;
 
-/// The number of bits that a given mana value can use, excluding the sign bit.
-pub const MANA_BITS: u64 = 63;
-/// Equivalent to `2^MANA_BITS - 1`
-pub const MAX_THEORETICAL_MANA: u64 = u64::MAX >> 1;
-
+use alloc::{boxed::Box, vec::Vec};
 use core::ops::RangeInclusive;
-use std::collections::HashSet;
 
 use derive_more::Deref;
+use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::allotment::Allotment;
 use super::{output::AccountId, Error};
+
+/// The number of bits that a given mana value can use, excluding the sign bit.
+pub const MANA_BITS: u64 = 63;
+/// Equivalent to `2^MANA_BITS - 1`
+pub const MAX_THEORETICAL_MANA: u64 = u64::MAX >> 1;
 
 pub(crate) type AllotmentCount = BoundedU16<{ *Allotments::COUNT_RANGE.start() }, { *Allotments::COUNT_RANGE.end() }>;
 
