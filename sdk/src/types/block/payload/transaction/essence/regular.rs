@@ -262,6 +262,7 @@ fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) ->
         let mut seen_utxos = HashSet::new();
 
         // There must be zero or one Commitment Input.
+        /*
         if context_inputs
             .iter()
             .filter(|i| matches!(i, ContextInput::CommitmentInput(_)))
@@ -270,6 +271,7 @@ fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) ->
         {
             return Err(Error::TooManyCommitmentInput);
         }
+        */
 
         // All Rewards Inputs must reference a different Index and it must hold that: Index <= Max Inputs Count.
         let rewards: Vec<u16> = context_inputs
@@ -295,6 +297,7 @@ fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) ->
         }
 
         // All Block Issuance Credit Inputs must reference a different Account ID.
+        /*
         let bic_inputs: Vec<BlockIssuanceCreditInput> = context_inputs
             .iter()
             .filter_map(|e| match e {
@@ -307,6 +310,7 @@ fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) ->
         if set.len() != bic_inputs.len() {
             return Err(Error::DuplicateAccountIndex());
         }
+        */
     }
 
     Ok(())

@@ -49,4 +49,6 @@ pub(crate) mod dto {
             Self::new(value.index)
         }
     }
+
+    impl_serde_typed_dto!(RewardContextInput, RewardContextInputDto, "Rewards context input");
 }
