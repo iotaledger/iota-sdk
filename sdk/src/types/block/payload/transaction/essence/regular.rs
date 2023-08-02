@@ -262,16 +262,14 @@ fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) ->
         let mut seen_utxos = HashSet::new();
 
         // There must be zero or one Commitment Input.
-        /*
-        if context_inputs
-            .iter()
-            .filter(|i| matches!(i, ContextInput::CommitmentInput(_)))
-            .count()
-            > 1
-        {
-            return Err(Error::TooManyCommitmentInput);
-        }
-        */
+        // if context_inputs
+        // .iter()
+        // .filter(|i| matches!(i, ContextInput::CommitmentInput(_)))
+        // .count()
+        // > 1
+        // {
+        // return Err(Error::TooManyCommitmentInput);
+        // }
 
         // All Rewards Inputs must reference a different Index and it must hold that: Index <= Max Inputs Count.
         let rewards: Vec<u16> = context_inputs
@@ -297,20 +295,18 @@ fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) ->
         }
 
         // All Block Issuance Credit Inputs must reference a different Account ID.
-        /*
-        let bic_inputs: Vec<BlockIssuanceCreditInput> = context_inputs
-            .iter()
-            .filter_map(|e| match e {
-                ContextInput::BlockIssuanceCreditInput(bic) => Some(bic),
-                _ => None,
-            })
-            .collect();
-
-        let set: HashSet<u16> = rewards.iter().map(|bic| bic.account_index()).collect()?;
-        if set.len() != bic_inputs.len() {
-            return Err(Error::DuplicateAccountIndex());
-        }
-        */
+        // let bic_inputs: Vec<BlockIssuanceCreditInput> = context_inputs
+        // .iter()
+        // .filter_map(|e| match e {
+        // ContextInput::BlockIssuanceCreditInput(bic) => Some(bic),
+        // _ => None,
+        // })
+        // .collect();
+        //
+        // let set: HashSet<u16> = rewards.iter().map(|bic| bic.account_index()).collect()?;
+        // if set.len() != bic_inputs.len() {
+        // return Err(Error::DuplicateAccountIndex());
+        // }
     }
 
     Ok(())
