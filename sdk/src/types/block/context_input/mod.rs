@@ -3,10 +3,17 @@
 
 mod reward;
 
+use core::ops::RangeInclusive;
+
 use derive_more::From;
 
 pub use self::reward::RewardContextInput;
 use crate::types::block::Error;
+
+/// The maximum number of context inputs of a transaction.
+pub const CONTEXT_INPUT_COUNT_MAX: u16 = 128;
+/// The range of valid numbers of context inputs of a transaction.
+pub const CONTEXT_INPUT_COUNT_RANGE: RangeInclusive<u16> = 1..=CONTEXT_INPUT_COUNT_MAX; // [1..128]
 
 /// A Context Input provides additional contextual information for the execution of a transaction, such as for different
 /// functionality related to accounts, commitments, or Mana rewards. A Context Input does not need to be unlocked.

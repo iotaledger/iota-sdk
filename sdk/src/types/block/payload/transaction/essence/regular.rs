@@ -8,6 +8,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::{
     block::{
+        context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
@@ -22,11 +23,12 @@ use crate::types::{
 #[must_use]
 pub struct RegularTransactionEssenceBuilder {
     network_id: u64,
+    context_inputs: Vec<ContextInput>,
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
     payload: OptionalPayload,
-    creation_time: Option<u64>,
+    creation_slot: Option<u64>,
 }
 
 impl RegularTransactionEssenceBuilder {
@@ -34,17 +36,24 @@ impl RegularTransactionEssenceBuilder {
     pub fn new(network_id: u64, inputs_commitment: InputsCommitment) -> Self {
         Self {
             network_id,
+            context_inputs: Vec::new(),
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
             payload: OptionalPayload::default(),
-            creation_time: None,
+            creation_slot: None,
         }
     }
 
     /// Adds creation time to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_creation_time(mut self, creation_time: impl Into<Option<u64>>) -> Self {
-        self.creation_time = creation_time.into();
+    pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<u64>>) -> Self {
+        self.creation_slot = creation_slot.into();
+        self
+    }
+
+    /// Adds context inputs to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_context_inputs(mut self, context_inputs: impl Into<Vec<ContextInput>>) -> Self {
+        self.context_inputs = context_inputs.into();
         self
     }
 
@@ -93,6 +102,12 @@ impl RegularTransactionEssenceBuilder {
             }
         }
 
+        let context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount> = self
+            .context_inputs
+            .into_boxed_slice()
+            .try_into()
+            .map_err(Error::InvalidContextInputCount)?;
+
         let inputs: BoxedSlicePrefix<Input, InputCount> = self
             .inputs
             .into_boxed_slice()
@@ -113,23 +128,24 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
-        let creation_time = self.creation_time.unwrap_or_else(|| {
+        let creation_slot = self.creation_slot.unwrap_or_else(|| {
             #[cfg(feature = "std")]
-            let creation_time = std::time::SystemTime::now()
+            let creation_slot = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .expect("Time went backwards")
                 .as_nanos() as u64;
             // TODO no_std way to have a nanosecond timestamp
             // https://github.com/iotaledger/iota-sdk/issues/647
             #[cfg(not(feature = "std"))]
-            let creation_time = 0;
+            let creation_slot = 0;
 
-            creation_time
+            creation_slot
         });
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
-            creation_time,
+            creation_slot,
+            context_inputs,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
@@ -144,6 +160,8 @@ impl RegularTransactionEssenceBuilder {
     }
 }
 
+pub(crate) type ContextInputCount =
+    BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
 pub(crate) type InputCount = BoundedU16<{ *INPUT_COUNT_RANGE.start() }, { *INPUT_COUNT_RANGE.end() }>;
 pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUTPUT_COUNT_RANGE.end() }>;
 
@@ -155,8 +173,11 @@ pub struct RegularTransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
-    /// The time at which this transaction was created by the client. It's a Unix-like timestamp in nanosecond.
-    creation_time: u64,
+    /// The slot at which this transaction was created by the client.
+    creation_slot: u64,
+    #[packable(verify_with = verify_inputs_packable)]
+    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
+    context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount>,
     #[packable(verify_with = verify_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
     inputs: BoxedSlicePrefix<Input, InputCount>,
@@ -184,8 +205,13 @@ impl RegularTransactionEssence {
     }
 
     /// Returns the creation time of a [`RegularTransactionEssence`].
-    pub fn creation_time(&self) -> u64 {
-        self.creation_time
+    pub fn creation_slot(&self) -> u64 {
+        self.creation_slot
+    }
+
+    /// Returns the context inputs of a [`RegularTransactionEssence`].
+    pub fn context_inputs(&self) -> &[ContextInput] {
+        &self.context_inputs
     }
 
     /// Returns the inputs of a [`RegularTransactionEssence`].
@@ -331,7 +357,8 @@ pub(crate) mod dto {
         pub kind: u8,
         pub network_id: String,
         #[serde(with = "string")]
-        pub creation_time: u64,
+        pub creation_slot: u64,
+        pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
@@ -344,7 +371,8 @@ pub(crate) mod dto {
             Self {
                 kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
-                creation_time: value.creation_time(),
+                creation_slot: value.creation_slot(),
+                context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
@@ -373,7 +401,8 @@ pub(crate) mod dto {
                 .collect::<Result<Vec<Output>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
-                .with_creation_time(dto.creation_time)
+                .with_creation_slot(dto.creation_slot)
+                .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
                 .with_outputs(outputs);
 

@@ -9,6 +9,7 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
+use super::payload::ContextInputCount;
 use crate::types::block::{
     input::UtxoInput,
     output::{
@@ -42,6 +43,7 @@ pub enum Error {
     StorageDepositReturnExceedsOutputAmount { deposit: u64, amount: u64 },
     InsufficientStorageDepositReturnAmount { deposit: u64, required: u64 },
     InvalidContextInputKind(u8),
+    InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
@@ -165,6 +167,7 @@ impl fmt::Display for Error {
                 f,
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
+            Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidEssenceKind(k) => write!(f, "invalid essence kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
