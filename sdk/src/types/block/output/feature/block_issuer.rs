@@ -7,10 +7,8 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
 use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
 
-const KEY_COUNT_MIN: u8 = 1;
-const KEY_COUNT_MAX: u8 = 128;
-
-pub(crate) type PublicKeyCount = BoundedU8<KEY_COUNT_MIN, KEY_COUNT_MAX>;
+pub(crate) type PublicKeyCount =
+    BoundedU8<{ BlockIssuerFeature::KEY_COUNT_MIN }, { BlockIssuerFeature::KEY_COUNT_MAX }>;
 
 /// This feature defines the public keys with which a signature to burn Mana from
 /// the containing account's Block Issuance Credit can be verified.
@@ -27,6 +25,10 @@ pub struct BlockIssuerFeature {
 impl BlockIssuerFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of an [`BlockIssuerFeature`].
     pub const KIND: u8 = 4;
+    /// Minimum number of [`PublicKey`]s in an [`BlockIssuerFeature`].
+    const KEY_COUNT_MIN: u8 = 1;
+    /// Maximum number of [`PublicKey`]s in an [`BlockIssuerFeature`].
+    const KEY_COUNT_MAX: u8 = 128;
 
     /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]
@@ -50,7 +52,7 @@ impl BlockIssuerFeature {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::BlockIssuerFeature;
@@ -65,11 +67,11 @@ pub(crate) mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct BlockIssuerFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(with = "string")]
-        pub expiry_slot: u64,
+        expiry_slot: u64,
         #[serde(skip_serializing_if = "alloc::vec::Vec::is_empty", default)]
-        pub keys: alloc::vec::Vec<PublicKeyDto>,
+        keys: alloc::vec::Vec<PublicKeyDto>,
     }
 
     impl From<&BlockIssuerFeature> for BlockIssuerFeatureDto {
