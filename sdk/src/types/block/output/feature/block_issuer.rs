@@ -65,6 +65,7 @@ mod dto {
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct BlockIssuerFeatureDto {
         #[serde(rename = "type")]
         kind: u8,
