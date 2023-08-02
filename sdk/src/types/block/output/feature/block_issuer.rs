@@ -23,11 +23,11 @@ pub struct BlockIssuerFeature {
 }
 
 impl BlockIssuerFeature {
-    /// The [`Feature`](crate::types::block::output::Feature) kind of an [`BlockIssuerFeature`].
+    /// The [`Feature`](crate::types::block::output::Feature) kind of a [`BlockIssuerFeature`].
     pub const KIND: u8 = 4;
-    /// Minimum number of [`PublicKey`]s in an [`BlockIssuerFeature`].
+    /// Minimum number of [`PublicKey`]s in a [`BlockIssuerFeature`].
     const KEY_COUNT_MIN: u8 = 1;
-    /// Maximum number of [`PublicKey`]s in an [`BlockIssuerFeature`].
+    /// Maximum number of [`PublicKey`]s in a [`BlockIssuerFeature`].
     const KEY_COUNT_MAX: u8 = 128;
 
     /// Creates a new [`BlockIssuerFeature`].
