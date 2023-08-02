@@ -9,7 +9,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 use crate::types::{
     block::{
         input::{Input, INPUT_COUNT_RANGE},
-        mana::{Allotment, ALLOTMENT_COUNT_RANGE},
+        mana::{Allotment, Allotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
@@ -70,8 +70,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Add allotments to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_allotments(mut self, allotments: impl Into<Vec<Allotment>>) -> Self {
-        self.allotments = allotments.into();
+    pub fn with_allotments(mut self, allotments: impl IntoIterator<Item = Allotment>) -> Self {
+        self.allotments = allotments.into_iter().collect();
         self
     }
 
@@ -126,15 +126,7 @@ impl RegularTransactionEssenceBuilder {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
-        let allotments: BoxedSlicePrefix<Allotment, AllotmentCount> = self
-            .allotments
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidAllotmentCount)?;
-
-        if let Some(protocol_parameters) = params.protocol_parameters() {
-            verify_allotments::<true>(&allotments, protocol_parameters)?;
-        }
+        let allotments = Allotments::from_vec(self.allotments)?;
 
         verify_payload::<true>(&self.payload)?;
 
@@ -172,7 +164,6 @@ impl RegularTransactionEssenceBuilder {
 
 pub(crate) type InputCount = BoundedU16<{ *INPUT_COUNT_RANGE.start() }, { *INPUT_COUNT_RANGE.end() }>;
 pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUTPUT_COUNT_RANGE.end() }>;
-pub(crate) type AllotmentCount = BoundedU16<{ *ALLOTMENT_COUNT_RANGE.start() }, { *ALLOTMENT_COUNT_RANGE.end() }>;
 
 /// A transaction regular essence consuming inputs, creating outputs and carrying an optional payload.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
@@ -192,9 +183,7 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_outputs)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
-    #[packable(verify_with = verify_allotments)]
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidAllotmentCount(p.into())))]
-    allotments: BoxedSlicePrefix<Allotment, AllotmentCount>,
+    allotments: Allotments,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
 }
@@ -325,31 +314,6 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
     Ok(())
 }
 
-fn verify_allotments<const VERIFY: bool>(allotments: &[Allotment], _visitor: &ProtocolParameters) -> Result<(), Error> {
-    if VERIFY {
-        let mut mana: u64;
-        let mut mana_sum: u64 = 0;
-        let mut unique_ids = HashSet::with_capacity(allotments.len());
-        for allotment in allotments.iter() {
-            mana = allotment.mana();
-            mana_sum = mana_sum
-                .checked_add(mana)
-                .ok_or(Error::InvalidAllotmentManaSum(mana_sum as u128 + mana as u128))?;
-
-            // TODO: compare with `max_mana_supply` from visitor once available
-            // if mana_sum > visitor.max_mana_supply() {
-            //     return Err(Error::InvalidAllotmentManaSum(mana_sum as u128));
-            // }
-
-            if !unique_ids.insert(*allotment.account_id()) {
-                return Err(Error::DuplicateAllotment(*allotment.account_id()));
-            }
-        }
-    }
-
-    Ok(())
-}
-
 fn verify_payload<const VERIFY: bool>(payload: &OptionalPayload) -> Result<(), Error> {
     if VERIFY {
         match &payload.0 {
@@ -379,9 +343,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{
-            input::dto::InputDto, mana::dto::AllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error,
-        },
+        block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -396,7 +358,7 @@ pub(crate) mod dto {
         pub inputs: Vec<InputDto>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
-        pub allotments: Vec<AllotmentDto>,
+        pub allotments: Vec<Allotment>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -410,7 +372,7 @@ pub(crate) mod dto {
                 inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
-                allotments: value.allotments().iter().map(Into::into).collect::<Vec<_>>(),
+                allotments: value.allotments().iter().copied().collect(),
                 payload: match value.payload() {
                     Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
                     Some(_) => unimplemented!(),
@@ -439,17 +401,12 @@ pub(crate) mod dto {
                 .into_iter()
                 .map(|o| Output::try_from_dto_with_params(o, &params))
                 .collect::<Result<Vec<Output>, Error>>()?;
-            let allotments = dto
-                .allotments
-                .into_iter()
-                .map(|a| Allotment::try_from_dto_with_params(a, &params))
-                .collect::<Result<Vec<Allotment>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
                 .with_creation_time(dto.creation_time)
                 .with_inputs(inputs)
                 .with_outputs(outputs)
-                .with_allotments(allotments);
+                .with_allotments(dto.allotments);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {

@@ -9,13 +9,14 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
+use super::mana::AllotmentCount;
 use crate::types::block::{
     input::UtxoInput,
     output::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
-    payload::{AllotmentCount, InputCount, OutputCount, TagLength, TaggedDataLength},
+    payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -53,6 +54,7 @@ pub enum Error {
     InvalidBech32Hrp(String),
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
+    InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
@@ -180,9 +182,10 @@ impl fmt::Display for Error {
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
-            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length {length}"),
+            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
+            Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
-                write!(f, "invalid metadata feature length {length}")
+                write!(f, "invalid metadata feature length: {length}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),

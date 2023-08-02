@@ -9,7 +9,7 @@ mod transaction_id;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
 
-pub(crate) use self::essence::{AllotmentCount, InputCount, OutputCount};
+pub(crate) use self::essence::{InputCount, OutputCount};
 pub use self::{
     essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
     transaction_id::TransactionId,

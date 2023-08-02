@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::ops::RangeInclusive;
-
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -10,23 +8,25 @@ use packable::{
     Packable,
 };
 
+use super::MAX_THEORETICAL_MANA;
 use crate::types::block::{output::AccountId, Error};
 
-/// The maximum number of allotments of a transaction.
-pub const ALLOTMENT_COUNT_MAX: u16 = 128;
-/// The range of valid numbers of allotments of a transaction.
-pub const ALLOTMENT_COUNT_RANGE: RangeInclusive<u16> = 1..=ALLOTMENT_COUNT_MAX; // [1..128]
-
-/// TODO
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// An allotment of Mana which will be added upon commitment of the slot in which the containing transaction was issued,
+/// in the form of Block Issuance Credits to the account.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(rename_all = "camelCase"))]
 pub struct Allotment {
-    account_id: AccountId,
-    mana: u64,
+    pub(crate) account_id: AccountId,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) mana: u64,
 }
 
 impl Allotment {
-    pub fn new(account_id: AccountId, mana: u64) -> Self {
-        Self { account_id, mana }
+    pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
+        if mana > MAX_THEORETICAL_MANA {
+            return Err(Error::InvalidManaValue(mana));
+        }
+        Ok(Self { account_id, mana })
     }
 
     pub fn account_id(&self) -> &AccountId {
@@ -58,36 +58,37 @@ impl Packable for Allotment {
     }
 }
 
-pub mod dto {
-    use serde::{Deserialize, Serialize};
+#[cfg(feature = "serde")]
+mod dto {
+    use serde::Deserialize;
 
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
+    use crate::utils::serde::string;
 
-    /// TODO
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct AllotmentDto {
-        pub account_id: AccountId,
-        #[serde(with = "crate::utils::serde::string")]
-        pub mana: u64,
-    }
-
-    impl From<&Allotment> for AllotmentDto {
-        fn from(value: &Allotment) -> Self {
-            Self {
-                account_id: value.account_id,
-                mana: value.mana,
+    impl<'de> Deserialize<'de> for Allotment {
+        fn deserialize<D>(d: D) -> Result<Self, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            #[derive(Deserialize)]
+            #[serde(rename_all = "camelCase")]
+            struct AllotmentDto {
+                account_id: AccountId,
+                #[cfg_attr(feature = "serde", serde(with = "string"))]
+                mana: u64,
             }
-        }
-    }
 
-    impl TryFromDto for Allotment {
-        type Dto = AllotmentDto;
-        type Error = Error;
+            impl TryFrom<AllotmentDto> for Allotment {
+                type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, _params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            // TODO: we may want to validate the mana amount?
-            Ok(Self::new(dto.account_id, dto.mana))
+                fn try_from(value: AllotmentDto) -> Result<Self, Self::Error> {
+                    Self::new(value.account_id, value.mana)
+                }
+            }
+
+            AllotmentDto::deserialize(d)?
+                .try_into()
+                .map_err(serde::de::Error::custom)
         }
     }
 }
