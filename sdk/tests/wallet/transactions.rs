@@ -273,12 +273,6 @@ async fn prepare_transaction_ledger() -> Result<()> {
     let account_1 = wallet.create_account().finish().await?;
 
     let amount = 1_000_000;
-    let tx = account_0
-        .send_with_params(
-            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
-            None,
-        )
-        .await?;
 
     let prepared_event = Arc::new(Mutex::new(None));
     let prepared_event_clone = prepared_event.clone();
@@ -292,6 +286,13 @@ async fn prepare_transaction_ledger() -> Result<()> {
             }
         })
         .await;
+
+    let tx = account_0
+        .send_with_params(
+            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
+            None,
+        )
+        .await?;
 
     if let TransactionProgressEvent::PreparedTransaction(data) = prepared_event.lock().unwrap().as_ref().unwrap() {
         assert_eq!(data.essence, tx.payload.essence().into());
