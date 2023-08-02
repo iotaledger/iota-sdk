@@ -259,8 +259,6 @@ fn verify_context_inputs_packable<const VERIFY: bool>(
 
 fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
     if VERIFY {
-        let mut seen_utxos = HashSet::new();
-
         // There must be zero or one Commitment Input.
         // if context_inputs
         // .iter()
