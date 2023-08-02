@@ -9,7 +9,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 use crate::types::{
     block::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
-        input::{Input, INPUT_COUNT_RANGE},
+        input::{Input, INPUT_COUNT_RANGE, INPUT_COUNT_MAX},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
@@ -175,7 +175,7 @@ pub struct RegularTransactionEssence {
     network_id: u64,
     /// The slot at which this transaction was created by the client.
     creation_slot: u64,
-    #[packable(verify_with = verify_inputs_packable)]
+    #[packable(verify_with = verify_context_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
     context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount>,
     #[packable(verify_with = verify_inputs_packable)]
@@ -244,6 +244,51 @@ fn verify_network_id<const VERIFY: bool>(network_id: &u64, visitor: &ProtocolPar
                 expected,
                 actual: *network_id,
             });
+        }
+    }
+
+    Ok(())
+}
+
+fn verify_context_inputs_packable<const VERIFY: bool>(context_inputs: &[ContextInput], _visitor: &ProtocolParameters) -> Result<(), Error> {
+    verify_context_inputs::<VERIFY>(context_inputs)
+}
+
+fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
+    if VERIFY {
+        let mut seen_utxos = HashSet::new();
+
+        // There must be zero or one Commitment Input.  
+        if context_inputs.iter().filter(|i| matches!(i, ContextInput::CommitmentInput(_))).count() > 1 {
+            return Err(Error::TooManyCommitmentInput);
+        }
+
+        // All Rewards Inputs must reference a different Index and it must hold that: Index <= Max Inputs Count.
+        let rewards: Vec<u16> = context_inputs.iter().filter_map(|e| match e {
+            ContextInput::Reward(r) => Some(r.index()),
+            _ => None,
+        }).collect();
+
+        let set: HashSet<u16> = rewards.iter().map(|i| {
+            if i <= &INPUT_COUNT_MAX {
+                Ok(i)
+            } else {
+                return Err(Error::InvalidAccountIndex(*i));
+            }
+        }).collect()?;
+        if set.len() != rewards.len() {
+            return Err(Error::DuplicateIndex());
+        }
+
+        // All Block Issuance Credit Inputs must reference a different Account ID.
+        let bic_inputs: Vec<BlockIssuanceCreditInput> = context_inputs.iter().filter_map(|e| match e {
+            ContextInput::BlockIssuanceCreditInput(bic) => Some(bic),
+            _ => None,
+        }).collect();
+
+        let set: HashSet<u16> = rewards.iter().map(|bic| bic.account_index()).collect()?;
+        if set.len() != bic_inputs.len() {
+            return Err(Error::DuplicateAccountIndex());
         }
     }
 
