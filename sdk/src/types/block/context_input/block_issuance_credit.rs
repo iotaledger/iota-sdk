@@ -5,7 +5,7 @@ use derive_more::{Display, From};
 
 use crate::types::block::output::AccountId;
 
-/// A Block Issuance Credit Input (BIC Input) provides the VM with context for the value of
+/// A Block Issuance Credit (BIC) Input provides the VM with context for the value of
 /// the BIC vector of a specific slot.
 #[derive(Clone, Copy, Debug, Display, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct BlockIssuanceCreditContextInput(AccountId);
