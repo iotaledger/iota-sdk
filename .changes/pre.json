@@ -72,6 +72,7 @@
     ".changes/incomingtransactions-type.md",
     ".changes/input-signing-data.md",
     ".changes/install.md",
+    ".changes/ledger-nano-events.md",
     ".changes/ledger-nano-prompt.md",
     ".changes/ledger-status-locked.md",
     ".changes/managerOptions.md",
