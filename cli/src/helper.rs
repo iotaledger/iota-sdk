@@ -136,12 +136,9 @@ pub async fn generate_mnemonic(
     let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
 
-    let file_path = output_file_name
-        .clone()
-        .unwrap_or(DEFAULT_MNEMONIC_FILE_PATH.to_string());
-
-    let selected_choice = match (output_file_name, output_stdout) {
-        (None, None) => {
+    let selected_choice = match (&output_file_name, &output_stdout) {
+        // Undecided, we give the user a choice
+        (None, None) | (None, Some(false)) => {
             let choices = [
                 "Write it to the console only",
                 "Write it to a file only",
@@ -157,7 +154,7 @@ pub async fn generate_mnemonic(
         // Only console
         (None, Some(true)) => 0,
         // Only file
-        (Some(_), Some(false)) | (Some(_), None) | (None, Some(false)) => 1,
+        (Some(_), Some(false)) | (Some(_), None) => 1,
         // File and console
         (Some(_), Some(true)) => 2,
     };
@@ -167,6 +164,8 @@ pub async fn generate_mnemonic(
         println!("{}", mnemonic.as_ref());
     }
     if [1, 2].contains(&selected_choice) {
+        let file_path = output_file_name.unwrap_or(DEFAULT_MNEMONIC_FILE_PATH.to_string());
+
         write_mnemonic_to_file(&file_path, &mnemonic).await?;
         println_log_info!("Mnemonic has been written to '{file_path}'.");
     }
