@@ -10,7 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            protocol::slot_index,
+            protocol::calc_slot_index,
             Block,
         },
         TryFromDto,
@@ -44,7 +44,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             slot_duration_in_seconds,
         } => {
             let block = Block::try_from_dto(block)?;
-            Response::BlockId(block.hash().with_slot_index(slot_index(
+            Response::BlockId(block.hash().with_slot_index(calc_slot_index(
                 block.issuing_time(),
                 genesis_unix_timestamp,
                 slot_duration_in_seconds,

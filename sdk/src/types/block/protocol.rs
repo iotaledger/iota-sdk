@@ -136,7 +136,7 @@ impl ProtocolParameters {
     }
 
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
-        slot_index(
+        calc_slot_index(
             timestamp,
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
@@ -148,7 +148,7 @@ impl ProtocolParameters {
     }
 }
 
-pub fn slot_index(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
+pub fn calc_slot_index(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
     (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
 }
 
