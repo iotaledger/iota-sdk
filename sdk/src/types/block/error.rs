@@ -9,6 +9,7 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
+use super::mana::AllotmentCount;
 use crate::types::block::{
     input::UtxoInput,
     output::{
@@ -30,6 +31,7 @@ pub enum Error {
     CreatedAmountOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
+    DuplicateAllotment(AccountId),
     DuplicateSignatureUnlock(u16),
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
@@ -55,6 +57,7 @@ pub enum Error {
     InvalidBech32Hrp(String),
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
+    InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
@@ -62,6 +65,7 @@ pub enum Error {
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
     InvalidOutputKind(u8),
+    InvalidAllotmentCount(<AllotmentCount as TryFrom<usize>>::Error),
     // TODO this would now need to be generic, not sure if possible.
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
@@ -81,6 +85,7 @@ pub enum Error {
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
+    InvalidAllotmentManaSum(u128),
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
@@ -125,6 +130,7 @@ impl fmt::Display for Error {
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
+            Self::DuplicateAllotment(id) => write!(f, "duplicate allotment, account ID: {id}"),
             Self::DuplicateSignatureUnlock(index) => {
                 write!(f, "duplicate signature unlock at index: {index}")
             }
@@ -181,9 +187,10 @@ impl fmt::Display for Error {
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
-            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length {length}"),
+            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
+            Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
-                write!(f, "invalid metadata feature length {length}")
+                write!(f, "invalid metadata feature length: {length}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
@@ -191,6 +198,7 @@ impl fmt::Display for Error {
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
             Self::InvalidOutputKind(k) => write!(f, "invalid output kind: {k}"),
+            Self::InvalidAllotmentCount(count) => write!(f, "invalid allotment count: {count}"),
             Self::InvalidParentCount => {
                 write!(f, "invalid parents count")
             }
@@ -219,6 +227,7 @@ impl fmt::Display for Error {
             Self::InvalidTransactionNativeTokensCount(count) => {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
+            Self::InvalidAllotmentManaSum(value) => write!(f, "invalid allotment mana sum: {value}"),
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {
