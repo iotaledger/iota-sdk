@@ -68,7 +68,7 @@ mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct BlockIssuerFeatureDto {
+    struct BlockIssuerFeatureDto {
         #[serde(rename = "type")]
         kind: u8,
         #[serde(with = "string")]
