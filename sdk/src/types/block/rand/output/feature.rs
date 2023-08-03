@@ -12,7 +12,7 @@ use crate::types::block::{
         address::rand_address,
         bytes::rand_bytes,
         number::{rand_number, rand_number_range},
-        public_key::{rand_public_key, rand_public_keys},
+        public_key::rand_public_keys,
     },
 };
 
