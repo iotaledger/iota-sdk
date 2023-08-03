@@ -9,6 +9,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 use crate::types::{
     block::{
         input::{Input, INPUT_COUNT_RANGE},
+        mana::{Allotment, Allotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
@@ -25,6 +26,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
+    allotments: Vec<Allotment>,
     payload: OptionalPayload,
     creation_time: Option<u64>,
 }
@@ -37,6 +39,7 @@ impl RegularTransactionEssenceBuilder {
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
+            allotments: Vec::new(),
             payload: OptionalPayload::default(),
             creation_time: None,
         }
@@ -66,9 +69,21 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
+    /// Add allotments to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_allotments(mut self, allotments: impl IntoIterator<Item = Allotment>) -> Self {
+        self.allotments = allotments.into_iter().collect();
+        self
+    }
+
     /// Add an output to a [`RegularTransactionEssenceBuilder`].
     pub fn add_output(mut self, output: Output) -> Self {
         self.outputs.push(output);
+        self
+    }
+
+    /// Add an allotment to a [`RegularTransactionEssenceBuilder`].
+    pub fn add_allotment(mut self, allotment: Allotment) -> Self {
+        self.allotments.push(allotment);
         self
     }
 
@@ -111,6 +126,8 @@ impl RegularTransactionEssenceBuilder {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
+        let allotments = Allotments::from_vec(self.allotments)?;
+
         verify_payload::<true>(&self.payload)?;
 
         let creation_time = self.creation_time.unwrap_or_else(|| {
@@ -133,6 +150,7 @@ impl RegularTransactionEssenceBuilder {
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
+            allotments,
             payload: self.payload,
         })
     }
@@ -165,6 +183,7 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_outputs)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
+    allotments: Allotments,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
 }
@@ -201,6 +220,11 @@ impl RegularTransactionEssence {
     /// Returns the outputs of a [`RegularTransactionEssence`].
     pub fn outputs(&self) -> &[Output] {
         &self.outputs
+    }
+
+    /// Returns the allotments of a [`RegularTransactionEssence`].
+    pub fn allotments(&self) -> &[Allotment] {
+        &self.allotments
     }
 
     /// Returns the optional payload of a [`RegularTransactionEssence`].
@@ -335,6 +359,7 @@ pub(crate) mod dto {
         pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
+        pub allotments: Vec<Allotment>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -348,6 +373,7 @@ pub(crate) mod dto {
                 inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
+                allotments: value.allotments().to_vec(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
@@ -375,7 +401,8 @@ pub(crate) mod dto {
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
                 .with_creation_time(dto.creation_time)
                 .with_inputs(dto.inputs)
-                .with_outputs(outputs);
+                .with_outputs(outputs)
+                .with_allotments(dto.allotments);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
