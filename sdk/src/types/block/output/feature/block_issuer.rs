@@ -10,8 +10,8 @@ use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
 pub(crate) type PublicKeyCount =
     BoundedU8<{ BlockIssuerFeature::KEY_COUNT_MIN }, { BlockIssuerFeature::KEY_COUNT_MAX }>;
 
-/// This feature defines the public keys with which a signature to burn Mana from
-/// the containing account's Block Issuance Credit can be verified.
+/// This feature defines the public keys with which a signature from the containing
+/// account's Block Issuance Credit can be verified in order to burn Mana.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
 #[packable(unpack_error = Error)]
 pub struct BlockIssuerFeature {
