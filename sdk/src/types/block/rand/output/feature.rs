@@ -12,7 +12,7 @@ use crate::types::block::{
         address::rand_address,
         bytes::rand_bytes,
         number::{rand_number, rand_number_range},
-        public_key::rand_public_key,
+        public_key::{rand_public_key, rand_public_keys},
     },
 };
 
@@ -40,7 +40,7 @@ pub fn rand_tag_feature() -> TagFeature {
 
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
-    BlockIssuerFeature::new(rand_number::<u64>(), vec![rand_public_key()]).unwrap()
+    BlockIssuerFeature::new(rand_number::<u64>(), rand_public_keys(1)).unwrap()
 }
 
 /// Generates a random [`StakingFeature`].

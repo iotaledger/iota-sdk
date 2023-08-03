@@ -53,6 +53,7 @@ impl BlockIssuerFeature {
 }
 
 mod dto {
+    use alloc::vec::Vec;
     use serde::{Deserialize, Serialize};
 
     use super::BlockIssuerFeature;
@@ -71,8 +72,8 @@ mod dto {
         kind: u8,
         #[serde(with = "string")]
         expiry_slot: u64,
-        #[serde(skip_serializing_if = "alloc::vec::Vec::is_empty", default)]
-        keys: alloc::vec::Vec<PublicKeyDto>,
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        keys: Vec<PublicKeyDto>,
     }
 
     impl From<&BlockIssuerFeature> for BlockIssuerFeatureDto {
@@ -93,7 +94,7 @@ mod dto {
                 .keys
                 .into_iter()
                 .map(PublicKey::try_from)
-                .collect::<Result<alloc::vec::Vec<PublicKey>, Error>>()?;
+                .collect::<Result<Vec<PublicKey>, Error>>()?;
 
             Self::new(value.expiry_slot, keys)
         }

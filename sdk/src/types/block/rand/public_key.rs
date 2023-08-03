@@ -13,3 +13,10 @@ pub fn rand_ed25519_public_key() -> Ed25519PublicKey {
 pub fn rand_public_key() -> PublicKey {
     rand_ed25519_public_key().into()
 }
+
+/// Generates a vector of random valid public keys of a given length.
+pub fn rand_public_keys(len: usize) -> Vec<PublicKey> {
+    let mut public_keys = (0..len).map(|_| rand_public_key()).collect::<Vec<_>>();
+    public_keys.sort_by(|a, b| a.cmp(b));
+    public_keys
+}
