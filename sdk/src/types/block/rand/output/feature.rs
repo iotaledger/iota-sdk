@@ -44,7 +44,9 @@ pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
         rand_number::<u64>(),
         rand_public_keys(rand_number_range(
             BlockIssuerFeature::KEY_COUNT_MIN as usize..=BlockIssuerFeature::KEY_COUNT_MAX as usize,
-        )),
+        ))
+        .into_iter()
+        .collect::<Vec<_>>(),
     )
     .unwrap()
 }
