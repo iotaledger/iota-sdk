@@ -21,26 +21,26 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 pub struct ProtocolParameters {
     // The version of the protocol running.
     #[cfg_attr(feature = "serde", serde(rename = "version"))]
-    pub(crate) protocol_version: u8,
+    protocol_version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
-    pub(crate) network_name: StringPrefix<u8>,
+    network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
-    pub(crate) bech32_hrp: Hrp,
+    bech32_hrp: Hrp,
     // The below max depth parameter of the network.
-    pub(crate) below_max_depth: u8,
+    below_max_depth: u8,
     // The rent structure used by given node/network.
-    pub(crate) rent_structure: RentStructure,
+    rent_structure: RentStructure,
     // TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) token_supply: u64,
+    token_supply: u64,
     // Genesis timestamp at which the slots start to count.
     #[cfg_attr(feature = "serde", serde(alias = "genesisUnixTimestamp"))]
-    pub(crate) genesis_unix_timestamp: u32,
+    genesis_unix_timestamp: u32,
     // Duration of each slot in seconds.
     #[cfg_attr(feature = "serde", serde(alias = "slotDurationInSeconds"))]
-    pub(crate) slot_duration_in_seconds: u8,
+    slot_duration_in_seconds: u8,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
