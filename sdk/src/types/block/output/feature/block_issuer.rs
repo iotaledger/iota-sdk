@@ -54,6 +54,7 @@ impl BlockIssuerFeature {
 
 mod dto {
     use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::BlockIssuerFeature;

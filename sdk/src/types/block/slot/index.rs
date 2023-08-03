@@ -1,8 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::utils::serde::string;
 use derive_more::{Deref, Display, From};
+
+use crate::utils::serde::string;
 
 /// Timeline is divided into slots, and each slot has a corresponding slot index.
 /// To calculate the slot index of a timestamp, `genesisTimestamp` and the duration of a slot are needed.
