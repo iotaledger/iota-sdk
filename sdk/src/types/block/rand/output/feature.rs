@@ -40,7 +40,7 @@ pub fn rand_tag_feature() -> TagFeature {
 
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
-    BlockIssuerFeature::new(rand_number::<u64>(), rand_public_keys(1)).unwrap()
+    BlockIssuerFeature::new(rand_number::<u64>(), rand_public_keys(rand_number_range(BlockIssuerFeature::KEY_COUNT_MIN..=BlockIssuerFeature::KEY_COUNT_MAX))).unwrap()
 }
 
 /// Generates a random [`StakingFeature`].
