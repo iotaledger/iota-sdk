@@ -19,7 +19,7 @@ impl ClientInner {
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
     ) -> Result<Block> {
-        // Finish block without doing PoW.
+        // Use tips as strong parents if none are provided.
         let strong_parents = match strong_parents {
             Some(strong_parents) => strong_parents,
             None => StrongParents::from_vec(self.get_tips().await?)?,

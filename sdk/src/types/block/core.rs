@@ -210,7 +210,7 @@ pub struct BlockWrapper<B> {
     pub(crate) issuer_id: IssuerId,
     /// The inner block data, either [`BasicBlock`] or [`ValidationBlock`].
     pub(crate) data: B,
-    ///
+    /// The block signature, used to validate issuance capabilities.
     pub(crate) signature: Ed25519Signature,
 }
 
@@ -450,8 +450,8 @@ impl Block {
         matches!(self, Self::Basic(_))
     }
 
-    /// Gets the block as an actual [`BasicBlock`].
-    /// PANIC: do not call on a non-basic block.
+    /// Gets the block as an actual [`ValidationBlock`].
+    /// PANIC: do not call on a non-validation block.
     pub fn as_validation(&self) -> &ValidationBlock {
         if let Self::Validation(block) = self {
             block
@@ -634,8 +634,7 @@ pub(crate) mod dto {
         pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
-        #[serde(flatten)]
-        pub data: BlockDataDto,
+        pub block: BlockDataDto,
         pub signature: Ed25519Signature,
     }
 
@@ -649,7 +648,7 @@ pub(crate) mod dto {
                     slot_commitment_id: b.slot_commitment_id(),
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
-                    data: (&b.data).into(),
+                    block: (&b.data).into(),
                     signature: *b.signature(),
                 },
                 Block::Validation(b) => Self {
@@ -659,7 +658,7 @@ pub(crate) mod dto {
                     slot_commitment_id: b.slot_commitment_id(),
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
-                    data: (&b.data).into(),
+                    block: (&b.data).into(),
                     signature: *b.signature(),
                 },
             }
@@ -671,7 +670,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            match dto.data {
+            match dto.block {
                 BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
                     dto.network_id,
                     dto.issuing_time,
@@ -679,7 +678,7 @@ pub(crate) mod dto {
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     BasicBlockData::try_from_dto_with_params_inner(b, params)?,
-                    Ed25519Signature::try_from(dto.signature)?,
+                    dto.signature,
                 )
                 .with_protocol_version(dto.protocol_version)
                 .finish(),
@@ -690,7 +689,7 @@ pub(crate) mod dto {
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
-                    Ed25519Signature::try_from(dto.signature)?,
+                    dto.signature,
                 )
                 .with_protocol_version(dto.protocol_version)
                 .finish(),

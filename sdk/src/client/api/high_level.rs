@@ -274,7 +274,6 @@ impl Client {
             *tip = *block_id;
         }
 
-        // Get block if we use remote Pow, because the node will change parents and nonce.
         let block = self.get_block(block_id).await?;
 
         let promote_block = self

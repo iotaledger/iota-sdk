@@ -74,11 +74,11 @@ use crate::types::{
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
-/// The range of valid numbers of outputs of a transaction .
+/// The range of valid numbers of outputs of a transaction.
 pub const OUTPUT_COUNT_RANGE: RangeInclusive<u16> = 1..=OUTPUT_COUNT_MAX; // [1..128]
 /// The maximum index of outputs of a transaction.
 pub const OUTPUT_INDEX_MAX: u16 = OUTPUT_COUNT_MAX - 1; // 127
-/// The range of valid indices of outputs of a transaction .
+/// The range of valid indices of outputs of a transaction.
 pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0..127]
 
 #[derive(Copy, Clone)]

@@ -21,12 +21,14 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
+        mana::Allotment,
         output::{AccountId, InputsCommitment, NftId},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
         },
         protocol::protocol_parameters,
+        rand::output::rand_account_id,
         semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -382,6 +384,7 @@ async fn all_combined() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
