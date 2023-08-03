@@ -69,14 +69,15 @@ class UTXOInput extends Input {
      */
     static fromOutputId(outputId: OutputId): UTXOInput {
         const source = outputId.startsWith("0x") ? outputId.substring(2) : outputId;
-        const inputHexLe = source.slice(64);
-        const chunks = [inputHexLe.substring(0, 2), inputHexLe.substring(2)];
-        const separated = chunks.map(n => parseInt(n, 16))
-        const buf = Uint8Array.from(separated).buffer;
-        const view = new DataView(buf);
+        const indexHexLe = source.slice(64);
+        const chunks = [indexHexLe.substring(0, 2), indexHexLe.substring(2)];
+        const buffer = Uint8Array.from(
+            chunks.map(n => parseInt(n, 16))
+        ).buffer;
+        const indexData = new DataView(buffer);
 
         const transactionId = source.substring(0, source.length - 4);
-        const transactionOutputIndex = view.getUint16(0, true);
+        const transactionOutputIndex = indexData.getUint16(0, true);
 
         return new UTXOInput(`0x${transactionId}`, transactionOutputIndex);
     }
