@@ -12,6 +12,7 @@ use std::collections::HashMap;
 
 use anymap::Map;
 use async_trait::async_trait;
+pub use chrysalis::migrate_db_from_chrysalis_to_stardust;
 use once_cell::sync::Lazy;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 

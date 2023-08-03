@@ -9,6 +9,9 @@ mod backup_restore;
 mod balance;
 mod bech32_hrp_validation;
 mod burn_outputs;
+#[cfg(not(target_os = "windows"))]
+#[cfg(feature = "rocksdb")]
+mod chrysalis_db;
 mod claim_outputs;
 mod common;
 mod consolidation;
