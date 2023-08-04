@@ -28,7 +28,13 @@ async fn main() -> Result<()> {
 
     // Create and send the block with the custom payload.
     let block = client
-        .finish_block_builder(None, Some(Payload::from(tagged_data_payload)))
+        .finish_basic_block_builder(
+            todo!("issuer id"),
+            todo!("block signature"),
+            todo!("issuing time"),
+            None,
+            Some(Payload::from(tagged_data_payload)),
+        )
         .await?;
 
     println!("{block:#?}");

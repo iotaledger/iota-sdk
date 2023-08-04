@@ -19,20 +19,25 @@ use crate::types::{api::plugins::participation::error::Error, block::impl_id};
 /// Participation tag.
 pub const PARTICIPATION_TAG: &str = "PARTICIPATE";
 
-/// Possible participation event types.
-#[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
-    serde(untagged)
-)]
-#[repr(u8)]
-pub enum ParticipationEventType {
-    /// Voting event.
-    Voting = 0,
-    /// Staking event.
-    Staking = 1,
+// This is needed because of the serde_repr macro generation >:(
+#[allow(non_camel_case_types)]
+mod participation_event_type {
+    /// Possible participation event types.
+    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
+        serde(untagged)
+    )]
+    #[repr(u8)]
+    pub enum ParticipationEventType {
+        /// Voting event.
+        Voting = 0,
+        /// Staking event.
+        Staking = 1,
+    }
 }
+pub use participation_event_type::*;
 
 /// Wrapper interface containing a participation event ID and the corresponding event data.
 #[derive(Debug, Clone, Eq, PartialEq)]
