@@ -23,40 +23,43 @@ use crate::{
 
 pub async fn migrate_db_from_chrysalis_to_stardust<P: AsRef<Path>>(
     chrysalis_storage_path: P,
-    _stardust_storage_path: P,
     password: Option<&str>,
 ) -> Result<(), Error> {
+    let chrysalis_storage_path: &Path = chrysalis_storage_path.as_ref();
+    // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
+    let chrysalis_storage_path = chrysalis_storage_path.join("db");
+
+    let encryption_key = password.map(storage_password_to_encryption_key);
+
     // let rocksdb = (&&*storage.inner as &dyn any::Any)
     //     .downcast_ref::<RocksdbStorageAdapter>()
     //     .unwrap()
     //     .clone();
     // let db = rocksdb.db.lock().await;
-    let chrysaslis_db = DB::open_default(chrysalis_storage_path).unwrap();
     // let stardust_db = DB::open_default("stardust_storage").unwrap();
+    let chrysalis_db = DB::open_default(chrysalis_storage_path).unwrap();
 
     // iterate over all rocksdb keys
     let mut map = HashMap::new();
-    let encryption_key = password.map(storage_password_to_encryption_key);
-    for item in chrysaslis_db.iterator(IteratorMode::Start) {
-        // let (key, mut value) = item.unwrap();
+    for item in chrysalis_db.iterator(IteratorMode::Start) {
         let (key, value) = item.unwrap();
 
+        let key_utf8 = String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
         let value = if let Some(encryption_key) = encryption_key {
-            // TODO: check if this is correct also with encrypted values
-            match String::from_utf8(value.to_vec()) {
-                Ok(value) => value,
-                Err(_) => decrypt_record(&value, &encryption_key)?,
+            let value_utf8 = String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
+            if serde_json::from_str::<Vec<u8>>(&value_utf8).is_ok() && key_utf8 != "iota-wallet-key-checksum_value" {
+                decrypt_record(&value_utf8, &encryption_key)?
+            } else {
+                value_utf8
             }
         } else {
             String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
         };
 
-        map.insert(
-            String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?,
-            value,
-        );
+        map.insert(key_utf8, value);
     }
 
+    // create new accounts base on previous data
     let mut new_accounts = Vec::new();
     if let Some(account_indexation) = map.get("iota-wallet-account-indexation") {
         if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
@@ -79,6 +82,7 @@ pub async fn migrate_db_from_chrysalis_to_stardust<P: AsRef<Path>>(
                     let (internal, public): (Vec<AccountAddress>, Vec<AccountAddress>) =
                         account_addresses.into_iter().partition(|a| a.internal);
 
+                    // TODO: define type in this module so it doesn't change
                     new_accounts.push(AccountDetailsDto {
                         index: account_data["index"].as_u64().unwrap() as u32,
                         coin_type: IOTA_COIN_TYPE,
@@ -105,14 +109,14 @@ pub async fn migrate_db_from_chrysalis_to_stardust<P: AsRef<Path>>(
     // clear old key (remove db, create new one?)
     // store chrysalis data in a new key
     // write new accounts to db (with account indexation)
+    // set secret manager?
+    // set db migration version (version 4?)
 
     // println!("{}", serde_json::to_string_pretty(&map)?);
 
     // stardust_db.put("CHRYSALIS_STORAGE", serde_json::to_string(&map)?)?;
 
     // std::fs::remove_dir_all("chrysalis_storage")?;
-
-    // create new accounts base on previous data
 
     Ok(())
 }
@@ -130,8 +134,8 @@ fn storage_password_to_encryption_key(password: &str) -> [u8; 32] {
     key
 }
 
-fn decrypt_record(record: &[u8], encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
-    // let record: Vec<u8> = serde_json::from_str(record)?;
+fn decrypt_record(record: &str, encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
+    let record: Vec<u8> = serde_json::from_str(record)?;
     let mut record: &[u8] = &record;
 
     let mut nonce = [0; XChaCha20Poly1305::NONCE_LENGTH];

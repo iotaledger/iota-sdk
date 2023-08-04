@@ -19,8 +19,7 @@ async fn migrate_chrysalis_db() -> Result<()> {
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db/db", storage_path).unwrap();
 
-    // TODO: also check with "migrate_chrysalis_db" as new folder name
-    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db/db", "stardust_db", None).await?;
+    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db", None).await?;
 
     // let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
 
@@ -56,6 +55,18 @@ async fn migrate_chrysalis_db() -> Result<()> {
     //         .to_string(),
     //     "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx"
     // );
+
+    tear_down(storage_path)
+}
+
+#[tokio::test]
+async fn migrate_chrysalis_db_encrypted() -> Result<()> {
+    let storage_path = "migrate_chrysalis_db_encrypted/db";
+    setup(storage_path)?;
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/chrysalis-db-encrypted/db", storage_path).unwrap();
+
+    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db_encrypted", Some("password")).await?;
 
     tear_down(storage_path)
 }
