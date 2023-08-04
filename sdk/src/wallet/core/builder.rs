@@ -15,7 +15,7 @@ use tokio::sync::RwLock;
 use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
-#[cfg(all(feature = "storage", not(feature = "rocksdb")))]
+#[cfg(all(feature = "storage", not(feature = "rocksdb"), not(feature = "jammdb")))]
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
@@ -134,10 +134,12 @@ where
             }
         }
 
-        #[cfg(all(feature = "rocksdb", feature = "storage"))]
+        #[cfg(all(not(feature = "jammdb"), feature = "rocksdb", feature = "storage"))]
         let storage =
             crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
-        #[cfg(all(not(feature = "rocksdb"), feature = "storage"))]
+        #[cfg(all(not(feature = "rocksdb"), feature = "jammdb", feature = "storage"))]
+        let storage = crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?;
+        #[cfg(all(not(feature = "rocksdb"), not(feature = "jammdb"), feature = "storage"))]
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
