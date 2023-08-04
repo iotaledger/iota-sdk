@@ -22,7 +22,6 @@ use crate::{
             core::Block,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::OutputWithMetadata,
-            parent::Parents,
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload,
