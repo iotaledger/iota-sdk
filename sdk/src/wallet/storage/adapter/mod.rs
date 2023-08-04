@@ -4,8 +4,15 @@
 pub mod memory;
 /// RocksDB storage adapter.
 #[cfg(feature = "rocksdb")]
+#[cfg(not(feature = "jammdb"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "rocksdb")))]
 pub mod rocksdb;
+
+/// JammDB storage adapter.
+#[cfg(feature = "jammdb")]
+#[cfg(not(feature = "rocksdb"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "jammdb")))]
+pub mod jammdb;
 
 use async_trait::async_trait;
 
