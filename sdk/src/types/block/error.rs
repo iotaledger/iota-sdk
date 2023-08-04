@@ -26,12 +26,12 @@ use crate::types::block::{
 #[derive(Debug, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum Error {
+    AllotmentsNotUniqueSorted,
     ConsumedAmountOverflow,
     ConsumedNativeTokensAmountOverflow,
     CreatedAmountOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
-    DuplicateAllotment(AccountId),
     DuplicateSignatureUnlock(u16),
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
@@ -125,12 +125,12 @@ impl std::error::Error for Error {}
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::AllotmentsNotUniqueSorted => write!(f, "allotments are not unique and/or sorted"),
             Self::ConsumedAmountOverflow => write!(f, "consumed amount overflow"),
             Self::ConsumedNativeTokensAmountOverflow => write!(f, "consumed native tokens amount overflow"),
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
-            Self::DuplicateAllotment(id) => write!(f, "duplicate allotment, account ID: {id}"),
             Self::DuplicateSignatureUnlock(index) => {
                 write!(f, "duplicate signature unlock at index: {index}")
             }
