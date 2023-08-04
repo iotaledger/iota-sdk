@@ -9,7 +9,12 @@ use serde::{Deserialize, Serialize};
 pub enum StorageKind {
     /// RocksDB storage.
     #[cfg(feature = "rocksdb")]
+    #[cfg(not(feature = "jammdb"))]
     Rocksdb,
+    /// JammDB storage
+    #[cfg(feature = "jammdb")]
+    #[cfg(not(feature = "rocksdb"))]
+    Jammdb,
     /// Storage backed by a Map in memory.
     Memory,
     /// Wasm storage.
@@ -20,10 +25,14 @@ pub enum StorageKind {
 impl Default for StorageKind {
     fn default() -> Self {
         #[cfg(feature = "rocksdb")]
+        #[cfg(not(feature = "jammdb"))]
         return Self::Rocksdb;
+        #[cfg(feature = "jammdb")]
+        #[cfg(not(feature = "rocksdb"))]
+        return Self::Jammdb;
         #[cfg(target_family = "wasm")]
         return Self::Wasm;
-        #[cfg(not(any(feature = "rocksdb", target_family = "wasm")))]
+        #[cfg(not(any(feature = "rocksdb", target_family = "wasm", feature = "jammdb")))]
         Self::Memory
     }
 }
