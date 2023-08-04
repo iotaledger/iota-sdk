@@ -3,8 +3,6 @@
 
 use derive_more::{Deref, Display, From, FromStr};
 
-use crate::utils::serde::string;
-
 /// Timeline is divided into slots, and each slot has a corresponding slot index.
 /// To calculate the slot index of a timestamp, `genesisTimestamp` and the duration of a slot are needed.
 /// The slot index of timestamp `ts` is `(ts - genesisTimestamp)/duration + 1`.

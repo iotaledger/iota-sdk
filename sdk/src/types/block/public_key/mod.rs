@@ -3,7 +3,9 @@
 
 mod ed25519;
 
+use alloc::boxed::Box;
 use alloc::collections::BTreeSet;
+use alloc::vec::Vec;
 use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};
