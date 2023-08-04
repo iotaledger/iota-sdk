@@ -156,7 +156,7 @@ impl PublicKeys {
             BoxedSlicePrefix::<PublicKey, PublicKeyCount>::try_from(public_keys.into_iter().collect::<Box<[_]>>())
                 .map_err(Error::InvalidPublicKeyCount)?;
 
-        // NOTE: We don't need to verify the public keys here, because they are already verified by the BTreeSet.
+        // We don't need to verify the public keys here, because they are already verified by the BTreeSet.
         Ok(Self(public_keys))
     }
 }
