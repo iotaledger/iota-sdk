@@ -173,7 +173,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
             let block = client
-                .finish_block_builder(
+                .finish_basic_block_builder(
+                    todo!("issuer id"),
+                    todo!("block signature"),
+                    todo!("issuing time"),
                     None,
                     Some(Payload::try_from_dto_with_params(
                         payload,

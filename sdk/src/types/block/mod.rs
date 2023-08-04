@@ -12,6 +12,8 @@ mod issuer_id;
 
 /// A module that provides types and syntactic validations of addresses.
 pub mod address;
+/// A module that provides types and syntactic validations of basic blocks.
+pub mod basic;
 /// A module that provides types and syntactic validations of context inputs.
 pub mod context_input;
 /// A module that provides types and syntactic validations of blocks.
@@ -43,6 +45,8 @@ pub mod signature;
 pub mod slot;
 /// A module that provides types and syntactic validations of unlocks.
 pub mod unlock;
+/// A module that provides types and syntactic validations of validation blocks.
+pub mod validation;
 
 #[cfg(feature = "serde")]
 pub(crate) use r#macro::string_serde_impl;

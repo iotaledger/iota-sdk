@@ -19,6 +19,7 @@ use crate::{
         api::core::response::LedgerInclusionState,
         block::{
             address::Bech32Address,
+            core::Block,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::OutputWithMetadata,
             parent::Parents,
@@ -26,7 +27,7 @@ use crate::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload,
             },
-            Block, BlockId,
+            BlockId,
         },
     },
     utils::unix_timestamp_now,
@@ -235,7 +236,15 @@ impl Client {
     pub async fn reattach_unchecked(&self, block_id: &BlockId) -> Result<(BlockId, Block)> {
         // Get the Block object by the BlockID.
         let block = self.get_block(block_id).await?;
-        let reattach_block = self.finish_block_builder(None, block.payload().cloned()).await?;
+        let reattach_block = self
+            .finish_basic_block_builder(
+                block.issuer_id(),
+                *block.signature(),
+                None,
+                None,
+                block.payload().cloned(),
+            )
+            .await?;
 
         // Post the modified
         let block_id = self.post_block_raw(&reattach_block).await?;
@@ -262,7 +271,17 @@ impl Client {
             *tip = *block_id;
         }
 
-        let promote_block = self.finish_block_builder(Some(Parents::from_vec(tips)?), None).await?;
+        let block = self.get_block(block_id).await?;
+
+        let promote_block = self
+            .finish_basic_block_builder(
+                block.issuer_id(),
+                *block.signature(),
+                None,
+                Some(Parents::from_vec(tips)?),
+                None,
+            )
+            .await?;
 
         let block_id = self.post_block_raw(&promote_block).await?;
 
