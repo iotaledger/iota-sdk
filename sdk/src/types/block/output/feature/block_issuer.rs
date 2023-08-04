@@ -66,7 +66,6 @@ mod dto {
         #[serde(rename = "type")]
         kind: u8,
         expiry_slot: SlotIndex,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
         keys: Vec<PublicKeyDto>,
     }
 
