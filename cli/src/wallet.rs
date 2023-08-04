@@ -58,8 +58,11 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 let wallet = sync_command(storage_path, snapshot_path).await?;
                 (Some(wallet), None)
             }
-            WalletCommand::Mnemonic => {
-                mnemonic_command().await?;
+            WalletCommand::Mnemonic {
+                output_file_name,
+                output_stdout,
+            } => {
+                mnemonic_command(output_file_name, output_stdout).await?;
                 return Ok((None, None));
             }
             WalletCommand::NodeInfo => {
