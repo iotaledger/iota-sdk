@@ -29,11 +29,6 @@ impl BlockId {
         unsafe { core::mem::transmute(bytes) }
     }
 
-    /// Creates a null [`BlockId`].
-    pub fn null() -> Self {
-        Self::new([0u8; Self::LENGTH])
-    }
-
     /// Checks if the [`BlockId`] is null.
     pub fn is_null(&self) -> bool {
         self.as_ref().iter().all(|&b| b == 0)
