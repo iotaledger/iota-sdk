@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::vec::Vec;
+
 use crate::types::block::{
     public_key::{PublicKey, PublicKeys},
     slot::SlotIndex,
