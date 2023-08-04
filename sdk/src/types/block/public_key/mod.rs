@@ -92,10 +92,8 @@ pub(crate) type PublicKeyCount = BoundedU8<{ *PublicKeys::COUNT_RANGE.start() },
 pub struct PublicKeys(#[packable(verify_with = verify_public_keys)] BoxedSlicePrefix<PublicKey, PublicKeyCount>);
 
 fn verify_public_keys<const VERIFY: bool>(public_keys: &[PublicKey], _visitor: &()) -> Result<(), Error> {
-    if VERIFY {
-        if !is_unique_sorted(public_keys.iter()) {
-            return Err(Error::PublicKeysNotUniqueSorted);
-        }
+    if VERIFY && !is_unique_sorted(public_keys.iter()) {
+        return Err(Error::PublicKeysNotUniqueSorted);
     }
 
     Ok(())

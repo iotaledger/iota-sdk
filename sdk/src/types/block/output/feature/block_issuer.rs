@@ -72,7 +72,7 @@ mod dto {
         fn from(value: &BlockIssuerFeature) -> Self {
             Self {
                 kind: BlockIssuerFeature::KIND,
-                expiry_slot: value.expiry_slot.into(),
+                expiry_slot: value.expiry_slot,
                 keys: value.public_keys.iter().map(|key| key.into()).collect(),
             }
         }
