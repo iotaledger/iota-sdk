@@ -9,14 +9,12 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
-use super::mana::AllotmentCount;
+use super::{mana::AllotmentCount, public_key::PublicKeyCount};
 use crate::types::block::{
     input::UtxoInput,
     output::{
-        feature::{FeatureCount, PublicKeyCount},
-        unlock_condition::UnlockConditionCount,
-        AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
-        TagFeatureLength,
+        feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
+        NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
     payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
@@ -105,6 +103,7 @@ pub enum Error {
     NonZeroStateIndexOrFoundryCounter,
     ParentsNotUniqueSorted,
     ProtocolVersionMismatch { expected: u8, actual: u8 },
+    PublicKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
@@ -266,6 +265,7 @@ impl fmt::Display for Error {
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
             }
+            Self::PublicKeysNotUniqueSorted => write!(f, "public keys are not unique and/or sorted"),
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }

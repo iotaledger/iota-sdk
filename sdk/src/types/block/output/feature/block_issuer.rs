@@ -1,43 +1,37 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::boxed::Box;
-
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
-
-use crate::types::block::{public_key::PublicKey, slot::SlotIndex, Error};
-
-pub(crate) type PublicKeyCount =
-    BoundedU8<{ BlockIssuerFeature::KEY_COUNT_MIN }, { BlockIssuerFeature::KEY_COUNT_MAX }>;
+use crate::types::block::{
+    public_key::{PublicKey, PublicKeys},
+    slot::SlotIndex,
+    Error,
+};
 
 /// This feature defines the public keys with which a signature from the containing
 /// account's Block Issuance Credit can be verified in order to burn Mana.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
 #[packable(unpack_error = Error)]
 pub struct BlockIssuerFeature {
     /// The slot index at which the Block Issuer Feature expires and can be removed.
     expiry_slot: SlotIndex,
     /// The Block Issuer Keys.
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidPublicKeyCount(p.into())))]
-    keys: BoxedSlicePrefix<PublicKey, PublicKeyCount>,
+    public_keys: PublicKeys,
 }
 
 impl BlockIssuerFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of a [`BlockIssuerFeature`].
     pub const KIND: u8 = 4;
-    /// Minimum number of [`PublicKey`]s in a [`BlockIssuerFeature`].
-    pub const KEY_COUNT_MIN: u8 = 1;
-    /// Maximum number of [`PublicKey`]s in a [`BlockIssuerFeature`].
-    pub const KEY_COUNT_MAX: u8 = 128;
 
     /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]
-    pub fn new(expiry_slot: impl Into<SlotIndex>, keys: impl Into<Box<[PublicKey]>>) -> Result<Self, Error> {
-        let keys: Box<[PublicKey]> = keys.into();
-
+    pub fn new(
+        expiry_slot: impl Into<SlotIndex>,
+        public_keys: impl IntoIterator<Item = PublicKey>,
+    ) -> Result<Self, Error> {
+        let public_keys = PublicKeys::from_vec(public_keys.into_iter().collect::<Vec<PublicKey>>())?;
         Ok(Self {
             expiry_slot: expiry_slot.into(),
-            keys: keys.try_into().map_err(Error::InvalidPublicKeyCount)?,
+            public_keys,
         })
     }
 
@@ -47,8 +41,8 @@ impl BlockIssuerFeature {
     }
 
     /// Returns the Block Issuer Keys.
-    pub fn keys(&self) -> &[PublicKey] {
-        &self.keys
+    pub fn public_keys(&self) -> &[PublicKey] {
+        &self.public_keys
     }
 }
 
@@ -58,12 +52,10 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::BlockIssuerFeature;
-    use crate::{
-        types::block::{
-            public_key::{dto::PublicKeyDto, PublicKey},
-            Error,
-        },
-        utils::serde::string,
+    use crate::types::block::{
+        public_key::{dto::PublicKeyDto, PublicKey},
+        slot::SlotIndex,
+        Error,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -71,8 +63,7 @@ mod dto {
     struct BlockIssuerFeatureDto {
         #[serde(rename = "type")]
         kind: u8,
-        #[serde(with = "string")]
-        expiry_slot: u64,
+        expiry_slot: SlotIndex,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         keys: Vec<PublicKeyDto>,
     }
@@ -82,7 +73,7 @@ mod dto {
             Self {
                 kind: BlockIssuerFeature::KIND,
                 expiry_slot: value.expiry_slot.into(),
-                keys: value.keys.iter().map(|key| key.into()).collect(),
+                keys: value.public_keys.iter().map(|key| key.into()).collect(),
             }
         }
     }

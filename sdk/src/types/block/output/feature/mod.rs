@@ -19,7 +19,7 @@ pub use self::{
     block_issuer::BlockIssuerFeature, issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature,
     staking::StakingFeature, tag::TagFeature,
 };
-pub(crate) use self::{block_issuer::PublicKeyCount, metadata::MetadataFeatureLength, tag::TagFeatureLength};
+pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
 
 ///
