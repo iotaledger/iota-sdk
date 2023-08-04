@@ -3,11 +3,11 @@
 
 mod allotment;
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
-use hashbrown::HashSet;
+use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::allotment::Allotment;
@@ -27,20 +27,24 @@ pub struct Allotments(#[packable(verify_with = verify_allotments)] BoxedSlicePre
 
 fn verify_allotments<const VERIFY: bool>(allotments: &[Allotment], _visitor: &()) -> Result<(), Error> {
     if VERIFY {
-        let mut mana_sum: u64 = 0;
-        let mut unique_ids = HashSet::with_capacity(allotments.len());
-        for Allotment { account_id, mana } in allotments.iter() {
-            mana_sum = mana_sum
-                .checked_add(*mana)
-                .ok_or(Error::InvalidAllotmentManaSum(mana_sum as u128 + *mana as u128))?;
+        if !is_unique_sorted(allotments.iter().map(|a| a.account_id)) {
+            return Err(Error::AllotmentsNotUniqueSorted);
+        }
+        verify_allotments_sum(allotments)?;
+    }
 
-            if mana_sum > MAX_THEORETICAL_MANA {
-                return Err(Error::InvalidAllotmentManaSum(mana_sum as u128));
-            }
+    Ok(())
+}
 
-            if !unique_ids.insert(account_id) {
-                return Err(Error::DuplicateAllotment(*account_id));
-            }
+fn verify_allotments_sum<'a>(allotments: impl IntoIterator<Item = &'a Allotment>) -> Result<(), Error> {
+    let mut mana_sum: u64 = 0;
+    for Allotment { mana, .. } in allotments {
+        mana_sum = mana_sum
+            .checked_add(*mana)
+            .ok_or(Error::InvalidAllotmentManaSum(mana_sum as u128 + *mana as u128))?;
+
+        if mana_sum > MAX_THEORETICAL_MANA {
+            return Err(Error::InvalidAllotmentManaSum(mana_sum as u128));
         }
     }
 
@@ -53,6 +57,15 @@ impl TryFrom<Vec<Allotment>> for Allotments {
     #[inline(always)]
     fn try_from(allotments: Vec<Allotment>) -> Result<Self, Self::Error> {
         Self::from_vec(allotments)
+    }
+}
+
+impl TryFrom<BTreeSet<Allotment>> for Allotments {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(allotments: BTreeSet<Allotment>) -> Result<Self, Self::Error> {
+        Self::from_set(allotments)
     }
 }
 
@@ -79,6 +92,17 @@ impl Allotments {
             .map_err(Error::InvalidAllotmentCount)?;
 
         verify_allotments::<true>(&allotments, &())?;
+
+        Ok(Self(allotments))
+    }
+
+    /// Creates a new [`Allotments`] from an ordered set.
+    pub fn from_set(allotments: BTreeSet<Allotment>) -> Result<Self, Error> {
+        let allotments =
+            BoxedSlicePrefix::<Allotment, AllotmentCount>::try_from(allotments.into_iter().collect::<Box<[_]>>())
+                .map_err(Error::InvalidAllotmentCount)?;
+
+        verify_allotments_sum(allotments.as_ref())?;
 
         Ok(Self(allotments))
     }

@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
@@ -26,7 +26,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
-    allotments: Vec<Allotment>,
+    allotments: BTreeSet<Allotment>,
     payload: OptionalPayload,
     creation_time: Option<u64>,
 }
@@ -39,7 +39,7 @@ impl RegularTransactionEssenceBuilder {
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
-            allotments: Vec::new(),
+            allotments: BTreeSet::new(),
             payload: OptionalPayload::default(),
             creation_time: None,
         }
@@ -81,9 +81,15 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Add an allotment to a [`RegularTransactionEssenceBuilder`].
+    /// Add an [`Allotment`] to a [`RegularTransactionEssenceBuilder`].
     pub fn add_allotment(mut self, allotment: Allotment) -> Self {
-        self.allotments.push(allotment);
+        self.allotments.insert(allotment);
+        self
+    }
+
+    /// Replaces an [`Allotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
+    pub fn replace_allotment(mut self, allotment: Allotment) -> Self {
+        self.allotments.replace(allotment);
         self
     }
 
@@ -126,7 +132,7 @@ impl RegularTransactionEssenceBuilder {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
-        let allotments = Allotments::from_vec(self.allotments)?;
+        let allotments = Allotments::from_set(self.allotments)?;
 
         verify_payload::<true>(&self.payload)?;
 
