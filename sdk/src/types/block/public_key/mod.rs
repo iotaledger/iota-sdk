@@ -3,11 +3,10 @@
 
 mod ed25519;
 
+use alloc::collections::BTreeSet;
 use core::ops::RangeInclusive;
 
-use alloc::collections::BTreeSet;
-use derive_more::Deref;
-use derive_more::From;
+use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
