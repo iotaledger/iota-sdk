@@ -230,37 +230,37 @@ required-features = ["client"]
 [[example]]
 name = "create_account"
 path = "examples/how_tos/accounts_and_addresses/create_account.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "list_accounts"
 path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "check_balance"
 path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "list_addresses"
 path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "create_address"
 path = "examples/how_tos/accounts_and_addresses/create_address.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "list_transactions"
 path = "examples/how_tos/accounts_and_addresses/list_transactions.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "list_outputs"
 path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "consolidate_outputs"
@@ -272,29 +272,29 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "request_funds"
 path = "examples/how_tos/simple_transaction/request_funds.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 # Advanced Transactions Examples
 
 [[example]]
 name = "send_micro_transaction"
 path = "examples/how_tos/advanced_transactions/send_micro_transaction.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "advanced_transaction"
 path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 # NFT Collection Examples
 
@@ -313,44 +313,44 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "create_native_token"
 path = "examples/how_tos/native_tokens/create.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "destroy_foundry"
 path = "examples/how_tos/native_tokens/destroy_foundry.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "burn_native_token"
 path = "examples/how_tos/native_tokens/burn.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "melt_native_token"
 path = "examples/how_tos/native_tokens/melt.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "mint_native_token"
 path = "examples/how_tos/native_tokens/mint.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "send_native_tokens"
 path = "examples/how_tos/native_tokens/send.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 # Alias wallet example
 
 [[example]]
 name = "alias_wallet_request_funds"
 path = "examples/how_tos/alias_wallet/request_funds.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "alias_wallet_transaction"
 path = "examples/how_tos/alias_wallet/transaction.rs"
-required-features = ["jammdb", "stronghold"]
+required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "create_alias"
