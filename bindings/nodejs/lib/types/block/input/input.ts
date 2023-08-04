@@ -67,21 +67,10 @@ class UTXOInput extends Input {
     /**
      * Creates a `UTXOInput` from an output id.
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     static fromOutputId(outputId: OutputId): UTXOInput {
-        const source = outputId.startsWith('0x')
-            ? outputId.substring(2)
-            : outputId;
-        const indexHexLe = source.slice(64);
-        const chunks = [indexHexLe.substring(0, 2), indexHexLe.substring(2)];
-        const buffer = Uint8Array.from(
-            chunks.map((n) => parseInt(n, 16)),
-        ).buffer;
-        const indexData = new DataView(buffer);
-
-        const transactionId = source.substring(0, source.length - 4);
-        const transactionOutputIndex = indexData.getUint16(0, true);
-
-        return new UTXOInput(`0x${transactionId}`, transactionOutputIndex);
+        // Implementation injected in lib/index.ts, as it uses bindings.
+        return null as unknown as UTXOInput;
     }
 }
 
