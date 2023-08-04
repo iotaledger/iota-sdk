@@ -77,7 +77,7 @@ pub enum UtilsMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
-    /// Returns a block ID (Blake2b256 hash of block bytes) from a block
+    /// Returns a block ID from a block and slot protocol parameters
     BlockId {
         /// Block
         block: BlockDto,
