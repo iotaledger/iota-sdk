@@ -118,11 +118,6 @@ describe('Wallet', () => {
 
         expect(account.getMetadata().index).toStrictEqual(0);
 
-        const client = await wallet.getClient();
-
-        const localPoW = await client.getLocalPow();
-        expect(localPoW).toBeTruthy();
-
         await wallet.destroy();
 
         const recreatedWallet = new Wallet(walletOptions);

@@ -14,7 +14,6 @@ const client = new Client({
             url: process.env.NODE_URL || 'http://localhost:14265',
         },
     ],
-    localPow: true,
 });
 
 // Skip for CI
@@ -62,8 +61,6 @@ describe.skip('Client info methods', () => {
     it('gets networkInfo', async () => {
         const networkInfo = await client.getNetworkInfo();
 
-        expect(networkInfo.localPow).toBeTruthy();
-        expect(networkInfo.minPowScore).toBe(1000);
         expect(networkInfo.protocolParameters.bech32Hrp).toBe('rms');
     });
 
@@ -79,27 +76,9 @@ describe.skip('Client info methods', () => {
         expect(bech32Hrp).toBeDefined();
     });
 
-    it('gets minimum PoW score', async () => {
-        const minPowScore = await client.getMinPowScore();
-
-        expect(minPowScore).toBeDefined();
-    });
-
     it('gets tips interval', async () => {
         const tipsInterval = await client.getTipsInterval();
 
         expect(tipsInterval).toBeDefined();
-    });
-
-    it('gets local PoW status', async () => {
-        const localPow = await client.getLocalPow();
-
-        expect(localPow).toBeTruthy();
-    });
-
-    it('gets fallback to local PoW status', async () => {
-        const fallbackToLocalPow = await client.getFallbackToLocalPow();
-
-        expect(fallbackToLocalPow).toBeTruthy();
     });
 });

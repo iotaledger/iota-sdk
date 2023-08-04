@@ -24,8 +24,4 @@ export class Block {
         discriminator: PayloadDiscriminator,
     })
     payload?: Payload;
-    /**
-     * The nonce for the block.
-     */
-    nonce!: string;
 }

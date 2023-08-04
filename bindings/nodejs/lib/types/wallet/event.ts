@@ -171,12 +171,6 @@ class SigningTransactionProgress extends TransactionProgress {
     }
 }
 
-class PerformingPowProgress extends TransactionProgress {
-    constructor() {
-        super(TransactionProgressType.PerformingPow);
-    }
-}
-
 class BroadcastingProgress extends TransactionProgress {
     constructor() {
         super(TransactionProgressType.Broadcasting);
@@ -199,7 +193,6 @@ export {
     PreparedTransactionProgress,
     PreparedTransactionEssenceHashProgress,
     SigningTransactionProgress,
-    PerformingPowProgress,
     BroadcastingProgress,
     TransactionProgressType,
 };
