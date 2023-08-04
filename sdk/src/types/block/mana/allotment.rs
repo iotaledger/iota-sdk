@@ -21,6 +21,18 @@ pub struct Allotment {
     pub(crate) mana: u64,
 }
 
+impl PartialOrd for Allotment {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Allotment {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.account_id.cmp(&other.account_id)
+    }
+}
+
 impl Allotment {
     pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
         if mana > MAX_THEORETICAL_MANA {
