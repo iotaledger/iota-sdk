@@ -313,18 +313,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?;
             Response::Reattached((block_id, BlockDto::from(&block)))
         }
-        ClientMethod::Promote { block_id } => {
-            let (block_id, block) = client
-                .promote::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
-                .await?;
-            Response::Promoted((block_id, BlockDto::from(&block)))
-        }
-        ClientMethod::PromoteUnchecked { block_id } => {
-            let (block_id, block) = client
-                .promote_unchecked::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
-                .await?;
-            Response::Promoted((block_id, BlockDto::from(&block)))
-        }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
         }

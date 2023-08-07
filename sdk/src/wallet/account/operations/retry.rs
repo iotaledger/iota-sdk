@@ -118,18 +118,9 @@ where
                             LedgerInclusionState::Conflicting => conflicting = true,
                         };
                     }
-                    // Only reattach or promote latest attachment of the block
+                    // Only reattach latest attachment of the block
                     if index == block_ids_len - 1 {
-                        if block_metadata.should_promote.unwrap_or(false) {
-                            // Safe to unwrap since we iterate over it
-                            self.client()
-                                .promote_unchecked(
-                                    block_ids.last().unwrap(),
-                                    self.wallet.coin_type(),
-                                    &*self.get_secret_manager().read().await,
-                                )
-                                .await?;
-                        } else if block_metadata.should_reattach.unwrap_or(false) {
+                        if block_metadata.should_reattach.unwrap_or(false) {
                             let reattached_block = self
                                 .client()
                                 .finish_basic_block_builder(

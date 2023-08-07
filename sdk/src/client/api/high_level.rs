@@ -23,7 +23,6 @@ use crate::{
             core::Block,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::OutputWithMetadata,
-            parent::Parents,
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload,
@@ -76,11 +75,9 @@ impl Client {
     where
         crate::client::Error: From<S::Error>,
     {
-        // Get the metadata to check if it needs to promote or reattach
+        // Get the metadata to check if it needs to reattach
         let block_metadata = self.get_block_metadata(block_id).await?;
-        if block_metadata.should_promote.unwrap_or(false) {
-            self.promote_unchecked(block_id, coin_type, secret_manager).await
-        } else if block_metadata.should_reattach.unwrap_or(false) {
+        if block_metadata.should_reattach.unwrap_or(false) {
             self.reattach_unchecked(block_id, coin_type, secret_manager).await
         } else {
             Err(Error::NoNeedPromoteOrReattach(block_id.to_string()))
@@ -146,13 +143,9 @@ impl Client {
                         LedgerInclusionState::Conflicting => conflicting = true,
                     };
                 }
-                // Only reattach or promote latest attachment of the block
+                // Only reattach latest attachment of the block
                 if index == block_ids_len - 1 {
-                    if block_metadata.should_promote.unwrap_or(false) {
-                        // Safe to unwrap since we iterate over it
-                        self.promote_unchecked(block_ids.last().unwrap(), coin_type, secret_manager)
-                            .await?;
-                    } else if block_metadata.should_reattach.unwrap_or(false) {
+                    if block_metadata.should_reattach.unwrap_or(false) {
                         // Safe to unwrap since we iterate over it
                         let reattached = self
                             .reattach_unchecked(block_ids.last().unwrap(), coin_type, secret_manager)
@@ -287,59 +280,6 @@ impl Client {
         let block_id = self.post_block_raw(&reattach_block).await?;
 
         Ok((block_id, reattach_block))
-    }
-
-    /// Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
-    /// method should error out and should not allow unnecessary promotions.
-    pub async fn promote<S: SecretManage>(
-        &self,
-        block_id: &BlockId,
-        coin_type: u32,
-        secret_manager: &S,
-    ) -> Result<(BlockId, Block)>
-    where
-        crate::client::Error: From<S::Error>,
-    {
-        let metadata = self.get_block_metadata(block_id).await?;
-        if metadata.should_promote.unwrap_or(false) {
-            self.promote_unchecked(block_id, coin_type, secret_manager).await
-        } else {
-            Err(Error::NoNeedPromoteOrReattach(block_id.to_string()))
-        }
-    }
-
-    /// Promote a block without checking if it should be promoted
-    pub async fn promote_unchecked<S: SecretManage>(
-        &self,
-        block_id: &BlockId,
-        coin_type: u32,
-        secret_manager: &S,
-    ) -> Result<(BlockId, Block)>
-    where
-        crate::client::Error: From<S::Error>,
-    {
-        // Create a new block (zero value block) for which one tip would be the actual block.
-        let mut tips = self.get_tips().await?;
-        if let Some(tip) = tips.first_mut() {
-            *tip = *block_id;
-        }
-
-        let block = self.get_block(block_id).await?;
-
-        let promote_block = self
-            .finish_basic_block_builder(
-                block.issuer_id(),
-                None,
-                Some(Parents::from_vec(tips)?),
-                None,
-                coin_type,
-                secret_manager,
-            )
-            .await?;
-
-        let block_id = self.post_block_raw(&promote_block).await?;
-
-        Ok((block_id, promote_block))
     }
 
     /// Returns the local time checked with the timestamp of the latest milestone, if the difference is larger than 5
