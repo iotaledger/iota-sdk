@@ -228,7 +228,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
     })
     readonly address: Address;
     /**
-     * @param address The State Controller address that owns the output.
+     * @param address The State Controller address that is allowed to do state transitions.
      */
     constructor(address: Address) {
         super(UnlockConditionType.StateControllerAddress);
