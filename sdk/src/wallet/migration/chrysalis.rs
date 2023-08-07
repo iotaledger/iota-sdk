@@ -11,13 +11,14 @@ use std::{
 
 use crypto::ciphers::{chacha::XChaCha20Poly1305, traits::Aead};
 use rocksdb::{IteratorMode, Options, DB};
+use serde::Serialize;
+use serde_json::Value;
 use zeroize::Zeroizing;
 
 use crate::{
     client::{constants::IOTA_COIN_TYPE, Password},
     types::block::address::Bech32Address,
     wallet::{
-        account::{types::AccountAddress, AccountDetailsDto},
         migration::{MigrationVersion, MIGRATION_VERSION_KEY},
         storage::constants::{
             ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
@@ -26,6 +27,33 @@ use crate::{
     },
 };
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AccountAddress {
+    address: Bech32Address,
+    key_index: u32,
+    internal: bool,
+    used: bool,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AccountDetailsDto {
+    index: u32,
+    coin_type: u32,
+    alias: String,
+    public_addresses: Vec<AccountAddress>,
+    internal_addresses: Vec<AccountAddress>,
+    addresses_with_unspent_outputs: Vec<Value>,
+    outputs: HashMap<String, Value>,
+    locked_outputs: HashSet<String>,
+    unspent_outputs: HashMap<String, Value>,
+    transactions: HashMap<String, Value>,
+    pending_transactions: HashSet<String>,
+    incoming_transactions: HashMap<String, Value>,
+    native_token_foundries: HashMap<String, Value>,
+}
+
 pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, password: Option<Password>) -> Result<()> {
     let storage_path = Path::new(&storage_path);
     // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
@@ -33,70 +61,13 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
 
     let chrysalis_data = get_chrysalis_data(&chrysalis_storage_path, password)?;
 
-    // create new accounts base on previous data
-    let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
-    let mut secret_manager_dto: Option<String> = None;
-    if let Some(account_indexation) = chrysalis_data.get("iota-wallet-account-indexation") {
-        if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
-            for account_key in account_keys {
-                if let Some(account_data) =
-                    chrysalis_data.get(account_key["key"].as_str().expect("key must be a string"))
-                {
-                    let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
-                    println!("{}", account_data);
-                    if secret_manager_dto.is_none() {
-                        let dto = match &account_data["signerType"]["type"].as_str() {
-                            Some("Stronghold") => format!(
-                                r#"{{"Stronghold": {{"password": null, "timeout": null, "snapshotPath": "{}/wallet.stronghold"}} }}"#,
-                                storage_path.to_string_lossy()
-                            ),
-                            Some("LedgerNano") => r#"{{"LedgerNano": false }}"#.into(),
-                            Some("LedgerNanoSimulator") => r#"{{"LedgerNano": true }}"#.into(),
-                            _ => return Err(Error::Migration("Missing signerType".into())),
-                        };
-                        secret_manager_dto = Some(dto);
-                    }
-
-                    let mut account_addresses = Vec::new();
-
-                    if let Some(addresses) = account_data["addresses"].as_array() {
-                        for address in addresses {
-                            account_addresses.push(AccountAddress {
-                                address: Bech32Address::from_str(address["address"].as_str().unwrap())?,
-                                key_index: address["keyIndex"].as_u64().unwrap() as u32,
-                                internal: address["internal"].as_bool().unwrap(),
-                                used: !address["outputs"].as_object().unwrap().is_empty(),
-                            })
-                        }
-                    }
-                    let (internal, public): (Vec<AccountAddress>, Vec<AccountAddress>) =
-                        account_addresses.into_iter().partition(|a| a.internal);
-
-                    // TODO: define type in this module so it doesn't change
-                    new_accounts.push(AccountDetailsDto {
-                        index: account_data["index"].as_u64().unwrap() as u32,
-                        coin_type: IOTA_COIN_TYPE,
-                        alias: account_data["alias"].as_str().unwrap().to_string(),
-                        public_addresses: public,
-                        internal_addresses: internal,
-                        addresses_with_unspent_outputs: Vec::new(),
-                        outputs: HashMap::new(),
-                        unspent_outputs: HashMap::new(),
-                        transactions: HashMap::new(),
-                        pending_transactions: HashSet::new(),
-                        locked_outputs: HashSet::new(),
-                        incoming_transactions: HashMap::new(),
-                        native_token_foundries: HashMap::new(),
-                    })
-                }
-            }
-        }
-    }
-
     log::debug!(
         "Migrating chrysalis data: {}",
-        serde_json::to_string_pretty(&new_accounts)?
+        serde_json::to_string_pretty(&chrysalis_data)?
     );
+
+    // create new accounts base on previous data
+    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path)?;
 
     let mut opts = Options::default();
     opts.create_if_missing(true);
@@ -142,6 +113,70 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
     std::fs::remove_dir_all(chrysalis_storage_path)?;
 
     Ok(())
+}
+
+fn migrate_from_chrysalis_data(
+    chrysalis_data: &HashMap<String, String>,
+    storage_path: &Path,
+) -> Result<(Vec<AccountDetailsDto>, Option<String>)> {
+    let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
+    let mut secret_manager_dto: Option<String> = None;
+    if let Some(account_indexation) = chrysalis_data.get("iota-wallet-account-indexation") {
+        if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
+            for account_key in account_keys {
+                if let Some(account_data) =
+                    chrysalis_data.get(account_key["key"].as_str().expect("key must be a string"))
+                {
+                    let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
+                    println!("{}", account_data);
+                    if secret_manager_dto.is_none() {
+                        let dto = match &account_data["signerType"]["type"].as_str() {
+                            Some("Stronghold") => format!(
+                                r#"{{"Stronghold": {{"password": null, "timeout": null, "snapshotPath": "{}/wallet.stronghold"}} }}"#,
+                                storage_path.to_string_lossy()
+                            ),
+                            Some("LedgerNano") => r#"{{"LedgerNano": false }}"#.into(),
+                            Some("LedgerNanoSimulator") => r#"{{"LedgerNano": true }}"#.into(),
+                            _ => return Err(Error::Migration("Missing signerType".into())),
+                        };
+                        secret_manager_dto = Some(dto);
+                    }
+
+                    let mut account_addresses = Vec::new();
+
+                    if let Some(addresses) = account_data["addresses"].as_array() {
+                        for address in addresses {
+                            account_addresses.push(AccountAddress {
+                                address: Bech32Address::from_str(address["address"].as_str().unwrap())?,
+                                key_index: address["keyIndex"].as_u64().unwrap() as u32,
+                                internal: address["internal"].as_bool().unwrap(),
+                                used: !address["outputs"].as_object().unwrap().is_empty(),
+                            })
+                        }
+                    }
+                    let (internal, public): (Vec<AccountAddress>, Vec<AccountAddress>) =
+                        account_addresses.into_iter().partition(|a| a.internal);
+
+                    new_accounts.push(AccountDetailsDto {
+                        index: account_data["index"].as_u64().unwrap() as u32,
+                        coin_type: IOTA_COIN_TYPE,
+                        alias: account_data["alias"].as_str().unwrap().to_string(),
+                        public_addresses: public,
+                        internal_addresses: internal,
+                        addresses_with_unspent_outputs: Vec::new(),
+                        outputs: HashMap::new(),
+                        unspent_outputs: HashMap::new(),
+                        transactions: HashMap::new(),
+                        pending_transactions: HashSet::new(),
+                        locked_outputs: HashSet::new(),
+                        incoming_transactions: HashMap::new(),
+                        native_token_foundries: HashMap::new(),
+                    })
+                }
+            }
+        }
+    }
+    Ok((new_accounts, secret_manager_dto))
 }
 
 fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>) -> Result<HashMap<String, String>> {
