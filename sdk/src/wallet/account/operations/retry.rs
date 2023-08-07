@@ -6,8 +6,9 @@ use crate::{
     types::{
         api::core::response::LedgerInclusionState,
         block::{
+            core::Block,
             payload::{transaction::TransactionId, Payload},
-            Block, BlockId,
+            BlockId,
         },
     },
     wallet::{
@@ -69,7 +70,13 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_block_builder(None, Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
+                    .finish_basic_block_builder(
+                        todo!("issuer id"),
+                        todo!("block signature"),
+                        todo!("issuing time"),
+                        None,
+                        Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                    )
                     .await?
                     .id(),
             };
@@ -101,15 +108,15 @@ where
                             LedgerInclusionState::Conflicting => conflicting = true,
                         };
                     }
-                    // Only reattach or promote latest attachment of the block
+                    // Only reattach latest attachment of the block
                     if index == block_ids_len - 1 {
-                        if block_metadata.should_promote.unwrap_or(false) {
-                            // Safe to unwrap since we iterate over it
-                            self.client().promote_unchecked(block_ids.last().unwrap()).await?;
-                        } else if block_metadata.should_reattach.unwrap_or(false) {
+                        if block_metadata.should_reattach.unwrap_or(false) {
                             let reattached_block = self
                                 .client()
-                                .finish_block_builder(
+                                .finish_basic_block_builder(
+                                    todo!("issuer id"),
+                                    todo!("block signature"),
+                                    todo!("issuing time"),
                                     None,
                                     Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                                 )

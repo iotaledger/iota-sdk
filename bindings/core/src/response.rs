@@ -156,10 +156,6 @@ pub enum Response {
     /// - [`ReattachUnchecked`](crate::method::ClientMethod::ReattachUnchecked)
     Reattached((BlockId, BlockDto)),
     /// Response for:
-    /// - [`Promote`](crate::method::ClientMethod::Promote)
-    /// - [`PromoteUnchecked`](crate::method::ClientMethod::PromoteUnchecked)
-    Promoted((BlockId, BlockDto)),
-    /// Response for:
     /// - [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     Bech32ToHex(String),
     /// Response for:

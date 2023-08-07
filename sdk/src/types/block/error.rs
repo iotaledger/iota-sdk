@@ -9,7 +9,9 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
-use super::payload::ContextInputCount;
+use super::{
+    mana::AllotmentCount, payload::ContextInputCount, protocol::ProtocolParametersHash, public_key::PublicKeyCount,
+};
 use crate::types::block::{
     input::UtxoInput,
     output::{
@@ -24,6 +26,7 @@ use crate::types::block::{
 #[derive(Debug, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum Error {
+    AllotmentsNotUniqueSorted,
     ConsumedAmountOverflow,
     ConsumedNativeTokensAmountOverflow,
     CreatedAmountOverflow,
@@ -33,21 +36,38 @@ pub enum Error {
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
     FeaturesNotUniqueSorted,
-    InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
+    InputUnlockCountMismatch {
+        input_count: usize,
+        unlock_count: usize,
+    },
     InvalidAddress,
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    InvalidBlockKind(u8),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
-    InsufficientStorageDepositAmount { amount: u64, required: u64 },
-    StorageDepositReturnExceedsOutputAmount { deposit: u64, amount: u64 },
-    InsufficientStorageDepositReturnAmount { deposit: u64, required: u64 },
+    InsufficientStorageDepositAmount {
+        amount: u64,
+        required: u64,
+    },
+    StorageDepositReturnExceedsOutputAmount {
+        deposit: u64,
+        amount: u64,
+    },
+    InsufficientStorageDepositReturnAmount {
+        deposit: u64,
+        required: u64,
+    },
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
-    InvalidFoundryOutputSupply { minted: U256, melted: U256, max: U256 },
+    InvalidFoundryOutputSupply {
+        minted: U256,
+        melted: U256,
+        max: U256,
+    },
     Hex(HexError),
     InvalidInputKind(u8),
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
@@ -55,6 +75,7 @@ pub enum Error {
     InvalidBech32Hrp(String),
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
+    InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
@@ -62,12 +83,21 @@ pub enum Error {
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
     InvalidOutputKind(u8),
+    InvalidAllotmentCount(<AllotmentCount as TryFrom<usize>>::Error),
     // TODO this would now need to be generic, not sure if possible.
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
     InvalidParentCount,
     InvalidPayloadKind(u32),
-    InvalidPayloadLength { expected: usize, actual: usize },
+    InvalidPayloadLength {
+        expected: usize,
+        actual: usize,
+    },
+    InvalidProtocolParametersHash {
+        expected: ProtocolParametersHash,
+        actual: ProtocolParametersHash,
+    },
+    InvalidPublicKeyCount(<PublicKeyCount as TryFrom<usize>>::Error),
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -80,6 +110,7 @@ pub enum Error {
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
+    InvalidAllotmentManaSum(u128),
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
@@ -94,19 +125,35 @@ pub enum Error {
     NativeTokensNotUniqueSorted,
     NativeTokensNullAmount,
     NativeTokensOverflow,
-    NetworkIdMismatch { expected: u64, actual: u64 },
+    NetworkIdMismatch {
+        expected: u64,
+        actual: u64,
+    },
     NonDisjointParents,
     NonZeroStateIndexOrFoundryCounter,
     ParentsNotUniqueSorted,
-    ProtocolVersionMismatch { expected: u8, actual: u8 },
+    ProtocolVersionMismatch {
+        expected: u8,
+        actual: u8,
+    },
+    PublicKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
-    SignaturePublicKeyMismatch { expected: String, actual: String },
+    SignaturePublicKeyMismatch {
+        expected: String,
+        actual: String,
+    },
     StorageDepositReturnOverflow,
     TimelockUnlockConditionZero,
-    UnallowedFeature { index: usize, kind: u8 },
-    UnallowedUnlockCondition { index: usize, kind: u8 },
+    UnallowedFeature {
+        index: usize,
+        kind: u8,
+    },
+    UnallowedUnlockCondition {
+        index: usize,
+        kind: u8,
+    },
     UnlockConditionsNotUniqueSorted,
     UnsupportedOutputKind(u8),
     DuplicateOutputChain(ChainId),
@@ -119,6 +166,7 @@ impl std::error::Error for Error {}
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::AllotmentsNotUniqueSorted => write!(f, "allotments are not unique and/or sorted"),
             Self::ConsumedAmountOverflow => write!(f, "consumed amount overflow"),
             Self::ConsumedNativeTokensAmountOverflow => write!(f, "consumed native tokens amount overflow"),
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
@@ -148,6 +196,7 @@ impl fmt::Display for Error {
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
+            Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
             }
@@ -181,9 +230,10 @@ impl fmt::Display for Error {
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
-            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length {length}"),
+            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
+            Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
-                write!(f, "invalid metadata feature length {length}")
+                write!(f, "invalid metadata feature length: {length}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
@@ -191,6 +241,7 @@ impl fmt::Display for Error {
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
             Self::InvalidOutputKind(k) => write!(f, "invalid output kind: {k}"),
+            Self::InvalidAllotmentCount(count) => write!(f, "invalid allotment count: {count}"),
             Self::InvalidParentCount => {
                 write!(f, "invalid parents count")
             }
@@ -198,6 +249,13 @@ impl fmt::Display for Error {
             Self::InvalidPayloadLength { expected, actual } => {
                 write!(f, "invalid payload length: expected {expected} but got {actual}")
             }
+            Self::InvalidProtocolParametersHash { expected, actual } => {
+                write!(
+                    f,
+                    "invalid protocol parameters hash: expected {expected} but got {actual}"
+                )
+            }
+            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
@@ -218,6 +276,7 @@ impl fmt::Display for Error {
             Self::InvalidTransactionNativeTokensCount(count) => {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
+            Self::InvalidAllotmentManaSum(value) => write!(f, "invalid allotment mana sum: {value}"),
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {
@@ -256,6 +315,7 @@ impl fmt::Display for Error {
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
             }
+            Self::PublicKeysNotUniqueSorted => write!(f, "public keys are not unique and/or sorted"),
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }

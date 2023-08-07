@@ -17,12 +17,14 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
+        mana::Allotment,
         output::{AccountId, InputsCommitment},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
         },
         protocol::protocol_parameters,
+        rand::output::rand_account_id,
         semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -94,6 +96,7 @@ async fn sign_account_state_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -185,6 +188,7 @@ async fn sign_account_governance_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -316,6 +320,7 @@ async fn account_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
