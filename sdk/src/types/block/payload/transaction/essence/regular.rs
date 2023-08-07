@@ -234,7 +234,7 @@ impl RegularTransactionEssence {
         self.network_id
     }
 
-    /// Returns the slot index of the block in which the transaction was created. [`RegularTransactionEssence`].
+    /// Returns the slot index of the block in which the [`RegularTransactionEssence`] was created.
     pub fn creation_slot(&self) -> SlotIndex {
         self.creation_slot
     }
