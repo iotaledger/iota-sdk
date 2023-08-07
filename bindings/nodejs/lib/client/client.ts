@@ -285,17 +285,6 @@ export class Client {
     }
 
     /**
-     * Returns the tips interval.
-     */
-    async getTipsInterval(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getTipsInterval',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Returns the token supply.
      */
     async getTokenSupply(): Promise<string> {

@@ -75,10 +75,4 @@ describe.skip('Client info methods', () => {
 
         expect(bech32Hrp).toBeDefined();
     });
-
-    it('gets tips interval', async () => {
-        const tipsInterval = await client.getTipsInterval();
-
-        expect(tipsInterval).toBeDefined();
-    });
 });

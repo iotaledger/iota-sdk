@@ -17,7 +17,6 @@ import type {
     __GetNodeMethod__,
     __GetNetworkIdMethod__,
     __GetBech32HrpMethod__,
-    __GetTipsIntervalMethod__,
     __GetProtocolParametersMethod__,
     __GetHealthMethod__,
     __GetNodeInfoMethod__,
@@ -71,7 +70,6 @@ export type __ClientMethods__ =
     | __GetNodeMethod__
     | __GetNetworkIdMethod__
     | __GetBech32HrpMethod__
-    | __GetTipsIntervalMethod__
     | __GetProtocolParametersMethod__
     | __GetHealthMethod__
     | __GetNodeInfoMethod__
