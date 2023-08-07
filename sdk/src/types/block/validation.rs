@@ -12,14 +12,14 @@ use super::{
     core::{verify_parents, BlockWrapper},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    signature::{Ed25519Signature, Signature},
+    signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
     Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
 };
 
 pub type ValidationBlock = BlockWrapper<ValidationBlockData>;
 
-impl BlockBuilder<ValidationBlock> {
+impl BlockBuilder<ValidationBlockData> {
     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
     #[inline(always)]
     pub fn new(
@@ -31,9 +31,8 @@ impl BlockBuilder<ValidationBlock> {
         strong_parents: StrongParents,
         highest_supported_version: u8,
         protocol_parameters: &ProtocolParameters,
-        signature: Ed25519Signature,
     ) -> Self {
-        Self(BlockWrapper {
+        Self {
             protocol_version: PROTOCOL_VERSION,
             network_id,
             issuing_time,
@@ -47,28 +46,20 @@ impl BlockBuilder<ValidationBlock> {
                 highest_supported_version,
                 protocol_parameters_hash: protocol_parameters.hash(),
             },
-            signature,
-        })
-    }
-
-    /// Adds a protocol version to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
-        self.0.protocol_version = protocol_version;
-        self
+        }
     }
 
     /// Adds weak parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.0.data.weak_parents = weak_parents.into();
+        self.data.weak_parents = weak_parents.into();
         self
     }
 
     /// Adds shallow like parents to a [`BlockBuilder`].
     #[inline(always)]
     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.0.data.shallow_like_parents = shallow_like_parents.into();
+        self.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
 }

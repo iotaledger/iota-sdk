@@ -4,21 +4,27 @@
 pub mod input_selection;
 pub mod transaction;
 
+use crypto::keys::bip44::Bip44;
+
 pub use self::transaction::verify_semantic;
 use crate::{
-    client::{ClientInner, Result},
-    types::block::{core::Block, parent::StrongParents, payload::Payload, signature::Ed25519Signature, IssuerId},
+    client::{secret::SecretManage, ClientInner, Result},
+    types::block::{core::Block, parent::StrongParents, payload::Payload, IssuerId},
 };
 
 impl ClientInner {
-    pub async fn finish_basic_block_builder(
+    pub async fn finish_basic_block_builder<S: SecretManage>(
         &self,
         issuer_id: IssuerId,
-        signature: Ed25519Signature,
         issuing_time: Option<u64>,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
-    ) -> Result<Block> {
+        coin_type: u32,
+        secret_manager: &S,
+    ) -> Result<Block>
+    where
+        crate::client::Error: From<S::Error>,
+    {
         // Use tips as strong parents if none are provided.
         let strong_parents = match strong_parents {
             Some(strong_parents) => strong_parents,
@@ -42,16 +48,19 @@ impl ClientInner {
         let latest_finalized_slot = node_info.status.latest_finalized_slot;
         let slot_commitment_id = self.get_slot_commitment_by_index(latest_finalized_slot).await?.id();
 
-        Ok(Block::build_basic(
+        let builder = Block::build_basic(
             self.get_network_id().await?,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
             strong_parents,
-            signature,
         )
-        .with_payload(payload)
-        .finish()?)
+        .with_payload(payload);
+        let signature = secret_manager
+            .sign_ed25519(&builder.signing_input(), Bip44::new(coin_type))
+            .await?;
+
+        Ok(builder.finish(signature)?)
     }
 }

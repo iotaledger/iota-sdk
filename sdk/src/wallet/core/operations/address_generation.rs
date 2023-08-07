@@ -121,6 +121,7 @@ impl Wallet {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get the bech32 hrp from the first account address or if not existent, from the client
     pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<Hrp> {

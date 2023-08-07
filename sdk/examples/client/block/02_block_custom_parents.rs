@@ -9,7 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{Client, Result},
+    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
     types::block::parent::StrongParents,
 };
 
@@ -23,6 +23,8 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     let protocol_parameters = client.get_protocol_parameters().await?;
 
     // Use tips as custom parents.
@@ -33,10 +35,11 @@ async fn main() -> Result<()> {
     let block = client
         .finish_basic_block_builder(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             Some(StrongParents::from_vec(tips)?),
             None,
+            IOTA_COIN_TYPE,
+            &secret_manager,
         )
         .await?;
 

@@ -43,7 +43,8 @@ async fn test_get_tips() {
 #[ignore]
 #[tokio::test]
 async fn test_post_block_with_tagged_data() {
-    let block_id = setup_tagged_data_block().await;
+    let secret_manager = setup_secret_manager();
+    let block_id = setup_tagged_data_block(&secret_manager).await;
     println!("{block_id}");
 }
 
@@ -59,8 +60,9 @@ async fn test_post_block_with_transaction() {
 #[tokio::test]
 async fn test_get_block_data() {
     let client = setup_client_with_node_health_ignored().await;
+    let secret_manager = setup_secret_manager();
 
-    let block_id = setup_tagged_data_block().await;
+    let block_id = setup_tagged_data_block(&secret_manager).await;
     let r = client.get_block(&block_id).await.unwrap();
 
     println!("{r:#?}");
@@ -69,7 +71,8 @@ async fn test_get_block_data() {
 #[ignore]
 #[tokio::test]
 async fn test_get_block_metadata() {
-    let block_id = setup_tagged_data_block().await;
+    let secret_manager = setup_secret_manager();
+    let block_id = setup_tagged_data_block(&secret_manager).await;
 
     let r = setup_client_with_node_health_ignored()
         .await
@@ -83,7 +86,8 @@ async fn test_get_block_metadata() {
 #[ignore]
 #[tokio::test]
 async fn test_get_block_raw() {
-    let block_id = setup_tagged_data_block().await;
+    let secret_manager = setup_secret_manager();
+    let block_id = setup_tagged_data_block(&secret_manager).await;
 
     let r = setup_client_with_node_health_ignored()
         .await

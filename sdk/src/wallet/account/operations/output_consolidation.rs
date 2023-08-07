@@ -72,6 +72,7 @@ impl ConsolidationParams {
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     fn should_consolidate_output(
         &self,

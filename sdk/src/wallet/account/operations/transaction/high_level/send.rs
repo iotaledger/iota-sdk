@@ -79,6 +79,7 @@ impl SendParams {
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Sends a certain amount of base coins to a single address.
     ///

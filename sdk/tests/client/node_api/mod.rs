@@ -8,8 +8,8 @@ mod mqtt;
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client,
+        api::GetAddressesOptions, constants::IOTA_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
         payload::{tagged_data::TaggedDataPayload, transaction::TransactionId, Payload},
@@ -23,7 +23,7 @@ use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL};
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
 
 // Sends a tagged data block to the node to test against it.
-async fn setup_tagged_data_block() -> BlockId {
+async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     let protocol_parameters = client.get_protocol_parameters().await.unwrap();
@@ -31,12 +31,13 @@ async fn setup_tagged_data_block() -> BlockId {
     client
         .finish_basic_block_builder(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
             ))),
+            IOTA_COIN_TYPE,
+            secret_manager,
         )
         .await
         .unwrap()
@@ -92,7 +93,10 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         _ => unreachable!(),
     };
 
-    let _ = client.retry_until_included(&block_id, None, None).await.unwrap();
+    let _ = client
+        .retry_until_included(&block_id, None, None, IOTA_COIN_TYPE, &secret_manager)
+        .await
+        .unwrap();
 
     (block_id, transaction_id)
 }

@@ -8,7 +8,7 @@
 //! cargo run --release --example block_confirmation_time
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -20,16 +20,19 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     let protocol_parameters = client.get_protocol_parameters().await?;
 
     // Create and send a block.
     let block = client
         .finish_basic_block_builder(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             None,
+            IOTA_COIN_TYPE,
+            &secret_manager,
         )
         .await?;
     let block_id = block.id(&protocol_parameters);
@@ -37,7 +40,9 @@ async fn main() -> Result<()> {
     println!("{block:#?}");
 
     // Try to check if the block has been confirmed.
-    client.retry_until_included(&block_id, None, None).await?;
+    client
+        .retry_until_included(&block_id, None, None, IOTA_COIN_TYPE, &secret_manager)
+        .await?;
     println!(
         "Block with no payload included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),

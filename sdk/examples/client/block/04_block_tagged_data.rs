@@ -9,7 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{Client, Result},
+    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
     types::block::payload::{Payload, TaggedDataPayload},
 };
 
@@ -23,13 +23,14 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     let protocol_parameters = client.get_protocol_parameters().await?;
 
     // Create and send the block with tag and data.
     let block = client
         .finish_basic_block_builder(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             Some(Payload::TaggedData(Box::new(
@@ -45,6 +46,8 @@ async fn main() -> Result<()> {
                 )
                 .unwrap(),
             ))),
+            IOTA_COIN_TYPE,
+            &secret_manager,
         )
         .await?;
 

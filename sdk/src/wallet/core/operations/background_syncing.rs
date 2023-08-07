@@ -16,6 +16,7 @@ pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_s
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Start the background syncing process for all accounts, default interval is 7 seconds
     pub async fn start_background_syncing(

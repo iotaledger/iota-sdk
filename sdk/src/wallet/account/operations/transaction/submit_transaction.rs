@@ -12,6 +12,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
@@ -26,10 +27,11 @@ where
             .client()
             .finish_basic_block_builder(
                 todo!("issuer id"),
-                todo!("block signature"),
                 todo!("issuing time"),
                 None,
                 Some(Payload::from(transaction_payload)),
+                self.wallet.coin_type(),
+                &*self.get_secret_manager().read().await,
             )
             .await?;
 

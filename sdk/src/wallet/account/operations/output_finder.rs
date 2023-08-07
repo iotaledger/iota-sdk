@@ -11,6 +11,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Search addresses with unspent outputs
     /// `address_gap_limit`: The number of addresses to search for, after the last address with unspent outputs

@@ -5,7 +5,10 @@ use iota_sdk::types::block::{
     payload::Payload,
     protocol::protocol_parameters,
     rand::{
-        block::{rand_basic_block_builder_with_strong_parents, rand_basic_block_with_strong_parents, rand_block},
+        block::{
+            rand_basic_block_builder_with_strong_parents, rand_basic_block_with_strong_parents, rand_block,
+            SignBlockRandom,
+        },
         parents::rand_strong_parents,
         payload::rand_tagged_data_payload,
     },
@@ -105,8 +108,7 @@ fn getters() {
 
     let block = rand_basic_block_builder_with_strong_parents(parents.clone())
         .with_payload(payload.clone())
-        .finish()
-        .unwrap();
+        .sign_random();
 
     assert_eq!(block.protocol_version(), protocol_parameters.protocol_version());
     assert_eq!(*block.strong_parents(), parents);

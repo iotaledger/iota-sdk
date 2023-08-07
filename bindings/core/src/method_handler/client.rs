@@ -4,7 +4,7 @@
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
-    client::{request_funds_from_faucet, Client},
+    client::{request_funds_from_faucet, secret::SecretManager, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -174,12 +174,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::PostBlockPayload { payload } => {
             let protocol_params = client.get_protocol_parameters().await?;
             let block = client
-                .finish_basic_block_builder(
+                .finish_basic_block_builder::<SecretManager>(
                     todo!("issuer id"),
-                    todo!("block signature"),
                     todo!("issuing time"),
                     None,
                     Some(Payload::try_from_dto_with_params(payload, &protocol_params)?),
+                    todo!("coin type"),
+                    todo!("secret manager"),
                 )
                 .await?;
 
@@ -272,7 +273,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .collect(),
         ),
         ClientMethod::Retry { block_id } => {
-            let (block_id, block) = client.retry(&block_id).await?;
+            let (block_id, block) = client
+                .retry::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
+                .await?;
             Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
         }
         ClientMethod::RetryUntilIncluded {
@@ -280,7 +283,15 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             interval,
             max_attempts,
         } => {
-            let res = client.retry_until_included(&block_id, interval, max_attempts).await?;
+            let res = client
+                .retry_until_included::<SecretManager>(
+                    &block_id,
+                    interval,
+                    max_attempts,
+                    todo!("coin type"),
+                    todo!("secret manager"),
+                )
+                .await?;
             let res = res
                 .into_iter()
                 .map(|(block_id, block)| (block_id, BlockDto::from(&block)))
@@ -291,19 +302,27 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Inputs(client.find_inputs(addresses, amount).await?)
         }
         ClientMethod::Reattach { block_id } => {
-            let (block_id, block) = client.reattach(&block_id).await?;
+            let (block_id, block) = client
+                .reattach::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
+                .await?;
             Response::Reattached((block_id, BlockDto::from(&block)))
         }
         ClientMethod::ReattachUnchecked { block_id } => {
-            let (block_id, block) = client.reattach_unchecked(&block_id).await?;
+            let (block_id, block) = client
+                .reattach_unchecked::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
+                .await?;
             Response::Reattached((block_id, BlockDto::from(&block)))
         }
         ClientMethod::Promote { block_id } => {
-            let (block_id, block) = client.promote(&block_id).await?;
+            let (block_id, block) = client
+                .promote::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
+                .await?;
             Response::Promoted((block_id, BlockDto::from(&block)))
         }
         ClientMethod::PromoteUnchecked { block_id } => {
-            let (block_id, block) = client.promote_unchecked(&block_id).await?;
+            let (block_id, block) = client
+                .promote_unchecked::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
+                .await?;
             Response::Promoted((block_id, BlockDto::from(&block)))
         }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {

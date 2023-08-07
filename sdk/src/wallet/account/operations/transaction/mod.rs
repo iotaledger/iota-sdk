@@ -34,6 +34,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Sends a transaction by specifying its outputs.
     ///

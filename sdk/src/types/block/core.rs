@@ -25,44 +25,75 @@ use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::Payload,
     protocol::ProtocolParameters,
-    BlockId, Error, PROTOCOL_VERSION,
+    BlockId, Error,
 };
 
 /// A builder to build a [`Block`].
 #[derive(Clone)]
 #[must_use]
-pub struct BlockBuilder<B>(pub(crate) B);
+pub struct BlockBuilder<B> {
+    /// Protocol version of the block.
+    pub(crate) protocol_version: u8,
+    /// Network identifier.
+    pub(crate) network_id: u64,
+    /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
+    pub(crate) issuing_time: u64,
+    /// The identifier of the slot to which this block commits.
+    pub(crate) slot_commitment_id: SlotCommitmentId,
+    /// The slot index of the latest finalized slot.
+    pub(crate) latest_finalized_slot: SlotIndex,
+    /// The identifier of the account that issued this block.
+    pub(crate) issuer_id: IssuerId,
+    /// The inner block data, either [`BasicBlock`] or [`ValidationBlock`].
+    pub(crate) data: B,
+}
 
-impl<B> BlockBuilder<BlockWrapper<B>> {
+impl<B> BlockBuilder<B> {
     pub fn from_block_data(
+        protocol_version: u8,
         network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
         data: B,
-        signature: Ed25519Signature,
     ) -> Self {
-        Self(BlockWrapper {
-            protocol_version: PROTOCOL_VERSION,
+        Self {
+            protocol_version,
             network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
             data,
-            signature,
-        })
+        }
+    }
+
+    /// Adds a protocol version to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
+        self.protocol_version = protocol_version;
+        self
     }
 }
 
 impl<B> BlockBuilder<B>
 where
     B: Packable,
-    Block: From<B>,
+    Block: From<BlockWrapper<B>>,
 {
-    fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-        let block = Block::from(self.0);
+    fn _finish(self, signature: Ed25519Signature) -> Result<(Block, Vec<u8>), Error> {
+        let wrapper = BlockWrapper {
+            protocol_version: self.protocol_version,
+            network_id: self.network_id,
+            issuing_time: self.issuing_time,
+            slot_commitment_id: self.slot_commitment_id,
+            latest_finalized_slot: self.latest_finalized_slot,
+            issuer_id: self.issuer_id,
+            data: self.data,
+            signature,
+        };
+        let block = Block::from(wrapper);
 
         verify_parents(
             block.strong_parents(),
@@ -80,8 +111,36 @@ where
     }
 
     /// Finishes the [`BlockBuilder`] into a [`Block`].
-    pub fn finish(self) -> Result<Block, Error> {
-        self._finish().map(|res| res.0)
+    pub fn finish(self, signature: Ed25519Signature) -> Result<Block, Error> {
+        self._finish(signature).map(|res| res.0)
+    }
+}
+
+impl<B: Packable> BlockBuilder<B> {
+    pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.protocol_version.pack(packer)?;
+        self.network_id.pack(packer)?;
+        self.issuing_time.pack(packer)?;
+        self.slot_commitment_id.pack(packer)?;
+        self.latest_finalized_slot.pack(packer)?;
+        self.issuer_id.pack(packer)?;
+        Ok(())
+    }
+
+    pub(crate) fn header_hash(&self) -> [u8; 32] {
+        let mut bytes = [0u8; Block::HEADER_LENGTH];
+        self.pack_header(&mut SlicePacker::new(&mut bytes)).unwrap();
+        Blake2b256::digest(bytes).into()
+    }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let bytes = self.data.pack_to_vec();
+        Blake2b256::digest(bytes).into()
+    }
+
+    /// Get the signing input that can be used to generate an [`Ed25519Signature`] for the resulting block;
+    pub fn signing_input(&self) -> Vec<u8> {
+        [self.header_hash(), self.block_hash()].concat()
     }
 }
 
@@ -256,7 +315,9 @@ impl<B> BlockWrapper<B> {
     pub fn signature(&self) -> &Ed25519Signature {
         &self.signature
     }
+}
 
+impl<B: Packable> BlockWrapper<B> {
     pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.protocol_version.pack(packer)?;
         self.network_id.pack(packer)?;
@@ -270,6 +331,11 @@ impl<B> BlockWrapper<B> {
     pub(crate) fn header_hash(&self) -> [u8; 32] {
         let mut bytes = [0u8; Block::HEADER_LENGTH];
         self.pack_header(&mut SlicePacker::new(&mut bytes)).unwrap();
+        Blake2b256::digest(bytes).into()
+    }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let bytes = self.data.pack_to_vec();
         Blake2b256::digest(bytes).into()
     }
 }
@@ -298,16 +364,14 @@ impl Block {
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
         strong_parents: StrongParents,
-        signature: Ed25519Signature,
-    ) -> BlockBuilder<BasicBlock> {
-        BlockBuilder::<BasicBlock>::new(
+    ) -> BlockBuilder<BasicBlockData> {
+        BlockBuilder::<BasicBlockData>::new(
             network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
             strong_parents,
-            signature,
         )
     }
 
@@ -323,8 +387,8 @@ impl Block {
         highest_supported_version: u8,
         protocol_parameters: &ProtocolParameters,
         signature: Ed25519Signature,
-    ) -> BlockBuilder<ValidationBlock> {
-        BlockBuilder::<ValidationBlock>::new(
+    ) -> BlockBuilder<ValidationBlockData> {
+        BlockBuilder::<ValidationBlockData>::new(
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -333,7 +397,6 @@ impl Block {
             strong_parents,
             highest_supported_version,
             protocol_parameters,
-            signature,
         )
     }
 
@@ -509,8 +572,8 @@ impl Block {
 
     pub(crate) fn block_hash(&self) -> [u8; 32] {
         let bytes = match self {
-            Block::Basic(b) => b.data.pack_to_vec(),
-            Block::Validation(b) => b.data.pack_to_vec(),
+            Block::Basic(b) => b.block_hash(),
+            Block::Validation(b) => b.block_hash(),
         };
         Blake2b256::digest(bytes).into()
     }
@@ -673,27 +736,25 @@ pub(crate) mod dto {
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             match dto.block {
                 BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
+                    dto.protocol_version,
                     dto.network_id,
                     dto.issuing_time,
                     dto.slot_commitment_id,
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     BasicBlockData::try_from_dto_with_params_inner(b, params)?,
-                    *dto.signature.as_ed25519(),
                 )
-                .with_protocol_version(dto.protocol_version)
-                .finish(),
+                .finish(*dto.signature.as_ed25519()),
                 BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
+                    dto.protocol_version,
                     dto.network_id,
                     dto.issuing_time,
                     dto.slot_commitment_id,
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
-                    *dto.signature.as_ed25519(),
                 )
-                .with_protocol_version(dto.protocol_version)
-                .finish(),
+                .finish(*dto.signature.as_ed25519()),
             }
         }
     }

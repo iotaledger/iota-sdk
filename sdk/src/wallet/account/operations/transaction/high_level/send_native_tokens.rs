@@ -81,6 +81,7 @@ impl SendNativeTokensParams {
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
     /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access

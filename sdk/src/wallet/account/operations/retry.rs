@@ -23,6 +23,7 @@ const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 impl<S: 'static + SecretManage> Account<S>
 where
     Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). This function is re-exported from the client library and default interval is as defined there.
@@ -35,7 +36,13 @@ where
     ) -> crate::wallet::Result<Vec<(BlockId, Block)>> {
         Ok(self
             .client()
-            .retry_until_included(block_id, interval, max_attempts)
+            .retry_until_included(
+                block_id,
+                interval,
+                max_attempts,
+                self.wallet.coin_type(),
+                &*self.get_secret_manager().read().await,
+            )
             .await?)
     }
 
@@ -74,10 +81,11 @@ where
                     .client()
                     .finish_basic_block_builder(
                         todo!("issuer id"),
-                        todo!("block signature"),
                         todo!("issuing time"),
                         None,
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                        self.wallet.coin_type(),
+                        &*self.get_secret_manager().read().await,
                     )
                     .await?
                     .id(&protocol_params),
@@ -114,16 +122,23 @@ where
                     if index == block_ids_len - 1 {
                         if block_metadata.should_promote.unwrap_or(false) {
                             // Safe to unwrap since we iterate over it
-                            self.client().promote_unchecked(block_ids.last().unwrap()).await?;
+                            self.client()
+                                .promote_unchecked(
+                                    block_ids.last().unwrap(),
+                                    self.wallet.coin_type(),
+                                    &*self.get_secret_manager().read().await,
+                                )
+                                .await?;
                         } else if block_metadata.should_reattach.unwrap_or(false) {
                             let reattached_block = self
                                 .client()
                                 .finish_basic_block_builder(
                                     todo!("issuer id"),
-                                    todo!("block signature"),
                                     todo!("issuing time"),
                                     None,
                                     Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                                    self.wallet.coin_type(),
+                                    &*self.get_secret_manager().read().await,
                                 )
                                 .await?;
                             block_ids.push(reattached_block.id(&protocol_params));

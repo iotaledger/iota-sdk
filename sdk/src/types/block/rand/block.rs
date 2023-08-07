@@ -3,9 +3,9 @@
 
 use alloc::vec::Vec;
 
-use super::signature::rand_ed25519_signature;
+use super::signature::rand_sign_ed25519;
 use crate::types::block::{
-    basic::BasicBlock,
+    basic::BasicBlockData,
     core::Block,
     parent::StrongParents,
     rand::{
@@ -30,12 +30,11 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
 pub fn rand_basic_block_with_strong_parents(strong_parents: StrongParents) -> Block {
     rand_basic_block_builder_with_strong_parents(strong_parents)
         .with_payload(rand_payload_for_block())
-        .finish()
-        .unwrap()
+        .sign_random()
 }
 
 /// Generates a random basic block builder with given parents.
-pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BlockBuilder<BasicBlock> {
+pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BlockBuilder<BasicBlockData> {
     Block::build_basic(
         rand_number(),
         rand_number(),
@@ -43,11 +42,21 @@ pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParent
         rand_number::<u64>().into(),
         rand_bytes_array().into(),
         strong_parents,
-        rand_ed25519_signature(),
     )
 }
 
 /// Generates a random block.
 pub fn rand_block() -> Block {
     rand_basic_block_with_strong_parents(rand_strong_parents())
+}
+
+pub trait SignBlockRandom {
+    fn sign_random(self) -> Block;
+}
+
+impl SignBlockRandom for BlockBuilder<BasicBlockData> {
+    fn sign_random(self) -> Block {
+        let signing_input = self.signing_input();
+        self.finish(rand_sign_ed25519(&signing_input)).unwrap()
+    }
 }
