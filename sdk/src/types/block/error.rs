@@ -32,6 +32,8 @@ pub enum Error {
     CreatedAmountOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
+    DuplicateBicAccountId(AccountId),
+    DuplicateRewardInputIndex(u16),
     DuplicateSignatureUnlock(u16),
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
@@ -44,6 +46,7 @@ pub enum Error {
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockKind(u8),
+    InvalidRewardInputIndex(u16),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {
@@ -146,6 +149,7 @@ pub enum Error {
     },
     StorageDepositReturnOverflow,
     TimelockUnlockConditionZero,
+    TooManyCommitmentInputs,
     UnallowedFeature {
         index: usize,
         kind: u8,
@@ -172,6 +176,8 @@ impl fmt::Display for Error {
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
+            Self::DuplicateBicAccountId(account_id) => write!(f, "duplicate BIC account id: {account_id}"),
+            Self::DuplicateRewardInputIndex(idx) => write!(f, "duplicate reward input index: {idx}"),
             Self::DuplicateSignatureUnlock(index) => {
                 write!(f, "duplicate signature unlock at index: {index}")
             }
@@ -197,6 +203,7 @@ impl fmt::Display for Error {
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
+            Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
             }
@@ -337,6 +344,7 @@ impl fmt::Display for Error {
                     "timelock unlock condition with milestone index and timestamp set to 0",
                 )
             }
+            Self::TooManyCommitmentInputs => write!(f, "too many commitment inputs"),
             Self::UnallowedFeature { index, kind } => {
                 write!(f, "unallowed feature at index {index} with kind {kind}")
             }

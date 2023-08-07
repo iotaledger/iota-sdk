@@ -9,7 +9,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 use crate::types::{
     block::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
-        input::{Input, INPUT_COUNT_MAX, INPUT_COUNT_RANGE},
+        input::{Input, INPUT_COUNT_RANGE},
         mana::{Allotment, Allotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
@@ -135,7 +135,7 @@ impl RegularTransactionEssenceBuilder {
             .try_into()
             .map_err(Error::InvalidInputCount)?;
 
-        verify_inputs::<true>(&inputs)?;
+        verify_inputs(&inputs)?;
 
         let outputs: BoxedSlicePrefix<Output, OutputCount> = self
             .outputs
@@ -149,7 +149,7 @@ impl RegularTransactionEssenceBuilder {
 
         let allotments = Allotments::from_set(self.allotments)?;
 
-        verify_payload::<true>(&self.payload)?;
+        verify_payload(&self.payload)?;
 
         let creation_slot = self.creation_slot.unwrap_or_else(|| {
             #[cfg(feature = "std")]
@@ -284,71 +284,59 @@ fn verify_context_inputs_packable<const VERIFY: bool>(
     context_inputs: &[ContextInput],
     _visitor: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_context_inputs::<VERIFY>(context_inputs)
+    if VERIFY {
+        verify_context_inputs(context_inputs)?;
+    }
+    Ok(())
 }
 
-fn verify_context_inputs<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
-    if VERIFY {
-        // There must be zero or one Commitment Input.
-        // if context_inputs
-        // .iter()
-        // .filter(|i| matches!(i, ContextInput::CommitmentInput(_)))
-        // .count()
-        // > 1
-        // {
-        // return Err(Error::TooManyCommitmentInput);
-        // }
+fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
+    // There must be zero or one Commitment Input.
+    if context_inputs
+        .iter()
+        .filter(|i| matches!(i, ContextInput::Commitment(_)))
+        .count()
+        > 1
+    {
+        return Err(Error::TooManyCommitmentInputs);
+    }
 
-        // All Rewards Inputs must reference a different Index and it must hold that: Index <= Max Inputs Count.
-        let rewards: Vec<u16> = context_inputs
-            .iter()
-            .filter_map(|e| match e {
-                ContextInput::Reward(r) => Some(r.index()),
-                _ => None,
-            })
-            .collect();
-
-        let set: HashSet<u16> = rewards
-            .iter()
-            .map(|i| {
-                if i <= &INPUT_COUNT_MAX {
-                    Ok(i)
-                } else {
-                    return Err(Error::InvalidAccountIndex(*i));
+    let mut reward_index_set = HashSet::new();
+    let mut bic_account_id_set = HashSet::new();
+    for input in context_inputs.iter() {
+        match input {
+            ContextInput::BlockIssuanceCredit(bic) => {
+                let account_id = bic.account_id();
+                // All Block Issuance Credit Inputs must reference a different Account ID.
+                if !bic_account_id_set.insert(account_id) {
+                    return Err(Error::DuplicateBicAccountId(account_id));
                 }
-            })
-            .collect()?;
-        if set.len() != rewards.len() {
-            return Err(Error::DuplicateIndex());
+            }
+            ContextInput::Reward(r) => {
+                let idx = r.index();
+                // It must hold that: Index <= Max Inputs Count.
+                if !INPUT_COUNT_RANGE.contains(&idx) {
+                    return Err(Error::InvalidRewardInputIndex(idx));
+                }
+                // All Rewards Inputs must reference a different Index
+                if !reward_index_set.insert(idx) {
+                    return Err(Error::DuplicateRewardInputIndex(idx));
+                }
+            }
+            _ => (),
         }
-
-        // All Block Issuance Credit Inputs must reference a different Account ID.
-        // let bic_inputs: Vec<BlockIssuanceCreditInput> = context_inputs
-        // .iter()
-        // .filter_map(|e| match e {
-        // ContextInput::BlockIssuanceCreditInput(bic) => Some(bic),
-        // _ => None,
-        // })
-        // .collect();
-        //
-        // let set: HashSet<u16> = rewards.iter().map(|bic| bic.account_index()).collect()?;
-        // if set.len() != bic_inputs.len() {
-        // return Err(Error::DuplicateAccountIndex());
-        // }
     }
 
     Ok(())
 }
 
-fn verify_inputs<const VERIFY: bool>(inputs: &[Input]) -> Result<(), Error> {
-    if VERIFY {
-        let mut seen_utxos = HashSet::new();
+fn verify_inputs(inputs: &[Input]) -> Result<(), Error> {
+    let mut seen_utxos = HashSet::new();
 
-        for input in inputs.iter() {
-            let Input::Utxo(utxo) = input;
-            if !seen_utxos.insert(utxo) {
-                return Err(Error::DuplicateUtxo(*utxo));
-            }
+    for input in inputs.iter() {
+        let Input::Utxo(utxo) = input;
+        if !seen_utxos.insert(utxo) {
+            return Err(Error::DuplicateUtxo(*utxo));
         }
     }
 
@@ -356,7 +344,10 @@ fn verify_inputs<const VERIFY: bool>(inputs: &[Input]) -> Result<(), Error> {
 }
 
 fn verify_inputs_packable<const VERIFY: bool>(inputs: &[Input], _visitor: &ProtocolParameters) -> Result<(), Error> {
-    verify_inputs::<VERIFY>(inputs)
+    if VERIFY {
+        verify_inputs(inputs)?;
+    }
+    Ok(())
 }
 
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
@@ -406,14 +397,10 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
     Ok(())
 }
 
-fn verify_payload<const VERIFY: bool>(payload: &OptionalPayload) -> Result<(), Error> {
-    if VERIFY {
-        match &payload.0 {
-            Some(Payload::TaggedData(_)) | None => Ok(()),
-            Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
-        }
-    } else {
-        Ok(())
+fn verify_payload(payload: &OptionalPayload) -> Result<(), Error> {
+    match &payload.0 {
+        Some(Payload::TaggedData(_)) | None => Ok(()),
+        Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
     }
 }
 
@@ -421,7 +408,10 @@ fn verify_payload_packable<const VERIFY: bool>(
     payload: &OptionalPayload,
     _visitor: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_payload::<VERIFY>(payload)
+    if VERIFY {
+        verify_payload(payload)?;
+    }
+    Ok(())
 }
 
 pub(crate) mod dto {
