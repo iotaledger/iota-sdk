@@ -12,7 +12,7 @@ impl BlockHash {
     }
 }
 
-/// A block identifier, the BLAKE2b-256 hash of the block bytes. See <https://www.blake2.net/> for more information.
+/// A block identifier.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, Debug, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[repr(C)]

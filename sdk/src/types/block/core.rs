@@ -16,7 +16,7 @@ use packable::{
 use super::{
     basic::{BasicBlock, BasicBlockData},
     block_id::BlockHash,
-    signature::Ed25519Signature,
+    signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     validation::{ValidationBlock, ValidationBlockData},
     IssuerId,
@@ -146,7 +146,7 @@ impl Packable for Block {
         let block = match kind {
             BasicBlock::KIND => {
                 let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
-                let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+                let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
                 Self::from(BlockWrapper {
                     protocol_version,
@@ -161,7 +161,7 @@ impl Packable for Block {
             }
             ValidationBlock::KIND => {
                 let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
-                let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+                let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
                 Self::from(BlockWrapper {
                     protocol_version,
@@ -286,7 +286,8 @@ impl Block {
         + size_of::<SlotIndex>()
         + size_of::<IssuerId>();
     /// The length of the block signature.
-    pub const SIGNATURE_LENGTH: usize = Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
+    pub const SIGNATURE_LENGTH: usize =
+        size_of::<u8>() + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
@@ -635,7 +636,7 @@ pub(crate) mod dto {
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
         pub block: BlockDataDto,
-        pub signature: Ed25519Signature,
+        pub signature: Signature,
     }
 
     impl From<&Block> for BlockDto {
@@ -649,7 +650,7 @@ pub(crate) mod dto {
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     block: (&b.data).into(),
-                    signature: *b.signature(),
+                    signature: b.signature.into(),
                 },
                 Block::Validation(b) => Self {
                     protocol_version: b.protocol_version(),
@@ -659,7 +660,7 @@ pub(crate) mod dto {
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     block: (&b.data).into(),
-                    signature: *b.signature(),
+                    signature: b.signature.into(),
                 },
             }
         }
@@ -678,7 +679,7 @@ pub(crate) mod dto {
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     BasicBlockData::try_from_dto_with_params_inner(b, params)?,
-                    dto.signature,
+                    *dto.signature.as_ed25519(),
                 )
                 .with_protocol_version(dto.protocol_version)
                 .finish(),
@@ -689,7 +690,7 @@ pub(crate) mod dto {
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
-                    dto.signature,
+                    *dto.signature.as_ed25519(),
                 )
                 .with_protocol_version(dto.protocol_version)
                 .finish(),
