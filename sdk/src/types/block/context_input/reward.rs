@@ -1,24 +1,40 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::{Display, From};
+use packable::bounded::BoundedU16;
+
+use super::CONTEXT_INPUT_COUNT_RANGE;
+use crate::types::block::Error;
+
+pub(crate) type RewardContextInputIndex =
+    BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
 
 /// A Reward Context Input indicates which transaction Input is claiming Mana rewards.
-#[derive(Clone, Copy, Debug, Display, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
-pub struct RewardContextInput(u16);
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
+#[packable(unpack_error = Error)]
+pub struct RewardContextInput(#[packable(unpack_error_with = Error::InvalidRewardInputIndex)] RewardContextInputIndex);
 
 impl RewardContextInput {
     /// The context input kind of a [`RewardContextInput`].
     pub const KIND: u8 = 2;
 
     /// Creates a new [`RewardContextInput`].
-    pub fn new(index: u16) -> Self {
-        Self(index)
+    pub fn new(index: u16) -> Result<Self, Error> {
+        index
+            .try_into()
+            .map(|index| Self(index))
+            .map_err(Error::InvalidRewardInputIndex)
     }
 
     /// Returns the index of a [`RewardContextInput`].
     pub fn index(&self) -> u16 {
-        self.0
+        self.0.get()
+    }
+}
+
+impl core::fmt::Display for RewardContextInput {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "RewardContextInput({})", self.index())
     }
 }
 
@@ -44,8 +60,10 @@ mod dto {
         }
     }
 
-    impl From<RewardContextInputDto> for RewardContextInput {
-        fn from(value: RewardContextInputDto) -> Self {
+    impl TryFrom<RewardContextInputDto> for RewardContextInput {
+        type Error = Error;
+
+        fn try_from(value: RewardContextInputDto) -> Result<Self, Self::Error> {
             Self::new(value.index)
         }
     }

@@ -9,16 +9,17 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
-use super::{
-    mana::AllotmentCount, payload::ContextInputCount, protocol::ProtocolParametersHash, public_key::PublicKeyCount,
-};
 use crate::types::block::{
+    context_input::RewardContextInputIndex,
     input::UtxoInput,
+    mana::AllotmentCount,
     output::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
-    payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
+    payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
+    protocol::ProtocolParametersHash,
+    public_key::PublicKeyCount,
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -46,7 +47,7 @@ pub enum Error {
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockKind(u8),
-    InvalidRewardInputIndex(u16),
+    InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {

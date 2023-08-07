@@ -314,10 +314,6 @@ fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
             }
             ContextInput::Reward(r) => {
                 let idx = r.index();
-                // It must hold that: Index <= Max Inputs Count.
-                if !INPUT_COUNT_RANGE.contains(&idx) {
-                    return Err(Error::InvalidRewardInputIndex(idx));
-                }
                 // All Rewards Inputs must reference a different Index
                 if !reward_index_set.insert(idx) {
                     return Err(Error::DuplicateRewardInputIndex(idx));

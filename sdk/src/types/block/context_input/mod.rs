@@ -9,6 +9,7 @@ use core::ops::RangeInclusive;
 
 use derive_more::{Display, From};
 
+pub(crate) use self::reward::RewardContextInputIndex;
 pub use self::{
     block_issuance_credit::BlockIssuanceCreditContextInput, commitment::CommitmentContextInput,
     reward::RewardContextInput,
