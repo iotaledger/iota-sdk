@@ -202,34 +202,3 @@ class HighLevelAPI():
         })
         result[1] = Block.from_dict(result[1])
         return result
-
-    def promote(self, block_id: HexStr) -> List[HexStr | Block]:
-        """Promotes a block. The method should validate if a promotion is necessary through get_block.
-        If not, the method should error out and should not allow unnecessary promotions.
-
-        Args:
-            block_id: A block id of a block that should be promoted.
-
-        Returns:
-            The block id and block that promoted the provided block.
-        """
-        result = self._call_method('promote', {
-            'blockId': block_id
-        })
-        result[1] = Block.from_dict(result[1])
-        return result
-
-    def promote_unchecked(self, block_id: HexStr) -> List[HexStr | Block]:
-        """Promote a block without checking if it should be promoted.
-
-        Args:
-            block_id: A block id of a block that should be promoted.
-
-        Returns:
-            The block id and block that promoted the provided block.
-        """
-        result = self._call_method('promoteUnchecked', {
-            'blockId': block_id
-        })
-        result[1] = Block.from_dict(result[1])
-        return result
