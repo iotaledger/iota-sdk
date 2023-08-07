@@ -14,6 +14,7 @@ use crate::types::{
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
+        slot::SlotIndex,
         Error,
     },
     ValidationParams,
@@ -30,7 +31,7 @@ pub struct RegularTransactionEssenceBuilder {
     outputs: Vec<Output>,
     allotments: BTreeSet<Allotment>,
     payload: OptionalPayload,
-    creation_slot: Option<u64>,
+    creation_slot: Option<SlotIndex>,
 }
 
 impl RegularTransactionEssenceBuilder {
@@ -49,7 +50,7 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Adds creation slot to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<u64>>) -> Self {
+    pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<SlotIndex>>) -> Self {
         self.creation_slot = creation_slot.into();
         self
     }
@@ -162,7 +163,7 @@ impl RegularTransactionEssenceBuilder {
             #[cfg(not(feature = "std"))]
             let creation_slot = 0;
 
-            creation_slot
+            creation_slot.into()
         });
 
         Ok(RegularTransactionEssence {
@@ -198,7 +199,7 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
     /// The slot index of the block in which the transaction was created.
-    creation_slot: u64,
+    creation_slot: SlotIndex,
     #[packable(verify_with = verify_context_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
     context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount>,
@@ -230,7 +231,7 @@ impl RegularTransactionEssence {
     }
 
     /// Returns the slot index of the block in which the transaction was created. [`RegularTransactionEssence`].
-    pub fn creation_slot(&self) -> u64 {
+    pub fn creation_slot(&self) -> SlotIndex {
         self.creation_slot
     }
 
@@ -417,12 +418,9 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::{
-            block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
-            TryFromDto,
-        },
-        utils::serde::string,
+    use crate::types::{
+        block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        TryFromDto,
     };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
@@ -432,8 +430,7 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub network_id: String,
-        #[serde(with = "string")]
-        pub creation_slot: u64,
+        pub creation_slot: SlotIndex,
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
         pub inputs_commitment: String,
