@@ -27,7 +27,10 @@ async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     client
-        .finish_block_builder(
+        .finish_basic_block_builder(
+            todo!("issuer id"),
+            todo!("block signature"),
+            todo!("issuing time"),
             None,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),

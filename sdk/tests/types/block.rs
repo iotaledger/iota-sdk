@@ -4,8 +4,11 @@
 use iota_sdk::types::block::{
     payload::Payload,
     protocol::protocol_parameters,
-    rand::{parents::rand_strong_parents, payload::rand_tagged_data_payload},
-    Block, BlockBuilder,
+    rand::{
+        block::{rand_basic_block_builder_with_strong_parents, rand_basic_block_with_strong_parents, rand_block},
+        parents::rand_strong_parents,
+        payload::rand_tagged_data_payload,
+    },
 };
 use packable::PackableExt;
 
@@ -84,7 +87,7 @@ use packable::PackableExt;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = BlockBuilder::new(rand_strong_parents()).finish().unwrap();
+    let block = rand_block();
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -100,7 +103,7 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let block = BlockBuilder::new(parents.clone())
+    let block = rand_basic_block_builder_with_strong_parents(parents.clone())
         .with_payload(payload.clone())
         .finish()
         .unwrap();
@@ -113,7 +116,7 @@ fn getters() {
 #[test]
 fn build_into_parents() {
     let parents = rand_strong_parents();
-    let block = Block::build(parents.clone()).finish().unwrap();
+    let block = rand_basic_block_with_strong_parents(parents.clone());
 
-    assert_eq!(block.into_strong_parents(), parents);
+    assert_eq!(block.strong_parents(), &parents);
 }

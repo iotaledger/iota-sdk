@@ -42,8 +42,6 @@ import type {
     __RetryUntilIncludedMethod__,
     __ReattachMethod__,
     __ReattachUncheckedMethod__,
-    __PromoteMethod__,
-    __PromoteUncheckedMethod__,
     __UnhealthyNodesMethod__,
     __BuildBasicOutputMethod__,
     __BuildAliasOutputMethod__,
@@ -98,8 +96,6 @@ export type __ClientMethods__ =
     | __RetryUntilIncludedMethod__
     | __ReattachMethod__
     | __ReattachUncheckedMethod__
-    | __PromoteMethod__
-    | __PromoteUncheckedMethod__
     | __UnhealthyNodesMethod__
     | __BuildBasicOutputMethod__
     | __BuildAliasOutputMethod__

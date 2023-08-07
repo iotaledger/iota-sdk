@@ -309,19 +309,6 @@ pub enum ClientMethod {
         /// Block ID
         block_id: BlockId,
     },
-    /// Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
-    /// method should error out and should not allow unnecessary promotions.
-    #[serde(rename_all = "camelCase")]
-    Promote {
-        /// Block ID
-        block_id: BlockId,
-    },
-    /// Promote a block without checking if it should be promoted
-    #[serde(rename_all = "camelCase")]
-    PromoteUnchecked {
-        /// Block ID
-        block_id: BlockId,
-    },
 
     //////////////////////////////////////////////////////////////////////
     // Utils

@@ -41,22 +41,6 @@ describe.skip('Block methods', () => {
         expect(blockRaw).toBeDefined();
     });
 
-    it('promotes a block', async () => {
-        const tips = await client.getTips();
-
-        // Promote a block without checking if it should be promoted
-        const promoteUnchecked = await client.promoteUnchecked(
-            tips[0],
-        );
-
-        expect(promoteUnchecked[1].parents).toContain(tips[0]);
-
-        // Returns expected error: no need to promote or reattach.
-        await expect(client.promote(tips[0])).rejects.toMatch(
-            'NoNeedPromoteOrReattach',
-        );
-    });
-
     it('reattaches a block', async () => {
         const tips = await client.getTips();
 
