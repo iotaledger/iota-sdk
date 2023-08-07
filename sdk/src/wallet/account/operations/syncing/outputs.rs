@@ -11,10 +11,7 @@ use crate::{
         block::{
             input::Input,
             output::{OutputId, OutputWithMetadata},
-            payload::{
-                transaction::{TransactionEssence, TransactionId},
-                Payload, TransactionPayload,
-            },
+            payload::{transaction::TransactionId, Payload, TransactionPayload},
         },
     },
     wallet::{

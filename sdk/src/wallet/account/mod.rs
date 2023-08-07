@@ -63,10 +63,7 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{
-                transaction::{TransactionEssence, TransactionId},
-                TransactionPayload,
-            },
+            payload::{transaction::TransactionId, TransactionPayload},
         },
         TryFromDto,
     },
@@ -599,7 +596,7 @@ fn serialize() {
         mana::Allotment,
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
         payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
+            transaction::{RegularTransactionEssence, TransactionId},
             TransactionPayload,
         },
         protocol::ProtocolParameters,

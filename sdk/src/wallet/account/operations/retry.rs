@@ -109,20 +109,18 @@ where
                         };
                     }
                     // Only reattach latest attachment of the block
-                    if index == block_ids_len - 1 {
-                        if block_metadata.should_reattach.unwrap_or(false) {
-                            let reattached_block = self
-                                .client()
-                                .finish_basic_block_builder(
-                                    todo!("issuer id"),
-                                    todo!("block signature"),
-                                    todo!("issuing time"),
-                                    None,
-                                    Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
-                                )
-                                .await?;
-                            block_ids.push(reattached_block.id());
-                        }
+                    if index == block_ids_len - 1 && block_metadata.should_reattach.unwrap_or(false) {
+                        let reattached_block = self
+                            .client()
+                            .finish_basic_block_builder(
+                                todo!("issuer id"),
+                                todo!("block signature"),
+                                todo!("issuing time"),
+                                None,
+                                Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                            )
+                            .await?;
+                        block_ids.push(reattached_block.id());
                     }
                 }
                 // After we checked all our reattached blocks, check if the transaction got reattached in another block

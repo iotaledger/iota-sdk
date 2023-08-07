@@ -20,10 +20,7 @@ impl RewardContextInput {
 
     /// Creates a new [`RewardContextInput`].
     pub fn new(index: u16) -> Result<Self, Error> {
-        index
-            .try_into()
-            .map(|index| Self(index))
-            .map_err(Error::InvalidRewardInputIndex)
+        index.try_into().map(Self).map_err(Error::InvalidRewardInputIndex)
     }
 
     /// Returns the index of a [`RewardContextInput`].
