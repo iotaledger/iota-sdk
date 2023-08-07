@@ -152,19 +152,23 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload(&self.payload)?;
 
-        let creation_slot = self.creation_slot.unwrap_or_else(|| {
-            #[cfg(feature = "std")]
-            let creation_slot = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_nanos() as u64;
-            // TODO no_std way to have a nanosecond timestamp
-            // https://github.com/iotaledger/iota-sdk/issues/647
-            #[cfg(not(feature = "std"))]
-            let creation_slot = 0;
-
-            creation_slot.into()
-        });
+        let creation_slot = self
+            .creation_slot
+            .or_else(|| {
+                #[cfg(feature = "std")]
+                let creation_slot = params.protocol_parameters().map(|params| {
+                    params.slot_index(
+                        std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .unwrap()
+                            .as_nanos() as u64,
+                    )
+                });
+                #[cfg(not(feature = "std"))]
+                let creation_slot = None;
+                creation_slot
+            })
+            .ok_or(Error::InvalidField("creation slot"))?;
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
