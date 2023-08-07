@@ -197,7 +197,7 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
     readonly unixTime: number;
 
     /**
-     * @param returnAddress The address to return the amount to.
+     * @param returnAddress The address that can unlock the expired output.
      * @param unixTime The Unix timestamp marking the end of the expiration period of the claim.
      */
     constructor(returnAddress: Address, unixTime: number) {
