@@ -9,7 +9,7 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
-use super::{mana::AllotmentCount, protocol::ProtocolParametersHash};
+use super::{mana::AllotmentCount, protocol::ProtocolParametersHash, public_key::PublicKeyCount};
 use crate::types::block::{
     input::UtxoInput,
     output::{
@@ -94,6 +94,7 @@ pub enum Error {
         expected: ProtocolParametersHash,
         actual: ProtocolParametersHash,
     },
+    InvalidPublicKeyCount(<PublicKeyCount as TryFrom<usize>>::Error),
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -132,6 +133,7 @@ pub enum Error {
         expected: u8,
         actual: u8,
     },
+    PublicKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
@@ -249,6 +251,7 @@ impl fmt::Display for Error {
                     "invalid protocol parameters hash: expected {expected} but got {actual}"
                 )
             }
+            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
@@ -308,6 +311,7 @@ impl fmt::Display for Error {
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
             }
+            Self::PublicKeysNotUniqueSorted => write!(f, "public keys are not unique and/or sorted"),
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }

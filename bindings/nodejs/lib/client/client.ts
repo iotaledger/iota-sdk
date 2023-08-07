@@ -704,36 +704,6 @@ export class Client {
     }
 
     /**
-     * Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
-     * method should error out and should not allow unnecessary promotions.
-     */
-    async promote(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'promote',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-    /**
-     * Promote a block without checking if it should be promoted
-     */
-    async promoteUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'promoteUnchecked',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-
-    /**
      * Returns the unhealthy nodes.
      */
     async unhealthyNodes(): Promise<Set<INode>> {

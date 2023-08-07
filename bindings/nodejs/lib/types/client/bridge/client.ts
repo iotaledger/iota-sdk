@@ -303,20 +303,6 @@ export interface __ReattachUncheckedMethod__ {
     };
 }
 
-export interface __PromoteMethod__ {
-    name: 'promote';
-    data: {
-        blockId: BlockId;
-    };
-}
-
-export interface __PromoteUncheckedMethod__ {
-    name: 'promoteUnchecked';
-    data: {
-        blockId: BlockId;
-    };
-}
-
 export interface __UnhealthyNodesMethod__ {
     name: 'unhealthyNodes';
 }
