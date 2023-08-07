@@ -144,6 +144,10 @@ async function createTxData(provider: any, address: string): Promise<TxData> {
         .transfer(RECIPIENT_ACCOUNT_ADDRESS, provider.utils.toHex(AMOUNT))
         .encodeABI();
 
+    const nonce = provider.utils.toHex(
+        await provider.eth.getTransactionCount(address),
+    );
+
     const _gasPrice = await provider.eth.getGasPrice();
     const gasPrice = provider.utils.toHex(_gasPrice);
 
@@ -157,7 +161,7 @@ async function createTxData(provider: any, address: string): Promise<TxData> {
     const to = RECIPIENT_ACCOUNT_ADDRESS;
     const value = provider.utils.toHex(AMOUNT);
 
-    return { gasPrice, gasLimit, to, value, data };
+    return { nonce, gasPrice, gasLimit, to, value, data };
 }
 
 function padHexString(str: string): string {
