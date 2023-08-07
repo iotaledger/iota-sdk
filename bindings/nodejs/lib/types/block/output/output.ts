@@ -19,7 +19,7 @@ export type OutputId = string;
  * All of the output types.
  */
 enum OutputType {
-    /** A Treasure output. */
+    /** A Treasury output. */
     Treasury = 2,
     /** A Basic output. */
     Basic = 3,
