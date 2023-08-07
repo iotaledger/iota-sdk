@@ -10,7 +10,7 @@ mod balance;
 mod bech32_hrp_validation;
 mod burn_outputs;
 #[cfg(not(target_os = "windows"))]
-#[cfg(feature = "rocksdb")]
+#[cfg(all(feature = "stronghold", feature = "storage"))]
 mod chrysalis_db;
 mod claim_outputs;
 mod common;

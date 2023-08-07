@@ -3,60 +3,67 @@
 
 use std::{fs, io, path::Path};
 
-// #[cfg(feature = "stronghold")]
-// use iota_sdk::client::stronghold::StrongholdAdapter;
-use iota_sdk::wallet::{migration::migrate_db_from_chrysalis_to_stardust, Result};
+use iota_sdk::{
+    wallet::{migration::migrate_db_from_chrysalis_to_stardust, ClientOptions, Result},
+    Wallet,
+};
 
 use crate::wallet::common::{setup, tear_down};
 
-// #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn migrate_chrysalis_db() -> Result<()> {
-    // iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
-
     let storage_path = "migrate_chrysalis_db/db";
     setup(storage_path)?;
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db/db", storage_path).unwrap();
 
-    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db", None).await?;
+    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db".into(), None).await?;
 
-    // let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
+    let wallet = Wallet::builder()
+        .with_storage_path("migrate_chrysalis_db")
+        .with_client_options(client_options)
+        .finish()
+        .await?;
 
-    // // Test if setting stronghold password still works
-    // wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
+    let accounts = wallet.get_accounts().await?;
+    assert_eq!(accounts.len(), 2);
+    assert_eq!(accounts[0].alias().await, "Alice");
+    assert_eq!(accounts[1].alias().await, "Bob");
 
-    // assert_eq!(wallet.get_accounts().await?.len(), 1);
+    let alice_acc_details = accounts[0].details().await;
+    assert_eq!(alice_acc_details.public_addresses().len(), 2);
+    assert_eq!(
+        alice_acc_details.public_addresses()[0].address(),
+        "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
+    );
+    assert_eq!(alice_acc_details.internal_addresses().len(), 1);
+    assert_eq!(
+        alice_acc_details.internal_addresses()[0].address(),
+        "rms1qz4tac74vympq4hqqz8g9egrkhscn9743svd9xxh2w99qf5cd8vcxrmspmw"
+    );
 
-    // let client_options = wallet.client_options().await;
-    // assert_eq!(client_options.node_manager_builder.nodes.len(), 1);
+    let bob_acc_details = accounts[1].details().await;
+    assert_eq!(bob_acc_details.public_addresses().len(), 1);
+    assert_eq!(
+        bob_acc_details.public_addresses()[0].address(),
+        "rms1qql3h5vxh2sxa93yadh7f4rkr7f9g9e65wlytazeu688mpcvhvmd2xvfq8y"
+    );
+    assert_eq!(bob_acc_details.internal_addresses().len(), 1);
+    assert_eq!(
+        bob_acc_details.internal_addresses()[0].address(),
+        "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
+    );
 
-    // let account = wallet.get_account("Alice").await?;
-
-    // let addresses = account.addresses().await?;
-    // // One public and one internal address
-    // assert_eq!(addresses.len(), 2);
-    // // Wallet was created with mnemonic: "rapid help true please need desk oppose seminar busy large tree speed
-    // pepper // adult hair duty mad chief boil pass coin biology survey fish"
-    // assert_eq!(
-    //     addresses[0].address().to_string(),
-    //     "rms1qzsw70tha0y4n78s0x0p99ayvz7nl7mzcye7yk8l3s8m6zrfg7slud2ve9f"
+    // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
+    // wallet.set_stronghold_password("password".to_owned()).await?;
+    // // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
+    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup" assert_eq!(
+    //     wallet.generate_ed25519_address(0, 0, None).await?.to_bech32(Hrp::from_str_unchecked("rms")),
+    //     "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
     // );
-    // assert!(!addresses[0].internal());
-    // assert_eq!(
-    //     addresses[1].address().to_string(),
-    //     "rms1qzjwe5plkaywncpv32x5dqqav8fe9zgyzl78cmjlnvzlcghnx489wuevhzf"
-    // );
-    // assert!(addresses[1].internal());
 
-    // assert_eq!(
-    //     account.generate_ed25519_addresses(1, None).await?[0]
-    //         .address()
-    //         .to_string(),
-    //     "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx"
-    // );
-
-    tear_down(storage_path)
+    tear_down("migrate_chrysalis_db")
 }
 
 #[tokio::test]
@@ -66,9 +73,57 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db-encrypted/db", storage_path).unwrap();
 
-    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db_encrypted", Some("password")).await?;
+    migrate_db_from_chrysalis_to_stardust(
+        "migrate_chrysalis_db_encrypted".into(),
+        Some("password".to_string().into()),
+    )
+    .await?;
 
-    tear_down(storage_path)
+    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
+    let wallet = Wallet::builder()
+        .with_storage_path("migrate_chrysalis_db_encrypted")
+        .with_client_options(client_options)
+        .finish()
+        .await?;
+
+    let accounts = wallet.get_accounts().await?;
+    assert_eq!(accounts.len(), 2);
+    assert_eq!(accounts[0].alias().await, "Alice");
+    assert_eq!(accounts[1].alias().await, "Bob");
+
+    let alice_acc_details = accounts[0].details().await;
+    assert_eq!(alice_acc_details.public_addresses().len(), 2);
+    assert_eq!(
+        alice_acc_details.public_addresses()[0].address(),
+        "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
+    );
+    assert_eq!(alice_acc_details.internal_addresses().len(), 1);
+    assert_eq!(
+        alice_acc_details.internal_addresses()[0].address(),
+        "rms1qz4tac74vympq4hqqz8g9egrkhscn9743svd9xxh2w99qf5cd8vcxrmspmw"
+    );
+
+    let bob_acc_details = accounts[1].details().await;
+    assert_eq!(bob_acc_details.public_addresses().len(), 1);
+    assert_eq!(
+        bob_acc_details.public_addresses()[0].address(),
+        "rms1qql3h5vxh2sxa93yadh7f4rkr7f9g9e65wlytazeu688mpcvhvmd2xvfq8y"
+    );
+    assert_eq!(bob_acc_details.internal_addresses().len(), 1);
+    assert_eq!(
+        bob_acc_details.internal_addresses()[0].address(),
+        "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
+    );
+
+    // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
+    // wallet.set_stronghold_password("password".to_owned()).await?;
+    // // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
+    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup" assert_eq!(
+    //     wallet.generate_ed25519_address(0, 0, None).await?.to_bech32(Hrp::from_str_unchecked("rms")),
+    //     "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
+    // );
+
+    tear_down("migrate_chrysalis_db_encrypted")
 }
 
 fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> {

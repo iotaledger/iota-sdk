@@ -10,62 +10,52 @@ use std::{
 };
 
 use crypto::ciphers::{chacha::XChaCha20Poly1305, traits::Aead};
-use rocksdb::{IteratorMode, DB};
+use rocksdb::{IteratorMode, Options, DB};
+use zeroize::Zeroizing;
 
 use crate::{
-    client::constants::IOTA_COIN_TYPE,
+    client::{constants::IOTA_COIN_TYPE, Password},
     types::block::address::Bech32Address,
     wallet::{
         account::{types::AccountAddress, AccountDetailsDto},
-        Error,
+        migration::{MigrationVersion, MIGRATION_VERSION_KEY},
+        storage::constants::{
+            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
+        },
+        Error, Result,
     },
 };
 
-pub async fn migrate_db_from_chrysalis_to_stardust<P: AsRef<Path>>(
-    chrysalis_storage_path: P,
-    password: Option<&str>,
-) -> Result<(), Error> {
-    let chrysalis_storage_path: &Path = chrysalis_storage_path.as_ref();
+pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, password: Option<Password>) -> Result<()> {
+    let storage_path = Path::new(&storage_path);
     // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
-    let chrysalis_storage_path = chrysalis_storage_path.join("db");
+    let chrysalis_storage_path = storage_path.clone().join("db");
 
-    let encryption_key = password.map(storage_password_to_encryption_key);
-
-    // let rocksdb = (&&*storage.inner as &dyn any::Any)
-    //     .downcast_ref::<RocksdbStorageAdapter>()
-    //     .unwrap()
-    //     .clone();
-    // let db = rocksdb.db.lock().await;
-    // let stardust_db = DB::open_default("stardust_storage").unwrap();
-    let chrysalis_db = DB::open_default(chrysalis_storage_path).unwrap();
-
-    // iterate over all rocksdb keys
-    let mut map = HashMap::new();
-    for item in chrysalis_db.iterator(IteratorMode::Start) {
-        let (key, value) = item.unwrap();
-
-        let key_utf8 = String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
-        let value = if let Some(encryption_key) = encryption_key {
-            let value_utf8 = String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
-            if serde_json::from_str::<Vec<u8>>(&value_utf8).is_ok() && key_utf8 != "iota-wallet-key-checksum_value" {
-                decrypt_record(&value_utf8, &encryption_key)?
-            } else {
-                value_utf8
-            }
-        } else {
-            String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
-        };
-
-        map.insert(key_utf8, value);
-    }
+    let chrysalis_data = get_chrysalis_data(&chrysalis_storage_path, password)?;
 
     // create new accounts base on previous data
-    let mut new_accounts = Vec::new();
-    if let Some(account_indexation) = map.get("iota-wallet-account-indexation") {
+    let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
+    let mut secret_manager_dto: Option<String> = None;
+    if let Some(account_indexation) = chrysalis_data.get("iota-wallet-account-indexation") {
         if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
             for account_key in account_keys {
-                if let Some(account_data) = map.get(account_key["key"].as_str().expect("key must be a string")) {
+                if let Some(account_data) =
+                    chrysalis_data.get(account_key["key"].as_str().expect("key must be a string"))
+                {
                     let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
+                    println!("{}", account_data);
+                    if secret_manager_dto.is_none() {
+                        let dto = match &account_data["signerType"]["type"].as_str() {
+                            Some("Stronghold") => format!(
+                                r#"{{"Stronghold": {{"password": null, "timeout": null, "snapshotPath": "{}/wallet.stronghold"}} }}"#,
+                                storage_path.to_string_lossy()
+                            ),
+                            Some("LedgerNano") => r#"{{"LedgerNano": false }}"#.into(),
+                            Some("LedgerNanoSimulator") => r#"{{"LedgerNano": true }}"#.into(),
+                            _ => return Err(Error::Migration("Missing signerType".into())),
+                        };
+                        secret_manager_dto = Some(dto);
+                    }
 
                     let mut account_addresses = Vec::new();
 
@@ -103,25 +93,84 @@ pub async fn migrate_db_from_chrysalis_to_stardust<P: AsRef<Path>>(
         }
     }
 
-    println!("{}", serde_json::to_string_pretty(&new_accounts)?);
+    log::debug!(
+        "Migrating chrysalis data: {}",
+        serde_json::to_string_pretty(&new_accounts)?
+    );
 
-    // TODO:
-    // clear old key (remove db, create new one?)
+    let mut opts = Options::default();
+    opts.create_if_missing(true);
+    opts.create_missing_column_families(true);
+    let stardust_db = DB::open(&opts, storage_path).unwrap();
+
     // store chrysalis data in a new key
+    stardust_db.put("CHRYSALIS_STORAGE", serde_json::to_string(&chrysalis_data)?)?;
+
     // write new accounts to db (with account indexation)
-    // set secret manager?
-    // set db migration version (version 4?)
+    let accounts_indexation_data: Vec<u32> = new_accounts.iter().map(|account| account.index).collect();
+    stardust_db.put(
+        ACCOUNTS_INDEXATION_KEY,
+        serde_json::to_string(&accounts_indexation_data)?,
+    )?;
+    // TODO: do we need to validate the address indexes to be sure that there are no gaps? And if there are, just ignore
+    // all above a gap?
+    for new_account in new_accounts {
+        stardust_db.put(
+            &format!("{ACCOUNT_INDEXATION_KEY}{}", new_account.index),
+            serde_json::to_string(&new_account)?,
+        )?;
+    }
 
-    // println!("{}", serde_json::to_string_pretty(&map)?);
+    if let Some(secret_manager_dto) = secret_manager_dto {
+        // This is required for the secret manager to be loaded
+        stardust_db.put(WALLET_INDEXATION_KEY, format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}"))?;
+        stardust_db.put(SECRET_MANAGER_KEY, secret_manager_dto)?;
+        // stardust_db.put(SECRET_MANAGER_KEY, serde_json::to_string(&secret_manager)?)?;
+    }
 
-    // stardust_db.put("CHRYSALIS_STORAGE", serde_json::to_string(&map)?)?;
+    // set db migration version
+    let migration_version = MigrationVersion {
+        id: 4,
+        sdk_version: "1.0.0-rc.0".to_string(),
+        date: time::macros::date!(2023 - 07 - 19),
+    };
+    stardust_db.put(MIGRATION_VERSION_KEY, serde_json::to_string(&migration_version)?)?;
 
-    // std::fs::remove_dir_all("chrysalis_storage")?;
+    drop(stardust_db);
+
+    // remove old db
+    std::fs::remove_dir_all(chrysalis_storage_path)?;
 
     Ok(())
 }
 
-fn storage_password_to_encryption_key(password: &str) -> [u8; 32] {
+fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>) -> Result<HashMap<String, String>> {
+    let encryption_key = password.map(storage_password_to_encryption_key);
+    let chrysalis_db = DB::open_default(chrysalis_storage_path).unwrap();
+    // iterate over all rocksdb keys
+    let mut chrysalis_data = HashMap::new();
+    for item in chrysalis_db.iterator(IteratorMode::Start) {
+        let (key, value) = item.unwrap();
+
+        let key_utf8 = String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
+        let value = if let Some(encryption_key) = &encryption_key {
+            let value_utf8 = String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
+            // "iota-wallet-key-checksum_value" is never an encrypted value
+            if serde_json::from_str::<Vec<u8>>(&value_utf8).is_ok() && key_utf8 != "iota-wallet-key-checksum_value" {
+                decrypt_record(&value_utf8, encryption_key)?
+            } else {
+                value_utf8
+            }
+        } else {
+            String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
+        };
+
+        chrysalis_data.insert(key_utf8, value);
+    }
+    Ok(chrysalis_data)
+}
+
+fn storage_password_to_encryption_key(password: Password) -> Zeroizing<[u8; 32]> {
     let mut dk = [0; 64];
     // safe to unwrap (rounds > 0)
     crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
@@ -131,7 +180,7 @@ fn storage_password_to_encryption_key(password: &str) -> [u8; 32] {
         &mut dk,
     );
     let key: [u8; 32] = dk[0..32][..].try_into().unwrap();
-    key
+    Zeroizing::new(key)
 }
 
 fn decrypt_record(record: &str, encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
