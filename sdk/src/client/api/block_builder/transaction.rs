@@ -9,7 +9,7 @@ use crate::{
     client::{secret::types::InputSigningData, Error, Result},
     types::block::{
         output::{Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionPayload},
+        payload::transaction::{RegularTransactionEssence, TransactionPayload},
         semantic::{semantic_validation, ConflictReason, ValidationContext},
         signature::Ed25519Signature,
         Block, BlockId,
@@ -30,7 +30,6 @@ pub fn verify_semantic(
     current_time: u32,
 ) -> crate::client::Result<ConflictReason> {
     let transaction_id = transaction.id();
-    let TransactionEssence::Regular(essence) = transaction.essence();
     let inputs = input_signing_data
         .iter()
         .map(|input| (input.output_id(), &input.output))
@@ -38,7 +37,7 @@ pub fn verify_semantic(
 
     let context = ValidationContext::new(
         &transaction_id,
-        essence,
+        transaction.essence(),
         inputs.iter().map(|(id, input)| (*id, *input)),
         transaction.unlocks(),
         current_time,

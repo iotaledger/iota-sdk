@@ -22,7 +22,7 @@ use crate::types::{
 /// A transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TransactionPayload {
-    essence: TransactionEssence,
+    essence: RegularTransactionEssence,
     unlocks: Unlocks,
 }
 
@@ -31,14 +31,14 @@ impl TransactionPayload {
     pub const KIND: u32 = 6;
 
     /// Creates a new [`TransactionPayload`].
-    pub fn new(essence: TransactionEssence, unlocks: Unlocks) -> Result<Self, Error> {
+    pub fn new(essence: RegularTransactionEssence, unlocks: Unlocks) -> Result<Self, Error> {
         verify_essence_unlocks(&essence, &unlocks)?;
 
         Ok(Self { essence, unlocks })
     }
 
     /// Return the essence of a [`TransactionPayload`].
-    pub fn essence(&self) -> &TransactionEssence {
+    pub fn essence(&self) -> &RegularTransactionEssence {
         &self.essence
     }
 
@@ -73,7 +73,7 @@ impl Packable for TransactionPayload {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let essence = TransactionEssence::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let TransactionEssence::Regular(essence) = TransactionEssence::unpack::<_, VERIFY>(unpacker, visitor)?;
         let unlocks = Unlocks::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
@@ -84,16 +84,12 @@ impl Packable for TransactionPayload {
     }
 }
 
-fn verify_essence_unlocks(essence: &TransactionEssence, unlocks: &Unlocks) -> Result<(), Error> {
-    match essence {
-        TransactionEssence::Regular(ref essence) => {
-            if essence.inputs().len() != unlocks.len() {
-                return Err(Error::InputUnlockCountMismatch {
-                    input_count: essence.inputs().len(),
-                    unlock_count: unlocks.len(),
-                });
-            }
-        }
+fn verify_essence_unlocks(essence: &RegularTransactionEssence, unlocks: &Unlocks) -> Result<(), Error> {
+    if essence.inputs().len() != unlocks.len() {
+        return Err(Error::InputUnlockCountMismatch {
+            input_count: essence.inputs().len(),
+            unlock_count: unlocks.len(),
+        });
     }
 
     Ok(())
@@ -124,7 +120,7 @@ pub mod dto {
         fn from(value: &TransactionPayload) -> Self {
             Self {
                 kind: TransactionPayload::KIND,
-                essence: value.essence().into(),
+                essence: TransactionEssenceDto::Regular(value.essence().into()),
                 unlocks: value.unlocks().to_vec(),
             }
         }
@@ -135,10 +131,9 @@ pub mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Self::new(
-                TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?,
-                Unlocks::new(dto.unlocks)?,
-            )
+            let TransactionEssence::Regular(essence) =
+                TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?;
+            Self::new(essence, Unlocks::new(dto.unlocks)?)
         }
     }
 }

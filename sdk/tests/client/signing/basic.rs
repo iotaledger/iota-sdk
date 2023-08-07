@@ -96,7 +96,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
@@ -211,7 +211,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
@@ -313,7 +313,7 @@ async fn two_signature_unlocks() -> Result<()> {
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
     assert_eq!((*unlocks).get(1).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 

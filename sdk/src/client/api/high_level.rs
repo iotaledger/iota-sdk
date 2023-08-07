@@ -22,10 +22,7 @@ use crate::{
             core::Block,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::OutputWithMetadata,
-            payload::{
-                transaction::{TransactionEssence, TransactionId},
-                Payload,
-            },
+            payload::{transaction::TransactionId, Payload},
             BlockId,
         },
     },
@@ -38,9 +35,7 @@ impl Client {
         let block = self.get_included_block(transaction_id).await?;
 
         let inputs = match block.payload() {
-            Some(Payload::Transaction(t)) => match t.essence() {
-                TransactionEssence::Regular(e) => e.inputs(),
-            },
+            Some(Payload::Transaction(t)) => t.essence().inputs(),
             _ => {
                 unreachable!()
             }

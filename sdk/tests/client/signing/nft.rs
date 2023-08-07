@@ -154,7 +154,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 

@@ -451,7 +451,6 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_payload: TransactionPayload,
     inputs: Vec<OutputWithMetadataResponse>,
 ) -> crate::wallet::Result<Transaction> {
-    let TransactionEssence::Regular(tx_essence) = &tx_payload.essence();
     Ok(Transaction {
         payload: tx_payload.clone(),
         block_id: inputs.first().map(|i| *i.metadata.block_id()),
@@ -463,7 +462,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
         //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
-        network_id: tx_essence.network_id(),
+        network_id: tx_payload.essence().network_id(),
         incoming: true,
         note: None,
         inputs,
@@ -638,14 +637,13 @@ fn serialize() {
             .finish_with_params(protocol_parameters.clone())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
+    let essence =
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
             .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
             .finish_with_params(protocol_parameters)
-            .unwrap(),
-    );
+            .unwrap();
 
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();

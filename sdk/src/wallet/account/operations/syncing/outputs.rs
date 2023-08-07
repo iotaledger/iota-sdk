@@ -202,9 +202,8 @@ pub(crate) async fn get_inputs_for_transaction_payload(
     client: &Client,
     transaction_payload: &TransactionPayload,
 ) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
-    let TransactionEssence::Regular(essence) = transaction_payload.essence();
-
-    let output_ids = essence
+    let output_ids = transaction_payload
+        .essence()
         .inputs()
         .iter()
         .map(|input| {
