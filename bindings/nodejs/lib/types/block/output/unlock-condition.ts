@@ -251,7 +251,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
     })
     readonly address: Address;
     /**
-     * @param address The governor address that owns the output.
+     * @param address The governor address that is allowed to do governance transitions.
      */
     constructor(address: Address) {
         super(UnlockConditionType.GovernorAddress);
