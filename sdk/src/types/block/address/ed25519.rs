@@ -47,8 +47,6 @@ impl core::fmt::Debug for Ed25519Address {
 }
 
 mod dto {
-    use alloc::format;
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
