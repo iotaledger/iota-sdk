@@ -16,5 +16,11 @@ impl SlotIndex {
     }
 }
 
+impl From<SlotIndex> for u64 {
+    fn from(slot_index: SlotIndex) -> Self {
+        *slot_index
+    }
+}
+
 #[cfg(feature = "serde")]
 string_serde_impl!(SlotIndex);

@@ -177,7 +177,7 @@ macro_rules! impl_serde_typed_dto {
             fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
                 let dto = <$dto>::deserialize(d)?;
                 if dto.kind != Self::KIND {
-                    return Err(serde::de::Error::custom(format!(
+                    return Err(serde::de::Error::custom(alloc::format!(
                         "invalid {} type: expected {}, found {}",
                         $type_str,
                         Self::KIND,

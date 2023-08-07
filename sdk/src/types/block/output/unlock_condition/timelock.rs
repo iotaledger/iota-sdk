@@ -39,8 +39,6 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
 }
 
 mod dto {
-    use alloc::format;
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
