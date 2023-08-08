@@ -63,6 +63,7 @@ impl Packable for TransactionPayload {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        RegularTransactionEssence::KIND.pack(packer)?;
         self.essence.pack(packer)?;
         self.unlocks.pack(packer)?;
 
