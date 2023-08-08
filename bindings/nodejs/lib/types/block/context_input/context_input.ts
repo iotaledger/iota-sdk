@@ -1,35 +1,35 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountId } from "../..";
-import { u16 } from "../../utils/type_aliases";
+import { AccountId } from '../..';
+import { u16 } from '../../utils/type_aliases';
 
 enum ContextInputType {
-  // ToDo: commitment context input;
+    // ToDo: commitment context input;
 
-  /**
-   * The context input kind of a `BlockIssuanceCreditContextInput`.
-   */
-  BLOCK_ISSUANCE_CREDIT = 1,
-  /**
-   * The context input kind of a `RewardContextInput`.
-   */
-  REWARD = 2,
+    /**
+     * The context input kind of a `BlockIssuanceCreditContextInput`.
+     */
+    BLOCK_ISSUANCE_CREDIT = 1,
+    /**
+     * The context input kind of a `RewardContextInput`.
+     */
+    REWARD = 2,
 }
 
 abstract class ContextInput {
-  private type: ContextInputType;
+    private type: ContextInputType;
 
-  constructor(type: ContextInputType) {
-    this.type = type;
-  }
+    constructor(type: ContextInputType) {
+        this.type = type;
+    }
 
-  /**
-   * The type of the context input.
-   */
-  getType(): ContextInputType {
-    return this.type;
-  }
+    /**
+     * The type of the context input.
+     */
+    getType(): ContextInputType {
+        return this.type;
+    }
 }
 
 /**
@@ -37,33 +37,33 @@ abstract class ContextInput {
  * the BIC vector of a specific slot.
  */
 class BlockIssuanceCreditContextInput extends ContextInput {
-  accountId: AccountId;
+    accountId: AccountId;
 
-  constructor(accountId: AccountId) {
-    super(ContextInputType.BLOCK_ISSUANCE_CREDIT);
-    this.accountId = accountId;
-  }
+    constructor(accountId: AccountId) {
+        super(ContextInputType.BLOCK_ISSUANCE_CREDIT);
+        this.accountId = accountId;
+    }
 }
 
 /**
  * A Reward Context Input indicates which transaction Input is claiming Mana rewards.
  */
 class RewardContextInput extends ContextInput {
-  index: number;
+    index: number;
 
-  constructor(index: u16) {
-    super(ContextInputType.REWARD);
-    this.index = index;
-  }
+    constructor(index: u16) {
+        super(ContextInputType.REWARD);
+        this.index = index;
+    }
 
-  getIndex(): number {
-    return this.index;
-  }
+    getIndex(): number {
+        return this.index;
+    }
 }
 
 export {
-  ContextInputType,
-  ContextInput,
-  RewardContextInput,
-  BlockIssuanceCreditContextInput
-}
+    ContextInputType,
+    ContextInput,
+    RewardContextInput,
+    BlockIssuanceCreditContextInput,
+};
