@@ -24,4 +24,9 @@ export class Block {
         discriminator: PayloadDiscriminator,
     })
     payload?: Payload;
+    /**
+     * The amount of mana the Account identified by IssuerID is at most
+     * willing to burn for this block.
+     */
+    burnedMana!: string;
 }
