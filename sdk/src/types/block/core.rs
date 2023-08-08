@@ -502,22 +502,24 @@ impl Block {
 
     pub(crate) fn header_hash(&self) -> [u8; 32] {
         match self {
-            Block::Basic(b) => b.header_hash(),
-            Block::Validation(b) => b.header_hash(),
+            Self::Basic(b) => b.header_hash(),
+            Self::Validation(b) => b.header_hash(),
         }
     }
 
     pub(crate) fn block_hash(&self) -> [u8; 32] {
         let bytes = match self {
-            Block::Basic(b) => b.data.pack_to_vec(),
-            Block::Validation(b) => b.data.pack_to_vec(),
+            Self::Basic(b) => [vec![BasicBlock::KIND], b.data.pack_to_vec()].concat(),
+            Self::Validation(b) => [vec![ValidationBlock::KIND], b.data.pack_to_vec()].concat(),
         };
         Blake2b256::digest(bytes).into()
     }
 
-    pub(crate) fn signature_bytes(&self) -> [u8; Block::SIGNATURE_LENGTH] {
-        let mut bytes = [0u8; Block::SIGNATURE_LENGTH];
-        self.signature().pack(&mut SlicePacker::new(&mut bytes)).unwrap();
+    pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
+        let mut bytes = [0u8; Self::SIGNATURE_LENGTH];
+        let mut packer = SlicePacker::new(&mut bytes);
+        Ed25519Signature::KIND.pack(&mut packer).unwrap();
+        self.signature().pack(&mut packer).unwrap();
         bytes
     }
 }
@@ -632,7 +634,7 @@ pub(crate) mod dto {
         pub network_id: u64,
         #[serde(with = "string")]
         pub issuing_time: u64,
-        pub slot_commitment_id: SlotCommitmentId,
+        pub slot_commitment: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
         pub block: BlockDataDto,
@@ -646,7 +648,7 @@ pub(crate) mod dto {
                     protocol_version: b.protocol_version(),
                     network_id: b.network_id(),
                     issuing_time: b.issuing_time(),
-                    slot_commitment_id: b.slot_commitment_id(),
+                    slot_commitment: b.slot_commitment_id(),
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     block: (&b.data).into(),
@@ -656,7 +658,7 @@ pub(crate) mod dto {
                     protocol_version: b.protocol_version(),
                     network_id: b.network_id(),
                     issuing_time: b.issuing_time(),
-                    slot_commitment_id: b.slot_commitment_id(),
+                    slot_commitment: b.slot_commitment_id(),
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     block: (&b.data).into(),
@@ -675,7 +677,7 @@ pub(crate) mod dto {
                 BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
                     dto.network_id,
                     dto.issuing_time,
-                    dto.slot_commitment_id,
+                    dto.slot_commitment,
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     BasicBlockData::try_from_dto_with_params_inner(b, params)?,
@@ -686,7 +688,7 @@ pub(crate) mod dto {
                 BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
                     dto.network_id,
                     dto.issuing_time,
-                    dto.slot_commitment_id,
+                    dto.slot_commitment,
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
