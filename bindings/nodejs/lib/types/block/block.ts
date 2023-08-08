@@ -25,10 +25,6 @@ export class Block {
     })
     payload?: Payload;
     /**
-     * The nonce for the block.
-     */
-    nonce!: string;
-    /**
      * The amount of mana the Account identified by IssuerID is at most
      * willing to burn for this block.
      */
