@@ -19,7 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.4 - 2023-MM-DD
+## 1.0.5 - YYYY-MM-DD
+
+
+## 1.0.4 - 2023-08-03
+
+### Changed
+
+- Prevent loading of bindings when importing UTXOInput type (changed UTXOInput.fromOutputId implementation)
 
 ### Fixed
 
