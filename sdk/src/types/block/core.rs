@@ -508,10 +508,17 @@ impl Block {
     }
 
     pub(crate) fn block_hash(&self) -> [u8; 32] {
-        let bytes = match self {
-            Self::Basic(b) => [vec![BasicBlock::KIND], b.data.pack_to_vec()].concat(),
-            Self::Validation(b) => [vec![ValidationBlock::KIND], b.data.pack_to_vec()].concat(),
-        };
+        let mut bytes = Vec::new();
+        match self {
+            Self::Basic(b) => {
+                bytes.push(BasicBlock::KIND);
+                bytes.extend(b.data.pack_to_vec());
+            }
+            Self::Validation(b) => {
+                bytes.push(ValidationBlock::KIND);
+                bytes.extend(b.data.pack_to_vec());
+            }
+        }
         Blake2b256::digest(bytes).into()
     }
 
