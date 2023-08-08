@@ -27,6 +27,8 @@ use crate::{
     },
 };
 
+pub(crate) const CHRYSALIS_STORAGE_KEY: &str = "CHRYSALIS_DATA";
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AccountAddress {
@@ -38,8 +40,8 @@ struct AccountAddress {
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct AccountDetailsDto {
-    index: u32,
+pub(crate) struct AccountDetailsDto {
+    pub(crate) index: u32,
     coin_type: u32,
     alias: String,
     public_addresses: Vec<AccountAddress>,
@@ -75,7 +77,7 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
     let stardust_db = DB::open(&opts, storage_path).unwrap();
 
     // store chrysalis data in a new key
-    stardust_db.put("CHRYSALIS_STORAGE", serde_json::to_string(&chrysalis_data)?)?;
+    stardust_db.put(CHRYSALIS_STORAGE_KEY, serde_json::to_string(&chrysalis_data)?)?;
 
     // write new accounts to db (with account indexation)
     let accounts_indexation_data: Vec<u32> = new_accounts.iter().map(|account| account.index).collect();
@@ -96,7 +98,6 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
         // This is required for the secret manager to be loaded
         stardust_db.put(WALLET_INDEXATION_KEY, format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}"))?;
         stardust_db.put(SECRET_MANAGER_KEY, secret_manager_dto)?;
-        // stardust_db.put(SECRET_MANAGER_KEY, serde_json::to_string(&secret_manager)?)?;
     }
 
     // set db migration version
@@ -115,7 +116,7 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
     Ok(())
 }
 
-fn migrate_from_chrysalis_data(
+pub(crate) fn migrate_from_chrysalis_data(
     chrysalis_data: &HashMap<String, String>,
     storage_path: &Path,
 ) -> Result<(Vec<AccountDetailsDto>, Option<String>)> {
@@ -128,7 +129,6 @@ fn migrate_from_chrysalis_data(
                     chrysalis_data.get(account_key["key"].as_str().expect("key must be a string"))
                 {
                     let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
-                    println!("{}", account_data);
                     if secret_manager_dto.is_none() {
                         let dto = match &account_data["signerType"]["type"].as_str() {
                             Some("Stronghold") => format!(

@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod chrysalis;
+// TODO: do we want a chrysalis feature for this?
+pub(crate) mod chrysalis;
 mod migrate_0;
 mod migrate_1;
 mod migrate_2;
