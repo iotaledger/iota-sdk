@@ -6,8 +6,6 @@ import type { IMqttBrokerOptions, INetworkInfo, INode } from './network';
 export interface IClientOptions {
     /** Node which will be tried first for all requests */
     primaryNode?: string | INode;
-    /** Node which will be tried first when using remote PoW, even before the primary_node */
-    primaryPowNode?: string | INode;
     nodes?: Array<string | INode>;
     permanodes?: Array<string | INode>;
     /** If the node health status should be ignored */
@@ -28,12 +26,6 @@ export interface IClientOptions {
     brokerOptions?: IMqttBrokerOptions;
     /** Timeout for API requests */
     apiTimeout?: IDuration;
-    /** Timeout when sending a block that requires remote proof of work */
-    remotePowTimeout?: IDuration;
-    /** The amount of threads to be used for proof of work */
-    powWorkerCount?: number;
-    /** Whether the PoW should be done locally or remotely. */
-    localPow?: boolean;
 }
 
 /** Time duration */

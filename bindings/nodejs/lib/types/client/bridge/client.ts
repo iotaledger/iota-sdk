@@ -118,24 +118,8 @@ export interface __GetBech32HrpMethod__ {
     name: 'getBech32Hrp';
 }
 
-export interface __GetMinPowScoreMethod__ {
-    name: 'getMinPowScore';
-}
-
-export interface __GetTipsIntervalMethod__ {
-    name: 'getTipsInterval';
-}
-
 export interface __GetProtocolParametersMethod__ {
     name: 'getProtocolParameters';
-}
-
-export interface __GetLocalPowMethod__ {
-    name: 'getLocalPow';
-}
-
-export interface __GetFallbackToLocalPowMethod__ {
-    name: 'getFallbackToLocalPow';
 }
 
 export interface __GetHealthMethod__ {

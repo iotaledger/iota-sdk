@@ -46,12 +46,4 @@ export interface INode {
 export interface INetworkInfo {
     /** Protocol parameters */
     protocolParameters: INodeInfoProtocol;
-    /** Minimum proof of work score*/
-    minPowScore: number;
-    /** Local proof of work */
-    localPow: boolean;
-    /** Fallback to local proof of work if the node doesn't support remote Pow */
-    fallbackToLocalPow: boolean;
-    /** Tips request interval during PoW in seconds */
-    tipsInterval: number;
 }
