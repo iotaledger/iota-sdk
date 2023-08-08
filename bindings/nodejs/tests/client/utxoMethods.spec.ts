@@ -13,7 +13,6 @@ const client = new Client({
             url: process.env.NODE_URL || 'http://localhost:14265',
         },
     ],
-    localPow: true,
 });
 
 // Skip for CI

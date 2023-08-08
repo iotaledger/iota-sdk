@@ -23,10 +23,6 @@ export interface INodeInfoProtocol {
      */
     version: number;
     /**
-     * The minimum score required for PoW.
-     */
-    minPowScore: number;
-    /**
      * The rent structure used by given node/network.
      */
     rentStructure: IRent;

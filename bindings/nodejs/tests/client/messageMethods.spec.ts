@@ -14,13 +14,12 @@ const client = new Client({
             url: process.env.NODE_URL || 'http://localhost:14265',
         },
     ],
-    localPow: true,
 });
 
 // Skip for CI
 describe.skip('Block methods', () => {
     it('sends a block raw', async () => {
-        const blockIdAndBlock = await client.postBlockPayload(new TaggedDataPayload( utf8ToHex('Hello'), utf8ToHex('Tangle')));
+        const blockIdAndBlock = await client.postBlockPayload(new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')));
 
         const blockId = await client.postBlockRaw(blockIdAndBlock[1]);
 
