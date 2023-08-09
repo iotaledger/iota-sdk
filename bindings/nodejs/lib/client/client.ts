@@ -73,7 +73,7 @@ export class Client {
     }
 
     /**
-     * Gets the network related information such as network_id and min_pow_score
+     * Gets the network related information such as network_id.
      */
     async getNetworkInfo(): Promise<INetworkInfo> {
         const response = await this.methodHandler.callMethod({
@@ -285,28 +285,6 @@ export class Client {
     }
 
     /**
-     * Returns the min PoW score.
-     */
-    async getMinPowScore(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getMinPowScore',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Returns the tips interval.
-     */
-    async getTipsInterval(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getTipsInterval',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Returns the token supply.
      */
     async getTokenSupply(): Promise<string> {
@@ -319,28 +297,6 @@ export class Client {
     async getProtocolParameters(): Promise<INodeInfoProtocol> {
         const response = await this.methodHandler.callMethod({
             name: 'getProtocolParameters',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Returns if local pow should be used or not.
-     */
-    async getLocalPow(): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getLocalPow',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get fallback to local proof of work timeout.
-     */
-    async getFallbackToLocalPow(): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getFallbackToLocalPow',
         });
 
         return JSON.parse(response).payload;

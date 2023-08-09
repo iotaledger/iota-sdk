@@ -130,7 +130,7 @@ impl ClientInner {
 
 impl Client {
     #[cfg(not(target_family = "wasm"))]
-    pub async fn update_node_manager(&self, node_manager: NodeManager) -> crate::wallet::Result<()> {
+    pub async fn update_node_manager(&self, node_manager: NodeManager) -> crate::client::Result<()> {
         let node_sync_interval = node_manager.node_sync_interval;
         let ignore_node_health = node_manager.ignore_node_health;
         let nodes = node_manager

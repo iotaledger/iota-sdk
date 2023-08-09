@@ -7,8 +7,17 @@ use crate::types::block::Error;
 impl_id!(pub BlockHash, 32, "The hash of a [`Block`].");
 
 impl BlockHash {
+    #[cfg(target_endian = "little")]
     pub fn with_slot_index(self, slot_index: SlotIndex) -> BlockId {
         BlockId { hash: self, slot_index }
+    }
+
+    #[cfg(target_endian = "big")]
+    pub fn with_slot_index(self, slot_index: SlotIndex) -> BlockId {
+        BlockId {
+            hash: self,
+            slot_index: slot_index.to_le().into(),
+        }
     }
 }
 
@@ -18,7 +27,9 @@ impl BlockHash {
 #[repr(C)]
 pub struct BlockId {
     pub(crate) hash: BlockHash,
-    pub(crate) slot_index: SlotIndex,
+    // INPORTANT: On big-endian systems this value is misrepresented because it is transmuted directly
+    // from bytes, so the getter below handles that conversion. Do not access it directly.
+    slot_index: SlotIndex,
 }
 
 impl BlockId {
@@ -29,14 +40,16 @@ impl BlockId {
         unsafe { core::mem::transmute(bytes) }
     }
 
-    /// Checks if the [`BlockId`] is null.
-    pub fn is_null(&self) -> bool {
-        self.as_ref().iter().all(|&b| b == 0)
+    /// Returns the [`BlockId`]'s slot index part.
+    #[cfg(target_endian = "little")]
+    pub fn slot_index(&self) -> SlotIndex {
+        self.slot_index
     }
 
     /// Returns the [`BlockId`]'s slot index part.
+    #[cfg(target_endian = "big")]
     pub fn slot_index(&self) -> SlotIndex {
-        self.slot_index
+        self.slot_index.to_le().into()
     }
 }
 
@@ -50,7 +63,7 @@ impl core::str::FromStr for BlockId {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(BlockId::new(prefix_hex::decode(s).map_err(Error::Hex)?))
+        Ok(Self::new(prefix_hex::decode(s).map_err(Error::Hex)?))
     }
 }
 

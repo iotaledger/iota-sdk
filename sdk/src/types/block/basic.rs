@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -75,6 +76,18 @@ impl BlockBuilder<BasicBlockData> {
         self.data.burned_mana = burned_mana;
         self
     }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let mut bytes = Vec::from([BasicBlock::KIND]);
+        bytes.extend(self.data.pack_to_vec());
+        Blake2b256::digest(bytes).into()
+    }
+
+    /// Get the signing input that can be used to generate an
+    /// [`Ed25519Signature`](crate::types::block::signature::Ed25519Signature) for the resulting block.
+    pub fn signing_input(&self) -> Vec<u8> {
+        [self.header_hash(), self.block_hash()].concat()
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -123,6 +136,12 @@ impl BasicBlock {
     #[inline(always)]
     pub fn burned_mana(&self) -> u64 {
         self.data.burned_mana
+    }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let mut bytes = Vec::from([Self::KIND]);
+        bytes.extend(self.data.pack_to_vec());
+        Blake2b256::digest(bytes).into()
     }
 }
 

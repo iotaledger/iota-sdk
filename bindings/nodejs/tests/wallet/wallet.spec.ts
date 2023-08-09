@@ -119,9 +119,8 @@ describe('Wallet', () => {
         expect(account.getMetadata().index).toStrictEqual(0);
 
         const client = await wallet.getClient();
-
-        const localPoW = await client.getLocalPow();
-        expect(localPoW).toBeTruthy();
+        const hrp = await client.getBech32Hrp();
+        expect(hrp).toEqual("smr");
 
         await wallet.destroy();
 

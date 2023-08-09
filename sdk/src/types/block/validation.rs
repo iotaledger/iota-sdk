@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -62,6 +63,18 @@ impl BlockBuilder<ValidationBlockData> {
         self.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let mut bytes = Vec::from([ValidationBlock::KIND]);
+        bytes.extend(self.data.pack_to_vec());
+        Blake2b256::digest(bytes).into()
+    }
+
+    /// Get the signing input that can be used to generate an
+    /// [`Ed25519Signature`](crate::types::block::signature::Ed25519Signature) for the resulting block.
+    pub fn signing_input(&self) -> Vec<u8> {
+        [self.header_hash(), self.block_hash()].concat()
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -109,6 +122,12 @@ impl ValidationBlock {
     #[inline(always)]
     pub fn protocol_parameters_hash(&self) -> ProtocolParametersHash {
         self.data.protocol_parameters_hash
+    }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let mut bytes = Vec::from([Self::KIND]);
+        bytes.extend(self.data.pack_to_vec());
+        Blake2b256::digest(bytes).into()
     }
 }
 
