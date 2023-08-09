@@ -47,6 +47,7 @@ where
         // are available again
         let mut output_ids_to_unlock = Vec::new();
         let mut transactions_to_reattach = Vec::new();
+        let protocol_params = self.client().get_protocol_parameters().await?;
 
         for transaction_id in &account_details.pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
@@ -126,7 +127,7 @@ where
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(
                                             transaction,
-                                            Some(included_block.id(&self.client().get_protocol_parameters().await?)),
+                                            Some(included_block.id(&protocol_params)),
                                             // block metadata was Conflicting, but it's confirmed in another attachment
                                             InclusionState::Confirmed,
                                             &mut updated_transactions,
