@@ -18,7 +18,9 @@ impl BlockHash {
 #[repr(C)]
 pub struct BlockId {
     pub(crate) hash: BlockHash,
-    pub(crate) slot_index: SlotIndex,
+    // INPORTANT: On big-endian systems this value is misrepresented because it is transmuted directly
+    // from bytes, so the getter below handles that conversion. Do not access it directly.
+    slot_index: SlotIndex,
 }
 
 impl BlockId {
@@ -29,14 +31,16 @@ impl BlockId {
         unsafe { core::mem::transmute(bytes) }
     }
 
-    /// Checks if the [`BlockId`] is null.
-    pub fn is_null(&self) -> bool {
-        self.as_ref().iter().all(|&b| b == 0)
+    /// Returns the [`BlockId`]'s slot index part.
+    #[cfg(target_endian = "little")]
+    pub fn slot_index(&self) -> SlotIndex {
+        self.slot_index
     }
 
     /// Returns the [`BlockId`]'s slot index part.
+    #[cfg(target_endian = "big")]
     pub fn slot_index(&self) -> SlotIndex {
-        self.slot_index
+        self.slot_index.to_le().into()
     }
 }
 

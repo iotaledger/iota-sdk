@@ -19,6 +19,7 @@ macro_rules! impl_id {
             packable::Packable,
         )]
         #[as_ref(forward)]
+        #[repr(transparent)]
         $vis struct $name([u8; $name::LENGTH]);
 
         impl $name {

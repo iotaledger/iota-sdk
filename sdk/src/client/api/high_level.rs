@@ -130,13 +130,11 @@ impl Client {
                     };
                 }
                 // Only reattach latest attachment of the block
-                if index == block_ids_len - 1 {
-                    if block_metadata.should_reattach.unwrap_or(false) {
-                        // Safe to unwrap since we iterate over it
-                        let reattached = self.reattach_unchecked(block_ids.last().unwrap()).await?;
-                        block_ids.push(reattached.0);
-                        blocks_with_id.push(reattached);
-                    }
+                if index == block_ids_len - 1 && block_metadata.should_reattach.unwrap_or(false) {
+                    // Safe to unwrap since we iterate over it
+                    let reattached = self.reattach_unchecked(block_ids.last().unwrap()).await?;
+                    block_ids.push(reattached.0);
+                    blocks_with_id.push(reattached);
                 }
             }
             // After we checked all our reattached blocks, check if the transaction got reattached in another block
