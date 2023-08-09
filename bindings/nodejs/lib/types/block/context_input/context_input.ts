@@ -18,17 +18,10 @@ enum ContextInputType {
 }
 
 abstract class ContextInput {
-    private type: ContextInputType;
+    type: ContextInputType;
 
     constructor(type: ContextInputType) {
         this.type = type;
-    }
-
-    /**
-     * The type of the context input.
-     */
-    getType(): ContextInputType {
-        return this.type;
     }
 }
 
@@ -49,15 +42,11 @@ class BlockIssuanceCreditContextInput extends ContextInput {
  * A Reward Context Input indicates which transaction Input is claiming Mana rewards.
  */
 class RewardContextInput extends ContextInput {
-    index: number;
+    index: u16;
 
     constructor(index: u16) {
         super(ContextInputType.REWARD);
         this.index = index;
-    }
-
-    getIndex(): number {
-        return this.index;
     }
 }
 
