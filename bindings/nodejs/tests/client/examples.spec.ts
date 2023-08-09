@@ -21,7 +21,6 @@ const client = new Client({
             url: process.env.NODE_URL || 'http://localhost:14265',
         },
     ],
-    localPow: true,
 });
 
 const secretManager = {
@@ -35,7 +34,6 @@ describe.skip('Main examples', () => {
         const info = await client.getInfo();
 
         expect(info.nodeInfo.protocol.bech32Hrp).toBe('rms');
-        expect(info.nodeInfo.protocol.minPowScore).toBe(1000);
     });
 
     it('generates a mnemonic', async () => {
@@ -133,9 +131,9 @@ describe.skip('Main examples', () => {
                     .getNativeTokens()
                     ?.forEach(
                         (token) =>
-                            (totalNativeTokens[token.id] =
-                                (totalNativeTokens[token.id] || 0) +
-                                Number(token.amount)),
+                        (totalNativeTokens[token.id] =
+                            (totalNativeTokens[token.id] || 0) +
+                            Number(token.amount)),
                     );
             }
 

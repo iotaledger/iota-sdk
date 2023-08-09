@@ -17,11 +17,7 @@ import type {
     __GetNodeMethod__,
     __GetNetworkIdMethod__,
     __GetBech32HrpMethod__,
-    __GetMinPowScoreMethod__,
-    __GetTipsIntervalMethod__,
     __GetProtocolParametersMethod__,
-    __GetLocalPowMethod__,
-    __GetFallbackToLocalPowMethod__,
     __GetHealthMethod__,
     __GetNodeInfoMethod__,
     __GetPeersMethod__,
@@ -74,11 +70,7 @@ export type __ClientMethods__ =
     | __GetNodeMethod__
     | __GetNetworkIdMethod__
     | __GetBech32HrpMethod__
-    | __GetMinPowScoreMethod__
-    | __GetTipsIntervalMethod__
     | __GetProtocolParametersMethod__
-    | __GetLocalPowMethod__
-    | __GetFallbackToLocalPowMethod__
     | __GetHealthMethod__
     | __GetNodeInfoMethod__
     | __GetPeersMethod__

@@ -93,7 +93,6 @@ async function run() {
 
     const client = new Client({
         nodes: ['https://api.testnet.shimmer.network'],
-        localPow: true,
     });
 
     try {
