@@ -5,6 +5,7 @@ use std::{fs, io, path::Path};
 
 use iota_sdk::{
     client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Password},
+    types::block::address::ToBech32Ext,
     wallet::{migration::migrate_db_from_chrysalis_to_stardust, ClientOptions, Result},
     Wallet,
 };
@@ -20,7 +21,7 @@ async fn migrate_chrysalis_db() -> Result<()> {
 
     migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db".into(), None).await?;
 
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
+    let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
         .with_storage_path("migrate_chrysalis_db")
         .with_client_options(client_options)
@@ -35,24 +36,26 @@ async fn migrate_chrysalis_db() -> Result<()> {
     let alice_acc_details = accounts[0].details().await;
     assert_eq!(alice_acc_details.public_addresses().len(), 2);
     assert_eq!(
-        alice_acc_details.public_addresses()[0].address(),
+        alice_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
     );
     assert_eq!(alice_acc_details.internal_addresses().len(), 1);
     assert_eq!(
-        alice_acc_details.internal_addresses()[0].address(),
+        alice_acc_details.internal_addresses()[0]
+            .address()
+            .try_to_bech32("rms")?,
         "rms1qz4tac74vympq4hqqz8g9egrkhscn9743svd9xxh2w99qf5cd8vcxrmspmw"
     );
 
     let bob_acc_details = accounts[1].details().await;
     assert_eq!(bob_acc_details.public_addresses().len(), 1);
     assert_eq!(
-        bob_acc_details.public_addresses()[0].address(),
+        bob_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qql3h5vxh2sxa93yadh7f4rkr7f9g9e65wlytazeu688mpcvhvmd2xvfq8y"
     );
     assert_eq!(bob_acc_details.internal_addresses().len(), 1);
     assert_eq!(
-        bob_acc_details.internal_addresses()[0].address(),
+        bob_acc_details.internal_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
@@ -80,7 +83,7 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     )
     .await?;
 
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
+    let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
         .with_storage_path("migrate_chrysalis_db_encrypted")
         .with_client_options(client_options)
@@ -95,24 +98,26 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     let alice_acc_details = accounts[0].details().await;
     assert_eq!(alice_acc_details.public_addresses().len(), 2);
     assert_eq!(
-        alice_acc_details.public_addresses()[0].address(),
+        alice_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
     );
     assert_eq!(alice_acc_details.internal_addresses().len(), 1);
     assert_eq!(
-        alice_acc_details.internal_addresses()[0].address(),
+        alice_acc_details.internal_addresses()[0]
+            .address()
+            .try_to_bech32("rms")?,
         "rms1qz4tac74vympq4hqqz8g9egrkhscn9743svd9xxh2w99qf5cd8vcxrmspmw"
     );
 
     let bob_acc_details = accounts[1].details().await;
     assert_eq!(bob_acc_details.public_addresses().len(), 1);
     assert_eq!(
-        bob_acc_details.public_addresses()[0].address(),
+        bob_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qql3h5vxh2sxa93yadh7f4rkr7f9g9e65wlytazeu688mpcvhvmd2xvfq8y"
     );
     assert_eq!(bob_acc_details.internal_addresses().len(), 1);
     assert_eq!(
-        bob_acc_details.internal_addresses()[0].address(),
+        bob_acc_details.internal_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
@@ -140,7 +145,7 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
         "migrate_chrysalis_stronghold/chrysalis-backup.stronghold",
     )?;
 
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
+    let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
         .with_storage_path(storage_path)
         .with_coin_type(IOTA_COIN_TYPE)
@@ -167,24 +172,26 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     let alice_acc_details = accounts[0].details().await;
     assert_eq!(alice_acc_details.public_addresses().len(), 2);
     assert_eq!(
-        alice_acc_details.public_addresses()[0].address(),
+        alice_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
     );
     assert_eq!(alice_acc_details.internal_addresses().len(), 1);
     assert_eq!(
-        alice_acc_details.internal_addresses()[0].address(),
+        alice_acc_details.internal_addresses()[0]
+            .address()
+            .try_to_bech32("rms")?,
         "rms1qz4tac74vympq4hqqz8g9egrkhscn9743svd9xxh2w99qf5cd8vcxrmspmw"
     );
 
     let bob_acc_details = accounts[1].details().await;
     assert_eq!(bob_acc_details.public_addresses().len(), 1);
     assert_eq!(
-        bob_acc_details.public_addresses()[0].address(),
+        bob_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qql3h5vxh2sxa93yadh7f4rkr7f9g9e65wlytazeu688mpcvhvmd2xvfq8y"
     );
     assert_eq!(bob_acc_details.internal_addresses().len(), 1);
     assert_eq!(
-        bob_acc_details.internal_addresses()[0].address(),
+        bob_acc_details.internal_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
@@ -196,7 +203,7 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     //     "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
     // );
 
-    tear_down("migrate_chrysalis_db_encrypted")
+    tear_down(storage_path)
 }
 
 fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> {

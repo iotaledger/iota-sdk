@@ -9,7 +9,10 @@ use std::{
     path::Path,
 };
 
-use crypto::ciphers::{chacha::XChaCha20Poly1305, traits::Aead};
+use crypto::{
+    ciphers::{chacha::XChaCha20Poly1305, traits::Aead},
+    macs::hmac::HMAC_SHA512,
+};
 use rocksdb::{IteratorMode, Options, DB};
 use serde::Serialize;
 use serde_json::Value;
@@ -63,13 +66,24 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
 
     let chrysalis_data = get_chrysalis_data(&chrysalis_storage_path, password)?;
 
-    log::debug!(
-        "Migrating chrysalis data: {}",
-        serde_json::to_string_pretty(&chrysalis_data)?
-    );
-
     // create new accounts base on previous data
-    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path)?;
+    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path, false)?;
+
+    // convert to string keys
+    let chrysalis_data_with_string_keys = chrysalis_data
+        .into_iter()
+        .map(|(k, v)| {
+            Ok((
+                String::from_utf8(k).map_err(|_| Error::Migration("invalid utf8".into()))?,
+                v,
+            ))
+        })
+        .collect::<Result<HashMap<String, String>>>()?;
+
+    log::debug!(
+        "Chrysalis data: {}",
+        serde_json::to_string_pretty(&chrysalis_data_with_string_keys)?
+    );
 
     let mut opts = Options::default();
     opts.create_if_missing(true);
@@ -77,8 +91,10 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
     let stardust_db = DB::open(&opts, storage_path).unwrap();
 
     // store chrysalis data in a new key
-    stardust_db.put(CHRYSALIS_STORAGE_KEY, serde_json::to_string(&chrysalis_data)?)?;
-
+    stardust_db.put(
+        CHRYSALIS_STORAGE_KEY,
+        serde_json::to_string(&chrysalis_data_with_string_keys)?,
+    )?;
     // write new accounts to db (with account indexation)
     let accounts_indexation_data: Vec<u32> = new_accounts.iter().map(|account| account.index).collect();
     stardust_db.put(
@@ -117,17 +133,33 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
 }
 
 pub(crate) fn migrate_from_chrysalis_data(
-    chrysalis_data: &HashMap<String, String>,
+    chrysalis_data: &HashMap<Vec<u8>, String>,
     storage_path: &Path,
+    // in stronghold the keys are hashed first
+    stronghold: bool,
 ) -> Result<(Vec<AccountDetailsDto>, Option<String>)> {
     let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
     let mut secret_manager_dto: Option<String> = None;
-    if let Some(account_indexation) = chrysalis_data.get("iota-wallet-account-indexation") {
+
+    let account_indexation_key = if stronghold {
+        key_to_chrysalis_key(b"iota-wallet-account-indexation")
+    } else {
+        b"iota-wallet-account-indexation".to_vec()
+    };
+    if let Some(account_indexation) = chrysalis_data.get(&account_indexation_key) {
         if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
             for account_key in account_keys {
-                if let Some(account_data) =
-                    chrysalis_data.get(account_key["key"].as_str().expect("key must be a string"))
-                {
+                let account_key = if stronghold {
+                    key_to_chrysalis_key(account_key["key"].as_str().expect("key must be a string").as_bytes())
+                } else {
+                    account_key["key"]
+                        .as_str()
+                        .expect("key must be a string")
+                        .as_bytes()
+                        .to_vec()
+                };
+
+                if let Some(account_data) = chrysalis_data.get(&account_key) {
                     let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
                     if secret_manager_dto.is_none() {
                         let dto = match &account_data["signerType"]["type"].as_str() {
@@ -176,10 +208,12 @@ pub(crate) fn migrate_from_chrysalis_data(
             }
         }
     }
+    // Accounts must be ordered by index
+    new_accounts.sort_unstable_by_key(|a| a.index);
     Ok((new_accounts, secret_manager_dto))
 }
 
-fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>) -> Result<HashMap<String, String>> {
+fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>) -> Result<HashMap<Vec<u8>, String>> {
     let encryption_key = password.map(storage_password_to_encryption_key);
     let chrysalis_db = DB::open_default(chrysalis_storage_path).unwrap();
     // iterate over all rocksdb keys
@@ -200,7 +234,7 @@ fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>)
             String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
         };
 
-        chrysalis_data.insert(key_utf8, value);
+        chrysalis_data.insert(key.to_vec(), value);
     }
     Ok(chrysalis_data)
 }
@@ -244,4 +278,13 @@ fn decrypt_record(record: &str, encryption_key: &[u8; 32]) -> crate::wallet::Res
     .map_err(|e| Error::Migration(format!("{:?}", e)))?;
 
     Ok(String::from_utf8_lossy(&pt).to_string())
+}
+
+pub(crate) fn key_to_chrysalis_key(key: &[u8]) -> Vec<u8> {
+    let mut buf = [0; 64];
+    HMAC_SHA512(key, key, &mut buf);
+
+    let (id, _) = buf.split_at(24);
+
+    id.try_into().unwrap()
 }
