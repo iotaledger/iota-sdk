@@ -4,7 +4,7 @@
 use core::str::FromStr;
 
 use iota_sdk::types::{
-    block::{slot::SlotIndex, Block, BlockDto, BlockId},
+    block::{protocol::ProtocolParameters, Block, BlockDto, BlockId},
     TryFromDto,
 };
 use packable::PackableExt;
@@ -55,14 +55,44 @@ fn pack_unpack_valid() {
 
 #[test]
 fn compute() {
-    let block_dto_json = r#"{"protocolVersion":3,"networkId":"0","issuingTime":"0","slotCommitment":"0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000","latestFinalizedSlot":"0","issuerId":"0x0000000000000000000000000000000000000000000000000000000000000000","block":{"type":1,"strongParents":["0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608"],"weakParents":[],"shallowLikeParents":[],"highestSupportedVersion":3,"protocolParametersHash":"0x0000000000000000000000000000000000000000000000000000000000000000"},"signature":{"type":0,"publicKey":"0x714f5f07067012267c21426d382a52752f0b3208443e0e3c49183e0110494148","signature":"0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"}}"#;
-    let block_dto = serde_json::from_str::<BlockDto>(block_dto_json).unwrap();
-    let block = Block::try_from_dto(block_dto).unwrap();
-    let block_hash = block.hash();
-    let block_id = block_hash.with_slot_index(SlotIndex::new(0));
+    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters_hash = protocol_parameters.hash();
+    let slot_index = 11_u64;
+    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+        + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
+    let block_dto_json = serde_json::json!({
+        "protocolVersion": 3,
+        "networkId": "0",
+        "issuingTime": issuing_time.to_string(),
+        "slotCommitment": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
+        "latestFinalizedSlot": "0",
+        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "block": {
+            "type":1,
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "weakParents": [],
+            "shallowLikeParents": [],
+            "highestSupportedVersion": 3,
+            "protocolParametersHash": protocol_parameters_hash
+        },
+        "signature": {
+            "type": 0,
+            "publicKey": "0x714f5f07067012267c21426d382a52752f0b3208443e0e3c49183e0110494148",
+            "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
+        }
+    });
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block = Block::try_from_dto_with_params(block_dto, protocol_parameters).unwrap();
+    let block_id = block.id();
 
+    // TODO: Independently verify this value
     assert_eq!(
         block_id.to_string(),
-        "0x836b8e132a331263f3da03735d22f1cb99e42d86dab09447d3bec113005c82490000000000000000"
+        "0xca12e2613baeac176b4652c76b269a36ce8da295d4816f0393b5e54e6b1953550b00000000000000"
     );
+    assert_eq!(
+        block_id.hash().to_string(),
+        "0xca12e2613baeac176b4652c76b269a36ce8da295d4816f0393b5e54e6b195355"
+    );
+    assert_eq!(block_id.slot_index().get(), slot_index);
 }
