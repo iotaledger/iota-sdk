@@ -25,7 +25,7 @@ use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::Payload,
     protocol::ProtocolParameters,
-    BlockId, Error, PROTOCOL_VERSION,
+    BlockId, Error,
 };
 
 /// A builder to build a [`Block`].
@@ -35,6 +35,7 @@ pub struct BlockBuilder<B>(pub(crate) B);
 
 impl<B> BlockBuilder<BlockWrapper<B>> {
     pub fn from_block_data(
+        protocol_params: ProtocolParameters,
         network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
@@ -44,7 +45,7 @@ impl<B> BlockBuilder<BlockWrapper<B>> {
         signature: Ed25519Signature,
     ) -> Self {
         Self(BlockWrapper {
-            protocol_version: PROTOCOL_VERSION,
+            protocol_params,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -118,15 +119,15 @@ impl Packable for Block {
 
     fn unpack<U: Unpacker, const VERIFY: bool>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        protocol_params: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let start_opt = unpacker.read_bytes();
 
         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != visitor.protocol_version() {
+        if VERIFY && protocol_version != protocol_params.protocol_version() {
             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: visitor.protocol_version(),
+                expected: protocol_params.protocol_version(),
                 actual: protocol_version,
             }));
         }
@@ -145,11 +146,11 @@ impl Packable for Block {
 
         let block = match kind {
             BasicBlock::KIND => {
-                let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
+                let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
                 Self::from(BlockWrapper {
-                    protocol_version,
+                    protocol_params: protocol_params.clone(),
                     network_id,
                     issuing_time,
                     slot_commitment_id,
@@ -160,11 +161,11 @@ impl Packable for Block {
                 })
             }
             ValidationBlock::KIND => {
-                let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
+                let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
                 Self::from(BlockWrapper {
-                    protocol_version,
+                    protocol_params: protocol_params.clone(),
                     network_id,
                     issuing_time,
                     slot_commitment_id,
@@ -196,8 +197,8 @@ impl Packable for Block {
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlockWrapper<B> {
-    /// Protocol version of the block.
-    pub(crate) protocol_version: u8,
+    /// Protocol parameters of the network to which this block belongs.
+    pub(crate) protocol_params: ProtocolParameters,
     /// Network identifier.
     pub(crate) network_id: u64,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
@@ -218,7 +219,13 @@ impl<B> BlockWrapper<B> {
     /// Returns the protocol version of a [`Block`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
-        self.protocol_version
+        self.protocol_params.protocol_version
+    }
+
+    /// Returns the protocol parameters of a [`Block`].
+    #[inline(always)]
+    pub fn protocol_parameters(&self) -> &ProtocolParameters {
+        &self.protocol_params
     }
 
     /// Returns the network id of a [`Block`].
@@ -258,7 +265,7 @@ impl<B> BlockWrapper<B> {
     }
 
     pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version.pack(packer)?;
+        self.protocol_params.protocol_version.pack(packer)?;
         self.network_id.pack(packer)?;
         self.issuing_time.pack(packer)?;
         self.slot_commitment_id.pack(packer)?;
@@ -292,6 +299,7 @@ impl Block {
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
     pub fn build_basic(
+        protocol_params: ProtocolParameters,
         network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
@@ -301,6 +309,7 @@ impl Block {
         signature: Ed25519Signature,
     ) -> BlockBuilder<BasicBlock> {
         BlockBuilder::<BasicBlock>::new(
+            protocol_params,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -314,6 +323,7 @@ impl Block {
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
     #[inline(always)]
     pub fn build_validation(
+        protocol_params: ProtocolParameters,
         network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
@@ -325,6 +335,7 @@ impl Block {
         signature: Ed25519Signature,
     ) -> BlockBuilder<ValidationBlock> {
         BlockBuilder::<ValidationBlock>::new(
+            protocol_params,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -343,6 +354,15 @@ impl Block {
         match self {
             Self::Basic(b) => b.protocol_version(),
             Self::Validation(b) => b.protocol_version(),
+        }
+    }
+
+    /// Returns the protocol parameters of a [`Block`].
+    #[inline(always)]
+    pub fn protocol_parameters(&self) -> &ProtocolParameters {
+        match self {
+            Self::Basic(b) => b.protocol_parameters(),
+            Self::Validation(b) => b.protocol_parameters(),
         }
     }
 
@@ -478,9 +498,9 @@ impl Block {
     }
 
     /// Computes the identifier of the block.
-    pub fn id(&self, protocol_parameters: &ProtocolParameters) -> BlockId {
+    pub fn id(&self) -> BlockId {
         self.hash()
-            .with_slot_index(protocol_parameters.slot_index(self.issuing_time()))
+            .with_slot_index(self.protocol_parameters().slot_index(self.issuing_time()))
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
@@ -680,8 +700,10 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            let protocol_params = params.protocol_parameters().cloned().unwrap_or_default();
             match dto.block {
                 BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
+                    protocol_params,
                     dto.network_id,
                     dto.issuing_time,
                     dto.slot_commitment,
@@ -690,9 +712,9 @@ pub(crate) mod dto {
                     BasicBlockData::try_from_dto_with_params_inner(b, params)?,
                     *dto.signature.as_ed25519(),
                 )
-                .with_protocol_version(dto.protocol_version)
                 .finish(),
                 BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
+                    protocol_params,
                     dto.network_id,
                     dto.issuing_time,
                     dto.slot_commitment,
@@ -701,7 +723,6 @@ pub(crate) mod dto {
                     ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
                     *dto.signature.as_ed25519(),
                 )
-                .with_protocol_version(dto.protocol_version)
                 .finish(),
             }
         }

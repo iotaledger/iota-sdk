@@ -143,10 +143,7 @@ impl Client {
                 let block = self.get_block(block_id).await?;
                 if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
                     let included_block = self.get_included_block(&transaction_payload.id()).await?;
-                    let mut included_and_reattached_blocks = vec![(
-                        included_block.id(&self.get_protocol_parameters().await?),
-                        included_block,
-                    )];
+                    let mut included_and_reattached_blocks = vec![(included_block.id(), included_block)];
                     included_and_reattached_blocks.extend(blocks_with_id);
                     return Ok(included_and_reattached_blocks);
                 }

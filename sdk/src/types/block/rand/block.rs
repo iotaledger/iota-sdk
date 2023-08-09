@@ -37,6 +37,7 @@ pub fn rand_basic_block_with_strong_parents(strong_parents: StrongParents) -> Bl
 /// Generates a random basic block builder with given parents.
 pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BlockBuilder<BasicBlock> {
     Block::build_basic(
+        Default::default(),
         rand_number(),
         rand_number(),
         rand_bytes_array().into(),

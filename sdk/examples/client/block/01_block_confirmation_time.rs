@@ -20,8 +20,6 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let protocol_parameters = client.get_protocol_parameters().await?;
-
     // Create and send a block.
     let block = client
         .finish_basic_block_builder(
@@ -32,7 +30,7 @@ async fn main() -> Result<()> {
             None,
         )
         .await?;
-    let block_id = block.id(&protocol_parameters);
+    let block_id = block.id();
 
     println!("{block:#?}");
 

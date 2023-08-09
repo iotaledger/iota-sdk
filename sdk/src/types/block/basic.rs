@@ -15,7 +15,7 @@ use super::{
     protocol::ProtocolParameters,
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
-    Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
+    Block, BlockBuilder, Error, IssuerId,
 };
 
 pub type BasicBlock = BlockWrapper<BasicBlockData>;
@@ -24,6 +24,7 @@ impl BlockBuilder<BasicBlock> {
     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
     #[inline(always)]
     pub fn new(
+        protocol_params: ProtocolParameters,
         network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
@@ -33,7 +34,7 @@ impl BlockBuilder<BasicBlock> {
         signature: Ed25519Signature,
     ) -> Self {
         Self(BlockWrapper {
-            protocol_version: PROTOCOL_VERSION,
+            protocol_params,
             network_id,
             issuing_time,
             slot_commitment_id,
@@ -48,13 +49,6 @@ impl BlockBuilder<BasicBlock> {
             },
             signature,
         })
-    }
-
-    /// Adds a protocol version to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
-        self.0.protocol_version = protocol_version;
-        self
     }
 
     /// Adds weak parents to a [`BlockBuilder`].
@@ -190,15 +184,15 @@ impl Packable for BasicBlock {
 
     fn unpack<U: Unpacker, const VERIFY: bool>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        protocol_params: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let start_opt = unpacker.read_bytes();
 
         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != visitor.protocol_version() {
+        if VERIFY && protocol_version != protocol_params.protocol_version() {
             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: visitor.protocol_version(),
+                expected: protocol_params.protocol_version(),
                 actual: protocol_version,
             }));
         }
@@ -219,12 +213,12 @@ impl Packable for BasicBlock {
             return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
         }
 
-        let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
         let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let block = Self {
-            protocol_version,
+            protocol_params: protocol_params.clone(),
             network_id,
             issuing_time,
             slot_commitment_id,
