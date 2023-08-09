@@ -7,8 +7,17 @@ use crate::types::block::Error;
 impl_id!(pub BlockHash, 32, "The hash of a [`Block`].");
 
 impl BlockHash {
+    #[cfg(target_endian = "little")]
     pub fn with_slot_index(self, slot_index: SlotIndex) -> BlockId {
         BlockId { hash: self, slot_index }
+    }
+
+    #[cfg(target_endian = "big")]
+    pub fn with_slot_index(self, slot_index: SlotIndex) -> BlockId {
+        BlockId {
+            hash: self,
+            slot_index: slot_index.to_le().into(),
+        }
     }
 }
 
