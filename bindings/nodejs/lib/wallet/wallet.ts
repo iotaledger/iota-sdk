@@ -149,6 +149,18 @@ export class Wallet {
     }
 
     /**
+     * Get chrysalis data.
+     */
+    // TODO: is this the correct type?
+    async getChrysalisData(): Promise<{ [key: string]: string }> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getChrysalisData',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Get secret manager.
      */
     async getSecretManager(): Promise<SecretManager> {

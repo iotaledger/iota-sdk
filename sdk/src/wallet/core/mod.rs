@@ -200,6 +200,11 @@ impl<S: SecretManage> WalletInner<S> {
         Ok(Client::generate_mnemonic()?)
     }
 
+    #[cfg(feature = "storage")]
+    pub async fn get_chrysalis_data(&self) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
+        self.storage_manager.read().await.get_chrysalis_data().await
+    }
+
     /// Verify that a &str is a valid mnemonic.
     pub fn verify_mnemonic(&self, mnemonic: &MnemonicRef) -> crate::wallet::Result<()> {
         verify_mnemonic(mnemonic)?;

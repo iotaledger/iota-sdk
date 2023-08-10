@@ -62,12 +62,12 @@ pub(crate) struct AccountDetailsDto {
 pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, password: Option<Password>) -> Result<()> {
     let storage_path = Path::new(&storage_path);
     // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
-    let chrysalis_storage_path = storage_path.clone().join("db");
+    let chrysalis_storage_path = &(*storage_path).join("db");
 
-    let chrysalis_data = get_chrysalis_data(&chrysalis_storage_path, password)?;
+    let chrysalis_data = get_chrysalis_data(chrysalis_storage_path, password)?;
 
     // create new accounts base on previous data
-    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path, false)?;
+    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, storage_path, false)?;
 
     // convert to string keys
     let chrysalis_data_with_string_keys = chrysalis_data

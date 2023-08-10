@@ -59,6 +59,9 @@ async fn migrate_chrysalis_db() -> Result<()> {
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
+    let chrysalis_data = wallet.get_chrysalis_data().await?;
+    assert!(!chrysalis_data.unwrap().is_empty());
+
     // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
     // wallet.set_stronghold_password("password".to_owned()).await?;
     // // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
@@ -120,6 +123,9 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
         bob_acc_details.internal_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
+
+    let chrysalis_data = wallet.get_chrysalis_data().await?;
+    assert!(!chrysalis_data.unwrap().is_empty());
 
     // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
     // wallet.set_stronghold_password("password".to_owned()).await?;
@@ -194,6 +200,10 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
         bob_acc_details.internal_addresses()[0].address().try_to_bech32("rms")?,
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
+
+    // TODO: enable when implemented
+    // let chrysalis_data = wallet.get_chrysalis_data().await?;
+    // assert!(!chrysalis_data.unwrap().is_empty());
 
     // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
     // wallet.set_stronghold_password("password".to_owned()).await?;

@@ -107,7 +107,7 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     log::debug!("migrate_snapshot_from_chrysalis_to_stardust");
     let stronghold = stronghold_adapter.inner().await;
     let stronghold_client = stronghold
-        .load_client(b"iota-wallet-records".to_vec())
+        .load_client(b"iota-wallet-records")
         .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
     let stronghold_store = stronghold_client.store();
     let keys = stronghold_store
@@ -117,7 +117,7 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     // check if snapshot contains chrysalis data
     if !keys
         .iter()
-        .any(|k| k == &key_to_chrysalis_key("iota-wallet-account-indexation".as_bytes()))
+        .any(|k| k == &key_to_chrysalis_key(b"iota-wallet-account-indexation"))
     {
         return Ok(());
     }
@@ -140,7 +140,7 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     drop(stronghold);
 
     let (new_accounts, secret_manager_dto) =
-        migrate_from_chrysalis_data(&chrysalis_data, &Path::new("wallet.stronghold"), true)?;
+        migrate_from_chrysalis_data(&chrysalis_data, Path::new("wallet.stronghold"), true)?;
 
     // convert to string keys
     let chrysalis_data_with_string_keys = chrysalis_data
