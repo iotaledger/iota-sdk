@@ -27,7 +27,7 @@ impl BlockHash {
 #[repr(C)]
 pub struct BlockId {
     pub(crate) hash: BlockHash,
-    // INPORTANT: On big-endian systems this value is misrepresented because it is transmuted directly
+    // IMPORTANT: On big-endian systems this value is misrepresented because it is transmuted directly
     // from bytes, so the getter below handles that conversion. Do not access it directly.
     slot_index: SlotIndex,
 }
