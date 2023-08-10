@@ -26,11 +26,11 @@ abstract class BlockWrapper {
     /**
      * Network identifier.
      */
-    networkId: BigInt;
+    networkId: bigint;
     /**
      * The time at which the block was issued. It is a Unix timestamp in nanoseconds.
      */
-    issuingTime: BigInt;
+    issuingTime: bigint;
     /**
      * The identifier of the slot to which this block commits.
      */
@@ -51,8 +51,8 @@ abstract class BlockWrapper {
     constructor(
         type: BlockType,
         protocolVersion: number,
-        networkId: BigInt,
-        issuingTime: BigInt,
+        networkId: bigint,
+        issuingTime: bigint,
         //slotCommitmentId: SlotCommitmentId,
         //latestFinalizedSlot: SlotIndex,
         //issuerId: IssuerId,
