@@ -4,7 +4,7 @@
 use core::str::FromStr;
 
 use iota_sdk::types::{
-    block::{slot::SlotIndex, Block, BlockDto, BlockId},
+    block::{rand::bytes::rand_bytes_array, slot::SlotIndex, Block, BlockDto, BlockHash, BlockId},
     TryFromDto,
 };
 use packable::PackableExt;
@@ -51,6 +51,17 @@ fn pack_unpack_valid() {
         block_id,
         PackableExt::unpack_verified(packed_block_id.as_slice(), &()).unwrap()
     );
+}
+
+#[test]
+fn memory_layout() {
+    let block_hash = BlockHash::new(rand_bytes_array());
+    let slot_index = 12345.into();
+    let block_id = block_hash.with_slot_index(slot_index);
+    assert_eq!(slot_index, block_id.slot_index());
+    let memory_layout =
+        <[u8; BlockId::LENGTH]>::try_from([block_hash.as_ref(), &slot_index.to_le_bytes()].concat()).unwrap();
+    assert_eq!(block_id.as_ref(), memory_layout);
 }
 
 #[test]
