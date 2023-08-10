@@ -5,7 +5,7 @@ import type {
     Bip44,
     SecretManagerType,
 } from '../../secret_manager/secret-manager';
-import type { Block, BlockId, Output, Payload } from '../../block';
+import type { BlockWrapper, BlockId, Output, Payload } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AccountQueryParameter,
@@ -48,7 +48,7 @@ export interface __GetOutputsMethod__ {
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {
-        block: Block;
+        block: BlockWrapper;
     };
 }
 
@@ -144,7 +144,7 @@ export interface __GetPeersMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: Block;
+        block: BlockWrapper;
     };
 }
 

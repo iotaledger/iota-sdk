@@ -5,7 +5,7 @@ import { callUtilsMethod } from '../bindings';
 import {
     Address,
     HexEncodedString,
-    Block,
+    BlockWrapper,
     Ed25519Signature,
     TransactionEssence,
     TransactionPayload,
@@ -198,7 +198,7 @@ export class Utils {
      * @param block A block.
      * @returns The corresponding block ID.
      */
-    static blockId(block: Block): BlockId {
+    static blockId(block: BlockWrapper): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
