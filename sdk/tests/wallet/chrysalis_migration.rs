@@ -201,9 +201,8 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
-    // TODO: enable when implemented
-    // let chrysalis_data = wallet.get_chrysalis_data().await?;
-    // assert!(!chrysalis_data.unwrap().is_empty());
+    let chrysalis_data = wallet.get_chrysalis_data().await?;
+    assert!(!chrysalis_data.unwrap().is_empty());
 
     // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
     // wallet.set_stronghold_password("password".to_owned()).await?;

@@ -61,9 +61,9 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     Option<u32>,
     Option<S::Config>,
     Option<Vec<AccountDetails>>,
+    Option<HashMap<String, String>>,
 )> {
-    // TODO: decide if we should have the chrysalis migration also in the migrate function
-    migrate_snapshot_from_chrysalis_to_stardust(stronghold).await?;
+    let chrysalis_data = migrate_snapshot_from_chrysalis_to_stardust(stronghold).await?;
 
     migrate(stronghold).await?;
 
@@ -98,12 +98,18 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
         })
         .transpose()?;
 
-    Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
+    Ok((
+        client_options,
+        coin_type,
+        restored_secret_manager,
+        restored_accounts,
+        chrysalis_data,
+    ))
 }
 
 async fn migrate_snapshot_from_chrysalis_to_stardust(
     stronghold_adapter: &StrongholdAdapter,
-) -> crate::wallet::Result<()> {
+) -> crate::wallet::Result<Option<HashMap<String, String>>> {
     log::debug!("migrate_snapshot_from_chrysalis_to_stardust");
     let stronghold = stronghold_adapter.inner().await;
     let stronghold_client = stronghold
@@ -119,7 +125,7 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         .iter()
         .any(|k| k == &key_to_chrysalis_key(b"iota-wallet-account-indexation"))
     {
-        return Ok(());
+        return Ok(None);
     }
     // TODO: are there snapshots with chrysalis AND stardust data? From shimmer claiming for example
     // What to do with them? Following would also move the stardust account data in the chrysalis data
@@ -204,5 +210,5 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
 
     // TODO: delete old chrysalis data records
 
-    Ok(())
+    Ok(Some(chrysalis_data_with_string_keys))
 }

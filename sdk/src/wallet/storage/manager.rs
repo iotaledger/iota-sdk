@@ -105,19 +105,30 @@ impl StorageManager {
         self.set(&key, &sync_options).await
     }
 
-    pub(crate) async fn get_chrysalis_data(
-        &self,
-    ) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
-        self.get(crate::wallet::migration::chrysalis::CHRYSALIS_STORAGE_KEY)
-            .await
-    }
-
     pub(crate) async fn get_default_sync_options(
         &self,
         account_index: u32,
     ) -> crate::wallet::Result<Option<SyncOptions>> {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
         self.get(&key).await
+    }
+
+    pub(crate) async fn set_chrysalis_data(
+        &self,
+        chrysalis_data: std::collections::HashMap<String, String>,
+    ) -> crate::wallet::Result<()> {
+        self.set(
+            crate::wallet::migration::chrysalis::CHRYSALIS_STORAGE_KEY,
+            &chrysalis_data,
+        )
+        .await
+    }
+
+    pub(crate) async fn get_chrysalis_data(
+        &self,
+    ) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
+        self.get(crate::wallet::migration::chrysalis::CHRYSALIS_STORAGE_KEY)
+            .await
     }
 }
 

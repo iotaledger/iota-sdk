@@ -102,7 +102,7 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts, chrysalis_data) =
             read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
@@ -204,6 +204,13 @@ impl Wallet {
             for account in accounts.iter() {
                 account.save(None).await?;
             }
+            if let Some(chrysalis_data) = chrysalis_data {
+                self.storage_manager
+                    .read()
+                    .await
+                    .set_chrysalis_data(chrysalis_data)
+                    .await?;
+            }
         }
 
         Ok(())
@@ -272,7 +279,7 @@ impl Wallet<StrongholdSecretManager> {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts, chrysalis_data) =
             read_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
@@ -366,6 +373,13 @@ impl Wallet<StrongholdSecretManager> {
             // also save account to db
             for account in accounts.iter() {
                 account.save(None).await?;
+            }
+            if let Some(chrysalis_data) = chrysalis_data {
+                self.storage_manager
+                    .read()
+                    .await
+                    .set_chrysalis_data(chrysalis_data)
+                    .await?;
             }
         }
 
