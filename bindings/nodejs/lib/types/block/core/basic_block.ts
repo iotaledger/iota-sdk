@@ -1,18 +1,15 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Payload, PayloadDiscriminator } from './payload';
+import { Payload, PayloadDiscriminator } from '../payload';
 import { Type } from 'class-transformer';
-import { StrongParents, WeakParents, ShallowLikeParents } from './parents';
+import { StrongParents, WeakParents, ShallowLikeParents } from '../parents';
+import { BlockWrapper } from './block_wrapper';
 
 /**
  * Basic Block layout.
  */
-export class Block {
-    /**
-     * The protocol version under which this block operates.
-     */
-    protocolVersion!: number;
+export class BasicBlock extends BlockWrapper {
     /**
      * Blocks that are strongly directly approved.
      */
