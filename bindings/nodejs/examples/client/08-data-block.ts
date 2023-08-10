@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+    BasicBlock,
     Client,
     hexToUtf8,
     initLogger,
@@ -38,9 +39,12 @@ async function run() {
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
         console.log('Block data: ', fetchedBlock);
 
-        if (fetchedBlock.payload instanceof TaggedDataPayload) {
-            const payload = fetchedBlock.payload as TaggedDataPayload;
-            console.log('Decoded data:', hexToUtf8(payload.data));
+        if (fetchedBlock instanceof BasicBlock) {
+            const basic = fetchedBlock as BasicBlock;
+            if (basic instanceof TaggedDataPayload) {
+                const payload = basic as TaggedDataPayload;
+                console.log('Decoded data:', hexToUtf8(payload.data));
+            }
         }
     } catch (error) {
         console.error('Error: ', error);
