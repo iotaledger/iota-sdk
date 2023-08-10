@@ -36,8 +36,6 @@ async fn main() -> Result<()> {
 
     println!("{block:#?}");
 
-    // Try to check if the block has been confirmed.
-    client.retry_until_included(&block_id, None, None).await?;
     println!(
         "Block with no payload included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),

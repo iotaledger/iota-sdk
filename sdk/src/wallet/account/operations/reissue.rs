@@ -16,8 +16,8 @@ use crate::{
     },
 };
 
-const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
-const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
+const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
+const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
 impl<S: 'static + SecretManage> Account<S>
 where
@@ -71,9 +71,9 @@ where
             // TODO: remove when todos in `finish_basic_block_builder()` are removed
             #[allow(unused_mut)]
             let mut block_ids = vec![block_id];
-            for _ in 0..max_attempts.unwrap_or(DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT) {
+            for _ in 0..max_attempts.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT) {
                 let duration =
-                    std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL));
+                    std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL));
 
                 #[cfg(target_family = "wasm")]
                 gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
