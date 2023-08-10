@@ -1,7 +1,7 @@
 import {
     Ed25519Signature,
     HexEncodedString,
-    Block,
+    BlockWrapper,
     TransactionEssence,
     TransactionPayload,
     TransactionId,
@@ -87,7 +87,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: Block;
+        block: BlockWrapper;
     };
 }
 
