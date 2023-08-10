@@ -18,36 +18,36 @@ abstract class BlockWrapper {
     /**
      * The type of block
      */
-    private type: BlockType;
+    readonly type: BlockType;
 
     /**
      * Protocol version of the block.
      */
-    private protocolVersion: number;
+    readonly protocolVersion: number;
     /**
      * Network identifier.
      */
-    private networkId: bigint;
+    readonly networkId: bigint;
     /**
      * The time at which the block was issued. It is a Unix timestamp in nanoseconds.
      */
-    private issuingTime: bigint;
+    readonly issuingTime: bigint;
     /**
      * The identifier of the slot to which this block commits.
      */
-    private slotCommitmentId: SlotCommitmentId;
+    readonly slotCommitmentId: SlotCommitmentId;
     /**
      * The slot index of the latest finalized slot.
      */
-    private latestFinalizedSlot: bigint;
+    readonly latestFinalizedSlot: bigint;
     /**
      * The identifier of the account that issued this block.
      */
-    private issuerId: IssuerId;
+    readonly issuerId: IssuerId;
     /**
      * The block signature; used to validate issuance capabilities.
      */
-    private signature: Ed25519Signature;
+    readonly signature: Ed25519Signature;
 
     constructor(
         type: BlockType,
