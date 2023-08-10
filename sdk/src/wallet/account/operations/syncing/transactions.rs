@@ -15,7 +15,7 @@ use crate::{
 };
 
 // ignore outputs and transactions from other networks
-// check if outputs are unspent, rebroadcast, reattach...
+// check if outputs are unspent, rebroadcast, reissue...
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
@@ -23,7 +23,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Sync transactions and reattach them if unconfirmed. Returns the transaction with updated metadata and spent
+    /// Sync transactions and reissue them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
     /// be synced again
@@ -46,7 +46,7 @@ where
         // Inputs from conflicting transactions that are unspent, but should be removed from the locked outputs so they
         // are available again
         let mut output_ids_to_unlock = Vec::new();
-        let mut transactions_to_reattach = Vec::new();
+        let mut transactions_to_reissue = Vec::new();
         let protocol_params = self.client().get_protocol_parameters().await?;
 
         for transaction_id in &account_details.pending_transactions {
@@ -151,7 +151,7 @@ where
                                 }
                             }
                         } else {
-                            // no need to reattach if one input got spent
+                            // no need to reissue if one input got spent
                             if input_got_spent {
                                 process_transaction_with_unknown_state(
                                     &account_details,
@@ -161,16 +161,16 @@ where
                                 )?;
                             } else {
                                 let time_now = unix_timestamp_now().as_millis();
-                                // Reattach if older than 30 seconds
+                                // Reissue if older than 30 seconds
                                 if transaction.timestamp + 30000 < time_now {
-                                    // only reattach if inputs are still unspent
-                                    transactions_to_reattach.push(transaction);
+                                    // only reissue if inputs are still unspent
+                                    transactions_to_reissue.push(transaction);
                                 }
                             }
                         }
                     }
                     Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
-                        // no need to reattach if one input got spent
+                        // no need to reissue if one input got spent
                         if input_got_spent {
                             process_transaction_with_unknown_state(
                                 &account_details,
@@ -180,10 +180,10 @@ where
                             )?;
                         } else {
                             let time_now = unix_timestamp_now().as_millis();
-                            // Reattach if older than 30 seconds
+                            // Reissue if older than 30 seconds
                             if transaction.timestamp + 30000 < time_now {
-                                // only reattach if inputs are still unspent
-                                transactions_to_reattach.push(transaction);
+                                // only reissue if inputs are still unspent
+                                transactions_to_reissue.push(transaction);
                             }
                         }
                     }
@@ -191,20 +191,20 @@ where
                 }
             } else {
                 // transaction wasn't submitted yet, so we have to send it again
-                // no need to reattach if one input got spent
+                // no need to reissue if one input got spent
                 if input_got_spent {
                 } else {
-                    // only reattach if inputs are still unspent
-                    transactions_to_reattach.push(transaction);
+                    // only reissue if inputs are still unspent
+                    transactions_to_reissue.push(transaction);
                 }
             }
         }
         drop(account_details);
 
-        for mut transaction in transactions_to_reattach {
-            log::debug!("[SYNC] reattach transaction");
-            let reattached_block = self.submit_transaction_payload(transaction.payload.clone()).await?;
-            transaction.block_id.replace(reattached_block);
+        for mut transaction in transactions_to_reissue {
+            log::debug!("[SYNC] reissue transaction");
+            let reissueed_block = self.submit_transaction_payload(transaction.payload.clone()).await?;
+            transaction.block_id.replace(reissueed_block);
             updated_transactions.push(transaction);
         }
 

@@ -38,7 +38,7 @@ async function run() {
         const transaction = await account.claimOutputs(output_ids);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        const blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);

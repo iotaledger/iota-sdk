@@ -20,7 +20,7 @@ async fn create_and_mint_native_token() -> Result<()> {
 
     let tx = account.create_account_output(None, None).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
@@ -36,7 +36,7 @@ async fn create_and_mint_native_token() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.native_tokens().len(), 1);
@@ -52,7 +52,7 @@ async fn create_and_mint_native_token() -> Result<()> {
 
     let tx = account.mint_native_token(create_tx.token_id, 50, None).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.native_tokens().len(), 1);
@@ -81,7 +81,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
 
     let tx = account.create_account_output(None, None).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
@@ -99,7 +99,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     // Sync native_token_foundries to get the metadata
     let balance = account

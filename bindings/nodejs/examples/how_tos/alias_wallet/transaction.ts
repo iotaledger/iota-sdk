@@ -75,7 +75,7 @@ async function run() {
             allowMicroAmount: false,
         };
         const transaction = await account.sendWithParams(params, options);
-        await account.retryTransactionUntilIncluded(transaction.transactionId);
+        await account.reissueTransactionUntilIncluded(transaction.transactionId);
         console.log(
             `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,
         );
