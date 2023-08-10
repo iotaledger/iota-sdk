@@ -1,7 +1,13 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Block, Client, initLogger } from '@iota/sdk';
+import {
+    BasicBlock,
+    BlockWrapper,
+    Client,
+    initLogger,
+    parseBlock,
+} from '@iota/sdk';
 import { plainToInstance } from 'class-transformer';
 
 require('dotenv').config({ path: '.env' });
@@ -34,8 +40,12 @@ async function run() {
 
         const parsed = JSON.parse(data);
         if (parsed.topic == 'blocks') {
-            const block = plainToInstance(Block, JSON.parse(parsed.payload));
-            console.log('payload:', block.payload);
+            const block = parseBlock(JSON.parse(parsed.payload));
+
+            if (block instanceof BasicBlock) {
+                const basic = block as BasicBlock;
+                console.log('payload:', basic.payload);
+            }
         }
     };
 
