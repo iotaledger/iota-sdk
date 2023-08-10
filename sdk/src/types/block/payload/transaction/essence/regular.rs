@@ -202,7 +202,7 @@ pub struct RegularTransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
-    /// The slot index of the block in which the transaction was created.
+    /// The slot index in which the transaction was created.
     creation_slot: SlotIndex,
     #[packable(verify_with = verify_context_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
@@ -234,7 +234,7 @@ impl RegularTransactionEssence {
         self.network_id
     }
 
-    /// Returns the slot index of the block in which the [`RegularTransactionEssence`] was created.
+    /// Returns the slot index in which the [`RegularTransactionEssence`] was created.
     pub fn creation_slot(&self) -> SlotIndex {
         self.creation_slot
     }
