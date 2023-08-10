@@ -4,8 +4,9 @@
 export * from './input/index';
 export * from './output/index';
 export * from './payload/index';
+export * from './parents/index';
 
 export * from './address';
 export * from './id';
-export * from './block';
+export * from './basic_block';
 export * from './signature';
