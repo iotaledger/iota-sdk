@@ -3,7 +3,7 @@
 
 import { BlockId } from '../id';
 
-type TupMinMax<
+type BoxedSlicePrefix<
     T,
     Min extends number,
     Max extends number,
@@ -11,13 +11,13 @@ type TupMinMax<
     O extends boolean = false,
 > = O extends false
     ? Min extends A['length']
-        ? TupMinMax<T, Min, Max, A, true>
-        : TupMinMax<T, Min, Max, [...A, T], false>
+        ? BoxedSlicePrefix<T, Min, Max, A, true>
+        : BoxedSlicePrefix<T, Min, Max, [...A, T], false>
     : Max extends A['length']
     ? A
-    : TupMinMax<T, Min, Max, [...A, T?], false>;
+    : BoxedSlicePrefix<T, Min, Max, [...A, T?], false>;
 
-export type Parents<Min extends number, Max extends number> = TupMinMax<
+export type Parents<Min extends number, Max extends number> = BoxedSlicePrefix<
     BlockId,
     Min,
     Max
