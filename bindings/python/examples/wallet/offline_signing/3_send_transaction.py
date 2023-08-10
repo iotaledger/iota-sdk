@@ -30,5 +30,6 @@ signed_transaction_data = from_dict(
 transaction = account.submit_and_store_transaction(signed_transaction_data)
 print(
     f'Transaction sent: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transactionId}')
-block_id = account.reissue_transaction_until_included(transaction.transactionId)
+block_id = account.reissue_transaction_until_included(
+    transaction.transactionId)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')

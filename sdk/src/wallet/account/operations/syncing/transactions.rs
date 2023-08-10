@@ -203,8 +203,8 @@ where
 
         for mut transaction in transactions_to_reissue {
             log::debug!("[SYNC] reissue transaction");
-            let reissueed_block = self.submit_transaction_payload(transaction.payload.clone()).await?;
-            transaction.block_id.replace(reissueed_block);
+            let reissued_block = self.submit_transaction_payload(transaction.payload.clone()).await?;
+            transaction.block_id.replace(reissued_block);
             updated_transactions.push(transaction);
         }
 

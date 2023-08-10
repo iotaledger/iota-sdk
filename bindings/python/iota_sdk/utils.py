@@ -26,6 +26,7 @@ class Utils():
         """Convert a Bech32 string to a hex string.
         """
         return _call_method('bech32ToHex', {
+
             'bech32': bech32
         })
 

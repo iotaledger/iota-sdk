@@ -50,7 +50,8 @@ transaction = account.prepare_consolidate_outputs(
 print('Transaction sent: ', transaction.transactionId)
 
 # Wait for the consolidation transaction to get confirmed
-block_id = account.reissue_transaction_until_included(transaction.transactionId)
+block_id = account.reissue_transaction_until_included(
+    transaction.transactionId)
 
 print(
     'Transaction included: {}/block/{}'.format(

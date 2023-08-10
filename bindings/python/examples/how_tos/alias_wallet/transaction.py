@@ -41,7 +41,8 @@ options = {
     'mandatoryInputs': [input],
 }
 transaction = account.send_with_params(params, options)
-account.reissue_transaction_until_included(transaction.transactionId, None, None)
+account.reissue_transaction_until_included(
+    transaction.transactionId, None, None)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transactionId}')
 

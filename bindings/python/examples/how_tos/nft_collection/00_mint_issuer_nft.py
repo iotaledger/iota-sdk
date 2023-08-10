@@ -30,7 +30,8 @@ prepared = account.prepare_mint_nfts([params])
 transaction = prepared.send()
 
 # Wait for transaction to get included
-block_id = account.reissue_transaction_until_included(transaction.transactionId)
+block_id = account.reissue_transaction_until_included(
+    transaction.transactionId)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
