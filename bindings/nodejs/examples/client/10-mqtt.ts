@@ -3,12 +3,10 @@
 
 import {
     BasicBlock,
-    BlockWrapper,
     Client,
     initLogger,
     parseBlock,
 } from '@iota/sdk';
-import { plainToInstance } from 'class-transformer';
 
 require('dotenv').config({ path: '.env' });
 
