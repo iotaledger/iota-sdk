@@ -1,7 +1,10 @@
-import iota_sdk
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet
+# pylint: disable=no-name-in-module
+from iota_sdk import migrate_stronghold_snapshot_v2_to_v3
 
 load_dotenv()
 
@@ -22,7 +25,7 @@ try:
 except ValueError as e:
     print(e)
 
-iota_sdk.migrate_stronghold_snapshot_v2_to_v3(
+migrate_stronghold_snapshot_v2_to_v3(
     v2_path,
     "current_password",
     "wallet.rs",
