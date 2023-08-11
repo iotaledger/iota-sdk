@@ -16,7 +16,6 @@ import {
     Output,
     IRent,
     OutputId,
-    hexToBigInt,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
@@ -139,14 +138,14 @@ export class Utils {
      * @returns The required storage deposit.
      */
     static computeStorageDeposit(output: Output, rent: IRent): bigint {
-        const depositHex = callUtilsMethod({
+        const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
                 rent,
             },
         });
-        return hexToBigInt(depositHex);
+        return BigInt(minStorageDepositAmount);
     }
 
     /**

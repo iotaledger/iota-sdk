@@ -26,3 +26,9 @@ once_cell = { version = "1.18.0", default-features = false }
 serde = { version = "1.0.175", default-features = false }
 serde_json = { version = "1.0.103", default-features = false }
 tokio = { version = "1.29.1", default-features = false }
+
+[profile.production]
+codegen-units = 1
+inherits = "release"
+lto = true
+strip = "symbols"
