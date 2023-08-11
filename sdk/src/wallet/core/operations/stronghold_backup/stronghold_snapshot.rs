@@ -150,14 +150,14 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
 
     // convert to string keys
     let chrysalis_data_with_string_keys = chrysalis_data
-        .into_iter()
+        .iter()
         .map(|(k, v)| {
             Ok((
                 // the key bytes are a hash in stronghold
                 // TODO: do we want to match against the known keys and replace them so they match what's in the db?
                 // Could be complicated since some keys are generated based on data in other values
                 prefix_hex::encode(k),
-                v,
+                v.clone(),
             ))
         })
         .collect::<crate::wallet::Result<HashMap<String, String>>>()?;
@@ -167,7 +167,6 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         serde_json::to_string_pretty(&chrysalis_data_with_string_keys)?
     );
 
-    // TODO: also store in the database?
     // store chrysalis data in a new key
     stronghold_adapter
         .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data_with_string_keys)
@@ -208,7 +207,18 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         .set(MIGRATION_VERSION_KEY, &migration_version)
         .await?;
 
-    // TODO: delete old chrysalis data records
+    // Remove old entries
+    let stronghold = stronghold_adapter.inner().await;
+    let stronghold_client = stronghold
+        .get_client(b"iota-wallet-records")
+        .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
+    let stronghold_store = stronghold_client.store();
+
+    for key in chrysalis_data.keys() {
+        stronghold_store
+            .delete(key)
+            .map_err(|_| crate::wallet::Error::Migration("couldn't delete old data".into()))?;
+    }
 
     Ok(Some(chrysalis_data_with_string_keys))
 }

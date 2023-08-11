@@ -143,14 +143,6 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     let storage_path = "migrate_chrysalis_stronghold";
     setup(storage_path)?;
 
-    // TODO: original doesn't get modified, so not needed?
-    // Copy stronghold file so the original doesn't get modified
-    fs::create_dir_all("migrate_chrysalis_stronghold")?;
-    std::fs::copy(
-        "./tests/wallet/fixtures/chrysalis-backup.stronghold",
-        "migrate_chrysalis_stronghold/chrysalis-backup.stronghold",
-    )?;
-
     let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
         .with_storage_path(storage_path)
@@ -163,7 +155,7 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     // TODO: create extra stronghold with encryption work factor 0
     wallet
         .restore_backup(
-            "migrate_chrysalis_stronghold/chrysalis-backup.stronghold".into(),
+            "./tests/wallet/fixtures/chrysalis-backup.stronghold".into(),
             Password::from("password".to_string()),
             None,
             None,
