@@ -4,7 +4,7 @@
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
 
-/** Options for the transaction creation. */
+/** Options for creating a transaction. */
 export interface TransactionOptions {
     /** The strategy applied for base coin remainders. */
     remainderValueStrategy?: RemainderValueStrategy;
