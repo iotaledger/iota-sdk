@@ -80,9 +80,10 @@ impl SlotCommitment {
 }
 
 pub(crate) mod dto {
+    use serde::{Deserialize, Serialize};
+
     use super::*;
     use crate::utils::serde::string;
-    use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -119,9 +120,10 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod test {
+    use core::str::FromStr;
+
     use super::SlotCommitment;
     use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
-    use core::str::FromStr;
 
     #[test]
     fn test() {

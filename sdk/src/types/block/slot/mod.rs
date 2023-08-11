@@ -7,6 +7,8 @@ mod index;
 mod roots_id;
 
 pub use self::{
-    commitment::dto::SlotCommitmentDto, commitment::SlotCommitment, commitment_id::SlotCommitmentId, index::SlotIndex,
+    commitment::{dto::SlotCommitmentDto, SlotCommitment},
+    commitment_id::SlotCommitmentId,
+    index::SlotIndex,
     roots_id::RootsId,
 };
