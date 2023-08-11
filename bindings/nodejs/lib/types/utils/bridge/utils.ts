@@ -8,14 +8,10 @@ import {
     TokenSchemeType,
     Output,
     IRent,
-    u64,
 } from '../../';
 import { AliasId } from '../../block/id';
 import {
-    RootsId,
     SlotCommitment,
-    SlotCommitmentId,
-    SlotIndex,
 } from '../../block/slot';
 
 export interface __GenerateMnemonicMethod__ {
