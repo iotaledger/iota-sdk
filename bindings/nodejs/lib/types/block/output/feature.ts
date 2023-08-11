@@ -22,7 +22,7 @@ enum FeatureType {
 abstract class Feature {
     readonly type: FeatureType;
 
-    /** 
+    /**
      * @param type The type of feature.
      */
     constructor(type: FeatureType) {
@@ -44,7 +44,7 @@ class SenderFeature extends Feature {
     })
     readonly address: Address;
 
-    /** 
+    /**
      * @param sender The Sender address stored with the feature.
      */
     constructor(sender: Address) {
@@ -67,8 +67,8 @@ class IssuerFeature extends Feature {
     })
     readonly address: Address;
 
-    /** 
-     * @param issuer The Issuer address stored with the feature. 
+    /**
+     * @param issuer The Issuer address stored with the feature.
      */
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
@@ -88,7 +88,7 @@ class MetadataFeature extends Feature {
     /** Defines metadata (arbitrary binary data) that will be stored in the output. */
     readonly data: string;
 
-    /** 
+    /**
      * @param data The metadata stored with the feature.
      */
     constructor(data: string) {
@@ -109,7 +109,7 @@ class TagFeature extends Feature {
     /** Defines a tag for the data. */
     readonly tag: string;
 
-    /** 
+    /**
      * @param tag The tag stored with the feature.
      */
     constructor(tag: string) {

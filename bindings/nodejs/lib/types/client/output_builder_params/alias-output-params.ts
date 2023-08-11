@@ -8,7 +8,7 @@ import type { BasicOutputBuilderParams } from './basic-output-params';
  */
 export interface AliasOutputBuilderParams extends BasicOutputBuilderParams {
     /**
-     * A unique ID for the new alias.
+     * Unique identifier of an alias, which is the BLAKE2b-256 hash of the Output ID that created it.
      */
     aliasId: HexEncodedString;
     /**

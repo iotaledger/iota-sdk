@@ -40,7 +40,7 @@ export class WalletMethodHandler {
 
     /**
      * Call a wallet method on the Rust backend.
-     * 
+     *
      * @param method The wallet method to call.
      */
     async callMethod(method: __Method__): Promise<string> {
@@ -70,7 +70,7 @@ export class WalletMethodHandler {
 
     /**
      * Call an account method on the Rust backend.
-     * 
+     *
      * @param accountIndex The account index.
      * @param method The account method to call.
      */
@@ -89,7 +89,7 @@ export class WalletMethodHandler {
 
     /**
      * Listen to wallet events.
-     * 
+     *
      * @param eventTypes The wallet event types to listen for.
      * @param callback The callback function to call when an event is received.
      */

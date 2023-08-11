@@ -10,7 +10,7 @@ export interface TransactionOptions {
     remainderValueStrategy?: RemainderValueStrategy;
     /** An optional tagged data payload. */
     taggedDataPayload?: TaggedDataPayload;
-    /** 
+    /**
      * Custom inputs that should be used for the transaction.
      * If custom inputs are provided only those are used. If also other additional inputs should be used, `mandatory_inputs` should be used instead.
      */
@@ -37,7 +37,7 @@ export type RemainderValueStrategy =
 export type ChangeAddress = {
     /** The name of the strategy. */
     strategy: 'ChangeAddress';
-    /** TODO */
+    /** Only required for `CustomAddress`. */
     value: null;
 };
 
@@ -47,7 +47,7 @@ export type ChangeAddress = {
 export type ReuseAddress = {
     /** The name of the strategy. */
     strategy: 'ReuseAddress';
-    /** TODO */
+    /** Only required for `CustomAddress`. */
     value: null;
 };
 

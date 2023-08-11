@@ -39,7 +39,7 @@ abstract class Output /*implements ICommonOutput*/ {
 
     readonly type: OutputType;
 
-    /** 
+    /**
      * @param type The type of output.
      * @param amount The amount of the output as big-integer or string.
      */
@@ -231,8 +231,8 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
  * An Alias output.
  */
 class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
-    /** 
-     * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
+    /**
+     * Unique identifier of the alias, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its a newly created alias, then the id is zeroed.
      */
     readonly aliasId: HexEncodedString;
@@ -288,7 +288,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
  */
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     /**
-     * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its newly minted, then the id is zeroed.
      */
     readonly nftId: HexEncodedString;

@@ -7,7 +7,7 @@ import type { Burn } from './burn';
 import { UTXOInput } from '../block/input';
 import { Output } from '../block/output';
 
-/** 
+/**
  * Options to build a new block, possibly with payloads.
  */
 export interface IBuildBlockOptions {

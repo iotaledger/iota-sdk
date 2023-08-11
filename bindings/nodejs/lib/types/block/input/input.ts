@@ -67,7 +67,7 @@ class UTXOInput extends Input {
      */
     transactionOutputIndex: number;
 
-    /** 
+    /**
      * @param transactionId The ID of the transaction it is an input of.
      * @param transactionOutputIndex The index of the input within the transaction.
      */

@@ -27,7 +27,7 @@ enum UnlockConditionType {
 abstract class UnlockCondition {
     readonly type: UnlockConditionType;
 
-    /** 
+    /**
      * @param type The type of the unlock condition.
      */
     constructor(type: UnlockConditionType) {

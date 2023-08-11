@@ -50,11 +50,11 @@ export interface Unlocks {
 
 /** Storage deposit strategy to be used for the output. */
 export interface StorageDeposit {
-    /** 
+    /**
      * The return strategy.
      */
     returnStrategy?: ReturnStrategy;
-    /** 
+    /**
      * If account has 2 Mi, min storage deposit is 1 Mi and one wants to send 1.5 Mi, it wouldn't be possible with a
      * 0.5 Mi remainder. To still send a transaction, the 0.5 can be added to the output automatically, if set to true.
      */

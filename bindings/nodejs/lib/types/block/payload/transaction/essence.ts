@@ -68,7 +68,7 @@ class RegularTransactionEssence extends TransactionEssence {
      * @param inputs The inputs of the transaction.
      * @param outputs The outputs of the transaction.
      * @param payload An optional Tagged Data payload.
-     * 
+     *
      */
     constructor(
         networkId: number,

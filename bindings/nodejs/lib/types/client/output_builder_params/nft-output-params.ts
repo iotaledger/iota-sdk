@@ -8,7 +8,7 @@ import type { BasicOutputBuilderParams } from './basic-output-params';
  */
 export interface NftOutputBuilderParams extends BasicOutputBuilderParams {
     /**
-     * A unique ID for the new NFT.
+     * Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
      */
     nftId: HexEncodedString;
     /**

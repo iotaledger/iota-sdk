@@ -27,9 +27,9 @@ export class SecretManagerMethodHandler {
         }
     }
 
-    /** 
+    /**
      * Call a secret manager method.
-     * 
+     *
      * @param method One of the supported secret manager methods.
      * @returns The JSON response of the method.
      */

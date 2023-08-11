@@ -29,9 +29,9 @@ export class ClientMethodHandler {
         return destroyClient(this.methodHandler);
     }
 
-    /** 
+    /**
      * Call a client method.
-     * 
+     *
      * @param method The client method.
      * @returns A promise that resolves to a JSON string response holding the result of the client method.
      */
@@ -42,9 +42,9 @@ export class ClientMethodHandler {
         );
     }
 
-    /** 
+    /**
      * Listen to MQTT events.
-     * 
+     *
      * @param topics The topics to listen to.
      * @param callback The callback to be called when an MQTT event is received.
      */

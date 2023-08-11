@@ -33,9 +33,9 @@ export class SecretManager {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 
-    /** 
+    /**
      * Generate Ed25519 addresses.
-     * 
+     *
      * @param generateAddressesOptions Options to generate addresses.
      * @returns An array of generated addresses.
      */
@@ -52,9 +52,9 @@ export class SecretManager {
         return JSON.parse(response).payload;
     }
 
-    /** 
+    /**
      * Generate EVM addresses.
-     * 
+     *
      * @param generateAddressesOptions Options to generate addresses.
      * @returns An array of generated addresses.
      */
@@ -73,7 +73,7 @@ export class SecretManager {
 
     /**
      * Store a mnemonic in the Stronghold vault.
-     * 
+     *
      * @param mnemonic The mnemonic to store.
      */
     async storeMnemonic(mnemonic: string): Promise<void> {
@@ -89,7 +89,7 @@ export class SecretManager {
 
     /**
      * Sign a transaction.
-     * 
+     *
      * @param preparedTransactionData An instance of `PreparedTransactionData`.
      * @returns The corresponding transaction payload.
      */
@@ -109,7 +109,7 @@ export class SecretManager {
 
     /**
      * Create a signature unlock using the provided `secretManager`.
-     * 
+     *
      * @param transactionEssenceHash The hash of the transaction essence.
      * @param chain A BIP44 chain.
      * @returns The corresponding unlock.
@@ -131,7 +131,7 @@ export class SecretManager {
 
     /**
      * Signs a message with an Ed25519 private key.
-     * 
+     *
      * @param message The message to sign.
      * @param chain A BIP44 chain.
      * @returns The corresponding signature.
@@ -152,7 +152,7 @@ export class SecretManager {
 
     /**
      * Signs a message with an Secp256k1Ecdsa private key.
-     * 
+     *
      * @param message The message to sign.
      * @param chain A BIP44 chain.
      * @returns The corresponding signature.

@@ -19,7 +19,7 @@ export interface SendParams {
     address: string;
     /** The amount to send. */
     amount: bigint | string;
-    /** 
+    /**
      * Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
      * given the provided amount. If a storage deposit is needed and a return address is not provided, it will
      * default to the first address of the account.

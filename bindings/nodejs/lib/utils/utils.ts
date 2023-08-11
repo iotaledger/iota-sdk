@@ -33,7 +33,7 @@ export class Utils {
 
     /**
      * Convert a mnemonic to a hex encoded seed.
-     * 
+     *
      * @param mnemonic A mnemonic string.
      * @returns The seed as hex-encoded string.
      */
@@ -48,7 +48,7 @@ export class Utils {
 
     /**
      * Compute the alias ID from a given Alias output ID.
-     * 
+     *
      * @param outputId The output ID as hex-encoded string.
      * @returns The Alias ID.
      */
@@ -63,7 +63,7 @@ export class Utils {
 
     /**
      * Compute the Foundry ID.
-     * 
+     *
      * @param aliasId The Alias ID associated with the Foundry.
      * @param serialNumber The serial number of the Foundry.
      * @param tokenSchemeType The Token scheme type. Currently only a simple scheme is supported.
@@ -86,7 +86,7 @@ export class Utils {
 
     /**
      * Compute the NFT ID from the given NFT output ID.
-     * 
+     *
      * @param outputId The output ID as hex-encoded string.
      * @returns The NFT ID.
      */
@@ -101,7 +101,7 @@ export class Utils {
 
     /**
      * Compute the input commitment from the output objects that are used as inputs to fund the transaction.
-     * 
+     *
      * @param inputs The output objects used as inputs for the transaction.
      * @returns The inputs commitment hash as hex-encoded string.
      */
@@ -116,7 +116,7 @@ export class Utils {
 
     /**
      * Compute the output ID from transaction ID and output index.
-     * 
+     *
      * @param transactionId The ID of the transaction.
      * @param outputIndex The index of the output.
      * @returns The output ID.
@@ -133,7 +133,7 @@ export class Utils {
 
     /**
      * Compute the required storage deposit of an output.
-     * 
+     *
      * @param output The output.
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
@@ -151,7 +151,7 @@ export class Utils {
 
     /**
      * Compute a Token iD from the aliasId, serial number and token scheme type.
-     * 
+     *
      * @param aliasId The alias that controls the foundry.
      * @param serialNumber The serial number of the foundry.
      * @param tokenSchemeType The tokenSchemeType of the foundry.
@@ -174,7 +174,7 @@ export class Utils {
 
     /**
      * Parse a Bech32 address from a string.
-     * 
+     *
      * @param address An Bech32 address as string.
      * @returns A Bech32 address.
      */
@@ -190,7 +190,7 @@ export class Utils {
 
     /**
      * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
-     * 
+     *
      * @param block A block.
      * @returns The corresponding block ID.
      */
@@ -205,7 +205,7 @@ export class Utils {
 
     /**
      * Compute the milestone ID (Blake2b256 hash of the milestone essence) of a milestone payload.
-     * 
+     *
      * @param payload A milestone payload.
      * @returns The milestone ID.
      */
@@ -220,7 +220,7 @@ export class Utils {
 
     /**
      * Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
-     * 
+     *
      * @param payload A transaction payload.
      * @returns The transaction ID.
      */
@@ -235,7 +235,7 @@ export class Utils {
 
     /**
      * Convert a Bech32 address to a hex-encoded string.
-     * 
+     *
      * @param bech32 A Bech32 address.
      * @returns The hex-encoded string.
      */
@@ -250,7 +250,7 @@ export class Utils {
 
     /**
      * Convert a hex-encoded address string to a Bech32-encoded address string.
-     * 
+     *
      * @param hex A hex-encoded address string.
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
@@ -267,7 +267,7 @@ export class Utils {
 
     /**
      * Convert an Alias ID to a Bech32-encoded address string.
-     * 
+     *
      * @param aliasId An Alias ID.
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
@@ -284,7 +284,7 @@ export class Utils {
 
     /**
      * Convert an NFT ID to a Bech32-encoded address string.
-     * 
+     *
      * @param nftId An NFT ID.
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
@@ -301,7 +301,7 @@ export class Utils {
 
     /**
      * Convert a hex-encoded public key to a Bech32-encoded address string.
-     * 
+     *
      * @param hex A hex-encoded public key.
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
@@ -318,7 +318,7 @@ export class Utils {
 
     /**
      * Checks whether an address string is a valid Bech32-encoded address.
-     * 
+     *
      * @param address An address string.
      */
     static isAddressValid(address: string): boolean {
@@ -332,7 +332,7 @@ export class Utils {
 
     /**
      * Compute the hash of a transaction essence.
-     * 
+     *
      * @param essence A transaction essence.
      * @returns The hash of the transaction essence as a hex-encoded string.
      */
@@ -349,7 +349,7 @@ export class Utils {
 
     /**
      * Verify an Ed25519 signature against a message.
-     * 
+     *
      * @param signature An Ed25519 signature.
      * @param message A hex-encoded message.
      */
@@ -389,7 +389,7 @@ export class Utils {
 
     /**
      * Verify if a mnemonic is a valid BIP39 mnemonic.
-     * 
+     *
      * @param mnemonic A mnemonic string.
      */
     static verifyMnemonic(mnemonic: string): void {
