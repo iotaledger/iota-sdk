@@ -14,7 +14,7 @@ enum UnlockConditionType {
     StorageDepositReturn = 1,
     /** A timelock unlock condition. */
     Timelock = 2,
-    /** An expiration unlock condition */
+    /** An expiration unlock condition. */
     Expiration = 3,
     /** A state controller address unlock condition. */
     StateControllerAddress = 4,
