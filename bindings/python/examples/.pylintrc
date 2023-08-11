@@ -1,8 +1,8 @@
 [MESSAGES CONTROL]
 disable=missing-module-docstring,
-  			 line-too-long,
-				 broad-exception-raised,
-				 invalid-name, # files that starts with number
-				 duplicate-code,
-				 consider-using-with
+				line-too-long,
+				broad-exception-raised,
+				invalid-name, # files that starts with number
+				duplicate-code,
+				consider-using-with
 
