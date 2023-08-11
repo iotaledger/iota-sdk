@@ -150,6 +150,5 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     OutputIdToUtxoInput { output_id: OutputId },
     /// Computes the slot commitment id from a slot commitment.
-    #[serde(rename_all = "camelCase")]
     ComputeSlotCommitmentId { dto: SlotCommitmentDto },
 }
