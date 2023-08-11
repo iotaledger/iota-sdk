@@ -10,7 +10,7 @@ export interface IClientOptions {
     primaryPowNode?: string | INode;
     /** A list of nodes. */
     nodes?: Array<string | INode>;
-    /** A lsit of permanodes. */
+    /** A list of permanodes. */
     permanodes?: Array<string | INode>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;

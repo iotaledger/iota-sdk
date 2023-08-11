@@ -12,7 +12,7 @@ export interface ParticipationOverview {
 }
 
 /**
- * Output participations for events..
+ * Output participations for events.
  */
 export interface Participations {
     [eventId: ParticipationEventId]: {

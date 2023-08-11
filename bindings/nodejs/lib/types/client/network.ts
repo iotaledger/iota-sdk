@@ -29,13 +29,13 @@ export interface IAuth {
 export interface IMqttBrokerOptions {
     /** Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not. */
     automaticDisconnect?: boolean;
-    /** Sets the timeout used for the MQTT operations. */
+    /** Sets the timeout in seconds used for the MQTT operations. */
     timeout?: number;
-    /**Sets the use_ws used for the MQTT operations. */
+    /** Sets whether websockets should be used instead of regular TCP for the MQTT operations. */
     useWs?: boolean;
-    /**Sets the port used for the MQTT operations. */
+    /** Sets the port used for the MQTT operations. */
     port?: number;
-    /**Sets the maximum number of reconnection attempts. 0 is unlimited. */
+    /** Sets the maximum number of reconnection attempts. 0 is unlimited. */
     maxReconnectionAttempts?: number;
 }
 

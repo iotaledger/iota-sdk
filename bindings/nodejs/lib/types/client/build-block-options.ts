@@ -17,7 +17,7 @@ export interface IBuildBlockOptions {
     accountIndex?: number;
     /** An initial address index. */
     initialAddressIndex?: number;
-    /** An list of inputs. */
+    /** A list of inputs. */
     inputs?: UTXOInput[];
     /** An input range. */
     inputRange?: IRange;
@@ -25,7 +25,7 @@ export interface IBuildBlockOptions {
     output?: IClientBlockBuilderOutputAddress;
     /** Hex encoded output address and amount. */
     outputHex?: IClientBlockBuilderOutputAddress;
-    /** An list of outputs. */
+    /** A list of outputs. */
     outputs?: Output[];
     /** A custom remainder address. */
     customRemainderAddress?: string;

@@ -1370,6 +1370,7 @@ export class Account {
 
     /**
      * Calculates the voting overview of an account.
+     *
      * @param eventIds Optional, filters participations only for provided events.
      * @returns An instance of `ParticipationOverview`
      */

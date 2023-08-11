@@ -174,7 +174,7 @@ export class Utils {
     /**
      * Parse a Bech32 address from a string.
      *
-     * @param address An Bech32 address as string.
+     * @param address A Bech32 address as string.
      * @returns A Bech32 address.
      */
     static parseBech32Address(address: string): Address {

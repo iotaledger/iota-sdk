@@ -12,7 +12,8 @@ export interface NftOutputBuilderParams extends BasicOutputBuilderParams {
      */
     nftId: HexEncodedString;
     /**
-     * Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
+     * Features that add utility to the output but do not impose unlocking conditions.
+     * These features need to be kept in future transitions of the UTXO state machine.
      */
     immutableFeatures?: Feature[];
 }
