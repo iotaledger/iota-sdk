@@ -28,7 +28,7 @@ import {
     FoundryOutput,
     NftOutput,
     Output,
-    BlockWrapper,
+    Block,
     BlockId,
     UnlockCondition,
     Payload,
@@ -139,7 +139,7 @@ export class Client {
     /**
      * Post block in JSON format, returns the block ID.
      */
-    async postBlock(block: BlockWrapper): Promise<BlockId> {
+    async postBlock(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlock',
             data: {
@@ -153,7 +153,7 @@ export class Client {
     /**
      * Get block as JSON.
      */
-    async getBlock(blockId: BlockId): Promise<BlockWrapper> {
+    async getBlock(blockId: BlockId): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlock',
             data: {
@@ -161,7 +161,7 @@ export class Client {
             },
         });
 
-        const parsed = JSON.parse(response) as Response<BlockWrapper>;
+        const parsed = JSON.parse(response) as Response<Block>;
         return parseBlock(parsed.payload);
     }
 
@@ -240,16 +240,14 @@ export class Client {
     /**
      * Submit a payload in a block
      */
-    async postBlockPayload(payload: Payload): Promise<[BlockId, BlockWrapper]> {
+    async postBlockPayload(payload: Payload): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockPayload',
             data: {
                 payload,
             },
         });
-        const parsed = JSON.parse(response) as Response<
-            [BlockId, BlockWrapper]
-        >;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
         const block = parseBlock(parsed.payload[1]);
         return [parsed.payload[0], block];
     }
@@ -348,7 +346,7 @@ export class Client {
     /**
      * Post block as raw bytes, returns the block ID.
      */
-    async postBlockRaw(block: BlockWrapper): Promise<BlockId> {
+    async postBlockRaw(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockRaw',
             data: {
@@ -376,30 +374,28 @@ export class Client {
     /**
      * Returns the included block of the transaction.
      */
-    async getIncludedBlock(transactionId: string): Promise<BlockWrapper> {
+    async getIncludedBlock(transactionId: string): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlock',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<BlockWrapper>;
+        const parsed = JSON.parse(response) as Response<Block>;
         return parseBlock(parsed.payload);
     }
 
     /**
      * Returns the metadata of the included block of the transaction.
      */
-    async getIncludedBlockMetadata(
-        transactionId: string,
-    ): Promise<BlockWrapper> {
+    async getIncludedBlockMetadata(transactionId: string): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<BlockWrapper>;
+        const parsed = JSON.parse(response) as Response<Block>;
         return parseBlock(parsed.payload);
     }
 
@@ -579,14 +575,14 @@ export class Client {
     /**
      * Find all blocks by provided block IDs.
      */
-    async findBlocks(blockIds: BlockId[]): Promise<BlockWrapper[]> {
+    async findBlocks(blockIds: BlockId[]): Promise<Block[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findBlocks',
             data: {
                 blockIds,
             },
         });
-        const parsed = JSON.parse(response) as Response<BlockWrapper[]>;
+        const parsed = JSON.parse(response) as Response<Block[]>;
         return parsed.payload.map((p) => parseBlock(p));
     }
 
@@ -594,16 +590,14 @@ export class Client {
      * Retries (promotes or reattaches) a block for provided block id. Block should be
      * retried only if they are valid and haven't been confirmed for a while.
      */
-    async retry(blockId: BlockId): Promise<[BlockId, BlockWrapper]> {
+    async retry(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'retry',
             data: {
                 blockId,
             },
         });
-        const parsed = JSON.parse(response) as Response<
-            [BlockId, BlockWrapper]
-        >;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
         const block = parseBlock(parsed.payload[1]);
         return [parsed.payload[0], block];
     }
@@ -617,7 +611,7 @@ export class Client {
         blockId: BlockId,
         interval?: number,
         maxAttempts?: number,
-    ): Promise<[BlockId, BlockWrapper][]> {
+    ): Promise<[BlockId, Block][]> {
         const response = await this.methodHandler.callMethod({
             name: 'retryUntilIncluded',
             data: {
@@ -626,10 +620,8 @@ export class Client {
                 maxAttempts,
             },
         });
-        const parsed = JSON.parse(response) as Response<
-            [BlockId, BlockWrapper][]
-        >;
-        const arr: [BlockId, BlockWrapper][] = [];
+        const parsed = JSON.parse(response) as Response<[BlockId, Block][]>;
+        const arr: [BlockId, Block][] = [];
         parsed.payload.forEach((payload) => {
             arr.push([payload[0], parseBlock(payload[1])]);
         });
@@ -641,16 +633,14 @@ export class Client {
      * Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
      * confirmed for a while.
      */
-    async reattach(blockId: BlockId): Promise<[BlockId, BlockWrapper]> {
+    async reattach(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'reattach',
             data: {
                 blockId,
             },
         });
-        const parsed = JSON.parse(response) as Response<
-            [BlockId, BlockWrapper]
-        >;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
         const block = parseBlock(parsed.payload[1]);
         return [parsed.payload[0], block];
     }
@@ -658,18 +648,14 @@ export class Client {
     /**
      * Reattach a block without checking if it should be reattached
      */
-    async reattachUnchecked(
-        blockId: BlockId,
-    ): Promise<[BlockId, BlockWrapper]> {
+    async reattachUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'reattachUnchecked',
             data: {
                 blockId,
             },
         });
-        const parsed = JSON.parse(response) as Response<
-            [BlockId, BlockWrapper]
-        >;
+        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
         const block = parseBlock(parsed.payload[1]);
         return [parsed.payload[0], block];
     }
