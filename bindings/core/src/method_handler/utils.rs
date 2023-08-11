@@ -10,7 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            slot::{SlotCommitment, SlotCommitmentId},
+            slot::SlotCommitment,
             Block,
         },
         TryFromDto,
