@@ -17,15 +17,15 @@ export class Block {
     /**
      * Blocks that are strongly directly approved.
      */
-    strongParents!: StrongParents;
+    readonly strongParents!: StrongParents;
     /**
      * Blocks that are weakly directly approved.
      */
-    weakParents!: WeakParents;
+    readonly weakParents!: WeakParents;
     /**
      * Blocks that are directly referenced to adjust opinion.
      */
-    shallowLikeParents!: ShallowLikeParents;
+    readonly shallowLikeParents!: ShallowLikeParents;
     /**
      * The payload contents.
      */
