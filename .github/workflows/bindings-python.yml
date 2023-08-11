@@ -65,11 +65,11 @@ jobs:
 
       - name: Run tox format check
         working-directory: bindings/python
-        run: tox -e fromat
+        run: tox -e format
 
       - name: Run tox lint check
         working-directory: bindings/python
-        run: tox -e lint
+        run: tox -e lint-examples
 
   test:
     name: Test
