@@ -10,9 +10,7 @@ import {
     IRent,
 } from '../../';
 import { AliasId } from '../../block/id';
-import {
-    SlotCommitment,
-} from '../../block/slot';
+import { SlotCommitment } from '../../block/slot';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
