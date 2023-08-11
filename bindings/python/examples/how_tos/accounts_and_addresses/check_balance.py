@@ -1,7 +1,9 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 # This example checks the balance of an account.
 

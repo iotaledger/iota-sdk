@@ -2,9 +2,9 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet
 # pylint: disable=no-name-in-module
-from iota_sdk import migrate_stronghold_snapshot_v2_to_v3
+from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager, Wallet,
+                      migrate_stronghold_snapshot_v2_to_v3)
 
 load_dotenv()
 

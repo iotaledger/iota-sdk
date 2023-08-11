@@ -3,9 +3,9 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager, Wallet)
 # pylint: disable=no-name-in-module
-from iota_sdk import init_logger
+from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager, Wallet,
+                      init_logger)
 
 load_dotenv()
 

@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, Utils, ConsolidationParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import ConsolidationParams, Utils, Wallet
 
 # In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
 # them to the same address again.
@@ -32,6 +34,7 @@ print('Outputs BEFORE consolidation:')
 
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
+    # pylint: disable=consider-using-f-string
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
@@ -53,10 +56,7 @@ print('Transaction sent: ', transaction.transactionId)
 block_id = account.retry_transaction_until_included(transaction.transactionId)
 
 print(
-    'Transaction included: {}/block/{}'.format(
-        os.environ['EXPLORER_URL'],
-        block_id
-    )
+    f'Transaction included: {os.environ["EXPLORER_ID"]}/block/{block_id}'
 )
 
 # Sync account
@@ -68,6 +68,7 @@ outputs = account.unspent_outputs()
 print('Outputs AFTER consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
+    # pylint: disable=consider-using-f-string
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),

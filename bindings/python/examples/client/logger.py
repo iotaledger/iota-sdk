@@ -3,9 +3,8 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Client
 # pylint: disable=no-name-in-module
-from iota_sdk import init_logger
+from iota_sdk import Client, init_logger
 
 load_dotenv()
 
