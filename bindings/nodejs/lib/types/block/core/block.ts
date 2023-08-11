@@ -14,6 +14,8 @@ import { BasicBlockData } from './basic-block';
 enum BlockType {
     /// A Basic block.
     Basic = 0,
+    /// A Validation block.
+    Validation = 1,
 }
 
 class BlockWrapper<T> {
