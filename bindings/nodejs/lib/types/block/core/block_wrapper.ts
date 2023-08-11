@@ -14,7 +14,7 @@ enum BlockType {
     Verification = 1,
 }
 
-abstract class BlockWrapper {
+abstract class Block {
     /**
      * The type of block
      */
@@ -70,4 +70,4 @@ abstract class BlockWrapper {
     }
 }
 
-export { BlockType, BlockWrapper };
+export { BlockType, Block };
