@@ -10,6 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
+            slot::{SlotCommitment, SlotCommitmentId},
             Block,
         },
         TryFromDto,
@@ -103,6 +104,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
         UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
+        UtilsMethod::ComputeSlotCommitmentId { dto } => {
+            let slot_commitment_id: SlotCommitmentId = SlotCommitment::from(dto).id();
+            Response::SlotCommitmentId(slot_commitment_id)
+        }
     };
     Ok(response)
 }

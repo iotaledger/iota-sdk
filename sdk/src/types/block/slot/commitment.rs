@@ -19,7 +19,7 @@ pub struct SlotCommitment {
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
     /// The commitment ID of the previous slot.
-    #[cfg_attr(feature = "serde", serde(rename = "prevId"))]
+    #[serde(rename = "prevId")]
     previous_slot_commitment_id: SlotCommitmentId,
     /// A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
     roots_id: RootsId,
@@ -76,5 +76,67 @@ impl SlotCommitment {
         self.index.pack(&mut packer).unwrap();
 
         SlotCommitmentId::from(bytes)
+    }
+}
+
+pub(crate) mod dto {
+    use super::*;
+    use crate::utils::serde::string;
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct SlotCommitmentDto {
+        pub index: SlotIndex,
+        pub previous_slot_commitment_id: SlotCommitmentId,
+        pub roots_id: RootsId,
+        #[serde(with = "string")]
+        pub cumulative_weight: u64,
+    }
+
+    impl From<&SlotCommitment> for SlotCommitmentDto {
+        fn from(slot_commitment: &SlotCommitment) -> Self {
+            Self {
+                index: slot_commitment.index(),
+                previous_slot_commitment_id: *slot_commitment.previous_slot_commitment_id(),
+                roots_id: *slot_commitment.roots_id(),
+                cumulative_weight: slot_commitment.cumulative_weight(),
+            }
+        }
+    }
+
+    impl From<SlotCommitmentDto> for SlotCommitment {
+        fn from(dto: SlotCommitmentDto) -> Self {
+            SlotCommitment::new(
+                dto.index,
+                dto.previous_slot_commitment_id,
+                dto.roots_id,
+                dto.cumulative_weight,
+            )
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::SlotCommitment;
+    use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
+    use core::str::FromStr;
+
+    #[test]
+    fn test() {
+        let commitment = SlotCommitment::new(
+            SlotIndex::new(10),
+            SlotCommitmentId::from_str(
+                "0x20e07a0ea344707d69a08b90be7ad14eec8326cf2b8b86c8ec23720fab8dcf8ec43a30e4a8cc3f1f",
+            )
+            .unwrap(),
+            RootsId::from_str("0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f").unwrap(),
+            5,
+        );
+        assert_eq!(
+            &commitment.id().to_string(),
+            "0xb485446277cc5111d54f443b46d886945d4af64e53c2f04064a7c2ea88fa4e020a00000000000000"
+        )
     }
 }
