@@ -3,7 +3,7 @@
 
 /** Parameters for consolidation */
 export interface ConsolidationParams {
-    /** Ignores the output_threshold if set to `true`. */
+    /** Ignores the output threshold if set to `true`. */
     force: boolean;
     /** Consolidates if the output number is >= the output_threshold. */
     outputThreshold?: number;
