@@ -67,13 +67,9 @@ jobs:
         working-directory: bindings/python
         run: tox -e format
 
-      - name: Run tox lint check
-        working-directory: bindings/python
-        run: tox -e lint-examples
-
 
   test:
-    name: Test
+    name: Linter & Tests
     needs: lint
     if: ${{ ! github.event.schedule }}
     runs-on: ${{ matrix.os }}
@@ -116,6 +112,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Run Tox
+      - name: Run linter for examples
+        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
+        working-directory: bindings/python
+        run: tox -e lint-examples
+
+      - name: Run tests
         working-directory: bindings/python
         run: tox
+
