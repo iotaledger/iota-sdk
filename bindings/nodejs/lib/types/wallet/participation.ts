@@ -21,7 +21,7 @@ export interface Participations {
 }
 
 /**
- * TrackedParticipation holds the information for each tracked participation.
+ * Holds the information for each tracked participation.
  */
 export interface TrackedParticipationOverview {
     /** Amount of tokens that were included in the output the participation was made. */
