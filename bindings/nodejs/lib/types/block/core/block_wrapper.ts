@@ -68,62 +68,6 @@ abstract class BlockWrapper {
         this.issuerId = issuerId;
         this.signature = signature;
     }
-
-    /**
-     * The type of block.
-     */
-    getType(): BlockType {
-        return this.type;
-    }
-
-    /**
-     * Protocol version of the block.
-     */
-    getProtocolVersion(): number {
-        return this.protocolVersion;
-    }
-
-    /**
-     * Network identifier.
-     */
-    getNetworkId(): bigint {
-        return this.networkId;
-    }
-
-    /**
-     * The time at which the block was issued. It is a Unix timestamp in nanoseconds.
-     */
-    getIssuingTime(): bigint {
-        return this.issuingTime;
-    }
-
-    /**
-     * The identifier of the slot to which this block commits.
-     */
-    getSlotCommitmentId(): SlotCommitmentId {
-        return this.slotCommitmentId;
-    }
-
-    /**
-     * The slot index of the latest finalized slot.
-     */
-    getLatestFinalizedSlot(): bigint {
-        return this.latestFinalizedSlot;
-    }
-
-    /**
-     * The identifier of the account that issued this block.
-     */
-    getIssuerId(): IssuerId {
-        return this.issuerId;
-    }
-
-    /**
-     * The block signature; used to validate issuance capabilities.
-     */
-    getSignature(): Ed25519Signature {
-        return this.signature;
-    }
 }
 
 export { BlockType, BlockWrapper };

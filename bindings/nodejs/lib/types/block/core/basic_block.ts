@@ -13,25 +13,25 @@ export class BasicBlock extends BlockWrapper {
     /**
      * Blocks that are strongly directly approved.
      */
-    strongParents!: StrongParents;
+    readonly strongParents!: StrongParents;
     /**
      * Blocks that are weakly directly approved.
      */
-    weakParents!: WeakParents;
+    readonly weakParents!: WeakParents;
     /**
      * Blocks that are directly referenced to adjust opinion.
      */
-    shallowLikeParents!: ShallowLikeParents;
+    readonly shallowLikeParents!: ShallowLikeParents;
     /**
      * The payload contents.
      */
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    payload?: Payload;
+    readonly payload?: Payload;
     /**
      * The amount of mana the Account identified by IssuerID is at most
      * willing to burn for this block.
      */
-    burnedMana!: string;
+    readonly burnedMana!: string;
 }
