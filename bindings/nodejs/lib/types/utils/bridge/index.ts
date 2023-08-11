@@ -23,7 +23,7 @@ import type {
     __VerifyMnemonicMethod__,
     __FaucetMethod__,
     __OutputIdToUtxoInput__,
-    __ComputeSlotCommitmentId__
+    __ComputeSlotCommitmentId__,
 } from './utils';
 
 export type __UtilsMethods__ =

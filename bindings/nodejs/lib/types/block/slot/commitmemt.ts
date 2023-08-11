@@ -1,9 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { u64 } from "../..";
-
-
+import { u64 } from '../..';
 
 /**
  * Timeline is divided into slots, and each slot has a corresponding slot index.
@@ -23,42 +21,42 @@ type SlotCommitmentId = string;
 type RootsId = string;
 
 /**
-  * Contains a summary of a slot.
-  * It is linked to the commitment of the previous slot, which forms a commitment chain.
-  */
+ * Contains a summary of a slot.
+ * It is linked to the commitment of the previous slot, which forms a commitment chain.
+ */
 class SlotCommitment {
-  /**
-   * The slot index of this commitment.
-   * It is calculated based on genesis timestamp and the duration of a slot.
-   */
-  index: SlotIndex;
-  /**
-   * The commitment ID of the previous slot.
-   */
-  previousSlotCommitmentId: SlotCommitmentId;
-  /**
-   * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
-   */
-  rootsId: RootsId;
+    /**
+     * The slot index of this commitment.
+     * It is calculated based on genesis timestamp and the duration of a slot.
+     */
+    index: SlotIndex;
+    /**
+     * The commitment ID of the previous slot.
+     */
+    previousSlotCommitmentId: SlotCommitmentId;
+    /**
+     * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
+     */
+    rootsId: RootsId;
 
-  /**
-   * The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
-   * slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
-   * the switching of a chain.
-   */
-  cumulativeWeight: u64;
+    /**
+     * The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
+     * slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
+     * the switching of a chain.
+     */
+    cumulativeWeight: u64;
 
-  constructor(index: SlotIndex, previousSlotCommitmentId: SlotCommitmentId, rootsId: RootsId, cumulativeWeight: u64) {
-    this.index = index;
-    this.previousSlotCommitmentId = previousSlotCommitmentId;
-    this.rootsId = rootsId;
-    this.cumulativeWeight = cumulativeWeight;
-  }
+    constructor(
+        index: SlotIndex,
+        previousSlotCommitmentId: SlotCommitmentId,
+        rootsId: RootsId,
+        cumulativeWeight: u64,
+    ) {
+        this.index = index;
+        this.previousSlotCommitmentId = previousSlotCommitmentId;
+        this.rootsId = rootsId;
+        this.cumulativeWeight = cumulativeWeight;
+    }
 }
 
-export {
-  SlotCommitment,
-  SlotIndex,
-  SlotCommitmentId,
-  RootsId
-}
+export { SlotCommitment, SlotIndex, SlotCommitmentId, RootsId };

@@ -327,19 +327,23 @@ export class Utils {
     }
 
     /**
-    * Derives the `SlotCommitmentId` of the `SlotCommitment`.
-    */
-    static computeSlotCommitmentId(slotCommitment: SlotCommitment): SlotCommitmentId {
+     * Derives the `SlotCommitmentId` of the `SlotCommitment`.
+     */
+    static computeSlotCommitmentId(
+        slotCommitment: SlotCommitment,
+    ): SlotCommitmentId {
         return callUtilsMethod({
             name: 'computeSlotCommitmentId',
             data: {
                 dto: {
                     index: slotCommitment.index.toString(10),
-                    previousSlotCommitmentId: slotCommitment.previousSlotCommitmentId,
+                    previousSlotCommitmentId:
+                        slotCommitment.previousSlotCommitmentId,
                     rootsId: slotCommitment.rootsId,
-                    cumulativeWeight: slotCommitment.cumulativeWeight.toString(10)
+                    cumulativeWeight:
+                        slotCommitment.cumulativeWeight.toString(10),
                 },
-            }
-        })
+            },
+        });
     }
 }
