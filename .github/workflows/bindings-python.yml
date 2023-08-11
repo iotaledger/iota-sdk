@@ -71,6 +71,7 @@ jobs:
         working-directory: bindings/python
         run: tox -e lint-examples
 
+
   test:
     name: Test
     needs: lint
