@@ -134,7 +134,7 @@ where
             }
         }
 
-        #[cfg(all(not(feature = "jammdb"), feature = "rocksdb", feature = "storage"))]
+        #[cfg(all(feature = "rocksdb", feature = "storage"))]
         let storage =
             crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
         #[cfg(all(not(feature = "rocksdb"), feature = "jammdb", feature = "storage"))]
