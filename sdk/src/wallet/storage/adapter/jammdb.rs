@@ -13,7 +13,8 @@ use tokio::sync::Mutex;
 /// The storage id.
 pub const STORAGE_ID: &str = "JammDB";
 
-const BUCKET_NAME: &str = "storage";
+/// Default storage name
+pub const BUCKET_NAME: &str = "Storage";
 
 impl Debug for JammdbStorageAdapter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
