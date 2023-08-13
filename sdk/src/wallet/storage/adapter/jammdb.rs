@@ -31,13 +31,10 @@ pub struct JammdbStorageAdapter {
 impl JammdbStorageAdapter {
     /// Initialises the storage adapter.
     pub fn new(path: impl AsRef<Path>) -> crate::wallet::Result<Self> {
-        let mut db_path = PathBuf::from("./sdk-wallet.db");
-        let dir_path = path.as_ref().to_string_lossy().to_string();
-        let mut temp_path = PathBuf::from(dir_path);
-        if path.as_ref().is_dir() {
-            temp_path.push(db_path);
+        let mut db_path = path.as_ref().to_owned();
+        if db_path.is_dir() {
+            db_path.push("sdk-wallet.db");
         }
-        db_path = temp_path;
         let db = OpenOptions::new().pagesize(4096).num_pages(32).open(db_path)?;
         // create a default bucket
         let tx = db.tx(true)?;
@@ -62,6 +59,7 @@ impl StorageAdapter for JammdbStorageAdapter {
             Some(r) => Ok(Some(r.kv().value().into())),
             None => Ok(None),
         }
+        Ok(bucket.get(key).map(|r| r.kv().value().into()))
     }
 
     async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), Self::Error> {
