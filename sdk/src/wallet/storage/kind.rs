@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 pub enum StorageKind {
     /// RocksDB storage.
     #[cfg(feature = "rocksdb")]
-    #[cfg(not(feature = "jammdb"))]
     Rocksdb,
     /// JammDB storage
     #[cfg(feature = "jammdb")]
@@ -25,7 +24,6 @@ pub enum StorageKind {
 impl Default for StorageKind {
     fn default() -> Self {
         #[cfg(feature = "rocksdb")]
-        #[cfg(not(feature = "jammdb"))]
         return Self::Rocksdb;
         #[cfg(feature = "jammdb")]
         #[cfg(not(feature = "rocksdb"))]
