@@ -4,8 +4,8 @@
 /// The default storage path.
 pub const DEFAULT_STORAGE_PATH: &str = "./storage";
 
-/// The default RocksDB storage path.
-#[cfg(feature = "jammdb")]
+/// The default jammDB storage path.
+#[cfg(all(not(feature = "rocksdb"), feature = "jammdb"))]
 pub(crate) const JAMMDB_FOLDERNAME: &str = "walletdb";
 
 /// The default RocksDB storage path.
@@ -13,7 +13,7 @@ pub(crate) const JAMMDB_FOLDERNAME: &str = "walletdb";
 pub(crate) const ROCKSDB_FOLDERNAME: &str = "walletdb";
 
 pub const fn default_storage_path() -> &'static str {
-    #[cfg(all(not(feature = "jammdb"), feature = "rocksdb"))]
+    #[cfg(all(feature = "rocksdb"))]
     return ROCKSDB_FOLDERNAME;
     #[cfg(all(not(feature = "rocksdb"), feature = "jammdb"))]
     return JAMMDB_FOLDERNAME;
