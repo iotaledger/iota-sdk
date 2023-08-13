@@ -13,7 +13,7 @@ pub(crate) const JAMMDB_FOLDERNAME: &str = "walletdb";
 pub(crate) const ROCKSDB_FOLDERNAME: &str = "walletdb";
 
 pub const fn default_storage_path() -> &'static str {
-    #[cfg(all(feature = "rocksdb"))]
+    #[cfg(feature = "rocksdb")]
     return ROCKSDB_FOLDERNAME;
     #[cfg(all(not(feature = "rocksdb"), feature = "jammdb"))]
     return JAMMDB_FOLDERNAME;
