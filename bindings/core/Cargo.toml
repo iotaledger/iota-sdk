@@ -1,7 +1,7 @@
 [package]
 name = "iota-sdk-bindings-core"
 version = "0.1.0"
-authors = [ "IOTA Stiftung" ]
+authors = ["IOTA Stiftung"]
 edition = "2021"
 homepage = "https://iota.org"
 description = "Bindings core for the IOTA SDK"
@@ -9,13 +9,19 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-iota-sdk = { path = "../../sdk", default-features = false, features = [ "wallet", "tls" ] }
+iota-sdk = { path = "../../sdk", default-features = false, features = [
+    "wallet",
+    "tls",
+] }
 
-backtrace = { version = "0.3.68", default-features = false, features = [ "std" ] }
+backtrace = { version = "0.3.68", default-features = false, features = ["std"] }
 derivative = { version = "2.2.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-futures =  { version = "0.3.28", default-features = false }
-iota-crypto = { version = "0.23.0", default-features = false, features = [ "slip10", "bip44" ] }
+futures = { version = "0.3.28", default-features = false }
+iota-crypto = { version = "0.23.0", default-features = false, features = [
+    "slip10",
+    "bip44",
+] }
 log = { version = "0.4.19", default-features = false }
 packable = { version = "0.8.1", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false }
@@ -27,11 +33,11 @@ tokio = { version = "1.29.1", default-features = false }
 zeroize = { version = "1.6.0", default-features = false }
 
 [features]
-events = [ "iota-sdk/events" ]
-ledger_nano = [ "iota-sdk/ledger_nano" ]
-mqtt = [ "iota-sdk/mqtt" ]
-participation = [ "iota-sdk/participation" ]
-rocksdb = [ "iota-sdk/rocksdb" ]
+events = ["iota-sdk/events"]
 jammdb = ["iota-sdk/jammdb"]
-storage = [ "iota-sdk/storage" ]
-stronghold = [ "iota-sdk/stronghold" ]
+ledger_nano = ["iota-sdk/ledger_nano"]
+mqtt = ["iota-sdk/mqtt"]
+participation = ["iota-sdk/participation"]
+rocksdb = ["iota-sdk/rocksdb"]
+storage = ["iota-sdk/storage"]
+stronghold = ["iota-sdk/stronghold"]
