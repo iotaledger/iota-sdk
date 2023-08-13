@@ -4,7 +4,6 @@
 pub mod memory;
 /// RocksDB storage adapter.
 #[cfg(feature = "rocksdb")]
-#[cfg(not(feature = "jammdb"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "rocksdb")))]
 pub mod rocksdb;
 
