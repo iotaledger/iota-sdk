@@ -18,11 +18,12 @@ pub const BUCKET_NAME: &str = "Storage";
 
 impl Debug for JammdbStorageAdapter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "JammDbStorageAdapter")
+        write!(f, "JammdbStorageAdapter")
     }
 }
 
 /// Key value storage adapter.
+#[derive(Clone)]
 pub struct JammdbStorageAdapter {
     db: Arc<Mutex<DB>>,
 }
