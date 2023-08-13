@@ -55,10 +55,6 @@ impl StorageAdapter for JammdbStorageAdapter {
         let db = self.db.lock().await;
         let tx = db.tx(false)?;
         let bucket = tx.get_bucket(BUCKET_NAME)?;
-        match bucket.get(key) {
-            Some(r) => Ok(Some(r.kv().value().into())),
-            None => Ok(None),
-        }
         Ok(bucket.get(key).map(|r| r.kv().value().into()))
     }
 
