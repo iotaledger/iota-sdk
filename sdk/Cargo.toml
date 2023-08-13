@@ -143,11 +143,11 @@ default = ["client", "wallet", "tls"]
 
 events = []
 ledger_nano = ["iota-ledger-nano"]
+jammdb = ["dep:jammdb", "storage"]
 mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
 pow = ["std", "num_cpus", "iota-crypto/curl-p"]
 rand = ["dep:rand"]
-jammdb = ["dep:jammdb", "storage"]
 rocksdb = ["dep:rocksdb", "storage"]
 serde = [
     "serde_repr",
