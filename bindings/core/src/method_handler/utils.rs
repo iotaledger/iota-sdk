@@ -104,7 +104,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
         UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
-        UtilsMethod::ComputeSlotCommitmentId { dto } => Response::SlotCommitmentId(SlotCommitment::from(dto).id()),
+        UtilsMethod::ComputeSlotCommitmentId { slot_commitment } => {
+            Response::SlotCommitmentId(SlotCommitment::from(slot_commitment).id())
+        }
     };
     Ok(response)
 }

@@ -197,6 +197,6 @@ type SlotCommitmentConverted = Omit<
 export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
-        dto: SlotCommitmentConverted;
+        slotCommitment: SlotCommitmentConverted;
     };
 }

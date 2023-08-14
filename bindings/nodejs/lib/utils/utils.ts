@@ -335,7 +335,7 @@ export class Utils {
         return callUtilsMethod({
             name: 'computeSlotCommitmentId',
             data: {
-                dto: {
+                slotCommitment: {
                     index: slotCommitment.index.toString(10),
                     previousSlotCommitmentId:
                         slotCommitment.previousSlotCommitmentId,
