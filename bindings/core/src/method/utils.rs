@@ -10,6 +10,7 @@ use iota_sdk::types::block::{
         TransactionId,
     },
     signature::Ed25519Signature,
+    slot::SlotCommitment,
     BlockDto,
 };
 use serde::{Deserialize, Serialize};
@@ -152,4 +153,7 @@ pub enum UtilsMethod {
     /// Creates a UTXOInput from outputId.
     #[serde(rename_all = "camelCase")]
     OutputIdToUtxoInput { output_id: OutputId },
+    /// Computes the slot commitment id from a slot commitment.
+    #[serde(rename_all = "camelCase")]
+    ComputeSlotCommitmentId { slot_commitment: SlotCommitment },
 }
