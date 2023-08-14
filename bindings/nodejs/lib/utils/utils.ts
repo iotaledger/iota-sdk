@@ -17,6 +17,7 @@ import {
     hexToBigInt,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
+import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
 
 /** Utils class for utils. */
 export class Utils {
@@ -322,6 +323,26 @@ export class Utils {
         return callUtilsMethod({
             name: 'verifyMnemonic',
             data: { mnemonic },
+        });
+    }
+
+    /**
+     * Derives the `SlotCommitmentId` of the `SlotCommitment`.
+     */
+    static computeSlotCommitmentId(
+        slotCommitment: SlotCommitment,
+    ): SlotCommitmentId {
+        return callUtilsMethod({
+            name: 'computeSlotCommitmentId',
+            data: {
+                slotCommitment: {
+                    index: slotCommitment.index.toString(10),
+                    prevId: slotCommitment.prevId,
+                    rootsId: slotCommitment.rootsId,
+                    cumulativeWeight:
+                        slotCommitment.cumulativeWeight.toString(10),
+                },
+            },
         });
     }
 }
