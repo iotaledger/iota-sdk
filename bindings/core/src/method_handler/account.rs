@@ -201,13 +201,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let events = account.register_participation_events(&options).await?;
             Response::ParticipationEvents(events)
         }
-        AccountMethod::RetryTransactionUntilIncluded {
+        AccountMethod::ReissueTransactionUntilIncluded {
             transaction_id,
             interval,
             max_attempts,
         } => {
             let block_id = account
-                .retry_transaction_until_included(&transaction_id, interval, max_attempts)
+                .reissue_transaction_until_included(&transaction_id, interval, max_attempts)
                 .await?;
             Response::BlockId(block_id)
         }

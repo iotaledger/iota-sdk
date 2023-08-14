@@ -37,7 +37,7 @@ pub struct SyncOptions {
     /// pruned.
     #[serde(default = "default_sync_incoming_transactions")]
     pub sync_incoming_transactions: bool,
-    /// Checks pending transactions and promotes/reattaches them if necessary.
+    /// Checks pending transactions and reissues them if necessary.
     #[serde(default = "default_sync_pending_transactions")]
     pub sync_pending_transactions: bool,
     /// Specifies what outputs should be synced for the ed25519 addresses from the account.

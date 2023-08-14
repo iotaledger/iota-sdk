@@ -30,7 +30,7 @@ import type {
     __PrepareSendMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
-    __RetryTransactionUntilIncludedMethod__,
+    __ReissueTransactionUntilIncludedMethod__,
     __SendMethod__,
     __SendWithParamsMethod__,
     __PrepareSendNativeTokensMethod__,
@@ -115,7 +115,7 @@ export type __AccountMethod__ =
     | __PrepareSendMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
-    | __RetryTransactionUntilIncludedMethod__
+    | __ReissueTransactionUntilIncludedMethod__
     | __SendMethod__
     | __SendWithParamsMethod__
     | __PrepareSendNativeTokensMethod__

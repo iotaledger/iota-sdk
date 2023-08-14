@@ -32,7 +32,7 @@ transaction = account.prepare_melt_native_token(token_id, melt_amount).send()
 print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
-blockId = account.retry_transaction_until_included(
+blockId = account.reissue_transaction_until_included(
     transaction.transactionId)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 

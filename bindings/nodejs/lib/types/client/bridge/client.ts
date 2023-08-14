@@ -257,36 +257,6 @@ export interface __FindBlocksMethod__ {
     };
 }
 
-export interface __RetryMethod__ {
-    name: 'retry';
-    data: {
-        blockId: string;
-    };
-}
-
-export interface __RetryUntilIncludedMethod__ {
-    name: 'retryUntilIncluded';
-    data: {
-        blockId: string;
-        interval?: number;
-        maxAttempts?: number;
-    };
-}
-
-export interface __ReattachMethod__ {
-    name: 'reattach';
-    data: {
-        blockId: BlockId;
-    };
-}
-
-export interface __ReattachUncheckedMethod__ {
-    name: 'reattachUnchecked';
-    data: {
-        blockId: BlockId;
-    };
-}
-
 export interface __UnhealthyNodesMethod__ {
     name: 'unhealthyNodes';
 }

@@ -88,7 +88,7 @@ class SyncOptions():
         Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained
         if it has been pruned.
     sync_pending_transactions :
-        Checks pending transactions and promotes/reattaches them if necessary.
+        Checks pending transactions and reissues them if necessary.
     account :
         Specifies what outputs should be synced for the Ed25519 addresses from the account.
     alias :
