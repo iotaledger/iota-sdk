@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { plainToInstance } from 'class-transformer';
-import { BlockType, Block } from './block-wrapper';
+import { BlockType, Block } from './block';
 import { BasicBlock } from './basic-block';
 
-export * from './block-wrapper';
+export * from './block';
 export * from './basic-block';
 
 export const BlockDiscriminator = {
