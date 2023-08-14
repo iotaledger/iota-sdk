@@ -19,23 +19,23 @@ export class ValidationBlockData {
     /**
      * Blocks that are strongly directly approved.
      */
-    strongParents!: StrongParents;
+    readonly strongParents!: StrongParents;
     /**
      * Blocks that are weakly directly approved.
      */
-    weakParents!: WeakParents;
+    readonly weakParents!: WeakParents;
     /**
      * Blocks that are directly referenced to adjust opinion.
      */
-    shallowLikeParents!: ShallowLikeParents;
+    readonly shallowLikeParents!: ShallowLikeParents;
 
     /**
      * The highest supported protocol version the issuer of this block supports.
      */
-    highestSupportedVersion!: number;
+    readonly highestSupportedVersion!: number;
 
     /**
      * The hash of the protocol parameters for the Highest Supported Version.
      */
-    protocolParametersHash!: HexEncodedString;
+    readonly protocolParametersHash!: HexEncodedString;
 }
