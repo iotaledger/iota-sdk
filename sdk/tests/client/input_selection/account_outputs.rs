@@ -208,7 +208,7 @@ fn basic_output_with_account_input() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([Account(
-        2_255_500,
+        2_259_500,
         account_id_2,
         0,
         BECH32_ADDRESS_ED25519_0,

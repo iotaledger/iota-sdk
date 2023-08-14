@@ -88,8 +88,8 @@ fn new_not_unique() {
 fn packed_len() {
     let parents = StrongParents::from_vec(rand_block_ids(5)).unwrap();
 
-    assert_eq!(parents.packed_len(), 1 + 5 * 32);
-    assert_eq!(parents.pack_to_vec().len(), 1 + 5 * 32);
+    assert_eq!(parents.packed_len(), 1 + 5 * 40);
+    assert_eq!(parents.pack_to_vec().len(), 1 + 5 * 40);
 }
 
 #[test]

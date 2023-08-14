@@ -38,4 +38,16 @@ impl Signature {
             Self::Ed25519(_) => Ed25519Signature::KIND,
         }
     }
+
+    /// Checks whether the signature is an [`Ed25519Signature`].
+    pub fn is_ed25519(&self) -> bool {
+        matches!(self, Self::Ed25519(_))
+    }
+
+    /// Gets the signature as an actual [`Ed25519Signature`].
+    /// PANIC: do not call on a non-ed25519 signature.
+    pub fn as_ed25519(&self) -> &Ed25519Signature {
+        let Self::Ed25519(sig) = self;
+        sig
+    }
 }
