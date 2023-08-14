@@ -45,8 +45,6 @@
 //         .finish()
 //         .await?;
 
-//     client.retry_until_included(&block.id(), None, None).await?;
-
 //     let output_id_0 = get_alias_output_id(block.payload().unwrap())?;
 //     let output_id_1 = client.alias_output_id(AliasId::from(&output_id_0)).await?;
 
@@ -76,8 +74,6 @@
 //         .with_outputs([nft_output])?
 //         .finish()
 //         .await?;
-
-//     client.retry_until_included(&block.id(), None, None).await?;
 
 //     let output_id_0 = get_nft_output_id(block.payload().unwrap())?;
 //     let output_id_1 = client.nft_output_id(NftId::from(&output_id_0)).await?;
@@ -111,8 +107,6 @@
 //         .finish()
 //         .await?;
 
-//     client.retry_until_included(&block.id(), None, None).await?;
-
 //     let alias_id = AliasId::from(&get_alias_output_id(block.payload().unwrap())?);
 
 //     let alias_output_1 = AliasOutputBuilder::from(alias_output_0.as_alias())
@@ -141,8 +135,6 @@
 //         .with_outputs([alias_output_1, foundry_output])?
 //         .finish()
 //         .await?;
-
-//     client.retry_until_included(&block.id(), None, None).await?;
 
 //     let output_id_0 = get_foundry_output_id(block.payload().unwrap())?;
 //     let output_id_1 = client.foundry_output_id(foundry_id).await?;
