@@ -36,7 +36,6 @@ pub struct BlockBuilder<B>(pub(crate) B);
 impl<B> BlockBuilder<BlockWrapper<B>> {
     pub fn from_block_data(
         protocol_params: ProtocolParameters,
-        network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -46,7 +45,6 @@ impl<B> BlockBuilder<BlockWrapper<B>> {
     ) -> Self {
         Self(BlockWrapper {
             protocol_params,
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
@@ -134,6 +132,13 @@ impl Packable for Block {
 
         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
+        if VERIFY && network_id != protocol_params.network_id() {
+            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+                expected: protocol_params.network_id(),
+                actual: network_id,
+            }));
+        }
+
         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -151,7 +156,6 @@ impl Packable for Block {
 
                 Self::from(BlockWrapper {
                     protocol_params: protocol_params.clone(),
-                    network_id,
                     issuing_time,
                     slot_commitment_id,
                     latest_finalized_slot,
@@ -166,7 +170,6 @@ impl Packable for Block {
 
                 Self::from(BlockWrapper {
                     protocol_params: protocol_params.clone(),
-                    network_id,
                     issuing_time,
                     slot_commitment_id,
                     latest_finalized_slot,
@@ -199,8 +202,6 @@ impl Packable for Block {
 pub struct BlockWrapper<B> {
     /// Protocol parameters of the network to which this block belongs.
     pub(crate) protocol_params: ProtocolParameters,
-    /// Network identifier.
-    pub(crate) network_id: u64,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
     pub(crate) issuing_time: u64,
     /// The identifier of the slot to which this block commits.
@@ -231,7 +232,7 @@ impl<B> BlockWrapper<B> {
     /// Returns the network id of a [`Block`].
     #[inline(always)]
     pub fn network_id(&self) -> u64 {
-        self.network_id
+        self.protocol_params.network_id()
     }
 
     /// Returns the issuing time of a [`Block`].
@@ -265,8 +266,8 @@ impl<B> BlockWrapper<B> {
     }
 
     pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_params.protocol_version.pack(packer)?;
-        self.network_id.pack(packer)?;
+        self.protocol_version().pack(packer)?;
+        self.network_id().pack(packer)?;
         self.issuing_time.pack(packer)?;
         self.slot_commitment_id.pack(packer)?;
         self.latest_finalized_slot.pack(packer)?;
@@ -300,7 +301,6 @@ impl Block {
     #[inline(always)]
     pub fn build_basic(
         protocol_params: ProtocolParameters,
-        network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -310,7 +310,6 @@ impl Block {
     ) -> BlockBuilder<BasicBlock> {
         BlockBuilder::<BasicBlock>::new(
             protocol_params,
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
@@ -324,7 +323,6 @@ impl Block {
     #[inline(always)]
     pub fn build_validation(
         protocol_params: ProtocolParameters,
-        network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -336,7 +334,6 @@ impl Block {
     ) -> BlockBuilder<ValidationBlock> {
         BlockBuilder::<ValidationBlock>::new(
             protocol_params,
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
@@ -704,7 +701,6 @@ pub(crate) mod dto {
             match dto.block {
                 BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
                     protocol_params,
-                    dto.network_id,
                     dto.issuing_time,
                     dto.slot_commitment,
                     dto.latest_finalized_slot,
@@ -715,7 +711,6 @@ pub(crate) mod dto {
                 .finish(),
                 BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
                     protocol_params,
-                    dto.network_id,
                     dto.issuing_time,
                     dto.slot_commitment,
                     dto.latest_finalized_slot,

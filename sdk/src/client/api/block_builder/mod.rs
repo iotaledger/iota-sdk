@@ -44,7 +44,6 @@ impl ClientInner {
 
         Ok(Block::build_basic(
             self.get_protocol_parameters().await?,
-            self.get_network_id().await?,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,

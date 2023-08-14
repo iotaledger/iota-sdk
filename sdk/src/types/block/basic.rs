@@ -25,7 +25,6 @@ impl BlockBuilder<BasicBlock> {
     #[inline(always)]
     pub fn new(
         protocol_params: ProtocolParameters,
-        network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -35,7 +34,6 @@ impl BlockBuilder<BasicBlock> {
     ) -> Self {
         Self(BlockWrapper {
             protocol_params,
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
@@ -199,6 +197,13 @@ impl Packable for BasicBlock {
 
         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
+        if VERIFY && network_id != protocol_params.network_id() {
+            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+                expected: protocol_params.network_id(),
+                actual: network_id,
+            }));
+        }
+
         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -219,7 +224,6 @@ impl Packable for BasicBlock {
 
         let block = Self {
             protocol_params: protocol_params.clone(),
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,

@@ -46,7 +46,6 @@ pub fn rand_basic_block_builder_with_strong_parents(
     Block::build_basic(
         protocol_params,
         rand_number(),
-        rand_number(),
         rand_bytes_array().into(),
         rand_number::<u64>().into(),
         rand_bytes_array().into(),

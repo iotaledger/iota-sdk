@@ -24,7 +24,6 @@ impl BlockBuilder<ValidationBlock> {
     #[inline(always)]
     pub fn new(
         protocol_params: ProtocolParameters,
-        network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -36,7 +35,6 @@ impl BlockBuilder<ValidationBlock> {
     ) -> Self {
         Self(BlockWrapper {
             protocol_params,
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
@@ -163,8 +161,8 @@ impl Packable for ValidationBlock {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_params.protocol_version.pack(packer)?;
-        self.network_id.pack(packer)?;
+        self.protocol_version().pack(packer)?;
+        self.network_id().pack(packer)?;
         self.issuing_time.pack(packer)?;
         self.slot_commitment_id.pack(packer)?;
         self.latest_finalized_slot.pack(packer)?;
@@ -193,6 +191,13 @@ impl Packable for ValidationBlock {
 
         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
+        if VERIFY && network_id != protocol_params.network_id() {
+            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+                expected: protocol_params.network_id(),
+                actual: network_id,
+            }));
+        }
+
         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -213,7 +218,6 @@ impl Packable for ValidationBlock {
 
         let block = Self {
             protocol_params: protocol_params.clone(),
-            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
