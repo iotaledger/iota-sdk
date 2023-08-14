@@ -5,7 +5,7 @@ import { HexEncodedString } from '../../../utils/hex-encoding';
 import { Payload, PayloadType } from '../payload';
 
 /**
- * Tagged data payload.
+ * A Tagged Data payload.
  */
 class TaggedDataPayload extends Payload {
     /**
@@ -16,6 +16,10 @@ class TaggedDataPayload extends Payload {
      * The index data.
      */
     data: HexEncodedString;
+    /**
+     * @param tag A tag as hex-encoded string.
+     * @param data Index data as hex-encoded string.
+     */
     constructor(tag: HexEncodedString, data: HexEncodedString) {
         super(PayloadType.TaggedData);
         this.tag = tag;

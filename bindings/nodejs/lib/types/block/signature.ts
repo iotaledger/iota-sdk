@@ -8,18 +8,27 @@ import { HexEncodedString } from '../utils';
  * All of the signature types.
  */
 enum SignatureType {
+    /**
+     * An Ed25519 signature.
+     */
     Ed25519 = 0,
 }
 
+/**
+ * The base class for signatures.
+ */
 abstract class Signature {
     readonly type: SignatureType;
 
+    /**
+     * @param type The type of signature.
+     */
     constructor(type: SignatureType) {
         this.type = type;
     }
 
     /**
-     * The type of signature.
+     * Get the type of signature.
      */
     getType(): SignatureType {
         return this.type;
@@ -27,7 +36,7 @@ abstract class Signature {
 }
 
 /**
- * Ed25519Signature signature.
+ * An Ed25519 signature.
  */
 class Ed25519Signature extends Signature {
     /**
@@ -39,6 +48,10 @@ class Ed25519Signature extends Signature {
      */
     signature: HexEncodedString;
 
+    /**
+     * @param publicKey A Ed25519 public key as hex-encoded string.
+     * @param signature A Ed25519 signature as hex-encoded string.
+     */
     constructor(publicKey: HexEncodedString, signature: HexEncodedString) {
         super(SignatureType.Ed25519);
         this.publicKey = publicKey;
