@@ -72,7 +72,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
     );
     // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(transaction_id, None, None)
+        .reissue_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",

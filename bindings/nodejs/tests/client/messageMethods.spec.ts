@@ -40,41 +40,4 @@ describe.skip('Block methods', () => {
 
         expect(blockRaw).toBeDefined();
     });
-
-    it('reattaches a block', async () => {
-        const tips = await client.getTips();
-
-        // Reattach a block without checking if it should be reattached
-        const reattachUnchecked = await client.reattachUnchecked(
-            tips[0],
-        );
-
-        expect(reattachUnchecked[0]).toBeValidBlockId();
-        expect(reattachUnchecked[1]).toBeDefined();
-
-        // Returns expected error: no need to promote or reattach.
-        await expect(client.reattach(tips[0])).rejects.toMatch(
-            'NoNeedPromoteOrReattach',
-        );
-    });
-
-    // Skip by default, retryUntilIncluded can be slow
-    it.skip('retries a block', async () => {
-        const tips = await client.getTips();
-
-        // Retries (promotes or reattaches) a block for provided block id until it's included
-        // (referenced by a milestone). Default interval is 5 seconds and max attempts is 40.
-        const retryUntilIncluded = await client.retryUntilIncluded(
-            tips[0],
-            2,
-            5,
-        );
-        //Returns the included block at first position and additional reattached blocks
-        expect(retryUntilIncluded[0][0]).toBe(tips[0]);
-
-        // Returns expected error: no need to promote or reattach.
-        await expect(client.retry(tips[0])).rejects.toMatch(
-            'NoNeedPromoteOrReattach',
-        );
-    });
 });

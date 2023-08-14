@@ -258,11 +258,11 @@ pub enum AccountMethod {
     RegisterParticipationEvents {
         options: ParticipationEventRegistrationOptions,
     },
-    /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+    /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
     #[serde(rename_all = "camelCase")]
-    RetryTransactionUntilIncluded {
+    ReissueTransactionUntilIncluded {
         /// Transaction id
         transaction_id: TransactionId,
         /// Interval
@@ -315,7 +315,7 @@ pub enum AccountMethod {
     SubmitAndStoreTransaction {
         signed_transaction_data: SignedTransactionDataDto,
     },
-    /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
+    /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using SetDefaultSyncOptions.
     /// Expected response: [`Balance`](crate::Response::Balance)
     Sync {

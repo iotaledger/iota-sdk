@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{}",

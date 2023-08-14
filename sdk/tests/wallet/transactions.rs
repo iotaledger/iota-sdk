@@ -25,7 +25,7 @@ async fn send_amount() -> Result<()> {
         .await?;
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
@@ -61,7 +61,7 @@ async fn send_amount_127_outputs() -> Result<()> {
         .await?;
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
@@ -91,7 +91,7 @@ async fn send_amount_custom_input() -> Result<()> {
         .await?;
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
@@ -131,7 +131,7 @@ async fn send_nft() -> Result<()> {
 
     let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
     accounts[0]
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
 
@@ -147,7 +147,7 @@ async fn send_nft() -> Result<()> {
         .await
         .unwrap();
     accounts[0]
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
     let balance = accounts[1].sync(None).await?;
@@ -213,7 +213,7 @@ async fn conflicting_transaction() -> Result<()> {
         )
         .await?;
     wallet_0_account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     // Second transaction will be conflicting
     let tx = wallet_1_account
@@ -229,7 +229,7 @@ async fn conflicting_transaction() -> Result<()> {
         .await?;
     // Should return an error since the tx is conflicting
     match wallet_1_account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await
         .unwrap_err()
     {

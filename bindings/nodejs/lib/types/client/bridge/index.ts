@@ -37,10 +37,6 @@ import type {
     __FoundryOutputIdMethod__,
     __GetOutputsIgnoreErrorsMethod__,
     __FindBlocksMethod__,
-    __RetryMethod__,
-    __RetryUntilIncludedMethod__,
-    __ReattachMethod__,
-    __ReattachUncheckedMethod__,
     __UnhealthyNodesMethod__,
     __BuildBasicOutputMethod__,
     __BuildAliasOutputMethod__,
@@ -90,10 +86,6 @@ export type __ClientMethods__ =
     | __FoundryOutputIdMethod__
     | __GetOutputsIgnoreErrorsMethod__
     | __FindBlocksMethod__
-    | __RetryMethod__
-    | __RetryUntilIncludedMethod__
-    | __ReattachMethod__
-    | __ReattachUncheckedMethod__
     | __UnhealthyNodesMethod__
     | __BuildBasicOutputMethod__
     | __BuildAliasOutputMethod__

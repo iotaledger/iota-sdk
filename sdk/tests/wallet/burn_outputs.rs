@@ -29,7 +29,7 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let transaction = account.mint_nfts(nft_options, None).await.unwrap();
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
     let balance = account.sync(None).await.unwrap();
@@ -43,7 +43,7 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let transaction = account.burn(nft_id, None).await.unwrap();
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
     let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
@@ -81,7 +81,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
 
     let transaction = account_0.send_outputs(outputs, None).await?;
     account_0
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
     let output_id = OutputId::new(transaction.transaction_id, 0u16)?;
@@ -90,7 +90,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     account_1.sync(None).await?;
     let transaction = account_1.burn(nft_id, None).await?;
     account_1
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account_1.sync(None).await?;
     // After burning the amount is available on account_1
@@ -113,7 +113,7 @@ async fn create_and_melt_native_token() -> Result<()> {
 
     // Wait for transaction to get included
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
@@ -128,7 +128,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     let create_transaction = account.create_native_token(params, None).await.unwrap();
 
     account
-        .retry_transaction_until_included(&create_transaction.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_transaction.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
 
@@ -147,7 +147,7 @@ async fn create_and_melt_native_token() -> Result<()> {
         .unwrap();
 
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
@@ -165,7 +165,7 @@ async fn create_and_melt_native_token() -> Result<()> {
         .unwrap();
 
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
@@ -193,7 +193,7 @@ async fn destroy_foundry(account: &Account) -> Result<()> {
 
     let transaction = account.burn(foundry_id, None).await.unwrap();
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
     let search = balance
@@ -215,7 +215,7 @@ async fn destroy_account(account: &Account) -> Result<()> {
     println!("account_id -> {account_id}");
     let transaction = account.burn(account_id, None).await.unwrap();
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
     let search = balance
@@ -242,7 +242,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
 
     let tx = account.create_account_output(None, None).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
@@ -258,7 +258,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
         )
         .await?;
     account
-        .retry_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx.transaction.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
@@ -266,7 +266,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
         .burn(NativeToken::new(create_tx.token_id, native_token_amount)?, None)
         .await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
 
@@ -286,7 +286,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
 
     let tx = account.create_account_output(None, None).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     account.sync(None).await?;
 
@@ -295,7 +295,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
     let nft_tx = account.mint_nfts(nft_options, None).await.unwrap();
     account
-        .retry_transaction_until_included(&nft_tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&nft_tx.transaction_id, None, None)
         .await?;
     let output_id = OutputId::new(nft_tx.transaction_id, 0u16).unwrap();
     let nft_id = NftId::from(&output_id);
@@ -307,7 +307,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
         .burn(Burn::new().add_nft(nft_id).add_account(*account_id), None)
         .await?;
     account
-        .retry_transaction_until_included(&burn_tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&burn_tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
 

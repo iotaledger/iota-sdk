@@ -55,7 +55,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         console.log('Waiting until included in block...');
-        const blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);

@@ -74,7 +74,7 @@ async function run() {
         console.log('Transaction sent: %s', transaction.transactionId);
 
         // Wait for the consolidation transaction to get confirmed
-        const blockId = account.retryTransactionUntilIncluded(
+        const blockId = account.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 
