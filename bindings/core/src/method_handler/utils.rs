@@ -11,7 +11,6 @@ use iota_sdk::{
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
             protocol::calc_slot_index,
-            slot::SlotCommitment,
             Block,
         },
         TryFromDto,
