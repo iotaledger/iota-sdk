@@ -10,6 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
+            protocol::calc_slot_index,
             Block,
         },
         TryFromDto,
@@ -37,9 +38,17 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let mnemonic = Mnemonic::from(mnemonic);
             Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(mnemonic)?)
         }
-        UtilsMethod::BlockId { block } => {
+        UtilsMethod::BlockId {
+            block,
+            genesis_unix_timestamp,
+            slot_duration_in_seconds,
+        } => {
             let block = Block::try_from_dto(block)?;
-            Response::BlockId(block.id())
+            Response::BlockId(block.hash().with_slot_index(calc_slot_index(
+                block.issuing_time(),
+                genesis_unix_timestamp,
+                slot_duration_in_seconds,
+            )))
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto(payload)?;

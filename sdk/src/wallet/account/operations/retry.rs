@@ -49,6 +49,8 @@ where
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[retry_transaction_until_included]");
 
+        let protocol_params = self.client().get_protocol_parameters().await?;
+
         let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
@@ -78,7 +80,7 @@ where
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                     )
                     .await?
-                    .id(),
+                    .id(&protocol_params),
             };
 
             // Attachments of the Block to check inclusion state
@@ -120,7 +122,7 @@ where
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                             )
                             .await?;
-                        block_ids.push(reattached_block.id());
+                        block_ids.push(reattached_block.id(&protocol_params));
                     }
                 }
                 // After we checked all our reattached blocks, check if the transaction got reattached in another block
@@ -134,7 +136,7 @@ where
                             e
                         }
                     })?;
-                    return Ok(included_block.id());
+                    return Ok(included_block.id(&protocol_params));
                 }
             }
             Err(ClientError::TangleInclusion(block_id.to_string()).into())
