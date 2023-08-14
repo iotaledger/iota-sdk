@@ -67,7 +67,7 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * Parse an output from a JSON string.
+     * Parse an output from a plain JS JSON object.
      */
     public static parse(data: any): Output {
         if (data.type == OutputType.Treasury) {

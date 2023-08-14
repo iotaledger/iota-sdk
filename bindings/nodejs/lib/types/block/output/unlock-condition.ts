@@ -41,7 +41,7 @@ abstract class UnlockCondition {
     }
 
     /**
-     * Parse an unlock condition from a JS object.
+     * Parse an unlock condition from a plain JS JSON object.
      */
     public static parse(data: any): UnlockCondition {
         if (data.type == UnlockConditionType.Address) {
