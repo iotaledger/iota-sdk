@@ -41,7 +41,7 @@ abstract class UnlockCondition {
     }
 
     /**
-     * Parse an unlock condition from a JSON string.
+     * Parse an unlock condition from a JS object.
      */
     public static parse(data: any): UnlockCondition {
         if (data.type == UnlockConditionType.Address) {
@@ -198,7 +198,7 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
 
     /**
      * @param returnAddress The address that can unlock the expired output.
-     * @param unixTime The Unix timestamp marking the end of the expiration period of the claim.
+     * @param unixTime The Unix timestamp marking the end of the claim period.
      */
     constructor(returnAddress: Address, unixTime: number) {
         super(UnlockConditionType.Expiration);
