@@ -574,7 +574,7 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{basic::dto::BasicBlockDataDto, validation::dto::ValidationBlockDataDto, Error},
-            TryFromDto, ValidationParams,
+            TryFromDto,
         },
         utils::serde::string,
     };
@@ -692,33 +692,49 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for Block {
-        type Dto = BlockDto;
-        type Error = Error;
+    impl Block {
+        pub fn try_from_dto(dto: BlockDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
+            if dto.protocol_version != protocol_params.protocol_version() {
+                return Err(Error::ProtocolVersionMismatch {
+                    expected: protocol_params.protocol_version(),
+                    actual: dto.protocol_version,
+                });
+            }
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let protocol_params = params.protocol_parameters().cloned().unwrap_or_default();
+            if dto.network_id != protocol_params.network_id() {
+                return Err(Error::NetworkIdMismatch {
+                    expected: protocol_params.network_id(),
+                    actual: dto.network_id,
+                });
+            }
+
             match dto.block {
-                BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
-                    protocol_params,
-                    dto.issuing_time,
-                    dto.slot_commitment,
-                    dto.latest_finalized_slot,
-                    dto.issuer_id,
-                    BasicBlockData::try_from_dto_with_params_inner(b, params)?,
-                    *dto.signature.as_ed25519(),
-                )
-                .finish(),
-                BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
-                    protocol_params,
-                    dto.issuing_time,
-                    dto.slot_commitment,
-                    dto.latest_finalized_slot,
-                    dto.issuer_id,
-                    ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
-                    *dto.signature.as_ed25519(),
-                )
-                .finish(),
+                BlockDataDto::Basic(b) => {
+                    let data = BasicBlockData::try_from_dto_with_params(b, &protocol_params)?;
+                    BlockBuilder::from_block_data(
+                        protocol_params,
+                        dto.issuing_time,
+                        dto.slot_commitment,
+                        dto.latest_finalized_slot,
+                        dto.issuer_id,
+                        data,
+                        *dto.signature.as_ed25519(),
+                    )
+                    .finish()
+                }
+                BlockDataDto::Validation(b) => {
+                    let data = ValidationBlockData::try_from_dto_with_params(b, &protocol_params)?;
+                    BlockBuilder::from_block_data(
+                        protocol_params,
+                        dto.issuing_time,
+                        dto.slot_commitment,
+                        dto.latest_finalized_slot,
+                        dto.issuer_id,
+                        data,
+                        *dto.signature.as_ed25519(),
+                    )
+                    .finish()
+                }
             }
         }
     }

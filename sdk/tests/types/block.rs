@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
+    helper::network_name_to_id,
     payload::Payload,
-    protocol::protocol_parameters,
+    protocol::{protocol_parameters, ProtocolParameters},
     rand::{
         block::{rand_basic_block_builder_with_strong_parents, rand_basic_block_with_strong_parents, rand_block},
         parents::rand_strong_parents,
         payload::rand_tagged_data_payload,
     },
+    Block, BlockDto,
 };
 use packable::PackableExt;
 
@@ -120,4 +122,87 @@ fn build_into_parents() {
     let block = rand_basic_block_with_strong_parents(protocol_parameters, parents.clone());
 
     assert_eq!(block.strong_parents(), &parents);
+}
+
+#[test]
+fn dto_mismatch_version() {
+    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters_hash = protocol_parameters.hash();
+    let slot_index = 11_u64;
+    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+        + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
+    let network_id = protocol_parameters.network_id();
+    let protocol_version = 4;
+    let block_dto_json = serde_json::json!({
+        "protocolVersion": protocol_version,
+        "networkId": network_id.to_string(),
+        "issuingTime": issuing_time.to_string(),
+        "slotCommitment": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
+        "latestFinalizedSlot": "0",
+        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "block": {
+            "type":1,
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "weakParents": [],
+            "shallowLikeParents": [],
+            "highestSupportedVersion": 3,
+            "protocolParametersHash": protocol_parameters_hash
+        },
+        "signature": {
+            "type": 0,
+            "publicKey": "0x714f5f07067012267c21426d382a52752f0b3208443e0e3c49183e0110494148",
+            "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
+        }
+    });
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block_res = Block::try_from_dto(block_dto, protocol_parameters.clone());
+
+    assert_eq!(
+        block_res,
+        Err(iota_sdk::types::block::Error::ProtocolVersionMismatch {
+            expected: protocol_parameters.protocol_version(),
+            actual: protocol_version
+        })
+    );
+}
+
+#[test]
+fn dto_mismatch_network_id() {
+    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters_hash = protocol_parameters.hash();
+    let slot_index = 11_u64;
+    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+        + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
+    let network_id = network_name_to_id("invalid-network");
+    let block_dto_json = serde_json::json!({
+        "protocolVersion": 3,
+        "networkId": network_id.to_string(),
+        "issuingTime": issuing_time.to_string(),
+        "slotCommitment": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
+        "latestFinalizedSlot": "0",
+        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "block": {
+            "type":1,
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "weakParents": [],
+            "shallowLikeParents": [],
+            "highestSupportedVersion": 3,
+            "protocolParametersHash": protocol_parameters_hash
+        },
+        "signature": {
+            "type": 0,
+            "publicKey": "0x714f5f07067012267c21426d382a52752f0b3208443e0e3c49183e0110494148",
+            "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
+        }
+    });
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block_res = Block::try_from_dto(block_dto, protocol_parameters.clone());
+
+    assert_eq!(
+        block_res,
+        Err(iota_sdk::types::block::Error::NetworkIdMismatch {
+            expected: protocol_parameters.network_id(),
+            actual: network_id
+        })
+    );
 }

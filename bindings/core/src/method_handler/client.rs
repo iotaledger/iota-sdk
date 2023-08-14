@@ -206,10 +206,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto_with_params(
-                    block,
-                    client.get_protocol_parameters().await?,
-                )?)
+                .post_block(&Block::try_from_dto(block, client.get_protocol_parameters().await?)?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
@@ -312,8 +309,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::CustomJson(data)
         }
         ClientMethod::BlockId { block } => {
-            let protocol_params = client.get_protocol_parameters().await?;
-            Response::BlockId(Block::try_from_dto_with_params(block, &protocol_params)?.id())
+            Response::BlockId(Block::try_from_dto(block, client.get_protocol_parameters().await?)?.id())
         }
     };
     Ok(response)
