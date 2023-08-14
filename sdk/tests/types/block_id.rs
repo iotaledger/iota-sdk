@@ -105,5 +105,5 @@ fn compute() {
         block_id.hash().to_string(),
         "0xca12e2613baeac176b4652c76b269a36ce8da295d4816f0393b5e54e6b195355"
     );
-    assert_eq!(block_id.slot_index().get(), slot_index);
+    assert_eq!(*block_id.slot_index(), slot_index);
 }

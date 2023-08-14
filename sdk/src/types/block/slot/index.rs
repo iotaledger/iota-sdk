@@ -17,11 +17,6 @@ impl SlotIndex {
     pub fn new(index: u64) -> Self {
         Self::from(index)
     }
-
-    /// Returns the inner value.
-    pub fn get(&self) -> u64 {
-        self.0
-    }
 }
 
 impl From<SlotIndex> for u64 {
