@@ -28,6 +28,4 @@ export type TokenId = HexEncodedString;
  */
 export type FoundryId = HexEncodedString;
 
-export type SlotCommitmentId = HexEncodedString;
-
 export type IssuerId = HexEncodedString;

@@ -1,8 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { IssuerId, SlotCommitmentId } from '../id';
+import { IssuerId } from '../id';
 import { Ed25519Signature } from '../signature';
+import { SlotCommitmentId, SlotIndex } from '../slot';
+import { u64 } from '../../utils/type-aliases';
 
 /**
  * All of the block types.
@@ -27,11 +29,11 @@ abstract class Block {
     /**
      * Network identifier.
      */
-    readonly networkId: bigint;
+    readonly networkId: u64;
     /**
      * The time at which the block was issued. It is a Unix timestamp in nanoseconds.
      */
-    readonly issuingTime: bigint;
+    readonly issuingTime: u64;
     /**
      * The identifier of the slot to which this block commits.
      */
@@ -39,7 +41,7 @@ abstract class Block {
     /**
      * The slot index of the latest finalized slot.
      */
-    readonly latestFinalizedSlot: bigint;
+    readonly latestFinalizedSlot: SlotIndex;
     /**
      * The identifier of the account that issued this block.
      */
@@ -52,10 +54,10 @@ abstract class Block {
     constructor(
         type: BlockType,
         protocolVersion: number,
-        networkId: bigint,
-        issuingTime: bigint,
+        networkId: u64,
+        issuingTime: u64,
         slotCommitmentId: SlotCommitmentId,
-        latestFinalizedSlot: bigint,
+        latestFinalizedSlot: SlotIndex,
         issuerId: IssuerId,
         signature: Ed25519Signature,
     ) {
