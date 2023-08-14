@@ -27,6 +27,7 @@ use iota_sdk::{
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
+            slot::SlotCommitmentId,
             unlock::Unlock,
             BlockDto, BlockId,
         },
@@ -179,6 +180,8 @@ pub enum Response {
     HexAddress(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
+    /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
+    SlotCommitmentId(SlotCommitmentId),
 
     // Responses in client and wallet
     /// Response for:

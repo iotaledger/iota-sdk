@@ -5,8 +5,9 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { Client, Ed25519Address, SecretManager, Utils } from '../../';
+import { Client, SecretManager, Utils } from '../../';
 import '../customMatchers';
+import { SlotCommitment } from '../../out/types/block/slot';
 
 const offlineClient = new Client({});
 
@@ -129,5 +130,18 @@ describe('Client utility methods', () => {
 
         const validSignature = Utils.verifyEd25519Signature(signature, message);
         expect(validSignature).toBeTruthy();
+    });
+
+    it('slot commitment id', async () => {
+        let slotCommitment = new SlotCommitment(
+            BigInt(10),
+            "0x20e07a0ea344707d69a08b90be7ad14eec8326cf2b8b86c8ec23720fab8dcf8ec43a30e4a8cc3f1f",
+            "0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f",
+            BigInt(5)
+        );
+        let id = Utils.computeSlotCommitmentId(slotCommitment);
+        expect(id).toBe(
+            '0xb485446277cc5111d54f443b46d886945d4af64e53c2f04064a7c2ea88fa4e020a00000000000000'
+        );
     });
 });
