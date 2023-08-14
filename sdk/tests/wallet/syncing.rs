@@ -116,7 +116,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
 
     let tx = account_0.send_outputs(outputs, None).await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Sync with sync_only_most_basic_outputs: true, only the first output should be synced
@@ -175,7 +175,7 @@ async fn sync_incoming_transactions() -> Result<()> {
 
     let tx = account_0.send_outputs(outputs, None).await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     account_1

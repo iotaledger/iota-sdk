@@ -36,8 +36,15 @@ async fn main() -> Result<()> {
 
     println!("{block:#?}");
 
-    // Try to check if the block has been confirmed.
-    client.retry_until_included(&block_id, None, None).await?;
+    // Wait for the block to get included
+    for _ in 0..30 {
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        let metadata = client.get_block_metadata(&block_id).await?;
+        if metadata.ledger_inclusion_state.is_some() {
+            break;
+        }
+    }
+
     println!(
         "Block with no payload included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),

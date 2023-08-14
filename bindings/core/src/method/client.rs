@@ -270,44 +270,12 @@ pub enum ClientMethod {
         /// BlockIDs
         block_ids: Vec<BlockId>,
     },
-    /// Retries (promotes or reattaches) a block for provided block id. Block should only be
-    /// retried only if they are valid and haven't been confirmed for a while.
-    #[serde(rename_all = "camelCase")]
-    Retry {
-        /// Block ID
-        block_id: BlockId,
-    },
-    /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
-    /// milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
-    /// position and additional reattached blocks
-    #[serde(rename_all = "camelCase")]
-    RetryUntilIncluded {
-        /// Block ID
-        block_id: BlockId,
-        /// Interval
-        interval: Option<u64>,
-        /// Maximum attempts
-        max_attempts: Option<u64>,
-    },
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
         addresses: Vec<Bech32Address>,
         /// Amount
         amount: u64,
-    },
-    /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
-    /// confirmed for a while.
-    #[serde(rename_all = "camelCase")]
-    Reattach {
-        /// Block ID
-        block_id: BlockId,
-    },
-    /// Reattach a block without checking if it should be reattached
-    #[serde(rename_all = "camelCase")]
-    ReattachUnchecked {
-        /// Block ID
-        block_id: BlockId,
     },
 
     //////////////////////////////////////////////////////////////////////
