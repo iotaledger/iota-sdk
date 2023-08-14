@@ -9,7 +9,9 @@ import {
 } from '../bindings';
 import type { IClientOptions, __ClientMethods__ } from '../types/client';
 
-/** The MethodHandler which sends the commands to the Rust side. */
+/**
+ * The MethodHandler which sends the commands to the Rust side.
+ */
 export class ClientMethodHandler {
     methodHandler: ClientMethodHandler;
 

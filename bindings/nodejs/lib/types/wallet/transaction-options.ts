@@ -12,7 +12,7 @@ export interface TransactionOptions {
     taggedDataPayload?: TaggedDataPayload;
     /**
      * Custom inputs that should be used for the transaction.
-     * If custom inputs are provided only those are used. If also other additional inputs should be used, `mandatory_inputs` should be used instead.
+     * If custom inputs are provided only those are used. If also other additional inputs should be used, `mandatoryInputs` should be used instead.
      */
     customInputs?: string[];
     /** Inputs that must be used for the transaction. */

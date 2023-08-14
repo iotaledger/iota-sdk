@@ -111,7 +111,7 @@ export class Client {
     }
 
     /**
-     * Get output from a given output ID
+     * Get output from a given output ID.
      */
     async getOutput(outputId: OutputId): Promise<OutputResponse> {
         const response = await this.methodHandler.callMethod({
@@ -499,7 +499,7 @@ export class Client {
     /**
      * Post block as raw bytes, returns the block ID.
      *
-     * @param block The block as raw bytes. TODO: why is it not taking a `Uint8Array` then?
+     * @param block The block.
      * @returns The ID of the posted block.
      */
     async postBlockRaw(block: Block): Promise<BlockId> {
@@ -1014,12 +1014,11 @@ export class Client {
         return [parsed.payload[0], block];
     }
 
-    //TODO: is this note really helpful to the user? Either we do those checks internally or we don't???
     /**
      * Promote a block.
      *
-     * **NOTE**: The method should validate whether a promotion is necessary through `get_block`. If not, the
-     * method should error out and should not allow unnecessary promotions.
+     * **NOTE**: The method validates whether a promotion is necessary through `get_block`. If not, the
+     * method will error out and will not do unnecessary promotions.
      *
      * @param blockId The ID of the block to promote.
      * @returns The included block.

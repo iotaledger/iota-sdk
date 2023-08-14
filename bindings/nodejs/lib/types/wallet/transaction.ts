@@ -36,10 +36,10 @@ export class Transaction {
     incoming!: boolean;
     /** Note that can be set when sending a transaction and is only stored locally */
     note?: string;
-    /** 
-    * Outputs that are used as input in the transaction.
-    * May not be all, because some may have already been deleted from the node.
-    */
+    /**
+     * Outputs that are used as input in the transaction.
+     * May not be all, because some may have already been deleted from the node.
+     */
     @Type(() => OutputResponse)
     inputs!: OutputResponse[];
 }
