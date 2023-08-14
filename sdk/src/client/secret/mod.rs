@@ -46,11 +46,14 @@ use crate::{
     },
     types::block::{
         address::{Address, Ed25519Address},
+        basic::BasicBlockData,
         output::Output,
         payload::{transaction::TransactionEssence, TransactionPayload},
         semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        validation::ValidationBlockData,
+        Block, BlockBuilder,
     },
     utils::unix_timestamp_now,
 };
@@ -524,4 +527,33 @@ where
     }
 
     Ok(tx_payload)
+}
+
+#[async_trait]
+pub trait SignBlockExt {
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+    where
+        crate::client::Error: From<S::Error>;
+}
+
+#[async_trait]
+impl SignBlockExt for BlockBuilder<BasicBlockData> {
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+    where
+        crate::client::Error: From<S::Error>,
+    {
+        let msg = self.signing_input();
+        Ok(self.finish(secret_manager.sign_ed25519(&msg, chain).await?)?)
+    }
+}
+
+#[async_trait]
+impl SignBlockExt for BlockBuilder<ValidationBlockData> {
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+    where
+        crate::client::Error: From<S::Error>,
+    {
+        let msg = self.signing_input();
+        Ok(self.finish(secret_manager.sign_ed25519(&msg, chain).await?)?)
+    }
 }

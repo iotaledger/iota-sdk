@@ -4,27 +4,22 @@
 pub mod input_selection;
 pub mod transaction;
 
-use crypto::keys::bip44::Bip44;
-
 pub use self::transaction::verify_semantic;
 use crate::{
-    client::{secret::SecretManage, ClientInner, Result},
-    types::block::{core::Block, parent::StrongParents, payload::Payload, IssuerId},
+    client::{ClientInner, Result},
+    types::block::{
+        basic::BasicBlockData, core::Block, parent::StrongParents, payload::Payload, BlockBuilder, IssuerId,
+    },
 };
 
 impl ClientInner {
-    pub async fn finish_basic_block_builder<S: SecretManage>(
+    pub async fn unsigned_basic_block_builder(
         &self,
         issuer_id: IssuerId,
         issuing_time: Option<u64>,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
-        coin_type: u32,
-        secret_manager: &S,
-    ) -> Result<Block>
-    where
-        crate::client::Error: From<S::Error>,
-    {
+    ) -> Result<BlockBuilder<BasicBlockData>> {
         // Use tips as strong parents if none are provided.
         let strong_parents = match strong_parents {
             Some(strong_parents) => strong_parents,
@@ -57,10 +52,7 @@ impl ClientInner {
             strong_parents,
         )
         .with_payload(payload);
-        let signature = secret_manager
-            .sign_ed25519(&builder.signing_input(), Bip44::new(coin_type))
-            .await?;
 
-        Ok(builder.finish(signature)?)
+        Ok(builder)
     }
 }

@@ -1,10 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
+
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
-    client::secret::SecretManage,
+    client::secret::{SecretManage, SignBlockExt},
     types::block::{payload::Payload, BlockId},
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };
@@ -25,13 +27,16 @@ where
 
         let block = self
             .client()
-            .finish_basic_block_builder(
+            .unsigned_basic_block_builder(
                 todo!("issuer id"),
                 todo!("issuing time"),
                 None,
                 Some(Payload::from(transaction_payload)),
-                self.wallet.coin_type(),
+            )
+            .await?
+            .sign_ed25519(
                 &*self.get_secret_manager().read().await,
+                Bip44::new(self.wallet.coin_type()),
             )
             .await?;
 

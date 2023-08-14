@@ -1,8 +1,13 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
+
 use crate::{
-    client::{secret::SecretManage, Error as ClientError},
+    client::{
+        secret::{SecretManage, SignBlockExt},
+        Error as ClientError,
+    },
     types::{
         api::core::response::LedgerInclusionState,
         block::{
@@ -57,13 +62,16 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_basic_block_builder(
+                    .unsigned_basic_block_builder(
                         todo!("issuer id"),
                         todo!("issuing time"),
                         None,
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
-                        self.wallet.coin_type(),
+                    )
+                    .await?
+                    .sign_ed25519(
                         &*self.get_secret_manager().read().await,
+                        Bip44::new(self.wallet.coin_type()),
                     )
                     .await?
                     .id(&protocol_params),
@@ -102,13 +110,16 @@ where
                     if index == block_ids_len - 1 && block_metadata.should_reattach.unwrap_or(false) {
                         let reissued_block = self
                             .client()
-                            .finish_basic_block_builder(
+                            .unsigned_basic_block_builder(
                                 todo!("issuer id"),
                                 todo!("issuing time"),
                                 None,
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
-                                self.wallet.coin_type(),
+                            )
+                            .await?
+                            .sign_ed25519(
                                 &*self.get_secret_manager().read().await,
+                                Bip44::new(self.wallet.coin_type()),
                             )
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_params));

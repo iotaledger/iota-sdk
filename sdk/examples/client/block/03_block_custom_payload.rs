@@ -8,8 +8,13 @@
 //! cargo run --release --example block_custom_payload
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{SecretManager, SignBlockExt},
+        Client, Result,
+    },
     types::block::payload::{Payload, TaggedDataPayload},
 };
 
@@ -32,14 +37,14 @@ async fn main() -> Result<()> {
 
     // Create and send the block with the custom payload.
     let block = client
-        .finish_basic_block_builder(
+        .unsigned_basic_block_builder(
             todo!("issuer id"),
             todo!("issuing time"),
             None,
             Some(Payload::from(tagged_data_payload)),
-            IOTA_COIN_TYPE,
-            &secret_manager,
         )
+        .await?
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
 
     println!("{block:#?}");

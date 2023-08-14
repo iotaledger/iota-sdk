@@ -11,7 +11,6 @@ use crate::{
         constants::FIVE_MINUTES_IN_SECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::QueryParameter,
-        secret::SecretManage,
         Client,
     },
     types::block::{

@@ -8,7 +8,12 @@
 //! cargo run --release --example block_confirmation_time
 //! ```
 
-use iota_sdk::client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result};
+use crypto::keys::bip44::Bip44;
+use iota_sdk::client::{
+    constants::IOTA_COIN_TYPE,
+    secret::{SecretManager, SignBlockExt},
+    Client, Result,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,14 +31,9 @@ async fn main() -> Result<()> {
 
     // Create and send a block.
     let block = client
-        .finish_basic_block_builder(
-            todo!("issuer id"),
-            todo!("issuing time"),
-            None,
-            None,
-            IOTA_COIN_TYPE,
-            &secret_manager,
-        )
+        .unsigned_basic_block_builder(todo!("issuer id"), todo!("issuing time"), None, None)
+        .await?
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
     let block_id = block.id(&protocol_parameters);
 
