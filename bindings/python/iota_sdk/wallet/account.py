@@ -373,13 +373,13 @@ class Account:
         )
         return PreparedTransaction(self, prepared)
 
-    def retry_transaction_until_included(
+    def reissue_transaction_until_included(
             self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
-        """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+        """Reissues a transaction sent from the account for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
         return self._call_account_method(
-            'retryTransactionUntilIncluded', {
+            'reissueTransactionUntilIncluded', {
                 'transactionId': transaction_id,
                 'interval': interval,
                 'maxAttempts': max_attempts
@@ -388,7 +388,7 @@ class Account:
 
     def sync(self, options: Optional[SyncOptions] = None) -> Balance:
         """Sync the account by fetching new information from the nodes.
-        Will also retry pending transactions and consolidate outputs if necessary.
+        Will also reissue pending transactions and consolidate outputs if necessary.
         A custom default can be set using set_default_sync_options.
         """
         return from_dict(Balance, self._call_account_method(

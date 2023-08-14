@@ -12,7 +12,7 @@ use super::{
     core::{verify_parents, BlockWrapper},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    signature::Ed25519Signature,
+    signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
 };
@@ -177,7 +177,7 @@ impl Packable for ValidationBlock {
         self.issuer_id.pack(packer)?;
         Self::KIND.pack(packer)?;
         self.data.pack(packer)?;
-        self.signature.pack(packer)?;
+        Signature::Ed25519(self.signature).pack(packer)?;
 
         Ok(())
     }
@@ -215,7 +215,7 @@ impl Packable for ValidationBlock {
 
         let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
 
-        let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+        let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let block = Self {
             protocol_version,

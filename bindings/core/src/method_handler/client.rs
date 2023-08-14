@@ -172,20 +172,18 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
+            let protocol_params = client.get_protocol_parameters().await?;
             let block = client
                 .finish_basic_block_builder(
                     todo!("issuer id"),
                     todo!("block signature"),
                     todo!("issuing time"),
                     None,
-                    Some(Payload::try_from_dto_with_params(
-                        payload,
-                        &client.get_protocol_parameters().await?,
-                    )?),
+                    Some(Payload::try_from_dto_with_params(payload, &protocol_params)?),
                 )
                 .await?;
 
-            let block_id = block.id();
+            let block_id = block.id(&protocol_params);
 
             Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
         }
@@ -273,32 +271,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(BlockDto::from)
                 .collect(),
         ),
-        ClientMethod::Retry { block_id } => {
-            let (block_id, block) = client.retry(&block_id).await?;
-            Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
-        }
-        ClientMethod::RetryUntilIncluded {
-            block_id,
-            interval,
-            max_attempts,
-        } => {
-            let res = client.retry_until_included(&block_id, interval, max_attempts).await?;
-            let res = res
-                .into_iter()
-                .map(|(block_id, block)| (block_id, BlockDto::from(&block)))
-                .collect();
-            Response::RetryUntilIncludedSuccessful(res)
-        }
         ClientMethod::FindInputs { addresses, amount } => {
             Response::Inputs(client.find_inputs(addresses, amount).await?)
-        }
-        ClientMethod::Reattach { block_id } => {
-            let (block_id, block) = client.reattach(&block_id).await?;
-            Response::Reattached((block_id, BlockDto::from(&block)))
-        }
-        ClientMethod::ReattachUnchecked { block_id } => {
-            let (block_id, block) = client.reattach_unchecked(&block_id).await?;
-            Response::Reattached((block_id, BlockDto::from(&block)))
         }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
@@ -334,6 +308,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .call_plugin_route(&base_plugin_path, &method, &endpoint, query_params, request_object)
                 .await?;
             Response::CustomJson(data)
+        }
+        ClientMethod::BlockId { block } => {
+            let protocol_params = client.get_protocol_parameters().await?;
+            Response::BlockId(Block::try_from_dto_with_params(block, &protocol_params)?.id(&protocol_params))
         }
     };
     Ok(response)

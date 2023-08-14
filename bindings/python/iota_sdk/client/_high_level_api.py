@@ -126,40 +126,6 @@ class HighLevelAPI():
         })
         return [Block.from_dict(block) for block in blocks]
 
-    def retry(self, block_id: HexStr) -> List[HexStr | Block]:
-        """Retries (promotes or reattaches) a block for provided block id. Block should only be
-        retried only if they are valid and haven't been confirmed for a while.
-
-        Args:
-            block_id: A block id.
-
-        Returns:
-            A list where the first element is the block id and the second one the block.
-        """
-        result = self._call_method('retry', {'blockId': block_id})
-        result[1] = Block.from_dict(result[1])
-        return result
-
-    def retry_until_included(
-            self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None) -> List[List[HexStr | Block]]:
-        """Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
-        milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
-        position and additional reattached blocks.
-
-        Args:
-            block_id: A block id.
-            interval: A retry interval in seconds. Defaults to 5.
-            max_attempts: A maximum number of retries. Defaults to 40.
-
-        Returns:
-            A list of lists where the first element is the block id and the second one the block.
-        """
-        result = self._call_method('retryUntilIncluded', {
-            'blockId': block_id,
-            'interval': interval,
-            'maxAttempts': max_attempts
-        })
-
     def find_inputs(self, addresses: List[str], amount: int):
         """Function to find inputs from addresses for a provided amount(useful for offline signing).
 
@@ -171,34 +137,3 @@ class HighLevelAPI():
             'addresses': addresses,
             'amount': amount
         })
-
-    def reattach(self, block_id: HexStr) -> List[HexStr | Block]:
-        """Reattaches blocks for a provided block id. Blocks can be reattached only if they are valid and
-        haven't been confirmed for a while .
-
-        Args:
-            block_id: A block id of a block that should be reattached.
-
-        Returns:
-            The reattached block id and block.
-        """
-        result = self._call_method('reattach', {
-            'blockId': block_id
-        })
-        result[1] = Block.from_dict(result[1])
-        return result
-
-    def reattach_unchecked(self, block_id: HexStr) -> List[HexStr | Block]:
-        """Reattach a block without checking if it should be reattached.
-
-        Args:
-            block_id: A block id of a block that should be reattached.
-
-        Returns:
-            The reattached block id and block.
-        """
-        result = self._call_method('reattachUnchecked', {
-            'blockId': block_id
-        })
-        result[1] = Block.from_dict(result[1])
-        return result

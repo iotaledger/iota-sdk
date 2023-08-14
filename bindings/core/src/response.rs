@@ -27,6 +27,7 @@ use iota_sdk::{
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
+            slot::SlotCommitmentId,
             unlock::Unlock,
             BlockDto, BlockId,
         },
@@ -108,15 +109,12 @@ pub enum Response {
     Block(BlockDto),
     /// Response for:
     /// - [`PostBlockPayload`](crate::method::ClientMethod::PostBlockPayload)
-    /// - [`Retry`](crate::method::ClientMethod::Retry)
     BlockIdWithBlock(BlockId, BlockDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
-    /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
-    /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
@@ -143,18 +141,11 @@ pub enum Response {
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
     Blocks(Vec<BlockDto>),
     /// Response for:
-    /// - [`RetryUntilIncluded`](crate::method::ClientMethod::RetryUntilIncluded)
-    RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
-    /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInput>),
     /// Response for:
     /// [`OutputIdToUtxoInput`](crate::method::UtilsMethod::OutputIdToUtxoInput)
     Input(UtxoInput),
-    /// Response for:
-    /// - [`Reattach`](crate::method::ClientMethod::Reattach)
-    /// - [`ReattachUnchecked`](crate::method::ClientMethod::ReattachUnchecked)
-    Reattached((BlockId, BlockDto)),
     /// Response for:
     /// - [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     Bech32ToHex(String),
@@ -189,6 +180,8 @@ pub enum Response {
     HexAddress(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
+    /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
+    SlotCommitmentId(SlotCommitmentId),
 
     // Responses in client and wallet
     /// Response for:
@@ -219,7 +212,7 @@ pub enum Response {
     /// - [`BlockId`](crate::method::UtilsMethod::BlockId)
     /// - [`PostBlock`](crate::method::ClientMethod::PostBlock)
     /// - [`PostBlockRaw`](crate::method::ClientMethod::PostBlockRaw)
-    /// - [`RetryTransactionUntilIncluded`](crate::method::AccountMethod::RetryTransactionUntilIncluded)
+    /// - [`ReissueTransactionUntilIncluded`](crate::method::AccountMethod::ReissueTransactionUntilIncluded)
     BlockId(BlockId),
     /// Response for:
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)

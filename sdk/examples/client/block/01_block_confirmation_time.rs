@@ -20,6 +20,8 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let protocol_parameters = client.get_protocol_parameters().await?;
+
     // Create and send a block.
     let block = client
         .finish_basic_block_builder(
@@ -30,12 +32,19 @@ async fn main() -> Result<()> {
             None,
         )
         .await?;
-    let block_id = block.id();
+    let block_id = block.id(&protocol_parameters);
 
     println!("{block:#?}");
 
-    // Try to check if the block has been confirmed.
-    client.retry_until_included(&block_id, None, None).await?;
+    // Wait for the block to get included
+    for _ in 0..30 {
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        let metadata = client.get_block_metadata(&block_id).await?;
+        if metadata.ledger_inclusion_state.is_some() {
+            break;
+        }
+    }
+
     println!(
         "Block with no payload included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),

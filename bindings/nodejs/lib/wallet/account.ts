@@ -978,10 +978,10 @@ export class Account {
     }
 
     /**
-     * Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+     * Reissues a transaction sent from the account for a provided transaction id until it's
      * included (referenced by a milestone). Returns the included block id.
      */
-    async retryTransactionUntilIncluded(
+    async reissueTransactionUntilIncluded(
         transactionId: string,
         interval?: number,
         maxAttempts?: number,
@@ -989,7 +989,7 @@ export class Account {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'retryTransactionUntilIncluded',
+                name: 'reissueTransactionUntilIncluded',
                 data: {
                     transactionId,
                     interval,
@@ -1241,7 +1241,7 @@ export class Account {
 
     /**
      * Sync the account by fetching new information from the nodes.
-     * Will also retry pending transactions if necessary.
+     * Will also reissue pending transactions if necessary.
      * A custom default can be set using setDefaultSyncOptions.
      *
      * @param options Optional synchronization options.

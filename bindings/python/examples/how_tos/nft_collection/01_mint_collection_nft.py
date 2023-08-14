@@ -64,7 +64,7 @@ while nft_mint_params:
     transaction = prepared.send()
 
     # Wait for transaction to get included
-    block_id = account.retry_transaction_until_included(
+    block_id = account.reissue_transaction_until_included(
         transaction.transactionId)
 
     print(

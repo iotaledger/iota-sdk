@@ -53,7 +53,7 @@ pub(crate) use r#macro::string_serde_impl;
 pub(crate) use r#macro::{create_bitflags, impl_id};
 
 pub use self::{
-    block_id::BlockId,
+    block_id::{BlockHash, BlockId},
     convert::ConvertTo,
     core::{dto::BlockDto, Block, BlockBuilder},
     error::Error,

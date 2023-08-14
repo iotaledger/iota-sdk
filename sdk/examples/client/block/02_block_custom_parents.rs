@@ -23,6 +23,8 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let protocol_parameters = client.get_protocol_parameters().await?;
+
     // Use tips as custom parents.
     let tips = client.get_tips().await?;
     println!("Custom tips:\n{tips:#?}");
@@ -43,7 +45,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with custom parents sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
+        block.id(&protocol_parameters)
     );
 
     Ok(())
