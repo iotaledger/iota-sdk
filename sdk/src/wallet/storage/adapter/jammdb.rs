@@ -1,14 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::StorageAdapter;
-use jammdb::{OpenOptions, DB};
 use std::{
     fmt::Debug,
     path::{Path, PathBuf},
     sync::Arc,
 };
+
+use jammdb::{OpenOptions, DB};
 use tokio::sync::Mutex;
+
+use super::StorageAdapter;
 
 /// The storage id.
 pub const STORAGE_ID: &str = "JammDB";
