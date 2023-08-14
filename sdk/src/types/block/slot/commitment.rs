@@ -4,7 +4,10 @@
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{packer::SlicePacker, Packable, PackableExt};
 
-use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
+use crate::{
+    types::block::slot::{RootsId, SlotCommitmentId, SlotIndex},
+    utils::serde::string,
+};
 
 /// Contains a summary of a slot.
 /// It is linked to the commitment of the previous slot, which forms a commitment chain.
@@ -26,6 +29,7 @@ pub struct SlotCommitment {
     /// The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
     /// slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
     /// the switching of a chain.
+    #[serde(with = "string")]
     cumulative_weight: u64,
 }
 
@@ -76,45 +80,6 @@ impl SlotCommitment {
         self.index.pack(&mut packer).unwrap();
 
         SlotCommitmentId::from(bytes)
-    }
-}
-
-pub(crate) mod dto {
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::utils::serde::string;
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct SlotCommitmentDto {
-        pub index: SlotIndex,
-        pub previous_slot_commitment_id: SlotCommitmentId,
-        pub roots_id: RootsId,
-        #[serde(with = "string")]
-        pub cumulative_weight: u64,
-    }
-
-    impl From<&SlotCommitment> for SlotCommitmentDto {
-        fn from(slot_commitment: &SlotCommitment) -> Self {
-            Self {
-                index: slot_commitment.index(),
-                previous_slot_commitment_id: *slot_commitment.previous_slot_commitment_id(),
-                roots_id: *slot_commitment.roots_id(),
-                cumulative_weight: slot_commitment.cumulative_weight(),
-            }
-        }
-    }
-
-    impl From<SlotCommitmentDto> for SlotCommitment {
-        fn from(dto: SlotCommitmentDto) -> Self {
-            SlotCommitment::new(
-                dto.index,
-                dto.previous_slot_commitment_id,
-                dto.roots_id,
-                dto.cumulative_weight,
-            )
-        }
     }
 }
 

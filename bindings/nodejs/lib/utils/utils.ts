@@ -337,8 +337,7 @@ export class Utils {
             data: {
                 slotCommitment: {
                     index: slotCommitment.index.toString(10),
-                    previousSlotCommitmentId:
-                        slotCommitment.previousSlotCommitmentId,
+                    prevId: slotCommitment.prevId,
                     rootsId: slotCommitment.rootsId,
                     cumulativeWeight:
                         slotCommitment.cumulativeWeight.toString(10),

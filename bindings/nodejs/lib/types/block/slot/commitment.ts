@@ -33,7 +33,7 @@ class SlotCommitment {
     /**
      * The commitment ID of the previous slot.
      */
-    previousSlotCommitmentId: SlotCommitmentId;
+    prevId: SlotCommitmentId;
     /**
      * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
      */
@@ -53,7 +53,7 @@ class SlotCommitment {
         cumulativeWeight: u64,
     ) {
         this.index = index;
-        this.previousSlotCommitmentId = previousSlotCommitmentId;
+        this.prevId = previousSlotCommitmentId;
         this.rootsId = rootsId;
         this.cumulativeWeight = cumulativeWeight;
     }
