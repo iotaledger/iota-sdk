@@ -521,7 +521,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
     accounts[0]
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
     let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
@@ -602,7 +602,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
     let transaction = account.send_outputs(vec![output], None).await?;
     account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
 
@@ -725,7 +725,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
         .mint_nfts([MintNftParams::new().try_with_address(account_1_address)?], None)
         .await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await?;
@@ -752,7 +752,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
         .await?;
     let tx = account_1.send_outputs([output], None).await?;
     account_1
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // account_0 now has the NFT

@@ -66,7 +66,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
+        let blockId = await account.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 
@@ -97,7 +97,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        blockId = await account.retryTransactionUntilIncluded(
+        blockId = await account.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 

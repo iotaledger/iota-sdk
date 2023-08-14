@@ -84,9 +84,6 @@ pub enum Error {
     /// Error on API request
     #[error("node error: {0}")]
     Node(#[from] crate::client::node_api::error::Error),
-    /// The block doesn't need to be promoted or reattached
-    #[error("block ID `{0}` doesn't need to be promoted or reattached")]
-    NoNeedPromoteOrReattach(String),
     /// Requested output id not found for this type
     #[error("No output found for {0}")]
     NoOutput(String),

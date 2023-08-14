@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
 
     // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
     println!(

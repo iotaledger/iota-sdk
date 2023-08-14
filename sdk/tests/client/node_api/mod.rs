@@ -93,11 +93,6 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         _ => unreachable!(),
     };
 
-    let _ = client
-        .retry_until_included(&block_id, None, None, IOTA_COIN_TYPE, &secret_manager)
-        .await
-        .unwrap();
-
     (block_id, transaction_id)
 }
 

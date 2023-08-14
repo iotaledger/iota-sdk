@@ -40,7 +40,7 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
         .await?;
 
     accounts[1]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -52,7 +52,7 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
         .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await?;
     accounts[0]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
@@ -90,7 +90,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
         .await?;
 
     accounts[1]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -102,7 +102,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
         .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Amount).await?)
         .await?;
     accounts[0]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
@@ -146,7 +146,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let tx = account_0.send_outputs(outputs, None).await?;
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 1
@@ -158,7 +158,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
         .claim_outputs(account_1.claimable_outputs(OutputsToClaim::All).await?)
         .await?;
     account_1
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
@@ -185,7 +185,7 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     let tx = accounts[1].create_account_output(None, None).await?;
     accounts[1]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     accounts[1].sync(None).await?;
 
@@ -201,7 +201,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     accounts[1]
-        .retry_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
     accounts[1].sync(None).await?;
 
@@ -217,7 +217,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     accounts[1]
-        .retry_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
     accounts[1].sync(None).await?;
 
@@ -237,7 +237,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     accounts[1]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -248,7 +248,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     accounts[0]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
@@ -285,7 +285,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     let tx = account_0.create_account_output(None, None).await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     account_0.sync(None).await?;
 
@@ -301,7 +301,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     account_0
-        .retry_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
     account_0.sync(None).await?;
 
@@ -317,7 +317,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     account_0
-        .retry_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
+        .reissue_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
     account_0.sync(None).await?;
 
@@ -352,7 +352,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 1
@@ -363,7 +363,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .claim_outputs(account_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     account_1
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
@@ -424,7 +424,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
 
     let tx = accounts[1].send_outputs(outputs, None).await?;
     accounts[1]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -435,7 +435,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
         .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     accounts[0]
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
@@ -485,7 +485,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let tx = account_0.send_outputs(outputs, None).await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 1
@@ -496,7 +496,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
         .claim_outputs(account_1.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     account_1
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
@@ -532,7 +532,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
         .await?;
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Try claim with account 1 will fail since it has no funds to cover the storage deposit

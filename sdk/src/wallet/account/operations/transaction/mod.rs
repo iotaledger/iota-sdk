@@ -39,7 +39,7 @@ where
     /// Sends a transaction by specifying its outputs.
     ///
     /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
-    /// will retry sending the transaction during syncing.
+    /// will reissue the transaction during syncing.
     /// ```ignore
     /// let outputs = [
     ///    BasicOutputBuilder::new_with_amount(1_000_000)?

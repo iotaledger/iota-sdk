@@ -272,46 +272,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(BlockDto::from)
                 .collect(),
         ),
-        ClientMethod::Retry { block_id } => {
-            let (block_id, block) = client
-                .retry::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
-                .await?;
-            Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
-        }
-        ClientMethod::RetryUntilIncluded {
-            block_id,
-            interval,
-            max_attempts,
-        } => {
-            let res = client
-                .retry_until_included::<SecretManager>(
-                    &block_id,
-                    interval,
-                    max_attempts,
-                    todo!("coin type"),
-                    todo!("secret manager"),
-                )
-                .await?;
-            let res = res
-                .into_iter()
-                .map(|(block_id, block)| (block_id, BlockDto::from(&block)))
-                .collect();
-            Response::RetryUntilIncludedSuccessful(res)
-        }
         ClientMethod::FindInputs { addresses, amount } => {
             Response::Inputs(client.find_inputs(addresses, amount).await?)
-        }
-        ClientMethod::Reattach { block_id } => {
-            let (block_id, block) = client
-                .reattach::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
-                .await?;
-            Response::Reattached((block_id, BlockDto::from(&block)))
-        }
-        ClientMethod::ReattachUnchecked { block_id } => {
-            let (block_id, block) = client
-                .reattach_unchecked::<SecretManager>(&block_id, todo!("coin type"), todo!("secret manager"))
-                .await?;
-            Response::Reattached((block_id, BlockDto::from(&block)))
         }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)

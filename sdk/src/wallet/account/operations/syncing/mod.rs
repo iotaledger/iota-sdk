@@ -47,7 +47,7 @@ where
         self.default_sync_options.lock().await.clone()
     }
 
-    /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
+    /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
         let options = match options {
