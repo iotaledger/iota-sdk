@@ -2,19 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{boxed::Box, vec::Vec};
+use core::mem::size_of;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
 use packable::{
     error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
-    packer::Packer,
+    packer::{Packer, SlicePacker},
     unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
     Packable, PackableExt,
 };
 
 use super::{
     basic::{BasicBlock, BasicBlockData},
-    signature::Ed25519Signature,
+    block_id::BlockHash,
+    signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     validation::{ValidationBlock, ValidationBlockData},
     IssuerId,
@@ -144,7 +146,7 @@ impl Packable for Block {
         let block = match kind {
             BasicBlock::KIND => {
                 let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
-                let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+                let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
                 Self::from(BlockWrapper {
                     protocol_version,
@@ -159,7 +161,7 @@ impl Packable for Block {
             }
             ValidationBlock::KIND => {
                 let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
-                let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+                let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
                 Self::from(BlockWrapper {
                     protocol_version,
@@ -254,6 +256,22 @@ impl<B> BlockWrapper<B> {
     pub fn signature(&self) -> &Ed25519Signature {
         &self.signature
     }
+
+    pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.protocol_version.pack(packer)?;
+        self.network_id.pack(packer)?;
+        self.issuing_time.pack(packer)?;
+        self.slot_commitment_id.pack(packer)?;
+        self.latest_finalized_slot.pack(packer)?;
+        self.issuer_id.pack(packer)?;
+        Ok(())
+    }
+
+    pub(crate) fn header_hash(&self) -> [u8; 32] {
+        let mut bytes = [0u8; Block::HEADER_LENGTH];
+        self.pack_header(&mut SlicePacker::new(&mut bytes)).unwrap();
+        Blake2b256::digest(bytes).into()
+    }
 }
 
 impl Block {
@@ -261,6 +279,15 @@ impl Block {
     pub const LENGTH_MIN: usize = 46;
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
+    /// The length of the block header.
+    pub const HEADER_LENGTH: usize = size_of::<u8>()
+        + 2 * size_of::<u64>()
+        + size_of::<SlotCommitmentId>()
+        + size_of::<SlotIndex>()
+        + size_of::<IssuerId>();
+    /// The length of the block signature.
+    pub const SIGNATURE_LENGTH: usize =
+        size_of::<u8>() + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
     #[inline(always)]
@@ -439,10 +466,21 @@ impl Block {
         matches!(self, Self::Validation(_))
     }
 
+    /// Computes the block hash.
+    pub fn hash(&self) -> BlockHash {
+        let id = [
+            &self.header_hash()[..],
+            &self.block_hash()[..],
+            &self.signature_bytes()[..],
+        ]
+        .concat();
+        BlockHash::new(Blake2b256::digest(id).into())
+    }
+
     /// Computes the identifier of the block.
-    #[inline(always)]
-    pub fn id(&self) -> BlockId {
-        BlockId::new(Blake2b256::digest(self.pack_to_vec()).into())
+    pub fn id(&self, protocol_parameters: &ProtocolParameters) -> BlockId {
+        self.hash()
+            .with_slot_index(protocol_parameters.slot_index(self.issuing_time()))
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
@@ -460,6 +498,36 @@ impl Block {
         }
 
         Ok(block)
+    }
+
+    pub(crate) fn header_hash(&self) -> [u8; 32] {
+        match self {
+            Self::Basic(b) => b.header_hash(),
+            Self::Validation(b) => b.header_hash(),
+        }
+    }
+
+    pub(crate) fn block_hash(&self) -> [u8; 32] {
+        let mut bytes = Vec::new();
+        match self {
+            Self::Basic(b) => {
+                bytes.push(BasicBlock::KIND);
+                bytes.extend(b.data.pack_to_vec());
+            }
+            Self::Validation(b) => {
+                bytes.push(ValidationBlock::KIND);
+                bytes.extend(b.data.pack_to_vec());
+            }
+        }
+        Blake2b256::digest(bytes).into()
+    }
+
+    pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
+        let mut bytes = [0u8; Self::SIGNATURE_LENGTH];
+        let mut packer = SlicePacker::new(&mut bytes);
+        Ed25519Signature::KIND.pack(&mut packer).unwrap();
+        self.signature().pack(&mut packer).unwrap();
+        bytes
     }
 }
 
@@ -573,11 +641,11 @@ pub(crate) mod dto {
         pub network_id: u64,
         #[serde(with = "string")]
         pub issuing_time: u64,
-        pub slot_commitment_id: SlotCommitmentId,
+        pub slot_commitment: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
         pub block: BlockDataDto,
-        pub signature: Ed25519Signature,
+        pub signature: Signature,
     }
 
     impl From<&Block> for BlockDto {
@@ -587,21 +655,21 @@ pub(crate) mod dto {
                     protocol_version: b.protocol_version(),
                     network_id: b.network_id(),
                     issuing_time: b.issuing_time(),
-                    slot_commitment_id: b.slot_commitment_id(),
+                    slot_commitment: b.slot_commitment_id(),
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     block: (&b.data).into(),
-                    signature: *b.signature(),
+                    signature: b.signature.into(),
                 },
                 Block::Validation(b) => Self {
                     protocol_version: b.protocol_version(),
                     network_id: b.network_id(),
                     issuing_time: b.issuing_time(),
-                    slot_commitment_id: b.slot_commitment_id(),
+                    slot_commitment: b.slot_commitment_id(),
                     latest_finalized_slot: b.latest_finalized_slot(),
                     issuer_id: b.issuer_id(),
                     block: (&b.data).into(),
-                    signature: *b.signature(),
+                    signature: b.signature.into(),
                 },
             }
         }
@@ -616,22 +684,22 @@ pub(crate) mod dto {
                 BlockDataDto::Basic(b) => BlockBuilder::from_block_data(
                     dto.network_id,
                     dto.issuing_time,
-                    dto.slot_commitment_id,
+                    dto.slot_commitment,
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     BasicBlockData::try_from_dto_with_params_inner(b, params)?,
-                    dto.signature,
+                    *dto.signature.as_ed25519(),
                 )
                 .with_protocol_version(dto.protocol_version)
                 .finish(),
                 BlockDataDto::Validation(b) => BlockBuilder::from_block_data(
                     dto.network_id,
                     dto.issuing_time,
-                    dto.slot_commitment_id,
+                    dto.slot_commitment,
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                     ValidationBlockData::try_from_dto_with_params_inner(b, params)?,
-                    dto.signature,
+                    *dto.signature.as_ed25519(),
                 )
                 .with_protocol_version(dto.protocol_version)
                 .finish(),

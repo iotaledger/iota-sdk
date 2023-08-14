@@ -23,6 +23,8 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let protocol_parameters = client.get_protocol_parameters().await?;
+
     // Create a custom payload.
     let tagged_data_payload = TaggedDataPayload::new(*b"Your tag", *b"Your data")?;
 
@@ -42,7 +44,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with custom payload sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
+        block.id(&protocol_parameters)
     );
 
     Ok(())

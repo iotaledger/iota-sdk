@@ -13,7 +13,7 @@ use super::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
-    signature::Ed25519Signature,
+    signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
 };
@@ -180,15 +180,10 @@ impl Packable for BasicBlock {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version.pack(packer)?;
-        self.network_id.pack(packer)?;
-        self.issuing_time.pack(packer)?;
-        self.slot_commitment_id.pack(packer)?;
-        self.latest_finalized_slot.pack(packer)?;
-        self.issuer_id.pack(packer)?;
+        self.pack_header(packer)?;
         Self::KIND.pack(packer)?;
         self.data.pack(packer)?;
-        self.signature.pack(packer)?;
+        Signature::Ed25519(self.signature).pack(packer)?;
 
         Ok(())
     }
@@ -226,7 +221,7 @@ impl Packable for BasicBlock {
 
         let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
 
-        let signature = Ed25519Signature::unpack::<_, VERIFY>(unpacker, &())?;
+        let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let block = Self {
             protocol_version,

@@ -159,7 +159,7 @@ fn basic_output_with_nft_input() {
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs([Nft(
-        2_233_500,
+        2_237_500,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,

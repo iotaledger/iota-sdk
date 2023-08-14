@@ -68,7 +68,7 @@ impl OutputStatusResponse {
             participations: [(
                 ParticipationEventId::new([42; 32]),
                 TrackedParticipation {
-                    block_id: BlockId::new([23; 32]),
+                    block_id: BlockId::new([23; 40]),
                     amount: 100,
                     start_milestone_index: 1000,
                     end_milestone_index: 9999,
