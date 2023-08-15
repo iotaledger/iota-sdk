@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { HexEncodedString } from '../../utils';
 import { Address } from '../address';
+import { SlotIndex } from '../slot';
 
 /**
  * All of the feature block types.
@@ -11,82 +13,72 @@ enum FeatureType {
     Issuer = 1,
     Metadata = 2,
     Tag = 3,
+    BlockIssuer = 4,
 }
-
 abstract class Feature {
-    private type: FeatureType;
+    readonly type: FeatureType;
     constructor(type: FeatureType) {
         this.type = type;
     }
-    /**
-     * The type of feature.
-     */
-    getType(): FeatureType {
-        return this.type;
-    }
 }
+
 /**
  * Sender feature.
  */
 class SenderFeature extends Feature {
-    private address: Address;
+    readonly address: Address;
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
-    }
-    /**
-     * The address.
-     */
-    getSender(): Address {
-        return this.address;
     }
 }
 /**
  * Issuer feature.
  */
 class IssuerFeature extends Feature {
-    private address: Address;
+    readonly address: Address;
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;
-    }
-    /**
-     * The address.
-     */
-    getIssuer(): Address {
-        return this.address;
     }
 }
 /**
  * Metadata feature.
  */
 class MetadataFeature extends Feature {
-    private data: string;
+    readonly data: string;
     constructor(data: string) {
         super(FeatureType.Metadata);
         this.data = data;
-    }
-    /**
-     * Defines metadata (arbitrary binary data) that will be stored in the output.
-     */
-    getData(): string {
-        return this.data;
     }
 }
 /**
  * Tag feature.
  */
 class TagFeature extends Feature {
-    private tag: string;
+    readonly tag: string;
     constructor(tag: string) {
         super(FeatureType.Tag);
         this.tag = tag;
     }
+}
+/**
+ * Block Issuer feature
+ */
+class BlockIssuerFeature extends Feature {
     /**
-     * Defines a tag for the data.
+     * The slot index at which the Block Issuer Feature expires and can be removed.
      */
-    getTag(): string {
-        return this.tag;
+    readonly expirySlot: SlotIndex;
+    /**
+     * The Block Issuer Keys.
+     */
+    readonly publicKeys: Set<HexEncodedString>;
+
+    constructor(expirtySlot: SlotIndex, publicKeys: Set<HexEncodedString>) {
+        super(FeatureType.BlockIssuer);
+        this.expirySlot = expirtySlot;
+        this.publicKeys = publicKeys;
     }
 }
 const FeatureDiscriminator = {
@@ -96,6 +88,7 @@ const FeatureDiscriminator = {
         { value: IssuerFeature, name: FeatureType.Issuer as any },
         { value: MetadataFeature, name: FeatureType.Metadata as any },
         { value: TagFeature, name: FeatureType.Tag as any },
+        { value: BlockIssuerFeature, name: FeatureType.BlockIssuer as any },
     ],
 };
 export {
@@ -106,4 +99,5 @@ export {
     IssuerFeature,
     MetadataFeature,
     TagFeature,
+    BlockIssuerFeature,
 };
