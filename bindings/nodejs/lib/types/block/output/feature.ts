@@ -78,9 +78,9 @@ class BlockIssuerFeature extends Feature {
      */
     readonly publicKeys: Set<HexEncodedString>;
 
-    constructor(expirtySlot: SlotIndex, publicKeys: Set<HexEncodedString>) {
+    constructor(expirySlot: SlotIndex, publicKeys: Set<HexEncodedString>) {
         super(FeatureType.BlockIssuer);
-        this.expirySlot = expirtySlot;
+        this.expirySlot = expirySlot;
         this.publicKeys = publicKeys;
     }
 }
