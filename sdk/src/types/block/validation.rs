@@ -14,7 +14,7 @@ use super::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
-    Block, BlockBuilder, Error, IssuerId, PROTOCOL_VERSION,
+    Block, BlockBuilder, Error, IssuerId,
 };
 
 pub type ValidationBlock = BlockWrapper<ValidationBlockData>;
@@ -23,7 +23,7 @@ impl BlockBuilder<ValidationBlock> {
     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
     #[inline(always)]
     pub fn new(
-        network_id: u64,
+        protocol_params: ProtocolParameters,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -34,8 +34,7 @@ impl BlockBuilder<ValidationBlock> {
         signature: Ed25519Signature,
     ) -> Self {
         Self(BlockWrapper {
-            protocol_version: PROTOCOL_VERSION,
-            network_id,
+            protocol_params,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
@@ -49,13 +48,6 @@ impl BlockBuilder<ValidationBlock> {
             },
             signature,
         })
-    }
-
-    /// Adds a protocol version to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
-        self.0.protocol_version = protocol_version;
-        self
     }
 
     /// Adds weak parents to a [`BlockBuilder`].
@@ -169,8 +161,8 @@ impl Packable for ValidationBlock {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version.pack(packer)?;
-        self.network_id.pack(packer)?;
+        self.protocol_version().pack(packer)?;
+        self.network_id().pack(packer)?;
         self.issuing_time.pack(packer)?;
         self.slot_commitment_id.pack(packer)?;
         self.latest_finalized_slot.pack(packer)?;
@@ -184,20 +176,27 @@ impl Packable for ValidationBlock {
 
     fn unpack<U: Unpacker, const VERIFY: bool>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        protocol_params: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let start_opt = unpacker.read_bytes();
 
         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != visitor.protocol_version() {
+        if VERIFY && protocol_version != protocol_params.protocol_version() {
             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: visitor.protocol_version(),
+                expected: protocol_params.protocol_version(),
                 actual: protocol_version,
             }));
         }
 
         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        if VERIFY && network_id != protocol_params.network_id() {
+            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+                expected: protocol_params.network_id(),
+                actual: network_id,
+            }));
+        }
 
         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
@@ -213,13 +212,12 @@ impl Packable for ValidationBlock {
             return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
         }
 
-        let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
         let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let block = Self {
-            protocol_version,
-            network_id,
+            protocol_params: protocol_params.clone(),
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
