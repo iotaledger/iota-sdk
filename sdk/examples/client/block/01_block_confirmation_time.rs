@@ -27,15 +27,13 @@ async fn main() -> Result<()> {
 
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    let protocol_parameters = client.get_protocol_parameters().await?;
-
     // Create and send a block.
     let block = client
         .unsigned_basic_block_builder(todo!("issuer id"), todo!("issuing time"), None, None)
         .await?
         .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
-    let block_id = block.id(&protocol_parameters);
+    let block_id = block.id();
 
     println!("{block:#?}");
 

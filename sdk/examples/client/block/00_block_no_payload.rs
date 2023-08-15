@@ -27,8 +27,6 @@ async fn main() -> Result<()> {
 
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    let protocol_parameters = client.get_protocol_parameters().await?;
-
     // Create and send the block.
     let block = client
         .unsigned_basic_block_builder(todo!("issuer id"), todo!("issuing time"), None, None)
@@ -41,7 +39,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with no payload sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id(&protocol_parameters)
+        block.id()
     );
 
     Ok(())

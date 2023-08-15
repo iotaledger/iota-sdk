@@ -30,8 +30,6 @@ async fn main() -> Result<()> {
 
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    let protocol_parameters = client.get_protocol_parameters().await?;
-
     // Create and send the block with tag and data.
     let block = client
         .unsigned_basic_block_builder(
@@ -72,7 +70,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with tag and data sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id(&protocol_parameters)
+        block.id()
     );
 
     Ok(())

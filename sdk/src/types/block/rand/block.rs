@@ -8,6 +8,7 @@ use crate::types::block::{
     basic::BasicBlockData,
     core::Block,
     parent::StrongParents,
+    protocol::ProtocolParameters,
     rand::{
         bytes::rand_bytes_array, number::rand_number, parents::rand_strong_parents, payload::rand_payload_for_block,
     },
@@ -27,16 +28,22 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
 }
 
 /// Generates a random basic block with given parents.
-pub fn rand_basic_block_with_strong_parents(strong_parents: StrongParents) -> Block {
-    rand_basic_block_builder_with_strong_parents(strong_parents)
+pub fn rand_basic_block_with_strong_parents(
+    protocol_params: ProtocolParameters,
+    strong_parents: StrongParents,
+) -> Block {
+    rand_basic_block_builder_with_strong_parents(protocol_params, strong_parents)
         .with_payload(rand_payload_for_block())
         .sign_random()
 }
 
 /// Generates a random basic block builder with given parents.
-pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BlockBuilder<BasicBlockData> {
+pub fn rand_basic_block_builder_with_strong_parents(
+    protocol_params: ProtocolParameters,
+    strong_parents: StrongParents,
+) -> BlockBuilder<BasicBlockData> {
     Block::build_basic(
-        rand_number(),
+        protocol_params,
         rand_number(),
         rand_bytes_array().into(),
         rand_number::<u64>().into(),
@@ -46,8 +53,8 @@ pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParent
 }
 
 /// Generates a random block.
-pub fn rand_block() -> Block {
-    rand_basic_block_with_strong_parents(rand_strong_parents())
+pub fn rand_block(protocol_params: ProtocolParameters) -> Block {
+    rand_basic_block_with_strong_parents(protocol_params, rand_strong_parents())
 }
 
 pub trait SignBlockRandom {

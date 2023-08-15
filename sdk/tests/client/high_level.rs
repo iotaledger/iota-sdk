@@ -22,12 +22,11 @@ async fn test_find_inputs_from_transaction_id() {
 #[tokio::test]
 async fn test_find_blocks() {
     let client = setup_client_with_node_health_ignored().await;
-    let protocol_parameters = client.get_protocol_parameters().await.unwrap();
     let (block_id, _transaction_id) = setup_transaction_block(&client).await;
     let blocks = client.find_blocks(&[block_id]).await.unwrap();
 
     assert_eq!(blocks.len(), 1);
-    assert_eq!(blocks[0].id(&protocol_parameters), block_id);
+    assert_eq!(blocks[0].id(), block_id);
 }
 
 #[ignore]
