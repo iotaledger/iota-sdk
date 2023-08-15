@@ -141,7 +141,7 @@ pub enum BlockState {
     Pending,
     // Confirmed with the first level of knowledge.
     Confirmed,
-    // Included and cannot be reverted anymore.
+    // Included and can no longer be reverted.
     Finalized,
     // Rejected by the node, and user should reissue payload if it contains one.
     Rejected,
@@ -161,7 +161,7 @@ pub enum TransactionState {
     Pending,
     // Confirmed with the first level of knowledge.
     Confirmed,
-    // Included and cannot be reverted anymore.
+    // Included and can no longer be reverted.
     Finalized,
     // The block is not successfully issued due to failure reason.
     Failed,
