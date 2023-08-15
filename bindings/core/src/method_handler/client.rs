@@ -172,18 +172,20 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
-            let protocol_params = client.get_protocol_parameters().await?;
             let block = client
                 .finish_basic_block_builder(
                     todo!("issuer id"),
                     todo!("block signature"),
                     todo!("issuing time"),
                     None,
-                    Some(Payload::try_from_dto_with_params(payload, &protocol_params)?),
+                    Some(Payload::try_from_dto_with_params(
+                        payload,
+                        &client.get_protocol_parameters().await?,
+                    )?),
                 )
                 .await?;
 
-            let block_id = block.id(&protocol_params);
+            let block_id = block.id();
 
             Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
         }
@@ -204,10 +206,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto_with_params(
-                    block,
-                    client.get_protocol_parameters().await?,
-                )?)
+                .post_block(&Block::try_from_dto(block, client.get_protocol_parameters().await?)?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
@@ -310,8 +309,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::CustomJson(data)
         }
         ClientMethod::BlockId { block } => {
-            let protocol_params = client.get_protocol_parameters().await?;
-            Response::BlockId(Block::try_from_dto_with_params(block, &protocol_params)?.id(&protocol_params))
+            Response::BlockId(Block::try_from_dto(block, client.get_protocol_parameters().await?)?.id())
         }
     };
     Ok(response)
