@@ -17,91 +17,120 @@ use crate::types::block::{
 
 /// Errors related to ledger types.
 #[derive(Debug)]
-pub enum ConflictError {
+pub enum TxFailureError {
     /// Invalid conflict byte.
-    InvalidConflict(u8),
+    InvalidTxFailure(u8),
 }
 
-impl fmt::Display for ConflictError {
+impl fmt::Display for TxFailureError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::InvalidConflict(byte) => write!(f, "invalid conflict byte {byte}"),
+            Self::InvalidTxFailure(byte) => write!(f, "invalid tx failure byte {byte}"),
         }
     }
 }
 
-impl From<Infallible> for ConflictError {
+impl From<Infallible> for TxFailureError {
     fn from(err: Infallible) -> Self {
         match err {}
     }
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for ConflictError {}
+impl std::error::Error for TxFailureError {}
 
 /// Represents the different reasons why a transaction can conflict with the ledger state.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = ConflictError)]
-#[packable(tag_type = u8, with_error = ConflictError::InvalidConflict)]
-pub enum ConflictReason {
+#[packable(unpack_error = TxFailureError)]
+#[packable(tag_type = u8, with_error = TxFailureError::InvalidTxFailure)]
+pub enum TxFailureReason {
+    // TODO: The API doesn't have this number since the TxFailureReason is just optional, remove?
     /// The block has no conflict.
     None = 0,
-    /// The referenced Utxo was already spent.
+    /// The referenced UTXO was already spent.
     InputUtxoAlreadySpent = 1,
-    /// The referenced Utxo was already spent while confirming this milestone.
-    InputUtxoAlreadySpentInThisMilestone = 2,
-    /// The referenced Utxo cannot be found.
-    InputUtxoNotFound = 3,
+    /// The transaction is conflicting with another transaction. Conflicting specifically means a double spend
+    /// situation that both transaction pass all validation rules, eventually losing one(s) should have this reason.
+    ConflictingWithAnotherTx = 2,
+    /// The referenced UTXO is invalid.
+    InvalidReferencedUtxo = 3,
+    /// The transaction is invalid.
+    InvalidTransaction = 4,
     /// The created amount does not match the consumed amount.
-    CreatedConsumedAmountMismatch = 4,
+    CreatedConsumedAmountMismatch = 5,
     /// The unlock signature is invalid.
-    InvalidSignature = 5,
+    InvalidSignature = 6,
     /// The configured timelock is not yet expired.
-    TimelockNotExpired = 6,
+    TimelockNotExpired = 7,
     /// The given native tokens are invalid.
-    InvalidNativeTokens = 7,
-    /// Storage deposit return mismatch.
-    StorageDepositReturnUnfulfilled = 8,
+    InvalidNativeTokens = 8,
+    /// The return amount in a transaction is not fulfilled by the output side.
+    StorageDepositReturnUnfulfilled = 9,
     /// An invalid unlock was used.
-    InvalidUnlock = 9,
+    InvalidUnlock = 10,
     /// The inputs commitments do not match.
-    InputsCommitmentsMismatch = 10,
+    InputsCommitmentsMismatch = 11,
     /// The sender was not verified.
-    UnverifiedSender = 11,
+    UnverifiedSender = 12,
     /// The chain state transition is invalid.
-    InvalidChainStateTransition = 12,
+    InvalidChainStateTransition = 13,
+    /// The referenced input is created after transaction issuing time.
+    InvalidTransactionIssuingTime = 14,
+    /// The mana amount is invalid.
+    InvalidManaAmount = 15,
+    /// The Block Issuance Credits amount is invalid.
+    InvalidBlockIssuanceCreditsAmount = 16,
+    /// Reward Input is invalid.
+    InvalidRewardInput = 17,
+    /// Commitment Input is invalid.
+    InvalidCommitmentInput = 18,
+    /// Staking Feature is not provided in account output when claiming rewards.
+    MissingStakingFeature = 19,
+    /// Failed to claim staking reward.
+    FailedToClaimStakingReward = 20,
+    /// Failed to claim delegation reward.
+    FailedToClaimDelegationReward = 21,
     /// The semantic validation failed for a reason not covered by the previous variants.
     SemanticValidationFailed = 255,
 }
 
-impl Default for ConflictReason {
+impl Default for TxFailureReason {
     fn default() -> Self {
         Self::None
     }
 }
 
-impl TryFrom<u8> for ConflictReason {
-    type Error = ConflictError;
+impl TryFrom<u8> for TxFailureReason {
+    type Error = TxFailureError;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
         Ok(match c {
             0 => Self::None,
             1 => Self::InputUtxoAlreadySpent,
-            2 => Self::InputUtxoAlreadySpentInThisMilestone,
-            3 => Self::InputUtxoNotFound,
-            4 => Self::CreatedConsumedAmountMismatch,
-            5 => Self::InvalidSignature,
-            6 => Self::TimelockNotExpired,
-            7 => Self::InvalidNativeTokens,
-            8 => Self::StorageDepositReturnUnfulfilled,
-            9 => Self::InvalidUnlock,
-            10 => Self::InputsCommitmentsMismatch,
-            11 => Self::UnverifiedSender,
-            12 => Self::InvalidChainStateTransition,
+            2 => Self::ConflictingWithAnotherTx,
+            3 => Self::InvalidReferencedUtxo,
+            4 => Self::InvalidTransaction,
+            5 => Self::CreatedConsumedAmountMismatch,
+            6 => Self::InvalidSignature,
+            7 => Self::TimelockNotExpired,
+            8 => Self::InvalidNativeTokens,
+            9 => Self::StorageDepositReturnUnfulfilled,
+            10 => Self::InvalidUnlock,
+            11 => Self::InputsCommitmentsMismatch,
+            12 => Self::UnverifiedSender,
+            13 => Self::InvalidChainStateTransition,
+            14 => Self::InvalidTransactionIssuingTime,
+            15 => Self::InvalidManaAmount,
+            16 => Self::InvalidBlockIssuanceCreditsAmount,
+            17 => Self::InvalidRewardInput,
+            18 => Self::InvalidCommitmentInput,
+            19 => Self::MissingStakingFeature,
+            20 => Self::FailedToClaimStakingReward,
+            21 => Self::FailedToClaimDelegationReward,
             255 => Self::SemanticValidationFailed,
-            x => return Err(Self::Error::InvalidConflict(x)),
+            x => return Err(Self::Error::InvalidTxFailure(x)),
         })
     }
 }
@@ -189,10 +218,10 @@ pub fn semantic_validation(
     mut context: ValidationContext<'_>,
     inputs: &[(&OutputId, &Output)],
     unlocks: &Unlocks,
-) -> Result<ConflictReason, Error> {
+) -> Result<TxFailureReason, Error> {
     // Validation of the inputs commitment.
     if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(ConflictReason::InputsCommitmentsMismatch);
+        return Ok(TxFailureReason::InputsCommitmentsMismatch);
     }
 
     // Validation of inputs.
@@ -235,7 +264,7 @@ pub fn semantic_validation(
         }
 
         if unlock_conditions.is_time_locked(context.milestone_timestamp) {
-            return Ok(ConflictReason::TimelockNotExpired);
+            return Ok(TxFailureReason::TimelockNotExpired);
         }
 
         if !unlock_conditions.is_expired(context.milestone_timestamp) {
@@ -289,7 +318,7 @@ pub fn semantic_validation(
 
         if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {
-                return Ok(ConflictReason::UnverifiedSender);
+                return Ok(TxFailureReason::UnverifiedSender);
             }
         }
 
@@ -316,16 +345,16 @@ pub fn semantic_validation(
     for (return_address, return_amount) in context.storage_deposit_returns.iter() {
         if let Some(deposit_amount) = context.simple_deposits.get(return_address) {
             if deposit_amount < return_amount {
-                return Ok(ConflictReason::StorageDepositReturnUnfulfilled);
+                return Ok(TxFailureReason::StorageDepositReturnUnfulfilled);
             }
         } else {
-            return Ok(ConflictReason::StorageDepositReturnUnfulfilled);
+            return Ok(TxFailureReason::StorageDepositReturnUnfulfilled);
         }
     }
 
     // Validation of amounts.
     if context.input_amount != context.output_amount {
-        return Ok(ConflictReason::CreatedConsumedAmountMismatch);
+        return Ok(TxFailureReason::CreatedConsumedAmountMismatch);
     }
 
     let mut native_token_ids = HashSet::new();
@@ -344,14 +373,14 @@ pub fn semantic_validation(
                 .output_chains
                 .contains_key(&ChainId::from(FoundryId::from(*token_id)))
         {
-            return Ok(ConflictReason::InvalidNativeTokens);
+            return Ok(TxFailureReason::InvalidNativeTokens);
         }
 
         native_token_ids.insert(token_id);
     }
 
     if native_token_ids.len() > NativeTokens::COUNT_MAX as usize {
-        return Ok(ConflictReason::InvalidNativeTokens);
+        return Ok(TxFailureReason::InvalidNativeTokens);
     }
 
     // Validation of state transitions and destructions.
@@ -363,7 +392,7 @@ pub fn semantic_validation(
         )
         .is_err()
         {
-            return Ok(ConflictReason::InvalidChainStateTransition);
+            return Ok(TxFailureReason::InvalidChainStateTransition);
         }
     }
 
@@ -372,9 +401,9 @@ pub fn semantic_validation(
         if context.input_chains.get(chain_id).is_none()
             && Output::verify_state_transition(None, Some(next_state), &context).is_err()
         {
-            return Ok(ConflictReason::InvalidChainStateTransition);
+            return Ok(TxFailureReason::InvalidChainStateTransition);
         }
     }
 
-    Ok(ConflictReason::None)
+    Ok(TxFailureReason::None)
 }

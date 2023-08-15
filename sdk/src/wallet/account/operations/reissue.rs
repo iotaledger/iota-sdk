@@ -4,7 +4,7 @@
 use crate::{
     client::{secret::SecretManage, Error as ClientError},
     types::{
-        api::core::response::LedgerInclusionState,
+        api::core::response::{BlockState, TransactionState},
         block::{
             payload::{transaction::TransactionId, Payload},
             BlockId,
@@ -84,18 +84,22 @@ where
                 let mut conflicting = false;
                 for (index, block_id_) in block_ids.clone().iter().enumerate() {
                     let block_metadata = self.client().get_block_metadata(block_id_).await?;
-                    if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
-                        match inclusion_state {
-                            LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
-                                return Ok(*block_id_);
-                            }
+                    if let Some(transaction_state) = block_metadata.tx_state {
+                        match transaction_state {
+                            TransactionState::Finalized => return Ok(*block_id_),
                             // only set it as conflicting here and don't return, because another reissued block could
                             // have the included transaction
-                            LedgerInclusionState::Conflicting => conflicting = true,
+                            // TODO: check if the comment above is still correct with IOTA 2.0
+                            TransactionState::Failed => conflicting = true,
+                            // TODO: what to do when confirmed?
+                            _ => {}
                         };
                     }
                     // Only reissue latest attachment of the block
-                    if index == block_ids_len - 1 && block_metadata.should_reattach.unwrap_or(false) {
+                    let should_reissue = block_metadata
+                        .block_state
+                        .map_or(false, |block_state| block_state == BlockState::Rejected);
+                    if index == block_ids_len - 1 && should_reissue {
                         let reissued_block = self
                             .client()
                             .finish_basic_block_builder(

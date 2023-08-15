@@ -22,7 +22,7 @@ use crate::{
         block::{
             output::{dto::OutputDto, Output},
             payload::transaction::TransactionPayload,
-            semantic::ConflictReason,
+            semantic::TxFailureReason,
         },
     },
     wallet::account::{
@@ -140,7 +140,7 @@ where
             local_time,
         )?;
 
-        if conflict != ConflictReason::None {
+        if conflict != TxFailureReason::None {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.transaction_payload

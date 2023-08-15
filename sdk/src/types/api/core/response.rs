@@ -7,6 +7,7 @@ use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
+    semantic::TxFailureReason,
     slot::{SlotCommitment, SlotIndex},
     BlockId,
 };
@@ -128,20 +129,62 @@ pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 
-/// Describes the ledger inclusion state of a transaction.
+/// Describes the state of a block.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub enum LedgerInclusionState {
-    Conflicting,
-    Included,
-    NoTransaction,
+pub enum BlockState {
+    // Stored but not confirmed or contains not yet included transaction.
+    Pending,
+    // Confirmed with the first level of knowledge.
+    Confirmed,
+    // Included and cannot be reverted anymore.
+    Finalized,
+    // Rejected by the node, and user should reissue payload if it contains one.
+    Rejected,
+    // Not successfully issued due to failure reason.
+    Failed,
 }
 
-/// Response of GET /api/core/v3/blocks/{block_id}/metadata.
+/// Describes the state of a transaction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub enum TransactionState {
+    // Stored but not confirmed or contains not yet included transaction.
+    Pending,
+    // Confirmed with the first level of knowledge.
+    Confirmed,
+    // Included and cannot be reverted anymore.
+    Finalized,
+    // The block is not successfully issued due to failure reason.
+    Failed,
+}
+
+/// Describes the reason of a block state.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[non_exhaustive]
+#[repr(u8)]
+pub enum BlockFailureReason {
+    TooOldToIssue = 1,
+    ParentsTooOld = 2,
+    FailedAtBooker = 3,
+    DroppedDueToCongestion = 4,
+    Invalid = 5,
+}
+
+/// Response of GET /api/core/v3/blocks/{blockId}/metadata.
 /// Returns the metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -151,22 +194,15 @@ pub enum LedgerInclusionState {
 )]
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
-    pub parents: Vec<BlockId>,
-    pub is_solid: bool,
+    // TODO: verify if really optional: https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub referenced_by_milestone_index: Option<u32>,
+    pub block_state: Option<BlockState>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_index: Option<u32>,
+    pub tx_state: Option<TransactionState>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ledger_inclusion_state: Option<LedgerInclusionState>,
+    pub block_failure_reason: Option<BlockFailureReason>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub conflict_reason: Option<u8>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub white_flag_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub should_promote: Option<bool>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub should_reattach: Option<bool>,
+    pub tx_failure_reason: Option<TxFailureReason>,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
