@@ -555,11 +555,10 @@ impl Block {
     }
 
     pub(crate) fn block_hash(&self) -> [u8; 32] {
-        let bytes = match self {
+        match self {
             Self::Basic(b) => b.block_hash(),
             Self::Validation(b) => b.block_hash(),
-        };
-        Blake2b256::digest(bytes).into()
+        }
     }
 
     pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
