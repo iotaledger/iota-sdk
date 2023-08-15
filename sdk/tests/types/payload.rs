@@ -7,7 +7,7 @@ use iota_sdk::types::block::{
     mana::Allotment,
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::{
-        transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
+        transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,
@@ -40,14 +40,12 @@ fn transaction() {
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs(vec![input1, input2])
-            .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs(vec![input1, input2])
+        .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();

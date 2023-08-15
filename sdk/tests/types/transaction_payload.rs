@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     mana::Allotment,
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-    payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
+    payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
     protocol::protocol_parameters,
     rand::output::{rand_account_id, rand_inputs_commitment},
     signature::{Ed25519Signature, Signature},
@@ -42,14 +42,12 @@ fn builder_no_essence_too_few_unlocks() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs([input1, input2])
-            .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input1, input2])
+        .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     // Construct a list with a single unlock, whereas we have 2 tx inputs.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
@@ -80,14 +78,12 @@ fn builder_no_essence_too_many_unlocks() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .add_input(input1)
-            .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .add_input(input1)
+        .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
@@ -121,14 +117,12 @@ fn pack_unpack_valid() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs([input1, input2])
-            .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input1, input2])
+        .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
@@ -164,14 +158,12 @@ fn getters() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs([input1, input2])
-            .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input1, input2])
+        .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
