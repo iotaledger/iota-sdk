@@ -46,6 +46,9 @@ class IssuerFeature extends Feature {
  * Metadata feature.
  */
 class MetadataFeature extends Feature {
+    /**
+     * Metadata (arbitrary binary data) that will be stored in the output.
+     */
     readonly data: string;
     constructor(data: string) {
         super(FeatureType.Metadata);
