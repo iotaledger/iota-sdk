@@ -37,7 +37,7 @@ well as the following:
 ### Windows
 
 On Windows, you will also need an LLVM. Our workflow uses
-`https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. You may also need to set
+`https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/LLVM-16.0.6-win64.exe`. You may also need to set
 an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
 ## Getting Started
