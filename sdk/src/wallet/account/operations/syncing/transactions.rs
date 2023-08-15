@@ -100,7 +100,6 @@ where
             if let Some(block_id) = transaction.block_id {
                 match self.client().get_block_metadata(&block_id).await {
                     Ok(metadata) => {
-                        // TODO: use tx_state or block_state?
                         if let Some(tx_state) = metadata.tx_state {
                             match tx_state {
                                 TransactionState::Finalized | TransactionState::Confirmed => {
