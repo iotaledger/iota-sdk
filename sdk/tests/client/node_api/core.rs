@@ -233,7 +233,7 @@ async fn test_get_included_block_metadata() {
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);
-    assert_eq!(metadata_response.tx_state.unwrap(), TransactionState::Finalized);
+    assert_eq!(metadata_response.tx_state, Some(TransactionState::Finalized));
 
     println!("{metadata_response:#?}");
 }
