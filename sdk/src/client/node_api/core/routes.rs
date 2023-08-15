@@ -219,7 +219,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the earliest block containing the transaction that get confirmed, as object.
+    /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");

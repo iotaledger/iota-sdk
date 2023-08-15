@@ -17,34 +17,34 @@ use crate::types::block::{
 
 /// Errors related to ledger types.
 #[derive(Debug)]
-pub enum TxFailureError {
-    /// Invalid conflict byte.
-    InvalidTxFailure(u8),
+pub enum TransactionFailureError {
+    /// Invalid transaction failure reason byte.
+    InvalidReason(u8),
 }
 
-impl fmt::Display for TxFailureError {
+impl fmt::Display for TransactionFailureError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::InvalidTxFailure(byte) => write!(f, "invalid tx failure byte {byte}"),
+            Self::InvalidReason(byte) => write!(f, "invalid transaction failure reason byte {byte}"),
         }
     }
 }
 
-impl From<Infallible> for TxFailureError {
+impl From<Infallible> for TransactionFailureError {
     fn from(err: Infallible) -> Self {
         match err {}
     }
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for TxFailureError {}
+impl std::error::Error for TransactionFailureError {}
 
 /// Represents the different reasons why a transaction can conflict with the ledger state.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = TxFailureError)]
-#[packable(tag_type = u8, with_error = TxFailureError::InvalidTxFailure)]
+#[packable(unpack_error = TransactionFailureError)]
+#[packable(tag_type = u8, with_error = TransactionFailureError::InvalidReason)]
 pub enum TransactionFailureReason {
     // TODO: The API doesn't have this number since the TransactionFailureReason is just optional, remove?
     /// The block has no conflict.
@@ -103,7 +103,7 @@ impl Default for TransactionFailureReason {
 }
 
 impl TryFrom<u8> for TransactionFailureReason {
-    type Error = TxFailureError;
+    type Error = TransactionFailureError;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
         Ok(match c {
@@ -130,7 +130,7 @@ impl TryFrom<u8> for TransactionFailureReason {
             20 => Self::FailedToClaimStakingReward,
             21 => Self::FailedToClaimDelegationReward,
             255 => Self::SemanticValidationFailed,
-            x => return Err(Self::Error::InvalidTxFailure(x)),
+            x => return Err(Self::Error::InvalidReason(x)),
         })
     }
 }
