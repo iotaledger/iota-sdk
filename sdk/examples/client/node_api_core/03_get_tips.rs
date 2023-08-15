@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Get tips.
-    let tips = client.get_tips().await?;
+    let tips = client.get_issuance().await?.strong_parents;
 
     println!("Tips:\n{tips:#?}");
 

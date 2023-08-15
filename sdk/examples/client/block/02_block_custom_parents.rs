@@ -8,10 +8,7 @@
 //! cargo run --release --example block_custom_parents
 //! ```
 
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::parent::StrongParents,
-};
+use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -23,9 +20,9 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Use tips as custom parents.
-    let tips = client.get_tips().await?;
-    println!("Custom tips:\n{tips:#?}");
+    // Use issuance as custom parents.
+    let issuance = client.get_issuance().await?;
+    println!("Issuance:\n{issuance:#?}");
 
     // Create and send the block with custom parents.
     let block = client
@@ -33,7 +30,7 @@ async fn main() -> Result<()> {
             todo!("issuer id"),
             todo!("block signature"),
             todo!("issuing time"),
-            Some(StrongParents::from_vec(tips)?),
+            Some(issuance.strong_parents),
             None,
         )
         .await?;

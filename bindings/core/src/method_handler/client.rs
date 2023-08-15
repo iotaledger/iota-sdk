@@ -195,7 +195,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
         ClientMethod::GetPeers => Response::Peers(client.get_peers().await?),
-        ClientMethod::GetTips => Response::Tips(client.get_tips().await?),
+        ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
                 .post_block_raw(&Block::unpack_strict(

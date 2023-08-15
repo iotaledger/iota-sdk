@@ -15,8 +15,8 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
-            UtxoChangesResponse,
+            BlockMetadataResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse, RoutesResponse,
+            SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputDto, Output, OutputId, OutputMetadata},
@@ -93,19 +93,16 @@ impl ClientInner {
 
     // Blocks routes.
 
-    /// Returns tips that are ideal for attaching a block.
-    /// GET /api/core/v3/tips
-    pub async fn get_tips(&self) -> Result<Vec<BlockId>> {
-        let path = "api/core/v3/tips";
+    /// Returns information that are ideal for attaching a block.
+    /// GET /api/core/v3/blocks/issuance
+    pub async fn get_issuance(&self) -> Result<IssuanceBlockHeaderResponse> {
+        const PATH: &str = "api/core/v3/blocks/issuance";
 
-        let response = self
-            .node_manager
+        self.node_manager
             .read()
             .await
-            .get_request::<TipsResponse>(path, None, self.get_timeout().await, false, false)
-            .await?;
-
-        Ok(response.tips)
+            .get_request::<IssuanceBlockHeaderResponse>(PATH, None, self.get_timeout().await, false, false)
+            .await
     }
 
     /// Returns the BlockId of the submitted block.

@@ -5,6 +5,7 @@ use alloc::{string::String, vec::Vec};
 
 use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
+    parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
     slot::SlotIndex,
     BlockId,
@@ -93,16 +94,24 @@ pub struct BaseTokenResponse {
     pub use_metric_prefix: bool,
 }
 
-/// Response of GET /api/core/v3/tips.
-/// Returns non-lazy tips.
+/// Response of
+/// - GET /api/core/v3/blocks/issuance
+/// Returns information that are ideal for attaching a block.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct TipsResponse {
-    pub tips: Vec<BlockId>,
+pub struct IssuanceBlockHeaderResponse {
+    /// Blocks that are strongly directly approved.
+    pub strong_parents: StrongParents,
+    /// Blocks that are weakly directly approved.
+    pub weak_parents: WeakParents,
+    /// Blocks that are directly referenced to adjust opinion.
+    pub shallow_like_parents: ShallowLikeParents,
+    /// The slot index of the latest finalized slot.
+    pub latest_finalized_slot: SlotIndex,
 }
 
 /// Response of POST /api/core/v3/blocks.
