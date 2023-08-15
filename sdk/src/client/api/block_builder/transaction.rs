@@ -10,7 +10,7 @@ use crate::{
     types::block::{
         output::{Output, OutputId},
         payload::transaction::{RegularTransactionEssence, TransactionPayload},
-        semantic::{semantic_validation, TxFailureReason, ValidationContext},
+        semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         Block, BlockId,
     },
@@ -28,7 +28,7 @@ pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
     current_time: u32,
-) -> crate::client::Result<TxFailureReason> {
+) -> crate::client::Result<TransactionFailureReason> {
     let transaction_id = transaction.id();
     let inputs = input_signing_data
         .iter()

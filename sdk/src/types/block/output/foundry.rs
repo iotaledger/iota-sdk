@@ -28,7 +28,7 @@ use crate::types::{
             Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
-        semantic::{TxFailureReason, ValidationContext},
+        semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
@@ -395,7 +395,7 @@ impl FoundryOutput {
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
-    ) -> Result<(), TxFailureReason> {
+    ) -> Result<(), TransactionFailureReason> {
         Address::from(*self.account_address()).unlock(unlock, inputs, context)
     }
 

@@ -7,7 +7,7 @@ use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
-    semantic::TxFailureReason,
+    semantic::TransactionFailureReason,
     slot::{SlotCommitment, SlotIndex},
     BlockId,
 };
@@ -202,7 +202,7 @@ pub struct BlockMetadataResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub block_failure_reason: Option<BlockFailureReason>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub tx_failure_reason: Option<TxFailureReason>,
+    pub tx_failure_reason: Option<TransactionFailureReason>,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.

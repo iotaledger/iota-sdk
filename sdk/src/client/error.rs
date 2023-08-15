@@ -13,7 +13,7 @@ use serde::{
 
 use crate::{
     client::{api::input_selection::Error as InputSelectionError, node_api::indexer::QueryParameter},
-    types::block::semantic::TxFailureReason,
+    types::block::semantic::TransactionFailureReason,
 };
 
 /// Type alias of `Result` in iota-client
@@ -140,7 +140,7 @@ pub enum Error {
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
-    TransactionSemantic(TxFailureReason),
+    TransactionSemantic(TransactionFailureReason),
     /// An indexer API request contains a query parameter not supported by the endpoint.
     #[error("an indexer API request contains a query parameter not supported by the endpoint: {0}.")]
     UnsupportedQueryParameter(QueryParameter),

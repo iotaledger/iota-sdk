@@ -45,8 +45,8 @@ impl std::error::Error for TxFailureError {}
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = TxFailureError)]
 #[packable(tag_type = u8, with_error = TxFailureError::InvalidTxFailure)]
-pub enum TxFailureReason {
-    // TODO: The API doesn't have this number since the TxFailureReason is just optional, remove?
+pub enum TransactionFailureReason {
+    // TODO: The API doesn't have this number since the TransactionFailureReason is just optional, remove?
     /// The block has no conflict.
     None = 0,
     /// The referenced UTXO was already spent.
@@ -96,13 +96,13 @@ pub enum TxFailureReason {
     SemanticValidationFailed = 255,
 }
 
-impl Default for TxFailureReason {
+impl Default for TransactionFailureReason {
     fn default() -> Self {
         Self::None
     }
 }
 
-impl TryFrom<u8> for TxFailureReason {
+impl TryFrom<u8> for TransactionFailureReason {
     type Error = TxFailureError;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
@@ -218,10 +218,10 @@ pub fn semantic_validation(
     mut context: ValidationContext<'_>,
     inputs: &[(&OutputId, &Output)],
     unlocks: &Unlocks,
-) -> Result<TxFailureReason, Error> {
+) -> Result<TransactionFailureReason, Error> {
     // Validation of the inputs commitment.
     if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(TxFailureReason::InputsCommitmentsMismatch);
+        return Ok(TransactionFailureReason::InputsCommitmentsMismatch);
     }
 
     // Validation of inputs.
@@ -264,7 +264,7 @@ pub fn semantic_validation(
         }
 
         if unlock_conditions.is_time_locked(context.milestone_timestamp) {
-            return Ok(TxFailureReason::TimelockNotExpired);
+            return Ok(TransactionFailureReason::TimelockNotExpired);
         }
 
         if !unlock_conditions.is_expired(context.milestone_timestamp) {
@@ -318,7 +318,7 @@ pub fn semantic_validation(
 
         if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {
-                return Ok(TxFailureReason::UnverifiedSender);
+                return Ok(TransactionFailureReason::UnverifiedSender);
             }
         }
 
@@ -345,16 +345,16 @@ pub fn semantic_validation(
     for (return_address, return_amount) in context.storage_deposit_returns.iter() {
         if let Some(deposit_amount) = context.simple_deposits.get(return_address) {
             if deposit_amount < return_amount {
-                return Ok(TxFailureReason::StorageDepositReturnUnfulfilled);
+                return Ok(TransactionFailureReason::StorageDepositReturnUnfulfilled);
             }
         } else {
-            return Ok(TxFailureReason::StorageDepositReturnUnfulfilled);
+            return Ok(TransactionFailureReason::StorageDepositReturnUnfulfilled);
         }
     }
 
     // Validation of amounts.
     if context.input_amount != context.output_amount {
-        return Ok(TxFailureReason::CreatedConsumedAmountMismatch);
+        return Ok(TransactionFailureReason::CreatedConsumedAmountMismatch);
     }
 
     let mut native_token_ids = HashSet::new();
@@ -373,14 +373,14 @@ pub fn semantic_validation(
                 .output_chains
                 .contains_key(&ChainId::from(FoundryId::from(*token_id)))
         {
-            return Ok(TxFailureReason::InvalidNativeTokens);
+            return Ok(TransactionFailureReason::InvalidNativeTokens);
         }
 
         native_token_ids.insert(token_id);
     }
 
     if native_token_ids.len() > NativeTokens::COUNT_MAX as usize {
-        return Ok(TxFailureReason::InvalidNativeTokens);
+        return Ok(TransactionFailureReason::InvalidNativeTokens);
     }
 
     // Validation of state transitions and destructions.
@@ -392,7 +392,7 @@ pub fn semantic_validation(
         )
         .is_err()
         {
-            return Ok(TxFailureReason::InvalidChainStateTransition);
+            return Ok(TransactionFailureReason::InvalidChainStateTransition);
         }
     }
 
@@ -401,9 +401,9 @@ pub fn semantic_validation(
         if context.input_chains.get(chain_id).is_none()
             && Output::verify_state_transition(None, Some(next_state), &context).is_err()
         {
-            return Ok(TxFailureReason::InvalidChainStateTransition);
+            return Ok(TransactionFailureReason::InvalidChainStateTransition);
         }
     }
 
-    Ok(TxFailureReason::None)
+    Ok(TransactionFailureReason::None)
 }

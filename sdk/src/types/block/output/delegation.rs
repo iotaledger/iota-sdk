@@ -23,7 +23,7 @@ use crate::types::{
             verify_output_amount, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
         },
         protocol::ProtocolParameters,
-        semantic::{TxFailureReason, ValidationContext},
+        semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
@@ -346,7 +346,7 @@ impl DelegationOutput {
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
-    ) -> Result<(), TxFailureReason> {
+    ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.milestone_timestamp)
             .unlock(unlock, inputs, context)

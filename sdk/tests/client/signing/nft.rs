@@ -25,7 +25,7 @@ use iota_sdk::{
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         rand::output::rand_account_id,
-        semantic::TxFailureReason,
+        semantic::TransactionFailureReason,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -160,7 +160,7 @@ async fn nft_reference_unlocks() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != TxFailureReason::None {
+    if conflict != TransactionFailureReason::None {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
