@@ -60,4 +60,4 @@ pub use self::{
     issuer_id::IssuerId,
 };
 
-pub(crate) const PROTOCOL_VERSION: u8 = 2;
+pub(crate) const PROTOCOL_VERSION: u8 = 3;

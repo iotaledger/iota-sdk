@@ -43,7 +43,7 @@ impl ClientInner {
         let slot_commitment_id = self.get_slot_commitment_by_index(latest_finalized_slot).await?.id();
 
         Ok(Block::build_basic(
-            self.get_network_id().await?,
+            self.get_protocol_parameters().await?,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,

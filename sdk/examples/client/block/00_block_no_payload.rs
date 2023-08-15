@@ -20,8 +20,6 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let protocol_parameters = client.get_protocol_parameters().await?;
-
     // Create and send the block.
     let block = client
         .finish_basic_block_builder(
@@ -38,7 +36,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with no payload sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id(&protocol_parameters)
+        block.id()
     );
 
     Ok(())
