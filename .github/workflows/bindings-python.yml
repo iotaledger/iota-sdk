@@ -40,7 +40,7 @@ concurrency:
 
 jobs:
   lint:
-    name: Python PEP8 format and lint check
+    name: Python PEP8 format
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
