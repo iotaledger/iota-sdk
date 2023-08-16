@@ -27,6 +27,7 @@ impl ClientInner {
             weak_parents,
             shallow_like_parents,
             latest_finalized_slot,
+            commitment,
         } = self.get_issuance().await?;
         let strong_parents = strong_parents.unwrap_or(default_strong_parents);
 
@@ -43,12 +44,10 @@ impl ClientInner {
             issuing_time
         });
 
-        let slot_commitment_id = self.get_slot_commitment_by_index(latest_finalized_slot).await?.id();
-
         Ok(Block::build_basic(
             self.get_protocol_parameters().await?,
             issuing_time,
-            slot_commitment_id,
+            commitment.id(),
             latest_finalized_slot,
             issuer_id,
             strong_parents,

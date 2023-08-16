@@ -102,9 +102,6 @@ pub enum Response {
     /// - [`GetPeers`](crate::method::ClientMethod::GetPeers)
     Peers(Vec<PeerResponse>),
     /// Response for:
-    /// - [`GetTips`](crate::method::ClientMethod::GetTips)
-    Tips(Vec<BlockId>),
-    /// Response for:
     /// - [`GetIssuance`](crate::method::ClientMethod::GetIssuance)
     Issuance(IssuanceBlockHeaderResponse),
     /// Response for:

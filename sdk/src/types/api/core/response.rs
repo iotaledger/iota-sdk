@@ -7,7 +7,7 @@ use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
-    slot::SlotIndex,
+    slot::{SlotCommitment, SlotIndex},
     BlockId,
 };
 
@@ -112,6 +112,8 @@ pub struct IssuanceBlockHeaderResponse {
     pub shallow_like_parents: ShallowLikeParents,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
+    /// TODO: help
+    pub commitment: SlotCommitment,
 }
 
 /// Response of POST /api/core/v3/blocks.
