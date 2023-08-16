@@ -38,7 +38,7 @@ runs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ inputs.toolchain }}
-        targets: ${{ inputs.target }}
+        targets: ${{ inputs.targets }}
         components: ${{ inputs.components }}
 
     - name: Cache dependencies
