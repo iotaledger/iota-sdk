@@ -6,7 +6,7 @@ use alloc::{string::String, vec::Vec};
 use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     protocol::ProtocolParameters,
-    slot::SlotIndex,
+    slot::{SlotCommitmentId, SlotIndex},
     BlockId,
 };
 
@@ -23,10 +23,9 @@ pub struct InfoResponse {
     pub version: String,
     pub status: StatusResponse,
     pub metrics: MetricsResponse,
-    pub supported_protocol_versions: Vec<u8>,
-    pub protocol: ProtocolParameters,
+    pub protocol_parameters: Box<[ProtocolParametersResponse]>,
     pub base_token: BaseTokenResponse,
-    pub features: Vec<String>,
+    pub features: Box<[String]>,
 }
 
 #[cfg(feature = "serde")]
@@ -46,19 +45,19 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub accepted_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub relative_accepted_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub confirmed_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub relative_confirmed_tangle_time: u64,
-    pub latest_committed_slot: SlotIndex,
+    pub latest_commitment_id: SlotCommitmentId,
     pub latest_finalized_slot: SlotIndex,
+    pub latest_accepted_block_slot: BlockId,
+    pub latest_confirmed_block_slot: BlockId,
     pub pruning_slot: SlotIndex,
-    pub latest_accepted_block_id: BlockId,
-    pub latest_confirmed_block_id: BlockId,
 }
 
 /// Returned in [`InfoResponse`].
@@ -70,9 +69,24 @@ pub struct StatusResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct MetricsResponse {
+    #[serde(with = "crate::utils::serde::string")]
     pub blocks_per_second: f64,
+    #[serde(with = "crate::utils::serde::string")]
     pub confirmed_blocks_per_second: f64,
+    #[serde(with = "crate::utils::serde::string")]
     pub confirmed_rate: f64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ProtocolParametersResponse {
+    // TODO: should this be a number?
+    pub start_epoch: String,
+    pub parameters: ProtocolParameters,
 }
 
 /// Returned in [`InfoResponse`].
@@ -87,9 +101,9 @@ pub struct BaseTokenResponse {
     pub name: String,
     pub ticker_symbol: String,
     pub unit: String,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub subunit: Option<String>,
     pub decimals: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subunit: Option<String>,
     pub use_metric_prefix: bool,
 }
 
@@ -142,19 +156,19 @@ pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     pub parents: Vec<BlockId>,
     pub is_solid: bool,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub referenced_by_milestone_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub milestone_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ledger_inclusion_state: Option<LedgerInclusionState>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conflict_reason: Option<u8>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub white_flag_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub should_promote: Option<bool>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub should_reattach: Option<bool>,
 }
 
@@ -256,11 +270,11 @@ pub enum Relation {
 pub struct PeerResponse {
     pub id: String,
     pub multi_addresses: Vec<String>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub alias: Option<String>,
     pub relation: Relation,
     pub connected: bool,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gossip: Option<Gossip>,
 }
 

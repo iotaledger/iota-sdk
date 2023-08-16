@@ -124,7 +124,7 @@ impl ClientInner {
 
     /// Gets the protocol version of the node we're connecting to.
     pub async fn get_protocol_version(&self) -> Result<u8> {
-        Ok(self.get_network_info().await?.protocol_parameters.protocol_version())
+        Ok(self.get_network_info().await?.protocol_parameters.version())
     }
 
     /// Gets the network name of the node we're connecting to.
@@ -139,12 +139,7 @@ impl ClientInner {
 
     /// Gets the bech32 HRP of the node we're connecting to.
     pub async fn get_bech32_hrp(&self) -> Result<Hrp> {
-        Ok(*self.get_network_info().await?.protocol_parameters.bech32_hrp())
-    }
-
-    /// Gets the below maximum depth of the node we're connecting to.
-    pub async fn get_below_max_depth(&self) -> Result<u8> {
-        Ok(self.get_network_info().await?.protocol_parameters.below_max_depth())
+        Ok(self.get_network_info().await?.protocol_parameters.bech32_hrp())
     }
 
     /// Gets the rent structure of the node we're connecting to.

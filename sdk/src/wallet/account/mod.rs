@@ -612,13 +612,13 @@ fn serialize() {
 
     let protocol_parameters = ProtocolParameters::new(
         2,
-        String::from("testnet"),
+        "testnet",
         "rms",
-        15,
         crate::types::block::output::RentStructure::new(500, 10, 1),
         1_813_620_509_061_365,
         1582328545,
         10,
+        "TODO",
     )
     .unwrap();
 

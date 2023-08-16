@@ -5,7 +5,7 @@ use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
 use crypto::Error as CryptoError;
-// use packable::bounded::BoundedU8;
+use packable::prefix::UnpackPrefixError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
@@ -83,6 +83,10 @@ pub enum Error {
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
+    InvalidEpochNearingThreshold(FromUtf8Error),
+    InvalidManaDecayFactors(UnpackOptionError<Infallible>),
+    InvalidLivenessThreshold(UnpackOptionError<FromUtf8Error>),
+    InvalidOption(Box<UnpackOptionError<Self>>),
     InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
@@ -245,6 +249,10 @@ impl fmt::Display for Error {
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
+            Self::InvalidEpochNearingThreshold(err) => write!(f, "invalid epoch nearing threshold: {err}"),
+            Self::InvalidManaDecayFactors(err) => write!(f, "invalid mana decay factors: {err}"),
+            Self::InvalidLivenessThreshold(err) => write!(f, "invalid liveness threshold: {err}"),
+            Self::InvalidOption(err) => write!(f, "invalid work score structure: {err}"),
             Self::InvalidNftIndex(index) => write!(f, "invalid nft index: {index}"),
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
@@ -357,6 +365,70 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct UnpackOptionError<E>(packable::option::UnpackOptionError<E>);
+
+impl<E: PartialEq> PartialEq for UnpackOptionError<E> {
+    fn eq(&self, other: &Self) -> bool {
+        use packable::option::UnpackOptionError as OtherErr;
+        match (&self.0, &other.0) {
+            (OtherErr::UnknownTag(t1), OtherErr::UnknownTag(t2)) => t1 == t2,
+            (OtherErr::Inner(e1), OtherErr::Inner(e2)) => e1 == e2,
+            _ => false,
+        }
+    }
+}
+impl<E: Eq> Eq for UnpackOptionError<E> {}
+
+impl<E> UnpackOptionError<E> {
+    fn map_opt_err<F: Fn(E) -> U, U>(self, f: F) -> UnpackOptionError<U> {
+        use packable::option::UnpackOptionError as OtherErr;
+        UnpackOptionError(match self.0 {
+            OtherErr::UnknownTag(t) => OtherErr::UnknownTag(t),
+            OtherErr::Inner(e) => OtherErr::Inner(f(e)),
+        })
+    }
+}
+
+#[cfg(feature = "std")]
+impl<E: std::fmt::Debug + std::fmt::Display> std::error::Error for UnpackOptionError<E> {}
+
+impl<E: std::fmt::Display> fmt::Display for UnpackOptionError<E> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use packable::option::UnpackOptionError as OtherErr;
+        match &self.0 {
+            OtherErr::UnknownTag(t) => write!(f, "unknown tag: {t}"),
+            OtherErr::Inner(e) => write!(f, "{e}"),
+        }
+    }
+}
+
+pub(crate) trait UnpackPrefixOptionErrorExt<E> {
+    fn into_opt_error(self) -> UnpackOptionError<E>;
+}
+
+impl<E> UnpackPrefixOptionErrorExt<E> for packable::option::UnpackOptionError<E> {
+    fn into_opt_error(self) -> UnpackOptionError<E> {
+        UnpackOptionError(self)
+    }
+}
+
+impl<E> UnpackPrefixOptionErrorExt<E> for packable::option::UnpackOptionError<UnpackPrefixError<E, Infallible>> {
+    fn into_opt_error(self) -> UnpackOptionError<E> {
+        use packable::option::UnpackOptionError as OtherErr;
+        UnpackOptionError(match self {
+            Self::UnknownTag(t) => OtherErr::UnknownTag(t),
+            Self::Inner(e) => OtherErr::Inner(e.into_item_err()),
+        })
+    }
+}
+
+impl<E: Into<Self>> From<packable::option::UnpackOptionError<E>> for Error {
+    fn from(value: packable::option::UnpackOptionError<E>) -> Self {
+        Self::InvalidOption(value.into_opt_error().map_opt_err(Into::into).into())
     }
 }
 

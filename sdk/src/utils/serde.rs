@@ -131,6 +131,33 @@ pub mod string_prefix {
     }
 }
 
+pub mod option_string_prefix {
+    use alloc::string::String;
+
+    use packable::{bounded::Bounded, prefix::StringPrefix};
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<T: Bounded, S>(value: &Option<StringPrefix<T>>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match value {
+            Some(bytes) => super::string_prefix::serialize(bytes, serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, T: Bounded, D>(deserializer: D) -> Result<Option<StringPrefix<T>>, D::Error>
+    where
+        D: Deserializer<'de>,
+        <T as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        Option::<String>::deserialize(deserializer)
+            .map_err(de::Error::custom)
+            .and_then(|s| s.map(|s| s.try_into().map_err(de::Error::custom)).transpose())
+    }
+}
+
 pub mod boxed_slice_prefix {
     use alloc::boxed::Box;
 
