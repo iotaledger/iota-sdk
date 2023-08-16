@@ -12,8 +12,6 @@ import { u64 } from '../../utils/type-aliases';
 enum BlockType {
     /// A Basic block.
     Basic = 0,
-    /// A Verification block.
-    Verification = 1,
 }
 
 abstract class Block {
