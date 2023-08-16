@@ -50,7 +50,5 @@ runs:
 
     - name: Install ${{ inputs.install }}
       if: ${{ inputs.install != '' }}
-      uses: actions-rs/cargo@v1
-      with:
-        command: install
-        args: ${{ inputs.install }}
+      shell: bash
+      run: cargo install ${{ inputs.install }}

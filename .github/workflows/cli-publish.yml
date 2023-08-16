@@ -12,7 +12,7 @@ jobs:
       RELEASE_UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: set version env variable
         run: echo "CRATE_VERSION=$(cat cli/Cargo.toml | sed -n 's/.*version = "\([^"]*\)".*/\1/p' | head -1)" >> $GITHUB_ENV
       - name: create release
@@ -55,7 +55,7 @@ jobs:
             ext: .exe
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -83,10 +83,7 @@ jobs:
 
       # build the CLI
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --manifest-path ./cli/Cargo.toml --profile production
+        run: cargo build --manifest-path ./cli/Cargo.toml --profile production
 
       - name: Import code signing assets (macOS)
         # Based on https://github.com/Apple-Actions/import-codesign-certs/blob/master/src/security.ts
