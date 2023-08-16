@@ -57,10 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install required packages (Ubuntu)
         if: matrix.os == 'ubuntu-latest'

@@ -17,10 +17,8 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
           target: "wasm32-unknown-unknown"
 
       # Download a pre-compiled wasm-bindgen binary.
