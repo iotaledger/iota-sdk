@@ -153,10 +153,7 @@ impl ClientInner {
             .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        Ok(Block::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
@@ -237,10 +234,7 @@ impl ClientInner {
             .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
             .await?;
 
-        Ok(Block::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
     /// Returns the block that was included in the ledger for a given transaction ID, as object, as raw bytes.

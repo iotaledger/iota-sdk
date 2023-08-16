@@ -21,7 +21,7 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 pub struct ProtocolParameters {
     // The version of the protocol running.
     #[cfg_attr(feature = "serde", serde(rename = "version"))]
-    protocol_version: u8,
+    pub(crate) protocol_version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]

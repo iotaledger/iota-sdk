@@ -19,7 +19,6 @@ abstract class Block {
      * The type of block
      */
     readonly type: BlockType;
-
     /**
      * Protocol version of the block.
      */

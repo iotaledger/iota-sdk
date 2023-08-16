@@ -40,6 +40,11 @@ impl BlockId {
         unsafe { core::mem::transmute(bytes) }
     }
 
+    /// Returns the [`BlockId`]'s hash part.
+    pub fn hash(&self) -> &BlockHash {
+        &self.hash
+    }
+
     /// Returns the [`BlockId`]'s slot index part.
     #[cfg(target_endian = "little")]
     pub fn slot_index(&self) -> SlotIndex {

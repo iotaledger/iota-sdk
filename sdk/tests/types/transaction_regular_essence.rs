@@ -14,7 +14,7 @@ use iota_sdk::types::block::{
         Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
-        transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
+        transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
         Payload,
     },
     protocol::protocol_parameters,
@@ -131,14 +131,12 @@ fn build_invalid_payload_kind() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs([input1.clone(), input2.clone()])
-            .add_output(output.clone())
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input1.clone(), input2.clone()])
+        .add_output(output.clone())
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();

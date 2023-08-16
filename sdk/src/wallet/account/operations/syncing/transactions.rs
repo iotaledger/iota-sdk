@@ -5,7 +5,7 @@ use crate::{
     client::secret::SecretManage,
     types::{
         api::core::response::LedgerInclusionState,
-        block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
+        block::{input::Input, output::OutputId, BlockId},
     },
     utils::unix_timestamp_now,
     wallet::account::{
@@ -47,7 +47,6 @@ where
         // are available again
         let mut output_ids_to_unlock = Vec::new();
         let mut transactions_to_reissue = Vec::new();
-        let protocol_params = self.client().get_protocol_parameters().await?;
 
         for transaction_id in &account_details.pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
@@ -88,9 +87,8 @@ where
             }
 
             // Check if the inputs of the transaction are still unspent
-            let TransactionEssence::Regular(essence) = transaction.payload.essence();
             let mut input_got_spent = false;
-            for input in essence.inputs() {
+            for input in transaction.payload.essence().inputs() {
                 let Input::Utxo(input) = input;
                 if let Some(input) = account_details.outputs.get(input.output_id()) {
                     if input.is_spent {
@@ -127,7 +125,7 @@ where
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(
                                             transaction,
-                                            Some(included_block.id(&protocol_params)),
+                                            Some(included_block.id()),
                                             // block metadata was Conflicting, but it's confirmed in another attachment
                                             InclusionState::Confirmed,
                                             &mut updated_transactions,
@@ -227,8 +225,7 @@ fn updated_transaction_and_outputs(
     transaction.block_id = block_id;
     transaction.inclusion_state = inclusion_state;
     // get spent inputs
-    let TransactionEssence::Regular(essence) = transaction.payload.essence();
-    for input in essence.inputs() {
+    for input in transaction.payload.essence().inputs() {
         let Input::Utxo(input) = input;
         spent_output_ids.push(*input.output_id());
     }
@@ -244,8 +241,7 @@ fn process_transaction_with_unknown_state(
     output_ids_to_unlock: &mut Vec<OutputId>,
 ) -> crate::wallet::Result<()> {
     let mut all_inputs_spent = true;
-    let TransactionEssence::Regular(essence) = transaction.payload.essence();
-    for input in essence.inputs() {
+    for input in transaction.payload.essence().inputs() {
         let Input::Utxo(input) = input;
         if let Some(output_data) = account.outputs.get(input.output_id()) {
             if !output_data.metadata.is_spent() {

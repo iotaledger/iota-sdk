@@ -113,7 +113,7 @@ async fn sign_account_state_transition() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
@@ -205,7 +205,7 @@ async fn sign_account_governance_transition() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
@@ -349,7 +349,7 @@ async fn account_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 

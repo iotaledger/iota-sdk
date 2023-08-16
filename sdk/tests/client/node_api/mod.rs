@@ -26,8 +26,6 @@ const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750
 async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
-    let protocol_parameters = client.get_protocol_parameters().await.unwrap();
-
     client
         .finish_basic_block_builder(
             todo!("issuer id"),
@@ -40,7 +38,7 @@ async fn setup_tagged_data_block() -> BlockId {
         )
         .await
         .unwrap()
-        .id(&protocol_parameters)
+        .id()
 }
 
 pub fn setup_secret_manager() -> SecretManager {

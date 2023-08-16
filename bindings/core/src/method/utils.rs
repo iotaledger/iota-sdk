@@ -9,6 +9,7 @@ use iota_sdk::types::block::{
         dto::{TransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
     },
+    protocol::ProtocolParameters,
     signature::Ed25519Signature,
     slot::SlotCommitment,
     BlockDto,
@@ -79,13 +80,12 @@ pub enum UtilsMethod {
         mnemonic: String,
     },
     /// Returns a block ID from a block and slot protocol parameters
+    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
         block: BlockDto,
-        /// Genesis timestamp at which the slots start to count.
-        genesis_unix_timestamp: u32,
-        /// Duration of each slot in seconds.
-        slot_duration_in_seconds: u8,
+        /// Network Protocol Parameters
+        protocol_parameters: ProtocolParameters,
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
