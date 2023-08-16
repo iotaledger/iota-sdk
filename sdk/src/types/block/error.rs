@@ -9,14 +9,17 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
-use super::{mana::AllotmentCount, protocol::ProtocolParametersHash, public_key::PublicKeyCount};
 use crate::types::block::{
+    context_input::RewardContextInputIndex,
     input::UtxoInput,
+    mana::AllotmentCount,
     output::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
-    payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
+    payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
+    protocol::ProtocolParametersHash,
+    public_key::PublicKeyCount,
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -30,6 +33,8 @@ pub enum Error {
     CreatedAmountOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
+    DuplicateBicAccountId(AccountId),
+    DuplicateRewardInputIndex(u16),
     DuplicateSignatureUnlock(u16),
     DuplicateUtxo(UtxoInput),
     ExpirationUnlockConditionZero,
@@ -42,6 +47,7 @@ pub enum Error {
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockKind(u8),
+    InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {
@@ -57,6 +63,7 @@ pub enum Error {
         required: u64,
     },
     InvalidContextInputKind(u8),
+    InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
@@ -143,6 +150,7 @@ pub enum Error {
     },
     StorageDepositReturnOverflow,
     TimelockUnlockConditionZero,
+    TooManyCommitmentInputs,
     UnallowedFeature {
         index: usize,
         kind: u8,
@@ -169,6 +177,8 @@ impl fmt::Display for Error {
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
+            Self::DuplicateBicAccountId(account_id) => write!(f, "duplicate BIC account id: {account_id}"),
+            Self::DuplicateRewardInputIndex(idx) => write!(f, "duplicate reward input index: {idx}"),
             Self::DuplicateSignatureUnlock(index) => {
                 write!(f, "duplicate signature unlock at index: {index}")
             }
@@ -194,6 +204,7 @@ impl fmt::Display for Error {
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
+            Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
             }
@@ -213,6 +224,7 @@ impl fmt::Display for Error {
                 f,
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
+            Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidEssenceKind(k) => write!(f, "invalid essence kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
@@ -333,6 +345,7 @@ impl fmt::Display for Error {
                     "timelock unlock condition with milestone index and timestamp set to 0",
                 )
             }
+            Self::TooManyCommitmentInputs => write!(f, "too many commitment inputs"),
             Self::UnallowedFeature { index, kind } => {
                 write!(f, "unallowed feature at index {index} with kind {kind}")
             }

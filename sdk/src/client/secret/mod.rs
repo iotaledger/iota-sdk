@@ -510,7 +510,9 @@ where
         .await?;
 
     let PreparedTransactionData {
-        essence, inputs_data, ..
+        essence: TransactionEssence::Regular(essence),
+        inputs_data,
+        ..
     } = prepared_transaction_data;
     let tx_payload = TransactionPayload::new(essence, unlocks)?;
 

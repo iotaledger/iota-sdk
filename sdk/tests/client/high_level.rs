@@ -1,10 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{
-    address::ToBech32Ext,
-    payload::{transaction::TransactionEssence, Payload},
-};
+use iota_sdk::types::block::{address::ToBech32Ext, payload::Payload};
 
 use crate::client::{common::setup_client_with_node_health_ignored, node_api::setup_transaction_block};
 
@@ -38,9 +35,7 @@ async fn test_find_inputs() {
     let transaction = block.payload().unwrap();
 
     if let Payload::Transaction(transaction) = transaction {
-        let TransactionEssence::Regular(essence) = transaction.essence();
-
-        let basic_output = essence.outputs().iter().next().unwrap().as_basic();
+        let basic_output = transaction.essence().outputs().iter().next().unwrap().as_basic();
         let address = basic_output
             .unlock_conditions()
             .address()

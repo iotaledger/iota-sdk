@@ -5,13 +5,21 @@ mod block_issuance_credit;
 mod commitment;
 mod reward;
 
+use core::ops::RangeInclusive;
+
 use derive_more::{Display, From};
 
+pub(crate) use self::reward::RewardContextInputIndex;
 pub use self::{
     block_issuance_credit::BlockIssuanceCreditContextInput, commitment::CommitmentContextInput,
     reward::RewardContextInput,
 };
 use crate::types::block::Error;
+
+/// The maximum number of context inputs of a transaction.
+pub const CONTEXT_INPUT_COUNT_MAX: u16 = 128;
+/// The range of valid numbers of context inputs of a transaction.
+pub const CONTEXT_INPUT_COUNT_RANGE: RangeInclusive<u16> = 0..=CONTEXT_INPUT_COUNT_MAX; // [0..128]
 
 /// A Context Input provides additional contextual information for the execution of a transaction, such as for different
 /// functionality related to accounts, commitments, or Mana rewards. A Context Input does not need to be unlocked.
