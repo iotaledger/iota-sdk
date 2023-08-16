@@ -63,10 +63,7 @@ jobs:
         uses: "./.github/actions/ledger-nano"
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: nextest
-          args: run --tests --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
+        run: cargo nextest run --tests --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
 
       - name: Tear down private tangle
         if: always()

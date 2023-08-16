@@ -92,10 +92,7 @@ jobs:
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
       - name: Run Cargo Udeps
-        uses: actions-rs/cargo@v1
-        with:
-          command: udeps
-          args: --all-targets --all-features
+        run: cargo udeps --all-targets --all-features
 
   check-format:
     name: Check Format
@@ -112,22 +109,13 @@ jobs:
           components: rustfmt
 
       - name: Install cargo-license-template
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --force cargo-license-template
+        run: cargo install --force cargo-license-template
 
       - name: Run Cargo Fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
 
       - name: Run cargo-license-template
-        uses: actions-rs/cargo@v1
-        with:
-          command: license-template
-          args: --template .license_template
+        run: cargo license-template --template .license_template
 
   audit:
     name: Perform Security Audit
@@ -144,15 +132,11 @@ jobs:
           install: cargo-audit
 
       - name: Run Cargo Audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: audit
-          # The ignored security advisories:
-          #
-          # - RUSTSEC-2021-0065: https://rustsec.org/advisories/RUSTSEC-2021-0065
-          #   - anymap is unmaintained 🤷‍♀️
-
-          args: --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2021-0065
+        # The ignored security advisories:
+        #
+        # - RUSTSEC-2021-0065: https://rustsec.org/advisories/RUSTSEC-2021-0065
+        #   - anymap is unmaintained 🤷‍♀️
+        run: cargo audit --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2021-0065
 
   no_std:
     name: Check `no_std` compatability
@@ -168,7 +152,4 @@ jobs:
           targets: riscv64gc-unknown-none-elf
 
       - name: Check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --no-default-features -F serde -p iota-sdk --target=riscv64gc-unknown-none-elf
+        run: cargo check --no-default-features -F serde -p iota-sdk --target=riscv64gc-unknown-none-elf
