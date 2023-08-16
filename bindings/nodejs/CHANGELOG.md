@@ -21,17 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.5 - YYYY-MM-DD
 
-
 ## 1.0.4 - 2023-08-08
-
-### Changed
-
-- Prevent loading of bindings when importing UTXOInput type (changed UTXOInput.fromOutputId implementation)
 
 ### Fixed
 
 - Missing production profile when no prebuild binary is available;
 - Ledger Nano events properly created when preparing transactions;
+- Prevent loading of bindings when importing UTXOInput type (changed UTXOInput.fromOutputId implementation);
 
 ## 1.0.3 - 2023-07-31
 
