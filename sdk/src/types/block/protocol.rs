@@ -117,7 +117,7 @@ impl Default for ProtocolParameters {
         Self {
             version: PROTOCOL_VERSION,
             // Unwrap: Known to be valid
-            network_name: "iota-core-testnet".to_owned().try_into().unwrap(),
+            network_name: String::from("iota-core-testnet").try_into().unwrap(),
             bech32_hrp: Hrp::from_str_unchecked("smr"),
             rent_structure: Default::default(),
             work_score_structure: Default::default(),

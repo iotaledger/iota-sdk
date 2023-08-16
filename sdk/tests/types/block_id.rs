@@ -99,11 +99,11 @@ fn compute() {
     // TODO: Independently verify this value
     assert_eq!(
         block_id.to_string(),
-        "0x89664f06b89ec91ef53b69a6c5da763aad498da7fc344978cf09fcdcbbd6464a0b00000000000000"
+        "0x5966461e29acde4d3ee431fa740aff3092368de4a655b96b4177e88d7050431a0b00000000000000"
     );
     assert_eq!(
         block_id.hash().to_string(),
-        "0x89664f06b89ec91ef53b69a6c5da763aad498da7fc344978cf09fcdcbbd6464a"
+        "0x5966461e29acde4d3ee431fa740aff3092368de4a655b96b4177e88d7050431a"
     );
     assert_eq!(*block_id.slot_index(), slot_index);
 }

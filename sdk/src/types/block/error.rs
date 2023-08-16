@@ -1,7 +1,10 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::string::{FromUtf8Error, String};
+use alloc::{
+    boxed::Box,
+    string::{FromUtf8Error, String},
+};
 use core::{convert::Infallible, fmt};
 
 use crypto::Error as CryptoError;
@@ -394,9 +397,9 @@ impl<E> UnpackOptionError<E> {
 }
 
 #[cfg(feature = "std")]
-impl<E: std::fmt::Debug + std::fmt::Display> std::error::Error for UnpackOptionError<E> {}
+impl<E: fmt::Debug + fmt::Display> std::error::Error for UnpackOptionError<E> {}
 
-impl<E: std::fmt::Display> fmt::Display for UnpackOptionError<E> {
+impl<E: fmt::Display> fmt::Display for UnpackOptionError<E> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use packable::option::UnpackOptionError as OtherErr;
         match &self.0 {
