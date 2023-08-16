@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.5 - YYYY-MM-DD
 
+### Added
+
+- Export ILoggerConfig from types;
 
 ## 1.0.4 - 2023-08-08
 
