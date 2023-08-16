@@ -5,8 +5,8 @@ inputs:
     description: Type of toolchain to install.
     required: false
     default: stable
-  target:
-    description: Target triple of the toolchain.
+  targets:
+    description: Targets triple of the toolchain.
     required: false
   components:
     description: Additional components to install.
