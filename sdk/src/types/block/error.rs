@@ -252,7 +252,7 @@ impl fmt::Display for Error {
             Self::InvalidEpochNearingThreshold(err) => write!(f, "invalid epoch nearing threshold: {err}"),
             Self::InvalidManaDecayFactors(err) => write!(f, "invalid mana decay factors: {err}"),
             Self::InvalidLivenessThreshold(err) => write!(f, "invalid liveness threshold: {err}"),
-            Self::InvalidOption(err) => write!(f, "invalid work score structure: {err}"),
+            Self::InvalidOption(err) => write!(f, "invalid optional field: {err}"),
             Self::InvalidNftIndex(index) => write!(f, "invalid nft index: {index}"),
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
