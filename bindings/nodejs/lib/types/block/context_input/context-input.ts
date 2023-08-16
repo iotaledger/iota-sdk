@@ -29,7 +29,7 @@ abstract class ContextInput {
 }
 
 /**
- * A Commitment Input indicates that the input references a commitment to a certain slot.
+ * A Commitment Input references a commitment to a certain slot.
  */
 class CommitmentContextInput extends ContextInput {
     readonly commitmentId: SlotCommitmentId;
