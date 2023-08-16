@@ -58,7 +58,7 @@ jobs:
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
-          target: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown
           cache-root: bindings/wasm
 
       # Download a pre-compiled wasm-bindgen binary.

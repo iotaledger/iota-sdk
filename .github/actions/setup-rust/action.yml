@@ -35,12 +35,10 @@ runs:
 
     - id: install
       name: Install Rust Toolchain
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ inputs.toolchain }}
-        target: ${{ inputs.target }}
-        override: true
-        profile: minimal
+        targets: ${{ inputs.target }}
         components: ${{ inputs.components }}
 
     - name: Cache dependencies
