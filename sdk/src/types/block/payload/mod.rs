@@ -19,7 +19,7 @@ use packable::{
 pub use self::{tagged_data::TaggedDataPayload, transaction::TransactionPayload};
 pub(crate) use self::{
     tagged_data::{TagLength, TaggedDataLength},
-    transaction::{InputCount, OutputCount},
+    transaction::{ContextInputCount, InputCount, OutputCount},
 };
 use crate::types::block::{protocol::ProtocolParameters, Error};
 

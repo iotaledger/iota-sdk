@@ -84,7 +84,8 @@ where
                 return Err(err.into());
             }
         };
-        let transaction_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+        let transaction_payload =
+            TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", transaction_payload);
 
