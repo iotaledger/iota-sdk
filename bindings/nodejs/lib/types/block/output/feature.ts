@@ -71,7 +71,7 @@ class TagFeature extends Feature {
 }
 
 /**
- * Block Issuer feature
+ * Block Issuer feature.
  */
 class BlockIssuerFeature extends Feature {
     /**
