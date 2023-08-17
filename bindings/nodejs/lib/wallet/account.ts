@@ -1415,7 +1415,9 @@ export class Account {
      * @param amount The amount to increase the voting power by.
      * @returns An instance of `PreparedTransaction`.
      */
-    async prepareIncreaseVotingPower(amount: string): Promise<PreparedTransaction> {
+    async prepareIncreaseVotingPower(
+        amount: string,
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
