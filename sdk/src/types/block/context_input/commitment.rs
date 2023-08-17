@@ -5,7 +5,7 @@ use derive_more::{Display, From};
 
 use crate::types::block::slot::SlotCommitmentId;
 
-/// A Commitment Input references a commitment to a certain slot.
+/// A Commitment Context Input references a commitment to a certain slot.
 #[derive(Clone, Copy, Display, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 pub struct CommitmentContextInput(SlotCommitmentId);
 
