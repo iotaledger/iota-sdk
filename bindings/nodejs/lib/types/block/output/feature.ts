@@ -15,6 +15,7 @@ enum FeatureType {
     Tag = 3,
     BlockIssuer = 4,
 }
+
 abstract class Feature {
     readonly type: FeatureType;
     constructor(type: FeatureType) {
