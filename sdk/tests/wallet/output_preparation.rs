@@ -386,6 +386,39 @@ async fn output_preparation() -> Result<()> {
     // address, sdr, expiration
     assert_eq!(output.unlock_conditions().unwrap().len(), 3);
 
+    let output = account
+        .prepare_output(
+            OutputParams {
+                recipient_address,
+                amount: 42600,
+                assets: None,
+                features: Some(Features {
+                    metadata: Some(prefix_hex::encode(b"Large metadata".repeat(100))),
+                    tag: Some(prefix_hex::encode(b"My Tag")),
+                    issuer: None,
+                    sender: None,
+                }),
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Return),
+                    use_excess_if_low: None,
+                }),
+            },
+            None,
+        )
+        .await?;
+    let rent_structure = wallet.client().get_rent_structure().await?;
+    let minimum_storage_deposit = output.rent_cost(&rent_structure);
+    assert_eq!(output.amount(), minimum_storage_deposit);
+    assert_eq!(output.amount(), 187900);
+    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    assert_eq!(sdr.amount(), 145300);
+    // address and storage deposit unlock condition, because of the metadata feature block, 42600 is not enough for the
+    // required storage deposit
+    assert_eq!(output.unlock_conditions().unwrap().len(), 2);
+    // metadata and tag features
+    assert_eq!(output.features().unwrap().len(), 2);
+
     tear_down(storage_path)
 }
 
