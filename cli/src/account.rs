@@ -172,7 +172,7 @@ pub async fn account_prompt_internal(
                 } => send_native_token_command(account, address, token_id, amount, gift_storage_deposit).await,
                 AccountCommand::SendNft { address, nft_id } => send_nft_command(account, address, nft_id).await,
                 AccountCommand::Sync => sync_command(account).await,
-                AccountCommand::Transaction { transaction_id } => transaction_command(account, &transaction_id).await,
+                AccountCommand::Transaction { selector } => transaction_command(account, selector).await,
                 AccountCommand::Transactions { show_details } => transactions_command(account, show_details).await,
                 AccountCommand::UnspentOutputs => unspent_outputs_command(account).await,
                 AccountCommand::Vote { event_id, answers } => vote_command(account, event_id, answers).await,
