@@ -767,7 +767,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
             transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
-            transactions.into_iter().skip(index).next()
+            transactions.into_iter().nth(index)
         }
     };
 
