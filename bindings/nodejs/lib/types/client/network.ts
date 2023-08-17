@@ -41,7 +41,7 @@ export interface INode {
 }
 
 /**
- * Struct containing network and PoW related information
+ * Struct containing network related information
  */
 export interface INetworkInfo {
     /** Protocol parameters */
