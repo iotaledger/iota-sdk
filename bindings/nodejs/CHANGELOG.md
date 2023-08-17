@@ -23,7 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Export ILoggerConfig from types;
+- Export `ILoggerConfig` from types;
+- Added `Account::prepareIncreaseVotingPower`;
+
+## Changed
+
+- Deprecate `Account::prepareVotingPower`;
 
 ## 1.0.4 - 2023-08-08
 
