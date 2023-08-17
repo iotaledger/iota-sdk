@@ -34,6 +34,9 @@ pub struct SlotCommitment {
     /// the switching of a chain.
     #[serde(with = "string")]
     cumulative_weight: u64,
+    /// Reference Mana Cost (RMC) to be used in the slot with index at `index + Max Committable Age`.
+    #[serde(with = "string")]
+    reference_mana_cost: u64,
 }
 
 impl SlotCommitment {
@@ -44,6 +47,7 @@ impl SlotCommitment {
         previous_slot_commitment_id: SlotCommitmentId,
         roots_id: RootsId,
         cumulative_weight: u64,
+        reference_mana_cost: u64,
     ) -> Self {
         Self {
             protocol_version,
@@ -51,6 +55,7 @@ impl SlotCommitment {
             previous_slot_commitment_id,
             roots_id,
             cumulative_weight,
+            reference_mana_cost,
         }
     }
 
@@ -109,10 +114,12 @@ mod test {
             .unwrap(),
             RootsId::from_str("0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f").unwrap(),
             5,
+            10,
         );
+        // TODO: Independently verify this value
         assert_eq!(
             &commitment.id().to_string(),
-            "0xc51e3baeebda4e08f1260664f4f3fb73fa287efa49022b230aacb756e71fbbd30a00000000000000"
+            "0x2f3ad38aa65d20ede9dcd6a045dccdd3332cf38192c4875308bb77116e8650880a00000000000000"
         )
     }
 }

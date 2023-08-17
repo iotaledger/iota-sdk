@@ -101,7 +101,7 @@ impl ClientInner {
         self.node_manager
             .read()
             .await
-            .get_request::<IssuanceBlockHeaderResponse>(PATH, None, self.get_timeout().await, false, false)
+            .get_request(PATH, None, self.get_timeout().await, false, false)
             .await
     }
 
