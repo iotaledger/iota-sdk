@@ -33,6 +33,7 @@ class SenderFeature extends Feature {
         this.address = sender;
     }
 }
+
 /**
  * Issuer feature.
  */
@@ -43,6 +44,7 @@ class IssuerFeature extends Feature {
         this.address = issuer;
     }
 }
+
 /**
  * Metadata feature.
  */
@@ -56,6 +58,7 @@ class MetadataFeature extends Feature {
         this.data = data;
     }
 }
+
 /**
  * Tag feature.
  */
@@ -66,6 +69,7 @@ class TagFeature extends Feature {
         this.tag = tag;
     }
 }
+
 /**
  * Block Issuer feature
  */
@@ -85,6 +89,7 @@ class BlockIssuerFeature extends Feature {
         this.publicKeys = publicKeys;
     }
 }
+
 const FeatureDiscriminator = {
     property: 'type',
     subTypes: [
@@ -95,6 +100,7 @@ const FeatureDiscriminator = {
         { value: BlockIssuerFeature, name: FeatureType.BlockIssuer as any },
     ],
 };
+
 export {
     FeatureDiscriminator,
     Feature,
