@@ -28,7 +28,7 @@ pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
     current_time: u32,
-) -> crate::client::Result<TransactionFailureReason> {
+) -> crate::client::Result<Option<TransactionFailureReason>> {
     let transaction_id = transaction.id();
     let inputs = input_signing_data
         .iter()

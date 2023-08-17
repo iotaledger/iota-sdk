@@ -46,9 +46,6 @@ impl std::error::Error for TransactionFailureError {}
 #[packable(unpack_error = TransactionFailureError)]
 #[packable(tag_type = u8, with_error = TransactionFailureError::InvalidReason)]
 pub enum TransactionFailureReason {
-    // TODO: The API doesn't have this number since the TransactionFailureReason is just optional, remove?
-    /// The block has no conflict.
-    None = 0,
     /// The referenced UTXO was already spent.
     InputUtxoAlreadySpent = 1,
     /// The transaction is conflicting with another transaction. Conflicting specifically means a double spend
@@ -96,18 +93,11 @@ pub enum TransactionFailureReason {
     SemanticValidationFailed = 255,
 }
 
-impl Default for TransactionFailureReason {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
 impl TryFrom<u8> for TransactionFailureReason {
     type Error = TransactionFailureError;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
         Ok(match c {
-            0 => Self::None,
             1 => Self::InputUtxoAlreadySpent,
             2 => Self::ConflictingWithAnotherTx,
             3 => Self::InvalidReferencedUtxo,
@@ -218,10 +208,10 @@ pub fn semantic_validation(
     mut context: ValidationContext<'_>,
     inputs: &[(&OutputId, &Output)],
     unlocks: &Unlocks,
-) -> Result<TransactionFailureReason, Error> {
+) -> Result<Option<TransactionFailureReason>, Error> {
     // Validation of the inputs commitment.
     if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(TransactionFailureReason::InputsCommitmentsMismatch);
+        return Ok(Some(TransactionFailureReason::InputsCommitmentsMismatch));
     }
 
     // Validation of inputs.
@@ -260,11 +250,11 @@ pub fn semantic_validation(
         };
 
         if let Err(conflict) = conflict {
-            return Ok(conflict);
+            return Ok(Some(conflict));
         }
 
         if unlock_conditions.is_time_locked(context.milestone_timestamp) {
-            return Ok(TransactionFailureReason::TimelockNotExpired);
+            return Ok(Some(TransactionFailureReason::TimelockNotExpired));
         }
 
         if !unlock_conditions.is_expired(context.milestone_timestamp) {
@@ -318,7 +308,7 @@ pub fn semantic_validation(
 
         if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {
-                return Ok(TransactionFailureReason::UnverifiedSender);
+                return Ok(Some(TransactionFailureReason::UnverifiedSender));
             }
         }
 
@@ -345,16 +335,16 @@ pub fn semantic_validation(
     for (return_address, return_amount) in context.storage_deposit_returns.iter() {
         if let Some(deposit_amount) = context.simple_deposits.get(return_address) {
             if deposit_amount < return_amount {
-                return Ok(TransactionFailureReason::StorageDepositReturnUnfulfilled);
+                return Ok(Some(TransactionFailureReason::StorageDepositReturnUnfulfilled));
             }
         } else {
-            return Ok(TransactionFailureReason::StorageDepositReturnUnfulfilled);
+            return Ok(Some(TransactionFailureReason::StorageDepositReturnUnfulfilled));
         }
     }
 
     // Validation of amounts.
     if context.input_amount != context.output_amount {
-        return Ok(TransactionFailureReason::CreatedConsumedAmountMismatch);
+        return Ok(Some(TransactionFailureReason::CreatedConsumedAmountMismatch));
     }
 
     let mut native_token_ids = HashSet::new();
@@ -373,14 +363,14 @@ pub fn semantic_validation(
                 .output_chains
                 .contains_key(&ChainId::from(FoundryId::from(*token_id)))
         {
-            return Ok(TransactionFailureReason::InvalidNativeTokens);
+            return Ok(Some(TransactionFailureReason::InvalidNativeTokens));
         }
 
         native_token_ids.insert(token_id);
     }
 
     if native_token_ids.len() > NativeTokens::COUNT_MAX as usize {
-        return Ok(TransactionFailureReason::InvalidNativeTokens);
+        return Ok(Some(TransactionFailureReason::InvalidNativeTokens));
     }
 
     // Validation of state transitions and destructions.
@@ -392,7 +382,7 @@ pub fn semantic_validation(
         )
         .is_err()
         {
-            return Ok(TransactionFailureReason::InvalidChainStateTransition);
+            return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
         }
     }
 
@@ -401,9 +391,9 @@ pub fn semantic_validation(
         if context.input_chains.get(chain_id).is_none()
             && Output::verify_state_transition(None, Some(next_state), &context).is_err()
         {
-            return Ok(TransactionFailureReason::InvalidChainStateTransition);
+            return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
         }
     }
 
-    Ok(TransactionFailureReason::None)
+    Ok(None)
 }

@@ -25,7 +25,6 @@ use iota_sdk::{
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         rand::output::rand_account_id,
-        semantic::TransactionFailureReason,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -121,7 +120,7 @@ async fn sign_account_state_transition() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != TransactionFailureReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
@@ -213,7 +212,7 @@ async fn sign_account_governance_transition() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != TransactionFailureReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
@@ -357,7 +356,7 @@ async fn account_reference_unlocks() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != TransactionFailureReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
