@@ -127,8 +127,6 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     {
         return Ok(None);
     }
-    // TODO: are there snapshots with chrysalis AND stardust data? From shimmer claiming for example
-    // What to do with them? Following would also move the stardust account data in the chrysalis data
 
     let mut chrysalis_data: HashMap<Vec<u8>, String> = HashMap::new();
     for key in keys {
@@ -154,8 +152,6 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         .map(|(k, v)| {
             Ok((
                 // the key bytes are a hash in stronghold
-                // TODO: do we want to match against the known keys and replace them so they match what's in the db?
-                // Could be complicated since some keys are generated based on data in other values
                 prefix_hex::encode(k),
                 v.clone(),
             ))
@@ -172,8 +168,6 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data_with_string_keys)
         .await?;
 
-    // TODO: do we need to validate the address indexes to be sure that there are no gaps? And if there are, just ignore
-    // all above a gap?
     stronghold_adapter
         .set(
             ACCOUNTS_KEY,

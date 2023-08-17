@@ -101,8 +101,6 @@ pub async fn migrate_db_from_chrysalis_to_stardust(storage_path: String, passwor
         ACCOUNTS_INDEXATION_KEY,
         serde_json::to_string(&accounts_indexation_data)?,
     )?;
-    // TODO: do we need to validate the address indexes to be sure that there are no gaps? And if there are, just ignore
-    // all above a gap?
     for new_account in new_accounts {
         stardust_db.put(
             &format!("{ACCOUNT_INDEXATION_KEY}{}", new_account.index),
@@ -176,12 +174,36 @@ pub(crate) fn migrate_from_chrysalis_data(
 
                     let mut account_addresses = Vec::new();
 
+                    // Migrate addresses, skips all above potential gaps (for example: index 0, 1, 3 -> 0, 1), public
+                    // and internal addresses on their own
                     if let Some(addresses) = account_data["addresses"].as_array() {
+                        let mut highest_public_address_index = 0;
+                        let mut highest_internal_address_index = 0;
                         for address in addresses {
+                            let internal = address["internal"].as_bool().unwrap();
+                            let key_index = address["keyIndex"].as_u64().unwrap() as u32;
+                            let bech32_address = Bech32Address::from_str(address["address"].as_str().unwrap())?;
+                            if internal {
+                                if key_index != highest_internal_address_index {
+                                    log::warn!(
+                                        "Skip migrating internal address because of gap: {bech32_address}, index {key_index}"
+                                    );
+                                    continue;
+                                }
+                                highest_internal_address_index += 1;
+                            } else {
+                                if key_index != highest_public_address_index {
+                                    log::warn!(
+                                        "Skip migrating public address because of gap: {bech32_address}, index {key_index}"
+                                    );
+                                    continue;
+                                }
+                                highest_public_address_index += 1;
+                            }
                             account_addresses.push(AccountAddress {
-                                address: Bech32Address::from_str(address["address"].as_str().unwrap())?,
-                                key_index: address["keyIndex"].as_u64().unwrap() as u32,
-                                internal: address["internal"].as_bool().unwrap(),
+                                address: bech32_address,
+                                key_index,
+                                internal,
                                 used: !address["outputs"].as_object().unwrap().is_empty(),
                             })
                         }
