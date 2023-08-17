@@ -103,8 +103,7 @@ enum TransactionProgressType {
     PreparedTransaction = 2,
     PreparedTransactionEssenceHash = 3,
     SigningTransaction = 4,
-    PerformingPow = 5,
-    Broadcasting = 6,
+    Broadcasting = 5,
 }
 
 class TransactionProgressWalletEvent extends WalletEvent {
