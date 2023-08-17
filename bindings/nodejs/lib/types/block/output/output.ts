@@ -9,7 +9,7 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt } from '../../utils';
+import { HexEncodedString, hexToBigInt, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 
@@ -126,8 +126,18 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
  * Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
-    constructor(amount: bigint, unlockConditions: UnlockCondition[]) {
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
+    constructor(
+        amount: bigint,
+        unlockConditions: UnlockCondition[],
+        mana: u64,
+    ) {
         super(OutputType.Basic, amount, unlockConditions);
+        this.mana = mana;
     }
 }
 
@@ -175,17 +185,24 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     private stateIndex: number;
     private foundryCounter: number;
 
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
     constructor(
         unlockConditions: UnlockCondition[],
         amount: bigint,
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
+        mana: u64,
     ) {
         super(OutputType.Alias, amount, unlockConditions);
         this.aliasId = aliasId;
         this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
+        this.mana = mana;
     }
     /**
      * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
@@ -213,13 +230,20 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
     constructor(
         amount: bigint,
         nftId: HexEncodedString,
         unlockConditions: UnlockCondition[],
+        mana: u64,
     ) {
         super(OutputType.Nft, amount, unlockConditions);
         this.nftId = nftId;
+        this.mana = mana;
     }
     /**
      * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
