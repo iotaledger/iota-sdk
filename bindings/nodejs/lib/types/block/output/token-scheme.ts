@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { u64 } from '../../utils';
+import { u256 } from '../../utils';
 import { hexToBigInt } from '../../utils/hex-encoding';
 
 enum TokenSchemeType {
@@ -27,11 +27,11 @@ abstract class TokenScheme {
  * Simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: u64;
-    private meltedTokens: u64;
-    private maximumSupply: u64;
+    private mintedTokens: u256;
+    private meltedTokens: u256;
+    private maximumSupply: u256;
 
-    constructor(mintedTokens: u64, meltedTokens: u64, maximumSupply: u64) {
+    constructor(mintedTokens: u256, meltedTokens: u256, maximumSupply: u256) {
         super(TokenSchemeType.Simple);
         if (typeof mintedTokens === 'bigint') {
             this.mintedTokens = mintedTokens;
@@ -61,21 +61,21 @@ class SimpleTokenScheme extends TokenScheme {
     /**
      * Amount of tokens minted.
      */
-    getMintedTokens(): u64 {
+    getMintedTokens(): u256 {
         return this.mintedTokens;
     }
 
     /**
      * Amount of tokens melted.
      */
-    getMeltedTokens(): u64 {
+    getMeltedTokens(): u256 {
         return this.meltedTokens;
     }
 
     /**
      * Maximum supply of tokens controlled.
      */
-    getMaximumSupply(): u64 {
+    getMaximumSupply(): u256 {
         return this.maximumSupply;
     }
 }

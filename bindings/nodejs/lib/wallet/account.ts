@@ -48,6 +48,7 @@ import {
     Response,
     PreparedCreateNativeTokenTransaction,
     u64,
+    u256,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
@@ -166,7 +167,7 @@ export class Account {
      */
     async prepareBurnNativeToken(
         tokenId: string,
-        burnAmount: u64,
+        burnAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -311,7 +312,7 @@ export class Account {
      */
     async prepareMeltNativeToken(
         tokenId: string,
-        meltAmount: u64,
+        meltAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -768,7 +769,7 @@ export class Account {
      */
     async prepareMintNativeToken(
         tokenId: string,
-        mintAmount: u64,
+        mintAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(

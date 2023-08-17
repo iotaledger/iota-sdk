@@ -6,7 +6,7 @@ import { AliasId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
-import { HexEncodedString, u64 } from '../utils';
+import { HexEncodedString, u256, u64 } from '../utils';
 
 /**
  * Account identifier
@@ -57,8 +57,8 @@ export interface RequiredStorageDeposit {
 export interface NativeTokenBalance {
     tokenId: HexEncodedString;
     metadata?: string;
-    total: u64;
-    available: u64;
+    total: u256;
+    available: u256;
 }
 
 /** Sync options for an account */

@@ -3,7 +3,7 @@
 
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
-import { u64 } from '../utils';
+import { u256 } from '../utils';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {
@@ -46,9 +46,9 @@ export type CustomAddress = {
 export interface CreateNativeTokenParams {
     aliasId?: string;
     /** Hex encoded number */
-    circulatingSupply: u64;
+    circulatingSupply: u256;
     /** Hex encoded number */
-    maximumSupply: u64;
+    maximumSupply: u256;
     /** Hex encoded bytes */
     foundryMetadata?: string;
 }
