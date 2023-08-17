@@ -1391,7 +1391,7 @@ export class Account {
 
     /** @deprecated use prepareIncreaseVotingPower() instead. */
     async prepareVotingPower(amount: string): Promise<PreparedTransaction> {
-        return this.prepareIncreaseVotingPower(amount)
+        return this.prepareIncreaseVotingPower(amount);
     }
 
     /**
