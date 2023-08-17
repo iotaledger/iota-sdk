@@ -1391,22 +1391,7 @@ export class Account {
 
     /** @deprecated use prepareIncreaseVotingPower() instead. */
     async prepareVotingPower(amount: string): Promise<PreparedTransaction> {
-        const response = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'prepareIncreaseVotingPower',
-                data: {
-                    amount,
-                },
-            },
-        );
-        const parsed = JSON.parse(
-            response,
-        ) as Response<PreparedTransactionData>;
-        return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, parsed.payload),
-            this,
-        );
+        return this.prepareIncreaseVotingPower(amount)
     }
 
     /**
