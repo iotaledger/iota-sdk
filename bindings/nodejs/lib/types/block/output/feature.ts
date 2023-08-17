@@ -1,94 +1,129 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Address } from '../address';
+import { Type } from 'class-transformer';
+import { Address, AddressDiscriminator } from '../address';
 
 /**
  * All of the feature block types.
  */
 enum FeatureType {
+    /** A Sender feature. */
     Sender = 0,
+    /** An Issuer feature. */
     Issuer = 1,
+    /** A Metadata feature. */
     Metadata = 2,
+    /** A Tag feature. */
     Tag = 3,
 }
 
+/** The base class for features. */
 abstract class Feature {
-    private type: FeatureType;
+    readonly type: FeatureType;
+
+    /**
+     * @param type The type of feature.
+     */
     constructor(type: FeatureType) {
         this.type = type;
     }
     /**
-     * The type of feature.
+     * Get the type of feature.
      */
     getType(): FeatureType {
         return this.type;
     }
 }
 /**
- * Sender feature.
+ * A Sender feature.
  */
 class SenderFeature extends Feature {
-    private address: Address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+
+    /**
+     * @param sender The Sender address stored with the feature.
+     */
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
     }
     /**
-     * The address.
+     * Get the sender address.
      */
     getSender(): Address {
         return this.address;
     }
 }
 /**
- * Issuer feature.
+ * An Issuer feature.
  */
 class IssuerFeature extends Feature {
-    private address: Address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+
+    /**
+     * @param issuer The Issuer address stored with the feature.
+     */
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;
     }
     /**
-     * The address.
+     * Get the Issuer address.
      */
     getIssuer(): Address {
         return this.address;
     }
 }
 /**
- * Metadata feature.
+ * A Metadata feature.
  */
 class MetadataFeature extends Feature {
-    private data: string;
+    /** Defines metadata (arbitrary binary data) that will be stored in the output. */
+    readonly data: string;
+
+    /**
+     * @param data The metadata stored with the feature.
+     */
     constructor(data: string) {
         super(FeatureType.Metadata);
         this.data = data;
     }
     /**
-     * Defines metadata (arbitrary binary data) that will be stored in the output.
+     * Get the metadata.
      */
     getData(): string {
         return this.data;
     }
 }
 /**
- * Tag feature.
+ * A Tag feature.
  */
 class TagFeature extends Feature {
-    private tag: string;
+    /** Defines a tag for the data. */
+    readonly tag: string;
+
+    /**
+     * @param tag The tag stored with the feature.
+     */
     constructor(tag: string) {
         super(FeatureType.Tag);
         this.tag = tag;
     }
     /**
-     * Defines a tag for the data.
+     * Get the tag.
      */
     getTag(): string {
         return this.tag;
     }
 }
+
 const FeatureDiscriminator = {
     property: 'type',
     subTypes: [
@@ -98,6 +133,7 @@ const FeatureDiscriminator = {
         { value: TagFeature, name: FeatureType.Tag as any },
     ],
 };
+
 export {
     FeatureDiscriminator,
     Feature,

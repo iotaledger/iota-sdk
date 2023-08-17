@@ -19,6 +19,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.5 - YYYY-MM-DD
+
+### Added
+
+- Export ILoggerConfig from types;
+
+## 1.0.4 - 2023-08-08
+
+### Fixed
+
+- Missing production profile when no prebuild binary is available;
+- Ledger Nano events properly created when preparing transactions;
+- Prevent loading of bindings when importing UTXOInput type (changed UTXOInput.fromOutputId implementation);
+
+## 1.0.3 - 2023-07-31
+
+### Fixed
+
+- `Balance::{baseCoin, requiredStorageDeposit}` amounts;
+- `Utils::computeStorageDeposit()` return amount;
+
+## 1.0.2 - 2023-07-28
+
+### Changed
+
+- Private properties on classes are now readonly;
+
+### Fixed
+
+- Constructor types in `RegularTransactionEssence`;
+- `SenderFeature.getSender()` and `IssuerFeature.getIssuer()` now return the correct types;
+
 ## 1.0.1 - 2023-07-25
 
 ### Changed
