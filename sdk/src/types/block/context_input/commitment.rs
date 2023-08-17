@@ -29,7 +29,7 @@ mod dto {
 
     use super::*;
 
-    /// A Commitment Input indicates that the input references a commitment to a certain slot.
+    /// A Commitment Context Input references a commitment to a certain slot.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct CommitmentContextInputDto {
