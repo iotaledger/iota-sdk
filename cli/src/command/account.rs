@@ -195,11 +195,12 @@ pub enum AccountCommand {
     },
     /// Synchronize the account.
     Sync,
-    /// Show the details of the transaction.
+    /// Show the details of a transaction.
     #[clap(visible_alias = "tx")]
     Transaction {
-        /// Transaction ID to be displayed e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
-        transaction_id: String,
+        /// Selector for transaction.
+        /// Either by ID (e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b) or index
+        selector: TransactionSelector,
     },
     /// List the account transactions.
     #[clap(visible_alias = "txs")]
@@ -244,6 +245,25 @@ pub enum AccountCommand {
     },
     /// Get the voting output of the account.
     VotingOutput,
+}
+
+/// Select by transaction ID or list index
+#[derive(Debug, Copy, Clone)]
+pub enum TransactionSelector {
+    Id(TransactionId),
+    Index(usize),
+}
+
+impl FromStr for TransactionSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Id(s.parse()?)
+        })
+    }
 }
 
 /// `addresses` command
@@ -741,15 +761,17 @@ pub async fn sync_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `transaction` command
-pub async fn transaction_command(account: &Account, transaction_id_str: &str) -> Result<(), Error> {
-    let transaction_id = TransactionId::from_str(transaction_id_str)?;
-    let maybe_transaction = account
-        .transactions()
-        .await
-        .into_iter()
-        .find(|tx| tx.transaction_id == transaction_id);
+pub async fn transaction_command(account: &Account, selector: TransactionSelector) -> Result<(), Error> {
+    let mut transactions = account.transactions().await;
+    let transaction = match selector {
+        TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
+        TransactionSelector::Index(index) => {
+            transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+            transactions.into_iter().skip(index).next()
+        }
+    };
 
-    if let Some(tx) = maybe_transaction {
+    if let Some(tx) = transaction {
         println_log_info!("{:#?}", tx);
     } else {
         println_log_info!("No transaction found");
