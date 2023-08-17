@@ -2,7 +2,7 @@ name: Test coverage
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, fix-coveralls-v2]
     paths:
       - ".github/workflows/coverage.yml"
       - ".github/actions/**"
@@ -73,5 +73,5 @@ jobs:
         uses: coverallsapp/github-action@v2.2.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverage.info
+          file: coverage.info
           flag-name: Unit
