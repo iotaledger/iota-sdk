@@ -199,7 +199,7 @@ pub enum AccountCommand {
     #[clap(visible_alias = "tx")]
     Transaction {
         /// Selector for transaction.
-        /// Either by ID (e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b) or index
+        /// Either by ID (e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b) or index.
         selector: TransactionSelector,
     },
     /// List the account transactions.
