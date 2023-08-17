@@ -9,7 +9,7 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt } from '../../utils';
+import { HexEncodedString, hexToBigInt, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 
@@ -30,7 +30,7 @@ abstract class Output /*implements ICommonOutput*/ {
 
     private type: OutputType;
 
-    constructor(type: OutputType, amount: bigint | string) {
+    constructor(type: OutputType, amount: u64 | string) {
         this.type = type;
         if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);
@@ -49,7 +49,7 @@ abstract class Output /*implements ICommonOutput*/ {
     /**
      * The amount of the output.
      */
-    getAmount(): bigint {
+    getAmount(): u64 {
         return BigInt(this.amount);
     }
 
@@ -85,7 +85,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
 
     constructor(
         type: OutputType,
-        amount: bigint,
+        amount: u64,
         unlockConditions: UnlockCondition[],
     ) {
         super(type, amount);
@@ -126,7 +126,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
  * Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
-    constructor(amount: bigint, unlockConditions: UnlockCondition[]) {
+    constructor(amount: u64, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
     }
 }
@@ -139,7 +139,7 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
 
     constructor(
         type: OutputType,
-        amount: bigint,
+        amount: u64,
         unlockConditions: UnlockCondition[],
     ) {
         super(type, amount, unlockConditions);
@@ -157,7 +157,7 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
 
     constructor(
         type: OutputType,
-        amount: bigint,
+        amount: u64,
         unlockConditions: UnlockCondition[],
     ) {
         super(type, amount, unlockConditions);
@@ -177,7 +177,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 
     constructor(
         unlockConditions: UnlockCondition[],
-        amount: bigint,
+        amount: u64,
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
@@ -214,7 +214,7 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
     constructor(
-        amount: bigint,
+        amount: u64,
         nftId: HexEncodedString,
         unlockConditions: UnlockCondition[],
     ) {
@@ -241,7 +241,7 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     private tokenScheme: TokenScheme;
 
     constructor(
-        amount: bigint,
+        amount: u64,
         serialNumber: number,
         unlockConditions: UnlockCondition[],
         tokenScheme: TokenScheme,
