@@ -110,13 +110,9 @@ where
         let min_storage_deposit_basic_output =
             MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
-        let min_required_storage_deposit = if nft_id.is_some() {
-            Output::Nft(first_output.as_nft().clone()).rent_cost(&rent_structure)
-        } else {
-            Output::Basic(first_output.as_basic().clone()).rent_cost(&rent_structure)
-        };
+        let min_required_storage_deposit = first_output.rent_cost(&rent_structure);
 
-        if params.amount > min_storage_deposit_basic_output {
+        if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
         }
 
