@@ -34,18 +34,18 @@ async fn client_builder() {
         "quorumThreshold":66,
         "userAgent":"iota-client/2.0.1-rc.3",
         "protocolParameters":{
-            "version":2,
+            "version":3,
             "networkName":"shimmer",
             "bech32Hrp":"smr",
-            "belowMaxDepth":15,
             "rentStructure":{
                 "vByteCost":100,
                 "vByteFactorKey":10,
                 "vByteFactorData":1
             },
             "tokenSupply":"1813620509061365",
-            "genesisUnixTimestamp":1582328545,
-            "slotDurationInSeconds":10
+            "genesisUnixTimestamp":"1582328545",
+            "slotDurationInSeconds":10,
+            "epochNearingThreshold":"TODO"
         },
         "apiTimeout":{
             "secs":15,
