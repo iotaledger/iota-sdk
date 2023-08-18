@@ -133,8 +133,8 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
 
     constructor(
         amount: bigint,
-        unlockConditions: UnlockCondition[],
         mana: u64,
+        unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Basic, amount, unlockConditions);
         this.mana = mana;
@@ -191,12 +191,12 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     readonly mana: u64;
 
     constructor(
-        unlockConditions: UnlockCondition[],
         amount: bigint,
+        mana: u64,
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
-        mana: u64,
+        unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Alias, amount, unlockConditions);
         this.aliasId = aliasId;
@@ -237,9 +237,9 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
 
     constructor(
         amount: bigint,
+        mana: u64,
         nftId: HexEncodedString,
         unlockConditions: UnlockCondition[],
-        mana: u64,
     ) {
         super(OutputType.Nft, amount, unlockConditions);
         this.nftId = nftId;
