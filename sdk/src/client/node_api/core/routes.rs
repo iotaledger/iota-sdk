@@ -234,7 +234,7 @@ impl ClientInner {
         Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
-    /// Returns earliest the block containing the transaction that get confirmed, as raw bytes.
+    /// Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
