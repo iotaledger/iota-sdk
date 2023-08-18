@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use iota_sdk::wallet::Wallet;
+use iota_sdk::wallet::{account::types::AccountIdentifier, Wallet};
 
 use crate::{
     command::wallet::{
@@ -16,11 +16,11 @@ use crate::{
     println_log_error, println_log_info,
 };
 
-pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
+pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
     let storage_path = Path::new(&cli.wallet_db_path);
     let snapshot_path = Path::new(&cli.stronghold_snapshot_path);
 
-    let (wallet, account) = if let Some(command) = cli.command {
+    let (wallet, account_id) = if let Some(command) = cli.command {
         match command {
             WalletCommand::Accounts => {
                 accounts_command(storage_path, snapshot_path).await?;
@@ -81,8 +81,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 } else if let Some(alias) = cli.account {
                     (Some(wallet), Some(alias))
                 } else if let Some(account) = pick_account(&wallet).await? {
-                    let alias = account.alias().await;
-                    (Some(wallet), Some(alias))
+                    (Some(wallet), Some(account.alias().await.into()))
                 } else {
                     (Some(wallet), None)
                 }
@@ -107,16 +106,16 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             }
         }
     };
-    Ok((wallet, account))
+    Ok((wallet, account_id))
 }
 
-async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<String>), Error> {
+async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
     // Ask the user whether an initial account should be created.
     if get_decision("Create initial account?")? {
         let alias = get_account_alias("New account alias", &wallet).await?;
-        let alias = add_account(&wallet, Some(alias)).await?;
+        let account_id = add_account(&wallet, Some(alias)).await?;
         println_log_info!("Created initial account.\nType `help` to see all available account commands.");
-        Ok((Some(wallet), Some(alias)))
+        Ok((Some(wallet), Some(account_id)))
     } else {
         Ok((Some(wallet), None))
     }
