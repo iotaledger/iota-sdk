@@ -96,7 +96,7 @@ pub struct BaseTokenResponse {
 
 /// Response of
 /// - GET /api/core/v3/blocks/issuance
-/// Returns information that are ideal for attaching a block.
+/// Information that is ideal for attaching a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -112,7 +112,7 @@ pub struct IssuanceBlockHeaderResponse {
     pub shallow_like_parents: ShallowLikeParents,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
-    /// TODO: help
+    /// The most recent slot commitment.
     pub commitment: SlotCommitment,
 }
 

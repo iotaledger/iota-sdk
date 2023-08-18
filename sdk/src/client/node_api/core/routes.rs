@@ -93,7 +93,7 @@ impl ClientInner {
 
     // Blocks routes.
 
-    /// Returns information that are ideal for attaching a block.
+    /// Returns information that is ideal for attaching a block in the network.
     /// GET /api/core/v3/blocks/issuance
     pub async fn get_issuance(&self) -> Result<IssuanceBlockHeaderResponse> {
         const PATH: &str = "api/core/v3/blocks/issuance";
