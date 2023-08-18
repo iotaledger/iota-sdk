@@ -7,7 +7,7 @@ use dialoguer::Input;
 use iota_sdk::wallet::{Account, Wallet};
 
 use crate::{
-    account_completion::ACCOUNT_COMPLETION,
+    account_completion::AccountCompletion,
     account_history::AccountHistory,
     command::account::{
         addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
@@ -64,7 +64,7 @@ pub async fn account_prompt_internal(
     let command: String = Input::new()
         .with_prompt(format!("Account \"{}\"", alias).green().to_string())
         .history_with(history)
-        .completion_with(&ACCOUNT_COMPLETION)
+        .completion_with(&AccountCompletion)
         .interact_text()?;
     match command.as_str() {
         "h" | "help" => print_account_help(),
@@ -182,8 +182,8 @@ pub async fn account_prompt_internal(
                     gift_storage_deposit,
                 } => send_native_token_command(account, address, token_id, amount, gift_storage_deposit).await,
                 AccountCommand::SendNft { address, nft_id } => send_nft_command(account, address, nft_id).await,
-                AccountCommand::Switch { other_account } => {
-                    return Ok(AccountPromptResponse::Switch(wallet.get_account(other_account).await?));
+                AccountCommand::Switch { account_id } => {
+                    return Ok(AccountPromptResponse::Switch(wallet.get_account(account_id).await?));
                 }
                 AccountCommand::Sync => sync_command(account).await,
                 AccountCommand::Transaction { selector } => transaction_command(account, selector).await,

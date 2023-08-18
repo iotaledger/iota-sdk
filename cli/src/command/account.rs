@@ -19,7 +19,10 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{types::AccountAddress, Account, ConsolidationParams, OutputsToClaim, TransactionOptions},
+        account::{
+            types::{AccountAddress, AccountIdentifier},
+            Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
+        },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
@@ -194,7 +197,10 @@ pub enum AccountCommand {
         nft_id: String,
     },
     /// Switch to a different account.
-    Switch { other_account: String },
+    Switch {
+        /// The identifier (alias or index) of the account you want to switch to.
+        account_id: AccountIdentifier,
+    },
     /// Synchronize the account.
     Sync,
     /// Show the details of a transaction.

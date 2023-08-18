@@ -11,7 +11,7 @@ use iota_sdk::{
         stronghold::StrongholdAdapter,
         utils::Password,
     },
-    wallet::{ClientOptions, Wallet},
+    wallet::{account::types::AccountIdentifier, ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
@@ -36,7 +36,7 @@ pub struct WalletCli {
     #[arg(long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
     pub stronghold_snapshot_path: String,
     /// Set the account to enter.
-    pub account: Option<String>,
+    pub account: Option<AccountIdentifier>,
     /// Set the log level.
     #[arg(short, long, default_value = DEFAULT_LOG_LEVEL)]
     pub log_level: LevelFilter,
@@ -210,7 +210,7 @@ pub async fn new_account_command(
     storage_path: &Path,
     snapshot_path: &Path,
     alias: Option<String>,
-) -> Result<(Wallet, String), Error> {
+) -> Result<(Wallet, AccountIdentifier), Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
 
@@ -304,7 +304,7 @@ pub async fn unlock_wallet(
     Ok(maybe_wallet?)
 }
 
-pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
+pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<AccountIdentifier, Error> {
     let mut account_builder = wallet.create_account();
 
     if let Some(alias) = alias {
@@ -312,7 +312,7 @@ pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<Strin
     }
 
     let account = account_builder.finish().await?;
-    let alias = account.details().await.alias().to_string();
+    let alias = AccountIdentifier::Alias(account.details().await.alias().clone());
 
     println_log_info!("Created account \"{alias}\"");
 
