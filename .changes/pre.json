@@ -102,6 +102,7 @@
     ".changes/prebuild.md",
     ".changes/prebuilds.md",
     ".changes/prepare-nft-output-features.md",
+    ".changes/prepare-output.md",
     ".changes/private-account-meta.md",
     ".changes/protocol-parameters.md",
     ".changes/query-all-participation-events-from-node.md",

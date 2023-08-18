@@ -1,5 +1,9 @@
 # Changelog
 
+## \[2.0.3-rc.45]
+
+- [`24effd1a7`](https://github.com/iotaledger/iota-sdk/commit/24effd1a7c1d867377005ce7ad65534844081a5f)([#1029](https://github.com/iotaledger/iota-sdk/pull/1029)) Fixed `Account::prepareOutput()` when `ReturnStrategy::Gift` is used with an existing NFT output;
+
 ## \[2.0.3-rc.44]
 
 - [`d8cbb77f4`](https://github.com/iotaledger/iota-sdk/commit/d8cbb77f47ab68aaee06297805d9eb2d2378a3e8)([#986](https://github.com/iotaledger/iota-sdk/pull/986)) Ledger Nano events properly created when preparing transactions;
