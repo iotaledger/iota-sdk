@@ -131,11 +131,7 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
      */
     readonly mana: u64;
 
-    constructor(
-        amount: u64,
-        mana: u64,
-        unlockConditions: UnlockCondition[],
-    ) {
+    constructor(amount: u64, mana: u64, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
         this.mana = mana;
     }
