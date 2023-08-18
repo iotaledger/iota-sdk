@@ -3,6 +3,7 @@
 
 import { u256 } from '../utils';
 import type { HexEncodedString } from '../utils/hex-encoding';
+
 /**
  * Native token.
  */
