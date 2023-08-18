@@ -126,8 +126,18 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
  * Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
-    constructor(amount: u64, unlockConditions: UnlockCondition[]) {
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
+    constructor(
+        amount: u64,
+        mana: u64,
+        unlockConditions: UnlockCondition[],
+    ) {
         super(OutputType.Basic, amount, unlockConditions);
+        this.mana = mana;
     }
 }
 
@@ -175,17 +185,24 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     private stateIndex: number;
     private foundryCounter: number;
 
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
     constructor(
-        unlockConditions: UnlockCondition[],
         amount: u64,
+        mana: u64,
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
+        unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Alias, amount, unlockConditions);
         this.aliasId = aliasId;
         this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
+        this.mana = mana;
     }
     /**
      * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
@@ -213,13 +230,20 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
     constructor(
         amount: u64,
+        mana: u64,
         nftId: HexEncodedString,
         unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Nft, amount, unlockConditions);
         this.nftId = nftId;
+        this.mana = mana;
     }
     /**
      * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
