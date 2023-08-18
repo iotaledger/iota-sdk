@@ -3,22 +3,25 @@
 
 import { AccountId } from '../..';
 import { u16 } from '../../utils/type_aliases';
+import { SlotCommitmentId } from '../slot';
 
 enum ContextInputType {
-    // ToDo: commitment context input;
-
     /**
-     * The context input kind of a `BlockIssuanceCreditContextInput`.
+     * The context input type of a `CommitmentContextInput`.
+     */
+    COMMITMENT = 0,
+    /**
+     * The context input type of a `BlockIssuanceCreditContextInput`.
      */
     BLOCK_ISSUANCE_CREDIT = 1,
     /**
-     * The context input kind of a `RewardContextInput`.
+     * The context input type of a `RewardContextInput`.
      */
     REWARD = 2,
 }
 
 abstract class ContextInput {
-    type: ContextInputType;
+    readonly type: ContextInputType;
 
     constructor(type: ContextInputType) {
         this.type = type;
@@ -26,11 +29,23 @@ abstract class ContextInput {
 }
 
 /**
- * A Block Issuance Credit (BIC) Input provides the VM with context for the value of
+ * A Commitment Context Input references a commitment to a certain slot.
+ */
+class CommitmentContextInput extends ContextInput {
+    readonly commitmentId: SlotCommitmentId;
+
+    constructor(commitmentId: SlotCommitmentId) {
+        super(ContextInputType.COMMITMENT);
+        this.commitmentId = commitmentId;
+    }
+}
+
+/**
+ * A Block Issuance Credit (BIC) Context Input provides the VM with context for the value of
  * the BIC vector of a specific slot.
  */
 class BlockIssuanceCreditContextInput extends ContextInput {
-    accountId: AccountId;
+    readonly accountId: AccountId;
 
     constructor(accountId: AccountId) {
         super(ContextInputType.BLOCK_ISSUANCE_CREDIT);
@@ -42,7 +57,7 @@ class BlockIssuanceCreditContextInput extends ContextInput {
  * A Reward Context Input indicates which transaction Input is claiming Mana rewards.
  */
 class RewardContextInput extends ContextInput {
-    index: u16;
+    readonly index: u16;
 
     constructor(index: u16) {
         super(ContextInputType.REWARD);
@@ -53,6 +68,7 @@ class RewardContextInput extends ContextInput {
 export {
     ContextInputType,
     ContextInput,
+    CommitmentContextInput,
     RewardContextInput,
     BlockIssuanceCreditContextInput,
 };
