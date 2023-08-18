@@ -193,6 +193,8 @@ pub enum AccountCommand {
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
     },
+    /// Switch to a different account.
+    Switch { other_account: String },
     /// Synchronize the account.
     Sync,
     /// Show the details of a transaction.

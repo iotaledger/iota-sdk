@@ -25,19 +25,30 @@ use crate::{
 };
 
 // loop on the account prompt
-pub async fn account_prompt(wallet: &Wallet, account: &Account) -> Result<(), Error> {
+pub async fn account_prompt(wallet: &Wallet, mut account: Account) -> Result<(), Error> {
     let mut history = AccountHistory::default();
     loop {
-        match account_prompt_internal(wallet, account, &mut history).await {
-            Ok(true) => {
-                return Ok(());
-            }
+        match account_prompt_internal(wallet, &account, &mut history).await {
+            Ok(res) => match res {
+                AccountPromptResponse::Reprompt => (),
+                AccountPromptResponse::Done => {
+                    return Ok(());
+                }
+                AccountPromptResponse::Switch(new_account) => {
+                    account = new_account;
+                }
+            },
             Err(e) => {
                 println_log_error!("{e}");
             }
-            _ => {}
         }
     }
+}
+
+pub enum AccountPromptResponse {
+    Reprompt,
+    Done,
+    Switch(Account),
 }
 
 // loop on the account prompt
@@ -45,7 +56,7 @@ pub async fn account_prompt_internal(
     wallet: &Wallet,
     account: &Account,
     history: &mut AccountHistory,
-) -> Result<bool, Error> {
+) -> Result<AccountPromptResponse, Error> {
     let alias = {
         let account = account.details().await;
         account.alias().clone()
@@ -77,7 +88,7 @@ pub async fn account_prompt_internal(
                 Ok(account_cli) => account_cli,
                 Err(err) => {
                     println!("{err}");
-                    return Ok(false);
+                    return Ok(AccountPromptResponse::Reprompt);
                 }
             };
             if let Err(err) = match account_cli.command {
@@ -108,7 +119,7 @@ pub async fn account_prompt_internal(
                 AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(account, alias_id).await,
                 AccountCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(account, foundry_id).await,
                 AccountCommand::Exit => {
-                    return Ok(true);
+                    return Ok(AccountPromptResponse::Done);
                 }
                 AccountCommand::Faucet { address, url } => faucet_command(account, address, url).await,
                 AccountCommand::MeltNativeToken { token_id, amount } => {
@@ -171,6 +182,9 @@ pub async fn account_prompt_internal(
                     gift_storage_deposit,
                 } => send_native_token_command(account, address, token_id, amount, gift_storage_deposit).await,
                 AccountCommand::SendNft { address, nft_id } => send_nft_command(account, address, nft_id).await,
+                AccountCommand::Switch { other_account } => {
+                    return Ok(AccountPromptResponse::Switch(wallet.get_account(other_account).await?));
+                }
                 AccountCommand::Sync => sync_command(account).await,
                 AccountCommand::Transaction { selector } => transaction_command(account, selector).await,
                 AccountCommand::Transactions { show_details } => transactions_command(account, show_details).await,
@@ -191,5 +205,5 @@ pub async fn account_prompt_internal(
         }
     }
 
-    Ok(false)
+    Ok(AccountPromptResponse::Reprompt)
 }
