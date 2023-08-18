@@ -1,6 +1,8 @@
-from iota_sdk import Client, MnemonicSecretManager, AddressAndAmount
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import AddressAndAmount, Client, MnemonicSecretManager
 
 load_dotenv()
 

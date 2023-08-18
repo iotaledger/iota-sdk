@@ -1,8 +1,10 @@
-from iota_sdk import Wallet, CoinType, ClientOptions
-from dotenv import load_dotenv
-from dataclasses import asdict
 import json
 import os
+from dataclasses import asdict
+
+from dotenv import load_dotenv
+
+from iota_sdk import ClientOptions, CoinType, Wallet
 
 load_dotenv()
 
