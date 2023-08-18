@@ -140,6 +140,7 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
 
 #[tokio::test]
 async fn migrate_chrysalis_stronghold() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
     let storage_path = "migrate_chrysalis_stronghold";
     setup(storage_path)?;
 
@@ -152,10 +153,9 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
         .finish()
         .await?;
 
-    // TODO: create extra stronghold with encryption work factor 0
     wallet
         .restore_backup(
-            "./tests/wallet/fixtures/chrysalis-backup.stronghold".into(),
+            "./tests/wallet/fixtures/chrysalis-backup-work-factor-0.stronghold".into(),
             Password::from("password".to_string()),
             None,
             None,
@@ -197,12 +197,16 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     assert!(!chrysalis_data.unwrap().is_empty());
 
     // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
-    // wallet.set_stronghold_password("password".to_owned()).await?;
-    // // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
-    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup" assert_eq!(
-    //     wallet.generate_ed25519_address(0, 0, None).await?.to_bech32(Hrp::from_str_unchecked("rms")),
-    //     "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
-    // );
+    wallet.set_stronghold_password("password".to_owned()).await?;
+    // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
+    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup"
+    assert_eq!(
+        wallet
+            .generate_ed25519_address(0, 0, None)
+            .await?
+            .to_bech32(iota_sdk::types::block::address::Hrp::from_str_unchecked("rms")),
+        "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
+    );
 
     tear_down(storage_path)
 }
