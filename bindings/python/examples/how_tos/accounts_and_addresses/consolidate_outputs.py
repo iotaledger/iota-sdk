@@ -34,7 +34,6 @@ print('Outputs BEFORE consolidation:')
 
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
-    # pylint: disable=consider-using-f-string
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
@@ -68,7 +67,6 @@ outputs = account.unspent_outputs()
 print('Outputs AFTER consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
-    # pylint: disable=consider-using-f-string
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
