@@ -81,16 +81,16 @@ where
 
                 // Check inclusion state for each attachment
                 let block_ids_len = block_ids.len();
-                let mut conflicting = false;
+                let mut failed = false;
                 for (index, block_id_) in block_ids.clone().iter().enumerate() {
                     let block_metadata = self.client().get_block_metadata(block_id_).await?;
                     if let Some(transaction_state) = block_metadata.tx_state {
                         match transaction_state {
                             TransactionState::Finalized => return Ok(*block_id_),
-                            // only set it as conflicting here and don't return, because another reissued block could
+                            // only set it as failed here and don't return, because another reissued block could
                             // have the included transaction
                             // TODO: check if the comment above is still correct with IOTA 2.0
-                            TransactionState::Failed => conflicting = true,
+                            TransactionState::Failed => failed = true,
                             // TODO: what to do when confirmed?
                             _ => {}
                         };
@@ -115,7 +115,9 @@ where
                 }
                 // After we checked all our reissued blocks, check if the transaction got reissued in another block
                 // and confirmed
-                if conflicting {
+                // TODO: can this still be the case? Is the TransactionState per transaction or per attachment in a
+                // block?
+                if failed {
                     let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
                         if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
                             // If no block was found with this transaction id, then it can't get included
