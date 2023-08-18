@@ -18,6 +18,9 @@ use crate::{
     serde(rename_all = "camelCase")
 )]
 pub struct SlotCommitment {
+    // The version of the protocol running.
+    #[serde(rename = "version")]
+    protocol_version: u8,
     /// The slot index of this commitment.
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
@@ -31,21 +34,28 @@ pub struct SlotCommitment {
     /// the switching of a chain.
     #[serde(with = "string")]
     cumulative_weight: u64,
+    /// Reference Mana Cost (RMC) to be used in the slot with index at `index + Max Committable Age`.
+    #[serde(with = "string")]
+    reference_mana_cost: u64,
 }
 
 impl SlotCommitment {
     /// Creates a new [`SlotCommitment`].
     pub fn new(
+        protocol_version: u8,
         index: SlotIndex,
         previous_slot_commitment_id: SlotCommitmentId,
         roots_id: RootsId,
         cumulative_weight: u64,
+        reference_mana_cost: u64,
     ) -> Self {
         Self {
+            protocol_version,
             index,
             previous_slot_commitment_id,
             roots_id,
             cumulative_weight,
+            reference_mana_cost,
         }
     }
 
@@ -88,11 +98,15 @@ mod test {
     use core::str::FromStr;
 
     use super::SlotCommitment;
-    use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
+    use crate::types::block::{
+        slot::{RootsId, SlotCommitmentId, SlotIndex},
+        PROTOCOL_VERSION,
+    };
 
     #[test]
     fn test() {
         let commitment = SlotCommitment::new(
+            PROTOCOL_VERSION,
             SlotIndex::new(10),
             SlotCommitmentId::from_str(
                 "0x20e07a0ea344707d69a08b90be7ad14eec8326cf2b8b86c8ec23720fab8dcf8ec43a30e4a8cc3f1f",
@@ -100,10 +114,12 @@ mod test {
             .unwrap(),
             RootsId::from_str("0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f").unwrap(),
             5,
+            10,
         );
+        // TODO: Independently verify this value
         assert_eq!(
             &commitment.id().to_string(),
-            "0xb485446277cc5111d54f443b46d886945d4af64e53c2f04064a7c2ea88fa4e020a00000000000000"
+            "0x2f3ad38aa65d20ede9dcd6a045dccdd3332cf38192c4875308bb77116e8650880a00000000000000"
         )
     }
 }
