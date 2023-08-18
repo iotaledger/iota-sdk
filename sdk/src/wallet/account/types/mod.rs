@@ -347,8 +347,8 @@ impl From<u32> for AccountIdentifier {
 impl core::fmt::Display for AccountIdentifier {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            AccountIdentifier::Alias(alias) => alias.fmt(f),
-            AccountIdentifier::Index(index) => index.fmt(f),
+            Self::Alias(alias) => alias.fmt(f),
+            Self::Index(index) => index.fmt(f),
         }
     }
 }

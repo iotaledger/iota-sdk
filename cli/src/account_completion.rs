@@ -47,7 +47,7 @@ pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
     "help",
 ];
 
-impl<'a> Completion for AccountCompletion {
+impl Completion for AccountCompletion {
     fn get(&self, input: &str) -> Option<String> {
         let matches = ACCOUNT_COMPLETION
             .iter()
