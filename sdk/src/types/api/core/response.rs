@@ -157,7 +157,7 @@ pub enum BlockState {
     serde(rename_all = "camelCase")
 )]
 pub enum TransactionState {
-    // Stored but not confirmed or contains not yet included transaction.
+    // Stored but not confirmed.
     Pending,
     // Confirmed with the first level of knowledge.
     Confirmed,
