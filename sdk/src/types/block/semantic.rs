@@ -45,6 +45,7 @@ impl std::error::Error for TransactionFailureError {}
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = TransactionFailureError)]
 #[packable(tag_type = u8, with_error = TransactionFailureError::InvalidReason)]
+#[non_exhaustive]
 pub enum TransactionFailureReason {
     /// The referenced UTXO was already spent.
     InputUtxoAlreadySpent = 1,
