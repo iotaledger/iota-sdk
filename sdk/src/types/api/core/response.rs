@@ -167,7 +167,7 @@ pub enum TransactionState {
     Failed,
 }
 
-/// Describes the reason of a block state.
+/// Describes the reason of a block failure.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
