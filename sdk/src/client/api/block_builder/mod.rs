@@ -7,7 +7,10 @@ pub mod transaction;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
-    types::block::{core::Block, parent::StrongParents, payload::Payload, signature::Ed25519Signature, IssuerId},
+    types::{
+        api::core::response::IssuanceBlockHeaderResponse,
+        block::{core::Block, parent::StrongParents, payload::Payload, signature::Ed25519Signature, IssuerId},
+    },
 };
 
 impl ClientInner {
@@ -19,11 +22,14 @@ impl ClientInner {
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
     ) -> Result<Block> {
-        // Use tips as strong parents if none are provided.
-        let strong_parents = match strong_parents {
-            Some(strong_parents) => strong_parents,
-            None => StrongParents::from_vec(self.get_tips().await?)?,
-        };
+        let IssuanceBlockHeaderResponse {
+            strong_parents: default_strong_parents,
+            weak_parents,
+            shallow_like_parents,
+            latest_finalized_slot,
+            commitment,
+        } = self.get_issuance().await?;
+        let strong_parents = strong_parents.unwrap_or(default_strong_parents);
 
         let issuing_time = issuing_time.unwrap_or_else(|| {
             #[cfg(feature = "std")]
@@ -38,19 +44,17 @@ impl ClientInner {
             issuing_time
         });
 
-        let node_info = self.get_info().await?.node_info;
-        let latest_finalized_slot = node_info.status.latest_finalized_slot;
-        let slot_commitment_id = self.get_slot_commitment_by_index(latest_finalized_slot).await?.id();
-
         Ok(Block::build_basic(
             self.get_protocol_parameters().await?,
             issuing_time,
-            slot_commitment_id,
+            commitment.id(),
             latest_finalized_slot,
             issuer_id,
             strong_parents,
             signature,
         )
+        .with_weak_parents(weak_parents)
+        .with_shallow_like_parents(shallow_like_parents)
         .with_payload(payload)
         .finish()?)
     }

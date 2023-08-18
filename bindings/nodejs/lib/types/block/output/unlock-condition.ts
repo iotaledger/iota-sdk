@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { plainToInstance, Type } from 'class-transformer';
+import { u64 } from '../../utils';
 import { Address, AddressDiscriminator, AliasAddress } from '../address';
 
 /**
@@ -99,7 +100,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
     })
     private returnAddress: Address;
 
-    constructor(returnAddress: Address, amount: bigint | string) {
+    constructor(returnAddress: Address, amount: u64 | string) {
         super(UnlockConditionType.StorageDepositReturn);
         if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);
@@ -111,7 +112,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
     /**
      * Amount of tokens the consuming transaction must deposit to the address defined in return address.
      */
-    getAmount(): bigint {
+    getAmount(): u64 {
         return BigInt(this.amount);
     }
 
