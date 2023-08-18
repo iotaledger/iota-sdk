@@ -73,5 +73,5 @@ jobs:
         uses: coverallsapp/github-action@v2.2.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: coverage.info
+          # file: coverage.info
           flag-name: Unit
