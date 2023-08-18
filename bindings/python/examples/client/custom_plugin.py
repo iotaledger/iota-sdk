@@ -1,8 +1,10 @@
-from iota_sdk import Client, init_logger
-from dotenv import load_dotenv
-
 import json
 import os
+
+from dotenv import load_dotenv
+
+# pylint: disable=no-name-in-module
+from iota_sdk import Client, init_logger
 
 load_dotenv()
 log_config = {

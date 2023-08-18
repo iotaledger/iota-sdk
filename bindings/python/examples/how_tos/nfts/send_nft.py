@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, SendNftParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import SendNftParams, Wallet
 
 load_dotenv()
 

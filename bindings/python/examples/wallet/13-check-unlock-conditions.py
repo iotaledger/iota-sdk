@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, Utils, OutputParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import OutputParams, Utils, Wallet
 
 load_dotenv()
 
@@ -19,6 +21,7 @@ output = account.prepare_output(OutputParams(
 
 
 def hexAddress(address):
+    """Converts an address to hex"""
     return Utils.bech32_to_hex(address.address)
 
 

@@ -1,7 +1,9 @@
-from iota_sdk import Wallet, OutputParams, Unlocks
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import OutputParams, Unlocks, Wallet
 
 load_dotenv()
 

@@ -6,11 +6,13 @@
 #  2) Submit the block to the Shimmer test network
 #  3) Use the block ID to read the payload back from the network
 
+import os
+
+from dotenv import load_dotenv
+
 # Import the python iota client
 # Make sure you have first installed it with `pip install iota_sdk`
 from iota_sdk import Client, hex_to_utf8, utf8_to_hex
-from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -40,7 +42,7 @@ robot!
 tag_hex = utf8_to_hex(tag)
 message_hex = utf8_to_hex(message)
 
-print(f'\nYour prepared block content is:')
+print('\nYour prepared block content is:')
 print(f'  tag: {tag}')
 print(f'  tag converted to hex: {tag_hex}')
 print(f'  message: {message}')
@@ -61,10 +63,10 @@ blockIdAndBlock = client.build_and_post_block(
 block_id = blockIdAndBlock[0]
 block = blockIdAndBlock[1]
 
-print(f'\nThe block ID for your submitted block is:')
+print('\nThe block ID for your submitted block is:')
 print(f'  {block_id}')
 
-print(f'\nMetadata for your submitted block is:')
+print('\nMetadata for your submitted block is:')
 print(f'  {block}')
 
 ########################################################
@@ -86,7 +88,7 @@ message_hex_out = block.payload.data
 
 # Unpackage the payload (from hex to text)
 message_out = hex_to_utf8(message_hex_out)
-print(f'\nYour message, read from the Shimmer network:')
+print('\nYour message, read from the Shimmer network:')
 print(f'  {message_out}')
 
 # Or see the message online, with the testnet explorer.
