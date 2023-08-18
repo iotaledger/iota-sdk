@@ -3,6 +3,4 @@
 
 export type u16 = number;
 export type u64 = bigint;
-
-// U256 mainly used for token amount
 export type u256 = bigint;
