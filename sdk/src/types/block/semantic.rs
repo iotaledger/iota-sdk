@@ -39,7 +39,7 @@ impl From<Infallible> for TransactionFailureError {
 #[cfg(feature = "std")]
 impl std::error::Error for TransactionFailureError {}
 
-/// Represents the different reasons why a transaction can conflict with the ledger state.
+/// Describes the reason of a transaction failure.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
