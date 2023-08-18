@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         block_id
     } else {
         // ... fetch one from the node.
-        client.get_tips().await?[0]
+        client.get_issuance().await?.strong_parents[0]
     };
 
     // Send the request.

@@ -8,7 +8,7 @@ import { u64 } from '../..';
  * To calculate the slot index of a timestamp, `genesisTimestamp` and the duration of a slot are needed.
  * The slot index of timestamp `ts` is `(ts - genesisTimestamp)/duration + 1`.
  */
-type SlotIndex = bigint;
+type SlotIndex = u64;
 
 /**
  * Identifier of a slot commitment

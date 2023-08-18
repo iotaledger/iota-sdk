@@ -146,8 +146,8 @@ pub enum ClientMethod {
     GetInfo,
     /// Get peers
     GetPeers,
-    /// Get tips
-    GetTips,
+    /// Get issuance
+    GetIssuance,
     /// Post block (JSON)
     PostBlock {
         /// Block

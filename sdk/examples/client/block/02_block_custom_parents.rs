@@ -30,16 +30,16 @@ async fn main() -> Result<()> {
 
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    // Use tips as custom parents.
-    let tips = client.get_tips().await?;
-    println!("Custom tips:\n{tips:#?}");
+    // Use issuance as custom parents.
+    let issuance = client.get_issuance().await?;
+    println!("Issuance:\n{issuance:#?}");
 
     // Create and send the block with custom parents.
     let block = client
         .unsigned_basic_block_builder(
             todo!("issuer id"),
             todo!("issuing time"),
-            Some(StrongParents::from_vec(tips)?),
+            Some(issuance.strong_parents),
             None,
         )
         .await?

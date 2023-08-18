@@ -16,7 +16,8 @@ use iota_sdk::{
     types::{
         api::{
             core::response::{
-                BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
+                BlockMetadataResponse, InfoResponse as NodeInfo, IssuanceBlockHeaderResponse,
+                OutputWithMetadataResponse, PeerResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -101,8 +102,8 @@ pub enum Response {
     /// - [`GetPeers`](crate::method::ClientMethod::GetPeers)
     Peers(Vec<PeerResponse>),
     /// Response for:
-    /// - [`GetTips`](crate::method::ClientMethod::GetTips)
-    Tips(Vec<BlockId>),
+    /// - [`GetIssuance`](crate::method::ClientMethod::GetIssuance)
+    Issuance(IssuanceBlockHeaderResponse),
     /// Response for:
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
