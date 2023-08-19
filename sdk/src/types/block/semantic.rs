@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeMap;
-use core::{convert::Infallible, fmt};
 
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
@@ -15,36 +14,12 @@ use crate::types::block::{
     Error,
 };
 
-/// Errors related to ledger types.
-#[derive(Debug)]
-pub enum TransactionFailureError {
-    /// Invalid transaction failure reason byte.
-    InvalidReason(u8),
-}
-
-impl fmt::Display for TransactionFailureError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::InvalidReason(byte) => write!(f, "invalid transaction failure reason byte {byte}"),
-        }
-    }
-}
-
-impl From<Infallible> for TransactionFailureError {
-    fn from(err: Infallible) -> Self {
-        match err {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for TransactionFailureError {}
-
 /// Describes the reason of a transaction failure.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = TransactionFailureError)]
-#[packable(tag_type = u8, with_error = TransactionFailureError::InvalidReason)]
+#[cfg_attr(feature = "serde", derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr))]
+#[packable(unpack_error = Error)]
+#[packable(tag_type = u8, with_error = Error::InvalidTransactionFailureReason)]
 #[non_exhaustive]
 pub enum TransactionFailureReason {
     /// The referenced UTXO was already spent.
@@ -80,10 +55,10 @@ pub enum TransactionFailureReason {
     InvalidManaAmount = 15,
     /// The Block Issuance Credits amount is invalid.
     InvalidBlockIssuanceCreditsAmount = 16,
-    /// Reward Input is invalid.
-    InvalidRewardInput = 17,
-    /// Commitment Input is invalid.
-    InvalidCommitmentInput = 18,
+    /// Reward Context Input is invalid.
+    InvalidRewardContextInput = 17,
+    /// Commitment Context Input is invalid.
+    InvalidCommitmentContextInput = 18,
     /// Staking Feature is not provided in account output when claiming rewards.
     MissingStakingFeature = 19,
     /// Failed to claim staking reward.
@@ -95,7 +70,7 @@ pub enum TransactionFailureReason {
 }
 
 impl TryFrom<u8> for TransactionFailureReason {
-    type Error = TransactionFailureError;
+    type Error = Error;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
         Ok(match c {
@@ -121,7 +96,7 @@ impl TryFrom<u8> for TransactionFailureReason {
             20 => Self::FailedToClaimStakingReward,
             21 => Self::FailedToClaimDelegationReward,
             255 => Self::SemanticValidationFailed,
-            x => return Err(Self::Error::InvalidReason(x)),
+            x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
         })
     }
 }

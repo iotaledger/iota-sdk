@@ -246,7 +246,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the metadata of the earliest block containing the tx that get confirmed.
+    /// Returns the metadata of the earliest block containing the tx that was confirmed.
     /// GET /api/core/v3/transactions/{transactionId}/included-block/metadata
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block/metadata");

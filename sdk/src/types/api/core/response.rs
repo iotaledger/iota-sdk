@@ -171,7 +171,7 @@ pub enum TransactionState {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
+    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
     serde(rename_all = "camelCase")
 )]
 #[non_exhaustive]

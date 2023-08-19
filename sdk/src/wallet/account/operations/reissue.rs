@@ -50,7 +50,7 @@ where
                 .into());
             }
 
-            let block_id = match transaction.block_id {
+            let first_block_id = match transaction.block_id {
                 Some(block_id) => block_id,
                 None => self
                     .client()
@@ -68,7 +68,7 @@ where
             // Attachments of the Block to check inclusion state
             // TODO: remove when todos in `finish_basic_block_builder()` are removed
             #[allow(unused_mut)]
-            let mut block_ids = vec![block_id];
+            let mut block_ids = vec![first_block_id];
             for _ in 0..max_attempts.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT) {
                 let duration =
                     std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL));
@@ -82,11 +82,11 @@ where
                 // Check inclusion state for each attachment
                 let block_ids_len = block_ids.len();
                 let mut failed = false;
-                for (index, block_id_) in block_ids.clone().iter().enumerate() {
-                    let block_metadata = self.client().get_block_metadata(block_id_).await?;
+                for (index, block_id) in block_ids.clone().iter().enumerate() {
+                    let block_metadata = self.client().get_block_metadata(block_id).await?;
                     if let Some(transaction_state) = block_metadata.tx_state {
                         match transaction_state {
-                            TransactionState::Finalized => return Ok(*block_id_),
+                            TransactionState::Finalized => return Ok(*block_id),
                             // only set it as failed here and don't return, because another reissued block could
                             // have the included transaction
                             // TODO: check if the comment above is still correct with IOTA 2.0
@@ -121,7 +121,7 @@ where
                     let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
                         if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
                             // If no block was found with this transaction id, then it can't get included
-                            ClientError::TangleInclusion(block_id.to_string())
+                            ClientError::TangleInclusion(first_block_id.to_string())
                         } else {
                             e
                         }
@@ -129,7 +129,7 @@ where
                     return Ok(included_block.id());
                 }
             }
-            Err(ClientError::TangleInclusion(block_id.to_string()).into())
+            Err(ClientError::TangleInclusion(first_block_id.to_string()).into())
         } else {
             Err(Error::TransactionNotFound(*transaction_id))
         }
