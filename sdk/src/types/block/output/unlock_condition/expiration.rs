@@ -11,8 +11,8 @@ use crate::types::block::{address::Address, slot::SlotIndex, Error};
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
     return_address: Address,
-    /// Before this slot index, Address Unlock Condition is allowed to unlock the output, after that only the address
-    /// defined in Return Address.
+    /// Before this slot index is reached, only the Address defined in the Address
+    /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
     #[packable(verify_with = verify_slot_index)]
     slot_index: SlotIndex,
 }
@@ -77,7 +77,7 @@ mod dto {
         #[serde(rename = "type")]
         kind: u8,
         return_address: Address,
-        slot_index: u64,
+        slot_index: SlotIndex,
     }
 
     impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {
@@ -85,7 +85,7 @@ mod dto {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
                 return_address: *value.return_address(),
-                slot_index: *value.slot_index(),
+                slot_index: value.slot_index(),
             }
         }
     }
