@@ -121,12 +121,12 @@ export class Account {
      * @param burn The outputs to burn
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The resulting transaction.
+     * @returns The prepared transaction.
      */
     async prepareBurn(
         burn: Burn,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -137,8 +137,13 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**
@@ -149,7 +154,7 @@ export class Account {
      * @param burnAmount The to be burned amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareBurnNativeToken(
         tokenId: string,
@@ -181,7 +186,7 @@ export class Account {
      * @param nftId The NftId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareBurnNft(
         nftId: string,
@@ -234,7 +239,7 @@ export class Account {
      * equal to the output consolidation threshold.
      * @param force Force consolidation on addresses where the threshold isn't met.
      * @param outputConsolidationThreshold A default threshold is used if this is omitted.
-     * @returns The consolidation transaction.
+     * @returns The prepared consolidation transaction.
      */
     async prepareConsolidateOutputs(
         params: ConsolidationParams,
@@ -262,7 +267,7 @@ export class Account {
      * @param params The alias output options.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns A transaction object.
+     * @returns The prepared transaction.
      */
     async prepareCreateAliasOutput(
         params?: AliasOutputParams,
@@ -294,7 +299,7 @@ export class Account {
      * @param meltAmount To be melted amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareMeltNativeToken(
         tokenId: string,
@@ -347,7 +352,7 @@ export class Account {
      * @param aliasId The AliasId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareDestroyAlias(
         aliasId: string,
@@ -381,7 +386,7 @@ export class Account {
      * @param foundryId The FoundryId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareDestroyFoundry(
         foundryId: string,
@@ -792,7 +797,7 @@ export class Account {
      * @param mintAmount To be minted amount.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction.
+     * @returns The prepared minting transaction.
      */
     async prepareMintNativeToken(
         tokenId: string,
@@ -867,7 +872,7 @@ export class Account {
      * @param params The options for minting nfts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The minting transaction.
+     * @returns The prepared minting transaction.
      */
     async prepareMintNfts(
         params: MintNftParams[],
@@ -1109,7 +1114,7 @@ export class Account {
      * @param params Addresses amounts and native tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The sent transaction.
+     * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
         params: SendNativeTokensParams[],
@@ -1140,7 +1145,7 @@ export class Account {
      * @param params Addresses and nft ids.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
-     * @returns The sent transaction.
+     * @returns The prepared transaction.
      */
     async prepareSendNft(
         params: SendNftParams[],
