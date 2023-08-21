@@ -57,6 +57,7 @@ impl Packable for ManaAllotment {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.account_id.pack(packer)?;
         self.mana.pack(packer)?;
+
         Ok(())
     }
 
@@ -66,7 +67,8 @@ impl Packable for ManaAllotment {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
         let mana = u64::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        Ok(Self { account_id, mana })
+
+        Ok(Self::new(account_id, mana).map_err(UnpackError::Packable)?)
     }
 }
 
