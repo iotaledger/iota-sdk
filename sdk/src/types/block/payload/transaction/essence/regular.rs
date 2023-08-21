@@ -10,7 +10,7 @@ use crate::types::{
     block::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
-        mana::{Allotment, Allotments},
+        mana::{ManaAllotment, ManaAllotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
@@ -29,7 +29,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
-    allotments: BTreeSet<Allotment>,
+    allotments: BTreeSet<ManaAllotment>,
     payload: OptionalPayload,
     creation_slot: Option<SlotIndex>,
 }
@@ -80,7 +80,7 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Add allotments to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_allotments(mut self, allotments: impl IntoIterator<Item = Allotment>) -> Self {
+    pub fn with_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
         self.allotments = allotments.into_iter().collect();
         self
     }
@@ -91,14 +91,14 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Add an [`Allotment`] to a [`RegularTransactionEssenceBuilder`].
-    pub fn add_allotment(mut self, allotment: Allotment) -> Self {
+    /// Add an [`ManaAllotment`] to a [`RegularTransactionEssenceBuilder`].
+    pub fn add_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.insert(allotment);
         self
     }
 
-    /// Replaces an [`Allotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
-    pub fn replace_allotment(mut self, allotment: Allotment) -> Self {
+    /// Replaces an [`ManaAllotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
+    pub fn replace_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.replace(allotment);
         self
     }
@@ -148,7 +148,7 @@ impl RegularTransactionEssenceBuilder {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
-        let allotments = Allotments::from_set(self.allotments)?;
+        let allotments = ManaAllotments::from_set(self.allotments)?;
 
         verify_payload(&self.payload)?;
 
@@ -215,7 +215,7 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_outputs)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
-    allotments: Allotments,
+    allotments: ManaAllotments,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
 }
@@ -260,7 +260,7 @@ impl RegularTransactionEssence {
     }
 
     /// Returns the allotments of a [`RegularTransactionEssence`].
-    pub fn allotments(&self) -> &[Allotment] {
+    pub fn allotments(&self) -> &[ManaAllotment] {
         &self.allotments
     }
 
@@ -439,7 +439,7 @@ pub(crate) mod dto {
         pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
-        pub allotments: Vec<Allotment>,
+        pub allotments: Vec<ManaAllotment>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }

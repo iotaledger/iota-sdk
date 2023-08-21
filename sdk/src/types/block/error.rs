@@ -12,7 +12,7 @@ use primitive_types::U256;
 use crate::types::block::{
     context_input::RewardContextInputIndex,
     input::UtxoInput,
-    mana::AllotmentCount,
+    mana::ManaAllotmentCount,
     output::{
         feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
@@ -87,7 +87,7 @@ pub enum Error {
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
     InvalidOutputKind(u8),
-    InvalidAllotmentCount(<AllotmentCount as TryFrom<usize>>::Error),
+    InvalidManaAllotmentCount(<ManaAllotmentCount as TryFrom<usize>>::Error),
     // TODO this would now need to be generic, not sure if possible.
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
@@ -114,7 +114,7 @@ pub enum Error {
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
-    InvalidAllotmentManaSum(u128),
+    InvalidManaAllotmentSum(u128),
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
@@ -249,7 +249,7 @@ impl fmt::Display for Error {
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
             Self::InvalidOutputKind(k) => write!(f, "invalid output kind: {k}"),
-            Self::InvalidAllotmentCount(count) => write!(f, "invalid allotment count: {count}"),
+            Self::InvalidManaAllotmentCount(count) => write!(f, "invalid mana allotment count: {count}"),
             Self::InvalidParentCount => {
                 write!(f, "invalid parents count")
             }
@@ -284,7 +284,7 @@ impl fmt::Display for Error {
             Self::InvalidTransactionNativeTokensCount(count) => {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
-            Self::InvalidAllotmentManaSum(value) => write!(f, "invalid allotment mana sum: {value}"),
+            Self::InvalidManaAllotmentSum(value) => write!(f, "invalid mana allotment sum: {value}"),
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {

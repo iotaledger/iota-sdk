@@ -593,14 +593,13 @@ fn serialize() {
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
-        mana::Allotment,
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
         payload::{
             transaction::{RegularTransactionEssence, TransactionId},
             TransactionPayload,
         },
         protocol::ProtocolParameters,
-        rand::output::rand_account_id,
+        rand::mana::rand_mana_allotment,
         signature::{Ed25519Signature, Signature},
         unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     };
@@ -638,7 +637,7 @@ fn serialize() {
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+            .add_allotment(rand_mana_allotment(10))
             .finish_with_params(protocol_parameters)
             .unwrap();
 

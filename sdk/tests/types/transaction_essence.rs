@@ -4,11 +4,10 @@
 use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
-    mana::Allotment,
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
     protocol::protocol_parameters,
-    rand::output::{rand_account_id, rand_inputs_commitment},
+    rand::{mana::rand_mana_allotment, output::rand_inputs_commitment},
     Error,
 };
 use packable::{error::UnpackError, PackableExt};
@@ -35,7 +34,7 @@ fn essence_kind() {
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
             .with_inputs([input1, input2])
             .add_output(output)
-            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+            .add_allotment(rand_mana_allotment(10))
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );

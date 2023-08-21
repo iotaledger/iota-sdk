@@ -15,14 +15,13 @@ use iota_sdk::{
     types::block::{
         address::ToBech32Ext,
         input::{Input, UtxoInput},
-        mana::Allotment,
         output::InputsCommitment,
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
         },
         protocol::protocol_parameters,
-        rand::output::rand_account_id,
+        rand::mana::rand_mana_allotment,
         semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -79,7 +78,7 @@ async fn single_ed25519_unlock() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .add_allotment(rand_mana_allotment(10))
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -182,7 +181,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .add_allotment(rand_mana_allotment(10))
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -295,7 +294,7 @@ async fn two_signature_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .add_allotment(rand_mana_allotment(10))
         .finish_with_params(protocol_parameters)?,
     );
 

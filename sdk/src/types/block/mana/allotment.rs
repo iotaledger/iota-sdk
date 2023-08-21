@@ -15,25 +15,25 @@ use crate::types::block::{output::AccountId, Error};
 /// in the form of Block Issuance Credits to the account.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(rename_all = "camelCase"))]
-pub struct Allotment {
+pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) mana: u64,
 }
 
-impl PartialOrd for Allotment {
+impl PartialOrd for ManaAllotment {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Allotment {
+impl Ord for ManaAllotment {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.account_id.cmp(&other.account_id)
     }
 }
 
-impl Allotment {
+impl ManaAllotment {
     pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
         if mana > MAX_THEORETICAL_MANA {
             return Err(Error::InvalidManaValue(mana));
@@ -50,7 +50,7 @@ impl Allotment {
     }
 }
 
-impl Packable for Allotment {
+impl Packable for ManaAllotment {
     type UnpackError = Error;
     type UnpackVisitor = ();
 
@@ -77,7 +77,7 @@ mod dto {
     use super::*;
     use crate::utils::serde::string;
 
-    impl<'de> Deserialize<'de> for Allotment {
+    impl<'de> Deserialize<'de> for ManaAllotment {
         fn deserialize<D>(d: D) -> Result<Self, D::Error>
         where
             D: serde::Deserializer<'de>,
@@ -90,7 +90,7 @@ mod dto {
                 mana: u64,
             }
 
-            impl TryFrom<AllotmentDto> for Allotment {
+            impl TryFrom<AllotmentDto> for ManaAllotment {
                 type Error = Error;
 
                 fn try_from(value: AllotmentDto) -> Result<Self, Self::Error> {
