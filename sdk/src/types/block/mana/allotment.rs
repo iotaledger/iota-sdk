@@ -68,7 +68,7 @@ impl Packable for ManaAllotment {
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
         let mana = u64::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
-        Ok(Self::new(account_id, mana).map_err(UnpackError::Packable)?)
+        Self::new(account_id, mana).map_err(UnpackError::Packable)
     }
 }
 

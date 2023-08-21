@@ -28,7 +28,6 @@ use iota_sdk::{
         },
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
-        rand::output::rand_account_id,
         unlock::{SignatureUnlock, Unlock},
     },
 };
