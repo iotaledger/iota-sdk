@@ -21,7 +21,7 @@ use iota_sdk::{
             TransactionPayload,
         },
         protocol::protocol_parameters,
-        rand::output::rand_account_id,
+        rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
     },
 };
