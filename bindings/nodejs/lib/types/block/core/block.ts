@@ -48,7 +48,7 @@ class BlockWrapper<T> {
 
     @Type((info) => {
         // Generics doesnt get covered in class-transformer out of the box
-        let type = info?.object['type'];
+        const type = info?.object['type'];
         switch (type) {
             case BlockType.Basic:
                 return BasicBlockData;
