@@ -4,12 +4,14 @@
 import { Payload, PayloadDiscriminator } from '../payload';
 import { Type } from 'class-transformer';
 import { StrongParents, WeakParents, ShallowLikeParents } from '../parents';
-import { Block } from './block';
+import { BlockWrapper } from './block';
+
+export type BasicBlock = BlockWrapper<BasicBlockData>;
 
 /**
  * Basic Block layout.
  */
-export class BasicBlock extends Block {
+export class BasicBlockData {
     /**
      * Blocks that are strongly directly approved.
      */
