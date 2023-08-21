@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,
@@ -9,20 +9,18 @@ use iota_sdk_bindings_core::{
     listen_mqtt as rust_listen_mqtt, ClientMethod, Response, Result,
 };
 use neon::prelude::*;
-use tokio::sync::RwLock;
 
 type JsCallback = Root<JsFunction<JsObject>>;
 
-// Wrapper so we can destroy the ClientMethodHandler
-pub type ClientMethodHandlerWrapperInner = Arc<RwLock<Option<ClientMethodHandler>>>;
-// Wrapper because we can't impl Finalize on ClientMethodHandlerWrapperInner
-pub struct ClientMethodHandlerWrapper(pub ClientMethodHandlerWrapperInner);
+pub type SharedClientMethodHandler = Arc<RwLock<Option<ClientMethodHandler>>>;
+
+#[derive(Clone)]
 pub struct ClientMethodHandler {
     channel: Channel,
     client: Client,
 }
 
-impl Finalize for ClientMethodHandlerWrapper {}
+impl Finalize for ClientMethodHandler {}
 
 impl ClientMethodHandler {
     pub fn new(channel: Channel, options: String) -> Result<Self> {
@@ -60,71 +58,69 @@ impl ClientMethodHandler {
     }
 }
 
-pub fn create_client(mut cx: FunctionContext) -> JsResult<JsBox<ClientMethodHandlerWrapper>> {
+pub fn create_client(mut cx: FunctionContext) -> JsResult<JsBox<SharedClientMethodHandler>> {
     let options = cx.argument::<JsString>(0)?;
     let options = options.value(&mut cx);
     let channel = cx.channel();
     let method_handler = ClientMethodHandler::new(channel, options)
         .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
-    Ok(cx.boxed(ClientMethodHandlerWrapper(Arc::new(RwLock::new(Some(method_handler))))))
+    Ok(cx.boxed(Arc::new(RwLock::new(Some(method_handler)))))
 }
 
-pub fn destroy_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&cx.argument::<JsBox<ClientMethodHandlerWrapper>>(0)?.0);
-    let channel = cx.channel();
-    let (deferred, promise) = cx.promise();
-    crate::RUNTIME.spawn(async move {
-        *method_handler.write().await = None;
-        deferred.settle_with(&channel, move |mut cx| Ok(cx.undefined()));
-    });
-    Ok(promise)
-}
-
-pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let method = cx.argument::<JsString>(0)?;
-    let method = method.value(&mut cx);
-    let method_handler = Arc::clone(&cx.argument::<JsBox<ClientMethodHandlerWrapper>>(1)?.0);
-    let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
-
-    let (sender, receiver) = std::sync::mpsc::channel();
-    crate::RUNTIME.spawn(async move {
-        if let Some(method_handler) = &*method_handler.read().await {
-            let (response, is_error) = method_handler.call_method(method).await;
-            method_handler.channel.send(move |mut cx| {
-                let cb = callback.into_inner(&mut cx);
-                let this = cx.undefined();
-
-                let args = [
-                    if is_error {
-                        cx.string(response.clone()).upcast::<JsValue>()
-                    } else {
-                        cx.undefined().upcast::<JsValue>()
-                    },
-                    cx.string(response).upcast::<JsValue>(),
-                ];
-
-                cb.call(&mut cx, this, args)?;
-
-                Ok(())
-            });
-        } else {
-            // Notify that the client got destroyed
-            // Safe to unwrap because the receiver is waiting on it
-            sender.send(()).unwrap();
+pub fn destroy_client(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    match cx.argument::<JsBox<SharedClientMethodHandler>>(0)?.write() {
+        Ok(mut lock) => *lock = None,
+        Err(e) => {
+            return cx
+                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
         }
-    });
-
-    if receiver.recv().is_ok() {
-        return cx.throw_error(
-            serde_json::to_string(&Response::Panic("Client got destroyed".to_string())).expect("json to string error"),
-        );
     }
-
     Ok(cx.undefined())
 }
 
+pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    match cx.argument::<JsBox<SharedClientMethodHandler>>(1)?.read() {
+        Ok(lock) => {
+            let method_handler = lock.clone();
+            let method = cx.argument::<JsString>(0)?;
+            let method = method.value(&mut cx);
+            let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
+            if let Some(method_handler) = method_handler {
+                crate::RUNTIME.spawn(async move {
+                    let (response, is_error) = method_handler.call_method(method).await;
+                    method_handler.channel.send(move |mut cx| {
+                        let cb = callback.into_inner(&mut cx);
+                        let this = cx.undefined();
+
+                        let args = [
+                            if is_error {
+                                cx.string(response.clone()).upcast::<JsValue>()
+                            } else {
+                                cx.undefined().upcast::<JsValue>()
+                            },
+                            cx.string(response).upcast::<JsValue>(),
+                        ];
+
+                        cb.call(&mut cx, this, args)?;
+                        Ok(())
+                    });
+                });
+
+                Ok(cx.undefined())
+            } else {
+                // Notify that the client got destroyed
+                cx.throw_error(
+                    serde_json::to_string(&Response::Panic("Client was destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            }
+        }
+        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
+    }
+}
+
 // MQTT
-pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsPromise> {
+pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
     let mut topics = Vec::with_capacity(vec.len());
@@ -134,25 +130,28 @@ pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsPromise> {
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-    let method_handler = Arc::clone(&cx.argument::<JsBox<ClientMethodHandlerWrapper>>(2)?.0);
-    let (deferred, promise) = cx.promise();
 
-    crate::RUNTIME.spawn(async move {
-        if let Some(method_handler) = &*method_handler.read().await {
-            let channel0 = method_handler.channel.clone();
-            let channel1 = method_handler.channel.clone();
-            rust_listen_mqtt(&method_handler.client, topics, move |event_data| {
-                call_event_callback(&channel0, event_data, callback.clone())
-            })
-            .await;
-
-            deferred.settle_with(&channel1, move |mut cx| Ok(cx.undefined()));
-        } else {
-            panic!("Client got destroyed")
+    match cx.argument::<JsBox<SharedClientMethodHandler>>(2)?.read() {
+        Ok(lock) => {
+            let method_handler = lock.clone();
+            if let Some(method_handler) = method_handler {
+                crate::RUNTIME.spawn(async move {
+                    rust_listen_mqtt(&method_handler.client, topics, move |event_data| {
+                        call_event_callback(&method_handler.channel, event_data, callback.clone())
+                    })
+                    .await;
+                });
+                Ok(cx.undefined())
+            } else {
+                // Notify that the client got destroyed
+                cx.throw_error(
+                    serde_json::to_string(&Response::Panic("Client was destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            }
         }
-    });
-
-    Ok(promise)
+        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
+    }
 }
 
 fn call_event_callback(channel: &neon::event::Channel, event_data: String, callback: Arc<JsCallback>) {

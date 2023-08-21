@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
@@ -12,23 +12,21 @@ use iota_sdk_bindings_core::{
     Response, Result, WalletMethod, WalletOptions,
 };
 use neon::prelude::*;
-use tokio::sync::RwLock;
 
 use crate::{
-    client::{ClientMethodHandler, ClientMethodHandlerWrapper},
+    client::{ClientMethodHandler, SharedClientMethodHandler},
     secret_manager::SecretManagerMethodHandler,
 };
 
-// Wrapper so we can destroy the WalletMethodHandler
-pub type WalletMethodHandlerWrapperInner = Arc<RwLock<Option<WalletMethodHandler>>>;
-// Wrapper because we can't impl Finalize on WalletMethodHandlerWrapperInner
-pub struct WalletMethodHandlerWrapper(pub WalletMethodHandlerWrapperInner);
-impl Finalize for WalletMethodHandlerWrapper {}
+pub type SharedWalletMethodHandler = Arc<RwLock<Option<WalletMethodHandler>>>;
 
+#[derive(Clone)]
 pub struct WalletMethodHandler {
     channel: Channel,
     wallet: Wallet,
 }
+
+impl Finalize for WalletMethodHandler {}
 
 type JsCallback = Root<JsFunction<JsObject>>;
 
@@ -68,8 +66,6 @@ impl WalletMethodHandler {
     }
 }
 
-impl Finalize for WalletMethodHandler {}
-
 fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callback: Arc<JsCallback>) {
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
@@ -86,57 +82,56 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callba
     });
 }
 
-pub fn create_wallet(mut cx: FunctionContext) -> JsResult<JsBox<WalletMethodHandlerWrapper>> {
+pub fn create_wallet(mut cx: FunctionContext) -> JsResult<JsBox<SharedWalletMethodHandler>> {
     let options = cx.argument::<JsString>(0)?;
     let options = options.value(&mut cx);
     let channel = cx.channel();
     let method_handler = WalletMethodHandler::new(channel, options)
         .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
 
-    Ok(cx.boxed(WalletMethodHandlerWrapper(Arc::new(RwLock::new(Some(method_handler))))))
+    Ok(cx.boxed(Arc::new(RwLock::new(Some(method_handler)))))
 }
 
 pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let method = cx.argument::<JsString>(0)?;
-    let method = method.value(&mut cx);
-    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(1)?.0);
-    let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
+    match cx.argument::<JsBox<SharedWalletMethodHandler>>(1)?.read() {
+        Ok(lock) => {
+            let method_handler = lock.clone();
+            let method = cx.argument::<JsString>(0)?;
+            let method = method.value(&mut cx);
+            let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
+            if let Some(method_handler) = method_handler {
+                crate::RUNTIME.spawn(async move {
+                    let (response, is_error) = method_handler.call_method(method).await;
+                    method_handler.channel.send(move |mut cx| {
+                        let cb = callback.into_inner(&mut cx);
+                        let this = cx.undefined();
 
-    let (sender, receiver) = std::sync::mpsc::channel();
-    crate::RUNTIME.spawn(async move {
-        if let Some(method_handler) = &*method_handler.read().await {
-            let (response, is_error) = method_handler.call_method(method).await;
-            method_handler.channel.send(move |mut cx| {
-                let cb = callback.into_inner(&mut cx);
-                let this = cx.undefined();
+                        let args = [
+                            if is_error {
+                                cx.string(response.clone()).upcast::<JsValue>()
+                            } else {
+                                cx.undefined().upcast::<JsValue>()
+                            },
+                            cx.string(response).upcast::<JsValue>(),
+                        ];
 
-                let args = [
-                    if is_error {
-                        cx.string(response.clone()).upcast::<JsValue>()
-                    } else {
-                        cx.undefined().upcast::<JsValue>()
-                    },
-                    cx.string(response).upcast::<JsValue>(),
-                ];
+                        cb.call(&mut cx, this, args)?;
 
-                cb.call(&mut cx, this, args)?;
+                        Ok(())
+                    });
+                });
 
-                Ok(())
-            });
-        } else {
-            // Notify that the wallet got destroyed
-            // Safe to unwrap because the receiver is waiting on it
-            sender.send(()).unwrap();
+                Ok(cx.undefined())
+            } else {
+                // Notify that the wallet was destroyed
+                cx.throw_error(
+                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            }
         }
-    });
-
-    if receiver.recv().is_ok() {
-        return cx.throw_error(
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).expect("json to string error"),
-        );
+        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
     }
-
-    Ok(cx.undefined())
 }
 
 pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
@@ -149,86 +144,89 @@ pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
             WalletEventType::try_from(event_type.value(&mut cx) as u8).or_else(|e| cx.throw_error(e))?;
         event_types.push(wallet_event_type);
     }
-
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(2)?.0);
 
-    crate::RUNTIME.spawn(async move {
-        if let Some(method_handler) = &*method_handler.read().await {
-            let channel = method_handler.channel.clone();
-            method_handler
-                .wallet
-                .listen(event_types, move |event_data| {
-                    call_event_callback(&channel, event_data.clone(), callback.clone())
-                })
-                .await;
-        } else {
-            panic!("Wallet got destroyed")
+    match cx.argument::<JsBox<SharedWalletMethodHandler>>(2)?.read() {
+        Ok(lock) => {
+            let method_handler = lock.clone();
+            if let Some(method_handler) = method_handler {
+                crate::RUNTIME.spawn(async move {
+                    method_handler
+                        .wallet
+                        .listen(event_types, move |event_data| {
+                            call_event_callback(&method_handler.channel, event_data.clone(), callback.clone())
+                        })
+                        .await;
+                });
+
+                Ok(cx.undefined())
+            } else {
+                // Notify that the wallet was destroyed
+                cx.throw_error(
+                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            }
         }
-    });
+        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
+    }
+}
 
+pub fn destroy_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    match cx.argument::<JsBox<SharedWalletMethodHandler>>(0)?.write() {
+        Ok(mut lock) => *lock = None,
+        Err(e) => {
+            return cx
+                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
+        }
+    }
     Ok(cx.undefined())
 }
 
-pub fn destroy_wallet(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
-    let channel = cx.channel();
-    let (deferred, promise) = cx.promise();
-    crate::RUNTIME.spawn(async move {
-        *method_handler.write().await = None;
-        deferred.settle_with(&channel, move |mut cx| Ok(cx.undefined()));
-    });
-    Ok(promise)
-}
+pub fn get_client(mut cx: FunctionContext) -> JsResult<JsBox<SharedClientMethodHandler>> {
+    match cx.argument::<JsBox<SharedWalletMethodHandler>>(0)?.read() {
+        Ok(lock) => {
+            if let Some(method_handler) = &*lock {
+                let client_method_handler =
+                    ClientMethodHandler::new_with_client(cx.channel(), method_handler.wallet.client().clone());
 
-pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
-    let channel = cx.channel();
-
-    let (deferred, promise) = cx.promise();
-    crate::RUNTIME.spawn(async move {
-        if let Some(method_handler) = &*method_handler.read().await {
-            let client_method_handler =
-                ClientMethodHandler::new_with_client(channel.clone(), method_handler.wallet.client().clone());
-            deferred.settle_with(&channel, move |mut cx| {
-                Ok(cx.boxed(ClientMethodHandlerWrapper(Arc::new(RwLock::new(Some(
-                    client_method_handler,
-                ))))))
-            });
-        } else {
-            deferred.settle_with(&channel, move |mut cx| {
-                cx.error(
-                    serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
+                Ok(cx.boxed(Arc::new(RwLock::new(Some(client_method_handler)))))
+            } else {
+                // Notify that the wallet was destroyed
+                cx.throw_error(
+                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
                         .expect("json to string error"),
                 )
-            });
+            }
         }
-    });
-
-    Ok(promise)
+        Err(e) => {
+            return cx
+                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
+        }
+    }
 }
 
-pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let method_handler = Arc::clone(&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
-    let channel = cx.channel();
+pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<SecretManagerMethodHandler>>> {
+    match cx.argument::<JsBox<SharedWalletMethodHandler>>(0)?.read() {
+        Ok(lock) => {
+            if let Some(method_handler) = &*lock {
+                let secret_manager_method_handler = SecretManagerMethodHandler::new_with_secret_manager(
+                    cx.channel(),
+                    method_handler.wallet.get_secret_manager().clone(),
+                );
 
-    let (deferred, promise) = cx.promise();
-    crate::RUNTIME.spawn(async move {
-        if let Some(method_handler) = &*method_handler.read().await {
-            let secret_manager_method_handler = SecretManagerMethodHandler::new_with_secret_manager(
-                channel.clone(),
-                method_handler.wallet.get_secret_manager().clone(),
-            );
-            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(secret_manager_method_handler)));
-        } else {
-            deferred.settle_with(&channel, move |mut cx| {
-                cx.error(
-                    serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
+                Ok(cx.boxed(secret_manager_method_handler))
+            } else {
+                // Notify that the wallet was destroyed
+                cx.throw_error(
+                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
                         .expect("json to string error"),
                 )
-            });
+            }
         }
-    });
-
-    Ok(promise)
+        Err(e) => {
+            return cx
+                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
+        }
+    }
 }
