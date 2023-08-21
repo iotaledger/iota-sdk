@@ -4,7 +4,7 @@
 use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
 use crate::types::block::{
-    output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
+    output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
     slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -189,6 +189,41 @@ pub struct BaseTokenResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub use_metric_prefix: bool,
+}
+
+/// Response of
+/// - GET /api/core/v3/committee
+/// The validator information of the committee.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommitteeResponse {
+    pub epoch_index: EpochIndex,
+    #[serde(with = "crate::utils::serde::string")]
+    pub total_stake: u64,
+    #[serde(with = "crate::utils::serde::string")]
+    pub total_validator_stake: u64,
+    pub committee: Box<[CommitteeMember]>,
+}
+
+/// Validator information.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommitteeMember {
+    pub account_id: AccountId,
+    #[serde(with = "crate::utils::serde::string")]
+    pub pool_stake: u64,
+    #[serde(with = "crate::utils::serde::string")]
+    pub validator_stake: u64,
+    #[serde(with = "crate::utils::serde::string")]
+    pub fixed_cost: u64,
 }
 
 /// Response of

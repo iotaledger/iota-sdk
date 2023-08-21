@@ -15,13 +15,13 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse, RoutesResponse,
-            SubmitBlockResponse, UtxoChangesResponse,
+            BlockMetadataResponse, CommitteeResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse,
+            RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputDto, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
-            slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
+            slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
         },
         TryFromDto,
@@ -88,6 +88,21 @@ impl ClientInner {
             .read()
             .await
             .get_request(INFO_PATH, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Return the information of committee members at the given epoch index. If epoch index is not provided, the
+    /// current committee members are returned.
+    /// GET /api/core/v3/committee/?epochIndex
+    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>>) -> Result<CommitteeResponse> {
+        const PATH: &str = "api/core/v3/committee";
+
+        let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
             .await
     }
 
