@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Fetch a block ID from the node.
-    let block_id = client.get_tips().await?[0];
+    let block_id = client.get_issuance().await?.strong_parents[0];
 
     // Get the block.
     let block = client.get_block(&block_id).await?;

@@ -35,8 +35,12 @@ async fn test_get_info() {
 
 #[ignore]
 #[tokio::test]
-async fn test_get_tips() {
-    let r = setup_client_with_node_health_ignored().await.get_tips().await.unwrap();
+async fn test_get_issuance() {
+    let r = setup_client_with_node_health_ignored()
+        .await
+        .get_issuance()
+        .await
+        .unwrap();
     println!("{r:#?}");
 }
 

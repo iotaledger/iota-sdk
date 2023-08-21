@@ -15,6 +15,7 @@ import {
     IRent,
     OutputId,
     hexToBigInt,
+    u64,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
@@ -120,7 +121,7 @@ export class Utils {
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: IRent): bigint {
+    static computeStorageDeposit(output: Output, rent: IRent): u64 {
         const depositHex = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {

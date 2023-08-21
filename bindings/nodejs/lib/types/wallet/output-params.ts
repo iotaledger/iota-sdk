@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { INativeToken } from '../models';
+import { u64 } from '../utils';
 import { HexEncodedString } from '../utils/hex-encoding';
 
 /** Options for the creation of an output */
 export interface OutputParams {
     recipientAddress: string;
-    amount: bigint | string;
+    amount: u64 | string;
     assets?: Assets;
     features?: Features;
     unlocks?: Unlocks;

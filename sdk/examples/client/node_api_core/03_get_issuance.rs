@@ -1,11 +1,12 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns tips that are ideal for attaching a block by querying its `/api/core/v3/tips` endpoint.
+//! Returns issuance with parents that are ideal for attaching a block by querying
+//! the `/api/core/v3/issuance` endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example node_api_core_get_tips [NODE URL]
+//! cargo run --release --example node_api_core_get_issuance [NODE URL]
 //! ```
 
 use iota_sdk::client::{Client, Result};
@@ -23,10 +24,10 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Get tips.
-    let tips = client.get_tips().await?;
+    // Get issuance.
+    let issuance = client.get_issuance().await?;
 
-    println!("Tips:\n{tips:#?}");
+    println!("Issuance:\n{issuance:#?}");
 
     Ok(())
 }

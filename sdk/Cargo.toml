@@ -408,8 +408,8 @@ path = "examples/client/node_api_core/01_get_routes.rs"
 required-features = ["client"]
 
 [[example]]
-name = "node_api_core_get_tips"
-path = "examples/client/node_api_core/03_get_tips.rs"
+name = "node_api_core_get_issuance"
+path = "examples/client/node_api_core/03_get_issuance.rs"
 required-features = ["client"]
 
 [[example]]

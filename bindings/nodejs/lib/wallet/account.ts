@@ -47,6 +47,8 @@ import {
     FoundryOutput,
     Response,
     PreparedCreateNativeTokenTransaction,
+    u64,
+    u256,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
@@ -165,7 +167,7 @@ export class Account {
      */
     async prepareBurnNativeToken(
         tokenId: string,
-        burnAmount: bigint,
+        burnAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -310,7 +312,7 @@ export class Account {
      */
     async prepareMeltNativeToken(
         tokenId: string,
-        meltAmount: bigint,
+        meltAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -767,7 +769,7 @@ export class Account {
      */
     async prepareMintNativeToken(
         tokenId: string,
-        mintAmount: bigint,
+        mintAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -1009,7 +1011,7 @@ export class Account {
      * @returns The sent transaction.
      */
     async send(
-        amount: bigint | string,
+        amount: u64 | string,
         address: string,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
