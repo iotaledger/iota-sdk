@@ -52,7 +52,7 @@ pub enum WalletMethod {
     /// Read accounts.
     /// Expected response: [`Accounts`](crate::Response::Accounts)
     GetAccounts,
-    /// Read accounts.
+    /// Get historic chrysalis data.
     /// Expected response: [`ChrysalisData`](crate::Response::ChrysalisData)
     #[cfg(feature = "storage")]
     #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]

@@ -117,5 +117,5 @@ export {
     getSecretManagerFromWallet,
     listenMqtt,
     migrateStrongholdSnapshotV2ToV3,
-    migrateDbFromChrysalisToStardust
+    migrateDbFromChrysalisToStardust,
 };

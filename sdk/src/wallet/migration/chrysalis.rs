@@ -24,13 +24,12 @@ use crate::{
     wallet::{
         migration::{MigrationVersion, MIGRATION_VERSION_KEY},
         storage::constants::{
-            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
+            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY,
+            WALLET_INDEXATION_KEY,
         },
         Error, Result,
     },
 };
-
-pub(crate) const CHRYSALIS_STORAGE_KEY: &str = "CHRYSALIS_DATA";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

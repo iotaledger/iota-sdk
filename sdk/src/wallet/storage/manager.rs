@@ -113,22 +113,18 @@ impl StorageManager {
         self.get(&key).await
     }
 
+    #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn set_chrysalis_data(
         &self,
         chrysalis_data: std::collections::HashMap<String, String>,
     ) -> crate::wallet::Result<()> {
-        self.set(
-            crate::wallet::migration::chrysalis::CHRYSALIS_STORAGE_KEY,
-            &chrysalis_data,
-        )
-        .await
+        self.set(CHRYSALIS_STORAGE_KEY, &chrysalis_data).await
     }
 
     pub(crate) async fn get_chrysalis_data(
         &self,
     ) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
-        self.get(crate::wallet::migration::chrysalis::CHRYSALIS_STORAGE_KEY)
-            .await
+        self.get(CHRYSALIS_STORAGE_KEY).await
     }
 }
 

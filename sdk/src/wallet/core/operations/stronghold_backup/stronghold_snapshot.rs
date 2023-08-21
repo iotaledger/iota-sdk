@@ -11,10 +11,10 @@ use crate::{
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
         migration::{
-            chrysalis::{key_to_chrysalis_key, migrate_from_chrysalis_data, CHRYSALIS_STORAGE_KEY},
+            chrysalis::{key_to_chrysalis_key, migrate_from_chrysalis_data},
             latest_backup_migration_version, migrate, MigrationVersion, MIGRATION_VERSION_KEY,
         },
-        storage::constants::WALLET_INDEXATION_KEY,
+        storage::constants::{CHRYSALIS_STORAGE_KEY, WALLET_INDEXATION_KEY},
         ClientOptions, Wallet,
     },
 };

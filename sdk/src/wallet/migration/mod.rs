@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO: do we want a chrysalis feature for this?
+#[cfg(not(target_family = "wasm"))]
 pub(crate) mod chrysalis;
 mod migrate_0;
 mod migrate_1;
@@ -13,6 +13,7 @@ use std::collections::HashMap;
 
 use anymap::Map;
 use async_trait::async_trait;
+#[cfg(not(target_family = "wasm"))]
 pub use chrysalis::migrate_db_from_chrysalis_to_stardust;
 use once_cell::sync::Lazy;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
