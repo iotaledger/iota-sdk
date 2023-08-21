@@ -5,9 +5,10 @@ use alloc::{string::String, vec::Vec};
 
 use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
+    parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
-    slot::SlotIndex,
-    BlockId, IssuerId,
+    slot::{SlotCommitment, SlotIndex},
+    BlockId,
 };
 
 /// Response of GET /api/core/v3/info.
@@ -21,7 +22,6 @@ use crate::types::block::{
 pub struct InfoResponse {
     pub name: String,
     pub version: String,
-    pub issuer_id: IssuerId,
     pub status: StatusResponse,
     pub metrics: MetricsResponse,
     pub supported_protocol_versions: Vec<u8>,
@@ -47,19 +47,19 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    pub last_accepted_block_id: BlockId,
-    pub last_confirmed_block_id: BlockId,
-    pub finalized_slot: SlotIndex,
-    #[cfg_attr(feature = "serde", serde(rename = "ATT"))]
-    pub att: u64,
-    #[cfg_attr(feature = "serde", serde(rename = "RATT"))]
-    pub ratt: u64,
-    #[cfg_attr(feature = "serde", serde(rename = "CTT"))]
-    pub ctt: u64,
-    #[cfg_attr(feature = "serde", serde(rename = "RCTT"))]
-    pub rctt: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub accepted_tangle_time: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub relative_accepted_tangle_time: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub confirmed_tangle_time: u64,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub relative_confirmed_tangle_time: u64,
     pub latest_committed_slot: SlotIndex,
+    pub latest_finalized_slot: SlotIndex,
     pub pruning_slot: SlotIndex,
+    pub latest_accepted_block_id: BlockId,
+    pub latest_confirmed_block_id: BlockId,
 }
 
 /// Returned in [`InfoResponse`].
@@ -94,16 +94,26 @@ pub struct BaseTokenResponse {
     pub use_metric_prefix: bool,
 }
 
-/// Response of GET /api/core/v3/tips.
-/// Returns non-lazy tips.
+/// Response of
+/// - GET /api/core/v3/blocks/issuance
+/// Information that is ideal for attaching a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct TipsResponse {
-    pub tips: Vec<BlockId>,
+pub struct IssuanceBlockHeaderResponse {
+    /// Blocks that are strongly directly approved.
+    pub strong_parents: StrongParents,
+    /// Blocks that are weakly directly approved.
+    pub weak_parents: WeakParents,
+    /// Blocks that are directly referenced to adjust opinion.
+    pub shallow_like_parents: ShallowLikeParents,
+    /// The slot index of the latest finalized slot.
+    pub latest_finalized_slot: SlotIndex,
+    /// The most recent slot commitment.
+    pub commitment: SlotCommitment,
 }
 
 /// Response of POST /api/core/v3/blocks.

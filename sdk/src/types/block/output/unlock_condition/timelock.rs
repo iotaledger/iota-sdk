@@ -40,18 +40,17 @@ fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Resu
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct TimelockUnlockConditionDto {
+    struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub slot_index: u64,
+        kind: u8,
+        slot_index: u64,
     }
 
     impl From<&TimelockUnlockCondition> for TimelockUnlockConditionDto {
@@ -70,4 +69,10 @@ pub(crate) mod dto {
             Self::new(SlotIndex::from(value.slot_index)).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
+
+    impl_serde_typed_dto!(
+        TimelockUnlockCondition,
+        TimelockUnlockConditionDto,
+        "timelock unlock condition"
+    );
 }

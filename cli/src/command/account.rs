@@ -441,7 +441,7 @@ pub async fn create_native_token_command(
             transaction.block_id
         );
         account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         // Sync account after the transaction got confirmed, so the account output is available
         account.sync(None).await?;

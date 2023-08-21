@@ -6,7 +6,7 @@ import { AliasId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
-import { HexEncodedString } from '../utils';
+import { HexEncodedString, u256, u64 } from '../utils';
 
 /**
  * Account identifier
@@ -38,27 +38,27 @@ export interface Balance {
 /** The balance of the base coin */
 export interface BaseCoinBalance {
     /** The total amount of the outputs */
-    total: bigint;
+    total: u64;
     /** The amount of the outputs that aren't used in a transaction */
-    available: bigint;
+    available: u64;
     /** Voting power */
     votingPower: string;
 }
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
-    alias: bigint;
-    basic: bigint;
-    foundry: bigint;
-    nft: bigint;
+    alias: u64;
+    basic: u64;
+    foundry: u64;
+    nft: u64;
 }
 
 /** The balance of a native token */
 export interface NativeTokenBalance {
     tokenId: HexEncodedString;
     metadata?: string;
-    total: bigint;
-    available: bigint;
+    total: u256;
+    available: u256;
 }
 
 /** Sync options for an account */
@@ -87,7 +87,7 @@ export interface SyncOptions {
     /// Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
     /// pruned.
     syncIncomingTransactions?: boolean;
-    /** Checks pending transactions and promotes/reattaches them if necessary. Default: true. */
+    /** Checks pending transactions and reissues them if necessary. Default: true. */
     syncPendingTransactions?: boolean;
     /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
     account?: AccountSyncOptions;

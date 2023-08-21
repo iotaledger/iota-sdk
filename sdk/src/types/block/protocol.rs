@@ -4,9 +4,10 @@
 use alloc::string::String;
 use core::borrow::Borrow;
 
-use packable::{prefix::StringPrefix, Packable};
+use crypto::hashes::{blake2b::Blake2b256, Digest};
+use packable::{prefix::StringPrefix, Packable, PackableExt};
 
-use super::address::Hrp;
+use super::{address::Hrp, slot::SlotIndex};
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
@@ -20,7 +21,7 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 pub struct ProtocolParameters {
     // The version of the protocol running.
     #[cfg_attr(feature = "serde", serde(rename = "version"))]
-    protocol_version: u8,
+    pub(crate) protocol_version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
@@ -133,6 +134,22 @@ impl ProtocolParameters {
     pub fn slot_duration_in_seconds(&self) -> u8 {
         self.slot_duration_in_seconds
     }
+
+    pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
+        calc_slot_index(
+            timestamp,
+            self.genesis_unix_timestamp(),
+            self.slot_duration_in_seconds(),
+        )
+    }
+
+    pub fn hash(&self) -> ProtocolParametersHash {
+        ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
+    }
+}
+
+pub fn calc_slot_index(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
+    (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.
@@ -150,3 +167,12 @@ pub fn protocol_parameters() -> ProtocolParameters {
     )
     .unwrap()
 }
+
+impl_id!(
+    pub ProtocolParametersHash,
+    32,
+    "The hash of the protocol parameters."
+);
+
+#[cfg(feature = "serde")]
+string_serde_impl!(ProtocolParametersHash);

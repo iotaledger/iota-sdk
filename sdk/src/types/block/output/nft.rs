@@ -505,19 +505,15 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
 }
 
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{
-                dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
-            },
-            Error,
+    use crate::{
+        types::{
+            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+            TryFromDto,
         },
-        TryFromDto,
+        utils::serde::string,
     };
 
     /// Describes an NFT output, a globally unique token with metadata attached.
@@ -527,8 +523,9 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
-        pub amount: String,
-        #[serde(with = "crate::utils::serde::string")]
+        #[serde(with = "string")]
+        pub amount: u64,
+        #[serde(with = "string")]
         pub mana: u64,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -537,22 +534,22 @@ pub(crate) mod dto {
         pub nft_id: NftId,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
+        pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
+        pub immutable_features: Vec<Feature>,
     }
 
     impl From<&NftOutput> for NftOutputDto {
         fn from(value: &NftOutput) -> Self {
             Self {
                 kind: NftOutput::KIND,
-                amount: value.amount().to_string(),
+                amount: value.amount(),
                 mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 nft_id: *value.nft_id(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
+                features: value.features().to_vec(),
+                immutable_features: value.immutable_features().to_vec(),
             }
         }
     }
@@ -562,23 +559,11 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = NftOutputBuilder::new_with_amount(
-                dto.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                dto.nft_id,
-            )
-            .with_mana(dto.mana);
-
-            for t in dto.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in dto.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in dto.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
+            let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
+                .with_mana(dto.mana)
+                .with_native_tokens(dto.native_tokens)
+                .with_features(dto.features)
+                .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
@@ -591,22 +576,19 @@ pub(crate) mod dto {
     impl NftOutput {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
-            amount: OutputBuilderAmountDto,
+            amount: OutputBuilderAmount,
             mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
-            immutable_features: Option<Vec<FeatureDto>>,
+            features: Option<Vec<Feature>>,
+            immutable_features: Option<Vec<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
             let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    *nft_id,
-                ),
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
+                OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
                 }
             }
@@ -623,18 +605,10 @@ pub(crate) mod dto {
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
             if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
@@ -650,10 +624,7 @@ mod tests {
     use super::*;
     use crate::types::{
         block::{
-            output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                FoundryId, SimpleTokenScheme, TokenId,
-            },
+            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
             protocol::protocol_parameters,
             rand::{
                 address::rand_account_address,
@@ -735,13 +706,13 @@ mod tests {
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
         let output_split = NftOutput::try_from_dtos(
-            OutputBuilderAmountDto::Amount(output.amount().to_string()),
+            OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
             Some(output.native_tokens().to_vec()),
             output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().iter().map(Into::into).collect()),
-            Some(output.immutable_features().iter().map(Into::into).collect()),
+            Some(output.features().to_vec()),
+            Some(output.immutable_features().to_vec()),
             &protocol_parameters,
         )
         .unwrap();
@@ -749,13 +720,13 @@ mod tests {
 
         let test_split_dto = |builder: NftOutputBuilder| {
             let output_split = NftOutput::try_from_dtos(
-                (&builder.amount).into(),
+                builder.amount,
                 builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.nft_id,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
-                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                Some(builder.features.iter().cloned().collect()),
+                Some(builder.immutable_features.iter().cloned().collect()),
                 &protocol_parameters,
             )
             .unwrap();

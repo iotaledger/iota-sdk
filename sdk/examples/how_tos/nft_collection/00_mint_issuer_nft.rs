@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
 
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
-    for (output_index, output) in transaction.payload.essence().as_regular().outputs().iter().enumerate() {
+    for (output_index, output) in transaction.payload.essence().outputs().iter().enumerate() {
         if let Output::Nft(nft_output) = output {
             // New minted nft id is empty in the output
             if nft_output.nft_id().is_null() {
@@ -72,7 +72,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
     );
     // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(transaction_id, None, None)
+        .reissue_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",

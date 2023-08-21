@@ -16,18 +16,20 @@ use iota_sdk::{
     types::{
         api::{
             core::response::{
-                BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
+                BlockMetadataResponse, InfoResponse as NodeInfo, IssuanceBlockHeaderResponse,
+                OutputWithMetadataResponse, PeerResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address, Hrp},
-            input::dto::UtxoInputDto,
+            address::{Address, Bech32Address, Hrp},
+            input::UtxoInput,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
-            signature::dto::Ed25519SignatureDto,
-            unlock::dto::UnlockDto,
+            signature::Ed25519Signature,
+            slot::SlotCommitmentId,
+            unlock::Unlock,
             BlockDto, BlockId,
         },
     },
@@ -78,10 +80,10 @@ pub enum Response {
     SignedTransaction(TransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
-    SignatureUnlock(UnlockDto),
+    SignatureUnlock(Unlock),
     /// Response for:
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
-    Ed25519Signature(Ed25519SignatureDto),
+    Ed25519Signature(Ed25519Signature),
     /// Response for:
     /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
@@ -100,23 +102,20 @@ pub enum Response {
     /// - [`GetPeers`](crate::method::ClientMethod::GetPeers)
     Peers(Vec<PeerResponse>),
     /// Response for:
-    /// - [`GetTips`](crate::method::ClientMethod::GetTips)
-    Tips(Vec<BlockId>),
+    /// - [`GetIssuance`](crate::method::ClientMethod::GetIssuance)
+    Issuance(IssuanceBlockHeaderResponse),
     /// Response for:
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
     Block(BlockDto),
     /// Response for:
     /// - [`PostBlockPayload`](crate::method::ClientMethod::PostBlockPayload)
-    /// - [`Retry`](crate::method::ClientMethod::Retry)
     BlockIdWithBlock(BlockId, BlockDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
-    /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
-    /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
@@ -143,28 +142,17 @@ pub enum Response {
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
     Blocks(Vec<BlockDto>),
     /// Response for:
-    /// - [`RetryUntilIncluded`](crate::method::ClientMethod::RetryUntilIncluded)
-    RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
-    /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
-    Inputs(Vec<UtxoInputDto>),
+    Inputs(Vec<UtxoInput>),
     /// Response for:
     /// [`OutputIdToUtxoInput`](crate::method::UtilsMethod::OutputIdToUtxoInput)
-    Input(UtxoInputDto),
-    /// Response for:
-    /// - [`Reattach`](crate::method::ClientMethod::Reattach)
-    /// - [`ReattachUnchecked`](crate::method::ClientMethod::ReattachUnchecked)
-    Reattached((BlockId, BlockDto)),
-    /// Response for:
-    /// - [`Promote`](crate::method::ClientMethod::Promote)
-    /// - [`PromoteUnchecked`](crate::method::ClientMethod::PromoteUnchecked)
-    Promoted((BlockId, BlockDto)),
+    Input(UtxoInput),
     /// Response for:
     /// - [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     Bech32ToHex(String),
     /// Response for:
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
-    ParsedBech32Address(AddressDto),
+    ParsedBech32Address(Address),
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
@@ -193,6 +181,8 @@ pub enum Response {
     HexAddress(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
+    /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
+    SlotCommitmentId(SlotCommitmentId),
 
     // Responses in client and wallet
     /// Response for:
@@ -223,7 +213,7 @@ pub enum Response {
     /// - [`BlockId`](crate::method::UtilsMethod::BlockId)
     /// - [`PostBlock`](crate::method::ClientMethod::PostBlock)
     /// - [`PostBlockRaw`](crate::method::ClientMethod::PostBlockRaw)
-    /// - [`RetryTransactionUntilIncluded`](crate::method::AccountMethod::RetryTransactionUntilIncluded)
+    /// - [`ReissueTransactionUntilIncluded`](crate::method::AccountMethod::ReissueTransactionUntilIncluded)
     BlockId(BlockId),
     /// Response for:
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)

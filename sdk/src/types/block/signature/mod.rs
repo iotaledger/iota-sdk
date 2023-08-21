@@ -3,8 +3,6 @@
 
 mod ed25519;
 
-use alloc::boxed::Box;
-
 use derive_more::From;
 
 pub use self::ed25519::Ed25519Signature;
@@ -15,19 +13,14 @@ use crate::types::block::Error;
 /// This is defined as part of the Unspent Transaction Output (UTXO) transaction protocol.
 ///
 /// RFC: <https://github.com/luca-moser/protocol-rfcs/blob/signed-tx-payload/text/0000-transaction-payload/0000-transaction-payload.md#signature-unlock-block>
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable, From)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidSignatureKind)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 pub enum Signature {
     /// An Ed25519 signature.
     #[packable(tag = Ed25519Signature::KIND)]
-    Ed25519(Box<Ed25519Signature>),
-}
-
-impl From<Ed25519Signature> for Signature {
-    fn from(value: Ed25519Signature) -> Self {
-        Self::Ed25519(Box::new(value))
-    }
+    Ed25519(Ed25519Signature),
 }
 
 impl core::fmt::Debug for Signature {
@@ -45,37 +38,16 @@ impl Signature {
             Self::Ed25519(_) => Ed25519Signature::KIND,
         }
     }
-}
 
-pub mod dto {
-    use serde::{Deserialize, Serialize};
-
-    pub use super::ed25519::dto::Ed25519SignatureDto;
-    use super::*;
-    use crate::types::block::Error;
-
-    /// Describes all the different signature types.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
-    #[serde(untagged)]
-    pub enum SignatureDto {
-        Ed25519(Box<Ed25519SignatureDto>),
+    /// Checks whether the signature is an [`Ed25519Signature`].
+    pub fn is_ed25519(&self) -> bool {
+        matches!(self, Self::Ed25519(_))
     }
 
-    impl From<&Signature> for SignatureDto {
-        fn from(value: &Signature) -> Self {
-            match value {
-                Signature::Ed25519(s) => Self::Ed25519(Box::new(s.as_ref().into())),
-            }
-        }
-    }
-
-    impl TryFrom<SignatureDto> for Signature {
-        type Error = Error;
-
-        fn try_from(value: SignatureDto) -> Result<Self, Self::Error> {
-            match value {
-                SignatureDto::Ed25519(s) => Ok(Self::Ed25519(Box::new((*s).try_into()?))),
-            }
-        }
+    /// Gets the signature as an actual [`Ed25519Signature`].
+    /// PANIC: do not call on a non-ed25519 signature.
+    pub fn as_ed25519(&self) -> &Ed25519Signature {
+        let Self::Ed25519(sig) = self;
+        sig
     }
 }

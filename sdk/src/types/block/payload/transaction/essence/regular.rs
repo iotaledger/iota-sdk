@@ -1,17 +1,20 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::{
     block::{
+        context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
+        mana::{Allotment, Allotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
+        slot::SlotIndex,
         Error,
     },
     ValidationParams,
@@ -22,11 +25,13 @@ use crate::types::{
 #[must_use]
 pub struct RegularTransactionEssenceBuilder {
     network_id: u64,
-    creation_time: Option<u64>,
+    context_inputs: Vec<ContextInput>,
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
+    allotments: BTreeSet<Allotment>,
     payload: OptionalPayload,
+    creation_slot: Option<SlotIndex>,
 }
 
 impl RegularTransactionEssenceBuilder {
@@ -34,17 +39,25 @@ impl RegularTransactionEssenceBuilder {
     pub fn new(network_id: u64, inputs_commitment: InputsCommitment) -> Self {
         Self {
             network_id,
-            creation_time: None,
+            context_inputs: Vec::new(),
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
+            allotments: BTreeSet::new(),
             payload: OptionalPayload::default(),
+            creation_slot: None,
         }
     }
 
-    /// Adds creation time to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_creation_time(mut self, creation_time: impl Into<Option<u64>>) -> Self {
-        self.creation_time = creation_time.into();
+    /// Adds creation slot to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<SlotIndex>>) -> Self {
+        self.creation_slot = creation_slot.into();
+        self
+    }
+
+    /// Adds context inputs to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_context_inputs(mut self, context_inputs: impl Into<Vec<ContextInput>>) -> Self {
+        self.context_inputs = context_inputs.into();
         self
     }
 
@@ -66,9 +79,27 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
+    /// Add allotments to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_allotments(mut self, allotments: impl IntoIterator<Item = Allotment>) -> Self {
+        self.allotments = allotments.into_iter().collect();
+        self
+    }
+
     /// Add an output to a [`RegularTransactionEssenceBuilder`].
     pub fn add_output(mut self, output: Output) -> Self {
         self.outputs.push(output);
+        self
+    }
+
+    /// Add an [`Allotment`] to a [`RegularTransactionEssenceBuilder`].
+    pub fn add_allotment(mut self, allotment: Allotment) -> Self {
+        self.allotments.insert(allotment);
+        self
+    }
+
+    /// Replaces an [`Allotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
+    pub fn replace_allotment(mut self, allotment: Allotment) -> Self {
+        self.allotments.replace(allotment);
         self
     }
 
@@ -93,13 +124,19 @@ impl RegularTransactionEssenceBuilder {
             }
         }
 
+        let context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount> = self
+            .context_inputs
+            .into_boxed_slice()
+            .try_into()
+            .map_err(Error::InvalidContextInputCount)?;
+
         let inputs: BoxedSlicePrefix<Input, InputCount> = self
             .inputs
             .into_boxed_slice()
             .try_into()
             .map_err(Error::InvalidInputCount)?;
 
-        verify_inputs::<true>(&inputs)?;
+        verify_inputs(&inputs)?;
 
         let outputs: BoxedSlicePrefix<Output, OutputCount> = self
             .outputs
@@ -111,28 +148,36 @@ impl RegularTransactionEssenceBuilder {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
-        verify_payload::<true>(&self.payload)?;
+        let allotments = Allotments::from_set(self.allotments)?;
 
-        let creation_time = self.creation_time.unwrap_or_else(|| {
-            #[cfg(feature = "std")]
-            let creation_time = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_nanos() as u64;
-            // TODO no_std way to have a nanosecond timestamp
-            // https://github.com/iotaledger/iota-sdk/issues/647
-            #[cfg(not(feature = "std"))]
-            let creation_time = 0;
+        verify_payload(&self.payload)?;
 
-            creation_time
-        });
+        let creation_slot = self
+            .creation_slot
+            .or_else(|| {
+                #[cfg(feature = "std")]
+                let creation_slot = params.protocol_parameters().map(|params| {
+                    params.slot_index(
+                        std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .unwrap()
+                            .as_nanos() as u64,
+                    )
+                });
+                #[cfg(not(feature = "std"))]
+                let creation_slot = None;
+                creation_slot
+            })
+            .ok_or(Error::InvalidField("creation slot"))?;
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
-            creation_time,
+            creation_slot,
+            context_inputs,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
+            allotments,
             payload: self.payload,
         })
     }
@@ -144,6 +189,8 @@ impl RegularTransactionEssenceBuilder {
     }
 }
 
+pub(crate) type ContextInputCount =
+    BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
 pub(crate) type InputCount = BoundedU16<{ *INPUT_COUNT_RANGE.start() }, { *INPUT_COUNT_RANGE.end() }>;
 pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUTPUT_COUNT_RANGE.end() }>;
 
@@ -155,8 +202,11 @@ pub struct RegularTransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
-    /// The time at which this transaction was created by the client. It's a Unix-like timestamp in nanosecond.
-    creation_time: u64,
+    /// The slot index in which the transaction was created.
+    creation_slot: SlotIndex,
+    #[packable(verify_with = verify_context_inputs_packable)]
+    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
+    context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount>,
     #[packable(verify_with = verify_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
     inputs: BoxedSlicePrefix<Input, InputCount>,
@@ -165,6 +215,7 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_outputs)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
+    allotments: Allotments,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
 }
@@ -183,9 +234,14 @@ impl RegularTransactionEssence {
         self.network_id
     }
 
-    /// Returns the creation time of a [`RegularTransactionEssence`].
-    pub fn creation_time(&self) -> u64 {
-        self.creation_time
+    /// Returns the slot index in which the [`RegularTransactionEssence`] was created.
+    pub fn creation_slot(&self) -> SlotIndex {
+        self.creation_slot
+    }
+
+    /// Returns the context inputs of a [`RegularTransactionEssence`].
+    pub fn context_inputs(&self) -> &[ContextInput] {
+        &self.context_inputs
     }
 
     /// Returns the inputs of a [`RegularTransactionEssence`].
@@ -201,6 +257,11 @@ impl RegularTransactionEssence {
     /// Returns the outputs of a [`RegularTransactionEssence`].
     pub fn outputs(&self) -> &[Output] {
         &self.outputs
+    }
+
+    /// Returns the allotments of a [`RegularTransactionEssence`].
+    pub fn allotments(&self) -> &[Allotment] {
+        &self.allotments
     }
 
     /// Returns the optional payload of a [`RegularTransactionEssence`].
@@ -224,15 +285,59 @@ fn verify_network_id<const VERIFY: bool>(network_id: &u64, visitor: &ProtocolPar
     Ok(())
 }
 
-fn verify_inputs<const VERIFY: bool>(inputs: &[Input]) -> Result<(), Error> {
+fn verify_context_inputs_packable<const VERIFY: bool>(
+    context_inputs: &[ContextInput],
+    _visitor: &ProtocolParameters,
+) -> Result<(), Error> {
     if VERIFY {
-        let mut seen_utxos = HashSet::new();
+        verify_context_inputs(context_inputs)?;
+    }
+    Ok(())
+}
 
-        for input in inputs.iter() {
-            let Input::Utxo(utxo) = input;
-            if !seen_utxos.insert(utxo) {
-                return Err(Error::DuplicateUtxo(*utxo));
+fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
+    // There must be zero or one Commitment Input.
+    if context_inputs
+        .iter()
+        .filter(|i| matches!(i, ContextInput::Commitment(_)))
+        .count()
+        > 1
+    {
+        return Err(Error::TooManyCommitmentInputs);
+    }
+
+    let mut reward_index_set = HashSet::new();
+    let mut bic_account_id_set = HashSet::new();
+    for input in context_inputs.iter() {
+        match input {
+            ContextInput::BlockIssuanceCredit(bic) => {
+                let account_id = bic.account_id();
+                // All Block Issuance Credit Inputs must reference a different Account ID.
+                if !bic_account_id_set.insert(account_id) {
+                    return Err(Error::DuplicateBicAccountId(account_id));
+                }
             }
+            ContextInput::Reward(r) => {
+                let idx = r.index();
+                // All Rewards Inputs must reference a different Index
+                if !reward_index_set.insert(idx) {
+                    return Err(Error::DuplicateRewardInputIndex(idx));
+                }
+            }
+            _ => (),
+        }
+    }
+
+    Ok(())
+}
+
+fn verify_inputs(inputs: &[Input]) -> Result<(), Error> {
+    let mut seen_utxos = HashSet::new();
+
+    for input in inputs.iter() {
+        let Input::Utxo(utxo) = input;
+        if !seen_utxos.insert(utxo) {
+            return Err(Error::DuplicateUtxo(*utxo));
         }
     }
 
@@ -240,7 +345,10 @@ fn verify_inputs<const VERIFY: bool>(inputs: &[Input]) -> Result<(), Error> {
 }
 
 fn verify_inputs_packable<const VERIFY: bool>(inputs: &[Input], _visitor: &ProtocolParameters) -> Result<(), Error> {
-    verify_inputs::<VERIFY>(inputs)
+    if VERIFY {
+        verify_inputs(inputs)?;
+    }
+    Ok(())
 }
 
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
@@ -290,14 +398,10 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
     Ok(())
 }
 
-fn verify_payload<const VERIFY: bool>(payload: &OptionalPayload) -> Result<(), Error> {
-    if VERIFY {
-        match &payload.0 {
-            Some(Payload::TaggedData(_)) | None => Ok(()),
-            Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
-        }
-    } else {
-        Ok(())
+fn verify_payload(payload: &OptionalPayload) -> Result<(), Error> {
+    match &payload.0 {
+        Some(Payload::TaggedData(_)) | None => Ok(()),
+        Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
     }
 }
 
@@ -305,21 +409,21 @@ fn verify_payload_packable<const VERIFY: bool>(
     payload: &OptionalPayload,
     _visitor: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_payload::<VERIFY>(payload)
+    if VERIFY {
+        verify_payload(payload)?;
+    }
+    Ok(())
 }
 
 pub(crate) mod dto {
-    use alloc::{
-        boxed::Box,
-        string::{String, ToString},
-    };
+    use alloc::string::{String, ToString};
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::{
-        block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -330,10 +434,12 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub network_id: String,
-        pub creation_time: u64,
-        pub inputs: Vec<InputDto>,
+        pub creation_slot: SlotIndex,
+        pub context_inputs: Vec<ContextInput>,
+        pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
+        pub allotments: Vec<Allotment>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -343,12 +449,14 @@ pub(crate) mod dto {
             Self {
                 kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
-                creation_time: value.creation_time(),
-                inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
+                creation_slot: value.creation_slot(),
+                context_inputs: value.context_inputs().to_vec(),
+                inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
+                allotments: value.allotments().to_vec(),
                 payload: match value.payload() {
-                    Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
+                    Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
                     None => None,
                 },
@@ -365,11 +473,6 @@ pub(crate) mod dto {
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let inputs = dto
-                .inputs
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<Input>, Error>>()?;
             let outputs = dto
                 .outputs
                 .into_iter()
@@ -377,13 +480,15 @@ pub(crate) mod dto {
                 .collect::<Result<Vec<Output>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
-                .with_creation_time(dto.creation_time)
-                .with_inputs(inputs)
-                .with_outputs(outputs);
+                .with_creation_slot(dto.creation_slot)
+                .with_context_inputs(dto.context_inputs)
+                .with_inputs(dto.inputs)
+                .with_outputs(outputs)
+                .with_allotments(dto.allotments);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(Payload::TaggedData(Box::new((*i).try_into()?)))
+                    builder.with_payload(*i)
                 } else {
                     return Err(Error::InvalidField("payload"));
                 }

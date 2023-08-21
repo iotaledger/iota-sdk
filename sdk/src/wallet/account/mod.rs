@@ -48,7 +48,7 @@ pub use self::{
                 },
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
+            RemainderValueStrategy, TransactionOptions,
         },
     },
     types::OutputDataDto,
@@ -63,10 +63,7 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{
-                transaction::{TransactionEssence, TransactionId},
-                TransactionPayload,
-            },
+            payload::{transaction::TransactionId, TransactionPayload},
         },
         TryFromDto,
     },
@@ -451,7 +448,6 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_payload: TransactionPayload,
     inputs: Vec<OutputWithMetadataResponse>,
 ) -> crate::wallet::Result<Transaction> {
-    let TransactionEssence::Regular(tx_essence) = &tx_payload.essence();
     Ok(Transaction {
         payload: tx_payload.clone(),
         block_id: inputs.first().map(|i| *i.metadata.block_id()),
@@ -463,7 +459,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
         //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
-        network_id: tx_essence.network_id(),
+        network_id: tx_payload.essence().network_id(),
         incoming: true,
         note: None,
         inputs,
@@ -597,12 +593,14 @@ fn serialize() {
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
+        mana::Allotment,
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
         payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
+            transaction::{RegularTransactionEssence, TransactionId},
             TransactionPayload,
         },
         protocol::ProtocolParameters,
+        rand::output::rand_account_id,
         signature::{Ed25519Signature, Signature},
         unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     };
@@ -636,19 +634,19 @@ fn serialize() {
             .finish_with_params(protocol_parameters.clone())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
+    let essence =
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
+            .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
             .finish_with_params(protocol_parameters)
-            .unwrap(),
-    );
+            .unwrap();
 
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
     let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
-    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
-    let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
+    let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
+    let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();

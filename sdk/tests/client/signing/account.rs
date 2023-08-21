@@ -17,12 +17,14 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
+        mana::Allotment,
         output::{AccountId, InputsCommitment},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
         },
         protocol::protocol_parameters,
+        rand::output::rand_account_id,
         semantic::ConflictReason,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
@@ -95,6 +97,7 @@ async fn sign_account_state_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -111,7 +114,7 @@ async fn sign_account_state_transition() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
@@ -184,6 +187,7 @@ async fn sign_account_governance_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -200,7 +204,7 @@ async fn sign_account_governance_transition() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
@@ -313,6 +317,7 @@ async fn account_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -341,7 +346,7 @@ async fn account_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 

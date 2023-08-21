@@ -118,24 +118,8 @@ export interface __GetBech32HrpMethod__ {
     name: 'getBech32Hrp';
 }
 
-export interface __GetMinPowScoreMethod__ {
-    name: 'getMinPowScore';
-}
-
-export interface __GetTipsIntervalMethod__ {
-    name: 'getTipsInterval';
-}
-
 export interface __GetProtocolParametersMethod__ {
     name: 'getProtocolParameters';
-}
-
-export interface __GetLocalPowMethod__ {
-    name: 'getLocalPow';
-}
-
-export interface __GetFallbackToLocalPowMethod__ {
-    name: 'getFallbackToLocalPow';
 }
 
 export interface __GetHealthMethod__ {
@@ -270,50 +254,6 @@ export interface __FindBlocksMethod__ {
     name: 'findBlocks';
     data: {
         blockIds: string[];
-    };
-}
-
-export interface __RetryMethod__ {
-    name: 'retry';
-    data: {
-        blockId: string;
-    };
-}
-
-export interface __RetryUntilIncludedMethod__ {
-    name: 'retryUntilIncluded';
-    data: {
-        blockId: string;
-        interval?: number;
-        maxAttempts?: number;
-    };
-}
-
-export interface __ReattachMethod__ {
-    name: 'reattach';
-    data: {
-        blockId: BlockId;
-    };
-}
-
-export interface __ReattachUncheckedMethod__ {
-    name: 'reattachUnchecked';
-    data: {
-        blockId: BlockId;
-    };
-}
-
-export interface __PromoteMethod__ {
-    name: 'promote';
-    data: {
-        blockId: BlockId;
-    };
-}
-
-export interface __PromoteUncheckedMethod__ {
-    name: 'promoteUnchecked';
-    data: {
-        blockId: BlockId;
     };
 }
 

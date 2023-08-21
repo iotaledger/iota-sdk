@@ -17,6 +17,7 @@ use crate::{
         slot::SlotIndex,
         ConvertTo,
     },
+    utils::serde::string,
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error,
@@ -27,7 +28,7 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 pub struct SendParams {
     /// Amount
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     #[getset(get = "pub")]
     amount: u64,
     /// Bech32 encoded address

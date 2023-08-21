@@ -17,7 +17,7 @@ use packable::{
 use crate::types::block::{address::Ed25519Address, public_key::Ed25519PublicKey, Error};
 
 /// An Ed25519 signature.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
     public_key: Ed25519PublicKey,
     signature: Signature,
@@ -63,7 +63,7 @@ impl Ed25519Signature {
 
     /// Verifies the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
     pub fn is_valid(&self, message: &[u8], address: &Ed25519Address) -> Result<(), Error> {
-        let signature_address: [u8; Self::PUBLIC_KEY_LENGTH] = Blake2b256::digest(&self.public_key).into();
+        let signature_address: [u8; Self::PUBLIC_KEY_LENGTH] = Blake2b256::digest(self.public_key).into();
 
         if address.deref() != &signature_address {
             return Err(Error::SignaturePublicKeyMismatch {
@@ -127,7 +127,7 @@ impl Packable for Ed25519Signature {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use alloc::string::String;
 
     use serde::{Deserialize, Serialize};
@@ -136,13 +136,13 @@ pub(crate) mod dto {
     use crate::types::block::Error;
 
     /// Defines an Ed25519 signature.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519SignatureDto {
+    struct Ed25519SignatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub public_key: String,
-        pub signature: String,
+        kind: u8,
+        public_key: String,
+        signature: String,
     }
 
     impl From<&Ed25519Signature> for Ed25519SignatureDto {
@@ -165,4 +165,6 @@ pub(crate) mod dto {
             )
         }
     }
+
+    impl_serde_typed_dto!(Ed25519Signature, Ed25519SignatureDto, "ed25519 signature");
 }

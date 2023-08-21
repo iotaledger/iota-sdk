@@ -7,20 +7,55 @@ pub mod transaction;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
-    types::block::{parent::StrongParents, payload::Payload, Block, BlockBuilder},
+    types::{
+        api::core::response::IssuanceBlockHeaderResponse,
+        block::{core::Block, parent::StrongParents, payload::Payload, signature::Ed25519Signature, IssuerId},
+    },
 };
 
 impl ClientInner {
-    pub async fn finish_block_builder(
+    pub async fn finish_basic_block_builder(
         &self,
+        issuer_id: IssuerId,
+        signature: Ed25519Signature,
+        issuing_time: Option<u64>,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
     ) -> Result<Block> {
-        let strong_parents = match strong_parents {
-            Some(strong_parents) => strong_parents,
-            None => StrongParents::from_vec(self.get_tips().await?)?,
-        };
+        let IssuanceBlockHeaderResponse {
+            strong_parents: default_strong_parents,
+            weak_parents,
+            shallow_like_parents,
+            latest_finalized_slot,
+            commitment,
+        } = self.get_issuance().await?;
+        let strong_parents = strong_parents.unwrap_or(default_strong_parents);
 
-        Ok(BlockBuilder::new(strong_parents).with_payload(payload).finish()?)
+        let issuing_time = issuing_time.unwrap_or_else(|| {
+            #[cfg(feature = "std")]
+            let issuing_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos() as u64;
+            // TODO no_std way to have a nanosecond timestamp
+            // https://github.com/iotaledger/iota-sdk/issues/647
+            #[cfg(not(feature = "std"))]
+            let issuing_time = 0;
+            issuing_time
+        });
+
+        Ok(Block::build_basic(
+            self.get_protocol_parameters().await?,
+            issuing_time,
+            commitment.id(),
+            latest_finalized_slot,
+            issuer_id,
+            strong_parents,
+            signature,
+        )
+        .with_weak_parents(weak_parents)
+        .with_shallow_like_parents(shallow_like_parents)
+        .with_payload(payload)
+        .finish()?)
     }
 }

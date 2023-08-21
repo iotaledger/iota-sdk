@@ -8,10 +8,8 @@ use iota_sdk::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
             },
             payload::Payload,
             Block, BlockDto,
@@ -71,9 +69,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(AccountOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 mana,
                 native_tokens,
@@ -98,9 +96,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(BasicOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 mana,
                 native_tokens,
@@ -122,9 +120,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(FoundryOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 native_tokens,
                 serial_number,
@@ -148,9 +146,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let output = Output::from(NftOutput::try_from_dtos(
                 if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
+                    OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 mana,
                 native_tokens,
@@ -175,7 +173,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
             let block = client
-                .finish_block_builder(
+                .finish_basic_block_builder(
+                    todo!("issuer id"),
+                    todo!("block signature"),
+                    todo!("issuing time"),
                     None,
                     Some(Payload::try_from_dto_with_params(
                         payload,
@@ -194,7 +195,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
         ClientMethod::GetPeers => Response::Peers(client.get_peers().await?),
-        ClientMethod::GetTips => Response::Tips(client.get_tips().await?),
+        ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
                 .post_block_raw(&Block::unpack_strict(
@@ -205,10 +206,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto_with_params(
-                    block,
-                    client.get_protocol_parameters().await?,
-                )?)
+                .post_block(&Block::try_from_dto(block, client.get_protocol_parameters().await?)?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
@@ -272,45 +270,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(BlockDto::from)
                 .collect(),
         ),
-        ClientMethod::Retry { block_id } => {
-            let (block_id, block) = client.retry(&block_id).await?;
-            Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
-        }
-        ClientMethod::RetryUntilIncluded {
-            block_id,
-            interval,
-            max_attempts,
-        } => {
-            let res = client.retry_until_included(&block_id, interval, max_attempts).await?;
-            let res = res
-                .into_iter()
-                .map(|(block_id, block)| (block_id, BlockDto::from(&block)))
-                .collect();
-            Response::RetryUntilIncludedSuccessful(res)
-        }
-        ClientMethod::FindInputs { addresses, amount } => Response::Inputs(
-            client
-                .find_inputs(addresses, amount)
-                .await?
-                .iter()
-                .map(UtxoInputDto::from)
-                .collect(),
-        ),
-        ClientMethod::Reattach { block_id } => {
-            let (block_id, block) = client.reattach(&block_id).await?;
-            Response::Reattached((block_id, BlockDto::from(&block)))
-        }
-        ClientMethod::ReattachUnchecked { block_id } => {
-            let (block_id, block) = client.reattach_unchecked(&block_id).await?;
-            Response::Reattached((block_id, BlockDto::from(&block)))
-        }
-        ClientMethod::Promote { block_id } => {
-            let (block_id, block) = client.promote(&block_id).await?;
-            Response::Promoted((block_id, BlockDto::from(&block)))
-        }
-        ClientMethod::PromoteUnchecked { block_id } => {
-            let (block_id, block) = client.promote_unchecked(&block_id).await?;
-            Response::Promoted((block_id, BlockDto::from(&block)))
+        ClientMethod::FindInputs { addresses, amount } => {
+            Response::Inputs(client.find_inputs(addresses, amount).await?)
         }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
@@ -346,6 +307,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .call_plugin_route(&base_plugin_path, &method, &endpoint, query_params, request_object)
                 .await?;
             Response::CustomJson(data)
+        }
+        ClientMethod::BlockId { block } => {
+            Response::BlockId(Block::try_from_dto(block, client.get_protocol_parameters().await?)?.id())
         }
     };
     Ok(response)

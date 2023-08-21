@@ -28,35 +28,36 @@ impl GovernorAddressUnlockCondition {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct GovernorAddressUnlockConditionDto {
+    #[derive(Serialize, Deserialize)]
+    struct GovernorAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        kind: u8,
+        address: Address,
     }
 
     impl From<&GovernorAddressUnlockCondition> for GovernorAddressUnlockConditionDto {
         fn from(value: &GovernorAddressUnlockCondition) -> Self {
             Self {
                 kind: GovernorAddressUnlockCondition::KIND,
-                address: value.address().into(),
+                address: value.0,
             }
         }
     }
 
-    impl TryFrom<GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
-        type Error = Error;
-
-        fn try_from(value: GovernorAddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(
-                Address::try_from(value.address).map_err(|_e| Error::InvalidField("governorAddressUnlockCondition"))?,
-            ))
+    impl From<GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
+        fn from(value: GovernorAddressUnlockConditionDto) -> Self {
+            Self(value.address)
         }
     }
+
+    impl_serde_typed_dto!(
+        GovernorAddressUnlockCondition,
+        GovernorAddressUnlockConditionDto,
+        "governor address unlock condition"
+    );
 }

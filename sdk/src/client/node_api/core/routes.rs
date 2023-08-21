@@ -15,8 +15,8 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
-            UtxoChangesResponse,
+            BlockMetadataResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse, RoutesResponse,
+            SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputDto, Output, OutputId, OutputMetadata},
@@ -47,10 +47,10 @@ impl ClientInner {
     /// Returns the health of the node.
     /// GET /health
     pub async fn get_health(&self, url: &str) -> Result<bool> {
-        let path = "health";
+        const PATH: &str = "health";
 
         let mut url = Url::parse(url)?;
-        url.set_path(path);
+        url.set_path(PATH);
         let status = crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
             .get(
                 Node {
@@ -72,12 +72,12 @@ impl ClientInner {
     /// Returns the available API route groups of the node.
     /// GET /api/routes
     pub async fn get_routes(&self) -> Result<RoutesResponse> {
-        let path = "api/routes";
+        const PATH: &str = "api/routes";
 
         self.node_manager
             .read()
             .await
-            .get_request(path, None, self.get_timeout().await, false, false)
+            .get_request(PATH, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -93,25 +93,22 @@ impl ClientInner {
 
     // Blocks routes.
 
-    /// Returns tips that are ideal for attaching a block.
-    /// GET /api/core/v3/tips
-    pub async fn get_tips(&self) -> Result<Vec<BlockId>> {
-        let path = "api/core/v3/tips";
+    /// Returns information that is ideal for attaching a block in the network.
+    /// GET /api/core/v3/blocks/issuance
+    pub async fn get_issuance(&self) -> Result<IssuanceBlockHeaderResponse> {
+        const PATH: &str = "api/core/v3/blocks/issuance";
 
-        let response = self
-            .node_manager
+        self.node_manager
             .read()
             .await
-            .get_request::<TipsResponse>(path, None, self.get_timeout().await, false, false)
-            .await?;
-
-        Ok(response.tips)
+            .get_request(PATH, None, self.get_timeout().await, false, false)
+            .await
     }
 
     /// Returns the BlockId of the submitted block.
     /// POST JSON to /api/core/v3/blocks
     pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
-        let path = "api/core/v3/blocks";
+        const PATH: &str = "api/core/v3/blocks";
         let timeout = self.get_timeout().await;
         let block_dto = BlockDto::from(block);
 
@@ -119,7 +116,7 @@ impl ClientInner {
             .node_manager
             .read()
             .await
-            .post_request_json::<SubmitBlockResponse>(path, timeout, serde_json::to_value(block_dto)?)
+            .post_request_json::<SubmitBlockResponse>(PATH, timeout, serde_json::to_value(block_dto)?)
             .await?;
 
         Ok(response.block_id)
@@ -128,14 +125,14 @@ impl ClientInner {
     /// Returns the BlockId of the submitted block.
     /// POST /api/core/v3/blocks
     pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
-        let path = "api/core/v3/blocks";
+        const PATH: &str = "api/core/v3/blocks";
         let timeout = self.get_timeout().await;
 
         let response = self
             .node_manager
             .read()
             .await
-            .post_request_bytes::<SubmitBlockResponse>(path, timeout, &block.pack_to_vec())
+            .post_request_bytes::<SubmitBlockResponse>(PATH, timeout, &block.pack_to_vec())
             .await?;
 
         Ok(response.block_id)
@@ -153,10 +150,7 @@ impl ClientInner {
             .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
-        Ok(Block::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
@@ -237,10 +231,7 @@ impl ClientInner {
             .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
             .await?;
 
-        Ok(Block::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
     /// Returns the block that was included in the ledger for a given transaction ID, as object, as raw bytes.
@@ -348,13 +339,13 @@ impl ClientInner {
 
     /// GET /api/core/v3/peers
     pub async fn get_peers(&self) -> Result<Vec<PeerResponse>> {
-        let path = "api/core/v3/peers";
+        const PATH: &str = "api/core/v3/peers";
 
         let resp = self
             .node_manager
             .read()
             .await
-            .get_request::<Vec<PeerResponse>>(path, None, self.get_timeout().await, false, false)
+            .get_request::<Vec<PeerResponse>>(PATH, None, self.get_timeout().await, false, false)
             .await?;
 
         Ok(resp)

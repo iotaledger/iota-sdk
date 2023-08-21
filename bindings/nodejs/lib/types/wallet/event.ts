@@ -103,8 +103,7 @@ enum TransactionProgressType {
     PreparedTransaction = 2,
     PreparedTransactionEssenceHash = 3,
     SigningTransaction = 4,
-    PerformingPow = 5,
-    Broadcasting = 6,
+    Broadcasting = 5,
 }
 
 class TransactionProgressWalletEvent extends WalletEvent {
@@ -171,12 +170,6 @@ class SigningTransactionProgress extends TransactionProgress {
     }
 }
 
-class PerformingPowProgress extends TransactionProgress {
-    constructor() {
-        super(TransactionProgressType.PerformingPow);
-    }
-}
-
 class BroadcastingProgress extends TransactionProgress {
     constructor() {
         super(TransactionProgressType.Broadcasting);
@@ -199,7 +192,6 @@ export {
     PreparedTransactionProgress,
     PreparedTransactionEssenceHashProgress,
     SigningTransactionProgress,
-    PerformingPowProgress,
     BroadcastingProgress,
     TransactionProgressType,
 };

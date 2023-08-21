@@ -1,6 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod block_issuer;
 mod issuer;
 mod metadata;
 mod sender;
@@ -15,7 +16,8 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{
-    issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, staking::StakingFeature, tag::TagFeature,
+    block_issuer::BlockIssuerFeature, issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature,
+    staking::StakingFeature, tag::TagFeature,
 };
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
@@ -24,6 +26,7 @@ use crate::types::block::{create_bitflags, Error};
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidFeatureKind)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 pub enum Feature {
     /// A sender feature.
     #[packable(tag = SenderFeature::KIND)]
@@ -37,6 +40,9 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
+    /// A block issuer feature.
+    #[packable(tag = BlockIssuerFeature::KIND)]
+    BlockIssuer(BlockIssuerFeature),
     /// A staking feature.
     #[packable(tag = StakingFeature::KIND)]
     Staking(StakingFeature),
@@ -61,6 +67,7 @@ impl core::fmt::Debug for Feature {
             Self::Issuer(feature) => feature.fmt(f),
             Self::Metadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
+            Self::BlockIssuer(feature) => feature.fmt(f),
             Self::Staking(feature) => feature.fmt(f),
         }
     }
@@ -74,6 +81,7 @@ impl Feature {
             Self::Issuer(_) => IssuerFeature::KIND,
             Self::Metadata(_) => MetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
+            Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
             Self::Staking(_) => StakingFeature::KIND,
         }
     }
@@ -85,6 +93,7 @@ impl Feature {
             Self::Issuer(_) => FeatureFlags::ISSUER,
             Self::Metadata(_) => FeatureFlags::METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
+            Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
             Self::Staking(_) => FeatureFlags::STAKING,
         }
     }
@@ -149,6 +158,21 @@ impl Feature {
         }
     }
 
+    /// Checks whether the feature is a [`BlockIssuerFeature`].
+    pub fn is_block_issuer(&self) -> bool {
+        matches!(self, Self::BlockIssuer(_))
+    }
+
+    /// Gets the feature as an actual [`BlockIssuerFeature`].
+    /// NOTE: Will panic if the feature is not a [`BlockIssuerFeature`].
+    pub fn as_block_issuer(&self) -> &BlockIssuerFeature {
+        if let Self::BlockIssuer(feature) = self {
+            feature
+        } else {
+            panic!("invalid downcast of non-BlockIssuerFeature");
+        }
+    }
+
     /// Checks whether the feature is a [`StakingFeature`].
     pub fn is_staking(&self) -> bool {
         matches!(self, Self::Staking(_))
@@ -174,6 +198,7 @@ create_bitflags!(
         (ISSUER, IssuerFeature),
         (METADATA, MetadataFeature),
         (TAG, TagFeature),
+        (BLOCK_ISSUER, BlockIssuerFeature),
         (STAKING, StakingFeature),
     ]
 );
@@ -269,6 +294,11 @@ impl Features {
         self.get(TagFeature::KIND).map(Feature::as_tag)
     }
 
+    /// Gets a reference to a [`BlockIssuerFeature`], if any.
+    pub fn block_issuer(&self) -> Option<&BlockIssuerFeature> {
+        self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
+    }
+
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
@@ -310,175 +340,9 @@ mod test {
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
                 FeatureFlags::TAG,
+                FeatureFlags::BLOCK_ISSUER,
                 FeatureFlags::STAKING
             ]
         );
-    }
-}
-
-pub mod dto {
-    use alloc::format;
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    pub use self::{
-        issuer::dto::IssuerFeatureDto, metadata::dto::MetadataFeatureDto, sender::dto::SenderFeatureDto,
-        staking::dto::StakingFeatureDto, tag::dto::TagFeatureDto,
-    };
-    use super::*;
-    use crate::types::block::{address::Address, Error};
-
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum FeatureDto {
-        /// A sender feature.
-        Sender(SenderFeatureDto),
-        /// An issuer feature.
-        Issuer(IssuerFeatureDto),
-        /// A metadata feature.
-        Metadata(MetadataFeatureDto),
-        /// A tag feature.
-        Tag(TagFeatureDto),
-        /// A staking feature.
-        Staking(StakingFeatureDto),
-    }
-
-    impl<'de> Deserialize<'de> for FeatureDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid feature type"))? as u8
-                {
-                    SenderFeature::KIND => Self::Sender(
-                        SenderFeatureDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize sender feature: {e}")))?,
-                    ),
-                    IssuerFeature::KIND => Self::Issuer(
-                        IssuerFeatureDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize issuer feature: {e}")))?,
-                    ),
-                    MetadataFeature::KIND => {
-                        Self::Metadata(MetadataFeatureDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize metadata feature: {e}"))
-                        })?)
-                    }
-                    TagFeature::KIND => Self::Tag(
-                        TagFeatureDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize tag feature: {e}")))?,
-                    ),
-                    StakingFeature::KIND => {
-                        Self::Staking(StakingFeatureDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize staking feature: {e}"))
-                        })?)
-                    }
-                    _ => return Err(serde::de::Error::custom("invalid feature type")),
-                },
-            )
-        }
-    }
-
-    impl Serialize for FeatureDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum FeatureDto_<'a> {
-                T1(&'a SenderFeatureDto),
-                T2(&'a IssuerFeatureDto),
-                T3(&'a MetadataFeatureDto),
-                T4(&'a TagFeatureDto),
-                T6(&'a StakingFeatureDto),
-            }
-            #[derive(Serialize)]
-            struct TypedFeature<'a> {
-                #[serde(flatten)]
-                feature: FeatureDto_<'a>,
-            }
-            let feature = match self {
-                Self::Sender(o) => TypedFeature {
-                    feature: FeatureDto_::T1(o),
-                },
-                Self::Issuer(o) => TypedFeature {
-                    feature: FeatureDto_::T2(o),
-                },
-                Self::Metadata(o) => TypedFeature {
-                    feature: FeatureDto_::T3(o),
-                },
-                Self::Tag(o) => TypedFeature {
-                    feature: FeatureDto_::T4(o),
-                },
-                Self::Staking(o) => TypedFeature {
-                    feature: FeatureDto_::T6(o),
-                },
-            };
-            feature.serialize(serializer)
-        }
-    }
-
-    impl From<&Feature> for FeatureDto {
-        fn from(value: &Feature) -> Self {
-            match value {
-                Feature::Sender(v) => Self::Sender(SenderFeatureDto {
-                    kind: SenderFeature::KIND,
-                    address: v.address().into(),
-                }),
-                Feature::Issuer(v) => Self::Issuer(IssuerFeatureDto {
-                    kind: IssuerFeature::KIND,
-                    address: v.address().into(),
-                }),
-                Feature::Metadata(v) => Self::Metadata(MetadataFeatureDto {
-                    kind: MetadataFeature::KIND,
-                    data: v.data().into(),
-                }),
-                Feature::Tag(v) => Self::Tag(TagFeatureDto {
-                    kind: TagFeature::KIND,
-                    tag: v.tag().into(),
-                }),
-                Feature::Staking(v) => Self::Staking(StakingFeatureDto {
-                    kind: StakingFeature::KIND,
-                    staked_amount: v.staked_amount(),
-                    fixed_cost: v.fixed_cost(),
-                    start_epoch: v.start_epoch(),
-                    end_epoch: v.end_epoch(),
-                }),
-            }
-        }
-    }
-
-    impl TryFrom<FeatureDto> for Feature {
-        type Error = Error;
-
-        fn try_from(value: FeatureDto) -> Result<Self, Self::Error> {
-            Ok(match value {
-                FeatureDto::Sender(v) => Self::Sender(SenderFeature::new(Address::try_from(v.address)?)),
-                FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new(Address::try_from(v.address)?)),
-                FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(v.data)?),
-                FeatureDto::Tag(v) => Self::Tag(TagFeature::new(v.tag)?),
-                FeatureDto::Staking(v) => Self::Staking(StakingFeature::new(
-                    v.staked_amount,
-                    v.fixed_cost,
-                    v.start_epoch,
-                    v.end_epoch,
-                )),
-            })
-        }
-    }
-
-    impl FeatureDto {
-        /// Return the feature kind of a `FeatureDto`.
-        pub fn kind(&self) -> u8 {
-            match self {
-                Self::Sender(_) => SenderFeature::KIND,
-                Self::Issuer(_) => IssuerFeature::KIND,
-                Self::Metadata(_) => MetadataFeature::KIND,
-                Self::Tag(_) => TagFeature::KIND,
-                Self::Staking(_) => StakingFeature::KIND,
-            }
-        }
     }
 }

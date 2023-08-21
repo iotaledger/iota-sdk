@@ -9,7 +9,9 @@ use iota_sdk::types::block::{
         dto::{TransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
     },
-    signature::dto::Ed25519SignatureDto,
+    protocol::ProtocolParameters,
+    signature::Ed25519Signature,
+    slot::SlotCommitment,
     BlockDto,
 };
 use serde::{Deserialize, Serialize};
@@ -77,10 +79,13 @@ pub enum UtilsMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
-    /// Returns a block ID (Blake2b256 hash of block bytes) from a block
+    /// Returns a block ID from a block and slot protocol parameters
+    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
         block: BlockDto,
+        /// Network Protocol Parameters
+        protocol_parameters: ProtocolParameters,
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
@@ -135,7 +140,7 @@ pub enum UtilsMethod {
     },
     /// Verify an ed25519 signature against a message.
     VerifyEd25519Signature {
-        signature: Ed25519SignatureDto,
+        signature: Ed25519Signature,
         message: String,
     },
     /// Verify a Secp256k1Ecdsa signature against a message.
@@ -148,4 +153,7 @@ pub enum UtilsMethod {
     /// Creates a UTXOInput from outputId.
     #[serde(rename_all = "camelCase")]
     OutputIdToUtxoInput { output_id: OutputId },
+    /// Computes the slot commitment id from a slot commitment.
+    #[serde(rename_all = "camelCase")]
+    ComputeSlotCommitmentId { slot_commitment: SlotCommitment },
 }

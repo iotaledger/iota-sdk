@@ -26,9 +26,6 @@ impl UtxoInput {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(UtxoInput);
-
 impl FromStr for UtxoInput {
     type Err = Error;
 
@@ -49,29 +46,27 @@ impl core::fmt::Debug for UtxoInput {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::string::{String, ToString};
-
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::block::Error;
 
     /// Describes an input which references an unspent transaction output to consume.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct UtxoInputDto {
+    struct UtxoInputDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub transaction_id: String,
-        pub transaction_output_index: u16,
+        kind: u8,
+        transaction_id: TransactionId,
+        transaction_output_index: u16,
     }
 
     impl From<&UtxoInput> for UtxoInputDto {
         fn from(value: &UtxoInput) -> Self {
             Self {
                 kind: UtxoInput::KIND,
-                transaction_id: value.output_id().transaction_id().to_string(),
+                transaction_id: *value.output_id().transaction_id(),
                 transaction_output_index: value.output_id().index(),
             }
         }
@@ -81,13 +76,9 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: UtxoInputDto) -> Result<Self, Self::Error> {
-            Self::new(
-                value
-                    .transaction_id
-                    .parse::<TransactionId>()
-                    .map_err(|_| Error::InvalidField("transactionId"))?,
-                value.transaction_output_index,
-            )
+            Self::new(value.transaction_id, value.transaction_output_index)
         }
     }
+
+    impl_serde_typed_dto!(UtxoInput, UtxoInputDto, "UTXO input");
 }

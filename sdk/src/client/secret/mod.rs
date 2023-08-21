@@ -91,7 +91,7 @@ pub trait SecretManage: Send + Sync {
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
     async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
-        Ok(Unlock::Signature(SignatureUnlock::new(Signature::from(
+        Ok(Unlock::from(SignatureUnlock::new(Signature::from(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
     }
@@ -515,7 +515,9 @@ where
         .await?;
 
     let PreparedTransactionData {
-        essence, inputs_data, ..
+        essence: TransactionEssence::Regular(essence),
+        inputs_data,
+        ..
     } = prepared_transaction_data;
     let tx_payload = TransactionPayload::new(essence, unlocks)?;
 

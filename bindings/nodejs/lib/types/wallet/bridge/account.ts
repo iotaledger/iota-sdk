@@ -235,8 +235,8 @@ export type __RegisterParticipationEventsMethod__ = {
     };
 };
 
-export type __RetryTransactionUntilIncludedMethod__ = {
-    name: 'retryTransactionUntilIncluded';
+export type __ReissueTransactionUntilIncludedMethod__ = {
+    name: 'reissueTransactionUntilIncluded';
     data: {
         transactionId: string;
         interval?: number;

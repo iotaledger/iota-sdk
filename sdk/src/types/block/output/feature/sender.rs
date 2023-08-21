@@ -7,7 +7,7 @@ use crate::types::block::address::Address;
 
 /// Identifies the validated sender of an output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-pub struct SenderFeature(Address);
+pub struct SenderFeature(pub(crate) Address);
 
 impl SenderFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of a [`SenderFeature`].
@@ -26,15 +26,32 @@ impl SenderFeature {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
-    use crate::types::block::address::dto::AddressDto;
+    use super::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct SenderFeatureDto {
+    #[derive(Serialize, Deserialize)]
+    struct SenderFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        kind: u8,
+        address: Address,
     }
+
+    impl From<&SenderFeature> for SenderFeatureDto {
+        fn from(value: &SenderFeature) -> Self {
+            Self {
+                kind: SenderFeature::KIND,
+                address: value.0,
+            }
+        }
+    }
+
+    impl From<SenderFeatureDto> for SenderFeature {
+        fn from(value: SenderFeatureDto) -> Self {
+            Self(value.address)
+        }
+    }
+
+    impl_serde_typed_dto!(SenderFeature, SenderFeatureDto, "sender feature");
 }

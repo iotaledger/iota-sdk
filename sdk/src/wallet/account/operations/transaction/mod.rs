@@ -10,7 +10,7 @@ mod prepare_transaction;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
-pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionOptionsDto};
+pub use self::options::{RemainderValueStrategy, TransactionOptions};
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
@@ -38,7 +38,7 @@ where
     /// Sends a transaction by specifying its outputs.
     ///
     /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
-    /// will retry sending the transaction during syncing.
+    /// will reissue the transaction during syncing.
     /// ```ignore
     /// let outputs = [
     ///    BasicOutputBuilder::new_with_amount(1_000_000)?

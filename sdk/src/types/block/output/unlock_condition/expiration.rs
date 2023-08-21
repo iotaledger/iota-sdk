@@ -65,26 +65,26 @@ fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Resu
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::Error;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct ExpirationUnlockConditionDto {
+    struct ExpirationUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub return_address: AddressDto,
-        pub slot_index: u64,
+        kind: u8,
+        return_address: Address,
+        slot_index: u64,
     }
 
     impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {
         fn from(value: &ExpirationUnlockCondition) -> Self {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
-                return_address: value.return_address().into(),
+                return_address: *value.return_address(),
                 slot_index: *value.slot_index(),
             }
         }
@@ -94,12 +94,14 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(
-                Address::try_from(value.return_address)
-                    .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
-                SlotIndex::from(value.slot_index),
-            )
-            .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
+            Self::new(value.return_address, SlotIndex::from(value.slot_index))
+                .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
         }
     }
+
+    impl_serde_typed_dto!(
+        ExpirationUnlockCondition,
+        ExpirationUnlockConditionDto,
+        "expiration unlock condition"
+    );
 }

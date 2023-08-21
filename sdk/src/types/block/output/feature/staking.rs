@@ -3,7 +3,6 @@
 
 /// Stakes coins to become eligible for committee selection, validate the network and receive Mana rewards.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StakingFeature {
     /// The amount of coins that are locked and staked in the containing account.
     staked_amount: u64,
@@ -50,23 +49,49 @@ impl StakingFeature {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
+    use super::*;
     use crate::utils::serde::string;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct StakingFeatureDto {
+    struct StakingFeatureDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         #[serde(with = "string")]
-        pub staked_amount: u64,
+        staked_amount: u64,
         #[serde(with = "string")]
-        pub fixed_cost: u64,
+        fixed_cost: u64,
         #[serde(with = "string")]
-        pub start_epoch: u64,
+        start_epoch: u64,
         #[serde(with = "string")]
-        pub end_epoch: u64,
+        end_epoch: u64,
     }
+
+    impl From<&StakingFeature> for StakingFeatureDto {
+        fn from(value: &StakingFeature) -> Self {
+            Self {
+                kind: StakingFeature::KIND,
+                staked_amount: value.staked_amount,
+                fixed_cost: value.fixed_cost,
+                start_epoch: value.start_epoch,
+                end_epoch: value.end_epoch,
+            }
+        }
+    }
+
+    impl From<StakingFeatureDto> for StakingFeature {
+        fn from(value: StakingFeatureDto) -> Self {
+            Self::new(
+                value.staked_amount,
+                value.fixed_cost,
+                value.start_epoch,
+                value.end_epoch,
+            )
+        }
+    }
+
+    impl_serde_typed_dto!(StakingFeature, StakingFeatureDto, "staking feature");
 }

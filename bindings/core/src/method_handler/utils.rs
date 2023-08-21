@@ -6,11 +6,10 @@ use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::{
         block::{
-            address::{dto::AddressDto, AccountAddress, Address, ToBech32Ext},
+            address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            signature::Ed25519Signature,
             Block,
         },
         TryFromDto,
@@ -31,15 +30,18 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(hex_public_key_to_bech32_address(&hex, bech32_hrp)?)
         }
-        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
+        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(Address::from(address.inner())),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.to_string()),
         UtilsMethod::MnemonicToHexSeed { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);
             Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(mnemonic)?)
         }
-        UtilsMethod::BlockId { block } => {
-            let block = Block::try_from_dto(block)?;
+        UtilsMethod::BlockId {
+            block,
+            protocol_parameters,
+        } => {
+            let block = Block::try_from_dto(block, protocol_parameters)?;
             Response::BlockId(block.id())
         }
         UtilsMethod::TransactionId { payload } => {
@@ -86,7 +88,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::Ok
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
-            let signature = Ed25519Signature::try_from(signature)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(signature.verify(&message))
         }
@@ -104,7 +105,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
-        UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input((&UtxoInput::from(output_id)).into()),
+        UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
+        UtilsMethod::ComputeSlotCommitmentId { slot_commitment } => Response::SlotCommitmentId(slot_commitment.id()),
     };
     Ok(response)
 }

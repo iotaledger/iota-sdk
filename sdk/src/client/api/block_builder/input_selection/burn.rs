@@ -11,15 +11,20 @@ use crate::types::block::output::{AccountId, FoundryId, NativeToken, NftId, Toke
 
 /// A type to specify what needs to be burned during input selection.
 /// Nothing will be burned that has not been explicitly set with this struct.
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Burn {
     /// Accounts to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) accounts: HashSet<AccountId>,
     /// NFTs to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) nfts: HashSet<NftId>,
     /// Foundries to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) foundries: HashSet<FoundryId>,
     /// Amounts of native tokens to burn.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub(crate) native_tokens: BTreeMap<TokenId, U256>,
 }
 
@@ -122,50 +127,5 @@ impl From<NftId> for Burn {
 impl From<NativeToken> for Burn {
     fn from(native_token: NativeToken) -> Self {
         Self::new().add_native_token(*native_token.token_id(), native_token.amount())
-    }
-}
-
-/// A DTO for [`Burn`].
-#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BurnDto {
-    /// Accounts to burn.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) accounts: Option<HashSet<AccountId>>,
-    /// NFTs to burn.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) nfts: Option<HashSet<NftId>>,
-    /// Foundries to burn.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) foundries: Option<HashSet<FoundryId>>,
-    /// Amounts of native tokens to burn.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) native_tokens: Option<BTreeMap<TokenId, U256>>,
-}
-
-impl From<&Burn> for BurnDto {
-    fn from(value: &Burn) -> Self {
-        Self {
-            accounts: (!value.accounts.is_empty()).then_some(value.accounts.clone()),
-            nfts: (!value.nfts.is_empty()).then_some(value.nfts.clone()),
-            foundries: (!value.foundries.is_empty()).then_some(value.foundries.clone()),
-            native_tokens: (!value.native_tokens.is_empty()).then_some(BTreeMap::from_iter(
-                value
-                    .native_tokens
-                    .iter()
-                    .map(|(token_id, amount)| (*token_id, *amount)),
-            )),
-        }
-    }
-}
-
-impl From<BurnDto> for Burn {
-    fn from(value: BurnDto) -> Self {
-        Self {
-            accounts: value.accounts.unwrap_or_default(),
-            nfts: value.nfts.unwrap_or_default(),
-            foundries: value.foundries.unwrap_or_default(),
-            native_tokens: value.native_tokens.unwrap_or_default(),
-        }
     }
 }

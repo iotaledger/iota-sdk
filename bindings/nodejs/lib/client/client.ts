@@ -73,7 +73,7 @@ export class Client {
     }
 
     /**
-     * Gets the network related information such as network_id and min_pow_score
+     * Gets the network related information such as network_id.
      */
     async getNetworkInfo(): Promise<INetworkInfo> {
         const response = await this.methodHandler.callMethod({
@@ -285,28 +285,6 @@ export class Client {
     }
 
     /**
-     * Returns the min PoW score.
-     */
-    async getMinPowScore(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getMinPowScore',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Returns the tips interval.
-     */
-    async getTipsInterval(): Promise<number> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getTipsInterval',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Returns the token supply.
      */
     async getTokenSupply(): Promise<string> {
@@ -319,28 +297,6 @@ export class Client {
     async getProtocolParameters(): Promise<INodeInfoProtocol> {
         const response = await this.methodHandler.callMethod({
             name: 'getProtocolParameters',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Returns if local pow should be used or not.
-     */
-    async getLocalPow(): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getLocalPow',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get fallback to local proof of work timeout.
-     */
-    async getFallbackToLocalPow(): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getFallbackToLocalPow',
         });
 
         return JSON.parse(response).payload;
@@ -627,110 +583,6 @@ export class Client {
         });
         const parsed = JSON.parse(response) as Response<Block[]>;
         return plainToInstance(Block, parsed.payload);
-    }
-
-    /**
-     * Retries (promotes or reattaches) a block for provided block id. Block should be
-     * retried only if they are valid and haven't been confirmed for a while.
-     */
-    async retry(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'retry',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-
-    /**
-     * Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
-     * milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
-     * position and additional reattached blocks
-     */
-    async retryUntilIncluded(
-        blockId: BlockId,
-        interval?: number,
-        maxAttempts?: number,
-    ): Promise<[BlockId, Block][]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'retryUntilIncluded',
-            data: {
-                blockId,
-                interval,
-                maxAttempts,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block][]>;
-        const arr: [BlockId, Block][] = [];
-        parsed.payload.forEach((payload) => {
-            arr.push([payload[0], plainToInstance(Block, payload[1])]);
-        });
-
-        return arr;
-    }
-
-    /**
-     * Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
-     * confirmed for a while.
-     */
-    async reattach(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'reattach',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-
-    /**
-     * Reattach a block without checking if it should be reattached
-     */
-    async reattachUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'reattachUnchecked',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-
-    /**
-     * Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
-     * method should error out and should not allow unnecessary promotions.
-     */
-    async promote(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'promote',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
-    }
-    /**
-     * Promote a block without checking if it should be promoted
-     */
-    async promoteUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'promoteUnchecked',
-            data: {
-                blockId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<[BlockId, Block]>;
-        const block = plainToInstance(Block, parsed.payload[1]);
-        return [parsed.payload[0], block];
     }
 
     /**

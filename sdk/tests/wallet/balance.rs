@@ -126,7 +126,7 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance_after_tx.base_coin().available(), 0);
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Account 1 balance before expiration
@@ -206,7 +206,7 @@ async fn addresses_balance() -> Result<()> {
     assert_eq!(balance_0, balance_0_sync);
 
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     account_1.sync(None).await?;
 
@@ -221,7 +221,7 @@ async fn addresses_balance() -> Result<()> {
 
     let tx = account_1.send(to_send / 2, acc_1_addr_2.address(), None).await?;
     account_1
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance_1_sync = account_1.sync(None).await?;
 
@@ -259,7 +259,7 @@ async fn balance_voting_power() -> Result<()> {
     // Only use a part as voting power
     let tx = account.increase_voting_power(voting_power).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
@@ -270,7 +270,7 @@ async fn balance_voting_power() -> Result<()> {
     // Increase voting power to total amount
     let tx = account.increase_voting_power(faucet_amount - voting_power).await?;
     account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);

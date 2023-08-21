@@ -39,7 +39,7 @@ async function run() {
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        const blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 

@@ -28,17 +28,16 @@ impl StateControllerAddressUnlockCondition {
     }
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct StateControllerAddressUnlockConditionDto {
+    #[derive(Serialize, Deserialize)]
+    struct StateControllerAddressUnlockConditionDto {
         #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
+        kind: u8,
+        address: Address,
     }
 
     impl From<&StateControllerAddressUnlockCondition> for StateControllerAddressUnlockConditionDto {
@@ -50,13 +49,15 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFrom<StateControllerAddressUnlockConditionDto> for StateControllerAddressUnlockCondition {
-        type Error = Error;
-
-        fn try_from(value: StateControllerAddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new(Address::try_from(value.address).map_err(|_e| {
-                Error::InvalidField("stateControllerAddressUnlockCondition")
-            })?))
+    impl From<StateControllerAddressUnlockConditionDto> for StateControllerAddressUnlockCondition {
+        fn from(value: StateControllerAddressUnlockConditionDto) -> Self {
+            Self(value.address)
         }
     }
+
+    impl_serde_typed_dto!(
+        StateControllerAddressUnlockCondition,
+        StateControllerAddressUnlockConditionDto,
+        "state controller address unlock condition"
+    );
 }

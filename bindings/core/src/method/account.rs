@@ -9,7 +9,7 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        api::{input_selection::BurnDto, PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
@@ -20,7 +20,7 @@ use iota_sdk::{
     wallet::{
         account::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -137,8 +137,8 @@ pub enum AccountMethod {
     ///
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareBurn {
-        burn: BurnDto,
-        options: Option<TransactionOptionsDto>,
+        burn: Burn,
+        options: Option<TransactionOptions>,
     },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -147,21 +147,24 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAccountOutput {
         params: Option<CreateAccountParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to create a native token.
     /// Expected response:
     /// [`PreparedCreateNativeTokenTransaction`](crate::Response::PreparedCreateNativeTokenTransaction)
     PrepareCreateNativeToken {
         params: CreateNativeTokenParams,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Reduces an account's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareDecreaseVotingPower { amount: String },
+    PrepareDecreaseVotingPower {
+        #[serde(with = "iota_sdk::utils::serde::string")]
+        amount: u64,
+    },
     /// Designates a given amount of tokens towards an account's "voting power" by creating a
     /// special output, which is really a basic one with some metadata.
     /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
@@ -169,7 +172,10 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareIncreaseVotingPower { amount: String },
+    PrepareIncreaseVotingPower {
+        #[serde(with = "iota_sdk::utils::serde::string")]
+        amount: u64,
+    },
     /// Prepare to melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -179,7 +185,7 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be melted amount
         melt_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to mint additional native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -189,38 +195,38 @@ pub enum AccountMethod {
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to mint NFTs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareMintNfts {
         params: Vec<MintNftParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
         params: Box<OutputParams>,
-        transaction_options: Option<TransactionOptionsDto>,
+        transaction_options: Option<TransactionOptions>,
     },
     /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSend {
         params: Vec<SendParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNativeTokens {
         params: Vec<SendNativeTokensParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Prepare to Send nft.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNft {
         params: Vec<SendNftParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Stop participating for an event.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -232,7 +238,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Vote for a participation event.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -252,11 +258,11 @@ pub enum AccountMethod {
     RegisterParticipationEvents {
         options: ParticipationEventRegistrationOptions,
     },
-    /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+    /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
     #[serde(rename_all = "camelCase")]
-    RetryTransactionUntilIncluded {
+    ReissueTransactionUntilIncluded {
         /// Transaction id
         transaction_id: TransactionId,
         /// Interval
@@ -270,19 +276,19 @@ pub enum AccountMethod {
         #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
         address: Bech32Address,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Send base coins to multiple addresses, or with additional parameters.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendWithParams {
         params: Vec<SendParams>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
+        options: Option<TransactionOptions>,
     },
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::Response::Ok)
@@ -309,7 +315,7 @@ pub enum AccountMethod {
     SubmitAndStoreTransaction {
         signed_transaction_data: SignedTransactionDataDto,
     },
-    /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
+    /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using SetDefaultSyncOptions.
     /// Expected response: [`Balance`](crate::Response::Balance)
     Sync {

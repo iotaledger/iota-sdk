@@ -4,6 +4,7 @@
 use iota_sdk::types::block::{
     address::{AccountAddress, Address, Ed25519Address},
     input::{Input, UtxoInput},
+    mana::Allotment,
     output::{
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition,
@@ -13,11 +14,14 @@ use iota_sdk::types::block::{
         Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
-        transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
+        transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
         Payload,
     },
     protocol::protocol_parameters,
-    rand::{output::rand_inputs_commitment, payload::rand_tagged_data_payload},
+    rand::{
+        output::{rand_account_id, rand_inputs_commitment},
+        payload::rand_tagged_data_payload,
+    },
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     Error,
@@ -54,6 +58,7 @@ fn build_valid() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -79,6 +84,7 @@ fn build_valid_with_payload() {
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -103,6 +109,7 @@ fn build_valid_add_inputs_outputs() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -124,20 +131,19 @@ fn build_invalid_payload_kind() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs([input1.clone(), input2.clone()])
-            .add_output(output.clone())
-            .finish_with_params(&protocol_parameters)
-            .unwrap(),
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input1.clone(), input2.clone()])
+        .add_output(output.clone())
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
     let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
-    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
-    let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
+    let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
+    let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
@@ -146,6 +152,7 @@ fn build_invalid_payload_kind() {
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .with_payload(tx_payload)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidPayloadKind(6))));
@@ -166,6 +173,7 @@ fn build_invalid_input_count_low() {
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
@@ -192,6 +200,7 @@ fn build_invalid_input_count_high() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input; 129])
         .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
@@ -208,6 +217,7 @@ fn build_invalid_output_count_low() {
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
@@ -234,6 +244,7 @@ fn build_invalid_output_count_high() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
         .with_outputs(vec![output; 129])
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
@@ -260,6 +271,7 @@ fn build_invalid_duplicate_utxo() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input; 2])
         .add_output(output)
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::DuplicateUtxo(_))));
@@ -294,6 +306,7 @@ fn build_invalid_accumulated_output() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
         .with_outputs([output1, output2])
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidTransactionAmountSum(_))));
@@ -320,6 +333,7 @@ fn getters() {
         .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
@@ -349,6 +363,7 @@ fn duplicate_output_nft() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
@@ -379,6 +394,7 @@ fn duplicate_output_nft_null() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -407,6 +423,7 @@ fn duplicate_output_account() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, account.clone(), account])
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
@@ -443,6 +460,7 @@ fn duplicate_output_foundry() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .with_outputs([basic, foundry.clone(), foundry])
+        .add_allotment(Allotment::new(rand_account_id(), 10).unwrap())
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(

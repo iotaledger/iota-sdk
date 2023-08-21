@@ -10,6 +10,7 @@ import {
     IRent,
 } from '../../';
 import { AliasId } from '../../block/id';
+import { SlotCommitment } from '../../block/slot';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -185,5 +186,17 @@ export interface __OutputIdToUtxoInput__ {
     name: 'outputIdToUtxoInput';
     data: {
         outputId: string;
+    };
+}
+
+// Modified `SlotCommitment` with bigint types converted to strings.
+type SlotCommitmentConverted = Omit<
+    SlotCommitment,
+    'index' | 'cumulativeWeight'
+> & { index: string; cumulativeWeight: string };
+export interface __ComputeSlotCommitmentId__ {
+    name: 'computeSlotCommitmentId';
+    data: {
+        slotCommitment: SlotCommitmentConverted;
     };
 }

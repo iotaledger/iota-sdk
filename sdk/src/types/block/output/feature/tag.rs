@@ -16,7 +16,7 @@ pub(crate) type TagFeatureLength =
 #[packable(unpack_error = Error, with = |e| Error::InvalidTagFeatureLength(e.into_prefix_err().into()))]
 pub struct TagFeature(
     // Binary tag.
-    BoxedSlicePrefix<u8, TagFeatureLength>,
+    pub(crate) BoxedSlicePrefix<u8, TagFeatureLength>,
 );
 
 impl TryFrom<Vec<u8>> for TagFeature {
@@ -66,18 +66,36 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-pub(crate) mod dto {
-    use alloc::boxed::Box;
+mod dto {
+    use alloc::borrow::Cow;
 
     use serde::{Deserialize, Serialize};
 
-    use crate::utils::serde::prefix_hex_bytes;
+    use super::*;
+    use crate::utils::serde::cow_boxed_slice_prefix;
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TagFeatureDto {
+    #[derive(Serialize, Deserialize)]
+    struct TagFeatureDto<'a> {
         #[serde(rename = "type")]
-        pub kind: u8,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub tag: Box<[u8]>,
+        kind: u8,
+        #[serde(with = "cow_boxed_slice_prefix")]
+        tag: Cow<'a, BoxedSlicePrefix<u8, TagFeatureLength>>,
     }
+
+    impl<'a> From<&'a TagFeature> for TagFeatureDto<'a> {
+        fn from(value: &'a TagFeature) -> Self {
+            Self {
+                kind: TagFeature::KIND,
+                tag: Cow::Borrowed(&value.0),
+            }
+        }
+    }
+
+    impl<'a> From<TagFeatureDto<'a>> for TagFeature {
+        fn from(value: TagFeatureDto<'a>) -> Self {
+            Self(value.tag.into_owned())
+        }
+    }
+
+    impl_serde_typed_dto!(TagFeature, TagFeatureDto<'_>, "tag feature");
 }

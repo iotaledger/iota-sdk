@@ -67,7 +67,7 @@ impl core::fmt::Debug for TaggedDataPayload {
     }
 }
 
-pub mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -75,13 +75,13 @@ pub mod dto {
 
     /// The payload type to define a tagged data payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TaggedDataPayloadDto {
+    struct TaggedDataPayloadDto {
         #[serde(rename = "type")]
-        pub kind: u32,
+        kind: u32,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub tag: Box<[u8]>,
+        tag: Box<[u8]>,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub data: Box<[u8]>,
+        data: Box<[u8]>,
     }
 
     impl From<&TaggedDataPayload> for TaggedDataPayloadDto {
@@ -101,4 +101,6 @@ pub mod dto {
             Self::new(value.tag, value.data)
         }
     }
+
+    impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
 }

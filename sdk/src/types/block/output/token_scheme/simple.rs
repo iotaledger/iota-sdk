@@ -116,7 +116,7 @@ fn verify_supply(minted_tokens: &U256, melted_tokens: &U256, maximum_supply: &U2
     Ok(())
 }
 
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -125,15 +125,15 @@ pub(crate) mod dto {
     /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct SimpleTokenSchemeDto {
+    struct SimpleTokenSchemeDto {
         #[serde(rename = "type")]
-        pub kind: u8,
+        kind: u8,
         // Amount of tokens minted by a foundry.
-        pub minted_tokens: U256,
+        minted_tokens: U256,
         // Amount of tokens melted by a foundry.
-        pub melted_tokens: U256,
+        melted_tokens: U256,
         // Maximum supply of tokens controlled by a foundry.
-        pub maximum_supply: U256,
+        maximum_supply: U256,
     }
 
     impl From<&SimpleTokenScheme> for SimpleTokenSchemeDto {
@@ -154,4 +154,6 @@ pub(crate) mod dto {
             Self::new(value.minted_tokens, value.melted_tokens, value.maximum_supply)
         }
     }
+
+    impl_serde_typed_dto!(SimpleTokenScheme, SimpleTokenSchemeDto, "simple token scheme");
 }

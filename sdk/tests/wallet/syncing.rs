@@ -116,7 +116,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
 
     let tx = account_0.send_outputs(outputs, None).await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Sync with sync_only_most_basic_outputs: true, only the first output should be synced
@@ -175,7 +175,7 @@ async fn sync_incoming_transactions() -> Result<()> {
 
     let tx = account_0.send_outputs(outputs, None).await?;
     account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     account_1
@@ -188,7 +188,7 @@ async fn sync_incoming_transactions() -> Result<()> {
     assert_eq!(incoming_transactions.len(), 1);
     let incoming_tx = account_1.get_incoming_transaction(&tx.transaction_id).await.unwrap();
     assert_eq!(incoming_tx.inputs.len(), 1);
-    let essence = incoming_tx.payload.essence().as_regular();
+    let essence = incoming_tx.payload.essence();
 
     // 2 created outputs plus remainder
     assert_eq!(essence.outputs().len(), 3);

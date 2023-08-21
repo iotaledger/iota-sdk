@@ -21,7 +21,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            address::{dto::AddressDto, Address},
+            address::Address,
             output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             slot::SlotIndex,
@@ -106,7 +106,7 @@ pub struct OutputDataDto {
     /// If an output is spent
     pub is_spent: bool,
     /// Associated account address.
-    pub address: AddressDto,
+    pub address: Address,
     /// Network ID
     pub network_id: String,
     /// Remainder
@@ -123,7 +123,7 @@ impl From<&OutputData> for OutputDataDto {
             metadata: value.metadata,
             output: OutputDto::from(&value.output),
             is_spent: value.is_spent,
-            address: AddressDto::from(&value.address),
+            address: value.address,
             network_id: value.network_id.to_string(),
             remainder: value.remainder,
             chain: value.chain,
@@ -144,7 +144,7 @@ impl TryFromDto for OutputData {
             metadata: dto.metadata,
             output: Output::try_from_dto_with_params(dto.output, params)?,
             is_spent: dto.is_spent,
-            address: dto.address.try_into()?,
+            address: dto.address,
             network_id: dto
                 .network_id
                 .parse()

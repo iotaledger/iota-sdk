@@ -15,8 +15,10 @@ import {
     IRent,
     OutputId,
     hexToBigInt,
+    u64,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
+import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
 
 /** Utils class for utils. */
 export class Utils {
@@ -119,7 +121,7 @@ export class Utils {
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: IRent): bigint {
+    static computeStorageDeposit(output: Output, rent: IRent): u64 {
         const depositHex = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
@@ -322,6 +324,26 @@ export class Utils {
         return callUtilsMethod({
             name: 'verifyMnemonic',
             data: { mnemonic },
+        });
+    }
+
+    /**
+     * Derives the `SlotCommitmentId` of the `SlotCommitment`.
+     */
+    static computeSlotCommitmentId(
+        slotCommitment: SlotCommitment,
+    ): SlotCommitmentId {
+        return callUtilsMethod({
+            name: 'computeSlotCommitmentId',
+            data: {
+                slotCommitment: {
+                    index: slotCommitment.index.toString(10),
+                    prevId: slotCommitment.prevId,
+                    rootsId: slotCommitment.rootsId,
+                    cumulativeWeight:
+                        slotCommitment.cumulativeWeight.toString(10),
+                },
+            },
         });
     }
 }

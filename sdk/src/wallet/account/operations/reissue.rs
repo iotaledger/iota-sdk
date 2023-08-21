@@ -7,7 +7,7 @@ use crate::{
         api::core::response::LedgerInclusionState,
         block::{
             payload::{transaction::TransactionId, Payload},
-            Block, BlockId,
+            BlockId,
         },
     },
     wallet::{
@@ -16,37 +16,22 @@ use crate::{
     },
 };
 
-const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
-const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
+const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
+const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
 impl<S: 'static + SecretManage> Account<S>
 where
     Error: From<S::Error>,
 {
-    /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
-    /// milestone). This function is re-exported from the client library and default interval is as defined there.
-    /// Returns the included block at first position and additional reattached blocks
-    pub async fn retry_until_included(
-        &self,
-        block_id: &BlockId,
-        interval: Option<u64>,
-        max_attempts: Option<u64>,
-    ) -> crate::wallet::Result<Vec<(BlockId, Block)>> {
-        Ok(self
-            .client()
-            .retry_until_included(block_id, interval, max_attempts)
-            .await?)
-    }
-
-    /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+    /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
-    pub async fn retry_transaction_until_included(
+    pub async fn reissue_transaction_until_included(
         &self,
         transaction_id: &TransactionId,
         interval: Option<u64>,
         max_attempts: Option<u64>,
     ) -> crate::wallet::Result<BlockId> {
-        log::debug!("[retry_transaction_until_included]");
+        log::debug!("[reissue_transaction_until_included]");
 
         let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
@@ -69,16 +54,24 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_block_builder(None, Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
+                    .finish_basic_block_builder(
+                        todo!("issuer id"),
+                        todo!("block signature"),
+                        todo!("issuing time"),
+                        None,
+                        Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                    )
                     .await?
                     .id(),
             };
 
             // Attachments of the Block to check inclusion state
+            // TODO: remove when todos in `finish_basic_block_builder()` are removed
+            #[allow(unused_mut)]
             let mut block_ids = vec![block_id];
-            for _ in 0..max_attempts.unwrap_or(DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT) {
+            for _ in 0..max_attempts.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT) {
                 let duration =
-                    std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL));
+                    std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL));
 
                 #[cfg(target_family = "wasm")]
                 gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
@@ -96,29 +89,27 @@ where
                             LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
                                 return Ok(*block_id_);
                             }
-                            // only set it as conflicting here and don't return, because another reattached block could
+                            // only set it as conflicting here and don't return, because another reissued block could
                             // have the included transaction
                             LedgerInclusionState::Conflicting => conflicting = true,
                         };
                     }
-                    // Only reattach or promote latest attachment of the block
-                    if index == block_ids_len - 1 {
-                        if block_metadata.should_promote.unwrap_or(false) {
-                            // Safe to unwrap since we iterate over it
-                            self.client().promote_unchecked(block_ids.last().unwrap()).await?;
-                        } else if block_metadata.should_reattach.unwrap_or(false) {
-                            let reattached_block = self
-                                .client()
-                                .finish_block_builder(
-                                    None,
-                                    Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
-                                )
-                                .await?;
-                            block_ids.push(reattached_block.id());
-                        }
+                    // Only reissue latest attachment of the block
+                    if index == block_ids_len - 1 && block_metadata.should_reattach.unwrap_or(false) {
+                        let reissued_block = self
+                            .client()
+                            .finish_basic_block_builder(
+                                todo!("issuer id"),
+                                todo!("block signature"),
+                                todo!("issuing time"),
+                                None,
+                                Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                            )
+                            .await?;
+                        block_ids.push(reissued_block.id());
                     }
                 }
-                // After we checked all our reattached blocks, check if the transaction got reattached in another block
+                // After we checked all our reissued blocks, check if the transaction got reissued in another block
                 // and confirmed
                 if conflicting {
                     let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
