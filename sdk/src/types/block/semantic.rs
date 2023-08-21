@@ -187,7 +187,7 @@ pub fn semantic_validation(
 ) -> Result<Option<TransactionFailureReason>, Error> {
     // Validation of the inputs commitment.
     if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(Some(TransactionFailureReason::InputsCommitmentsMismatch));
+        return Ok(Some(TransactionFailureReason::InvalidInputsCommitments));
     }
 
     // Validation of inputs.
@@ -284,7 +284,7 @@ pub fn semantic_validation(
 
         if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {
-                return Ok(Some(TransactionFailureReason::UnverifiedSender));
+                return Ok(Some(TransactionFailureReason::SenderNotUnlocked));
             }
         }
 
