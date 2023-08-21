@@ -1,13 +1,13 @@
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, string::String, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
 use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
-    slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
+    slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
     BlockId,
 };
 
@@ -24,9 +24,23 @@ pub struct InfoResponse {
     pub version: String,
     pub status: StatusResponse,
     pub metrics: MetricsResponse,
-    pub protocol_parameters: Box<[ProtocolParametersResponse]>,
+    pub protocol_parameters: ProtocolParametersResponse,
     pub base_token: BaseTokenResponse,
     pub features: Box<[String]>,
+}
+
+impl InfoResponse {
+    pub fn latest_protocol_parameters(&self) -> &ProtocolParameters {
+        self.protocol_parameters.latest()
+    }
+
+    pub fn parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParameters> {
+        self.protocol_parameters.by_version(protocol_version)
+    }
+
+    pub fn parameters_by_epoch(&self, epoch_index: EpochIndex) -> Option<&ProtocolParameters> {
+        self.protocol_parameters.by_epoch(epoch_index)
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -79,15 +93,84 @@ pub struct MetricsResponse {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
 pub struct ProtocolParametersResponse {
-    // TODO: should this be a number?
-    pub start_epoch: String,
-    pub parameters: ProtocolParameters,
+    parameters: Box<[ProtocolParameters]>,
+    version_map: BTreeMap<u8, usize>,
+    epoch_map: BTreeMap<EpochIndex, usize>,
+}
+
+impl ProtocolParametersResponse {
+    pub fn iter(&self) -> impl Iterator<Item = (EpochIndex, &ProtocolParameters)> {
+        self.epoch_map.iter().map(|(&epoch, &i)| (epoch, &self.parameters[i]))
+    }
+
+    pub fn latest(&self) -> &ProtocolParameters {
+        &self.parameters[*self.version_map.last_key_value().unwrap().1]
+    }
+
+    pub fn by_version(&self, protocol_version: u8) -> Option<&ProtocolParameters> {
+        self.version_map.get(&protocol_version).map(|&i| &self.parameters[i])
+    }
+
+    pub fn by_epoch(&self, epoch_index: EpochIndex) -> Option<&ProtocolParameters> {
+        self.epoch_map.get(&epoch_index).map(|&i| &self.parameters[i])
+    }
+}
+
+#[cfg(feature = "serde")]
+mod serde_protocol_params_response {
+    use alloc::borrow::Cow;
+
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    use super::*;
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct ProtocolParametersResponseDto<'a> {
+        parameters: Cow<'a, ProtocolParameters>,
+        start_epoch: EpochIndex,
+    }
+
+    impl Serialize for ProtocolParametersResponse {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.collect_seq(
+                self.iter()
+                    .map(|(start_epoch, parameters)| ProtocolParametersResponseDto {
+                        parameters: Cow::Borrowed(parameters),
+                        start_epoch,
+                    }),
+            )
+        }
+    }
+
+    impl<'de> Deserialize<'de> for ProtocolParametersResponse {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let parameters = Vec::<ProtocolParametersResponseDto<'_>>::deserialize(deserializer)?;
+            let (mut version_map, mut epoch_map) = (BTreeMap::default(), BTreeMap::default());
+            let parameters = parameters
+                .into_iter()
+                .enumerate()
+                .map(|(i, res)| {
+                    let (start_epoch, parameters) = (res.start_epoch, res.parameters.into_owned());
+                    version_map.insert(parameters.version(), i);
+                    epoch_map.insert(start_epoch, i);
+                    parameters
+                })
+                .collect();
+            Ok(Self {
+                parameters,
+                version_map,
+                epoch_map,
+            })
+        }
+    }
 }
 
 /// Returned in [`InfoResponse`].

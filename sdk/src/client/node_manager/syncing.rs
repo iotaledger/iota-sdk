@@ -73,8 +73,7 @@ impl ClientInner {
             match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
-                        // TODO: is it okay to index like this?
-                        let network_name = info.protocol_parameters[0].parameters.network_name();
+                        let network_name = info.latest_protocol_parameters().network_name();
                         match network_nodes.get_mut(network_name) {
                             Some(network_node_entry) => {
                                 network_node_entry.push((info, node.clone()));
@@ -106,10 +105,8 @@ impl ClientInner {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
-                // TODO change to one of the new timestamps, which ones ?
-                // TODO: okay to index here?
-                // network_info.latest_milestone_timestamp = info.status.latest_milestone.timestamp;
-                network_info.protocol_parameters = info.protocol_parameters[0].parameters.clone();
+                network_info.latest_finalized_slot = Some(info.status.latest_finalized_slot);
+                network_info.protocol_parameters = info.latest_protocol_parameters().clone();
             }
 
             for (info, node_url) in nodes {

@@ -130,13 +130,13 @@ pub enum Error {
     TaskJoin(#[from] tokio::task::JoinError),
     /// Local time doesn't match the time of the latest milestone timestamp
     #[error(
-        "local time {current_time} doesn't match the time of the latest milestone timestamp: {milestone_timestamp}"
+        "local time {current_time} doesn't match the time of the latest finalized slot timestamp: {latest_finalized_slot_timestamp}"
     )]
     TimeNotSynced {
         /// The local time.
         current_time: u32,
-        /// The timestamp of the latest milestone.
-        milestone_timestamp: u32,
+        /// The timestamp of the latest finalized slot.
+        latest_finalized_slot_timestamp: u32,
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]

@@ -16,7 +16,7 @@ fn stringified_error() {
 
     let error = Error::TimeNotSynced {
         current_time: 0,
-        milestone_timestamp: 10000,
+        latest_finalized_slot_timestamp: 10000,
     };
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),

@@ -11,11 +11,17 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{address::Hrp, slot::SlotIndex};
+use super::{
+    address::Hrp,
+    slot::{EpochIndex, SlotIndex},
+};
 use crate::types::block::{
     error::UnpackPrefixOptionErrorExt, helper::network_name_to_id, output::RentStructure, ConvertTo, Error,
     PROTOCOL_VERSION,
 };
+
+// TODO: The API spec lists this field as optional, but is it really? And if so, what would the default be?
+pub const DEFAULT_SLOTS_PER_EPOCH_EXPONENT: u32 = 10;
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -56,7 +62,7 @@ pub struct ProtocolParameters {
     #[getset(get_copy = "pub")]
     slot_duration_in_seconds: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
+    #[getset(skip)]
     slots_per_epoch_exponent: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
@@ -87,19 +93,9 @@ pub struct ProtocolParameters {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
     eviction_age: Option<SlotIndex>,
-    // TODO: wtf are these? should they be strings?
-    #[packable(unpack_error_with = |err| Error::InvalidLivenessThreshold(err.into_opt_error()))]
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        with = "crate::utils::serde::option_string_prefix"
-    )]
-    #[getset(skip)]
-    liveness_threshold: Option<StringPrefix<u8>>,
-    #[packable(unpack_error_with = |err| Error::InvalidEpochNearingThreshold(err.into_item_err()))]
-    #[serde(with = "crate::utils::serde::string_prefix")]
-    #[getset(skip)]
-    epoch_nearing_threshold: StringPrefix<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    liveness_threshold: Option<SlotIndex>,
+    epoch_nearing_threshold: SlotIndex,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]
     version_signaling: Option<VersionSignalingParameters>,
@@ -124,6 +120,7 @@ impl Default for ProtocolParameters {
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
+            epoch_nearing_threshold: 20.into(),
             slots_per_epoch_exponent: Default::default(),
             mana_generation_rate: Default::default(),
             mana_generation_rate_exponent: Default::default(),
@@ -134,7 +131,6 @@ impl Default for ProtocolParameters {
             staking_unbonding_period: Default::default(),
             eviction_age: Default::default(),
             liveness_threshold: Default::default(),
-            epoch_nearing_threshold: Default::default(),
             version_signaling: Default::default(),
         }
     }
@@ -151,7 +147,7 @@ impl ProtocolParameters {
         token_supply: u64,
         genesis_unix_timestamp: u32,
         slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: impl Into<String>,
+        epoch_nearing_threshold: impl Into<SlotIndex>,
     ) -> Result<Self, Error> {
         Ok(Self {
             version,
@@ -161,8 +157,7 @@ impl ProtocolParameters {
             token_supply,
             genesis_unix_timestamp,
             slot_duration_in_seconds,
-            epoch_nearing_threshold: <StringPrefix<u8>>::try_from(epoch_nearing_threshold.into())
-                .map_err(Error::InvalidStringPrefix)?,
+            epoch_nearing_threshold: epoch_nearing_threshold.into(),
             ..Default::default()
         })
     }
@@ -183,13 +178,18 @@ impl ProtocolParameters {
     }
 
     /// Returns the liveness threshold of the [`ProtocolParameters`].
-    pub fn liveness_threshold(&self) -> Option<&str> {
-        self.liveness_threshold.as_ref().map(|s| s.as_str())
+    pub fn liveness_threshold(&self) -> Option<SlotIndex> {
+        self.liveness_threshold
     }
 
     /// Returns the epoch nearing threshold of the [`ProtocolParameters`].
-    pub fn epoch_nearing_threshold(&self) -> &str {
-        &self.epoch_nearing_threshold
+    pub fn epoch_nearing_threshold(&self) -> SlotIndex {
+        self.epoch_nearing_threshold
+    }
+
+    pub fn slots_per_epoch_exponent(&self) -> u32 {
+        self.slots_per_epoch_exponent
+            .unwrap_or(DEFAULT_SLOTS_PER_EPOCH_EXPONENT)
     }
 
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
@@ -198,6 +198,11 @@ impl ProtocolParameters {
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
+    }
+
+    pub fn epoch_index(&self, timestamp: u64) -> EpochIndex {
+        self.slot_index(timestamp)
+            .to_epoch_index(self.slots_per_epoch_exponent())
     }
 
     pub fn hash(&self) -> ProtocolParametersHash {
@@ -269,7 +274,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
         1_813_620_509_061_365,
         1582328545,
         10,
-        "TODO",
+        20,
     )
     .unwrap()
 }

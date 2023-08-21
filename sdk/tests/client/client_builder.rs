@@ -45,7 +45,7 @@ async fn client_builder() {
             "tokenSupply":"1813620509061365",
             "genesisUnixTimestamp":"1582328545",
             "slotDurationInSeconds":10,
-            "epochNearingThreshold":"TODO"
+            "epochNearingThreshold":"30"
         },
         "apiTimeout":{
             "secs":15,

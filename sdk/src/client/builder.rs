@@ -19,7 +19,7 @@ use crate::{
         },
         Client,
     },
-    types::block::protocol::ProtocolParameters,
+    types::block::{protocol::ProtocolParameters, slot::SlotIndex},
 };
 
 /// Builder to construct client instance with sensible default values
@@ -263,9 +263,9 @@ pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
-    /// The latest cached milestone timestamp.
+    /// The latest finalized slot index.
     #[serde(skip)]
-    pub latest_milestone_timestamp: Option<u32>,
+    pub latest_finalized_slot: Option<SlotIndex>,
 }
 
 impl NetworkInfo {
@@ -274,8 +274,8 @@ impl NetworkInfo {
         self
     }
 
-    pub fn with_latest_milestone_timestamp(mut self, latest_milestone_timestamp: impl Into<Option<u32>>) -> Self {
-        self.latest_milestone_timestamp = latest_milestone_timestamp.into();
+    pub fn with_latest_finalized_slot(mut self, latest_finalized_slot: impl Into<SlotIndex>) -> Self {
+        self.latest_finalized_slot = Some(latest_finalized_slot.into());
         self
     }
 }

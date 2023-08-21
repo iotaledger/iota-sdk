@@ -121,14 +121,20 @@ impl Client {
 
         let network_info = self.get_network_info().await?;
 
-        if let Some(latest_ms_timestamp) = network_info.latest_milestone_timestamp {
+        if let Some(latest_finalized_slot_timestamp) = network_info.latest_finalized_slot.map(|idx| {
+            idx.as_timestamp(
+                network_info.protocol_parameters.genesis_unix_timestamp(),
+                network_info.protocol_parameters.slot_duration_in_seconds(),
+            )
+        }) {
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
-            if !(latest_ms_timestamp - FIVE_MINUTES_IN_SECONDS..latest_ms_timestamp + FIVE_MINUTES_IN_SECONDS)
+            if !(latest_finalized_slot_timestamp - FIVE_MINUTES_IN_SECONDS
+                ..latest_finalized_slot_timestamp + FIVE_MINUTES_IN_SECONDS)
                 .contains(&current_time)
             {
                 return Err(Error::TimeNotSynced {
                     current_time,
-                    milestone_timestamp: latest_ms_timestamp,
+                    latest_finalized_slot_timestamp,
                 });
             }
         }
