@@ -20,7 +20,7 @@ fn stringified_error() {
     };
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"timeNotSynced\",\"error\":\"local time 0 doesn't match the time of the latest milestone timestamp: 10000\"}"
+        "{\"type\":\"timeNotSynced\",\"error\":\"local time 0 doesn't match the time of the latest finalized slot timestamp: 10000\"}"
     );
 
     let error = Error::PlaceholderSecretManager;
