@@ -43,8 +43,8 @@ pub enum TransactionFailureReason {
     StorageDepositReturnUnfulfilled = 9,
     /// An invalid unlock was used.
     InvalidUnlock = 10,
-    /// The inputs commitments is invalid.
-    InvalidInputsCommitments = 11,
+    /// The inputs commitment is invalid.
+    InvalidInputsCommitment = 11,
     /// The sender was not verified.
     SenderNotUnlocked = 12,
     /// The chain state transition is invalid.
