@@ -84,7 +84,7 @@ impl TryFrom<u8> for TransactionFailureReason {
             8 => Self::InvalidNativeTokens,
             9 => Self::StorageDepositReturnUnfulfilled,
             10 => Self::InvalidUnlock,
-            11 => Self::InvalidInputsCommitments,
+            11 => Self::InvalidInputsCommitment,
             12 => Self::SenderNotUnlocked,
             13 => Self::InvalidChainStateTransition,
             14 => Self::InvalidTransactionIssuingTime,
@@ -187,7 +187,7 @@ pub fn semantic_validation(
 ) -> Result<Option<TransactionFailureReason>, Error> {
     // Validation of the inputs commitment.
     if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(Some(TransactionFailureReason::InvalidInputsCommitments));
+        return Ok(Some(TransactionFailureReason::InvalidInputsCommitment));
     }
 
     // Validation of inputs.
