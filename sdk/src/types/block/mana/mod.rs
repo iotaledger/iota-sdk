@@ -16,7 +16,7 @@ use super::{output::AccountId, Error};
 /// The number of bits that a given mana value can use, excluding the sign bit.
 pub const MANA_BITS: u64 = 63;
 /// Equivalent to `2^MANA_BITS - 1`
-pub const MAX_THEORETICAL_MANA: u64 = u64::MAX >> 1;
+pub const THEORETICAL_MANA_MAX: u64 = u64::MAX >> 1;
 
 pub(crate) type ManaAllotmentCount =
     BoundedU16<{ *ManaAllotments::COUNT_RANGE.start() }, { *ManaAllotments::COUNT_RANGE.end() }>;
@@ -28,9 +28,46 @@ pub struct ManaAllotments(
     #[packable(verify_with = verify_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
 );
 
+impl ManaAllotments {
+    /// The minimum number of mana allotments of a transaction.
+    pub const COUNT_MIN: u16 = 1;
+    /// The maximum number of mana allotments of a transaction.
+    pub const COUNT_MAX: u16 = 128;
+    /// The range of valid numbers of mana allotments of a transaction.
+    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
+
+    /// Creates a new [`ManaAllotments`] from a vec.
+    pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
+        let allotments = BoxedSlicePrefix::<ManaAllotment, ManaAllotmentCount>::try_from(allotments.into_boxed_slice())
+            .map_err(Error::InvalidManaAllotmentCount)?;
+
+        verify_allotments::<true>(&allotments, &())?;
+
+        Ok(Self(allotments))
+    }
+
+    /// Creates a new [`ManaAllotments`] from an ordered set.
+    pub fn from_set(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Error> {
+        let allotments = BoxedSlicePrefix::<ManaAllotment, ManaAllotmentCount>::try_from(
+            allotments.into_iter().collect::<Box<[_]>>(),
+        )
+        .map_err(Error::InvalidManaAllotmentCount)?;
+
+        verify_allotments_sum(allotments.as_ref())?;
+
+        Ok(Self(allotments))
+    }
+
+    /// Gets a reference to an [`ManaAllotment`], if one exists, using an [`AccountId`].
+    #[inline(always)]
+    pub fn get(&self, account_id: &AccountId) -> Option<&ManaAllotment> {
+        self.0.iter().find(|a| a.account_id() == account_id)
+    }
+}
+
 fn verify_allotments<const VERIFY: bool>(allotments: &[ManaAllotment], _visitor: &()) -> Result<(), Error> {
     if VERIFY {
-        if !is_unique_sorted(allotments.iter().map(|a| a.account_id)) {
+        if !is_unique_sorted(allotments.iter()) {
             return Err(Error::AllotmentsNotUniqueSorted);
         }
         verify_allotments_sum(allotments)?;
@@ -47,7 +84,7 @@ fn verify_allotments_sum<'a>(allotments: impl IntoIterator<Item = &'a ManaAllotm
             .checked_add(*mana)
             .ok_or(Error::InvalidManaAllotmentSum(mana_sum as u128 + *mana as u128))?;
 
-        if mana_sum > MAX_THEORETICAL_MANA {
+        if mana_sum > THEORETICAL_MANA_MAX {
             return Err(Error::InvalidManaAllotmentSum(mana_sum as u128));
         }
     }
@@ -79,46 +116,5 @@ impl IntoIterator for ManaAllotments {
 
     fn into_iter(self) -> Self::IntoIter {
         Vec::from(Into::<Box<[ManaAllotment]>>::into(self.0)).into_iter()
-    }
-}
-
-impl ManaAllotments {
-    /// The minimum number of allotments of a transaction.
-    pub const COUNT_MIN: u16 = 1;
-    /// The maximum number of allotments of a transaction.
-    pub const COUNT_MAX: u16 = 128;
-    /// The range of valid numbers of allotments of a transaction.
-    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
-
-    /// Creates a new [`ManaAllotments`] from a vec.
-    pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
-        let allotments = BoxedSlicePrefix::<ManaAllotment, ManaAllotmentCount>::try_from(allotments.into_boxed_slice())
-            .map_err(Error::InvalidManaAllotmentCount)?;
-
-        verify_allotments::<true>(&allotments, &())?;
-
-        Ok(Self(allotments))
-    }
-
-    /// Creates a new [`ManaAllotments`] from an ordered set.
-    pub fn from_set(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Error> {
-        let allotments = BoxedSlicePrefix::<ManaAllotment, ManaAllotmentCount>::try_from(
-            allotments.into_iter().collect::<Box<[_]>>(),
-        )
-        .map_err(Error::InvalidManaAllotmentCount)?;
-
-        verify_allotments_sum(allotments.as_ref())?;
-
-        Ok(Self(allotments))
-    }
-
-    /// Gets a reference to an [`ManaAllotment`], if one exists, using an [`AccountId`].
-    #[inline(always)]
-    pub fn get(&self, account_id: &AccountId) -> Option<&ManaAllotment> {
-        self.0
-            .iter()
-            .position(|a| a.account_id() == account_id)
-            // PANIC: indexation is fine since the index has been found.
-            .map(|index| &self.0[index])
     }
 }

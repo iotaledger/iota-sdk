@@ -8,7 +8,7 @@ use packable::{
     Packable,
 };
 
-use super::MAX_THEORETICAL_MANA;
+use super::THEORETICAL_MANA_MAX;
 use crate::types::block::{output::AccountId, Error};
 
 /// An allotment of Mana which will be added upon commitment of the slot in which the containing transaction was issued,
@@ -35,7 +35,7 @@ impl Ord for ManaAllotment {
 
 impl ManaAllotment {
     pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
-        if mana > MAX_THEORETICAL_MANA {
+        if mana > THEORETICAL_MANA_MAX {
             return Err(Error::InvalidManaValue(mana));
         }
         Ok(Self { account_id, mana })
