@@ -68,7 +68,7 @@ impl ManaAllotments {
 fn verify_allotments<const VERIFY: bool>(allotments: &[ManaAllotment], _visitor: &()) -> Result<(), Error> {
     if VERIFY {
         if !is_unique_sorted(allotments.iter()) {
-            return Err(Error::AllotmentsNotUniqueSorted);
+            return Err(Error::ManaAllotmentsNotUniqueSorted);
         }
         verify_allotments_sum(allotments)?;
     }
