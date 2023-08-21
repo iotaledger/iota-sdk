@@ -5,8 +5,8 @@ use derive_more::From;
 
 use crate::types::block::{address::Address, slot::SlotIndex, Error};
 
-/// Defines a slot index until which only Address, defined in Address Unlock Condition, is allowed to unlock the output.
-/// After the slot index is reached/passed, only Return Address can unlock it.
+/// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
+/// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
