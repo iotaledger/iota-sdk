@@ -177,10 +177,15 @@ pub enum TransactionState {
 #[non_exhaustive]
 #[repr(u8)]
 pub enum BlockFailureReason {
+    /// The block is too old to issue.
     TooOldToIssue = 1,
+    /// The block's parents are too old.
     ParentsTooOld = 2,
+    /// The block failed at the booker.
     FailedAtBooker = 3,
+    /// The block is dropped due to congestion.
     DroppedDueToCongestion = 4,
+    /// The block is invalid.
     Invalid = 5,
 }
 

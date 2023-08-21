@@ -43,10 +43,10 @@ pub enum TransactionFailureReason {
     StorageDepositReturnUnfulfilled = 9,
     /// An invalid unlock was used.
     InvalidUnlock = 10,
-    /// The inputs commitments do not match.
-    InputsCommitmentsMismatch = 11,
+    /// The inputs commitments is invalid.
+    InvalidInputsCommitments = 11,
     /// The sender was not verified.
-    UnverifiedSender = 12,
+    SenderNotUnlocked = 12,
     /// The chain state transition is invalid.
     InvalidChainStateTransition = 13,
     /// The referenced input is created after transaction issuing time.
@@ -84,8 +84,8 @@ impl TryFrom<u8> for TransactionFailureReason {
             8 => Self::InvalidNativeTokens,
             9 => Self::StorageDepositReturnUnfulfilled,
             10 => Self::InvalidUnlock,
-            11 => Self::InputsCommitmentsMismatch,
-            12 => Self::UnverifiedSender,
+            11 => Self::InvalidInputsCommitments,
+            12 => Self::SenderNotUnlocked,
             13 => Self::InvalidChainStateTransition,
             14 => Self::InvalidTransactionIssuingTime,
             15 => Self::InvalidManaAmount,

@@ -86,6 +86,7 @@ where
                     let block_metadata = self.client().get_block_metadata(block_id).await?;
                     if let Some(transaction_state) = block_metadata.tx_state {
                         match transaction_state {
+                            // TODO: find out what to do with TransactionState::Confirmed
                             TransactionState::Finalized => return Ok(*block_id),
                             // only set it as failed here and don't return, because another reissued block could
                             // have the included transaction
