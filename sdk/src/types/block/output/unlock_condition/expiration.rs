@@ -11,8 +11,7 @@ use crate::types::block::{address::Address, slot::SlotIndex, Error};
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
     return_address: Address,
-    /// Before this slot index is reached, only the Address defined in the Address
-    /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
+    /// The slot index that determines when the associated output expires.
     #[packable(verify_with = verify_slot_index)]
     slot_index: SlotIndex,
 }
