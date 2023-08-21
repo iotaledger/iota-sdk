@@ -34,7 +34,7 @@ fn essence_kind() {
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
             .with_inputs([input1, input2])
             .add_output(output)
-            .add_mana_allotment(rand_mana_allotment(10))
+            .add_mana_allotment(rand_mana_allotment())
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );

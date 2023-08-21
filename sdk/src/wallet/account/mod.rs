@@ -637,7 +637,7 @@ fn serialize() {
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
-            .add_mana_allotment(rand_mana_allotment(10))
+            .add_mana_allotment(rand_mana_allotment())
             .finish_with_params(protocol_parameters)
             .unwrap();
 

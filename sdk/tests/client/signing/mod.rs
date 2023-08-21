@@ -383,7 +383,7 @@ async fn all_combined() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(10))
+        .add_mana_allotment(rand_mana_allotment())
         .finish_with_params(protocol_parameters)?,
     );
 
