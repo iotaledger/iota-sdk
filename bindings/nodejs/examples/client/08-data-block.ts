@@ -3,6 +3,7 @@
 
 import {
     BasicBlock,
+    BlockType,
     Client,
     hexToUtf8,
     initLogger,
@@ -39,10 +40,10 @@ async function run() {
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
         console.log('Block data: ', fetchedBlock);
 
-        if (fetchedBlock instanceof BasicBlock) {
+        if (fetchedBlock.type === BlockType.Basic) {
             const basic = fetchedBlock as BasicBlock;
-            if (basic instanceof TaggedDataPayload) {
-                const payload = basic as TaggedDataPayload;
+            if (basic.block.payload instanceof TaggedDataPayload) {
+                const payload = basic.block.payload as TaggedDataPayload;
                 console.log('Decoded data:', hexToUtf8(payload.data));
             }
         }

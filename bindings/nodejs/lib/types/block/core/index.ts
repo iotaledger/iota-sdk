@@ -2,20 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { plainToInstance } from 'class-transformer';
-import { BlockType, Block } from './block';
-import { BasicBlock } from './basic-block';
+import { BasicBlock, BasicBlockData } from './basic-block';
+import { BlockType, BlockWrapper } from './block';
 
 export * from './block';
 export * from './basic-block';
 
+export type Block = BasicBlock;
+
 export const BlockDiscriminator = {
     property: 'type',
-    subTypes: [{ value: BasicBlock, name: BlockType.Basic as any }],
+    subTypes: [
+        { value: BlockWrapper<BasicBlockData>, name: BlockType.Basic as any },
+    ],
 };
 
 export function parseBlock(data: any): Block {
     if (data.type == BlockType.Basic) {
-        return plainToInstance(BasicBlock, data) as any as BasicBlock;
+        return plainToInstance(
+            BlockWrapper<BasicBlockData>,
+            data,
+        ) as any as BlockWrapper<BasicBlockData>;
     }
     throw new Error('Invalid JSON');
 }
