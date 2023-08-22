@@ -13,10 +13,11 @@ use crate::wallet::WalletBuilder;
 use crate::{
     client::{
         secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
+        storage::StorageAdapter,
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{Account, Wallet},
+    wallet::{storage::constants::CHRYSALIS_STORAGE_KEY, Account, Wallet},
 };
 
 impl Wallet {
@@ -208,7 +209,7 @@ impl Wallet {
                 self.storage_manager
                     .read()
                     .await
-                    .set_chrysalis_data(chrysalis_data)
+                    .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data)
                     .await?;
             }
         }
@@ -378,7 +379,7 @@ impl Wallet<StrongholdSecretManager> {
                 self.storage_manager
                     .read()
                     .await
-                    .set_chrysalis_data(chrysalis_data)
+                    .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data)
                     .await?;
             }
         }
