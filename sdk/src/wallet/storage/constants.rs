@@ -5,20 +5,25 @@
 pub const DEFAULT_STORAGE_PATH: &str = "./storage";
 
 /// The default jammDB storage path.
-#[cfg(all(not(feature = "rocksdb"), feature = "jammdb"))]
-pub(crate) const JAMMDB_FOLDERNAME: &str = "walletdb";
+#[cfg(feature = "jammdb")]
+pub const JAMMDB_FOLDERNAME: &str = "walletdb";
 
 /// The default RocksDB storage path.
 #[cfg(feature = "rocksdb")]
 pub(crate) const ROCKSDB_FOLDERNAME: &str = "walletdb";
 
 pub const fn default_storage_path() -> &'static str {
-    #[cfg(feature = "rocksdb")]
-    return ROCKSDB_FOLDERNAME;
-    #[cfg(all(not(feature = "rocksdb"), feature = "jammdb"))]
-    return JAMMDB_FOLDERNAME;
-    #[cfg(all(not(feature = "rocksdb"), not(feature = "jammdb")))]
-    DEFAULT_STORAGE_PATH
+    cfg_if::cfg_if!{
+        if #[cfg(feature = "rocksdb")]{
+            return ROCKSDB_FOLDERNAME;
+        }
+        else if #[cfg(feature = "jammdb")] {
+            return JAMMDB_FOLDERNAME;
+        }
+        else {
+            DEFAULT_STORAGE_PATH
+        }
+    }    
 }
 
 pub(crate) const WALLET_INDEXATION_KEY: &str = "iota-wallet-account-manager";
