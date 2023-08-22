@@ -21,7 +21,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 bech32 = { version = "0.9.1", default-features = false }
 bitflags = { version = "2.3.3", default-features = false }
 bytemuck = { version = "1.13.1", default-features = false }
-cfg-if={version= "1.0.0", default-features = false}
+cfg-if = { version = "1.0.0", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [
     "from",
     "as_ref",
