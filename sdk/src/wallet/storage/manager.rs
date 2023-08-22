@@ -112,12 +112,6 @@ impl StorageManager {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
         self.get(&key).await
     }
-
-    pub(crate) async fn get_chrysalis_data(
-        &self,
-    ) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
-        self.get(CHRYSALIS_STORAGE_KEY).await
-    }
 }
 
 #[async_trait::async_trait]
