@@ -14,6 +14,7 @@ enum FeatureType {
     Metadata = 2,
     Tag = 3,
     BlockIssuer = 4,
+    Staking = 5,
 }
 
 abstract class Feature {
@@ -90,6 +91,41 @@ class BlockIssuerFeature extends Feature {
     }
 }
 
+/**
+ * Block Issuer feature.
+ */
+class StakingFeature extends Feature {
+    /**
+     * The amount of coins that are locked and staked in the containing account.
+     **/
+    readonly stakedAmount: bigint;
+    /**
+     * The fixed cost of the validator, which it receives as part of its Mana rewards.
+     */
+    readonly fixedCost: bigint;
+    /**
+     * The epoch index in which the staking started.
+     */
+    readonly startEpoch: bigint;
+    /**
+     * The epoch index in which the staking ends.
+     */
+    readonly endEpoch: bigint;
+
+    constructor(
+        stakedAmount: bigint,
+        fixedCost: bigint,
+        startEpoch: bigint,
+        endEpoch: bigint,
+    ) {
+        super(FeatureType.Staking);
+        this.stakedAmount = stakedAmount;
+        this.fixedCost = fixedCost;
+        this.startEpoch = startEpoch;
+        this.endEpoch = endEpoch;
+    }
+}
+
 const FeatureDiscriminator = {
     property: 'type',
     subTypes: [
@@ -98,6 +134,7 @@ const FeatureDiscriminator = {
         { value: MetadataFeature, name: FeatureType.Metadata as any },
         { value: TagFeature, name: FeatureType.Tag as any },
         { value: BlockIssuerFeature, name: FeatureType.BlockIssuer as any },
+        { value: StakingFeature, name: FeatureType.Staking as any },
     ],
 };
 
@@ -110,4 +147,5 @@ export {
     MetadataFeature,
     TagFeature,
     BlockIssuerFeature,
+    StakingFeature,
 };
