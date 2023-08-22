@@ -19,7 +19,7 @@ use crate::{
         },
         Client,
     },
-    types::block::{protocol::ProtocolParameters, slot::SlotIndex},
+    types::block::protocol::ProtocolParameters,
 };
 
 /// Builder to construct client instance with sensible default values
@@ -263,9 +263,9 @@ pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
-    /// The latest finalized slot index.
+    /// The current tangle time.
     #[serde(skip)]
-    pub latest_finalized_slot: Option<SlotIndex>,
+    pub tangle_time: Option<u64>,
 }
 
 impl NetworkInfo {
@@ -274,8 +274,8 @@ impl NetworkInfo {
         self
     }
 
-    pub fn with_latest_finalized_slot(mut self, latest_finalized_slot: impl Into<SlotIndex>) -> Self {
-        self.latest_finalized_slot = Some(latest_finalized_slot.into());
+    pub fn with_tangle_time(mut self, tangle_time: u64) -> Self {
+        self.tangle_time = Some(tangle_time.into());
         self
     }
 }

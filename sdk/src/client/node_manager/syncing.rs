@@ -105,7 +105,7 @@ impl ClientInner {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
-                network_info.latest_finalized_slot = Some(info.status.latest_finalized_slot);
+                network_info.tangle_time = Some(info.status.relative_accepted_tangle_time);
                 network_info.protocol_parameters = info.latest_protocol_parameters().clone();
             }
 

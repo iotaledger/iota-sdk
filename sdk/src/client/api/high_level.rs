@@ -121,12 +121,8 @@ impl Client {
 
         let network_info = self.get_network_info().await?;
 
-        if let Some(latest_finalized_slot_timestamp) = network_info.latest_finalized_slot.map(|idx| {
-            idx.as_timestamp(
-                network_info.protocol_parameters.genesis_unix_timestamp(),
-                network_info.protocol_parameters.slot_duration_in_seconds(),
-            )
-        }) {
+        if let Some(latest_finalized_slot_timestamp) = network_info.tangle_time {
+            let latest_finalized_slot_timestamp = latest_finalized_slot_timestamp as u32;
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
             if !(latest_finalized_slot_timestamp - FIVE_MINUTES_IN_SECONDS
                 ..latest_finalized_slot_timestamp + FIVE_MINUTES_IN_SECONDS)
