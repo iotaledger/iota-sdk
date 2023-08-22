@@ -15,11 +15,11 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse, RoutesResponse,
-            SubmitBlockResponse, UtxoChangesResponse,
+            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse,
+            RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
-            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+            output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -88,6 +88,18 @@ impl ClientInner {
             .read()
             .await
             .get_request(INFO_PATH, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Checks if the account is ready to issue a block.
+    /// GET /api/core/v3/accounts/{accountId}/congestion
+    pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
+        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 

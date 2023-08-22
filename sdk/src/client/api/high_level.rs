@@ -127,7 +127,7 @@ impl Client {
             if !(tangle_time - FIVE_MINUTES_IN_SECONDS..tangle_time + FIVE_MINUTES_IN_SECONDS).contains(&current_time) {
                 return Err(Error::TimeNotSynced {
                     current_time,
-                    latest_finalized_slot_timestamp: tangle_time,
+                    tangle_time,
                 });
             }
         }

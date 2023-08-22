@@ -186,9 +186,9 @@ pub struct BaseTokenResponse {
     pub name: String,
     pub ticker_symbol: String,
     pub unit: String,
-    pub decimals: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
+    pub decimals: u32,
     pub use_metric_prefix: bool,
 }
 
@@ -439,4 +439,25 @@ pub struct UtxoChangesResponse {
     pub index: u32,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Response of GET /api/core/v3/accounts/{accountId}/congestion.
+/// Provides the cost and readiness to issue estimates.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CongestionResponse {
+    /// The slot index for which the congestion estimate is provided.
+    pub slot_index: SlotIndex,
+    /// Indicates if a node is ready to issue a block in a current congestion or should wait.
+    pub ready: bool,
+    /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
+    #[serde(with = "crate::utils::serde::string")]
+    pub reference_mana_cost: u64,
+    /// The Block Issuance Credits of the requested account.
+    #[serde(with = "crate::utils::serde::string")]
+    pub block_issuance_credits: u64,
 }
