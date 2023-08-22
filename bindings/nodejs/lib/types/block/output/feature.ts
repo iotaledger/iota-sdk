@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedString } from '../../utils';
+import { HexEncodedString, u64 } from '../../utils';
 import { Address } from '../address';
 import { SlotIndex } from '../slot';
 
@@ -98,25 +98,25 @@ class StakingFeature extends Feature {
     /**
      * The amount of coins that are locked and staked in the containing account.
      **/
-    readonly stakedAmount: bigint;
+    readonly stakedAmount: u64;
     /**
      * The fixed cost of the validator, which it receives as part of its Mana rewards.
      */
-    readonly fixedCost: bigint;
+    readonly fixedCost: u64;
     /**
      * The epoch index in which the staking started.
      */
-    readonly startEpoch: bigint;
+    readonly startEpoch: u64;
     /**
      * The epoch index in which the staking ends.
      */
-    readonly endEpoch: bigint;
+    readonly endEpoch: u64;
 
     constructor(
-        stakedAmount: bigint,
-        fixedCost: bigint,
-        startEpoch: bigint,
-        endEpoch: bigint,
+        stakedAmount: u64,
+        fixedCost: u64,
+        startEpoch: u64,
+        endEpoch: u64,
     ) {
         super(FeatureType.Staking);
         this.stakedAmount = stakedAmount;
