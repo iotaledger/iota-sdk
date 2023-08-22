@@ -106,7 +106,7 @@ async fn sign_account_state_transition() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(SlotIndex::from(0)))
+        .sign_transaction_essence(&prepared_transaction_data, SlotIndex::from(0))
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -196,7 +196,7 @@ async fn sign_account_governance_transition() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(SlotIndex::from(0)))
+        .sign_transaction_essence(&prepared_transaction_data, SlotIndex::from(0))
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -326,7 +326,7 @@ async fn account_reference_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(SlotIndex::from(0)))
+        .sign_transaction_essence(&prepared_transaction_data, SlotIndex::from(0))
         .await?;
 
     assert_eq!(unlocks.len(), 3);

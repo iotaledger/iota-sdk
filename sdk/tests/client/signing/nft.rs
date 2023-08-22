@@ -135,7 +135,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let slot_index = SlotIndex::from(100);
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(slot_index))
+        .sign_transaction_essence(&prepared_transaction_data, slot_index)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
