@@ -1665,6 +1665,7 @@ dependencies = [
  "bech32 0.9.1",
  "bitflags 2.3.3",
  "bytemuck",
+ "cfg-if",
  "derive_builder",
  "derive_more",
  "dotenvy",
