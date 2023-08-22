@@ -112,9 +112,17 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
 ) -> crate::wallet::Result<Option<HashMap<String, String>>> {
     log::debug!("migrate_snapshot_from_chrysalis_to_stardust");
     let stronghold = stronghold_adapter.inner().await;
-    let stronghold_client = stronghold
-        .load_client(b"iota-wallet-records")
-        .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
+    let stronghold_client = match stronghold.load_client(b"iota-wallet-records") {
+        Ok(client) => client,
+        // `iota-wallet-records` was only used in chrysalis
+        Err(iota_stronghold::ClientError::ClientDataNotPresent) => return Ok(None),
+        Err(e) => {
+            return Err(crate::wallet::Error::Client(Box::new(
+                crate::client::Error::Stronghold(e.into()),
+            )));
+        }
+    };
+
     let stronghold_store = stronghold_client.store();
     let keys = stronghold_store
         .keys()
