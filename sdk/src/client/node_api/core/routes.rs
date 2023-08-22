@@ -139,7 +139,7 @@ impl ClientInner {
     }
 
     /// Finds a block by its ID and returns it as object.
-    /// GET /api/core/v3/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{blockId}
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
@@ -154,7 +154,7 @@ impl ClientInner {
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
-    /// GET /api/core/v3/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{blockId}
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
@@ -166,7 +166,7 @@ impl ClientInner {
     }
 
     /// Returns the metadata of a block.
-    /// GET /api/core/v3/blocks/{BlockId}/metadata
+    /// GET /api/core/v3/blocks/{blockId}/metadata
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/blocks/{block_id}/metadata");
 
@@ -219,7 +219,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the block that was included in the ledger for a given transaction ID, as object.
+    /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -234,7 +234,7 @@ impl ClientInner {
         Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
-    /// Returns the block that was included in the ledger for a given transaction ID, as object, as raw bytes.
+    /// Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -246,7 +246,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the metadata of the block that was included in the ledger for a given TransactionId.
+    /// Returns the metadata of the earliest block containing the tx that was confirmed.
     /// GET /api/core/v3/transactions/{transactionId}/included-block/metadata
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block/metadata");

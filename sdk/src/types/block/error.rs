@@ -49,6 +49,8 @@ pub enum Error {
     InvalidBlockKind(u8),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
+    /// Invalid transaction failure reason byte.
+    InvalidTransactionFailureReason(u8),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {
         amount: u64,
@@ -207,6 +209,9 @@ impl fmt::Display for Error {
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
+            }
+            Self::InvalidTransactionFailureReason(reason_byte) => {
+                write!(f, "invalid transaction failure reason byte: {reason_byte}")
             }
             Self::InsufficientStorageDepositAmount { amount, required } => {
                 write!(

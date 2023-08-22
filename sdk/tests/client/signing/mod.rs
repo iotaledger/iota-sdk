@@ -28,7 +28,6 @@ use iota_sdk::{
         },
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
-        semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -481,7 +480,7 @@ async fn all_combined() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != ConflictReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 

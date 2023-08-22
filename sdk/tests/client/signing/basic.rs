@@ -22,7 +22,6 @@ use iota_sdk::{
         },
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
-        semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -103,7 +102,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != ConflictReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
@@ -218,7 +217,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != ConflictReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
@@ -320,7 +319,7 @@ async fn two_signature_unlocks() -> Result<()> {
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-    if conflict != ConflictReason::None {
+    if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
