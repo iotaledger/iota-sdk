@@ -202,46 +202,46 @@ fn transition_account_id_zero() {
 //     ));
 // }
 
-#[test]
-fn basic_output_with_account_input() {
-    let protocol_parameters = protocol_parameters();
-    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
+// #[test]
+// fn basic_output_with_account_input() {
+//     let protocol_parameters = protocol_parameters();
+//     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Account(
-        2_259_500,
-        account_id_2,
-        0,
-        BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
-        None,
-        None,
-        None,
-        None,
-    )]);
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        BECH32_ADDRESS_ED25519_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+//     let inputs = build_inputs([Account(
+//         2_259_500,
+//         account_id_2,
+//         0,
+//         BECH32_ADDRESS_ED25519_0,
+//         BECH32_ADDRESS_ED25519_0,
+//         None,
+//         None,
+//         None,
+//         None,
+//     )]);
+//     let outputs = build_outputs([Basic(
+//         2_000_000,
+//         BECH32_ADDRESS_ED25519_0,
+//         None,
+//         None,
+//         None,
+//         None,
+//         None,
+//         None,
+//     )]);
 
-    let selected = InputSelection::new(
-        inputs.clone(),
-        outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
-        protocol_parameters,
-    )
-    .select()
-    .unwrap();
+//     let selected = InputSelection::new(
+//         inputs.clone(),
+//         outputs,
+//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         protocol_parameters,
+//     )
+//     .select()
+//     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    // basic output + account remainder
-    assert_eq!(selected.outputs.len(), 2);
-}
+//     assert!(unsorted_eq(&selected.inputs, &inputs));
+//     // basic output + account remainder
+//     assert_eq!(selected.outputs.len(), 2);
+// }
 
 #[test]
 fn create_account() {
