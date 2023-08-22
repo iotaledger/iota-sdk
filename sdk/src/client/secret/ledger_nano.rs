@@ -241,8 +241,9 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,
-        slot_index: Option<SlotIndex>,
+        slot_index: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
+        let slot_index = slot_index.into();
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
         let mut account_index = None;

@@ -284,7 +284,7 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        slot_index: Option<SlotIndex>,
+        slot_index: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<Unlocks, Self::Error> {
         crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data, slot_index).await
     }
@@ -588,12 +588,10 @@ mod tests {
         stronghold_adapter.clear_key().await;
 
         // Address generation returns an error when the key is cleared.
-        assert!(
-            stronghold_adapter
-                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
-                .await
-                .is_err()
-        );
+        assert!(stronghold_adapter
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+            .await
+            .is_err());
 
         stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 

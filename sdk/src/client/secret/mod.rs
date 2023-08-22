@@ -100,7 +100,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        slot_index: Option<SlotIndex>,
+        slot_index: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<Unlocks, Self::Error>;
 
     async fn sign_transaction(
@@ -335,7 +335,7 @@ impl SecretManage for SecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        slot_index: Option<SlotIndex>,
+        slot_index: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
@@ -426,7 +426,7 @@ impl SecretManager {
 pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
-    slot_index: Option<SlotIndex>,
+    slot_index: impl Into<Option<SlotIndex>> + Send,
 ) -> crate::client::Result<Unlocks>
 where
     crate::client::Error: From<M::Error>,
@@ -435,6 +435,7 @@ where
     let hashed_essence = prepared_transaction_data.essence.hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
+    let slot_index = slot_index.into();
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
