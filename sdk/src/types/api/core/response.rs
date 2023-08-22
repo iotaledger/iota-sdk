@@ -358,7 +358,9 @@ pub struct CongestionResponse {
     /// Indicates if a node is ready to issue a block in a current congestion or should wait.
     pub ready: bool,
     /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
-    pub reference_mana_cost: String,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub reference_mana_cost: u64,
     /// The Block Issuance Credits of the requested account.
-    pub block_issuance_credits: String,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub block_issuance_credits: u64,
 }
