@@ -25,5 +25,5 @@ class ManaAllotment {
 
 export {
   ManaAllotment
-}
+};
 
