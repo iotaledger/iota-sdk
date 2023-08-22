@@ -168,7 +168,7 @@ pub enum AccountCommand {
         /// the receiver already. The expiration will only be used if one is necessary given the provided
         /// amount. If an expiration is needed but not provided, it will default to one day.
         #[arg(long)]
-        expiration: Option<u64>,
+        expiration: Option<SlotIndex>,
         /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
         /// conditions if necessary. This flag is implied by the existence of a return address or expiration.
         #[arg(long, default_value_t = false)]
@@ -641,12 +641,12 @@ pub async fn send_command(
     address: impl ConvertTo<Bech32Address>,
     amount: u64,
     return_address: Option<impl ConvertTo<Bech32Address>>,
-    expiration: Option<u64>,
+    expiration: Option<SlotIndex>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let params = [SendParams::new(amount, address)?
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
-        .with_expiration(expiration.map(SlotIndex::from))];
+        .with_expiration(expiration)];
     let transaction = account
         .send_with_params(
             params,
