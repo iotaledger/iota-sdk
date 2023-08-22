@@ -20,8 +20,8 @@ impl EpochIndex {
 }
 
 impl From<EpochIndex> for u64 {
-    fn from(slot_index: EpochIndex) -> Self {
-        *slot_index
+    fn from(epoch_index: EpochIndex) -> Self {
+        *epoch_index
     }
 }
 
