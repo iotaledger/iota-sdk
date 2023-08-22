@@ -93,7 +93,7 @@ mod dto {
         type Error = Error;
 
         fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.return_address, SlotIndex::from(value.slot_index))
+            Self::new(value.return_address, value.slot_index)
                 .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
         }
     }
