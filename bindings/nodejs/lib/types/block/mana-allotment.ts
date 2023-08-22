@@ -9,7 +9,7 @@ import { AccountId } from "..";
  */
 class ManaAllotment {
   /**
-   * The Account to allot to.
+   * The Account to allot Mana to.
    */
   readonly accountId: AccountId;
   /**
