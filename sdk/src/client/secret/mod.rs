@@ -48,7 +48,6 @@ use crate::{
         address::{Address, Ed25519Address},
         output::Output,
         payload::{transaction::TransactionEssence, TransactionPayload},
-        semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
@@ -520,7 +519,7 @@ where
 
     let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
 
-    if conflict != ConflictReason::None {
+    if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
         return Err(Error::TransactionSemantic(conflict));
     }
