@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountId } from '..';
+import { AccountId, u64 } from '..';
 
 /**
  * An allotment of Mana which will be added upon commitment of the slot in which the containing transaction was issued,
@@ -15,9 +15,9 @@ class ManaAllotment {
     /**
      * The Amount of Mana to allot.
      */
-    readonly mana: bigint;
+    readonly mana: u64;
 
-    constructor(accountId: AccountId, mana: bigint) {
+    constructor(accountId: AccountId, mana: u64) {
         this.accountId = accountId;
         this.mana = mana;
     }
