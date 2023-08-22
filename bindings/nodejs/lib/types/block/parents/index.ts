@@ -6,14 +6,14 @@ import { BlockId } from '../id';
 export type Parents = BlockId[];
 
 /**
- *  Array of Strongly referenced parents in the range of 1..8
+ *  Array of Strongly referenced parents.
  */
 export type StrongParents = Parents;
 /**
- *  Array of Weakly referenced parents in the range of 0..8
+ *  Array of Weakly referenced parents.
  */
 export type WeakParents = Parents;
 /**
- *  Array of Shallowly referenced parents in the range of 0..8
+ *  Array of Shallowly referenced parents.
  */
 export type ShallowLikeParents = Parents;

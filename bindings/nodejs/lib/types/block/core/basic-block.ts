@@ -13,15 +13,15 @@ export type BasicBlock = BlockWrapper<BasicBlockData>;
  */
 export class BasicBlockData {
     /**
-     * Blocks that are strongly directly approved.
+     * Blocks that are strongly directly approved, in the range of 1..8.
      */
     readonly strongParents!: StrongParents;
     /**
-     * Blocks that are weakly directly approved.
+     * Blocks that are weakly directly approved, in the range of 0..8.
      */
     readonly weakParents!: WeakParents;
     /**
-     * Blocks that are directly referenced to adjust opinion.
+     * Blocks that are directly referenced to adjust opinion, in the range of 0..8.
      */
     readonly shallowLikeParents!: ShallowLikeParents;
     /**
