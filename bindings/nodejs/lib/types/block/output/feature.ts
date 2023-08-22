@@ -92,7 +92,7 @@ class BlockIssuerFeature extends Feature {
 }
 
 /**
- * Block Issuer feature.
+ * Staking feature.
  */
 class StakingFeature extends Feature {
     /**
