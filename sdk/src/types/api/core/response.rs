@@ -343,3 +343,22 @@ pub struct UtxoChangesResponse {
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
 }
+
+/// Response of GET /api/core/v3/accounts/{accountId}/congestion.
+/// Provides the cost and readiness to issue estimates.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CongestionResponse {
+    /// The slot index for which the congestion estimate is provided.
+    pub slot_index: SlotIndex,
+    /// Indicates if a node is ready to issue a block in a current congestion or should wait.
+    pub ready: bool,
+    /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
+    pub reference_mana_cost: String,
+    /// The Block Issuance Credits of the requested account.
+    pub block_issuance_credits: String,
+}
