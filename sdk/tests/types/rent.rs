@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{Output, Rent, RentStructure},
+    output::{Output, RentCost, RentStructure},
     protocol::protocol_parameters,
     rand::output::{rand_account_output, rand_basic_output, rand_foundry_output, rand_nft_output},
 };

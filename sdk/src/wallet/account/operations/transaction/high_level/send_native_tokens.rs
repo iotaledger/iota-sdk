@@ -10,10 +10,8 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+            BasicOutputBuilder, NativeToken, NativeTokens, TokenId,
         },
         ConvertTo,
     },
@@ -167,29 +165,16 @@ where
                     .collect::<Result<Vec<NativeToken>>>()?,
             )?;
 
-            // get minimum required amount for such an output, so we don't lock more than required
-            // We have to check it for every output individually, because different address types and amount of
-            // different native tokens require a different storage deposit
-            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                .with_native_tokens(native_tokens.clone())
-                .with_storage_deposit_return()?
-                .with_expiration()?
-                .finish()?;
-
             let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
                 local_time + expiration_time
             });
 
             outputs.push(
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
+                BasicOutputBuilder::new_with_amount(0)
                     .with_native_tokens(native_tokens)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(
-                        // We send the full storage_deposit_amount back to the sender, so only the native tokens are
-                        // sent
-                        StorageDepositReturnUnlockCondition::new(return_address, storage_deposit_amount, token_supply)?,
-                    )
                     .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                    .with_sufficient_storage_deposit(return_address, &rent_structure, token_supply)?
                     .finish_output(token_supply)?,
             )
         }

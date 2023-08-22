@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, TokenId},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, NftId, RentCost, TokenId},
     },
     wallet::{
         account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
@@ -583,8 +583,9 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let token_supply = account.client().get_token_supply().await?;
 
     let balance = account.sync(None).await?;
-    let minimum_required_storage_deposit =
-        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+    let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .rent_cost(&rent_structure);
 
     // Send away most balance so we can test with leaving dust
     let output = account

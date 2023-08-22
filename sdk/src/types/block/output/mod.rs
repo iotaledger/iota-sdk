@@ -35,9 +35,10 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable, PackableExt,
+    Packable,
 };
 
+use self::rent::RentBuilder;
 pub(crate) use self::{
     account::StateMetadataLength,
     feature::{MetadataFeatureLength, TagFeatureLength},
@@ -60,13 +61,13 @@ pub use self::{
     nft::{NftOutput, NftOutputBuilder},
     nft_id::NftId,
     output_id::OutputId,
-    rent::{MinimumStorageDepositBasicOutput, Rent, RentStructure},
+    rent::{Rent, RentCost, RentStructure},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_id::TokenId,
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-use super::protocol::ProtocolParameters;
+use super::{protocol::ProtocolParameters, slot::SlotIndex, BlockId};
 use crate::types::{
     block::{address::Address, semantic::ValidationContext, Error},
     ValidationParams,
@@ -470,8 +471,28 @@ impl Packable for Output {
 }
 
 impl Rent for Output {
-    fn weighted_bytes(&self, rent_structure: &RentStructure) -> u64 {
-        self.packed_len() as u64 * rent_structure.byte_factor_data() as u64
+    fn build_weighted_bytes(&self, rent_structure: &mut RentBuilder) {
+        match self {
+            Output::Basic(o) => o.build_weighted_bytes(rent_structure),
+            Output::Account(o) => o.build_weighted_bytes(rent_structure),
+            Output::Foundry(o) => o.build_weighted_bytes(rent_structure),
+            Output::Nft(o) => o.build_weighted_bytes(rent_structure),
+            Output::Delegation(o) => o.build_weighted_bytes(rent_structure),
+        }
+    }
+}
+
+impl RentCost for Output {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        builder
+            // The ID of the output.
+            .key_field::<OutputId>()
+            // The ID of the block in which the transaction payload that created this output was included.
+            .data_field::<BlockId>()
+            // The index of the slot in which the transaction that created it was booked.
+            .data_field::<SlotIndex>()
+            // The index of the slot in which the transaction was created.
+            .data_field::<SlotIndex>();
     }
 }
 

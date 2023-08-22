@@ -20,6 +20,7 @@ pub use self::{
     staking::StakingFeature, tag::TagFeature,
 };
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
+use super::Rent;
 use crate::types::block::{create_bitflags, Error};
 
 ///
@@ -57,6 +58,12 @@ impl PartialOrd for Feature {
 impl Ord for Feature {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.kind().cmp(&other.kind())
+    }
+}
+
+impl Rent for Feature {
+    fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
+        builder.packable_field(self);
     }
 }
 

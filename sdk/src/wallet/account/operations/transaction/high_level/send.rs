@@ -9,10 +9,8 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput,
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+            BasicOutputBuilder, RentCost,
         },
         ConvertTo,
     },
@@ -169,51 +167,30 @@ where
                 .unwrap_or(default_return_address.address);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_output(token_supply)?;
+            let output =
+                BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address));
 
-            if amount >= output.amount() {
-                outputs.push(
-                    BasicOutputBuilder::from(output.as_basic())
-                        .with_amount(amount)
-                        .finish_output(token_supply)?,
-                )
+            if amount >= output.rent_cost(&rent_structure) {
+                outputs.push(output.finish_output(token_supply)?)
             } else {
                 let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
                     local_time + expiration_time
                 });
 
                 // Since it does need a storage deposit, calculate how much that should be
-                let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                    .with_storage_deposit_return()?
-                    .with_expiration()?
-                    .finish()?;
+                let output = output
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                    .with_sufficient_storage_deposit(return_address, &rent_structure, token_supply)?
+                    .finish_output(token_supply)?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
                     return Err(Error::InsufficientFunds {
                         available: amount,
-                        required: amount + storage_deposit_amount,
+                        required: output.amount(),
                     });
                 }
 
-                outputs.push(
-                    // Add address_and_amount.amount+storage_deposit_amount, so receiver can get
-                    // address_and_amount.amount
-                    BasicOutputBuilder::from(output.as_basic())
-                        .with_amount(amount + storage_deposit_amount)
-                        .add_unlock_condition(
-                            // We send the storage_deposit_amount back to the sender, so only the additional amount is
-                            // sent
-                            StorageDepositReturnUnlockCondition::new(
-                                return_address,
-                                storage_deposit_amount,
-                                token_supply,
-                            )?,
-                        )
-                        .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
-                        .finish_output(token_supply)?,
-                )
+                outputs.push(output)
             }
         }
 

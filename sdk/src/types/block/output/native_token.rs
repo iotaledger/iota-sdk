@@ -12,6 +12,7 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
+use super::Rent;
 use crate::types::block::{output::TokenId, Error};
 
 ///
@@ -59,6 +60,12 @@ impl PartialOrd for NativeToken {
 impl Ord for NativeToken {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.token_id.cmp(&other.token_id)
+    }
+}
+
+impl Rent for NativeToken {
+    fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
+        builder.data_field::<TokenId>().data_field::<U256>();
     }
 }
 

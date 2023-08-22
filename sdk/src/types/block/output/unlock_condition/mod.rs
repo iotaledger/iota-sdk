@@ -30,6 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
+use super::Rent;
 use crate::types::{
     block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error},
     ValidationParams,
@@ -62,6 +63,12 @@ impl PartialOrd for UnlockCondition {
 impl Ord for UnlockCondition {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.kind().cmp(&other.kind())
+    }
+}
+
+impl Rent for UnlockCondition {
+    fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
+        builder.packable_field(self);
     }
 }
 

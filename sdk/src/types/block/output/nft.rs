@@ -10,7 +10,10 @@ use packable::{
     Packable,
 };
 
-use super::verify_output_amount_packable;
+use super::{
+    rent::{RentBuilder, RentCost},
+    verify_output_amount_packable,
+};
 use crate::types::{
     block::{
         address::{Address, NftAddress},
@@ -195,6 +198,11 @@ impl NftOutputBuilder {
 
     ///
     pub fn finish(self) -> Result<NftOutput, Error> {
+        let amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+        };
+
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions, &self.nft_id)?;
@@ -207,24 +215,15 @@ impl NftOutputBuilder {
 
         verify_allowed_features(&immutable_features, NftOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        let mut output = NftOutput {
-            amount: 1u64,
+        Ok(NftOutput {
+            amount,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             nft_id: self.nft_id,
             unlock_conditions,
             features,
             immutable_features,
-        };
-
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Nft(output.clone()).rent_cost(&rent_structure)
-            }
-        };
-
-        Ok(output)
+        })
     }
 
     ///
@@ -241,6 +240,38 @@ impl NftOutputBuilder {
     /// Finishes the [`NftOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Nft(self.finish_with_params(params)?))
+    }
+}
+
+impl Rent for NftOutputBuilder {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Mana
+            .data_field::<u64>()
+            // Nft ID
+            .data_field::<NftId>()
+            // Native Tokens
+            .data_field::<u8>()
+            .weighted_field(&self.native_tokens)
+            // Unlock Conditions
+            .data_field::<u8>()
+            .weighted_field(&self.unlock_conditions)
+            // Features
+            .data_field::<u8>()
+            .weighted_field(&self.features)
+            // Immutable Features
+            .data_field::<u8>()
+            .weighted_field(&self.immutable_features);
+    }
+}
+
+impl RentCost for NftOutputBuilder {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -400,6 +431,34 @@ impl NftOutput {
             return Err(StateTransitionError::MutatedImmutableField);
         }
         Ok(())
+    }
+}
+
+impl Rent for NftOutput {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Mana
+            .data_field::<u64>()
+            // Nft ID
+            .data_field::<NftId>()
+            // Native Tokens
+            .packable_field(&self.native_tokens)
+            // Unlock Conditions
+            .packable_field(&self.unlock_conditions)
+            // Features
+            .packable_field(&self.features)
+            // Immutable Features
+            .packable_field(&self.immutable_features);
+    }
+}
+
+impl RentCost for NftOutput {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -678,10 +737,7 @@ mod tests {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap();
 
-        assert_eq!(
-            output.amount(),
-            Output::Nft(output).rent_cost(protocol_parameters.rent_structure())
-        );
+        assert_eq!(output.amount(), output.rent_cost(protocol_parameters.rent_structure()));
     }
 
     #[test]

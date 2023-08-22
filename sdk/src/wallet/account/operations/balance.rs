@@ -7,7 +7,7 @@ use crate::{
     client::secret::SecretManage,
     types::block::{
         address::Bech32Address,
-        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, RentCost},
         ConvertTo,
     },
     wallet::{

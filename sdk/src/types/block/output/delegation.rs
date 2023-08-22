@@ -10,6 +10,7 @@ use packable::{
     Packable,
 };
 
+use super::rent::{RentBuilder, RentCost};
 use crate::types::{
     block::{
         address::Address,
@@ -174,28 +175,23 @@ impl DelegationOutputBuilder {
 
     /// Finishes the builder into a [`DelegationOutput`] without amount verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
+        let amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+        };
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
 
-        let mut output = DelegationOutput {
-            amount: 1u64,
+        Ok(DelegationOutput {
+            amount,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
             validator_id: self.validator_id,
             start_epoch: self.start_epoch,
             end_epoch: self.end_epoch,
             unlock_conditions,
-        };
-
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Delegation(output.clone()).rent_cost(&rent_structure)
-            }
-        };
-
-        Ok(output)
+        })
     }
 
     /// Finishes the builder into a [`DelegationOutput`] with amount verification.
@@ -215,6 +211,36 @@ impl DelegationOutputBuilder {
     /// Finishes the [`DelegationOutputBuilder`] into an [`Output`].
     pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
         Ok(Output::Delegation(self.finish_with_params(token_supply)?))
+    }
+}
+
+impl Rent for DelegationOutputBuilder {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Delegated Amount
+            .data_field::<u64>()
+            // Delegation ID
+            .data_field::<DelegationId>()
+            // Validator ID
+            .data_field::<AccountId>()
+            // Start Epoch
+            // TODO: Replace these with EpochIndex
+            .data_field::<u64>()
+            // End Epoch
+            .data_field::<u64>()
+            // Unlock Conditions
+            .data_field::<u8>()
+            .weighted_field(&self.unlock_conditions);
+    }
+}
+
+impl RentCost for DelegationOutputBuilder {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -350,6 +376,35 @@ impl DelegationOutput {
         self.unlock_conditions()
             .locked_address(self.address(), context.milestone_timestamp)
             .unlock(unlock, inputs, context)
+    }
+}
+
+impl Rent for DelegationOutput {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Delegated Amount
+            .data_field::<u64>()
+            // Delegation ID
+            .data_field::<DelegationId>()
+            // Validator ID
+            .data_field::<AccountId>()
+            // Start Epoch
+            // TODO: Replace these with EpochIndex
+            .data_field::<u64>()
+            // End Epoch
+            .data_field::<u64>()
+            // Unlock Conditions
+            .packable_field(&self.unlock_conditions);
+    }
+}
+
+impl RentCost for DelegationOutput {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 

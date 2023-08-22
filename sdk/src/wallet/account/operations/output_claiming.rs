@@ -11,8 +11,7 @@ use crate::{
         address::Address,
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
-            Output, OutputId,
+            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId, RentCost,
         },
     },
     wallet::account::{
@@ -300,9 +299,9 @@ where
             required_amount_for_nfts
         } else {
             required_amount_for_nfts
-                + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                    .with_native_tokens(option_native_token)
-                    .finish()?
+                + BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
+                    .with_native_tokens(option_native_token.into_iter().flatten())
+                    .rent_cost(&rent_structure)
         };
 
         let mut additional_inputs = Vec::new();
@@ -320,9 +319,9 @@ where
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
                 required_amount = required_amount_for_nfts
-                    + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                        .with_native_tokens(option_native_token)
-                        .finish()?;
+                    + BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
+                        .with_native_tokens(option_native_token.into_iter().flatten())
+                        .rent_cost(&rent_structure);
 
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {

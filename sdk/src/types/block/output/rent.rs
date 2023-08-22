@@ -7,18 +7,10 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
-use crate::types::block::{
-    address::{Address, Ed25519Address},
-    output::{
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
-        BasicOutputBuilder, NativeTokens, Output, OutputId,
-    },
-    slot::SlotIndex,
-    BlockId, Error,
-};
+use crate::types::block::Error;
 
 const DEFAULT_BYTE_COST: u32 = 100;
 const DEFAULT_BYTE_COST_FACTOR_KEY: u8 = 10;
@@ -124,78 +116,84 @@ impl Packable for RentStructure {
 
 /// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
 pub trait Rent {
-    /// Computes the byte offset given a [`RentStructure`].
-    fn byte_offset(&self, rent_structure: &RentStructure) -> u32 {
-        // The ID of the output.
-        size_of::<OutputId>() as u32 * rent_structure.v_byte_factor_key as u32
-        // The ID of the block in which the transaction payload that created this output was included.
-            + size_of::<BlockId>() as u32 * rent_structure.v_byte_factor_data as u32
-            // The index of the slot in which the transaction that created it was booked.
-            + size_of::<SlotIndex>() as u32 * rent_structure.v_byte_factor_data as u32
-            // The index of the slot in which the transaction was created.
-            + size_of::<SlotIndex>() as u32 * rent_structure.v_byte_factor_data as u32
-    }
-
     /// Different fields in a type lead to different storage requirements for the ledger state.
-    fn weighted_bytes(&self, config: &RentStructure) -> u64;
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder);
+
+    fn weighted_bytes(&self, config: &RentStructure) -> u64 {
+        let mut builder = RentBuilder::new(*config);
+        self.build_weighted_bytes(&mut builder);
+        builder.bytes
+    }
+}
+
+impl<T: Rent> Rent for &T {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        (*self).build_weighted_bytes(builder)
+    }
+}
+
+macro_rules! impl_rent_via_iter {
+    ($type:ty) => {
+        impl<T: Rent> Rent for $type {
+            fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+                for elem in self.iter() {
+                    elem.build_weighted_bytes(builder)
+                }
+            }
+        }
+    };
+}
+impl_rent_via_iter!(alloc::collections::BTreeSet<T>);
+impl_rent_via_iter!(alloc::vec::Vec<T>);
+impl_rent_via_iter!(alloc::boxed::Box<[T]>);
+
+pub trait RentCost: Rent {
+    fn build_byte_offset(builder: &mut RentBuilder);
+
+    fn byte_offset(rent_structure: &RentStructure) -> u64 {
+        let mut builder = RentBuilder::new(*rent_structure);
+        Self::build_byte_offset(&mut builder);
+        builder.bytes
+    }
 
     /// Computes the rent cost given a [`RentStructure`].
     fn rent_cost(&self, rent_structure: &RentStructure) -> u64 {
-        rent_structure.v_byte_cost as u64
-            * (self.weighted_bytes(rent_structure) + self.byte_offset(rent_structure) as u64)
+        rent_structure.byte_cost() as u64 * (self.weighted_bytes(&rent_structure) + Self::byte_offset(&rent_structure))
     }
 }
 
-impl<T: Rent, const N: usize> Rent for [T; N] {
-    fn weighted_bytes(&self, config: &RentStructure) -> u64 {
-        self.iter().map(|elem| elem.weighted_bytes(config)).sum()
-    }
-}
-
-pub struct MinimumStorageDepositBasicOutput {
+pub struct RentBuilder {
     config: RentStructure,
-    token_supply: u64,
-    builder: BasicOutputBuilder,
+    bytes: u64,
 }
 
-impl MinimumStorageDepositBasicOutput {
-    pub fn new(config: RentStructure, token_supply: u64) -> Self {
-        Self {
-            config,
-            token_supply,
-            builder: BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN).add_unlock_condition(
-                AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH]))),
-            ),
-        }
+impl RentBuilder {
+    pub fn new(config: RentStructure) -> Self {
+        Self { config, bytes: 0 }
     }
 
-    pub fn with_native_tokens(mut self, native_tokens: impl Into<Option<NativeTokens>>) -> Self {
-        if let Some(native_tokens) = native_tokens.into() {
-            self.builder = self.builder.with_native_tokens(native_tokens);
-        }
+    pub fn bytes(&mut self, bytes: u64) -> &mut Self {
+        self.bytes += bytes;
         self
     }
 
-    pub fn with_storage_deposit_return(mut self) -> Result<Self, Error> {
-        self.builder = self
-            .builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
-                Output::AMOUNT_MIN,
-                self.token_supply,
-            )?);
-        Ok(self)
+    pub fn key_field<T>(&mut self) -> &mut Self {
+        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_key() as u64;
+        self
     }
 
-    pub fn with_expiration(mut self) -> Result<Self, Error> {
-        self.builder = self.builder.add_unlock_condition(ExpirationUnlockCondition::new(
-            Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
-            1,
-        )?);
-        Ok(self)
+    pub fn data_field<T>(&mut self) -> &mut Self {
+        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_data() as u64;
+        self
     }
 
-    pub fn finish(self) -> Result<u64, Error> {
-        Ok(self.builder.finish_output(self.token_supply)?.rent_cost(&self.config))
+    pub fn weighted_field<T: Rent>(&mut self, field: T) -> &mut Self {
+        field.build_weighted_bytes(self);
+        self
+    }
+
+    pub fn packable_field<T: Packable>(&mut self, field: &T) -> &mut Self {
+        self.bytes += field.pack_to_vec().len() as u64;
+        self
     }
 }

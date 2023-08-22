@@ -24,6 +24,11 @@ impl Ed25519Address {
     pub fn new(address: [u8; Self::LENGTH]) -> Self {
         Self::from(address)
     }
+
+    #[allow(dead_code)]
+    pub(crate) fn null() -> Self {
+        Self::new([0; Self::LENGTH])
+    }
 }
 
 impl FromStr for Ed25519Address {

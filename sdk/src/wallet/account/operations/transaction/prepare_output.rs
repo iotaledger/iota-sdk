@@ -6,15 +6,14 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::{Address, Bech32Address},
+        address::{Address, Bech32Address, Ed25519Address},
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
-            RentStructure, UnlockCondition,
+            BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Output, RentCost, RentStructure, UnlockCondition,
         },
         Error,
     },
@@ -108,8 +107,9 @@ where
             OutputBuilder::Basic(BasicOutputBuilder::from(first_output.as_basic()))
         };
 
-        let min_storage_deposit_basic_output =
-            MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+        let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_amount(0)
+            .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+            .rent_cost(&rent_structure);
 
         if params.amount > min_storage_deposit_basic_output {
             second_output_builder = second_output_builder.with_amount(params.amount);

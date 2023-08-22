@@ -15,7 +15,10 @@ use packable::{
 };
 use primitive_types::U256;
 
-use super::verify_output_amount_packable;
+use super::{
+    rent::{RentBuilder, RentCost},
+    verify_output_amount_packable,
+};
 use crate::types::{
     block::{
         address::{AccountAddress, Address},
@@ -212,6 +215,11 @@ impl FoundryOutputBuilder {
             return Err(Error::InvalidFoundryZeroSerialNumber);
         }
 
+        let amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+        };
+
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions)?;
@@ -224,24 +232,15 @@ impl FoundryOutputBuilder {
 
         verify_allowed_features(&immutable_features, FoundryOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        let mut output = FoundryOutput {
-            amount: 1u64,
+        Ok(FoundryOutput {
+            amount,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             serial_number: self.serial_number,
             token_scheme: self.token_scheme,
             unlock_conditions,
             features,
             immutable_features,
-        };
-
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Foundry(output.clone()).rent_cost(&rent_structure)
-            }
-        };
-
-        Ok(output)
+        })
     }
 
     ///
@@ -261,6 +260,38 @@ impl FoundryOutputBuilder {
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Foundry(self.finish_with_params(params)?))
+    }
+}
+
+impl Rent for FoundryOutputBuilder {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Native Tokens
+            .data_field::<u8>()
+            .weighted_field(&self.native_tokens)
+            // Serial Number
+            .data_field::<u32>()
+            // Token Scheme
+            .data_field::<TokenScheme>()
+            // Unlock Conditions
+            .data_field::<u8>()
+            .weighted_field(&self.unlock_conditions)
+            // Features
+            .data_field::<u8>()
+            .weighted_field(&self.features)
+            // Immutable Features
+            .data_field::<u8>()
+            .weighted_field(&self.immutable_features);
+    }
+}
+
+impl RentCost for FoundryOutputBuilder {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -476,6 +507,34 @@ impl FoundryOutput {
         }
 
         Ok(())
+    }
+}
+
+impl Rent for FoundryOutput {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Native Tokens
+            .packable_field(&self.native_tokens)
+            // Serial Number
+            .data_field::<u32>()
+            // Token Scheme
+            .data_field::<TokenScheme>()
+            // Unlock Conditions
+            .packable_field(&self.unlock_conditions)
+            // Features
+            .packable_field(&self.features)
+            // Immutable Features
+            .packable_field(&self.immutable_features);
+    }
+}
+
+impl RentCost for FoundryOutput {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -798,10 +857,7 @@ mod tests {
             .finish_with_params(&protocol_parameters)
             .unwrap();
 
-        assert_eq!(
-            output.amount(),
-            Output::Foundry(output).rent_cost(protocol_parameters.rent_structure())
-        );
+        assert_eq!(output.amount(), output.rent_cost(protocol_parameters.rent_structure()));
     }
 
     #[test]

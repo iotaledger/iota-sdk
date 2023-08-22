@@ -5,7 +5,11 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use packable::Packable;
 
-use super::verify_output_amount_packable;
+use super::{
+    rent::{RentBuilder, RentCost},
+    unlock_condition::StorageDepositReturnUnlockCondition,
+    verify_output_amount_packable,
+};
 use crate::types::{
     block::{
         address::Address,
@@ -29,7 +33,7 @@ use crate::types::{
 #[derive(Clone)]
 #[must_use]
 pub struct BasicOutputBuilder {
-    amount: OutputBuilderAmount,
+    pub(crate) amount: OutputBuilderAmount,
     mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -152,8 +156,34 @@ impl BasicOutputBuilder {
         self
     }
 
+    /// Adds a storage deposit if one is needed to cover the current amount.
+    pub fn with_sufficient_storage_deposit(
+        self,
+        return_address: impl Into<Address>,
+        rent_structure: &RentStructure,
+        token_supply: u64,
+    ) -> Result<Self, Error> {
+        Ok(match self.amount {
+            OutputBuilderAmount::Amount(amount) => {
+                let rent_cost = self.rent_cost(rent_structure);
+                if amount < rent_cost {
+                    self.with_amount(amount + rent_cost).replace_unlock_condition(
+                        StorageDepositReturnUnlockCondition::new(return_address, rent_cost, token_supply)?,
+                    )
+                } else {
+                    self
+                }
+            }
+            OutputBuilderAmount::MinimumStorageDeposit(_) => self,
+        })
+    }
+
     ///
     pub fn finish(self) -> Result<BasicOutput, Error> {
+        let amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+        };
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
@@ -162,22 +192,13 @@ impl BasicOutputBuilder {
 
         verify_features::<true>(&features)?;
 
-        let mut output = BasicOutput {
-            amount: 1u64,
+        Ok(BasicOutput {
+            amount,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             unlock_conditions,
             features,
-        };
-
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Basic(output.clone()).rent_cost(&rent_structure)
-            }
-        };
-
-        Ok(output)
+        })
     }
 
     ///
@@ -194,6 +215,33 @@ impl BasicOutputBuilder {
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Basic(self.finish_with_params(params)?))
+    }
+}
+
+impl Rent for BasicOutputBuilder {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Mana
+            .data_field::<u64>()
+            // Native Tokens
+            .data_field::<u8>()
+            .weighted_field(&self.native_tokens)
+            // Unlock Conditions
+            .data_field::<u8>()
+            .weighted_field(&self.unlock_conditions)
+            // Features
+            .data_field::<u8>()
+            .weighted_field(&self.features);
+    }
+}
+
+impl RentCost for BasicOutputBuilder {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -316,6 +364,30 @@ impl BasicOutput {
         }
 
         None
+    }
+}
+
+impl Rent for BasicOutput {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Mana
+            .data_field::<u64>()
+            // Native Tokens
+            .packable_field(&self.native_tokens)
+            // Unlock Conditions
+            .packable_field(&self.unlock_conditions)
+            // Features
+            .packable_field(&self.features);
+    }
+}
+
+impl RentCost for BasicOutput {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -506,10 +578,7 @@ mod tests {
             .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
             .unwrap();
 
-        assert_eq!(
-            output.amount(),
-            Output::Basic(output.clone()).rent_cost(protocol_parameters.rent_structure())
-        );
+        assert_eq!(output.amount(), output.rent_cost(protocol_parameters.rent_structure()));
         assert_eq!(output.features().metadata(), Some(&metadata));
         assert_eq!(output.features().sender(), Some(&sender_1));
     }

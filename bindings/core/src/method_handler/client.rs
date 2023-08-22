@@ -9,7 +9,8 @@ use iota_sdk::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount,
+                RentCost,
             },
             payload::Payload,
             Block, BlockDto,

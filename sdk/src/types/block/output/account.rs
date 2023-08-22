@@ -13,7 +13,10 @@ use packable::{
     Packable,
 };
 
-use super::verify_output_amount_packable;
+use super::{
+    rent::{RentBuilder, RentCost},
+    verify_output_amount_packable,
+};
 use crate::types::{
     block::{
         address::{AccountAddress, Address},
@@ -256,6 +259,10 @@ impl AccountOutputBuilder {
 
     ///
     pub fn finish(self) -> Result<AccountOutput, Error> {
+        let amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+        };
         let state_index = self.state_index.unwrap_or(0);
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
@@ -279,8 +286,8 @@ impl AccountOutputBuilder {
 
         verify_allowed_features(&immutable_features, AccountOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        let mut output = AccountOutput {
-            amount: 1,
+        Ok(AccountOutput {
+            amount,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
@@ -290,16 +297,7 @@ impl AccountOutputBuilder {
             unlock_conditions,
             features,
             immutable_features,
-        };
-
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Account(output.clone()).rent_cost(&rent_structure)
-            }
-        };
-
-        Ok(output)
+        })
     }
 
     ///
@@ -336,6 +334,43 @@ impl From<&AccountOutput> for AccountOutputBuilder {
             features: output.features.iter().cloned().collect(),
             immutable_features: output.immutable_features.iter().cloned().collect(),
         }
+    }
+}
+
+impl Rent for AccountOutputBuilder {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Mana
+            .data_field::<u64>()
+            // Native Tokens
+            .data_field::<u8>()
+            .weighted_field(&self.native_tokens)
+            // State Index
+            .data_field::<u32>()
+            // State Metadata
+            .data_field::<u16>()
+            .bytes(self.state_metadata.len() as _)
+            // Foundry Counter
+            .data_field::<u32>()
+            // Unlock Conditions
+            .data_field::<u8>()
+            .weighted_field(&self.unlock_conditions)
+            // Features
+            .data_field::<u8>()
+            .weighted_field(&self.features)
+            // Immutable Features
+            .data_field::<u8>()
+            .weighted_field(&self.features);
+    }
+}
+
+impl RentCost for AccountOutputBuilder {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -622,6 +657,38 @@ impl StateTransitionVerifier for AccountOutput {
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         Ok(())
+    }
+}
+
+impl Rent for AccountOutput {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Amount
+            .data_field::<u64>()
+            // Mana
+            .data_field::<u64>()
+            // Native Tokens
+            .packable_field(&self.native_tokens)
+            // State Index
+            .data_field::<u32>()
+            // State Metadata
+            .packable_field(&self.state_metadata)
+            // Foundry Counter
+            .data_field::<u32>()
+            // Unlock Conditions
+            .packable_field(&self.unlock_conditions)
+            // Features
+            .packable_field(&self.features)
+            // Immutable Features
+            .packable_field(&self.immutable_features);
+    }
+}
+
+impl RentCost for AccountOutput {
+    fn build_byte_offset(builder: &mut RentBuilder) {
+        Output::build_byte_offset(builder)
     }
 }
 
@@ -964,10 +1031,7 @@ mod tests {
             .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
             .unwrap();
 
-        assert_eq!(
-            output.amount(),
-            Output::Account(output.clone()).rent_cost(protocol_parameters.rent_structure())
-        );
+        assert_eq!(output.amount(), output.rent_cost(protocol_parameters.rent_structure()));
         assert_eq!(output.features().metadata(), Some(&metadata));
         assert_eq!(output.features().sender(), Some(&sender_1));
         assert_eq!(output.immutable_features().metadata(), Some(&metadata));

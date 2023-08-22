@@ -8,7 +8,7 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
+            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, RentCost, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
             Block,
         },
