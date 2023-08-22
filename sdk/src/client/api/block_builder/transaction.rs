@@ -10,7 +10,7 @@ use crate::{
     types::block::{
         output::{Output, OutputId},
         payload::transaction::{RegularTransactionEssence, TransactionPayload},
-        semantic::{semantic_validation, ConflictReason, ValidationContext},
+        semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         slot::SlotIndex,
         Block, BlockId,
@@ -29,7 +29,7 @@ pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
     slot_index: impl Into<SlotIndex>,
-) -> crate::client::Result<ConflictReason> {
+) -> crate::client::Result<Option<TransactionFailureReason>> {
     let slot_index = slot_index.into();
     let transaction_id = transaction.id();
     let inputs = input_signing_data

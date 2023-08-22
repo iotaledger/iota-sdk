@@ -23,7 +23,7 @@ use crate::types::{
             Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        semantic::{ConflictReason, ValidationContext},
+        semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
@@ -376,7 +376,7 @@ impl NftOutput {
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
-    ) -> Result<(), ConflictReason> {
+    ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.slot_index)
             .unlock(unlock, inputs, context)?;

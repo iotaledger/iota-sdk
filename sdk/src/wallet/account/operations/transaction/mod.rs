@@ -22,7 +22,6 @@ use crate::{
         block::{
             output::{dto::OutputDto, Output},
             payload::transaction::TransactionPayload,
-            semantic::ConflictReason,
         },
     },
     wallet::account::{
@@ -140,7 +139,7 @@ where
             slot_index,
         )?;
 
-        if conflict != ConflictReason::None {
+        if let Some(conflict) = conflict {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.transaction_payload
