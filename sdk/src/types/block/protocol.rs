@@ -94,6 +94,7 @@ pub struct ProtocolParameters {
     #[getset(get_copy = "pub")]
     eviction_age: Option<SlotIndex>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
     liveness_threshold: Option<SlotIndex>,
     epoch_nearing_threshold: SlotIndex,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -175,11 +176,6 @@ impl ProtocolParameters {
     /// Returns the mana decay factors slice of the [`ProtocolParameters`].
     pub fn mana_decay_factors(&self) -> Option<&[u32]> {
         self.mana_decay_factors.as_ref().map(|slice| slice.as_ref())
-    }
-
-    /// Returns the liveness threshold of the [`ProtocolParameters`].
-    pub fn liveness_threshold(&self) -> Option<SlotIndex> {
-        self.liveness_threshold
     }
 
     /// Returns the epoch nearing threshold of the [`ProtocolParameters`].
