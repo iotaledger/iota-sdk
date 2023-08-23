@@ -48,13 +48,13 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub accepted_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub relative_accepted_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub confirmed_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub relative_confirmed_tangle_time: u64,
     pub latest_committed_slot: SlotIndex,
     pub latest_finalized_slot: SlotIndex,
@@ -89,7 +89,7 @@ pub struct BaseTokenResponse {
     pub name: String,
     pub ticker_symbol: String,
     pub unit: String,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
     pub use_metric_prefix: bool,
@@ -200,13 +200,13 @@ pub enum BlockFailureReason {
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     // TODO: verify if really optional: https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub block_state: Option<BlockState>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tx_state: Option<TransactionState>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub block_failure_reason: Option<BlockFailureReason>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tx_failure_reason: Option<TransactionFailureReason>,
 }
 
@@ -308,11 +308,11 @@ pub enum Relation {
 pub struct PeerResponse {
     pub id: String,
     pub multi_addresses: Vec<String>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alias: Option<String>,
     pub relation: Relation,
     pub connected: bool,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gossip: Option<Gossip>,
 }
 
@@ -342,4 +342,25 @@ pub struct UtxoChangesResponse {
     pub index: u32,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Response of GET /api/core/v3/accounts/{accountId}/congestion.
+/// Provides the cost and readiness to issue estimates.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CongestionResponse {
+    /// The slot index for which the congestion estimate is provided.
+    pub slot_index: SlotIndex,
+    /// Indicates if a node is ready to issue a block in a current congestion or should wait.
+    pub ready: bool,
+    /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
+    #[serde(with = "crate::utils::serde::string")]
+    pub reference_mana_cost: u64,
+    /// The Block Issuance Credits of the requested account.
+    #[serde(with = "crate::utils::serde::string")]
+    pub block_issuance_credits: u64,
 }
