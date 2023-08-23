@@ -91,6 +91,7 @@ class ConflictReason(Enum):
     invalidChainState = 12,
     semanticValidationFailed = 255,
 
+
 CONFLICT_REASON_STRINGS = {
     ConflictReason.none: 'The block has no conflict',
     ConflictReason.inputUTXOAlreadySpent: 'The referenced UTXO was already spent',
@@ -107,6 +108,7 @@ CONFLICT_REASON_STRINGS = {
     ConflictReason.invalidChainState: 'The chain state transition is invalid',
     ConflictReason.semanticValidationFailed: 'The semantic validation failed'
 }
+
 
 @dataclass
 class BlockMetadata:
