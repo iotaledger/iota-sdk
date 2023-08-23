@@ -13,17 +13,17 @@ pub const JAMMDB_FOLDERNAME: &str = "walletdb";
 pub(crate) const ROCKSDB_FOLDERNAME: &str = "walletdb";
 
 pub const fn default_storage_path() -> &'static str {
-    cfg_if::cfg_if!{
+    cfg_if::cfg_if! {
         if #[cfg(feature = "rocksdb")]{
-            return ROCKSDB_FOLDERNAME;
+            ROCKSDB_FOLDERNAME
         }
         else if #[cfg(feature = "jammdb")] {
-            return JAMMDB_FOLDERNAME;
+            JAMMDB_FOLDERNAME
         }
         else {
             DEFAULT_STORAGE_PATH
         }
-    }    
+    }
 }
 
 pub(crate) const WALLET_INDEXATION_KEY: &str = "iota-wallet-account-manager";
