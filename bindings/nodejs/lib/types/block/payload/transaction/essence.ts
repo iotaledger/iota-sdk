@@ -73,7 +73,7 @@ class RegularTransactionEssence extends TransactionEssence {
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;
-        this.contextInput = contextInput
+        this.contextInput = contextInput;
         this.inputs = inputs;
         this.inputsCommitment = inputsCommitment;
         this.outputs = outputs;
