@@ -15,8 +15,8 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse,
-            RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse,
+            PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
@@ -95,6 +95,18 @@ impl ClientInner {
     /// GET /api/core/v3/accounts/{accountId}/congestion
     pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
         let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Returns the totally available Mana rewards of an account or delegation output decayed up to epochEnd index
+    /// provided in the response. GET /api/core/v3/rewards/{outputId}
+    pub async fn get_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
+        let path = &format!("api/core/v3/rewards/{output_id}");
 
         self.node_manager
             .read()
