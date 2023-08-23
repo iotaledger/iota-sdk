@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Ledger Nano events properly created when preparing transactions;
-- `Account::prepareOutput()` when `ReturnStrategy.Gift` is used;
+- `Account::prepare_output()` when `ReturnStrategy.Gift` is used;
 
 ## 1.0.0 - 2023-07-24
 
