@@ -105,7 +105,7 @@ impl ClientInner {
 
     /// Returns the totally available Mana rewards of an account or delegation output decayed up to epochEnd index
     /// provided in the response. GET /api/core/v3/rewards/{outputId}
-    pub async fn get_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
+    pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
 
         self.node_manager
