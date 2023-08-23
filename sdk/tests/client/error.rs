@@ -16,11 +16,11 @@ fn stringified_error() {
 
     let error = Error::TimeNotSynced {
         current_time: 0,
-        latest_finalized_slot_timestamp: 10000,
+        tangle_time: 10000,
     };
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"timeNotSynced\",\"error\":\"local time 0 doesn't match the time of the latest finalized slot timestamp: 10000\"}"
+        "{\"type\":\"timeNotSynced\",\"error\":\"local time 0 doesn't match the tangle time: 10000\"}"
     );
 
     let error = Error::PlaceholderSecretManager;

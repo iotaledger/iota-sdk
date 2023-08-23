@@ -3,7 +3,8 @@
 
 use derive_more::{Deref, Display, From, FromStr};
 
-/// Timeline is divided into slots, and each epoch has a corresponding epoch index.
+/// The tangle timeline is divided into epochs, and each epoch has a corresponding epoch index. Epochs are further
+/// subdivided into slots, each with a [`SlotIndex`](super::SlotIndex).
 /// To calculate the epoch index of a timestamp, `slotsPerEpochExponent` and `slotDurationInSeconds` are needed.
 /// An epoch consists of `2^slotsPerEpochExponent` slots.
 #[derive(
@@ -20,8 +21,8 @@ impl EpochIndex {
 }
 
 impl From<EpochIndex> for u64 {
-    fn from(slot_index: EpochIndex) -> Self {
-        *slot_index
+    fn from(epoch_index: EpochIndex) -> Self {
+        *epoch_index
     }
 }
 

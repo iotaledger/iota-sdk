@@ -13,7 +13,7 @@ use serde::{
 
 use crate::{
     client::{api::input_selection::Error as InputSelectionError, node_api::indexer::QueryParameter},
-    types::block::semantic::ConflictReason,
+    types::block::semantic::TransactionFailureReason,
 };
 
 /// Type alias of `Result` in iota-client
@@ -128,19 +128,17 @@ pub enum Error {
     /// Tokio task join error
     #[error("{0}")]
     TaskJoin(#[from] tokio::task::JoinError),
-    /// Local time doesn't match the time of the latest milestone timestamp
-    #[error(
-        "local time {current_time} doesn't match the time of the latest finalized slot timestamp: {latest_finalized_slot_timestamp}"
-    )]
+    /// Local time doesn't match the network time
+    #[error("local time {current_time} doesn't match the tangle time: {tangle_time}")]
     TimeNotSynced {
         /// The local time.
         current_time: u32,
-        /// The timestamp of the latest finalized slot.
-        latest_finalized_slot_timestamp: u32,
+        /// The tangle time.
+        tangle_time: u32,
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
-    TransactionSemantic(ConflictReason),
+    TransactionSemantic(TransactionFailureReason),
     /// An indexer API request contains a query parameter not supported by the endpoint.
     #[error("an indexer API request contains a query parameter not supported by the endpoint: {0}.")]
     UnsupportedQueryParameter(QueryParameter),

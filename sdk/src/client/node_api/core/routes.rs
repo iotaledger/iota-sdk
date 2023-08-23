@@ -15,11 +15,11 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, CommitteeResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse,
-            RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
+            PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
-            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+            output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -154,7 +154,7 @@ impl ClientInner {
     }
 
     /// Finds a block by its ID and returns it as object.
-    /// GET /api/core/v3/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{blockId}
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
@@ -169,7 +169,7 @@ impl ClientInner {
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
-    /// GET /api/core/v3/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{blockId}
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
@@ -181,7 +181,7 @@ impl ClientInner {
     }
 
     /// Returns the metadata of a block.
-    /// GET /api/core/v3/blocks/{BlockId}/metadata
+    /// GET /api/core/v3/blocks/{blockId}/metadata
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/blocks/{block_id}/metadata");
 
@@ -234,7 +234,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the block that was included in the ledger for a given transaction ID, as object.
+    /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -249,7 +249,7 @@ impl ClientInner {
         Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
-    /// Returns the block that was included in the ledger for a given transaction ID, as object, as raw bytes.
+    /// Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
@@ -261,7 +261,7 @@ impl ClientInner {
             .await
     }
 
-    /// Returns the metadata of the block that was included in the ledger for a given TransactionId.
+    /// Returns the metadata of the earliest block containing the tx that was confirmed.
     /// GET /api/core/v3/transactions/{transactionId}/included-block/metadata
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block/metadata");
@@ -385,6 +385,20 @@ impl ClientInner {
     // // RouteControlSnapshotsCreate is the control route to manually create a snapshot files.
     // // POST creates a snapshot (full, delta or both).
     // RouteControlSnapshotsCreate = "/control/snapshots/create"
+
+    // Accounts routes
+
+    /// Checks if the account is ready to issue a block.
+    /// GET /api/core/v3/accounts/{accountId}/congestion
+    pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
+        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
 }
 
 impl Client {

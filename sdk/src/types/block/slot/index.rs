@@ -5,8 +5,9 @@ use derive_more::{Deref, Display, From, FromStr};
 
 use super::EpochIndex;
 
-/// Timeline is divided into slots, and each slot has a corresponding slot index.
-/// To calculate the slot index of a timestamp, `genesisTimestamp` and the duration of a slot are needed.
+/// The tangle timeline is divided into epochs, and each epoch has a corresponding [`EpochIndex`]. Epochs are further
+/// subdivided into slots, each with a slot index.
+/// To calculate the slot index of a timestamp, `genesisUnixTimestamp` and the `slotDurationInSeconds` are needed.
 /// The slot index of timestamp `ts` is `(ts - genesisTimestamp)/duration + 1`.
 #[derive(
     Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,

@@ -26,7 +26,7 @@ use crate::types::{
             Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        semantic::{ConflictReason, ValidationContext},
+        semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
@@ -496,7 +496,7 @@ impl AccountOutput {
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
-    ) -> Result<(), ConflictReason> {
+    ) -> Result<(), TransactionFailureReason> {
         let account_id = if self.account_id().is_null() {
             AccountId::from(output_id)
         } else {

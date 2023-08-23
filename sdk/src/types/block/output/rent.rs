@@ -16,14 +16,13 @@ use crate::types::block::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         BasicOutputBuilder, NativeTokens, Output, OutputId,
     },
+    slot::SlotIndex,
     BlockId, Error,
 };
 
 const DEFAULT_BYTE_COST: u32 = 100;
 const DEFAULT_BYTE_COST_FACTOR_KEY: u8 = 10;
 const DEFAULT_BYTE_COST_FACTOR_DATA: u8 = 1;
-
-type ConfirmationUnixTimestamp = u32;
 
 /// Specifies the current parameters for the byte cost computation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -93,15 +92,6 @@ impl RentStructure {
     pub fn byte_factor_data(&self) -> u8 {
         self.v_byte_factor_data
     }
-
-    /// Returns the byte offset of the [`RentStructure`].
-    pub fn byte_offset(&self) -> u32 {
-        size_of::<OutputId>() as u32 * self.v_byte_factor_key as u32
-            + size_of::<BlockId>() as u32 * self.v_byte_factor_data as u32
-            // TODO MilestoneIndex has been removed, check how the specs will evolve about that.
-            + 4 * self.v_byte_factor_data as u32
-            + size_of::<ConfirmationUnixTimestamp>() as u32 * self.v_byte_factor_data as u32
-    }
 }
 
 impl Packable for RentStructure {
@@ -134,12 +124,25 @@ impl Packable for RentStructure {
 
 /// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
 pub trait Rent {
+    /// Computes the byte offset given a [`RentStructure`].
+    fn byte_offset(&self, rent_structure: &RentStructure) -> u32 {
+        // The ID of the output.
+        size_of::<OutputId>() as u32 * rent_structure.v_byte_factor_key as u32
+        // The ID of the block in which the transaction payload that created this output was included.
+            + size_of::<BlockId>() as u32 * rent_structure.v_byte_factor_data as u32
+            // The index of the slot in which the transaction that created it was booked.
+            + size_of::<SlotIndex>() as u32 * rent_structure.v_byte_factor_data as u32
+            // The index of the slot in which the transaction was created.
+            + size_of::<SlotIndex>() as u32 * rent_structure.v_byte_factor_data as u32
+    }
+
     /// Different fields in a type lead to different storage requirements for the ledger state.
     fn weighted_bytes(&self, config: &RentStructure) -> u64;
 
     /// Computes the rent cost given a [`RentStructure`].
-    fn rent_cost(&self, config: &RentStructure) -> u64 {
-        config.v_byte_cost as u64 * (self.weighted_bytes(config) + config.byte_offset() as u64)
+    fn rent_cost(&self, rent_structure: &RentStructure) -> u64 {
+        rent_structure.v_byte_cost as u64
+            * (self.weighted_bytes(rent_structure) + self.byte_offset(rent_structure) as u64)
     }
 }
 

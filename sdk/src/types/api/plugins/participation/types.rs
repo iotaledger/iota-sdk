@@ -93,7 +93,7 @@ pub enum ParticipationEventPayload {
 )]
 #[getset(get = "pub")]
 pub struct VotingEventPayload {
-    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    #[serde(rename = "type")]
     kind: u32,
     questions: Vec<Question>,
 }
@@ -135,7 +135,7 @@ pub struct Answer {
 )]
 #[getset(get = "pub")]
 pub struct StakingEventPayload {
-    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    #[serde(rename = "type")]
     kind: u32,
     text: String,
     symbol: String,
