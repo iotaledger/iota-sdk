@@ -68,7 +68,7 @@ fn compute() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = SlotIndex::new(11_u64);
-    let issuing_time = slot_index.as_timestamp(
+    let issuing_time = slot_index.to_timestamp(
         protocol_parameters.genesis_unix_timestamp(),
         protocol_parameters.slot_duration_in_seconds(),
     );

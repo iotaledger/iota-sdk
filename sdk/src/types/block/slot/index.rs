@@ -25,7 +25,7 @@ impl SlotIndex {
         EpochIndex::new((self.0 >> slots_per_epoch_exponent) + 1)
     }
 
-    pub fn as_timestamp(self, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> u32 {
+    pub fn to_timestamp(self, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> u32 {
         (((self.0 - 1) * slot_duration_in_seconds as u64) + genesis_unix_timestamp as u64) as _
     }
 }
