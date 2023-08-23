@@ -9,3 +9,4 @@ export * from './address';
 export * from './id';
 export * from './block';
 export * from './signature';
+export * from './mana-allotment';

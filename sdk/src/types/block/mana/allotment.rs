@@ -17,7 +17,7 @@ use crate::types::block::{output::AccountId, Error};
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(rename_all = "camelCase"))]
 pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) mana: u64,
 }
 
