@@ -103,11 +103,13 @@ impl ClientInner {
             .await
     }
 
+    // Reward routes.
+
     /// Returns the total available Mana rewards of an account or delegation output decayed up to epochEnd index
     /// provided in the response.
     /// Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
     /// staking feature is equal or greater than the current epoch, the rewards response will not include the potential
-    /// future rewards for those epochs. epoch_start and epoch_end indicates the actual range for which reward value is
+    /// future rewards for those epochs. epochStart and epochEnd indicates the actual range for which reward value is
     /// returned and decayed for.
     /// GET /api/core/v3/rewards/{outputId}
     pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
