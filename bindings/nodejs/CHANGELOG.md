@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `migrateDbFromChrysalisToStardust` function;
-- `Wallet::getChrysalisData`;
+- `Wallet::getChrysalisData` method;
 
 ### Fixed
 
