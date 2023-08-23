@@ -15,8 +15,8 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse,
-            RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse,
+            PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
@@ -95,6 +95,25 @@ impl ClientInner {
     /// GET /api/core/v3/accounts/{accountId}/congestion
     pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
         let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    // Reward routes.
+
+    /// Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
+    /// provided in the response.
+    /// Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
+    /// staking feature is equal or greater than the current epoch, the rewards response will not include the potential
+    /// future rewards for those epochs. `epochStart` and `epochEnd` indicates the actual range for which reward value
+    /// is returned and decayed for.
+    /// GET /api/core/v3/rewards/{outputId}
+    pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
+        let path = &format!("api/core/v3/rewards/{output_id}");
 
         self.node_manager
             .read()

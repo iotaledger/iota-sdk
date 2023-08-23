@@ -364,3 +364,22 @@ pub struct CongestionResponse {
     #[serde(with = "crate::utils::serde::string")]
     pub block_issuance_credits: u64,
 }
+
+/// Response of GET /api/core/v3/rewards/{outputId}.
+/// Returns the mana rewards of an account or delegation output.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ManaRewardsResponse {
+    /// The starting epoch index for which the mana rewards are returned.
+    pub epoch_start: u64, // TODO: replace with `EpochIndex`
+    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
+    /// included.
+    pub epoch_end: u64, // TODO: replace with `EpochIndex`
+    /// The amount of totally available rewards the requested output may claim.
+    #[serde(with = "crate::utils::serde::string")]
+    pub rewards: u64,
+}
