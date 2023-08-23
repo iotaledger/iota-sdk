@@ -79,31 +79,31 @@ pub enum ConflictReason {
 impl fmt::Display for ConflictReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ConflictReason::None => write!(f, "The block has no conflict"),
-            ConflictReason::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent"),
-            ConflictReason::InputUtxoAlreadySpentInThisMilestone => write!(
+            Self::None => write!(f, "The block has no conflict"),
+            Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent"),
+            Self::InputUtxoAlreadySpentInThisMilestone => write!(
                 f,
                 "The referenced UTXO was already spent while confirming this milestone"
             ),
-            ConflictReason::InputUtxoNotFound => write!(f, "The referenced UTXO cannot be found"),
-            ConflictReason::CreatedConsumedAmountMismatch => {
+            Self::InputUtxoNotFound => write!(f, "The referenced UTXO cannot be found"),
+            Self::CreatedConsumedAmountMismatch => {
                 write!(f, "The sum of the inputs and output values does not match")
             }
-            ConflictReason::InvalidSignature => write!(f, "The unlock block signature is invalid"),
-            ConflictReason::TimelockNotExpired => write!(f, "The configured timelock is not yet expired"),
-            ConflictReason::InvalidNativeTokens => write!(f, "The native tokens are invalid"),
-            ConflictReason::StorageDepositReturnUnfulfilled => write!(
+            Self::InvalidSignature => write!(f, "The unlock block signature is invalid"),
+            Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired"),
+            Self::InvalidNativeTokens => write!(f, "The native tokens are invalid"),
+            Self::StorageDepositReturnUnfulfilled => write!(
                 f,
                 "The return amount in a transaction is not fulfilled by the output side"
             ),
-            ConflictReason::InvalidUnlock => write!(f, "The input unlock is invalid"),
-            ConflictReason::InputsCommitmentsMismatch => write!(f, "The inputs commitment is invalid"),
-            ConflictReason::UnverifiedSender => write!(
+            Self::InvalidUnlock => write!(f, "The input unlock is invalid"),
+            Self::InputsCommitmentsMismatch => write!(f, "The inputs commitment is invalid"),
+            Self::UnverifiedSender => write!(
                 f,
                 " The output contains a Sender with an ident (address) which is not unlocked"
             ),
-            ConflictReason::InvalidChainStateTransition => write!(f, "The chain state transition is invalid"),
-            ConflictReason::SemanticValidationFailed => write!(f, "The semantic validation failed"),
+            Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid"),
+            Self::SemanticValidationFailed => write!(f, "The semantic validation failed"),
         }
     }
 }
