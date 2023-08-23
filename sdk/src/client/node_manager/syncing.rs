@@ -73,6 +73,7 @@ impl ClientInner {
             match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
+                        // TODO: What about future parameters?
                         let network_name = info.latest_protocol_parameters().network_name();
                         match network_nodes.get_mut(network_name) {
                             Some(network_node_entry) => {

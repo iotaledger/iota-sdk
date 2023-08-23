@@ -71,8 +71,8 @@ pub struct StatusResponse {
     pub relative_confirmed_tangle_time: u64,
     pub latest_commitment_id: SlotCommitmentId,
     pub latest_finalized_slot: SlotIndex,
-    pub latest_accepted_block_slot: BlockId,
-    pub latest_confirmed_block_slot: BlockId,
+    pub latest_accepted_block_slot: SlotIndex,
+    pub latest_confirmed_block_slot: SlotIndex,
     pub pruning_slot: SlotIndex,
 }
 
