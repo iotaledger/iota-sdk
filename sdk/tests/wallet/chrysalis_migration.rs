@@ -6,7 +6,7 @@ use std::{fs, io, path::Path};
 use iota_sdk::{
     client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Password},
     types::block::address::ToBech32Ext,
-    wallet::{migration::migrate_db_from_chrysalis_to_stardust, ClientOptions, Result},
+    wallet::{migration::migrate_db_chrysalis_to_stardust, ClientOptions, Result},
     Wallet,
 };
 
@@ -19,7 +19,7 @@ async fn migrate_chrysalis_db() -> Result<()> {
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db/db", storage_path).unwrap();
 
-    migrate_db_from_chrysalis_to_stardust("migrate_chrysalis_db".into(), None).await?;
+    migrate_db_chrysalis_to_stardust("migrate_chrysalis_db".into(), None).await?;
 
     let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
@@ -80,7 +80,7 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db-encrypted/db", storage_path).unwrap();
 
-    migrate_db_from_chrysalis_to_stardust(
+    migrate_db_chrysalis_to_stardust(
         "migrate_chrysalis_db_encrypted".into(),
         Some("password".to_string().into()),
     )

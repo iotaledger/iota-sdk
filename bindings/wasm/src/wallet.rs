@@ -146,8 +146,8 @@ pub async fn listen_wallet(
 ///
 /// Throws an error if called, only included for compatibility
 /// with the Node.js bindings TypeScript definitions.
-#[wasm_bindgen(js_name = migrateDbFromChrysalisToStardust)]
-pub fn migrate_db_from_chrysalis_to_stardust(_storage_path: String, _password: Option<String>) -> Result<(), JsValue> {
+#[wasm_bindgen(js_name = migrateDbChrysalisToStardust)]
+pub fn migrate_db_chrysalis_to_stardust(_storage_path: String, _password: Option<String>) -> Result<(), JsValue> {
     let js_error = js_sys::Error::new("Rocksdb chrysalis migration is not supported for WebAssembly");
 
     Err(JsValue::from(js_error))

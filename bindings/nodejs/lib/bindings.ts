@@ -27,7 +27,7 @@ const {
     getClientFromWallet,
     getSecretManagerFromWallet,
     migrateStrongholdSnapshotV2ToV3,
-    migrateDbFromChrysalisToStardust,
+    migrateDbChrysalisToStardust,
 } = addon;
 
 const callClientMethodAsync = (
@@ -117,5 +117,5 @@ export {
     getSecretManagerFromWallet,
     listenMqtt,
     migrateStrongholdSnapshotV2ToV3,
-    migrateDbFromChrysalisToStardust,
+    migrateDbChrysalisToStardust,
 };
