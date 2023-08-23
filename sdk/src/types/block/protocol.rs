@@ -189,7 +189,7 @@ impl ProtocolParameters {
     }
 
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
-        calc_slot_index(
+        SlotIndex::from_timestamp(
             timestamp,
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
@@ -204,10 +204,6 @@ impl ProtocolParameters {
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
-}
-
-pub fn calc_slot_index(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
-    (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
