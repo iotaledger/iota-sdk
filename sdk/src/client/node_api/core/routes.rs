@@ -17,6 +17,7 @@ use crate::{
         api::core::response::{
             BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse,
             PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            AccountStakingResponse, ValidatorsResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
@@ -114,6 +115,29 @@ impl ClientInner {
     /// GET /api/core/v3/rewards/{outputId}
     pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Return the information of requested staker.
+    /// GET JSON to /api/core/v3/validators/{accountId}
+    pub async fn get_validators(&self) -> Result<ValidatorsResponse> {
+        const PATH: &str = "api/core/v3/validators";
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(PATH, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Checks if the account is ready to issue a block.
+    /// GET /api/core/v3/accounts/{accountId}/congestion
+    pub async fn get_validator(&self, account_id: &AccountId) -> Result<AccountStakingResponse> {
+        let path = &format!("api/core/v3/validators/{account_id}");
 
         self.node_manager
             .read()

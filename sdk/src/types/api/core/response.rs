@@ -186,6 +186,28 @@ pub struct BaseTokenResponse {
 }
 
 /// Response of
+/// - GET /api/core/v3/blocks/validators
+/// Information of all registered validators and if they are active.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ValidatorsResponse {}
+
+/// Response of
+/// - GET /api/core/v3/blocks/validators/{accountId}
+/// Information of requested staker.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct AccountStakingResponse {}
+
+/// Response of
 /// - GET /api/core/v3/blocks/issuance
 /// Information that is ideal for attaching a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
