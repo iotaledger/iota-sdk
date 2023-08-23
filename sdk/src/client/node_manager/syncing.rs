@@ -4,15 +4,13 @@
 #[cfg(not(target_family = "wasm"))]
 use {
     crate::types::api::core::response::InfoResponse,
+    crate::types::block::PROTOCOL_VERSION,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
 
 use super::{Node, NodeManager};
-use crate::{
-    client::{Client, ClientInner, Error, Result},
-    types::block::PROTOCOL_VERSION,
-};
+use crate::client::{Client, ClientInner, Error, Result};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
