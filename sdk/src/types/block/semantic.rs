@@ -76,33 +76,41 @@ pub enum ConflictReason {
     SemanticValidationFailed = 255,
 }
 
-impl Default for ConflictReason {
-    fn default() -> Self {
-        Self::None
+impl fmt::Display for ConflictReason {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConflictReason::None => write!(f, "The block has no conflict"),
+            ConflictReason::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent"),
+            ConflictReason::InputUtxoAlreadySpentInThisMilestone => write!(
+                f,
+                "The referenced UTXO was already spent while confirming this milestone"
+            ),
+            ConflictReason::InputUtxoNotFound => write!(f, "The referenced UTXO cannot be found"),
+            ConflictReason::CreatedConsumedAmountMismatch => {
+                write!(f, "The sum of the inputs and output values does not match")
+            }
+            ConflictReason::InvalidSignature => write!(f, "The unlock block signature is invalid"),
+            ConflictReason::TimelockNotExpired => write!(f, "The configured timelock is not yet expired"),
+            ConflictReason::InvalidNativeTokens => write!(f, "The native tokens are invalid"),
+            ConflictReason::StorageDepositReturnUnfulfilled => write!(
+                f,
+                "The return amount in a transaction is not fulfilled by the output side"
+            ),
+            ConflictReason::InvalidUnlock => write!(f, "The input unlock is invalid"),
+            ConflictReason::InputsCommitmentsMismatch => write!(f, "The inputs commitment is invalid"),
+            ConflictReason::UnverifiedSender => write!(
+                f,
+                " The output contains a Sender with an ident (address) which is not unlocked"
+            ),
+            ConflictReason::InvalidChainStateTransition => write!(f, "The chain state transition is invalid"),
+            ConflictReason::SemanticValidationFailed => write!(f, "The semantic validation failed"),
+        }
     }
 }
 
-impl TryFrom<u8> for ConflictReason {
-    type Error = ConflictError;
-
-    fn try_from(c: u8) -> Result<Self, Self::Error> {
-        Ok(match c {
-            0 => Self::None,
-            1 => Self::InputUtxoAlreadySpent,
-            2 => Self::InputUtxoAlreadySpentInThisMilestone,
-            3 => Self::InputUtxoNotFound,
-            4 => Self::CreatedConsumedAmountMismatch,
-            5 => Self::InvalidSignature,
-            6 => Self::TimelockNotExpired,
-            7 => Self::InvalidNativeTokens,
-            8 => Self::StorageDepositReturnUnfulfilled,
-            9 => Self::InvalidUnlock,
-            10 => Self::InputsCommitmentsMismatch,
-            11 => Self::UnverifiedSender,
-            12 => Self::InvalidChainStateTransition,
-            255 => Self::SemanticValidationFailed,
-            x => return Err(Self::Error::InvalidConflict(x)),
-        })
+impl Default for ConflictReason {
+    fn default() -> Self {
+        Self::None
     }
 }
 
