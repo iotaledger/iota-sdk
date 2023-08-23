@@ -109,8 +109,8 @@ impl ClientInner {
     /// provided in the response.
     /// Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
     /// staking feature is equal or greater than the current epoch, the rewards response will not include the potential
-    /// future rewards for those epochs. epochStart and epochEnd indicates the actual range for which reward value is
-    /// returned and decayed for.
+    /// future rewards for those epochs. `epochStart` and `epochEnd` indicates the actual range for which reward value
+    /// is returned and decayed for.
     /// GET /api/core/v3/rewards/{outputId}
     pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
