@@ -9,10 +9,13 @@
 //! ```
 
 use crypto::keys::bip44::Bip44;
-use iota_sdk::client::{
-    constants::IOTA_COIN_TYPE,
-    secret::{SecretManager, SignBlockExt},
-    Client, Result,
+use iota_sdk::{
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{SecretManager, SignBlockExt},
+        Client, Result,
+    },
+    types::api::core::response::BlockState,
 };
 
 #[tokio::main]
@@ -41,7 +44,7 @@ async fn main() -> Result<()> {
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let metadata = client.get_block_metadata(&block_id).await?;
-        if metadata.ledger_inclusion_state.is_some() {
+        if let Some(BlockState::Confirmed | BlockState::Finalized) = metadata.block_state {
             break;
         }
     }

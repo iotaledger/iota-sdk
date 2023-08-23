@@ -7,6 +7,7 @@ use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
+    semantic::TransactionFailureReason,
     slot::{SlotCommitment, SlotIndex},
     BlockId,
 };
@@ -47,13 +48,13 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub accepted_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub relative_accepted_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub confirmed_tangle_time: u64,
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[serde(with = "crate::utils::serde::string")]
     pub relative_confirmed_tangle_time: u64,
     pub latest_committed_slot: SlotIndex,
     pub latest_finalized_slot: SlotIndex,
@@ -88,7 +89,7 @@ pub struct BaseTokenResponse {
     pub name: String,
     pub ticker_symbol: String,
     pub unit: String,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
     pub use_metric_prefix: bool,
@@ -128,20 +129,67 @@ pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 
-/// Describes the ledger inclusion state of a transaction.
+/// Describes the state of a block.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub enum LedgerInclusionState {
-    Conflicting,
-    Included,
-    NoTransaction,
+pub enum BlockState {
+    // Stored but not confirmed.
+    Pending,
+    // Confirmed with the first level of knowledge.
+    Confirmed,
+    // Included and can no longer be reverted.
+    Finalized,
+    // Rejected by the node, and user should reissue payload if it contains one.
+    Rejected,
+    // Not successfully issued due to failure reason.
+    Failed,
 }
 
-/// Response of GET /api/core/v3/blocks/{block_id}/metadata.
+/// Describes the state of a transaction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub enum TransactionState {
+    // Stored but not confirmed.
+    Pending,
+    // Confirmed with the first level of knowledge.
+    Confirmed,
+    // Included and can no longer be reverted.
+    Finalized,
+    // The block is not successfully issued due to failure reason.
+    Failed,
+}
+
+/// Describes the reason of a block failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
+    serde(rename_all = "camelCase")
+)]
+#[non_exhaustive]
+#[repr(u8)]
+pub enum BlockFailureReason {
+    /// The block is too old to issue.
+    TooOldToIssue = 1,
+    /// The block's parents are too old.
+    ParentsTooOld = 2,
+    /// The block failed at the booker.
+    FailedAtBooker = 3,
+    /// The block is dropped due to congestion.
+    DroppedDueToCongestion = 4,
+    /// The block is invalid.
+    Invalid = 5,
+}
+
+/// Response of GET /api/core/v3/blocks/{blockId}/metadata.
 /// Returns the metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -151,22 +199,15 @@ pub enum LedgerInclusionState {
 )]
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
-    pub parents: Vec<BlockId>,
-    pub is_solid: bool,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub referenced_by_milestone_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ledger_inclusion_state: Option<LedgerInclusionState>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub conflict_reason: Option<u8>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub white_flag_index: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub should_promote: Option<bool>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub should_reattach: Option<bool>,
+    // TODO: verify if really optional: https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub block_state: Option<BlockState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tx_state: Option<TransactionState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub block_failure_reason: Option<BlockFailureReason>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tx_failure_reason: Option<TransactionFailureReason>,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
@@ -267,11 +308,11 @@ pub enum Relation {
 pub struct PeerResponse {
     pub id: String,
     pub multi_addresses: Vec<String>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alias: Option<String>,
     pub relation: Relation,
     pub connected: bool,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gossip: Option<Gossip>,
 }
 
@@ -301,4 +342,25 @@ pub struct UtxoChangesResponse {
     pub index: u32,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Response of GET /api/core/v3/accounts/{accountId}/congestion.
+/// Provides the cost and readiness to issue estimates.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CongestionResponse {
+    /// The slot index for which the congestion estimate is provided.
+    pub slot_index: SlotIndex,
+    /// Indicates if a node is ready to issue a block in a current congestion or should wait.
+    pub ready: bool,
+    /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
+    #[serde(with = "crate::utils::serde::string")]
+    pub reference_mana_cost: u64,
+    /// The Block Issuance Credits of the requested account.
+    #[serde(with = "crate::utils::serde::string")]
+    pub block_issuance_credits: u64,
 }
