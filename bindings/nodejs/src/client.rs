@@ -108,7 +108,7 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
                 Ok(cx.undefined())
             } else {
-                // Notify that the client got destroyed
+                // Notify that the client was destroyed
                 cx.throw_error(
                     serde_json::to_string(&Response::Panic("Client was destroyed".to_string()))
                         .expect("json to string error"),
@@ -143,7 +143,7 @@ pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 });
                 Ok(cx.undefined())
             } else {
-                // Notify that the client got destroyed
+                // Notify that the client was destroyed
                 cx.throw_error(
                     serde_json::to_string(&Response::Panic("Client was destroyed".to_string()))
                         .expect("json to string error"),
