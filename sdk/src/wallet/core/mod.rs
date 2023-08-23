@@ -19,10 +19,7 @@ use crate::wallet::events::{
     EventEmitter,
 };
 #[cfg(feature = "storage")]
-use crate::{
-    client::storage::StorageAdapter,
-    wallet::storage::{constants::CHRYSALIS_STORAGE_KEY, StorageManager, StorageOptions},
-};
+use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::{
         secret::{SecretManage, SecretManager},
@@ -201,11 +198,6 @@ impl<S: SecretManage> WalletInner<S> {
     /// Generates a new random mnemonic.
     pub fn generate_mnemonic(&self) -> crate::wallet::Result<Mnemonic> {
         Ok(Client::generate_mnemonic()?)
-    }
-
-    #[cfg(feature = "storage")]
-    pub async fn get_chrysalis_data(&self) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
-        self.storage_manager.read().await.get(CHRYSALIS_STORAGE_KEY).await
     }
 
     /// Verify that a &str is a valid mnemonic.
