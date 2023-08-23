@@ -108,6 +108,30 @@ impl fmt::Display for ConflictReason {
     }
 }
 
+impl TryFrom<u8> for ConflictReason {
+    type Error = ConflictError;
+
+    fn try_from(c: u8) -> Result<Self, Self::Error> {
+        Ok(match c {
+            0 => Self::None,
+            1 => Self::InputUtxoAlreadySpent,
+            2 => Self::InputUtxoAlreadySpentInThisMilestone,
+            3 => Self::InputUtxoNotFound,
+            4 => Self::CreatedConsumedAmountMismatch,
+            5 => Self::InvalidSignature,
+            6 => Self::TimelockNotExpired,
+            7 => Self::InvalidNativeTokens,
+            8 => Self::StorageDepositReturnUnfulfilled,
+            9 => Self::InvalidUnlock,
+            10 => Self::InputsCommitmentsMismatch,
+            11 => Self::UnverifiedSender,
+            12 => Self::InvalidChainStateTransition,
+            255 => Self::SemanticValidationFailed,
+            x => return Err(Self::Error::InvalidConflict(x)),
+        })
+    }
+}
+
 impl Default for ConflictReason {
     fn default() -> Self {
         Self::None
