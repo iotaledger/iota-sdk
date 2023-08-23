@@ -138,7 +138,7 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 Ok(())
             });
         } else {
-            panic!("Message handler got destroyed")
+            panic!("Message handler was destroyed")
         }
     });
 
@@ -169,7 +169,7 @@ pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 })
                 .await;
         } else {
-            panic!("Message handler got destroyed")
+            panic!("Message handler was destroyed")
         }
     });
 

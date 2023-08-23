@@ -49,7 +49,7 @@ pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
     let response = crate::block_on(async {
         match wallet.wallet.read().await.as_ref() {
             Some(wallet) => rust_call_wallet_method(wallet, method).await,
-            None => Response::Panic("wallet got destroyed".into()),
+            None => Response::Panic("wallet was destroyed".into()),
         }
     });
 
@@ -77,7 +77,7 @@ pub fn listen_wallet(wallet: &Wallet, events: Vec<u8>, handler: PyObject) {
             .read()
             .await
             .as_ref()
-            .expect("wallet got destroyed")
+            .expect("wallet was destroyed")
             .listen(rust_events, move |event| {
                 let event_string = serde_json::to_string(&event).expect("json to string error");
                 Python::with_gil(|py| {
@@ -101,7 +101,7 @@ pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
             .map(|w| w.client().clone())
             .ok_or_else(|| {
                 Error::from(
-                    serde_json::to_string(&Response::Panic("wallet got destroyed".into()))
+                    serde_json::to_string(&Response::Panic("wallet was destroyed".into()))
                         .expect("json to string error")
                         .as_str(),
                 )
@@ -123,7 +123,7 @@ pub fn get_secret_manager_from_wallet(wallet: &Wallet) -> Result<SecretManager> 
             .map(|w| w.get_secret_manager().clone())
             .ok_or_else(|| {
                 Error::from(
-                    serde_json::to_string(&Response::Panic("wallet got destroyed".into()))
+                    serde_json::to_string(&Response::Panic("wallet was destroyed".into()))
                         .expect("json to string error")
                         .as_str(),
                 )
