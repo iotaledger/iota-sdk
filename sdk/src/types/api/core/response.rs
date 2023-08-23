@@ -374,9 +374,10 @@ pub struct CongestionResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct ManaRewardsResponse {
-    ///  The starting epoch index for which the mana rewards are returned.
+    /// The starting epoch index for which the mana rewards are returned.
     pub epoch_start: u64, // TODO: replace with `EpochIndex`
-    ///  The ending epoch index for which the mana rewards are returned, the decay is applied up to this point included.
+    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
+    /// included.
     pub epoch_end: u64, // TODO: replace with `EpochIndex`
     /// The amount of totally available rewards the requested output may claim.
     #[serde(with = "crate::utils::serde::string")]
