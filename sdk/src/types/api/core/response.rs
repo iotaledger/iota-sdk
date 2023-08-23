@@ -4,7 +4,7 @@
 use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
 use crate::types::block::{
-    output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
+    output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
     semantic::TransactionFailureReason,
@@ -185,27 +185,53 @@ pub struct BaseTokenResponse {
     pub use_metric_prefix: bool,
 }
 
-/// Response of
-/// - GET /api/core/v3/blocks/validators
-/// Information of all registered validators and if they are active.
+/// Information of a validator.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct ValidatorsResponse {}
+pub struct Validator {
+    /// The account identifier of the validator
+    account_id: AccountId,
+    /// The epoch index until which the validator registered to stake.
+    staking_epoch_end: u64,
+    /// The total stake of the pool, including delegators.
+    pool_stake: u64,
+    /// The stake of a validator.
+    validator_stake: u64,
+    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    fixed_cost: u64,
+    /// Shows whether validator was active recently.
+    active: bool,
+    /// The latest protocol version the validator supported.
+    latest_supported_protocol_version: u64,
+}
+
+/// Response of
+/// - GET /api/core/v3/blocks/validators
+/// A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
+/// (are eligible for committee selection).
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ValidatorsResponse {
+    validators: Vec<Validator>,
+    ///  The number of validators returned per one API request with pagination.
+    page_size: u32,
+    /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
+    /// last page.
+    cursor: String,
+}
 
 /// Response of
 /// - GET /api/core/v3/blocks/validators/{accountId}
-/// Information of requested staker.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct AccountStakingResponse {}
+/// The requested staking information of the account.
+pub type AccountStakingResponse = Validator;
 
 /// Response of
 /// - GET /api/core/v3/blocks/issuance
