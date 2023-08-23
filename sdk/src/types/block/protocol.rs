@@ -11,10 +11,7 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{
-    address::Hrp,
-    slot::{EpochIndex, SlotIndex},
-};
+use super::{address::Hrp, slot::SlotIndex};
 use crate::types::block::{
     error::UnpackPrefixOptionErrorExt, helper::network_name_to_id, output::RentStructure, ConvertTo, Error,
     PROTOCOL_VERSION,
@@ -179,11 +176,13 @@ impl ProtocolParameters {
         self.mana_decay_factors.as_ref().map(|slice| slice.as_ref())
     }
 
+    /// Returns the slots per epoch exponent of the [`ProtocolParameters`].
     pub fn slots_per_epoch_exponent(&self) -> u32 {
         self.slots_per_epoch_exponent
             .unwrap_or(DEFAULT_SLOTS_PER_EPOCH_EXPONENT)
     }
 
+    /// Gets a [`SlotIndex`] from a unix timestamp.
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
         SlotIndex::from_timestamp(
             timestamp,
@@ -192,11 +191,7 @@ impl ProtocolParameters {
         )
     }
 
-    pub fn epoch_index(&self, timestamp: u64) -> EpochIndex {
-        self.slot_index(timestamp)
-            .to_epoch_index(self.slots_per_epoch_exponent())
-    }
-
+    /// Returns the hash of the [`ProtocolParameters`].
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
