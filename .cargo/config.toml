@@ -4,6 +4,7 @@ ci-check-nodejs = "check --manifest-path bindings/nodejs/Cargo.toml --all-target
 ci-check-python = "check --manifest-path bindings/python/Cargo.toml --all-targets --lib"
 ci-check-wasm = "check --manifest-path bindings/wasm/Cargo.toml --target wasm32-unknown-unknown --lib"
 ci-check-nostd = "check --no-default-features -F serde -p iota-sdk --target riscv64gc-unknown-none-elf"
+ci-check-types = "check --no-default-features -F std -p iota-sdk"
 
 ci-test = "nextest run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core"
 
