@@ -15,8 +15,6 @@ use tokio::sync::RwLock;
 use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
-#[cfg(all(feature = "storage", not(feature = "rocksdb"), not(feature = "jammdb")))]
-use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
     account::AccountDetails,
@@ -134,13 +132,19 @@ where
             }
         }
 
-        #[cfg(all(feature = "rocksdb", feature = "storage"))]
-        let storage =
-            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
-        #[cfg(all(not(feature = "rocksdb"), feature = "jammdb", feature = "storage"))]
-        let storage = crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?;
-        #[cfg(all(not(feature = "rocksdb"), not(feature = "jammdb"), feature = "storage"))]
-        let storage = Memory::default();
+        #[cfg(feature = "storage")]
+        cfg_if::cfg_if!(
+            if #[cfg(feature = "rocksdb")] {
+                let storage =
+                crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
+            }
+            else if #[cfg(feature = "jammdb")]{
+                let storage = crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?;
+            }
+            else {
+                let storage = crate::wallet::storage::adapter::memory::Memory::default();
+            }
+        );
 
         #[cfg(feature = "storage")]
         let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
