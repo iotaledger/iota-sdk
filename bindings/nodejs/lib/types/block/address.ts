@@ -7,7 +7,7 @@ import { AccountId, NftId } from './id';
 
 enum AddressType {
     Ed25519 = 0,
-    Alias = 8,
+    Account = 8,
     Nft = 16,
 }
 
@@ -32,7 +32,7 @@ abstract class Address {
                 Ed25519Address,
                 data,
             ) as any as Ed25519Address;
-        } else if (data.type == AddressType.Alias) {
+        } else if (data.type == AddressType.Account) {
             return plainToInstance(AccountAddress, data) as any as AccountAddress;
         } else if (data.type == AddressType.Nft) {
             return plainToInstance(NftAddress, data) as any as NftAddress;
@@ -65,11 +65,11 @@ class Ed25519Address extends Address {
 class AccountAddress extends Address {
     private accountId: AccountId;
     constructor(address: AccountId) {
-        super(AddressType.Alias);
+        super(AddressType.Account);
         this.accountId = address;
     }
     /**
-     * The alias id.
+     * The account id.
      */
     getAccountId(): AccountId {
         return this.accountId;
@@ -104,7 +104,7 @@ const AddressDiscriminator = {
     property: 'type',
     subTypes: [
         { value: Ed25519Address, name: AddressType.Ed25519 as any },
-        { value: AccountAddress, name: AddressType.Alias as any },
+        { value: AccountAddress, name: AddressType.Account as any },
         { value: NftAddress, name: AddressType.Nft as any },
     ],
 };

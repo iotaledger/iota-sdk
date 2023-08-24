@@ -15,7 +15,7 @@ import {
     NftOutputBuilderParams,
     FoundryQueryParameter,
     NftQueryParameter,
-    AliasQueryParameter,
+    AccountQueryParameter,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import {
@@ -414,7 +414,7 @@ export class Client {
     }
 
     /**
-     * Transforms an alias id to a bech32 encoded address.
+     * Transforms an account id to a bech32 encoded address.
      */
     async accountIdToBech32(
         accountId: string,
@@ -465,10 +465,10 @@ export class Client {
     }
 
     /**
-     * Fetch alias output IDs
+     * Fetch account output IDs
      */
     async accountOutputIds(
-        queryParameters: AliasQueryParameter[],
+        queryParameters: AccountQueryParameter[],
     ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'accountOutputIds',
@@ -481,7 +481,7 @@ export class Client {
     }
 
     /**
-     * Fetch alias output ID
+     * Fetch account output ID
      */
     async accountOutputId(accountId: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -615,7 +615,7 @@ export class Client {
     }
 
     /**
-     * Build an Alias Output.
+     * Build an Account Output.
      */
     async buildAccountOutput(
         params: AccountOutputBuilderParams,

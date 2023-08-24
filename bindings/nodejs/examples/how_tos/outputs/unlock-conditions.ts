@@ -33,7 +33,7 @@ async function run() {
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        const aliasHexAddress = Utils.bech32ToHex(
+        const accountHexAddress = Utils.bech32ToHex(
             'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux',
         );
 
@@ -95,13 +95,13 @@ async function run() {
             ],
         });
 
-        // Output with immutable alias unlock condition
+        // Output with immutable account unlock condition
         const foundryOutput = await client.buildFoundryOutput({
             serialNumber: 1,
             tokenScheme: tokenSchema,
             unlockConditions: [
                 new ImmutableAccountAddressUnlockCondition(
-                    new AccountAddress(aliasHexAddress),
+                    new AccountAddress(accountHexAddress),
                 ),
             ],
         });

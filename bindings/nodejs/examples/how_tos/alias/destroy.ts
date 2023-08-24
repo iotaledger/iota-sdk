@@ -35,16 +35,16 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
-        if (balance.aliases.length == 0) {
+        if (balance.accounts.length == 0) {
             throw new Error(`No Alias available in account 'Alice'`);
         }
 
         // We try to destroy the first alias in the account
-        const accountId = balance.aliases[0];
+        const accountId = balance.accounts[0];
 
         console.log(
-            `Aliases BEFORE destroying (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts BEFORE destroying (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
 
         // To sign a transaction we need to unlock stronghold.
@@ -70,8 +70,8 @@ async function run() {
 
         balance = await account.sync();
         console.log(
-            `Aliases AFTER destroying (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts AFTER destroying (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
     } catch (error) {
         console.log('Error: ', error);

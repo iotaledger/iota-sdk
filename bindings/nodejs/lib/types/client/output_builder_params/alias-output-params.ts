@@ -4,7 +4,7 @@ import { Feature, HexEncodedString } from '../..';
 import type { BasicOutputBuilderParams } from './basic-output-params';
 
 /**
- * Options for building an Alias Output
+ * Options for building an Account Output
  */
 export interface AccountOutputBuilderParams extends BasicOutputBuilderParams {
     accountId: HexEncodedString;

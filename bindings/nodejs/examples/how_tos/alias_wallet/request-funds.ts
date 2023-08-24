@@ -37,7 +37,7 @@ async function run() {
             `Balance before requesting funds on alias address: ${totalBaseTokenBalance}`,
         );
 
-        const accountId = balance.aliases[0];
+        const accountId = balance.accounts[0];
         console.log(`Alias Id: ${accountId}`);
 
         // Get Alias address

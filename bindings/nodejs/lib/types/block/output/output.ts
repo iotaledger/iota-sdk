@@ -20,7 +20,7 @@ export type OutputId = string;
  */
 enum OutputType {
     Basic = 3,
-    Alias = 4,
+    Account = 4,
     Foundry = 5,
     Nft = 6,
 }
@@ -56,7 +56,7 @@ abstract class Output /*implements ICommonOutput*/ {
     public static parse(data: any): Output {
         if (data.type == OutputType.Basic) {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
-        } else if (data.type == OutputType.Alias) {
+        } else if (data.type == OutputType.Account) {
             return plainToInstance(AccountOutput, data) as any as AccountOutput;
         } else if (data.type == OutputType.Foundry) {
             return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
@@ -194,27 +194,27 @@ class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
         foundryCounter: number,
         unlockConditions: UnlockCondition[],
     ) {
-        super(OutputType.Alias, amount, unlockConditions);
+        super(OutputType.Account, amount, unlockConditions);
         this.accountId = accountId;
         this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
         this.mana = mana;
     }
     /**
-     * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its a newly created alias, then the id is zeroed.
+     * Unique identifier of the account, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unless its a newly created account, then the id is zeroed.
      */
     getAccountId(): HexEncodedString {
         return this.accountId;
     }
     /**
-     * A counter that must increase by 1 every time the alias is state transitioned.
+     * A counter that must increase by 1 every time the account is state transitioned.
      */
     getStateIndex(): number {
         return this.stateIndex;
     }
     /**
-     * A counter that denotes the number of foundries created by this alias account.
+     * A counter that denotes the number of foundries created by this account.
      */
     getFoundryCounter(): number {
         return this.foundryCounter;
@@ -271,7 +271,7 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
         this.tokenScheme = tokenScheme;
     }
     /**
-     * The serial number of the foundry with respect to the controlling alias.
+     * The serial number of the foundry with respect to the controlling account.
      */
     getSerialNumber(): number {
         return this.serialNumber;
@@ -288,7 +288,7 @@ const OutputDiscriminator = {
     property: 'type',
     subTypes: [
         { value: BasicOutput, name: OutputType.Basic as any },
-        { value: AccountOutput, name: OutputType.Alias as any },
+        { value: AccountOutput, name: OutputType.Account as any },
         { value: NftOutput, name: OutputType.Nft as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
     ],

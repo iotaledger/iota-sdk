@@ -16,9 +16,9 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./client/13-build-alias-output.ts
+// yarn run-example ./client/13-build-account-output.ts
 
-// In this example we will build an alias output.
+// In this example we will build an account output.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {

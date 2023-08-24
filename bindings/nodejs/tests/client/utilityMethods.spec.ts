@@ -80,7 +80,7 @@ describe('Client utility methods', () => {
         );
     });
 
-    it('alias id to address', async () => {
+    it('account id to address', async () => {
         const accountId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
 

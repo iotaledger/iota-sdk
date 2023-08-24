@@ -209,7 +209,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
     }
 }
 /**
- * Immutable Alias Unlock Condition.
+ * Immutable Account Unlock Condition.
  */
 class ImmutableAccountAddressUnlockCondition extends UnlockCondition /*implements IImmutableAccountAddressUnlockCondition*/ {
     @Type(() => Address, {

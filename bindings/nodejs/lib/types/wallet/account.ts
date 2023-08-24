@@ -24,8 +24,8 @@ export interface Balance {
     nativeTokens: NativeTokenBalance[];
     /** Nft outputs */
     nfts: string[];
-    /** Alias outputs */
-    aliases: string[];
+    /** Account outputs */
+    accounts: string[];
     /** Foundry outputs */
     foundries: string[];
     /**
@@ -167,9 +167,9 @@ export interface FilterOptions {
     lowerBoundBookedTimestamp?: number;
     /** Filter all outputs where the booked milestone index is above the specified timestamp */
     upperBoundBookedTimestamp?: number;
-    /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
+    /** Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6) */
     outputTypes?: Uint8Array;
-    /** Return all alias outputs matching these IDs. */
+    /** Return all account outputs matching these IDs. */
     accountIds?: AccountId[];
     /** Return all foundry outputs matching these IDs. */
     foundryIds?: FoundryId[];

@@ -44,7 +44,7 @@ export class Utils {
     }
 
     /**
-     * Computes the alias id for the given alias output id.
+     * Computes the account id for the given account output id.
      */
     static computeAccountId(outputId: string): AccountId {
         return callUtilsMethod({
@@ -134,7 +134,7 @@ export class Utils {
 
     /**
      * Computes a tokenId from the accountId, serial number and token scheme type.
-     * @param accountId The alias that controls the foundry.
+     * @param accountId The account that controls the foundry.
      * @param serialNumber The serial number of the foundry.
      * @param tokenSchemeType The tokenSchemeType of the foundry.
      * @returns The tokenId.
@@ -219,7 +219,7 @@ export class Utils {
     }
 
     /**
-     * Transforms an alias id to a bech32 encoded address.
+     * Transforms an account id to a bech32 encoded address.
      */
     static accountIdToBech32(accountId: string, bech32Hrp: string): string {
         return callUtilsMethod({

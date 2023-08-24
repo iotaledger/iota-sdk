@@ -8,14 +8,14 @@ import type {
 import type { Block, BlockId, Output, Payload } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
-    AliasQueryParameter,
+    AccountQueryParameter,
     FoundryQueryParameter,
     NftQueryParameter,
     QueryParameter,
 } from '../query-parameters';
 import type { IAuth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
-import type { AccountOutputBuilderParams } from '../output_builder_params/alias-output-params';
+import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
 import { HexEncodedString } from '../../utils';
@@ -204,7 +204,7 @@ export interface __HexPublicKeyToBech32AddressMethod__ {
 export interface __AccountOutputIdsMethod__ {
     name: 'accountOutputIds';
     data: {
-        queryParameters: AliasQueryParameter[];
+        queryParameters: AccountQueryParameter[];
     };
 }
 

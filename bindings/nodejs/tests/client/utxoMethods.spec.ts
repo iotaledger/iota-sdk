@@ -17,15 +17,15 @@ const client = new Client({
 
 // Skip for CI
 describe.skip('UTXO methods', () => {
-    it('gets aliases output IDs', async () => {
-        const aliasesOutputIds = await client.accountOutputIds([
+    it('gets accounts output IDs', async () => {
+        const accountsOutputIds = await client.accountOutputIds([
             {
                 stateController:
                     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             },
         ]);
 
-        expect(aliasesOutputIds).toBeDefined();
+        expect(accountsOutputIds).toBeDefined();
     });
 
     it('gets nfts output IDs', async () => {
@@ -50,7 +50,7 @@ describe.skip('UTXO methods', () => {
     });
 
     // TODO: get valid IDs to test with
-    it('get alias/nft/foundry outputId rejects with 404 for invalid IDs', async () => {
+    it('get account/nft/foundry outputId rejects with 404 for invalid IDs', async () => {
         await expect(
             client.accountOutputId(
                 '0x03119f37e7ad40608fc7ab15db49390abc233648c95e78141ff2e298f60d7a95',

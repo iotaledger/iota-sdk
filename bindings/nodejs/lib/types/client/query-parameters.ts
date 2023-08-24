@@ -23,8 +23,8 @@ export type QueryParameter =
     | Governor
     | CommonQueryParameters;
 
-/** Query parameters for filtering Alias Outputs */
-export type AliasQueryParameter =
+/** Query parameters for filtering Account Outputs */
+export type AccountQueryParameter =
     | StateController
     | Governor
     | Issuer
@@ -66,7 +66,7 @@ type CommonQueryParameters =
 interface Address {
     address: string;
 }
-/** Filter foundry outputs based on bech32-encoded address of the controlling alias. */
+/** Filter foundry outputs based on bech32-encoded address of the controlling account. */
 interface AccountAddress {
     accountAddress: string;
 }

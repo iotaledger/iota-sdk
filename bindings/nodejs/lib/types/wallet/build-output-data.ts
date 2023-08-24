@@ -3,7 +3,7 @@
 
 import { Feature, INativeToken, TokenScheme, UnlockCondition } from '../';
 
-/** An alias output */
+/** An account output */
 export interface BuildAccountOutputData extends BuildBasicOutputData {
     accountId: string;
     stateIndex?: number;

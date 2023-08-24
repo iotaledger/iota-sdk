@@ -40,8 +40,8 @@ async function run() {
         let balance = await account.sync();
 
         console.log(
-            `Aliases BEFORE (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts BEFORE (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
 
         // To sign a transaction we need to unlock stronghold.
@@ -66,8 +66,8 @@ async function run() {
 
         balance = await account.sync();
         console.log(
-            `Aliases AFTER (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts AFTER (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
     } catch (error) {
         console.log('Error: ', error);

@@ -46,7 +46,7 @@ describe.skip('Output builder methods', () => {
         expect(basicOutput).toBeDefined();
     });
 
-    it('builds an alias output', async () => {
+    it('builds an account output', async () => {
         const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
@@ -58,7 +58,7 @@ describe.skip('Output builder methods', () => {
 
         const accountId =
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa';
-        // most simple alias output
+        // most simple account output
         const accountOutput = await client.buildAccountOutput({
             accountId,
             unlockConditions: [

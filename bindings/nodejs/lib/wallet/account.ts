@@ -131,7 +131,7 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
+     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and accounts.
      * @param burn The outputs to burn
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -272,8 +272,8 @@ export class Account {
     }
 
     /**
-     * `createAccountOutput` creates an alias output
-     * @param params The alias output options.
+     * `createAccountOutput` creates an account output
+     * @param params The account output options.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns A transaction object.
@@ -367,7 +367,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        aliases: [accountId],
+                        accounts: [accountId],
                     },
                     options: transactionOptions,
                 },
@@ -384,7 +384,7 @@ export class Account {
 
     /**
      * Function to destroy a foundry output with a circulating supply of 0.
-     * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias.
+     * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account.
      * @param foundryId The FoundryId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -469,8 +469,8 @@ export class Account {
         payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
         payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
 
-        payload.requiredStorageDeposit.alias = hexToBigInt(
-            payload.requiredStorageDeposit.alias,
+        payload.requiredStorageDeposit.account = hexToBigInt(
+            payload.requiredStorageDeposit.account,
         );
         payload.requiredStorageDeposit.basic = hexToBigInt(
             payload.requiredStorageDeposit.basic,
