@@ -11,9 +11,9 @@ import { Wallet, initLogger, Utils } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias_wallet/transaction.ts
+// yarn run-example ./how_tos/account_wallet/transaction.ts
 
-// In this example we send funds from an alias wallet.
+// In this example we send funds from an account wallet.
 async function run() {
     initLogger();
     try {

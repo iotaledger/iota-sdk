@@ -7,9 +7,9 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias/destroy.ts
+// yarn run-example ./how_tos/account_output/destroy.ts
 
-// In this example we destroy alias.
+// In this example we destroy an alias account.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {

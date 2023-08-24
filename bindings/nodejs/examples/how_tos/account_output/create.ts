@@ -11,9 +11,9 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias/create.ts
+// yarn run-example ./how_tos/account_output/create.ts
 
-// In this example we create alias.
+// In this example we create an alias output.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {
