@@ -12,6 +12,7 @@ use packable::prefix::UnpackPrefixError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
+use super::slot::EpochIndex;
 use crate::types::block::{
     context_input::RewardContextInputIndex,
     input::UtxoInput,
@@ -113,6 +114,7 @@ pub enum Error {
     InvalidSignature,
     InvalidSignatureKind(u8),
     InvalidPublicKeyKind(u8),
+    InvalidStartEpoch(EpochIndex),
     InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
     InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
     InvalidTagFeatureLength(<TagFeatureLength as TryFrom<usize>>::Error),
@@ -280,6 +282,7 @@ impl fmt::Display for Error {
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
             Self::InvalidPublicKeyKind(k) => write!(f, "invalid public key kind: {k}"),
+            Self::InvalidStartEpoch(index) => write!(f, "invalid start epoch: {index}"),
             Self::InvalidStringPrefix(p) => write!(f, "invalid string prefix: {p}"),
             Self::InvalidTaggedDataLength(length) => {
                 write!(f, "invalid tagged data length {length}")

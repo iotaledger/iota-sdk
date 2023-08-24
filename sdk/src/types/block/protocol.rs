@@ -11,10 +11,7 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{
-    address::Hrp,
-    slot::{EpochIndex, SlotIndex},
-};
+use super::{address::Hrp, slot::SlotIndex};
 use crate::types::block::{
     error::UnpackPrefixOptionErrorExt, helper::network_name_to_id, output::RentStructure, ConvertTo, Error,
     PROTOCOL_VERSION,
@@ -94,7 +91,9 @@ pub struct ProtocolParameters {
     #[getset(get_copy = "pub")]
     eviction_age: Option<SlotIndex>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[getset(get_copy = "pub")]
     liveness_threshold: Option<SlotIndex>,
+    #[getset(get_copy = "pub")]
     epoch_nearing_threshold: SlotIndex,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]
@@ -177,41 +176,25 @@ impl ProtocolParameters {
         self.mana_decay_factors.as_ref().map(|slice| slice.as_ref())
     }
 
-    /// Returns the liveness threshold of the [`ProtocolParameters`].
-    pub fn liveness_threshold(&self) -> Option<SlotIndex> {
-        self.liveness_threshold
-    }
-
-    /// Returns the epoch nearing threshold of the [`ProtocolParameters`].
-    pub fn epoch_nearing_threshold(&self) -> SlotIndex {
-        self.epoch_nearing_threshold
-    }
-
+    /// Returns the slots per epoch exponent of the [`ProtocolParameters`].
     pub fn slots_per_epoch_exponent(&self) -> u32 {
         self.slots_per_epoch_exponent
             .unwrap_or(DEFAULT_SLOTS_PER_EPOCH_EXPONENT)
     }
 
+    /// Gets a [`SlotIndex`] from a unix timestamp.
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
-        calc_slot_index(
+        SlotIndex::from_timestamp(
             timestamp,
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
     }
 
-    pub fn epoch_index(&self, timestamp: u64) -> EpochIndex {
-        self.slot_index(timestamp)
-            .to_epoch_index(self.slots_per_epoch_exponent())
-    }
-
+    /// Returns the hash of the [`ProtocolParameters`].
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
-}
-
-pub fn calc_slot_index(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
-    (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]

@@ -4,6 +4,7 @@
 #[cfg(not(target_family = "wasm"))]
 use {
     crate::types::api::core::response::InfoResponse,
+    crate::types::block::PROTOCOL_VERSION,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
@@ -73,7 +74,12 @@ impl ClientInner {
             match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
-                        let network_name = info.latest_protocol_parameters().network_name();
+                        // Unwrap: We should always have parameters for this version. If we don't we can't recover.
+                        let network_name = info
+                            .protocol_parameters_by_version(PROTOCOL_VERSION)
+                            .expect("missing v3 protocol parameters")
+                            .parameters
+                            .network_name();
                         match network_nodes.get_mut(network_name) {
                             Some(network_node_entry) => {
                                 network_node_entry.push((info, node.clone()));
@@ -106,7 +112,12 @@ impl ClientInner {
                 let mut network_info = self.network_info.write().await;
 
                 network_info.tangle_time = Some(info.status.relative_accepted_tangle_time);
-                network_info.protocol_parameters = info.latest_protocol_parameters().clone();
+                // Unwrap: We should always have parameters for this version. If we don't we can't recover.
+                network_info.protocol_parameters = info
+                    .protocol_parameters_by_version(PROTOCOL_VERSION)
+                    .expect("missing v3 protocol parameters")
+                    .parameters
+                    .clone();
             }
 
             for (info, node_url) in nodes {

@@ -14,7 +14,7 @@ use {
 };
 
 #[cfg(target_family = "wasm")]
-use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
+use crate::{client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS, types::block::PROTOCOL_VERSION};
 use crate::{
     client::{
         builder::{ClientBuilder, NetworkInfo},
@@ -109,7 +109,11 @@ impl ClientInner {
             }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self.network_info.write().await;
-            client_network_info.protocol_parameters = info.latest_protocol_parameters().clone();
+            client_network_info.protocol_parameters = info
+                .protocol_parameters_by_version(PROTOCOL_VERSION)
+                .expect("missing v3 protocol parameters")
+                .parameters
+                .clone();
 
             *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
