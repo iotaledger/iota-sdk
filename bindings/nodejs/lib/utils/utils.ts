@@ -17,7 +17,7 @@ import {
     hexToBigInt,
     u64,
 } from '../types';
-import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
+import { AccountId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
 
 /** Utils class for utils. */
@@ -46,9 +46,9 @@ export class Utils {
     /**
      * Computes the alias id for the given alias output id.
      */
-    static computeAliasId(outputId: string): AliasId {
+    static computeAccountId(outputId: string): AccountId {
         return callUtilsMethod({
-            name: 'computeAliasId',
+            name: 'computeAccountId',
             data: {
                 outputId,
             },
@@ -59,14 +59,14 @@ export class Utils {
      * Computes the foundry id.
      */
     static computeFoundryId(
-        aliasId: AliasId,
+        accountId: AccountId,
         serialNumber: number,
         tokenSchemeType: number,
     ): FoundryId {
         return callUtilsMethod({
             name: 'computeFoundryId',
             data: {
-                aliasId,
+                accountId,
                 serialNumber,
                 tokenSchemeType,
             },
@@ -133,21 +133,21 @@ export class Utils {
     }
 
     /**
-     * Computes a tokenId from the aliasId, serial number and token scheme type.
-     * @param aliasId The alias that controls the foundry.
+     * Computes a tokenId from the accountId, serial number and token scheme type.
+     * @param accountId The alias that controls the foundry.
      * @param serialNumber The serial number of the foundry.
      * @param tokenSchemeType The tokenSchemeType of the foundry.
      * @returns The tokenId.
      */
     static computeTokenId(
-        aliasId: AliasId,
+        accountId: AccountId,
         serialNumber: number,
         tokenSchemeType: TokenSchemeType,
     ): TokenId {
         return callUtilsMethod({
             name: 'computeTokenId',
             data: {
-                aliasId,
+                accountId,
                 serialNumber,
                 tokenSchemeType,
             },
@@ -221,11 +221,11 @@ export class Utils {
     /**
      * Transforms an alias id to a bech32 encoded address.
      */
-    static aliasIdToBech32(aliasId: string, bech32Hrp: string): string {
+    static accountIdToBech32(accountId: string, bech32Hrp: string): string {
         return callUtilsMethod({
-            name: 'aliasIdToBech32',
+            name: 'accountIdToBech32',
             data: {
-                aliasId,
+                accountId,
                 bech32Hrp,
             },
         });

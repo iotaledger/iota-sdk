@@ -12,7 +12,7 @@ import {
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
-    AliasOutputParams,
+    AccountOutputParams,
     FilterOptions,
     GenerateAddressOptions,
     CreateNativeTokenParams,
@@ -29,7 +29,7 @@ import {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
-    BuildAliasOutputData,
+    BuildAccountOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
@@ -40,7 +40,7 @@ import {
 } from '../types/wallet';
 import { INode, Burn, PreparedTransactionData } from '../client';
 import {
-    AliasOutput,
+    AccountOutput,
     NftOutput,
     Output,
     BasicOutput,
@@ -65,15 +65,15 @@ export class Account {
     }
 
     /**
-     * Build an `AliasOutput`.
-     * @param data Options for building an `AliasOutput`.
-     * @returns The built `AliasOutput`.
+     * Build an `AccountOutput`.
+     * @param data Options for building an `AccountOutput`.
+     * @returns The built `AccountOutput`.
      */
-    async buildAliasOutput(data: BuildAliasOutputData): Promise<AliasOutput> {
+    async buildAccountOutput(data: BuildAccountOutputData): Promise<AccountOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'buildAliasOutput',
+                name: 'buildAccountOutput',
                 data,
             },
         );
@@ -272,20 +272,20 @@ export class Account {
     }
 
     /**
-     * `createAliasOutput` creates an alias output
+     * `createAccountOutput` creates an alias output
      * @param params The alias output options.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns A transaction object.
      */
-    async prepareCreateAliasOutput(
-        params?: AliasOutputParams,
+    async prepareCreateAccountOutput(
+        params?: AccountOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareCreateAliasOutput',
+                name: 'prepareCreateAccountOutput',
                 data: {
                     params,
                     options: transactionOptions,
@@ -352,13 +352,13 @@ export class Account {
 
     /**
      * Destroy an alias output.
-     * @param aliasId The AliasId.
+     * @param accountId The AccountId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The transaction.
      */
     async prepareDestroyAlias(
-        aliasId: string,
+        accountId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -367,7 +367,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        aliases: [aliasId],
+                        aliases: [accountId],
                     },
                     options: transactionOptions,
                 },

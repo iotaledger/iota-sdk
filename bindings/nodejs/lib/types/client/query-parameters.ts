@@ -6,7 +6,7 @@
  */
 export type QueryParameter =
     | Address
-    | AliasAddress
+    | AccountAddress
     | HasStorageDepositReturn
     | StorageDepositReturnAddress
     | HasTimelock
@@ -32,12 +32,12 @@ export type AliasQueryParameter =
     | CommonQueryParameters;
 
 /** Query parameters for filtering Foundry Outputs */
-export type FoundryQueryParameter = AliasAddress | CommonQueryParameters;
+export type FoundryQueryParameter = AccountAddress | CommonQueryParameters;
 
 /** Query parameters for filtering Nft Outputs */
 export type NftQueryParameter =
     | Address
-    | AliasAddress
+    | AccountAddress
     | HasStorageDepositReturn
     | StorageDepositReturnAddress
     | HasTimelock
@@ -67,8 +67,8 @@ interface Address {
     address: string;
 }
 /** Filter foundry outputs based on bech32-encoded address of the controlling alias. */
-interface AliasAddress {
-    aliasAddress: string;
+interface AccountAddress {
+    accountAddress: string;
 }
 /** Filters outputs based on the presence of storage deposit return unlock condition. */
 interface HasStorageDepositReturn {

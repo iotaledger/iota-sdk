@@ -37,17 +37,17 @@ async function run() {
             `Balance before requesting funds on alias address: ${totalBaseTokenBalance}`,
         );
 
-        const aliasId = balance.aliases[0];
-        console.log(`Alias Id: ${aliasId}`);
+        const accountId = balance.aliases[0];
+        console.log(`Alias Id: ${accountId}`);
 
         // Get Alias address
-        const aliasAddress = Utils.aliasIdToBech32(
-            aliasId,
+        const accountAddress = Utils.accountIdToBech32(
+            accountId,
             await (await wallet.getClient()).getBech32Hrp(),
         );
         const faucetResponse = await (
             await wallet.getClient()
-        ).requestFundsFromFaucet(faucetUrl, aliasAddress);
+        ).requestFundsFromFaucet(faucetUrl, accountAddress);
         console.log(faucetResponse);
 
         await new Promise((resolve) => setTimeout(resolve, 10000));

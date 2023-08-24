@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountAddress, AddressWithUnspentOutputs } from './address';
-import { AliasId, FoundryId, NftId } from '../block/id';
+import { AccountId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
@@ -104,14 +104,14 @@ export interface SyncOptions {
 /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
 export interface AccountSyncOptions {
     basicOutputs?: boolean;
-    aliasOutputs?: boolean;
+    accountOutputs?: boolean;
     nftOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an alias output. */
 export interface AliasSyncOptions {
     basicOutputs?: boolean;
-    aliasOutputs?: boolean;
+    accountOutputs?: boolean;
     nftOutputs?: boolean;
     foundryOutputs?: boolean;
 }
@@ -119,7 +119,7 @@ export interface AliasSyncOptions {
 /** Specifies what outputs should be synced for the address of an nft output. */
 export interface NftSyncOptions {
     basicOutputs?: boolean;
-    aliasOutputs?: boolean;
+    accountOutputs?: boolean;
     nftOutputs?: boolean;
 }
 
@@ -170,7 +170,7 @@ export interface FilterOptions {
     /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
     outputTypes?: Uint8Array;
     /** Return all alias outputs matching these IDs. */
-    aliasIds?: AliasId[];
+    accountIds?: AccountId[];
     /** Return all foundry outputs matching these IDs. */
     foundryIds?: FoundryId[];
     /** Return all NFT outputs matching these IDs. */

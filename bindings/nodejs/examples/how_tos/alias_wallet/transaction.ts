@@ -44,19 +44,19 @@ async function run() {
             `Balance before sending funds from alias: ${totalBaseTokenBalance}`,
         );
 
-        const aliasId = balance.aliases[0];
-        console.log(`Alias Id: ${aliasId}`);
+        const accountId = balance.aliases[0];
+        console.log(`Alias Id: ${accountId}`);
 
         // Get Alias address
-        const aliasAddress = Utils.aliasIdToBech32(
-            aliasId,
+        const accountAddress = Utils.accountIdToBech32(
+            accountId,
             await (await wallet.getClient()).getBech32Hrp(),
         );
 
         // Find first output unlockable by the alias address
         const queryParameters = [
             {
-                address: aliasAddress,
+                address: accountAddress,
             },
         ];
         const input = (

@@ -35,8 +35,8 @@ async function run() {
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        const aliasOutput = await client.buildAliasOutput({
-            aliasId:
+        const accountOutput = await client.buildAccountOutput({
+            accountId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
             stateMetadata: utf8ToHex('hello'),
             unlockConditions: [
@@ -57,7 +57,7 @@ async function run() {
             ],
         });
 
-        console.log(JSON.stringify(aliasOutput, null, 2));
+        console.log(JSON.stringify(accountOutput, null, 2));
         process.exit();
     } catch (error) {
         console.error('Error: ', error);

@@ -14,8 +14,8 @@ import {
     SimpleTokenScheme,
     StateControllerAddressUnlockCondition,
     GovernorAddressUnlockCondition,
-    ImmutableAliasAddressUnlockCondition,
-    AliasAddress,
+    ImmutableAccountAddressUnlockCondition,
+    AccountAddress,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -82,8 +82,8 @@ async function run() {
         });
 
         // Output with governor and state controller unlock condition
-        const aliasOutput = await client.buildAliasOutput({
-            aliasId:
+        const accountOutput = await client.buildAccountOutput({
+            accountId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
                 new GovernorAddressUnlockCondition(
@@ -100,8 +100,8 @@ async function run() {
             serialNumber: 1,
             tokenScheme: tokenSchema,
             unlockConditions: [
-                new ImmutableAliasAddressUnlockCondition(
-                    new AliasAddress(aliasHexAddress),
+                new ImmutableAccountAddressUnlockCondition(
+                    new AccountAddress(aliasHexAddress),
                 ),
             ],
         });
@@ -113,7 +113,7 @@ async function run() {
                     basicOutputWithStorageReturn,
                     basicOutputWithTimelock,
                     basicOutputWithExpiration,
-                    aliasOutput,
+                    accountOutput,
                     foundryOutput,
                 ],
                 null,

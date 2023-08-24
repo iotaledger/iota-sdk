@@ -57,7 +57,7 @@ abstract class Output /*implements ICommonOutput*/ {
         if (data.type == OutputType.Basic) {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
         } else if (data.type == OutputType.Alias) {
-            return plainToInstance(AliasOutput, data) as any as AliasOutput;
+            return plainToInstance(AccountOutput, data) as any as AccountOutput;
         } else if (data.type == OutputType.Foundry) {
             return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
         } else if (data.type == OutputType.Nft) {
@@ -176,8 +176,8 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     }
 }
 
-class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
-    private aliasId: HexEncodedString;
+class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
+    private accountId: HexEncodedString;
     private stateIndex: number;
     private foundryCounter: number;
 
@@ -189,13 +189,13 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     constructor(
         amount: u64,
         mana: u64,
-        aliasId: HexEncodedString,
+        accountId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
         unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Alias, amount, unlockConditions);
-        this.aliasId = aliasId;
+        this.accountId = accountId;
         this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
         this.mana = mana;
@@ -204,8 +204,8 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
      * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
      * Unless its a newly created alias, then the id is zeroed.
      */
-    getAliasId(): HexEncodedString {
-        return this.aliasId;
+    getAccountId(): HexEncodedString {
+        return this.accountId;
     }
     /**
      * A counter that must increase by 1 every time the alias is state transitioned.
@@ -288,7 +288,7 @@ const OutputDiscriminator = {
     property: 'type',
     subTypes: [
         { value: BasicOutput, name: OutputType.Basic as any },
-        { value: AliasOutput, name: OutputType.Alias as any },
+        { value: AccountOutput, name: OutputType.Alias as any },
         { value: NftOutput, name: OutputType.Nft as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
     ],
@@ -300,7 +300,7 @@ export {
     OutputType,
     CommonOutput,
     BasicOutput,
-    AliasOutput,
+    AccountOutput,
     NftOutput,
     FoundryOutput,
 };

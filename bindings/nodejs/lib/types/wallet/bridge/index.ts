@@ -1,13 +1,13 @@
 import type { AccountId } from '../account';
 import type {
-    __BuildAliasOutputMethod__,
+    __BuildAccountOutputMethod__,
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
     __PrepareBurnMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
-    __PrepareCreateAliasOutputMethod__,
+    __PrepareCreateAccountOutputMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateEd25519AddressesMethod__,
     __GetBalanceMethod__,
@@ -80,14 +80,14 @@ import type {
 } from './wallet';
 
 export type __AccountMethod__ =
-    | __BuildAliasOutputMethod__
+    | __BuildAccountOutputMethod__
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
-    | __PrepareCreateAliasOutputMethod__
+    | __PrepareCreateAccountOutputMethod__
     | __DeregisterParticipationEventMethod__
     | __GenerateEd25519AddressesMethod__
     | __GetBalanceMethod__

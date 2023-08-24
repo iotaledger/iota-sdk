@@ -40,7 +40,7 @@ async function run() {
         }
 
         // We try to destroy the first alias in the account
-        const aliasId = balance.aliases[0];
+        const accountId = balance.aliases[0];
 
         console.log(
             `Aliases BEFORE destroying (${balance.aliases.length}):\n`,
@@ -54,7 +54,7 @@ async function run() {
 
         // Destroy an alias
         const transaction = await account
-            .prepareDestroyAlias(aliasId)
+            .prepareDestroyAlias(accountId)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -66,7 +66,7 @@ async function run() {
         console.log(
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
-        console.log(`Destroyed alias ${aliasId}`);
+        console.log(`Destroyed alias ${accountId}`);
 
         balance = await account.sync();
         console.log(

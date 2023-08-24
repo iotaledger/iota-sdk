@@ -26,11 +26,11 @@ import type {
     __GetIncludedBlockMethod__,
     __GetIncludedBlockMetadataMethod__,
     __HexToBech32Method__,
-    __AliasIdToBech32Method__,
+    __AccountIdToBech32Method__,
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
-    __AliasOutputIdsMethod__,
-    __AliasOutputIdMethod__,
+    __AccountOutputIdsMethod__,
+    __AccountOutputIdMethod__,
     __NftOutputIdsMethod__,
     __NftOutputIdMethod__,
     __FoundryOutputIdsMethod__,
@@ -39,7 +39,7 @@ import type {
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
     __BuildBasicOutputMethod__,
-    __BuildAliasOutputMethod__,
+    __BuildAccountOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
     __ClearListenersMethod__,
@@ -75,11 +75,11 @@ export type __ClientMethods__ =
     | __GetIncludedBlockMethod__
     | __GetIncludedBlockMetadataMethod__
     | __HexToBech32Method__
-    | __AliasIdToBech32Method__
+    | __AccountIdToBech32Method__
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
-    | __AliasOutputIdsMethod__
-    | __AliasOutputIdMethod__
+    | __AccountOutputIdsMethod__
+    | __AccountOutputIdMethod__
     | __NftOutputIdsMethod__
     | __NftOutputIdMethod__
     | __FoundryOutputIdsMethod__
@@ -88,7 +88,7 @@ export type __ClientMethods__ =
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__
     | __BuildBasicOutputMethod__
-    | __BuildAliasOutputMethod__
+    | __BuildAccountOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __ClearListenersMethod__

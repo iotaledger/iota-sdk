@@ -51,7 +51,7 @@ async function run() {
 
         // Create an alias
         const transaction = await account
-            .prepareCreateAliasOutput()
+            .prepareCreateAccountOutput()
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);

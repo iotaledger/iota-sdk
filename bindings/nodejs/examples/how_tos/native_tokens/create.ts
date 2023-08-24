@@ -32,7 +32,7 @@ async function run() {
         if (balance.aliases.length == 0) {
             // If we don't have an alias, we need to create one
             const transaction = await account
-                .prepareCreateAliasOutput()
+                .prepareCreateAccountOutput()
                 .then((prepared) => prepared.send());
             console.log(`Transaction sent: ${transaction.transactionId}`);
 
