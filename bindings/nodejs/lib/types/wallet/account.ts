@@ -92,10 +92,11 @@ export interface SyncOptions {
     /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
     account?: AccountSyncOptions;
     /** Specifies what outputs should be synced for the address of an account output. */
-    account?: AccountSyncOptions;
+    // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
+    alias?: AliasSyncOptions;
     /** Specifies what outputs should be synced for the address of an nft output. */
     nft?: NftSyncOptions;
-    /** Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite `account`, `account` and `nft` options. Default: false. */
+    /** Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite `account`, `alias` and `nft` options. Default: false. */
     syncOnlyMostBasicOutputs?: boolean;
     /** Sync native token foundries, so their metadata can be returned in the balance. Default: false. */
     syncNativeTokenFoundries?: boolean;
@@ -109,7 +110,7 @@ export interface AccountSyncOptions {
 }
 
 /** Specifies what outputs should be synced for the address of an account output. */
-export interface AccountSyncOptions {
+export interface AliasSyncOptions {
     basicOutputs?: boolean;
     accountOutputs?: boolean;
     nftOutputs?: boolean;
