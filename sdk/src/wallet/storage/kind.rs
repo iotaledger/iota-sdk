@@ -12,7 +12,6 @@ pub enum StorageKind {
     Rocksdb,
     /// JammDB storage
     #[cfg(feature = "jammdb")]
-    #[cfg(not(feature = "rocksdb"))]
     Jammdb,
     /// Storage backed by a Map in memory.
     Memory,
