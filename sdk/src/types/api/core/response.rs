@@ -196,17 +196,20 @@ pub struct Validator {
     /// The account identifier of the validator
     account_id: AccountId,
     /// The epoch index until which the validator registered to stake.
-    staking_epoch_end: u64,
+    staking_epoch_end: EpochIndex,
     /// The total stake of the pool, including delegators.
+    #[serde(with = "crate::utils::serde::string")]
     pool_stake: u64,
     /// The stake of a validator.
+    #[serde(with = "crate::utils::serde::string")]
     validator_stake: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    #[serde(with = "crate::utils::serde::string")]
     fixed_cost: u64,
     /// Shows whether validator was active recently.
     active: bool,
     /// The latest protocol version the validator supported.
-    latest_supported_protocol_version: u64,
+    latest_supported_protocol_version: u8,
 }
 
 /// Response of
