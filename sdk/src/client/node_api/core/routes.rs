@@ -122,9 +122,10 @@ impl ClientInner {
             .await
     }
 
-    /// Return the information of requested staker.
-    /// GET JSON to /api/core/v3/validators/{accountId}
+    /// Returns information of all registered validators and if they are active.
+    /// GET JSON to /api/core/v3/validators
     pub async fn get_validators(&self) -> Result<ValidatorsResponse> {
+        // TODO: Pagination is not in the TIP yet
         const PATH: &str = "api/core/v3/validators";
 
         self.node_manager
@@ -134,8 +135,8 @@ impl ClientInner {
             .await
     }
 
-    /// Checks if the account is ready to issue a block.
-    /// GET /api/core/v3/accounts/{accountId}/congestion
+    /// Return the information of requested staker.
+    /// GET /api/core/v3/validators/{accountId}
     pub async fn get_validator(&self, account_id: &AccountId) -> Result<AccountStakingResponse> {
         let path = &format!("api/core/v3/validators/{account_id}");
 
