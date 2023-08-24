@@ -35,10 +35,12 @@ class RegularTransactionEssence extends TransactionEssence {
      */
     networkId: u64;
 
+    creationSlot: SlotIndex;
+
     @Type(() => Input, {
         discriminator: ContextInputDiscriminator,
     })
-    contextInput: ContextInput[];
+    contextInputs: ContextInput[];
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
@@ -59,27 +61,25 @@ class RegularTransactionEssence extends TransactionEssence {
     })
     payload?: Payload;
 
-    creationSlot?: SlotIndex;
-
     constructor(
         networkId: u64,
-        contextInput: ContextInput[],
+        creationSlot: SlotIndex,
+        contextInputs: ContextInput[],
         inputs: Input[],
         inputsCommitment: HexEncodedString,
         outputs: Output[],
         allotments: ManaAllotment[],
         payload?: Payload,
-        creationSlot?: SlotIndex,
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;
-        this.contextInput = contextInput;
+        this.creationSlot = creationSlot;
+        this.contextInputs = contextInputs;
         this.inputs = inputs;
         this.inputsCommitment = inputsCommitment;
         this.outputs = outputs;
         this.allotments = allotments;
         this.payload = payload;
-        this.creationSlot = creationSlot;
     }
 }
 
