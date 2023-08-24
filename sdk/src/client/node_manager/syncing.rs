@@ -111,7 +111,7 @@ impl ClientInner {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
-                network_info.tangle_time = Some(info.status.relative_accepted_tangle_time);
+                network_info.tangle_time = info.status.relative_accepted_tangle_time;
                 // Unwrap: We should always have parameters for this version. If we don't we can't recover.
                 network_info.protocol_parameters = info
                     .protocol_parameters_by_version(PROTOCOL_VERSION)

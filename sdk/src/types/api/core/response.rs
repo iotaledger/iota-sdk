@@ -61,18 +61,18 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    #[serde(with = "crate::utils::serde::string")]
-    pub accepted_tangle_time: u64,
-    #[serde(with = "crate::utils::serde::string")]
-    pub relative_accepted_tangle_time: u64,
-    #[serde(with = "crate::utils::serde::string")]
-    pub confirmed_tangle_time: u64,
-    #[serde(with = "crate::utils::serde::string")]
-    pub relative_confirmed_tangle_time: u64,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub accepted_tangle_time: Option<u64>,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub relative_accepted_tangle_time: Option<u64>,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub confirmed_tangle_time: Option<u64>,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub relative_confirmed_tangle_time: Option<u64>,
     pub latest_commitment_id: SlotCommitmentId,
     pub latest_finalized_slot: SlotIndex,
-    pub latest_accepted_block_slot: SlotIndex,
-    pub latest_confirmed_block_slot: SlotIndex,
+    pub latest_accepted_block_slot: Option<SlotIndex>,
+    pub latest_confirmed_block_slot: Option<SlotIndex>,
     pub pruning_slot: SlotIndex,
 }
 

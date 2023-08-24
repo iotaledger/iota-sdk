@@ -31,73 +31,73 @@ pub const DEFAULT_SLOTS_PER_EPOCH_EXPONENT: u32 = 10;
 pub struct ProtocolParameters {
     // The version of the protocol running.
     #[getset(get_copy = "pub")]
-    version: u8,
+    pub(crate) version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
     #[serde(with = "crate::utils::serde::string_prefix")]
     #[getset(skip)]
-    network_name: StringPrefix<u8>,
+    pub(crate) network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
     #[getset(get_copy = "pub")]
-    bech32_hrp: Hrp,
+    pub(crate) bech32_hrp: Hrp,
     // The rent structure used by given node/network.
     #[getset(get = "pub")]
-    rent_structure: RentStructure,
+    pub(crate) rent_structure: RentStructure,
     // The work score structure used by the node/network.
     #[getset(get = "pub")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    work_score_structure: Option<WorkScoreStructure>,
+    pub(crate) work_score_structure: Option<WorkScoreStructure>,
     // TokenSupply defines the current token supply on the network.
     #[serde(with = "crate::utils::serde::string")]
     #[getset(get_copy = "pub")]
-    token_supply: u64,
+    pub(crate) token_supply: u64,
     // Genesis timestamp at which the slots start to count.
     #[serde(with = "crate::utils::serde::string")]
     #[getset(get_copy = "pub")]
-    genesis_unix_timestamp: u32,
+    pub(crate) genesis_unix_timestamp: u32,
     // Duration of each slot in seconds.
     #[getset(get_copy = "pub")]
-    slot_duration_in_seconds: u8,
+    pub(crate) slot_duration_in_seconds: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(skip)]
-    slots_per_epoch_exponent: Option<u32>,
+    pub(crate) slots_per_epoch_exponent: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    mana_generation_rate: Option<u32>,
+    pub(crate) mana_generation_rate: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    mana_generation_rate_exponent: Option<u32>,
+    pub(crate) mana_generation_rate_exponent: Option<u32>,
     #[packable(unpack_error_with = |err| Error::InvalidManaDecayFactors(err.into_opt_error()))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(skip)]
-    mana_decay_factors: Option<BoxedSlicePrefix<u32, u8>>,
+    pub(crate) mana_decay_factors: Option<BoxedSlicePrefix<u32, u8>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    mana_decay_factors_exponent: Option<u32>,
+    pub(crate) mana_decay_factors_exponent: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    mana_decay_factor_epochs_sum: Option<u32>,
+    pub(crate) mana_decay_factor_epochs_sum: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    mana_decay_factor_epochs_sum_exponent: Option<u32>,
+    pub(crate) mana_decay_factor_epochs_sum_exponent: Option<u32>,
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
         with = "crate::utils::serde::option_string"
     )]
     #[getset(get_copy = "pub")]
-    staking_unbonding_period: Option<u32>,
+    pub(crate) staking_unbonding_period: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    eviction_age: Option<SlotIndex>,
+    pub(crate) eviction_age: Option<SlotIndex>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    liveness_threshold: Option<SlotIndex>,
+    pub(crate) liveness_threshold: Option<SlotIndex>,
     #[getset(get_copy = "pub")]
-    epoch_nearing_threshold: SlotIndex,
+    pub(crate) epoch_nearing_threshold: SlotIndex,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[getset(get = "pub")]
-    version_signaling: Option<VersionSignalingParameters>,
+    pub(crate) version_signaling: Option<VersionSignalingParameters>,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -174,6 +174,11 @@ impl ProtocolParameters {
     /// Returns the mana decay factors slice of the [`ProtocolParameters`].
     pub fn mana_decay_factors(&self) -> Option<&[u32]> {
         self.mana_decay_factors.as_ref().map(|slice| slice.as_ref())
+    }
+
+    /// Returns the slots per epoch of the [`ProtocolParameters`].
+    pub fn slots_per_epoch(&self) -> u64 {
+        2_u64.pow(self.slots_per_epoch_exponent())
     }
 
     /// Returns the slots per epoch exponent of the [`ProtocolParameters`].

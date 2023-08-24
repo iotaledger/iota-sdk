@@ -32,6 +32,17 @@ impl EpochIndex {
         let mut res = 0;
         let mut last = None;
         for (start_epoch, exponent) in slots_per_epoch_exponent_iter {
+            if let Some((last_start_epoch, last_exponent)) = last {
+                // Get the number of slots this range of epochs represents
+                let slots_in_range = (*start_epoch - last_start_epoch) << last_exponent;
+                // Check whether the slot index is contained in this range
+                if slot_index > slots_in_range {
+                    // Update the slot index so it is in the context of the next epoch
+                    slot_index -= slots_in_range;
+                } else {
+                    break;
+                }
+            }
             if *start_epoch > res {
                 // We can't calculate the epoch if we don't have the exponent for the containing range
                 if slot_index > 0 {
@@ -40,23 +51,11 @@ impl EpochIndex {
                     break;
                 }
             }
-            if let Some((last_start_epoch, last_exponent)) = last {
-                // Get the number of slots this range of epochs represents
-                let slots_in_range = (*start_epoch - last_start_epoch) << last_exponent;
-                // Check whether the slot index is contained in this range
-                if slot_index > slots_in_range {
-                    // Update the slot index so it is in the context of the next epoch
-                    slot_index -= slots_in_range;
-                }
-            }
-            res = *start_epoch;
+            res = *start_epoch + (slot_index >> exponent);
             last = Some((*start_epoch, exponent));
         }
-        if let Some((_, exponent)) = last {
-            res += slot_index >> exponent;
-        }
-        // TODO: Do we need to add one?
-        Ok(Self(res + 1))
+        // TODO: Or do we need to add one here?
+        Ok(Self(res))
     }
 }
 
@@ -68,3 +67,41 @@ impl From<EpochIndex> for u64 {
 
 #[cfg(feature = "serde")]
 string_serde_impl!(EpochIndex);
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::types::block::protocol::ProtocolParameters;
+
+    #[test]
+    fn epoch_index_from_slot() {
+        let v3_params = ProtocolParameters {
+            version: 3,
+            slots_per_epoch_exponent: Some(10),
+            ..Default::default()
+        };
+        let v4_params = ProtocolParameters {
+            version: 4,
+            slots_per_epoch_exponent: Some(11),
+            ..Default::default()
+        };
+        let params = [(EpochIndex(0), v3_params.clone()), (EpochIndex(10), v4_params)];
+        let slots_per_epoch_exponent_iter = params
+            .iter()
+            .map(|(start_index, params)| (*start_index, params.slots_per_epoch_exponent()));
+
+        let slot_index = SlotIndex::new(3000);
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.clone());
+        assert_eq!(epoch_index, Ok(EpochIndex(2)));
+
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.clone().skip(1));
+        assert_eq!(epoch_index, Err(Error::InvalidStartEpoch(EpochIndex(10))));
+
+        let slot_index = SlotIndex::new(10 * v3_params.slots_per_epoch() + 3000);
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.clone());
+        assert_eq!(epoch_index, Ok(EpochIndex(11)));
+
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.skip(1));
+        assert_eq!(epoch_index, Err(Error::InvalidStartEpoch(EpochIndex(10))));
+    }
+}
