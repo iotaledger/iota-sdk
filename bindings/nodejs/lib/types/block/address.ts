@@ -33,7 +33,10 @@ abstract class Address {
                 data,
             ) as any as Ed25519Address;
         } else if (data.type == AddressType.Account) {
-            return plainToInstance(AccountAddress, data) as any as AccountAddress;
+            return plainToInstance(
+                AccountAddress,
+                data,
+            ) as any as AccountAddress;
         } else if (data.type == AddressType.Nft) {
             return plainToInstance(NftAddress, data) as any as NftAddress;
         }

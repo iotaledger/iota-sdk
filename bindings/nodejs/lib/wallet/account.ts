@@ -69,7 +69,9 @@ export class Account {
      * @param data Options for building an `AccountOutput`.
      * @returns The built `AccountOutput`.
      */
-    async buildAccountOutput(data: BuildAccountOutputData): Promise<AccountOutput> {
+    async buildAccountOutput(
+        data: BuildAccountOutputData,
+    ): Promise<AccountOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

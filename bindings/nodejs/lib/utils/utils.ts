@@ -17,7 +17,13 @@ import {
     hexToBigInt,
     u64,
 } from '../types';
-import { AccountId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
+import {
+    AccountId,
+    BlockId,
+    FoundryId,
+    NftId,
+    TokenId,
+} from '../types/block/id';
 import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
 
 /** Utils class for utils. */
