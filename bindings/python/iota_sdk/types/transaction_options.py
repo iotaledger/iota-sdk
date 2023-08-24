@@ -1,13 +1,17 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from enum import Enum
+from typing import Optional, List
+from dataclasses import dataclass
+from dataclasses_json import dataclass_json, LetterCase
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
-from enum import Enum
-from typing import Optional, List
 
 
+@json
+@dataclass
 class RemainderValueStrategyCustomAddress:
     """Remainder value strategy for custom addresses.
 
@@ -24,12 +28,12 @@ class RemainderValueStrategyCustomAddress:
                  internal: bool,
                  used: bool):
         self.address = address
-        self.keyIndex = key_index
+        self.key_index = key_index
         self.internal = internal
         self.used = used
 
     def as_dict(self):
-        return dict({"strategy": "CustomAddress", "value": self.__dict__})
+        return dict({"strategy": "CustomAddress", "value": self.to_dict()})
 
 
 class RemainderValueStrategy(Enum):

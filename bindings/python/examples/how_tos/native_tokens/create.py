@@ -24,11 +24,11 @@ balance = account.sync()
 if not balance.aliases:
     # If we don't have an alias, we need to create one
     transaction = account.prepare_create_alias_output(None, None).send()
-    print(f'Transaction sent: {transaction.transactionId}')
+    print(f'Transaction sent: {transaction.transaction_id}')
 
     # Wait for transaction to get included
     blockId = account.reissue_transaction_until_included(
-        transaction.transactionId)
+        transaction.transaction_id)
     print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
     account.sync()
@@ -44,10 +44,10 @@ params = CreateNativeTokenParams(
 
 prepared_transaction = account.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-blockId = account.reissue_transaction_until_included(transaction.transactionId)
+blockId = account.reissue_transaction_until_included(transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 print(f'Created token: {prepared_transaction.token_id()}')

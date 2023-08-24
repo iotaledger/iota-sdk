@@ -4,9 +4,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import HexStr, json
 
 
+@json
 @dataclass
 class NodeInfoMilestone:
     """Milestone info.
@@ -21,6 +22,7 @@ class NodeInfoMilestone:
     milestoneId: Optional[HexStr] = None
 
 
+@json
 @dataclass
 class NodeInfoStatus:
     """Node status.
@@ -37,34 +39,37 @@ class NodeInfoStatus:
     pruningIndex: int
 
 
+@json
 @dataclass
 class NodeInfoMetrics:
     """Node metrics.
 
     Attributes:
-        blocksPerSecond: The blocks per second gossiped in the network.
-        referencedBlocksPerSecond: The referenced blocks per second in the network.
-        referencedRate: The percentage of blocks that get referenced.
+        blocks_per_second: The blocks per second gossiped in the network.
+        referenced_blocks_per_second: The referenced blocks per second in the network.
+        referenced_rate: The percentage of blocks that get referenced.
     """
-    blocksPerSecond: float
-    referencedBlocksPerSecond: float
-    referencedRate: float
+    blocks_per_second: float
+    referenced_block_per_second: float
+    referenced_rate: float
 
 
+@json
 @dataclass
 class RentStructure:
     """Rent structure for the storage deposit.
 
     Attributes:
-        vByteCost: The cost of base coin per virtual byte.
-        vByteFactorData: The weight factor used for key fields in the outputs.
-        vByteFactorKey: The weight factor used for data fields in the outputs.
+        v_byte_cost: The cost of base coin per virtual byte.
+        v_byte_factor_data: The weight factor used for key fields in the outputs.
+        v_byte_factor_key: The weight factor used for data fields in the outputs.
     """
-    vByteCost: int
-    vByteFactorData: int
-    vByteFactorKey: int
+    v_byte_cost: int
+    v_byte_factor_data: int
+    v_byte_factor_key: int
 
 
+@json
 @dataclass
 class NodeInfoProtocol:
     """Protocol info.
@@ -85,19 +90,20 @@ class NodeInfoProtocol:
     rentStructure: RentStructure
 
 
+@json
 @dataclass
 class PendingProtocolParameter:
     """Pending protocol parameters.
 
     Attributes:
         type: Type of change.
-        targetMilestoneIndex: Milestone index at which the new protocol parameters become active.
-        protocolVersion: The new protocol version.
+        target_milestone_index: Milestone index at which the new protocol parameters become active.
+        protocol_version: The new protocol version.
         params: The new protocol parameters.
     """
     type: int
-    targetMilestoneIndex: int
-    protocolVersion: int
+    target_milestone_index: int
+    protocol_version: int
     params: str
 
 
@@ -121,6 +127,7 @@ class NodeInfoBaseToken:
     subunit: Optional[str] = None
 
 
+@json
 @dataclass
 class NodeInfo:
     """Response from the /info endpoint.
@@ -130,10 +137,10 @@ class NodeInfo:
         version: The version of the node.
         status: The status of the node.
         metrics: Some node metrics.
-        supportedProtocolVersions: Supported protocol versions by the ndoe.
+        supported_protocol_versions: Supported protocol versions by the ndoe.
         protocol: Information about the running protocol.
-        pendingProtocolParameters: A list of pending (not yet active) protocol parameters.
-        baseToken: Information about the base token.
+        pending_protocol_parameters: A list of pending (not yet active) protocol parameters.
+        base_token: Information about the base token.
         features: List of features supported by the node.
     """
 
@@ -141,20 +148,21 @@ class NodeInfo:
     version: str
     status: NodeInfoStatus
     metrics: NodeInfoMetrics
-    supportedProtocolVersions: List[int]
+    supported_protocol_version: List[int]
     protocol: NodeInfoProtocol
-    pendingProtocolParameters: List[PendingProtocolParameter]
-    baseToken: NodeInfoBaseToken
+    pending_protocol_parameters: List[PendingProtocolParameter]
+    base_token: NodeInfoBaseToken
     features: List[str]
 
 
+@json
 @dataclass
 class NodeInfoWrapper:
     """NodeInfo wrapper which contains the node info and the url from the node.
 
     Attributes:
-        nodeInfo: A NodeInfo object.
+        node_info: A NodeInfo object.
         url: The URL of the node.
     """
-    nodeInfo: NodeInfo
+    node_info: NodeInfo
     url: str

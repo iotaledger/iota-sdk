@@ -65,7 +65,7 @@ while nft_mint_params:
 
     # Wait for transaction to get included
     block_id = account.reissue_transaction_until_included(
-        transaction.transactionId)
+        transaction.transaction_id)
 
     print(
         f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

@@ -31,7 +31,7 @@ transaction = prepared.send()
 
 # Wait for transaction to get included
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
@@ -42,6 +42,6 @@ for outputIndex, output in enumerate(essence["outputs"]):
     # New minted NFT id is empty in the output
     if output["type"] == 6 and output["nftId"] == '0x0000000000000000000000000000000000000000000000000000000000000000':
         outputId = Utils.compute_output_id(
-            transaction.transactionId, outputIndex)
+            transaction.transaction_id, outputIndex)
         nftId = Utils.compute_nft_id(outputId)
         print(f'New minted NFT id: {nftId}')

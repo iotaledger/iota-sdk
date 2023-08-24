@@ -12,7 +12,7 @@ def test_feature():
         "data": "0x426c61"
     }
     metadata_feature = from_dict(MetadataFeature, feature_dict)
-    assert metadata_feature.as_dict() == feature_dict
+    assert metadata_feature.to_dict() == feature_dict
 
     issuer_dict = {
         "type": 1,
@@ -22,7 +22,7 @@ def test_feature():
         }
     }
     issuer_feature = from_dict(IssuerFeature, issuer_dict)
-    assert issuer_feature.as_dict() == issuer_dict
+    assert issuer_feature.to_dict() == issuer_dict
 
 
 def test_output():
@@ -40,7 +40,7 @@ def test_output():
         ]
     }
     basic_output = from_dict(BasicOutput, basic_output_dict)
-    assert basic_output.as_dict() == basic_output_dict
+    assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
         "type": 3,
@@ -78,7 +78,7 @@ def test_output():
         ]
     }
     basic_output = from_dict(BasicOutput, basic_output_dict)
-    assert basic_output.as_dict() == basic_output_dict
+    assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
         "type": 3,
@@ -104,7 +104,7 @@ def test_output():
         ]
     }
     basic_output = from_dict(BasicOutput, basic_output_dict)
-    assert basic_output.as_dict() == basic_output_dict
+    assert basic_output.to_dict() == basic_output_dict
 
     alias_output_dict = {
         "type": 4,

@@ -1,10 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
-from iota_sdk.types.common import HexStr
-from dataclasses import dataclass, field
 from enum import IntEnum
+
+from dataclasses import dataclass, field
+
+from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
+from iota_sdk.types.common import HexStr, json
 
 
 class FeatureType(IntEnum):
@@ -22,19 +24,15 @@ class FeatureType(IntEnum):
     Tag = 3
 
 
+@json
 @dataclass
 class Feature():
     """Base class of a feature.
     """
     type: int
 
-    def as_dict(self):
-        res = {k: v for k, v in self.__dict__.items() if v is not None}
-        if 'address' in res:
-            res['address'] = res['address'].as_dict()
-        return res
 
-
+@json
 @dataclass
 class SenderFeature(Feature):
     """Sender feature.
@@ -48,6 +46,7 @@ class SenderFeature(Feature):
         init=False)
 
 
+@json
 @dataclass
 class IssuerFeature(Feature):
     """Issuer feature.
@@ -61,6 +60,7 @@ class IssuerFeature(Feature):
         init=False)
 
 
+@json
 @dataclass
 class MetadataFeature(Feature):
     """Metadata feature.
@@ -74,6 +74,7 @@ class MetadataFeature(Feature):
         init=False)
 
 
+@json
 @dataclass
 class TagFeature(Feature):
     """Tag feature.

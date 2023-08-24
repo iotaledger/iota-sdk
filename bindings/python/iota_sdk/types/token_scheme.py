@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass, field
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import HexStr, json
 
 
+@json
 @dataclass
 class TokenScheme():
     """Base class of a token scheme.
@@ -12,23 +13,24 @@ class TokenScheme():
     type: int
 
 
+@json
 @dataclass
 class SimpleTokenScheme(TokenScheme):
     """A simple token scheme.
 
     Attributes:
-        mintedTokens: The number of tokens that were minted.
-        meltedTokens: The number of tokens that were melted.
-        maximumSupply: The maximum supply of the token.
+        minted_tokens: The number of tokens that were minted.
+        melted_tokens: The number of tokens that were melted.
+        maximum_supply: The maximum supply of the token.
         type: The type code of the token scheme.
     """
-    mintedTokens: HexStr
-    meltedTokens: HexStr
-    maximumSupply: HexStr
+    minted_tokens: HexStr
+    melted_tokens: HexStr
+    maximum_supply: HexStr
     type: int = field(default_factory=lambda: 0, init=False)
 
-    def as_dict(self):
-        config = dict(self.__dict__)
+    def to_dict(self):
+        config = super().to_dict()
 
         if isinstance(config['mintedTokens'], int):
             config['mintedTokens'] = str(hex(config['mintedTokens']))

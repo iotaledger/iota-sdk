@@ -25,4 +25,4 @@ print(f"Output: {json.dumps(output.as_dict(), indent=4)}")
 account.sync()
 
 transaction = account.send_outputs([output])
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

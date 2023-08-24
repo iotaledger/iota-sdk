@@ -24,4 +24,4 @@ outputs = [SendNftParams(
 )]
 
 transaction = account.prepare_send_nft(outputs).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

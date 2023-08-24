@@ -3,14 +3,16 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
+from iota_sdk.types.common import json
 from iota_sdk.types.node_info import NodeInfoProtocol
 
 
+@json
 @dataclass
 class NetworkInfo:
     """Network and PoW related information.
     """
 
-    protocolParameters: NodeInfoProtocol
+    protocol_parameters: NodeInfoProtocol
     localPow: bool
-    tipsInterval: int
+    tips_interval: int

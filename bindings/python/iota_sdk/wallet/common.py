@@ -14,9 +14,13 @@ def _call_method_routine(func):
     def wrapper(*args, **kwargs):
         class MyEncoder(JSONEncoder):
             def default(self, obj):
+                # TODO as_dict should be replaced with to_dict
                 as_dict_method = getattr(obj, "as_dict", None)
                 if callable(as_dict_method):
                     return obj.as_dict()
+                to_dict_method = getattr(obj, "as_dict", None)
+                if callable(to_dict_method):
+                    return obj.to_dict()
                 if isinstance(obj, str):
                     return obj
                 if isinstance(obj, Enum):

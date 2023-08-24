@@ -29,7 +29,7 @@ signed_transaction_data = from_dict(
 # Sends offline signed transaction online.
 transaction = account.submit_and_store_transaction(signed_transaction_data)
 print(
-    f'Transaction sent: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transactionId}')
+    f'Transaction sent: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
