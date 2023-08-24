@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 
 use iota_sdk::{
     client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Password},
-    types::block::address::ToBech32Ext,
+    types::block::address::{Hrp, ToBech32Ext},
     wallet::{migration::migrate_db_chrysalis_to_stardust, ClientOptions, Result},
     Wallet,
 };
@@ -14,12 +14,18 @@ use crate::wallet::common::{setup, tear_down};
 
 #[tokio::test]
 async fn migrate_chrysalis_db() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
     let storage_path = "migrate_chrysalis_db/db";
     setup(storage_path)?;
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db/db", storage_path).unwrap();
+    std::fs::copy(
+        "./tests/wallet/fixtures/chrysalis-db/wallet.stronghold",
+        "migrate_chrysalis_db/wallet.stronghold",
+    )
+    .unwrap();
 
-    migrate_db_chrysalis_to_stardust("migrate_chrysalis_db".into(), None).await?;
+    migrate_db_chrysalis_to_stardust("migrate_chrysalis_db", None).await?;
 
     let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
@@ -59,32 +65,52 @@ async fn migrate_chrysalis_db() -> Result<()> {
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
-    let chrysalis_data = wallet.get_chrysalis_data().await?;
-    assert!(!chrysalis_data.unwrap().is_empty());
+    let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
+    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    assert_eq!(
+        accounts_indexation,
+        "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
+    );
 
-    // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
-    // wallet.set_stronghold_password("password".to_owned()).await?;
-    // // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
-    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup" assert_eq!(
-    //     wallet.generate_ed25519_address(0, 0, None).await?.to_bech32(Hrp::from_str_unchecked("rms")),
-    //     "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
-    // );
+    // Tests if setting stronghold password still works
+    wallet.set_stronghold_password("password".to_owned()).await?;
+    // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
+    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup"
+    assert_eq!(
+        wallet
+            .generate_ed25519_address(0, 0, None)
+            .await?
+            .to_bech32(Hrp::from_str_unchecked("rms")),
+        "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
+    );
 
     tear_down("migrate_chrysalis_db")
 }
 
 #[tokio::test]
 async fn migrate_chrysalis_db_encrypted() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
     let storage_path = "migrate_chrysalis_db_encrypted/db";
     setup(storage_path)?;
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db-encrypted/db", storage_path).unwrap();
-
-    migrate_db_chrysalis_to_stardust(
-        "migrate_chrysalis_db_encrypted".into(),
-        Some("password".to_string().into()),
+    std::fs::copy(
+        "./tests/wallet/fixtures/chrysalis-db-encrypted/wallet.stronghold",
+        "migrate_chrysalis_db_encrypted/wallet.stronghold",
     )
-    .await?;
+    .unwrap();
+
+    // error on wrong password
+    assert!(matches!(
+        migrate_db_chrysalis_to_stardust(
+            "migrate_chrysalis_db_encrypted",
+            Some("wrong-password".to_string().into()),
+        )
+        .await,
+        Err(iota_sdk::wallet::Error::Migration(err)) if err.contains("XCHACHA20-POLY1305")
+    ));
+
+    migrate_db_chrysalis_to_stardust("migrate_chrysalis_db_encrypted", Some("password".to_string().into())).await?;
 
     let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
@@ -124,16 +150,24 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
-    let chrysalis_data = wallet.get_chrysalis_data().await?;
-    assert!(!chrysalis_data.unwrap().is_empty());
+    let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
+    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    assert_eq!(
+        accounts_indexation,
+        "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
+    );
 
-    // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
-    // wallet.set_stronghold_password("password".to_owned()).await?;
-    // // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
-    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup" assert_eq!(
-    //     wallet.generate_ed25519_address(0, 0, None).await?.to_bech32(Hrp::from_str_unchecked("rms")),
-    //     "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
-    // );
+    // Tests if setting stronghold password still works
+    wallet.set_stronghold_password("password".to_owned()).await?;
+    // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
+    // hawk gift hero pool clerk hill mask man code dragon jacket dog soup"
+    assert_eq!(
+        wallet
+            .generate_ed25519_address(0, 0, None)
+            .await?
+            .to_bech32(Hrp::from_str_unchecked("rms")),
+        "rms1qqqu7qry22f6v7d2d9aesny9vjtf56unpevkfzfudddlcq5ja9clv44sef6"
+    );
 
     tear_down("migrate_chrysalis_db_encrypted")
 }
@@ -193,10 +227,17 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
         "rms1qq4c9kl7vz0yssjw02w7jda56lec4ss3anfq03gwzdxzl92hcfjz7daxdfg"
     );
 
-    let chrysalis_data = wallet.get_chrysalis_data().await?;
-    assert!(!chrysalis_data.unwrap().is_empty());
+    let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
+    // "iota-wallet-account-indexation"
+    let accounts_indexation = chrysalis_data
+        .get("0xddc058ad3b93b5a575b0051aafbc8ff17ad0415d7aa1c54d")
+        .unwrap();
+    assert_eq!(
+        accounts_indexation,
+        "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
+    );
 
-    // // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
+    // Tests if setting stronghold password still works, commented because age encryption is very slow in CI
     wallet.set_stronghold_password("password".to_owned()).await?;
     // Wallet was created with mnemonic: "extra dinosaur float same hockey cheese motor divert cry misery response
     // hawk gift hero pool clerk hill mask man code dragon jacket dog soup"

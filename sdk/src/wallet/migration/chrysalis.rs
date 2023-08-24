@@ -1,12 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::str::FromStr;
 use std::{
     collections::{HashMap, HashSet},
     convert::TryInto,
     io::Read,
     path::Path,
+    str::FromStr,
 };
 
 use crypto::{
@@ -58,8 +58,12 @@ pub(crate) struct AccountDetailsDto {
     native_token_foundries: HashMap<String, Value>,
 }
 
-pub async fn migrate_db_chrysalis_to_stardust(storage_path: String, password: Option<Password>) -> Result<()> {
-    let storage_path = Path::new(&storage_path);
+pub async fn migrate_db_chrysalis_to_stardust(
+    storage_path: impl Into<String> + Send,
+    password: Option<Password>,
+) -> Result<()> {
+    let storage_path_string = storage_path.into();
+    let storage_path = Path::new(&storage_path_string);
     // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
     let chrysalis_storage_path = &(*storage_path).join("db");
 
