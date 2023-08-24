@@ -42,7 +42,7 @@ account.sync()
 prepared_transaction = account.prepare_send(params)
 
 json_data = json.dumps(
-    prepared_transaction.prepared_transaction_data().as_dict(),
+    prepared_transaction.prepared_transaction_data().to_dict(),
     indent=4)
 print(f"example.prepared_transaction.json:\n{json_data}")
 f = open(PREPARED_TRANSACTION_FILE_PATH, "w")

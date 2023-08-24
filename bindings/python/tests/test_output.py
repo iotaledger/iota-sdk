@@ -140,7 +140,7 @@ def test_output():
         ]
     }
     alias_output = from_dict(AliasOutput, alias_output_dict)
-    assert alias_output.as_dict() == alias_output_dict
+    assert alias_output.to_dict() == alias_output_dict
 
     alias_output_dict = {
         "type": 4,
@@ -180,7 +180,7 @@ def test_output():
         ]
     }
     alias_output = from_dict(AliasOutput, alias_output_dict)
-    assert alias_output.as_dict() == alias_output_dict
+    assert alias_output.to_dict() == alias_output_dict
 
     foundry_output_dict = {
         "type": 5,
@@ -209,7 +209,7 @@ def test_output():
         ]
     }
     foundry_output = from_dict(FoundryOutput, foundry_output_dict)
-    assert foundry_output.as_dict() == foundry_output_dict
+    assert foundry_output.to_dict() == foundry_output_dict
 
     nft_output_dict = {
         "type": 6,
@@ -238,4 +238,4 @@ def test_output():
         ]
     }
     nft_output = from_dict(NftOutput, nft_output_dict)
-    assert nft_output.as_dict() == nft_output_dict
+    assert nft_output.to_dict() == nft_output_dict

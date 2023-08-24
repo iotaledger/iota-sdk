@@ -118,7 +118,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the basic outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('basicOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -133,7 +133,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the alias outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('aliasOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -158,7 +158,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the NFT outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('nftOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -183,7 +183,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the foundry outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('foundryOutputIds', {
             'queryParameters': query_parameters_camelized,

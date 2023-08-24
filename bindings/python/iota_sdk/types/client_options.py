@@ -108,6 +108,6 @@ class ClientOptions:
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'brokerOptions' in config:
-            config['brokerOptions'] = config['brokerOptions'].as_dict()
+            config['brokerOptions'] = config['brokerOptions'].to_dict()
 
         return config

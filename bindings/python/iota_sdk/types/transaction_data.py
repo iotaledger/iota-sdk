@@ -29,8 +29,8 @@ class InputSigningData:
 
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        config['output'] = config['output'].as_dict()
-        config['outputMetadata'] = config['outputMetadata'].as_dict()
+        config['output'] = config['output'].to_dict()
+        config['outputMetadata'] = config['outputMetadata'].to_dict()
         if 'chain' in config:
             config['chain'] = asdict(config['chain'])
 
@@ -53,8 +53,8 @@ class RemainderData:
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        config['output'] = config['output'].as_dict()
-        config['address'] = config['address'].as_dict()
+        config['output'] = config['output'].to_dict()
+        config['address'] = config['address'].to_dict()
         if 'chain' in config:
             config['chain'] = asdict(config['chain'])
 
@@ -77,13 +77,13 @@ class PreparedTransactionData:
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        config['essence'] = config['essence'].as_dict()
+        config['essence'] = config['essence'].to_dict()
 
         config['inputsData'] = list(map(
-            lambda x: x.as_dict(), config['inputsData']))
+            lambda x: x.to_dict(), config['inputsData']))
 
         if 'remainder' in config:
-            config['remainder'] = config['remainder'].as_dict()
+            config['remainder'] = config['remainder'].to_dict()
 
         return config
 
@@ -103,9 +103,9 @@ class SignedTransactionData:
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        config['transactionPayload'] = config['transactionPayload'].as_dict()
+        config['transactionPayload'] = config['transactionPayload'].to_dict()
 
         config['inputsData'] = list(map(
-            lambda x: x.as_dict(), config['inputsData']))
+            lambda x: x.to_dict(), config['inputsData']))
 
         return config

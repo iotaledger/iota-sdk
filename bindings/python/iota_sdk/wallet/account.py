@@ -84,7 +84,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': burn.as_dict(),
+                'burn': burn.to_dict(),
                 'options': options
             },
         )
@@ -100,7 +100,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_native_token(NativeToken(token_id, hex(burn_amount))).as_dict(),
+                'burn': Burn().add_native_token(NativeToken(token_id, hex(burn_amount))).to_dict(),
                 'options': options
             },
         )
@@ -113,7 +113,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_nft(nft_id).as_dict(),
+                'burn': Burn().add_nft(nft_id).to_dict(),
                 'options': options
             },
         )
@@ -150,7 +150,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_alias(alias_id).as_dict(),
+                'burn': Burn().add_alias(alias_id).to_dict(),
                 'options': options
             },
         )
@@ -163,7 +163,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_foundry(foundry_id).as_dict(),
+                'burn': Burn().add_foundry(foundry_id).to_dict(),
                 'options': options
             },
         )
