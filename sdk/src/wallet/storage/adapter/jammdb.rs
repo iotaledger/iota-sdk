@@ -1,11 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    fmt::Debug,
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::{fmt::Debug, path::Path, sync::Arc};
 
 use jammdb::{OpenOptions, DB};
 use tokio::sync::Mutex;
