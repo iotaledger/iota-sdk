@@ -351,13 +351,13 @@ export class Account {
     }
 
     /**
-     * Destroy an alias output.
+     * Destroy an account output.
      * @param accountId The AccountId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The transaction.
      */
-    async prepareDestroyAlias(
+    async prepareDestroyAccount(
         accountId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {

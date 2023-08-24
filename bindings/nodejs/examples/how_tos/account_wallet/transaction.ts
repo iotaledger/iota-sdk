@@ -24,7 +24,7 @@ async function run() {
         }
 
         const syncOptions = {
-            alias: {
+            account: {
                 basicOutputs: true,
             },
         };
@@ -41,19 +41,19 @@ async function run() {
 
         const totalBaseTokenBalance = balance.baseCoin.total;
         console.log(
-            `Balance before sending funds from alias: ${totalBaseTokenBalance}`,
+            `Balance before sending funds from account: ${totalBaseTokenBalance}`,
         );
 
         const accountId = balance.accounts[0];
-        console.log(`Alias Id: ${accountId}`);
+        console.log(`Account Id: ${accountId}`);
 
-        // Get Alias address
+        // Get Account address
         const accountAddress = Utils.accountIdToBech32(
             accountId,
             await (await wallet.getClient()).getBech32Hrp(),
         );
 
-        // Find first output unlockable by the alias address
+        // Find first output unlockable by the account address
         const queryParameters = [
             {
                 address: accountAddress,
@@ -85,7 +85,7 @@ async function run() {
         const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
             .baseCoin.total;
         console.log(
-            `Balance after sending funds from alias: ${totalBaseTokenBalanceAfter}`,
+            `Balance after sending funds from account: ${totalBaseTokenBalanceAfter}`,
         );
     } catch (error) {
         console.error('Error: ', error);

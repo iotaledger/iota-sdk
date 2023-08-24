@@ -47,7 +47,7 @@ export interface BaseCoinBalance {
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
-    alias: u64;
+    account: u64;
     basic: u64;
     foundry: u64;
     nft: u64;
@@ -91,11 +91,11 @@ export interface SyncOptions {
     syncPendingTransactions?: boolean;
     /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
     account?: AccountSyncOptions;
-    /** Specifies what outputs should be synced for the address of an alias output. */
-    alias?: AliasSyncOptions;
+    /** Specifies what outputs should be synced for the address of an account output. */
+    account?: AccountSyncOptions;
     /** Specifies what outputs should be synced for the address of an nft output. */
     nft?: NftSyncOptions;
-    /** Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite `account`, `alias` and `nft` options. Default: false. */
+    /** Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite `account`, `account` and `nft` options. Default: false. */
     syncOnlyMostBasicOutputs?: boolean;
     /** Sync native token foundries, so their metadata can be returned in the balance. Default: false. */
     syncNativeTokenFoundries?: boolean;
@@ -108,8 +108,8 @@ export interface AccountSyncOptions {
     nftOutputs?: boolean;
 }
 
-/** Specifies what outputs should be synced for the address of an alias output. */
-export interface AliasSyncOptions {
+/** Specifies what outputs should be synced for the address of an account output. */
+export interface AccountSyncOptions {
     basicOutputs?: boolean;
     accountOutputs?: boolean;
     nftOutputs?: boolean;

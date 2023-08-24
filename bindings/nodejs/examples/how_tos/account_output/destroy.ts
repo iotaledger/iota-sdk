@@ -9,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/account_output/destroy.ts
 
-// In this example we destroy an alias account.
+// In this example we destroy an account output.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {
@@ -36,10 +36,10 @@ async function run() {
         let balance = await account.sync();
 
         if (balance.accounts.length == 0) {
-            throw new Error(`No Alias available in account 'Alice'`);
+            throw new Error(`No Account output available in account 'Alice'`);
         }
 
-        // We try to destroy the first alias in the account
+        // We try to destroy the first account output in the account
         const accountId = balance.accounts[0];
 
         console.log(
@@ -50,11 +50,11 @@ async function run() {
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        console.log('Sending the destroy-alias transaction...');
+        console.log('Sending the destroy-account transaction...');
 
-        // Destroy an alias
+        // Destroy an account output
         const transaction = await account
-            .prepareDestroyAlias(accountId)
+            .prepareDestroyAccount(accountId)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -66,7 +66,7 @@ async function run() {
         console.log(
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
-        console.log(`Destroyed alias ${accountId}`);
+        console.log(`Destroyed account output ${accountId}`);
 
         balance = await account.sync();
         console.log(

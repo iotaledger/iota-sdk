@@ -13,7 +13,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/account_output/create.ts
 
-// In this example we create an alias output.
+// In this example we create an account output.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {
@@ -47,9 +47,9 @@ async function run() {
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        console.log('Sending the create-alias transaction...');
+        console.log('Sending the create-account transaction...');
 
-        // Create an alias
+        // Create an account output
         const transaction = await account
             .prepareCreateAccountOutput()
             .then((prepared) => prepared.send());

@@ -71,7 +71,7 @@ export interface MintNftParams {
     immutableMetadata?: string;
 }
 
-/** Options for the alias output creation */
+/** Options for the account output creation */
 export interface AccountOutputParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
