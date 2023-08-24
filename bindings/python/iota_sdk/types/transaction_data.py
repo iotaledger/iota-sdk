@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Optional, List
 from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput, OutputMetadata
@@ -25,18 +25,7 @@ class InputSigningData:
     output_metadata: OutputMetadata
     chain: Optional[Bip44] = None
 
-    def as_dict(self):
-
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
-
-        config['output'] = config['output'].to_dict()
-        config['outputMetadata'] = config['outputMetadata'].to_dict()
-        if 'chain' in config:
-            config['chain'] = asdict(config['chain'])
-
-        return config
-
-
+@json
 @dataclass
 class RemainderData:
     """Data for a remainder output, used for ledger nano.
@@ -50,62 +39,30 @@ class RemainderData:
     address: Ed25519Address | AliasAddress | NFTAddress
     chain: Optional[Bip44] = None
 
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        config['output'] = config['output'].to_dict()
-        config['address'] = config['address'].to_dict()
-        if 'chain' in config:
-            config['chain'] = asdict(config['chain'])
-
-        return config
-
-
+@json
 @dataclass
 class PreparedTransactionData:
     """Helper class for offline signing.
 
     Attributes:
         essence: The transaction essence.
-        inputsData: Data about the inputs which is required for signing.
+        inputs_data: Data about the inputs which is required for signing.
         remainder: Data about a remainder.
     """
     essence: RegularTransactionEssence
-    inputsData: List[InputSigningData]
+    inputs_data: List[InputSigningData]
     remainder: Optional[RemainderData] = None
 
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        config['essence'] = config['essence'].to_dict()
-
-        config['inputsData'] = list(map(
-            lambda x: x.to_dict(), config['inputsData']))
-
-        if 'remainder' in config:
-            config['remainder'] = config['remainder'].to_dict()
-
-        return config
-
-
-@dataclass_j    _
+@json
 @dataclass
 class SignedTransactionData:
     """Helper class for offline signing.
 
     Attributes:
         transaction_payload: The transaction payload.
-        inputsData: Data about the inputs consumed in the transaction.
+        inputs_data: Data about the inputs consumed in the transaction.
     """
-    transactionPayload: TransactionPayload
-    inputsData: List[InputSigningData]
-
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
-
-        config['transactionPayload'] = config['transactionPayload'].to_dict()
-
-        config['inputsData'] = list(map(
-            lambda x: x.to_dict(), config['inputsData']))
-
-        return config
+    transaction_payload: TransactionPayload
+    inputs_data: List[InputSigningData]

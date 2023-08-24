@@ -71,7 +71,7 @@ class CreateNativeTokenParams():
     foundry_metadata: Optional[str] = None
     alias_id: Optional[str] = None
 
-	@staticmethod
+    @staticmethod
     def _to_dict_custom(config):
         config['circulatingSupply'] = hex(config['circulatingSupply'])
         config['maximumSupply'] = hex(config['maximumSupply'])

@@ -4,8 +4,8 @@
 from enum import Enum
 from typing import Optional, List
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
 from iota_sdk.types.burn import Burn
+from iota_sdk.types.common import json
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
 
