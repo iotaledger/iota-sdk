@@ -114,7 +114,7 @@ impl Client {
         Ok(selected_inputs)
     }
 
-    /// Returns the local time checked with the timestamp of the latest milestone, if the difference is larger than 5
+    /// Returns the local time checked with the tangle timestamp. If the difference is larger than 5
     /// minutes an error is returned to prevent locking outputs by accident for a wrong time.
     pub async fn get_time_checked(&self) -> Result<u32> {
         let current_time = unix_timestamp_now().as_secs() as u32;

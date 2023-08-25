@@ -3,9 +3,12 @@
 
 import { Type } from 'class-transformer';
 import { PayloadDiscriminator } from '..';
-import { HexEncodedString } from '../../../utils';
+import { HexEncodedString, u64 } from '../../../utils';
+import { ContextInput, ContextInputDiscriminator } from '../../context_input';
 import { Input, InputDiscriminator } from '../../input';
+import { ManaAllotment } from '../../mana-allotment';
 import { Output, OutputDiscriminator } from '../../output';
+import { SlotIndex } from '../../slot';
 import { Payload } from '../payload';
 
 /**
@@ -16,17 +19,10 @@ enum TransactionEssenceType {
 }
 
 abstract class TransactionEssence {
-    private type: TransactionEssenceType;
+    readonly type: TransactionEssenceType;
 
     constructor(type: TransactionEssenceType) {
         this.type = type;
-    }
-
-    /**
-     * The type of essence.
-     */
-    getType(): TransactionEssenceType {
-        return this.type;
     }
 }
 
@@ -34,37 +30,55 @@ abstract class TransactionEssence {
  * RegularTransactionEssence transaction essence.
  */
 class RegularTransactionEssence extends TransactionEssence {
-    /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
-    networkId: number;
-    inputsCommitment: HexEncodedString;
+    /**
+     * The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
+     */
+    networkId: u64;
+
+    creationSlot: SlotIndex;
+
+    @Type(() => Input, {
+        discriminator: ContextInputDiscriminator,
+    })
+    contextInputs: ContextInput[];
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
-    inputs: [Input];
+    inputs: Input[];
+
+    inputsCommitment: HexEncodedString;
 
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
-    outputs: [Output];
+    outputs: Output[];
+
+    allotments: ManaAllotment[];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    payload: Payload | undefined;
+    payload?: Payload;
 
     constructor(
-        networkId: number,
+        networkId: u64,
+        creationSlot: SlotIndex,
+        contextInputs: ContextInput[],
+        inputs: Input[],
         inputsCommitment: HexEncodedString,
-        inputs: [Input],
-        outputs: [Output],
-        payload: Payload | undefined,
+        outputs: Output[],
+        allotments: ManaAllotment[],
+        payload?: Payload,
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;
-        this.inputsCommitment = inputsCommitment;
+        this.creationSlot = creationSlot;
+        this.contextInputs = contextInputs;
         this.inputs = inputs;
+        this.inputsCommitment = inputsCommitment;
         this.outputs = outputs;
+        this.allotments = allotments;
         this.payload = payload;
     }
 }
