@@ -133,16 +133,13 @@ where
         }
 
         #[cfg(feature = "storage")]
-        cfg_if::cfg_if!(
+        let storage = cfg_if::cfg_if!(
             if #[cfg(feature = "rocksdb")] {
-                let storage =
-                crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
-            }
-            else if #[cfg(feature = "jammdb")]{
-                let storage = crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?;
-            }
-            else {
-                let storage = crate::wallet::storage::adapter::memory::Memory::default();
+                crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?
+            } else if #[cfg(feature = "jammdb")] {
+                crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?
+            } else {
+                crate::wallet::storage::adapter::memory::Memory::default()
             }
         );
 
