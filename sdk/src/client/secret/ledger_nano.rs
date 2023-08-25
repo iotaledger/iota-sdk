@@ -548,7 +548,7 @@ fn merge_unlocks(
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
                 if !input_address.is_ed25519() {
-                    return Err(Error::MissingInputWithEd25519Address)?;
+                    return Err(Error::MissingInputWithEd25519Address);
                 }
 
                 let unlock = unlocks.next().ok_or(Error::MissingInputWithEd25519Address)?;
