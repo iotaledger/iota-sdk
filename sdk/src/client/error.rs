@@ -128,15 +128,13 @@ pub enum Error {
     /// Tokio task join error
     #[error("{0}")]
     TaskJoin(#[from] tokio::task::JoinError),
-    /// Local time doesn't match the time of the latest milestone timestamp
-    #[error(
-        "local time {current_time} doesn't match the time of the latest milestone timestamp: {milestone_timestamp}"
-    )]
+    /// Local time doesn't match the network time
+    #[error("local time {current_time} doesn't match the tangle time: {tangle_time}")]
     TimeNotSynced {
         /// The local time.
         current_time: u32,
-        /// The timestamp of the latest milestone.
-        milestone_timestamp: u32,
+        /// The tangle time.
+        tangle_time: u32,
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
