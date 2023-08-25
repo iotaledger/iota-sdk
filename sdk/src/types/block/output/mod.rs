@@ -28,7 +28,6 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
-use alloc::string::ToString;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
@@ -68,10 +67,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
-use crate::types::{
-    block::{address::Address, semantic::ValidationContext, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, semantic::ValidationContext, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -501,8 +497,12 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
-    use alloc::{format, string::String};
+    use alloc::{
+        format,
+        string::{String, ToString},
+    };
 
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
@@ -516,10 +516,9 @@ pub mod dto {
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
-    #[derive(Clone, Debug, From)]
-    #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
+    #[derive(Clone, Debug, From, Deserialize)]
     pub enum OutputBuilderAmountDto {
         Amount(String),
         MinimumStorageDeposit(RentStructure),

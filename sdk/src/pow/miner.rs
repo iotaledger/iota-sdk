@@ -81,7 +81,7 @@ impl MinerBuilder {
     pub fn finish(self) -> Miner {
         Miner {
             num_workers: self.num_workers.unwrap_or_else(num_cpus::get),
-            cancel: self.cancel.unwrap_or_else(MinerCancel::new),
+            cancel: self.cancel.unwrap_or_default(),
         }
     }
 }
