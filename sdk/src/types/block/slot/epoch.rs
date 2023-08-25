@@ -51,7 +51,7 @@ impl EpochIndex {
                     break;
                 }
             }
-            res = *start_epoch + (slot_index >> exponent) + 1;
+            res = *start_epoch + (slot_index >> exponent);
             last = Some((*start_epoch, exponent));
         }
         // TODO: Or do we need to add one here?
