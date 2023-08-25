@@ -34,13 +34,5 @@ impl Default for StorageKind {
                 return Self::Memory;
             }
         );
-        // #[cfg(feature = "rocksdb")]
-        // return #[cfg(feature = "jammdb")]
-        // #[cfg(not(feature = "rocksdb"))]
-        // return Self::Jammdb;
-        // #[cfg(target_family = "wasm")]
-        // return Self::Wasm;
-        // #[cfg(not(any(feature = "rocksdb", target_family = "wasm", feature = "jammdb")))]
-        // Self::Memory
     }
 }
