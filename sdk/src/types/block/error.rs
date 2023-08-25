@@ -1,10 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{
-    boxed::Box,
-    string::{FromUtf8Error, String},
-};
+use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
 use crypto::Error as CryptoError;
