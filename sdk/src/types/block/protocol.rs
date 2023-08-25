@@ -75,7 +75,7 @@ pub struct ProtocolParameters {
     pub(crate) max_committable_age: SlotIndex,
     /// TODO
     pub(crate) epoch_nearing_threshold: SlotIndex,
-    /// Parameters used by to calculate the Reference Mana Cost (RMC).
+    /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// TODO
     pub(crate) version_signaling: VersionSignalingParameters,
