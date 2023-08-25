@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Account::prepareBurn()` return type;
+- `Wallet::restoreBackup()` when no secret manager data is stored inside;
 
 ## 1.0.5 - 2023-08-18
 

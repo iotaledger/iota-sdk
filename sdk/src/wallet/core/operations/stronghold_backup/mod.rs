@@ -140,6 +140,10 @@ impl Wallet {
                 stronghold.set_password(stronghold_password).await?;
             }
             *secret_manager = restored_secret_manager;
+        } else {
+            // If no secret manager data was in the backup, just copy the Stronghold file so the seed is available in
+            // the new location
+            fs::copy(backup_path, new_snapshot_path)?;
         }
 
         // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
