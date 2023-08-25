@@ -125,7 +125,7 @@ impl Packable for RentStructure {
 /// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
 pub trait Rent {
     /// Computes the byte offset given a [`RentStructure`].
-    fn byte_offset(&self, rent_structure: &RentStructure) -> u32 {
+    fn byte_offset(&self, rent_structure: RentStructure) -> u32 {
         // The ID of the output.
         size_of::<OutputId>() as u32 * rent_structure.v_byte_factor_key as u32
         // The ID of the block in which the transaction payload that created this output was included.
@@ -137,17 +137,17 @@ pub trait Rent {
     }
 
     /// Different fields in a type lead to different storage requirements for the ledger state.
-    fn weighted_bytes(&self, config: &RentStructure) -> u64;
+    fn weighted_bytes(&self, config: RentStructure) -> u64;
 
     /// Computes the rent cost given a [`RentStructure`].
-    fn rent_cost(&self, rent_structure: &RentStructure) -> u64 {
+    fn rent_cost(&self, rent_structure: RentStructure) -> u64 {
         rent_structure.v_byte_cost as u64
             * (self.weighted_bytes(rent_structure) + self.byte_offset(rent_structure) as u64)
     }
 }
 
 impl<T: Rent, const N: usize> Rent for [T; N] {
-    fn weighted_bytes(&self, config: &RentStructure) -> u64 {
+    fn weighted_bytes(&self, config: RentStructure) -> u64 {
         self.iter().map(|elem| elem.weighted_bytes(config)).sum()
     }
 }
@@ -196,6 +196,6 @@ impl MinimumStorageDepositBasicOutput {
     }
 
     pub fn finish(self) -> Result<u64, Error> {
-        Ok(self.builder.finish_output(self.token_supply)?.rent_cost(&self.config))
+        Ok(self.builder.finish_output(self.token_supply)?.rent_cost(self.config))
     }
 }

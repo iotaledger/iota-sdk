@@ -171,7 +171,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.rent_cost(&rent_structure);
+            available_base_coin += existing_nft_output_data.output.rent_cost(rent_structure);
         }
 
         if final_amount > available_base_coin {

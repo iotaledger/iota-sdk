@@ -99,12 +99,12 @@ mod test {
     fn epoch_index_from_slot() {
         let v3_params = ProtocolParameters {
             version: 3,
-            slots_per_epoch_exponent: Some(10),
+            slots_per_epoch_exponent: 10,
             ..Default::default()
         };
         let v4_params = ProtocolParameters {
             version: 4,
-            slots_per_epoch_exponent: Some(11),
+            slots_per_epoch_exponent: 11,
             ..Default::default()
         };
         let params = [(EpochIndex(0), v3_params.clone()), (EpochIndex(10), v4_params)];
@@ -125,17 +125,17 @@ mod test {
     fn invalid_params() {
         let v3_params = ProtocolParameters {
             version: 3,
-            slots_per_epoch_exponent: Some(10),
+            slots_per_epoch_exponent: 10,
             ..Default::default()
         };
         let v4_params = ProtocolParameters {
             version: 4,
-            slots_per_epoch_exponent: Some(11),
+            slots_per_epoch_exponent: 11,
             ..Default::default()
         };
         let v5_params = ProtocolParameters {
             version: 5,
-            slots_per_epoch_exponent: Some(12),
+            slots_per_epoch_exponent: 12,
             ..Default::default()
         };
         let slot_index = SlotIndex::new(100000);

@@ -11,14 +11,11 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{address::Hrp, slot::SlotIndex};
-use crate::types::block::{
-    error::UnpackPrefixOptionErrorExt, helper::network_name_to_id, output::RentStructure, ConvertTo, Error,
-    PROTOCOL_VERSION,
+use super::{
+    address::Hrp,
+    slot::{EpochIndex, SlotIndex},
 };
-
-// TODO: The API spec lists this field as optional, but is it really? And if so, what would the default be?
-pub const DEFAULT_SLOTS_PER_EPOCH_EXPONENT: u32 = 10;
+use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -28,9 +25,9 @@ pub const DEFAULT_SLOTS_PER_EPOCH_EXPONENT: u32 = 10;
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[getset(get_copy = "pub")]
 pub struct ProtocolParameters {
     // The version of the protocol running.
-    #[getset(get_copy = "pub")]
     pub(crate) version: u8,
     // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
@@ -38,66 +35,35 @@ pub struct ProtocolParameters {
     #[getset(skip)]
     pub(crate) network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
-    #[getset(get_copy = "pub")]
     pub(crate) bech32_hrp: Hrp,
     // The rent structure used by given node/network.
-    #[getset(get = "pub")]
     pub(crate) rent_structure: RentStructure,
     // The work score structure used by the node/network.
-    #[getset(get = "pub")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub(crate) work_score_structure: Option<WorkScoreStructure>,
+    pub(crate) work_score_structure: WorkScoreStructure,
     // TokenSupply defines the current token supply on the network.
     #[serde(with = "crate::utils::serde::string")]
-    #[getset(get_copy = "pub")]
     pub(crate) token_supply: u64,
     // Genesis timestamp at which the slots start to count.
     #[serde(with = "crate::utils::serde::string")]
-    #[getset(get_copy = "pub")]
     pub(crate) genesis_unix_timestamp: u32,
     // Duration of each slot in seconds.
-    #[getset(get_copy = "pub")]
     pub(crate) slot_duration_in_seconds: u8,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) slots_per_epoch_exponent: u32,
+    pub(crate) mana_generation_rate: u32,
+    pub(crate) mana_generation_rate_exponent: u32,
+    #[packable(unpack_error_with = |_| Error::InvalidManaDecayFactors)]
     #[getset(skip)]
-    pub(crate) slots_per_epoch_exponent: Option<u32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) mana_generation_rate: Option<u32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) mana_generation_rate_exponent: Option<u32>,
-    #[packable(unpack_error_with = |err| Error::InvalidManaDecayFactors(err.into_opt_error()))]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(skip)]
-    pub(crate) mana_decay_factors: Option<BoxedSlicePrefix<u32, u8>>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) mana_decay_factors_exponent: Option<u32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) mana_decay_factor_epochs_sum: Option<u32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) mana_decay_factor_epochs_sum_exponent: Option<u32>,
-    #[serde(
-        default,
-        skip_serializing_if = "Option::is_none",
-        with = "crate::utils::serde::option_string"
-    )]
-    #[getset(get_copy = "pub")]
-    pub(crate) staking_unbonding_period: Option<u32>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) eviction_age: Option<SlotIndex>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get_copy = "pub")]
-    pub(crate) liveness_threshold: Option<SlotIndex>,
-    #[getset(get_copy = "pub")]
+    pub(crate) mana_decay_factors: BoxedSlicePrefix<u32, u8>,
+    pub(crate) mana_decay_factors_exponent: u32,
+    pub(crate) mana_decay_factor_epochs_sum: u32,
+    pub(crate) mana_decay_factor_epochs_sum_exponent: u32,
+    pub(crate) staking_unbonding_period: EpochIndex,
+    pub(crate) liveness_threshold: SlotIndex,
+    pub(crate) min_committable_age: SlotIndex,
+    pub(crate) max_committable_age: SlotIndex,
     pub(crate) epoch_nearing_threshold: SlotIndex,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[getset(get = "pub")]
-    pub(crate) version_signaling: Option<VersionSignalingParameters>,
+    pub(crate) congestion_control_parameters: CongestionControlParameters,
+    pub(crate) version_signaling: VersionSignalingParameters,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -127,9 +93,11 @@ impl Default for ProtocolParameters {
             mana_decay_factors_exponent: Default::default(),
             mana_decay_factor_epochs_sum: Default::default(),
             mana_decay_factor_epochs_sum_exponent: Default::default(),
-            staking_unbonding_period: Default::default(),
-            eviction_age: Default::default(),
-            liveness_threshold: Default::default(),
+            staking_unbonding_period: 10.into(),
+            liveness_threshold: 5.into(),
+            min_committable_age: 10.into(),
+            max_committable_age: 20.into(),
+            congestion_control_parameters: Default::default(),
             version_signaling: Default::default(),
         }
     }
@@ -172,19 +140,13 @@ impl ProtocolParameters {
     }
 
     /// Returns the mana decay factors slice of the [`ProtocolParameters`].
-    pub fn mana_decay_factors(&self) -> Option<&[u32]> {
-        self.mana_decay_factors.as_ref().map(|slice| slice.as_ref())
+    pub fn mana_decay_factors(&self) -> &[u32] {
+        &self.mana_decay_factors
     }
 
     /// Returns the slots per epoch of the [`ProtocolParameters`].
     pub fn slots_per_epoch(&self) -> u64 {
         2_u64.pow(self.slots_per_epoch_exponent())
-    }
-
-    /// Returns the slots per epoch exponent of the [`ProtocolParameters`].
-    pub fn slots_per_epoch_exponent(&self) -> u32 {
-        self.slots_per_epoch_exponent
-            .unwrap_or(DEFAULT_SLOTS_PER_EPOCH_EXPONENT)
     }
 
     /// Gets a [`SlotIndex`] from a unix timestamp.
@@ -202,7 +164,7 @@ impl ProtocolParameters {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -212,7 +174,7 @@ impl ProtocolParameters {
 #[getset(get_copy = "pub")]
 pub struct WorkScoreStructure {
     /// Modifier for network traffic per byte.
-    data_byte: u32,
+    data_kilobyte: u32,
     /// Modifier for work done to process a block.
     block: u32,
     /// Modifier for slashing when there are insufficient strong tips.
@@ -237,7 +199,65 @@ pub struct WorkScoreStructure {
     min_strong_parents_threshold: u32,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
+impl Default for WorkScoreStructure {
+    fn default() -> Self {
+        Self {
+            data_kilobyte: 0,
+            block: 100,
+            missing_parent: 500,
+            input: 20,
+            context_input: 20,
+            output: 20,
+            native_token: 20,
+            staking: 100,
+            block_issuer: 100,
+            allotment: 100,
+            signature_ed25519: 200,
+            min_strong_parents_threshold: 4,
+        }
+    }
+}
+
+/// Defines the parameters used to calculate the Reference Mana Cost (RMC).
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[packable(unpack_error = Error)]
+#[getset(get_copy = "pub")]
+pub struct CongestionControlParameters {
+    #[serde(with = "crate::utils::serde::string")]
+    rmc_min: u64,
+    #[serde(with = "crate::utils::serde::string")]
+    increase: u64,
+    #[serde(with = "crate::utils::serde::string")]
+    decrease: u64,
+    increase_threshold: u32,
+    decrease_threshold: u32,
+    scheduler_rate: u32,
+    #[serde(with = "crate::utils::serde::string")]
+    min_mana: u64,
+    max_buffer_size: u32,
+}
+
+impl Default for CongestionControlParameters {
+    fn default() -> Self {
+        Self {
+            rmc_min: 500,
+            increase: 500,
+            decrease: 500,
+            increase_threshold: 800000,
+            decrease_threshold: 500000,
+            scheduler_rate: 100000,
+            min_mana: 1,
+            max_buffer_size: 3276800,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -249,6 +269,16 @@ pub struct VersionSignalingParameters {
     window_size: u32,
     window_target_ratio: u32,
     activation_offset: u32,
+}
+
+impl Default for VersionSignalingParameters {
+    fn default() -> Self {
+        Self {
+            window_size: 7,
+            window_target_ratio: 5,
+            activation_offset: 7,
+        }
+    }
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.

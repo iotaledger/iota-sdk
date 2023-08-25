@@ -192,7 +192,7 @@ impl DelegationOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Delegation(output.clone()).rent_cost(&rent_structure)
+                Output::Delegation(output.clone()).rent_cost(rent_structure)
             }
         };
 
