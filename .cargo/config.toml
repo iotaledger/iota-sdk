@@ -15,3 +15,10 @@ ci-doc = "doc --all-features --no-deps --document-private-items"
 ci-fmt = "fmt --all -- --check"
 ci-toml = "sort --grouped --check"
 ci-udeps = "udeps --all-targets --all-features --backend=depinfo"
+ci-license = "license-template --template .license_template"
+
+# The ignored security advisories:
+#
+# - RUSTSEC-2021-0065: https://rustsec.org/advisories/RUSTSEC-2021-0065
+#   - anymap is unmaintained 🤷‍♀️
+ci-audit = "audit --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2021-0065"
