@@ -148,7 +148,7 @@ jobs:
           targets: riscv64gc-unknown-none-elf
 
       - name: Check
-        run: cargo ci-check-wasm
+        run: cargo ci-check-nostd
 
   types:
     name: Check types-only compilation
