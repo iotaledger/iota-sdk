@@ -112,6 +112,7 @@
     ".changes/remove-list-prefix.md",
     ".changes/required-storage-deposit.md",
     ".changes/restore-backup-bech32Hrp.md",
+    ".changes/restore-backup.md",
     ".changes/restoreBackupOptions.md",
     ".changes/retry-transaction-until-included.md",
     ".changes/revoting.md",

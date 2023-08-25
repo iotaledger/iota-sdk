@@ -1,5 +1,9 @@
 # Changelog
 
+## \[2.0.3-rc.46]
+
+- [`8e605423c`](https://github.com/iotaledger/iota-sdk/commit/8e605423ca17fb78e22f1f469be7d95a9c098147)([#1083](https://github.com/iotaledger/iota-sdk/pull/1083)) Fixed `Wallet::restoreBackup()` when no secret manager data is stored inside;
+
 ## \[2.0.3-rc.45]
 
 - [`24effd1a7`](https://github.com/iotaledger/iota-sdk/commit/24effd1a7c1d867377005ce7ad65534844081a5f)([#1029](https://github.com/iotaledger/iota-sdk/pull/1029)) Fixed `Account::prepareOutput()` when `ReturnStrategy::Gift` is used with an existing NFT output;
