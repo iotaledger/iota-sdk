@@ -16,8 +16,8 @@ use iota_sdk::{
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -110,8 +110,8 @@ async fn backup_and_restore() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold and MnemonicSecretManager
+#[tokio::test]
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -192,8 +192,8 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore_different_coin_type() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -276,8 +276,8 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore_same_coin_type() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -358,8 +358,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -528,8 +528,8 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Restore a Stronghold snapshot without secret manager data
+#[tokio::test]
 async fn restore_no_secret_manager_data() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
