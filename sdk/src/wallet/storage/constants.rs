@@ -14,13 +14,11 @@ pub(crate) const ROCKSDB_FOLDERNAME: &str = "walletdb";
 
 pub const fn default_storage_path() -> &'static str {
     cfg_if::cfg_if! {
-        if #[cfg(feature = "rocksdb")]{
+        if #[cfg(feature = "rocksdb")] {
             ROCKSDB_FOLDERNAME
-        }
-        else if #[cfg(feature = "jammdb")] {
+        } else if #[cfg(feature = "jammdb")] {
             JAMMDB_FOLDERNAME
-        }
-        else {
+        } else {
             DEFAULT_STORAGE_PATH
         }
     }
