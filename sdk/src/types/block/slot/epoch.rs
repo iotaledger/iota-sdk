@@ -28,11 +28,13 @@ impl EpochIndex {
         slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u32)>,
     ) -> Result<Self, Error> {
         let mut slot_index = *slot_index;
-        // TODO: Should this start at 1?
         let mut res = 0;
         let mut last = None;
         for (start_epoch, exponent) in slots_per_epoch_exponent_iter {
             if let Some((last_start_epoch, last_exponent)) = last {
+                if *start_epoch <= last_start_epoch {
+                    return Err(Error::InvalidStartEpoch(start_epoch));
+                }
                 // Get the number of slots this range of epochs represents
                 let slots_in_range = (*start_epoch - last_start_epoch) << last_exponent;
                 // Check whether the slot index is contained in this range
@@ -54,7 +56,6 @@ impl EpochIndex {
             res = *start_epoch + (slot_index >> exponent);
             last = Some((*start_epoch, exponent));
         }
-        // TODO: Or do we need to add one here?
         Ok(Self(res))
     }
 }
@@ -94,14 +95,60 @@ mod test {
         let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.clone());
         assert_eq!(epoch_index, Ok(EpochIndex(2)));
 
-        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.clone().skip(1));
-        assert_eq!(epoch_index, Err(Error::InvalidStartEpoch(EpochIndex(10))));
-
         let slot_index = SlotIndex::new(10 * v3_params.slots_per_epoch() + 3000);
         let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.clone());
         assert_eq!(epoch_index, Ok(EpochIndex(11)));
+    }
 
-        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter.skip(1));
+    #[test]
+    fn invalid_params() {
+        let v3_params = ProtocolParameters {
+            version: 3,
+            slots_per_epoch_exponent: Some(10),
+            ..Default::default()
+        };
+        let v4_params = ProtocolParameters {
+            version: 4,
+            slots_per_epoch_exponent: Some(11),
+            ..Default::default()
+        };
+        let v5_params = ProtocolParameters {
+            version: 5,
+            slots_per_epoch_exponent: Some(12),
+            ..Default::default()
+        };
+        let slot_index = SlotIndex::new(100000);
+
+        // Params must cover the entire history starting at epoch 0
+        let params = [(EpochIndex(10), v4_params.clone()), (EpochIndex(20), v5_params.clone())];
+        let slots_per_epoch_exponent_iter = params
+            .iter()
+            .map(|(start_index, params)| (*start_index, params.slots_per_epoch_exponent()));
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter);
+        assert_eq!(epoch_index, Err(Error::InvalidStartEpoch(EpochIndex(10))));
+
+        // Params must not contain duplicate start epochs
+        let params = [
+            (EpochIndex(0), v3_params.clone()),
+            (EpochIndex(10), v4_params.clone()),
+            (EpochIndex(10), v5_params.clone()),
+        ];
+        let slots_per_epoch_exponent_iter = params
+            .iter()
+            .map(|(start_index, params)| (*start_index, params.slots_per_epoch_exponent()));
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter);
+        assert_eq!(epoch_index, Err(Error::InvalidStartEpoch(EpochIndex(10))));
+
+        // Params must be properly ordered
+        let params = [
+            (EpochIndex(10), v4_params),
+            (EpochIndex(0), v3_params),
+            (EpochIndex(20), v5_params),
+        ];
+        let slots_per_epoch_exponent_iter = params
+            .iter()
+            .map(|(start_index, params)| (*start_index, params.slots_per_epoch_exponent()));
+        let epoch_index = EpochIndex::from_slot_index(slot_index, slots_per_epoch_exponent_iter);
         assert_eq!(epoch_index, Err(Error::InvalidStartEpoch(EpochIndex(10))));
     }
 }
