@@ -7,7 +7,10 @@ use crate::{
     client::secret::SecretManage,
     types::block::{
         address::Bech32Address,
-        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+        output::{
+            unlock_condition::{UnlockCondition, UnlockConditions},
+            FoundryId, NativeTokensBuilder, Output, Rent,
+        },
         ConvertTo,
     },
     wallet::{
@@ -89,178 +92,113 @@ where
 
                     let output = &data.output;
                     let rent = output.rent_cost(&rent_structure);
+                    let output_balance = Balance::default();
 
-                    // Add alias and foundry outputs here because they can't have a
-                    // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
+                    balance.base_coin.total += output.amount();
+
                     match output {
+                        Output::Basic(_) => {
+                            balance.required_storage_deposit.basic += rent;
+                        }
                         Output::Alias(output) => {
-                            // Add amount
-                            balance.base_coin.total += output.amount();
-                            // Add storage deposit
                             balance.required_storage_deposit.alias += rent;
-                            if !account_details.locked_outputs.contains(output_id) {
-                                total_rent_amount += rent;
-                            }
-                            // Add native tokens
-                            total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
-
-                            let alias_id = output.alias_id_non_null(output_id);
-                            balance.aliases.push(alias_id);
+                            balance.aliases.push(output.alias_id_non_null(output_id));
                         }
                         Output::Foundry(output) => {
-                            // Add amount
-                            balance.base_coin.total += output.amount();
-                            // Add storage deposit
                             balance.required_storage_deposit.foundry += rent;
-                            if !account_details.locked_outputs.contains(output_id) {
-                                total_rent_amount += rent;
-                            }
-                            // Add native tokens
-                            total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
-
                             balance.foundries.push(output.id());
                         }
-                        _ => {
-                            // If there is only an [AddressUnlockCondition], then we can spend the output at any time
-                            // without restrictions
-                            if let [UnlockCondition::Address(_)] = output
-                                .unlock_conditions()
-                                .expect("output needs to have unlock conditions")
-                                .as_ref()
-                            {
-                                // add nft_id for nft outputs
-                                if let Output::Nft(output) = &output {
-                                    let nft_id = output.nft_id_non_null(output_id);
-                                    balance.nfts.push(nft_id);
-                                }
+                        Output::Nft(output) => {
+                            balance.required_storage_deposit.nft += rent;
+                            balance.nfts.push(output.nft_id_non_null(output_id));
+                        }
+                        _ => {}
+                    }
 
-                                // Add amount
-                                balance.base_coin.total += output.amount();
+                    if output.is_basic() {
+                        // Amount for basic outputs isn't added to total_rent_amount if there aren't native tokens,
+                        // since we can spend it without burning.
+                        if output
+                            .native_tokens()
+                            .map(|native_tokens| !native_tokens.is_empty())
+                            .unwrap_or(false)
+                            && !account_details.locked_outputs.contains(output_id)
+                        {
+                            total_rent_amount += rent;
+                        }
+                    } else {
+                        if !account_details.locked_outputs.contains(output_id) {
+                            total_rent_amount += rent;
+                        }
+                    }
 
-                                // Add storage deposit
-                                if output.is_basic() {
-                                    balance.required_storage_deposit.basic += rent;
-                                    if output
-                                        .native_tokens()
-                                        .map(|native_tokens| !native_tokens.is_empty())
-                                        .unwrap_or(false)
-                                        && !account_details.locked_outputs.contains(output_id)
+                    if let Some(native_tokens) = output.native_tokens() {
+                        total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                    }
+
+                    // If there is only an [AddressUnlockCondition], then we can spend the output at any time
+                    // without restrictions
+                    if let [UnlockCondition::Address(_)] = output
+                        .unlock_conditions()
+                        .expect("output needs to have unlock conditions")
+                        .as_ref()
+                    {
+                        balance += output_balance;
+                    } else {
+                        // if we have multiple unlock conditions for basic or nft outputs, then we might can't
+                        // spend the balance at the moment or in the future
+
+                        let account_addresses = self.addresses().await?;
+                        let local_time = self.client().get_time_checked().await?;
+                        let is_claimable = self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
+
+                        // For outputs that are expired or have a timelock unlock condition, but no expiration
+                        // unlock condition and we then can unlock them, then
+                        // they can never be not available for us anymore
+                        // and should be added to the balance
+                        if is_claimable {
+                            // check if output can be unlocked always from now on, in that case it should be
+                            // added to the total amount
+                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
+                                // We use the addresses with unspent outputs, because other addresses of
+                                // the account without unspent
+                                // outputs can't be related to this output
+                                &account_details.addresses_with_unspent_outputs,
+                                output,
+                                local_time,
+                            );
+
+                            if output_can_be_unlocked_now_and_in_future {
+                                // If output has a StorageDepositReturnUnlockCondition, the amount of it should be
+                                // subtracted, because this part needs to be sent back.
+                                if let Some(sdr) = output
+                                    .unlock_conditions()
+                                    .and_then(UnlockConditions::storage_deposit_return)
+                                {
+                                    // Sending to someone else
+                                    if !account_addresses
+                                        .iter()
+                                        .any(|a| a.address.inner == *sdr.return_address())
                                     {
-                                        total_rent_amount += rent;
-                                    }
-                                } else if output.is_nft() {
-                                    balance.required_storage_deposit.nft += rent;
-                                    if !account_details.locked_outputs.contains(output_id) {
-                                        total_rent_amount += rent;
+                                        balance.base_coin.total -= sdr.amount();
                                     }
                                 }
 
-                                // Add native tokens
-                                if let Some(native_tokens) = output.native_tokens() {
-                                    total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                                balance += output_balance;
+                            } else {
+                                // only add outputs that can't be locked now and at any point in the future
+                                balance.potentially_locked_outputs.insert(*output_id, true);
+                            }
+                        } else {
+                            // Don't add expired outputs that can't ever be unlocked by us
+                            if let Some(expiration) = output.unlock_conditions().and_then(UnlockConditions::expiration)
+                            {
+                                // Not expired, could get unlockable when it's expired, so we insert it
+                                if local_time < expiration.timestamp() {
+                                    balance.potentially_locked_outputs.insert(*output_id, false);
                                 }
                             } else {
-                                // if we have multiple unlock conditions for basic or nft outputs, then we might can't
-                                // spend the balance at the moment or in the future
-
-                                let account_addresses = self.addresses().await?;
-                                let local_time = self.client().get_time_checked().await?;
-                                let is_claimable =
-                                    self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
-
-                                // For outputs that are expired or have a timelock unlock condition, but no expiration
-                                // unlock condition and we then can unlock them, then
-                                // they can never be not available for us anymore
-                                // and should be added to the balance
-                                if is_claimable {
-                                    // check if output can be unlocked always from now on, in that case it should be
-                                    // added to the total amount
-                                    let output_can_be_unlocked_now_and_in_future =
-                                        can_output_be_unlocked_forever_from_now_on(
-                                            // We use the addresses with unspent outputs, because other addresses of
-                                            // the account without unspent
-                                            // outputs can't be related to this output
-                                            &account_details.addresses_with_unspent_outputs,
-                                            output,
-                                            local_time,
-                                        );
-
-                                    if output_can_be_unlocked_now_and_in_future {
-                                        // If output has a StorageDepositReturnUnlockCondition, the amount of it should
-                                        // be subtracted, because this part
-                                        // needs to be sent back
-                                        let amount = output
-                                            .unlock_conditions()
-                                            .and_then(|u| u.storage_deposit_return())
-                                            .map_or_else(
-                                                || output.amount(),
-                                                |sdr| {
-                                                    if account_addresses
-                                                        .iter()
-                                                        .any(|a| a.address.inner == *sdr.return_address())
-                                                    {
-                                                        // sending to ourself, we get the full amount
-                                                        output.amount()
-                                                    } else {
-                                                        // Sending to someone else
-                                                        output.amount() - sdr.amount()
-                                                    }
-                                                },
-                                            );
-
-                                        // add nft_id for nft outputs
-                                        if let Output::Nft(output) = &output {
-                                            let nft_id = output.nft_id_non_null(output_id);
-                                            balance.nfts.push(nft_id);
-                                        }
-
-                                        // Add amount
-                                        balance.base_coin.total += amount;
-
-                                        // Add storage deposit
-                                        if output.is_basic() {
-                                            balance.required_storage_deposit.basic += rent;
-                                            // Amount for basic outputs isn't added to total_rent_amount if there aren't
-                                            // native tokens, since we can
-                                            // spend it without burning.
-                                            if output
-                                                .native_tokens()
-                                                .map(|native_tokens| !native_tokens.is_empty())
-                                                .unwrap_or(false)
-                                                && !account_details.locked_outputs.contains(output_id)
-                                            {
-                                                total_rent_amount += rent;
-                                            }
-                                        } else if output.is_nft() {
-                                            balance.required_storage_deposit.nft += rent;
-                                            if !account_details.locked_outputs.contains(output_id) {
-                                                total_rent_amount += rent;
-                                            }
-                                        }
-
-                                        // Add native tokens
-                                        if let Some(native_tokens) = output.native_tokens() {
-                                            total_native_tokens.add_native_tokens(native_tokens.clone())?;
-                                        }
-                                    } else {
-                                        // only add outputs that can't be locked now and at any point in the future
-                                        balance.potentially_locked_outputs.insert(*output_id, true);
-                                    }
-                                } else {
-                                    // Don't add expired outputs that can't ever be unlocked by us
-                                    if let Some(expiration) = output
-                                        .unlock_conditions()
-                                        .expect("output needs to have unlock conditions")
-                                        .expiration()
-                                    {
-                                        // Not expired, could get unlockable when it's expired, so we insert it
-                                        if local_time < expiration.timestamp() {
-                                            balance.potentially_locked_outputs.insert(*output_id, false);
-                                        }
-                                    } else {
-                                        balance.potentially_locked_outputs.insert(*output_id, false);
-                                    }
-                                }
+                                balance.potentially_locked_outputs.insert(*output_id, false);
                             }
                         }
                     }
