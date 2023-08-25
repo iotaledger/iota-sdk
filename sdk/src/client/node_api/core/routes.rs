@@ -115,6 +115,7 @@ impl ClientInner {
     /// GET /api/core/v3/rewards/{outputId}
     pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
+
         self.node_manager
             .read()
             .await
