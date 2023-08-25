@@ -133,15 +133,15 @@ where
         }
 
         #[cfg(feature = "storage")]
-        let storage = cfg_if::cfg_if!(
+        cfg_if::cfg_if!(
             if #[cfg(feature = "rocksdb")] {
-                crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?
+                let storage = crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
             } else if #[cfg(feature = "jammdb")] {
-                crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?
+                let storage = crate::wallet::storage::adapter::jammdb::JammdbStorageAdapter::new(storage_options.path.clone())?;
             } else {
-                crate::wallet::storage::adapter::memory::Memory::default()
+                let storage = crate::wallet::storage::adapter::memory::Memory::default();
             }
-        );
+        )
 
         #[cfg(feature = "storage")]
         let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
