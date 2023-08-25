@@ -142,7 +142,7 @@ impl Wallet {
             *secret_manager = restored_secret_manager;
         } else {
             // If no secret manager data was in the backup, just copy the Stronghold file so the seed is available in
-            // the new location
+            // the new location.
             fs::copy(backup_path, new_snapshot_path)?;
         }
 
