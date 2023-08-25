@@ -10,6 +10,18 @@ use crate::types::block::Error;
 /// subdivided into slots, each with a slot index.
 /// To calculate the slot index of a timestamp, `genesisUnixTimestamp` and the `slotDurationInSeconds` are needed.
 /// The slot index of timestamp `ts` is `(ts - genesisTimestamp)/duration + 1`.
+///
+/// # Examples
+///
+/// Given `slotDurationInSeconds == 10`
+///
+/// ## Slots
+///
+/// | slot<br>index | start timestamp<br>(inclusive) | end timestamp<br>(exclusive) |
+/// | :- | :------------ | :------------ |
+/// | 0  | -infinity     | genesis       |
+/// | 1  | genesis       | genesis + 10s |
+/// | 2  | genesis + 10s | genesis + 20s |
 #[derive(
     Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
 )]

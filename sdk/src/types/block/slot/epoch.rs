@@ -10,6 +10,27 @@ use crate::types::block::Error;
 /// subdivided into slots, each with a [`SlotIndex`].
 /// To calculate the epoch index of a timestamp, `slotsPerEpochExponent` and `slotDurationInSeconds` are needed.
 /// An epoch consists of `2^slotsPerEpochExponent` slots.
+///
+/// # Examples
+///
+/// Given `slotDurationInSeconds == 10` and `slotsPerEpochExponent == 3`
+///
+/// ## Slots
+///
+/// | slot<br>index | start timestamp<br>(inclusive) | end timestamp<br>(exclusive) |
+/// | :- | :------------ | :------------ |
+/// | 0  | -infinity     | genesis       |
+/// | 1  | genesis       | genesis + 10s |
+/// | 2  | genesis + 10s | genesis + 20s |
+///
+/// ## Epochs
+///
+/// | epoch<br>index | start slot<br>(inclusive) | end slot<br>(exclusive) |
+/// | :- | :-- | :-- |
+/// | 0  | 0   | 8   |
+/// | 1  | 8   | 16  |
+/// | 2  | 16  | 24  |
+// ...
 #[derive(
     Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
 )]

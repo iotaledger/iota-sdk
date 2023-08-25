@@ -90,7 +90,7 @@ pub struct MetricsResponse {
     #[serde(with = "crate::utils::serde::string")]
     pub confirmed_blocks_per_second: f64,
     #[serde(with = "crate::utils::serde::string")]
-    pub confirmed_rate: f64,
+    pub confirmation_rate: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
