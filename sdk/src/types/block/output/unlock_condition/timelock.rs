@@ -38,6 +38,7 @@ fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), E
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
