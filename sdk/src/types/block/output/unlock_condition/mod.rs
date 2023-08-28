@@ -29,10 +29,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::{
-    block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -55,12 +52,12 @@ pub enum UnlockCondition {
 
 impl PartialOrd for UnlockCondition {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        self.kind().partial_cmp(&other.kind())
+        Some(self.cmp(other))
     }
 }
 impl Ord for UnlockCondition {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        self.partial_cmp(other).unwrap()
+        self.kind().cmp(&other.kind())
     }
 }
 
@@ -496,6 +493,7 @@ mod test {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
@@ -510,7 +508,7 @@ pub mod dto {
         storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
     };
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum UnlockConditionDto {
