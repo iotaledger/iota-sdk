@@ -128,11 +128,9 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         .keys()
         .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
 
+    let wallet_indexation_key = key_to_chrysalis_key(b"iota-wallet-account-indexation", true);
     // check if snapshot contains chrysalis data
-    if !keys
-        .iter()
-        .any(|k| k == &key_to_chrysalis_key(b"iota-wallet-account-indexation"))
-    {
+    if !keys.iter().any(|k| k == &wallet_indexation_key) {
         return Ok(None);
     }
 

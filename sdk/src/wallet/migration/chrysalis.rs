@@ -90,7 +90,7 @@ pub async fn migrate_db_chrysalis_to_stardust(
     let mut opts = Options::default();
     opts.create_if_missing(true);
     opts.create_missing_column_families(true);
-    let stardust_db = DB::open(&opts, storage_path_string).unwrap();
+    let stardust_db = DB::open(&opts, storage_path_string)?;
 
     // store chrysalis data in a new key
     stardust_db.put(
@@ -137,23 +137,14 @@ pub(crate) fn migrate_from_chrysalis_data(
     let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
     let mut secret_manager_dto: Option<String> = None;
 
-    let account_indexation_key = if stronghold {
-        key_to_chrysalis_key(b"iota-wallet-account-indexation")
-    } else {
-        b"iota-wallet-account-indexation".to_vec()
-    };
+    let account_indexation_key = key_to_chrysalis_key(b"iota-wallet-account-indexation", stronghold);
     if let Some(account_indexation) = chrysalis_data.get(&account_indexation_key) {
         if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
             for account_key in account_keys {
-                let account_key = if stronghold {
-                    key_to_chrysalis_key(account_key["key"].as_str().expect("key must be a string").as_bytes())
-                } else {
-                    account_key["key"]
-                        .as_str()
-                        .expect("key must be a string")
-                        .as_bytes()
-                        .to_vec()
-                };
+                let account_key = key_to_chrysalis_key(
+                    account_key["key"].as_str().expect("key must be a string").as_bytes(),
+                    stronghold,
+                );
 
                 if let Some(account_data) = chrysalis_data.get(&account_key) {
                     let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
@@ -245,10 +236,14 @@ fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>)
         let value = if let Some(encryption_key) = &encryption_key {
             let value_utf8 = String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
             // "iota-wallet-key-checksum_value" is never an encrypted value
-            if serde_json::from_str::<Vec<u8>>(&value_utf8).is_ok() && key_utf8 != "iota-wallet-key-checksum_value" {
-                decrypt_record(&value_utf8, encryption_key)?
-            } else {
+            if key_utf8 == "iota-wallet-key-checksum_value" {
                 value_utf8
+            } else {
+                if let Ok(value) = serde_json::from_str::<Vec<u8>>(&value_utf8) {
+                    decrypt_record(value, encryption_key)?
+                } else {
+                    value_utf8
+                }
             }
         } else {
             String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
@@ -272,9 +267,8 @@ fn storage_password_to_encryption_key(password: Password) -> Zeroizing<[u8; 32]>
     Zeroizing::new(key)
 }
 
-fn decrypt_record(record: &str, encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
-    let record: Vec<u8> = serde_json::from_str(record)?;
-    let mut record: &[u8] = &record;
+fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
+    let mut record: &[u8] = &record_bytes;
 
     let mut nonce = [0; XChaCha20Poly1305::NONCE_LENGTH];
     record.read_exact(&mut nonce)?;
@@ -300,11 +294,16 @@ fn decrypt_record(record: &str, encryption_key: &[u8; 32]) -> crate::wallet::Res
     Ok(String::from_utf8_lossy(&pt).to_string())
 }
 
-pub(crate) fn key_to_chrysalis_key(key: &[u8]) -> Vec<u8> {
-    let mut buf = [0; 64];
-    HMAC_SHA512(key, key, &mut buf);
+pub(crate) fn key_to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
+    // key only needs to be hashed for stronghold
+    if stronghold {
+        let mut buf = [0; 64];
+        HMAC_SHA512(key, key, &mut buf);
 
-    let (id, _) = buf.split_at(24);
+        let (id, _) = buf.split_at(24);
 
-    id.try_into().unwrap()
+        id.try_into().unwrap()
+    } else {
+        key.into()
+    }
 }
