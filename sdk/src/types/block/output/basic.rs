@@ -33,7 +33,7 @@ use crate::types::{
 #[derive(Clone)]
 #[must_use]
 pub struct BasicOutputBuilder {
-    pub(crate) amount: OutputBuilderAmount,
+    amount: OutputBuilderAmount,
     mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     unlock_conditions: BTreeSet<UnlockCondition>,
