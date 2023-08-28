@@ -15,9 +15,9 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse,
-            PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
-            AccountStakingResponse, ValidatorsResponse,
+            AccountStakingResponse, BlockMetadataResponse, CongestionResponse, InfoResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
+            UtxoChangesResponse, ValidatorsResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
