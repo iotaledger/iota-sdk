@@ -1,8 +1,10 @@
-from iota_sdk import Wallet, Utils, utf8_to_hex, MintNftParams
-from dotenv import load_dotenv
+import json
 import os
 import sys
-import json
+
+from dotenv import load_dotenv
+
+from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex
 
 load_dotenv()
 
@@ -34,7 +36,8 @@ bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
 
 
-def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
+def get_immutable_metadata(index: int, collection_id: str) -> str:
+    """Returns the immutable metadata for the NFT with the given index"""
     data = {
         "standard": "IRC27",
         "version": "v1.0",
@@ -43,7 +46,7 @@ def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
         "name": "Shimmer OG NFT #" + str(index),
         "description": "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
         "issuerName": "IOTA Foundation",
-        "collectionId": issuer_nft_id,
+        "collectionId": collection_id,
         "collectionName": "Shimmer OG"
     }
     return json.dumps(data, separators=(',', ':'))

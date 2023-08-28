@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, utf8_to_hex, MintNftParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import MintNftParams, Wallet, utf8_to_hex
 
 load_dotenv()
 

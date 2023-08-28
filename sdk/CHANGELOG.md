@@ -31,6 +31,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bump `iota_stronghold` dependency to `2.0.0`;
+## 1.1.0 - 2023-MM-DD
+
+### Added
+
+- `Wallet::get_or_create_account` convenience method;
+- `Output::kind_str()` method;
+- `ConflictReason` display implementation with an explanation of the conflict;
+
+### Changed
+
+- `StrongholdAdapterBuilder` updated to be slightly more ergonomic;
+- `Wallet::{set_stronghold_password, change_stronghold_password, set_stronghold_password_clear_interval, store_mnemonic}` return an `Err` instead of `Ok` in case of a non-stronghold secret manager; 
 
 ## 1.0.1 - 2023-07-25
 

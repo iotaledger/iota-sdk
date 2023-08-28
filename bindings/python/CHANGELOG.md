@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Ledger Nano events properly created when preparing transactions;
 
+## 1.1.0 - 2023-MM-DD
+
+### Added
+
+- `ConflictReason` display implementation with an explanation of the conflict;
+
 ## 1.0.0 - 2023-07-24
 
 ### Added

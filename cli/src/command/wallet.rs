@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{builder::BoolishValueParser, Args, Parser, Subcommand};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -11,7 +11,7 @@ use iota_sdk::{
         stronghold::StrongholdAdapter,
         utils::Password,
     },
-    wallet::{ClientOptions, Wallet},
+    wallet::{account::types::AccountIdentifier, ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
@@ -36,7 +36,7 @@ pub struct WalletCli {
     #[arg(long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
     pub stronghold_snapshot_path: String,
     /// Set the account to enter.
-    pub account: Option<String>,
+    pub account: Option<AccountIdentifier>,
     /// Set the log level.
     #[arg(short, long, default_value = DEFAULT_LOG_LEVEL)]
     pub log_level: LevelFilter,
@@ -46,6 +46,8 @@ pub struct WalletCli {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum WalletCommand {
+    /// List all accounts.
+    Accounts,
     /// Create a stronghold backup file.
     Backup {
         /// Path of the created stronghold backup file.
@@ -61,7 +63,14 @@ pub enum WalletCommand {
         path: Option<String>,
     },
     /// Generate a random mnemonic.
-    Mnemonic,
+    Mnemonic {
+        // Output the mnemonic to the specified file.
+        #[arg(long)]
+        output_file_name: Option<String>,
+        // Output the mnemonic to the stdout.
+        #[arg(long, num_args = 0..=1, default_missing_value = Some("true"), value_parser = BoolishValueParser::new())]
+        output_stdout: Option<bool>,
+    },
     /// Create a new account.
     NewAccount {
         /// Account alias, next available account index if not provided.
@@ -105,6 +114,20 @@ impl Default for InitParameters {
             coin_type: SHIMMER_COIN_TYPE,
         }
     }
+}
+
+pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
+    let password = get_password("Stronghold password", false)?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    let accounts = wallet.get_accounts().await?;
+
+    println!("INDEX\tALIAS");
+    for account in accounts {
+        let details = &*account.details().await;
+        println!("{}\t{}", details.index(), details.alias());
+    }
+
+    Ok(())
 }
 
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
@@ -178,9 +201,8 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
     Ok(())
 }
 
-pub async fn mnemonic_command() -> Result<(), Error> {
-    generate_mnemonic().await?;
-
+pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: Option<bool>) -> Result<(), Error> {
+    generate_mnemonic(output_file_name, output_stdout).await?;
     Ok(())
 }
 
@@ -188,7 +210,7 @@ pub async fn new_account_command(
     storage_path: &Path,
     snapshot_path: &Path,
     alias: Option<String>,
-) -> Result<(Wallet, String), Error> {
+) -> Result<(Wallet, AccountIdentifier), Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
 
@@ -282,7 +304,7 @@ pub async fn unlock_wallet(
     Ok(maybe_wallet?)
 }
 
-pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
+pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<AccountIdentifier, Error> {
     let mut account_builder = wallet.create_account();
 
     if let Some(alias) = alias {
@@ -290,7 +312,7 @@ pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<Strin
     }
 
     let account = account_builder.finish().await?;
-    let alias = account.details().await.alias().to_string();
+    let alias = AccountIdentifier::Alias(account.details().await.alias().clone());
 
     println_log_info!("Created account \"{alias}\"");
 

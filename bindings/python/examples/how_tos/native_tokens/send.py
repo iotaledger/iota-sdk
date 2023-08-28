@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, SendNativeTokensParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import SendNativeTokensParams, Wallet
 
 load_dotenv()
 
