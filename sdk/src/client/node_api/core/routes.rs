@@ -91,21 +91,6 @@ impl ClientInner {
             .await
     }
 
-    /// Return the information of committee members at the given epoch index. If epoch index is not provided, the
-    /// current committee members are returned.
-    /// GET /api/core/v3/committee/?epochIndex
-    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>>) -> Result<CommitteeResponse> {
-        const PATH: &str = "api/core/v3/committee";
-
-        let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
-
-        self.node_manager
-            .read()
-            .await
-            .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
-            .await
-    }
-
     // Reward routes.
 
     /// Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
@@ -122,6 +107,21 @@ impl ClientInner {
             .read()
             .await
             .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+    /// current committee members are returned.
+    /// GET /api/core/v3/committee/?epochIndex
+    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>>) -> Result<CommitteeResponse> {
+        const PATH: &str = "api/core/v3/committee";
+
+        let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
             .await
     }
 
