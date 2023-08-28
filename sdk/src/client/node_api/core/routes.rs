@@ -91,6 +91,18 @@ impl ClientInner {
             .await
     }
 
+    /// Checks if the account is ready to issue a block.
+    /// GET /api/core/v3/accounts/{accountId}/congestion
+    pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
+        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
     // Reward routes.
 
     /// Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
@@ -404,20 +416,6 @@ impl ClientInner {
     // // RouteControlSnapshotsCreate is the control route to manually create a snapshot files.
     // // POST creates a snapshot (full, delta or both).
     // RouteControlSnapshotsCreate = "/control/snapshots/create"
-
-    // Accounts routes
-
-    /// Checks if the account is ready to issue a block.
-    /// GET /api/core/v3/accounts/{accountId}/congestion
-    pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
-        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
-
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
-    }
 }
 
 impl Client {
