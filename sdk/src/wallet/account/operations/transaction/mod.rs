@@ -73,10 +73,7 @@ where
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(
-                *protocol_parameters.rent_structure(),
-                protocol_parameters.token_supply(),
-            )?;
+            output.verify_storage_deposit(protocol_parameters.rent_structure(), protocol_parameters.token_supply())?;
         }
 
         self.finish_transaction(outputs, options).await

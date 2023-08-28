@@ -112,7 +112,7 @@ fn getters() {
         .with_payload(payload.clone())
         .sign_random();
 
-    assert_eq!(block.protocol_version(), protocol_parameters.protocol_version());
+    assert_eq!(block.protocol_version(), protocol_parameters.version());
     assert_eq!(*block.strong_parents(), parents);
     assert_eq!(*block.payload().as_ref().unwrap(), &payload);
 }
@@ -162,7 +162,7 @@ fn dto_mismatch_version() {
     assert_eq!(
         block_res,
         Err(iota_sdk::types::block::Error::ProtocolVersionMismatch {
-            expected: protocol_parameters.protocol_version(),
+            expected: protocol_parameters.version(),
             actual: protocol_version
         })
     );
