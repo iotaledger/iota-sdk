@@ -174,7 +174,7 @@ where
                     .with_native_tokens(native_tokens)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
                     .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
-                    .with_sufficient_storage_deposit(return_address, &rent_structure, token_supply)?
+                    .with_sufficient_storage_deposit(return_address, rent_structure, token_supply)?
                     .finish_output(token_supply)?,
             )
         }

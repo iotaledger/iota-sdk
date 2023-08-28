@@ -200,7 +200,7 @@ impl NftOutputBuilder {
     pub fn finish(self) -> Result<NftOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
         };
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -732,7 +732,7 @@ mod tests {
         assert!(output.immutable_features().is_empty());
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap();
@@ -797,7 +797,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            NftOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), NftId::null())
+            NftOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), NftId::null())
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(rand_address_unlock_condition())
                 .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))

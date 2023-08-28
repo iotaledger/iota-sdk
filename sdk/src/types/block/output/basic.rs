@@ -160,7 +160,7 @@ impl BasicOutputBuilder {
     pub fn with_sufficient_storage_deposit(
         self,
         return_address: impl Into<Address>,
-        rent_structure: &RentStructure,
+        rent_structure: RentStructure,
         token_supply: u64,
     ) -> Result<Self, Error> {
         Ok(match self.amount {
@@ -182,7 +182,7 @@ impl BasicOutputBuilder {
     pub fn finish(self) -> Result<BasicOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
         };
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
@@ -572,7 +572,7 @@ mod tests {
         let metadata = rand_metadata_feature();
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .with_features([Feature::from(metadata.clone()), sender_1.into()])
             .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
@@ -638,7 +638,7 @@ mod tests {
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder = BasicOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        let builder = BasicOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));

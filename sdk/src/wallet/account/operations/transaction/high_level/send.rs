@@ -170,7 +170,7 @@ where
             let output =
                 BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address));
 
-            if amount >= output.rent_cost(&rent_structure) {
+            if amount >= output.rent_cost(rent_structure) {
                 outputs.push(output.finish_output(token_supply)?)
             } else {
                 let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
@@ -180,7 +180,7 @@ where
                 // Since it does need a storage deposit, calculate how much that should be
                 let output = output
                     .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
-                    .with_sufficient_storage_deposit(return_address, &rent_structure, token_supply)?
+                    .with_sufficient_storage_deposit(return_address, rent_structure, token_supply)?
                     .finish_output(token_supply)?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {

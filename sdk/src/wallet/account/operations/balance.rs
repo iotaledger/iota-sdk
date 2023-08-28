@@ -88,7 +88,7 @@ where
                     }
 
                     let output = &data.output;
-                    let rent = output.rent_cost(&rent_structure);
+                    let rent = output.rent_cost(rent_structure);
 
                     // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions

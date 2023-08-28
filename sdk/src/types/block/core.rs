@@ -123,9 +123,9 @@ impl Packable for Block {
 
         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != protocol_params.protocol_version() {
+        if VERIFY && protocol_version != protocol_params.version() {
             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: protocol_params.protocol_version(),
+                expected: protocol_params.version(),
                 actual: protocol_version,
             }));
         }
@@ -220,7 +220,7 @@ impl<B> BlockWrapper<B> {
     /// Returns the protocol version of a [`Block`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
-        self.protocol_params.protocol_version
+        self.protocol_params.version()
     }
 
     /// Returns the protocol parameters of a [`Block`].
@@ -321,6 +321,7 @@ impl Block {
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
     #[inline(always)]
+    #[allow(clippy::too_many_arguments)]
     pub fn build_validation(
         protocol_params: ProtocolParameters,
         issuing_time: u64,
@@ -694,9 +695,9 @@ pub(crate) mod dto {
 
     impl Block {
         pub fn try_from_dto(dto: BlockDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
-            if dto.protocol_version != protocol_params.protocol_version() {
+            if dto.protocol_version != protocol_params.version() {
                 return Err(Error::ProtocolVersionMismatch {
-                    expected: protocol_params.protocol_version(),
+                    expected: protocol_params.version(),
                     actual: dto.protocol_version,
                 });
             }

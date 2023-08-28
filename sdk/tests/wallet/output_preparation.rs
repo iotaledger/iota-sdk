@@ -585,7 +585,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let balance = account.sync(None).await?;
     let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
         .add_unlock_condition(AddressUnlockCondition::new(address))
-        .rent_cost(&rent_structure);
+        .rent_cost(rent_structure);
 
     // Send away most balance so we can test with leaving dust
     let output = account

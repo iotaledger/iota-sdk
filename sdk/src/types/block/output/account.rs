@@ -261,7 +261,7 @@ impl AccountOutputBuilder {
     pub fn finish(self) -> Result<AccountOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(&rent_structure),
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
         };
         let state_index = self.state_index.unwrap_or(0);
         let foundry_counter = self.foundry_counter.unwrap_or(0);
@@ -1021,7 +1021,7 @@ mod tests {
         let metadata = rand_metadata_feature();
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
                 &account_id,
             ))
@@ -1105,7 +1105,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id)
+            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(gov_address)
                 .add_unlock_condition(state_address)

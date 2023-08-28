@@ -119,8 +119,8 @@ pub trait Rent {
     /// Different fields in a type lead to different storage requirements for the ledger state.
     fn build_weighted_bytes(&self, builder: &mut RentBuilder);
 
-    fn weighted_bytes(&self, config: &RentStructure) -> u64 {
-        let mut builder = RentBuilder::new(*config);
+    fn weighted_bytes(&self, config: RentStructure) -> u64 {
+        let mut builder = RentBuilder::new(config);
         self.build_weighted_bytes(&mut builder);
         builder.bytes
     }
@@ -150,15 +150,15 @@ impl_rent_via_iter!(alloc::boxed::Box<[T]>);
 pub trait RentCost: Rent {
     fn build_byte_offset(builder: &mut RentBuilder);
 
-    fn byte_offset(rent_structure: &RentStructure) -> u64 {
-        let mut builder = RentBuilder::new(*rent_structure);
+    fn byte_offset(rent_structure: RentStructure) -> u64 {
+        let mut builder = RentBuilder::new(rent_structure);
         Self::build_byte_offset(&mut builder);
         builder.bytes
     }
 
     /// Computes the rent cost given a [`RentStructure`].
-    fn rent_cost(&self, rent_structure: &RentStructure) -> u64 {
-        rent_structure.byte_cost() as u64 * (self.weighted_bytes(&rent_structure) + Self::byte_offset(&rent_structure))
+    fn rent_cost(&self, rent_structure: RentStructure) -> u64 {
+        rent_structure.byte_cost() as u64 * (self.weighted_bytes(rent_structure) + Self::byte_offset(rent_structure))
     }
 }
 

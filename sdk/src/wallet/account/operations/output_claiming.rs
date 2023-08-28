@@ -301,7 +301,7 @@ where
             required_amount_for_nfts
                 + BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
                     .with_native_tokens(option_native_token.into_iter().flatten())
-                    .rent_cost(&rent_structure)
+                    .rent_cost(rent_structure)
         };
 
         let mut additional_inputs = Vec::new();
@@ -321,7 +321,7 @@ where
                 required_amount = required_amount_for_nfts
                     + BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
                         .with_native_tokens(option_native_token.into_iter().flatten())
-                        .rent_cost(&rent_structure);
+                        .rent_cost(rent_structure);
 
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {

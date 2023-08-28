@@ -52,7 +52,7 @@ pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
 
 /// Generates a random [`StakingFeature`].
 pub fn rand_staking_feature() -> StakingFeature {
-    StakingFeature::new(rand_number(), rand_number(), rand_number(), rand_number())
+    StakingFeature::new(rand_number(), rand_number(), rand_number::<u64>(), rand_number::<u64>())
 }
 
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
