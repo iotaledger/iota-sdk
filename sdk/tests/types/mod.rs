@@ -11,6 +11,7 @@ mod input;
 mod output_id;
 mod parents;
 mod payload;
+mod public_key;
 mod rent;
 mod tagged_data_payload;
 mod transaction_essence;

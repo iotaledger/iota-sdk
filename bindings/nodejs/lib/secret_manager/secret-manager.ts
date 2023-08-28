@@ -121,7 +121,8 @@ export class SecretManager {
                 chain,
             },
         });
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<Ed25519Signature>;
+        return plainToInstance(Ed25519Signature, parsed.payload);
     }
 
     /**

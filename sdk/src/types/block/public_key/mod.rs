@@ -14,7 +14,6 @@ pub use self::ed25519::Ed25519PublicKey;
 use crate::types::block::Error;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidPublicKeyKind)]
 pub enum PublicKey {
@@ -52,6 +51,7 @@ impl PublicKey {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
@@ -82,6 +82,8 @@ pub(crate) mod dto {
             }
         }
     }
+
+    impl_serde_typed_enum_dto!(PublicKey, PublicKeyDto, "public key");
 }
 
 pub(crate) type PublicKeyCount = BoundedU8<{ *PublicKeys::COUNT_RANGE.start() }, { *PublicKeys::COUNT_RANGE.end() }>;

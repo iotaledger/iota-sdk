@@ -66,15 +66,12 @@ pub(crate) mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Ed25519PublicKeyDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
         pub public_key: String,
     }
 
     impl From<&Ed25519PublicKey> for Ed25519PublicKeyDto {
         fn from(value: &Ed25519PublicKey) -> Self {
             Self {
-                kind: Ed25519PublicKey::KIND,
                 public_key: prefix_hex::encode(value.0.as_slice()),
             }
         }
