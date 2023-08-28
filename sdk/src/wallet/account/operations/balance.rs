@@ -92,25 +92,25 @@ where
 
                     let output = &data.output;
                     let rent = output.rent_cost(&rent_structure);
-                    let output_balance = Balance::default();
+                    let mut output_balance = Balance::default();
 
-                    balance.base_coin.total += output.amount();
+                    output_balance.base_coin.total += output.amount();
 
                     match output {
                         Output::Basic(_) => {
-                            balance.required_storage_deposit.basic += rent;
+                            output_balance.required_storage_deposit.basic += rent;
                         }
                         Output::Alias(output) => {
-                            balance.required_storage_deposit.alias += rent;
-                            balance.aliases.push(output.alias_id_non_null(output_id));
+                            output_balance.required_storage_deposit.alias += rent;
+                            output_balance.aliases.push(output.alias_id_non_null(output_id));
                         }
                         Output::Foundry(output) => {
-                            balance.required_storage_deposit.foundry += rent;
-                            balance.foundries.push(output.id());
+                            output_balance.required_storage_deposit.foundry += rent;
+                            output_balance.foundries.push(output.id());
                         }
                         Output::Nft(output) => {
-                            balance.required_storage_deposit.nft += rent;
-                            balance.nfts.push(output.nft_id_non_null(output_id));
+                            output_balance.required_storage_deposit.nft += rent;
+                            output_balance.nfts.push(output.nft_id_non_null(output_id));
                         }
                         _ => {}
                     }
@@ -179,7 +179,7 @@ where
                                         .iter()
                                         .any(|a| a.address.inner == *sdr.return_address())
                                     {
-                                        balance.base_coin.total -= sdr.amount();
+                                        output_balance.base_coin.total -= sdr.amount();
                                     }
                                 }
 
