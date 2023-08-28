@@ -4,6 +4,7 @@
 #[cfg(not(target_family = "wasm"))]
 use {
     crate::types::api::core::response::InfoResponse,
+    crate::types::block::PROTOCOL_VERSION,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
@@ -73,13 +74,18 @@ impl ClientInner {
             match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
-                        match network_nodes.get_mut(info.protocol.network_name()) {
+                        // Unwrap: We should always have parameters for this version. If we don't we can't recover.
+                        let network_name = info
+                            .protocol_parameters_by_version(PROTOCOL_VERSION)
+                            .expect("missing v3 protocol parameters")
+                            .parameters
+                            .network_name();
+                        match network_nodes.get_mut(network_name) {
                             Some(network_node_entry) => {
                                 network_node_entry.push((info, node.clone()));
                             }
                             None => {
-                                network_nodes
-                                    .insert(info.protocol.network_name().to_owned(), vec![(info, node.clone())]);
+                                network_nodes.insert(network_name.to_owned(), vec![(info, node.clone())]);
                             }
                         }
                     } else {
@@ -105,9 +111,13 @@ impl ClientInner {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
-                // TODO change to one of the new timestamps, which ones ?
-                // network_info.latest_milestone_timestamp = info.status.latest_milestone.timestamp;
-                network_info.protocol_parameters = info.protocol.clone();
+                network_info.tangle_time = info.status.relative_accepted_tangle_time;
+                // Unwrap: We should always have parameters for this version. If we don't we can't recover.
+                network_info.protocol_parameters = info
+                    .protocol_parameters_by_version(PROTOCOL_VERSION)
+                    .expect("missing v3 protocol parameters")
+                    .parameters
+                    .clone();
             }
 
             for (info, node_url) in nodes {
