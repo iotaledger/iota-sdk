@@ -115,19 +115,18 @@ where
                         _ => {}
                     }
 
-                    if output.is_basic() {
-                        // Amount for basic outputs isn't added to total_rent_amount if there aren't native tokens,
-                        // since we can spend it without burning.
-                        if output
-                            .native_tokens()
-                            .map(|native_tokens| !native_tokens.is_empty())
-                            .unwrap_or(false)
-                            && !account_details.locked_outputs.contains(output_id)
-                        {
-                            total_rent_amount += rent;
-                        }
-                    } else {
-                        if !account_details.locked_outputs.contains(output_id) {
+                    if !account_details.locked_outputs.contains(output_id) {
+                        if output.is_basic() {
+                            // Amount for basic outputs isn't added to total_rent_amount if there aren't native tokens,
+                            // since we can spend it without burning.
+                            if output
+                                .native_tokens()
+                                .map(|native_tokens| !native_tokens.is_empty())
+                                .unwrap_or(false)
+                            {
+                                total_rent_amount += rent;
+                            }
+                        } else {
                             total_rent_amount += rent;
                         }
                     }
