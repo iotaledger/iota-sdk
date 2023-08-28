@@ -391,7 +391,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 }
             }
 
-            output.verify_storage_deposit(*visitor.rent_structure(), visitor.token_supply())?;
+            output.verify_storage_deposit(visitor.rent_structure(), visitor.token_supply())?;
         }
     }
 

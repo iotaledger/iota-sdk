@@ -237,7 +237,7 @@ impl FoundryOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Foundry(output.clone()).rent_cost(&rent_structure)
+                Output::Foundry(output.clone()).rent_cost(rent_structure)
             }
         };
 
@@ -793,7 +793,7 @@ mod tests {
         assert!(output.immutable_features().is_empty());
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .finish_with_params(&protocol_parameters)
             .unwrap();
@@ -851,7 +851,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder = FoundryOutput::build_with_minimum_storage_deposit(
-            *protocol_parameters.rent_structure(),
+            protocol_parameters.rent_structure(),
             123,
             rand_token_scheme(),
         )

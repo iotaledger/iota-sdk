@@ -1,14 +1,14 @@
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{string::String, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
 use crate::types::block::{
     output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
     semantic::TransactionFailureReason,
-    slot::{SlotCommitment, SlotIndex},
+    slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
     BlockId,
 };
 
@@ -25,10 +25,23 @@ pub struct InfoResponse {
     pub version: String,
     pub status: StatusResponse,
     pub metrics: MetricsResponse,
-    pub supported_protocol_versions: Vec<u8>,
-    pub protocol: ProtocolParameters,
+    pub protocol_parameters: ProtocolParametersMap,
     pub base_token: BaseTokenResponse,
-    pub features: Vec<String>,
+    pub features: Box<[String]>,
+}
+
+impl InfoResponse {
+    pub fn latest_protocol_parameters(&self) -> &ProtocolParametersResponse {
+        self.protocol_parameters.latest()
+    }
+
+    pub fn protocol_parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
+        self.protocol_parameters.by_version(protocol_version)
+    }
+
+    pub fn protocol_parameters_by_epoch(&self, epoch_index: EpochIndex) -> Option<&ProtocolParametersResponse> {
+        self.protocol_parameters.by_epoch(epoch_index)
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -48,19 +61,19 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    #[serde(with = "crate::utils::serde::string")]
-    pub accepted_tangle_time: u64,
-    #[serde(with = "crate::utils::serde::string")]
-    pub relative_accepted_tangle_time: u64,
-    #[serde(with = "crate::utils::serde::string")]
-    pub confirmed_tangle_time: u64,
-    #[serde(with = "crate::utils::serde::string")]
-    pub relative_confirmed_tangle_time: u64,
-    pub latest_committed_slot: SlotIndex,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub accepted_tangle_time: Option<u64>,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub relative_accepted_tangle_time: Option<u64>,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub confirmed_tangle_time: Option<u64>,
+    #[serde(with = "crate::utils::serde::option_string")]
+    pub relative_confirmed_tangle_time: Option<u64>,
+    pub latest_commitment_id: SlotCommitmentId,
     pub latest_finalized_slot: SlotIndex,
+    pub latest_accepted_block_slot: Option<SlotIndex>,
+    pub latest_confirmed_block_slot: Option<SlotIndex>,
     pub pruning_slot: SlotIndex,
-    pub latest_accepted_block_id: BlockId,
-    pub latest_confirmed_block_id: BlockId,
 }
 
 /// Returned in [`InfoResponse`].
@@ -72,9 +85,86 @@ pub struct StatusResponse {
     serde(rename_all = "camelCase")
 )]
 pub struct MetricsResponse {
+    #[serde(with = "crate::utils::serde::string")]
     pub blocks_per_second: f64,
+    #[serde(with = "crate::utils::serde::string")]
     pub confirmed_blocks_per_second: f64,
-    pub confirmed_rate: f64,
+    #[serde(with = "crate::utils::serde::string")]
+    pub confirmation_rate: f64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ProtocolParametersResponse {
+    pub parameters: ProtocolParameters,
+    pub start_epoch: EpochIndex,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProtocolParametersMap {
+    parameters: Box<[ProtocolParametersResponse]>,
+    version_map: BTreeMap<u8, usize>,
+    epoch_map: BTreeMap<EpochIndex, usize>,
+}
+
+impl ProtocolParametersMap {
+    pub fn iter(&self) -> impl Iterator<Item = &ProtocolParametersResponse> {
+        self.parameters.iter()
+    }
+
+    pub fn latest(&self) -> &ProtocolParametersResponse {
+        &self.parameters[*self.version_map.last_key_value().unwrap().1]
+    }
+
+    pub fn by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
+        self.version_map.get(&protocol_version).map(|&i| &self.parameters[i])
+    }
+
+    pub fn by_epoch(&self, epoch_index: EpochIndex) -> Option<&ProtocolParametersResponse> {
+        self.epoch_map
+            .range(..=epoch_index)
+            .map(|(_, &i)| &self.parameters[i])
+            .last()
+    }
+}
+
+#[cfg(feature = "serde")]
+mod serde_protocol_params_response {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    use super::*;
+
+    impl Serialize for ProtocolParametersMap {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.collect_seq(self.iter())
+        }
+    }
+
+    impl<'de> Deserialize<'de> for ProtocolParametersMap {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let parameters = Box::<[ProtocolParametersResponse]>::deserialize(deserializer)?;
+            let (mut version_map, mut epoch_map) = (BTreeMap::default(), BTreeMap::default());
+            for (i, res) in parameters.iter().enumerate() {
+                version_map.insert(res.parameters.version(), i);
+                epoch_map.insert(res.start_epoch, i);
+            }
+            Ok(Self {
+                parameters,
+                version_map,
+                epoch_map,
+            })
+        }
+    }
 }
 
 /// Returned in [`InfoResponse`].
@@ -89,7 +179,7 @@ pub struct BaseTokenResponse {
     pub name: String,
     pub ticker_symbol: String,
     pub unit: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
     pub use_metric_prefix: bool,
@@ -200,13 +290,13 @@ pub enum BlockFailureReason {
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     // TODO: verify if really optional: https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_state: Option<BlockState>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tx_state: Option<TransactionState>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_failure_reason: Option<BlockFailureReason>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tx_failure_reason: Option<TransactionFailureReason>,
 }
 
@@ -308,11 +398,11 @@ pub enum Relation {
 pub struct PeerResponse {
     pub id: String,
     pub multi_addresses: Vec<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub alias: Option<String>,
     pub relation: Relation,
     pub connected: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gossip: Option<Gossip>,
 }
 
@@ -363,4 +453,23 @@ pub struct CongestionResponse {
     /// The Block Issuance Credits of the requested account.
     #[serde(with = "crate::utils::serde::string")]
     pub block_issuance_credits: u64,
+}
+
+/// Response of GET /api/core/v3/rewards/{outputId}.
+/// Returns the mana rewards of an account or delegation output.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ManaRewardsResponse {
+    /// The starting epoch index for which the mana rewards are returned.
+    pub epoch_start: u64, // TODO: replace with `EpochIndex`
+    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
+    /// included.
+    pub epoch_end: u64, // TODO: replace with `EpochIndex`
+    /// The amount of totally available rewards the requested output may claim.
+    #[serde(with = "crate::utils::serde::string")]
+    pub rewards: u64,
 }

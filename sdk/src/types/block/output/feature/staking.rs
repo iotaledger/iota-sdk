@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::types::block::slot::EpochIndex;
+
 /// Stakes coins to become eligible for committee selection, validate the network and receive Mana rewards.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
 pub struct StakingFeature {
@@ -9,9 +11,9 @@ pub struct StakingFeature {
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
     fixed_cost: u64,
     /// The epoch index in which the staking started.
-    start_epoch: u64,
+    start_epoch: EpochIndex,
     /// The epoch index in which the staking ends.
-    end_epoch: u64,
+    end_epoch: EpochIndex,
 }
 
 impl StakingFeature {
@@ -19,12 +21,17 @@ impl StakingFeature {
     pub const KIND: u8 = 5;
 
     /// Creates a new [`StakingFeature`].
-    pub fn new(staked_amount: u64, fixed_cost: u64, start_epoch: u64, end_epoch: u64) -> Self {
+    pub fn new(
+        staked_amount: u64,
+        fixed_cost: u64,
+        start_epoch: impl Into<EpochIndex>,
+        end_epoch: impl Into<EpochIndex>,
+    ) -> Self {
         Self {
             staked_amount,
             fixed_cost,
-            start_epoch,
-            end_epoch,
+            start_epoch: start_epoch.into(),
+            end_epoch: end_epoch.into(),
         }
     }
 
@@ -39,12 +46,12 @@ impl StakingFeature {
     }
 
     /// Returns the start epoch of the [`StakingFeature`].
-    pub fn start_epoch(&self) -> u64 {
+    pub fn start_epoch(&self) -> EpochIndex {
         self.start_epoch
     }
 
     /// Returns the end epoch of the [`StakingFeature`].
-    pub fn end_epoch(&self) -> u64 {
+    pub fn end_epoch(&self) -> EpochIndex {
         self.end_epoch
     }
 }
@@ -64,10 +71,8 @@ mod dto {
         staked_amount: u64,
         #[serde(with = "string")]
         fixed_cost: u64,
-        #[serde(with = "string")]
-        start_epoch: u64,
-        #[serde(with = "string")]
-        end_epoch: u64,
+        start_epoch: EpochIndex,
+        end_epoch: EpochIndex,
     }
 
     impl From<&StakingFeature> for StakingFeatureDto {
