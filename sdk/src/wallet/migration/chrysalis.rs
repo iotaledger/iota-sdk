@@ -63,14 +63,13 @@ pub async fn migrate_db_chrysalis_to_stardust(
     password: Option<Password>,
 ) -> Result<()> {
     let storage_path_string = storage_path.into();
-    let storage_path = Path::new(&storage_path_string);
     // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
-    let chrysalis_storage_path = &(*storage_path).join("db");
+    let chrysalis_storage_path = &(*storage_path_string).join("db");
 
     let chrysalis_data = get_chrysalis_data(chrysalis_storage_path, password)?;
 
     // create new accounts base on previous data
-    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, storage_path, false)?;
+    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path_string, false)?;
 
     // convert to string keys
     let chrysalis_data_with_string_keys = chrysalis_data
@@ -91,7 +90,7 @@ pub async fn migrate_db_chrysalis_to_stardust(
     let mut opts = Options::default();
     opts.create_if_missing(true);
     opts.create_missing_column_families(true);
-    let stardust_db = DB::open(&opts, storage_path).unwrap();
+    let stardust_db = DB::open(&opts, storage_path_string).unwrap();
 
     // store chrysalis data in a new key
     stardust_db.put(
@@ -236,11 +235,11 @@ pub(crate) fn migrate_from_chrysalis_data(
 
 fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>) -> Result<HashMap<Vec<u8>, String>> {
     let encryption_key = password.map(storage_password_to_encryption_key);
-    let chrysalis_db = DB::open_default(chrysalis_storage_path).unwrap();
-    // iterate over all rocksdb keys
+    let chrysalis_db = DB::open_default(chrysalis_storage_path)?;
     let mut chrysalis_data = HashMap::new();
+    // iterate over all rocksdb keys
     for item in chrysalis_db.iterator(IteratorMode::Start) {
-        let (key, value) = item.unwrap();
+        let (key, value) = item?;
 
         let key_utf8 = String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
         let value = if let Some(encryption_key) = &encryption_key {
