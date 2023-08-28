@@ -275,7 +275,7 @@ impl NetworkInfo {
     }
 
     pub fn with_tangle_time(mut self, tangle_time: u64) -> Self {
-        self.tangle_time = Some(tangle_time.into());
+        self.tangle_time = Some(tangle_time);
         self
     }
 }

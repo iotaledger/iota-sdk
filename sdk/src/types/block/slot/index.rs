@@ -43,7 +43,7 @@ impl SlotIndex {
     }
 
     /// Gets the slot index of a unix timestamp.
-    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
+    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> Self {
         (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
     }
 

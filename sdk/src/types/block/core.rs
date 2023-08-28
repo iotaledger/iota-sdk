@@ -106,7 +106,7 @@ where
 
 impl<B: Packable> BlockBuilder<B> {
     pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_params.protocol_version().pack(packer)?;
+        self.protocol_params.version().pack(packer)?;
         self.protocol_params.network_id().pack(packer)?;
         self.issuing_time.pack(packer)?;
         self.slot_commitment_id.pack(packer)?;
