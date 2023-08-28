@@ -1,6 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { SlotIndex } from "../block/slot";
+
 /**
  * Query parameter for filtering output requests
  */
@@ -84,13 +86,13 @@ interface StorageDepositReturnAddress {
 interface HasTimelock {
     hasTimelock: boolean;
 }
-/** Return outputs that are timelocked before a certain Unix timestamp. */
+/** Return outputs that are timelocked before a certain Slot index. */
 interface TimelockedBefore {
-    timelockedBefore: number;
+    timelockedBefore: SlotIndex;
 }
-/** Return outputs that are timelocked after a certain Unix timestamp. */
+/** Return outputs that are timelocked after a certain Slot index. */
 interface TimelockedAfter {
-    timelockedAfter: number;
+    timelockedAfter: SlotIndex;
 }
 
 /** Filters outputs based on the presence of expiration unlock condition. */
@@ -109,13 +111,13 @@ interface MaxNativeTokenCount {
 interface MinNativeTokenCount {
     minNativeTokenCount: number;
 }
-/** Return outputs that expire before a certain Unix timestamp. */
+/** Return outputs that expire before a certain Slot index. */
 interface ExpiresBefore {
-    expiresBefore: number;
+    expiresBefore: SlotIndex;
 }
-/** Return outputs that expire after a certain Unix timestamp. */
+/** Return outputs that expire after a certain Slot index. */
 interface ExpiresAfter {
-    expiresAfter: number;
+    expiresAfter: SlotIndex;
 }
 /** Filter outputs based on the presence of a specific Bech32-encoded return
  * address in the expiration unlock condition.
@@ -131,13 +133,13 @@ interface Sender {
 interface Tag {
     tag: string;
 }
-/** Return outputs that were created before a certain Unix timestamp. */
+/** Return outputs that were created before a certain Slot index. */
 interface CreatedBefore {
-    createdBefore: number;
+    createdBefore: SlotIndex;
 }
-/** Return outputs that were created after a certain Unix timestamp. */
+/** Return outputs that were created after a certain Slot index. */
 interface CreatedAfter {
-    createdAfter: number;
+    createdAfter: SlotIndex;
 }
 /** Pass the cursor(confirmationMS+outputId.pageSize) to start the results from */
 interface Cursor {

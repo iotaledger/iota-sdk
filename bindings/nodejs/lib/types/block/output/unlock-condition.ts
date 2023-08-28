@@ -4,6 +4,7 @@
 import { plainToInstance, Type } from 'class-transformer';
 import { u64 } from '../../utils';
 import { Address, AddressDiscriminator, AliasAddress } from '../address';
+import { SlotIndex } from '../slot';
 
 /**
  * All of the unlock condition types.
@@ -72,7 +73,7 @@ abstract class UnlockCondition {
     }
 }
 
-class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlockCondition*/ {
+class AddressUnlockCondition extends UnlockCondition {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
@@ -92,7 +93,7 @@ class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlock
 /**
  * Storage Deposit Return Unlock Condition.
  */
-class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements IStorageDepositReturnUnlockCondition*/ {
+class StorageDepositReturnUnlockCondition extends UnlockCondition {
     private amount: string;
 
     @Type(() => Address, {
@@ -124,41 +125,44 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
     }
 }
 /**
- * Timelock Unlock Condition.
+ * Defines a slot index until which the output can not be unlocked.
  */
-class TimelockUnlockCondition extends UnlockCondition /*implements ITimelockUnlockCondition*/ {
-    private unixTime: number;
+class TimelockUnlockCondition extends UnlockCondition {
+    private slotIndex: SlotIndex;
 
-    constructor(unixTime: number) {
+    constructor(slotIndex: SlotIndex) {
         super(UnlockConditionType.Timelock);
-        this.unixTime = unixTime;
+        this.slotIndex = slotIndex;
     }
     /**
-     * Unix time (seconds since Unix epoch) starting from which the output can be consumed.
+     * Slot index starting from which the output can be consumed.
      */
-    getUnixTime(): number {
-        return this.unixTime;
+    getSlotIndex(): SlotIndex {
+        return this.slotIndex;
     }
 }
-
-class ExpirationUnlockCondition extends UnlockCondition /*implements IExpirationUnlockCondition*/ {
+/**
+ * Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
+ * Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
+ */
+class ExpirationUnlockCondition extends UnlockCondition {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     private returnAddress: Address;
-    private unixTime: number;
+    private slotIndex: SlotIndex;
 
-    constructor(returnAddress: Address, unixTime: number) {
+    constructor(returnAddress: Address, slotIndex: SlotIndex) {
         super(UnlockConditionType.Expiration);
         this.returnAddress = returnAddress;
-        this.unixTime = unixTime;
+        this.slotIndex = slotIndex;
     }
     /**
-     * Before this unix time, the condition is allowed to unlock the output,
+     * Before this slot index, the condition is allowed to unlock the output,
      * after that only the address defined in return address.
      */
-    getUnixTime(): number {
-        return this.unixTime;
+    getSlotIndex(): SlotIndex {
+        return this.slotIndex;
     }
 
     /**
@@ -171,7 +175,7 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
 /**
  * State Controller Address Unlock Condition.
  */
-class StateControllerAddressUnlockCondition extends UnlockCondition /*implements IStateControllerAddressUnlockCondition*/ {
+class StateControllerAddressUnlockCondition extends UnlockCondition {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
@@ -191,7 +195,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
 /**
  * Governor Unlock Condition.
  */
-class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGovernorAddressUnlockCondition*/ {
+class GovernorAddressUnlockCondition extends UnlockCondition {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
@@ -211,7 +215,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
 /**
  * Immutable Alias Unlock Condition.
  */
-class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements IImmutableAliasAddressUnlockCondition*/ {
+class ImmutableAliasAddressUnlockCondition extends UnlockCondition {
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })

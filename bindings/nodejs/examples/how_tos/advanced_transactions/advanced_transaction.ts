@@ -3,7 +3,6 @@
 
 import {
     AddressUnlockCondition,
-    Client,
     Ed25519Address,
     TimelockUnlockCondition,
     Utils,
@@ -36,9 +35,12 @@ async function run() {
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
+        const client = await wallet.getClient();
+
         // Create an ouput with amount 1_000_000 and a timelock of 1 hour
-        const in_an_hour = Math.floor(Date.now() / 1000) + 3600;
-        const basicOutput = await new Client({}).buildBasicOutput({
+        // TODO !!!
+        const slot_index = 1000; // client.getSlotIndex() + 1
+        const basicOutput = await client.buildBasicOutput({
             unlockConditions: [
                 new AddressUnlockCondition(
                     new Ed25519Address(
@@ -47,7 +49,7 @@ async function run() {
                         ),
                     ),
                 ),
-                new TimelockUnlockCondition(in_an_hour),
+                new TimelockUnlockCondition(slot_index),
             ],
         });
 
