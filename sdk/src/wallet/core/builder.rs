@@ -141,7 +141,7 @@ where
             } else {
                 let storage = crate::wallet::storage::adapter::memory::Memory::default();
             }
-        )
+        );
 
         #[cfg(feature = "storage")]
         let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
