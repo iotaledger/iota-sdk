@@ -32,6 +32,6 @@ impl Default for StorageKind {
             } else {
                 Self::Memory
             }
-        );
+        )
     }
 }
