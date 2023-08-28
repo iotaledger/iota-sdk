@@ -5,7 +5,7 @@ use std::{
     collections::{HashMap, HashSet},
     convert::TryInto,
     io::Read,
-    path::Path,
+    path::{Path, PathBuf},
     str::FromStr,
 };
 
@@ -22,7 +22,7 @@ use crate::{
     client::{constants::IOTA_COIN_TYPE, Password},
     types::block::address::Bech32Address,
     wallet::{
-        migration::{MigrationVersion, MIGRATION_VERSION_KEY},
+        migration::{MigrationData, MIGRATION_VERSION_KEY},
         storage::constants::{
             ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY,
             WALLET_INDEXATION_KEY,
@@ -59,7 +59,7 @@ pub(crate) struct AccountDetailsDto {
 }
 
 pub async fn migrate_db_chrysalis_to_stardust(
-    storage_path: impl Into<String> + Send,
+    storage_path: impl Into<PathBuf> + Send,
     password: Option<Password>,
 ) -> Result<()> {
     let storage_path_string = storage_path.into();
@@ -118,11 +118,7 @@ pub async fn migrate_db_chrysalis_to_stardust(
     }
 
     // set db migration version
-    let migration_version = MigrationVersion {
-        id: 4,
-        sdk_version: "1.0.0-rc.0".to_string(),
-        date: time::macros::date!(2023 - 07 - 19),
-    };
+    let migration_version = crate::wallet::migration::migrate_4::Migrate::version();
     stardust_db.put(MIGRATION_VERSION_KEY, serde_json::to_string(&migration_version)?)?;
 
     drop(stardust_db);

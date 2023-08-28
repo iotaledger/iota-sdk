@@ -12,7 +12,7 @@ use crate::{
         account::{AccountDetails, AccountDetailsDto},
         migration::{
             chrysalis::{key_to_chrysalis_key, migrate_from_chrysalis_data},
-            latest_backup_migration_version, migrate, MigrationVersion, MIGRATION_VERSION_KEY,
+            latest_backup_migration_version, migrate, MigrationData, MIGRATION_VERSION_KEY,
         },
         storage::constants::{CHRYSALIS_STORAGE_KEY, WALLET_INDEXATION_KEY},
         ClientOptions, Wallet,
@@ -200,11 +200,7 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     }
 
     // set db migration version
-    let migration_version = MigrationVersion {
-        id: 4,
-        sdk_version: "1.0.0-rc.0".to_string(),
-        date: time::macros::date!(2023 - 07 - 19),
-    };
+    let migration_version = crate::wallet::migration::migrate_4::Migrate::version();
     stronghold_adapter
         .set(MIGRATION_VERSION_KEY, &migration_version)
         .await?;

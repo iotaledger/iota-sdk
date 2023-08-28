@@ -7,7 +7,7 @@ mod migrate_0;
 mod migrate_1;
 mod migrate_2;
 mod migrate_3;
-mod migrate_4;
+pub(crate) mod migrate_4;
 
 use std::collections::HashMap;
 
