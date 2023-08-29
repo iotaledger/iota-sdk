@@ -298,9 +298,9 @@ impl Default for CongestionControlParameters {
 #[getset(get_copy = "pub")]
 pub struct VersionSignalingParameters {
     /// The size of the window in epochs to find which version of protocol parameters was most signaled, from
-    /// currentEpoch - windowSize to currentEpoch.
+    /// current_epoch - window_size to current_epoch.
     window_size: u8,
-    /// The target number of supporters for a version to win in a windowSize.
+    /// The target number of supporters for a version to win in a window_size.
     window_target_ratio: u8,
     /// The offset in epochs to activate the new version of protocol parameters.
     activation_offset: u8,
