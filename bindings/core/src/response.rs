@@ -304,7 +304,6 @@ pub enum Response {
     /// Response for:
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
     SignedTransactionData(SignedTransactionDataDto),
-    /// GenerateAddress response.
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
     GeneratedAccountAddresses(Vec<Bip44Address>),
