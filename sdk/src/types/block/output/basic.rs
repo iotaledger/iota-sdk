@@ -158,15 +158,26 @@ impl BasicOutputBuilder {
 
     /// Adds a storage deposit if one is needed to cover the current amount.
     pub fn with_sufficient_storage_deposit(
-        self,
+        mut self,
         return_address: impl Into<Address>,
         rent_structure: RentStructure,
         token_supply: u64,
     ) -> Result<Self, Error> {
         Ok(match self.amount {
             OutputBuilderAmount::Amount(amount) => {
+                let return_address = return_address.into();
+                // Get the current rent requirement
                 let rent_cost = self.rent_cost(rent_structure);
+                // Check whether we already have enough funds to cover it
                 if amount < rent_cost {
+                    // Add a temporary storage deposit unlock condition so the new rent requirement can be calculated
+                    self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                        return_address,
+                        0,
+                        token_supply,
+                    )?);
+                    let rent_cost = self.rent_cost(rent_structure);
+                    // Add the required storage deposit unlock condition and the additional rent amount
                     self.with_amount(amount + rent_cost).replace_unlock_condition(
                         StorageDepositReturnUnlockCondition::new(return_address, rent_cost, token_supply)?,
                     )
