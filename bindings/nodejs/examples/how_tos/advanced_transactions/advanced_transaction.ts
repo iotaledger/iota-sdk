@@ -37,9 +37,9 @@ async function run() {
 
         const client = await wallet.getClient();
 
-        // Create an ouput with amount 1_000_000 and a timelock of 1 hour
+        // Create an output with amount 1_000_000 and a timelock of 1 hour
         // TODO !!!
-        const slot_index = BigInt(1000); // client.getSlotIndex() + 1
+        const slotIndex = BigInt(1000);
         const basicOutput = await client.buildBasicOutput({
             unlockConditions: [
                 new AddressUnlockCondition(
@@ -49,7 +49,7 @@ async function run() {
                         ),
                     ),
                 ),
-                new TimelockUnlockCondition(slot_index),
+                new TimelockUnlockCondition(slotIndex),
             ],
         });
 
