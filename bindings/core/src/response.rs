@@ -34,7 +34,7 @@ use iota_sdk::{
         },
     },
     wallet::account::{
-        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
+        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionDto},
         AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
@@ -255,7 +255,7 @@ pub enum Response {
     Accounts(Vec<AccountDetailsDto>),
     /// Response for:
     /// - [`Addresses`](crate::method::AccountMethod::Addresses)
-    Addresses(Vec<AccountAddress>),
+    Addresses(Vec<Bip44Address>),
     /// Response for:
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
@@ -307,7 +307,7 @@ pub enum Response {
     /// GenerateAddress response.
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
-    GeneratedAccountAddresses(Vec<AccountAddress>),
+    GeneratedAccountAddresses(Vec<Bip44Address>),
     /// Response for:
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)

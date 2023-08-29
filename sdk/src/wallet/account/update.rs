@@ -9,7 +9,7 @@ use crate::{
     wallet::account::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
-        Account, AccountAddress,
+        Account, Bip44Address,
     },
 };
 #[cfg(feature = "events")]
@@ -256,7 +256,7 @@ where
     pub(crate) async fn update_account_addresses(
         &self,
         internal: bool,
-        new_addresses: Vec<AccountAddress>,
+        new_addresses: Vec<Bip44Address>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[update_account_addresses]");
 

@@ -9,14 +9,14 @@ use crate::{
     client::secret::{SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address, Ed25519Address, Hrp},
     wallet::{
-        account::{types::AccountAddress, Account, AccountDetails},
+        account::{types::Bip44Address, Account, AccountDetails},
         Error, Wallet,
     },
 };
 
 /// The AccountBuilder
 pub struct AccountBuilder<S: SecretManage = SecretManager> {
-    addresses: Option<Vec<AccountAddress>>,
+    addresses: Option<Vec<Bip44Address>>,
     alias: Option<String>,
     bech32_hrp: Option<Hrp>,
     wallet: Wallet<S>,
@@ -38,7 +38,7 @@ where
 
     /// Set the addresses, should only be used for accounts with an offline counterpart account from which the addresses
     /// were exported
-    pub fn with_addresses(mut self, addresses: impl Into<Option<Vec<AccountAddress>>>) -> Self {
+    pub fn with_addresses(mut self, addresses: impl Into<Option<Vec<Bip44Address>>>) -> Self {
         self.addresses = addresses.into();
         self
     }
@@ -125,7 +125,7 @@ where
                 let first_public_address =
                     get_first_public_address(&self.wallet.secret_manager, coin_type, account_index).await?;
 
-                let first_public_account_address = AccountAddress {
+                let first_public_account_address = Bip44Address {
                     address: Bech32Address::new(bech32_hrp, first_public_address),
                     key_index: 0,
                     internal: false,

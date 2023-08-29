@@ -11,11 +11,11 @@ use crate::types::{
     block::{address::Bech32Address, output::OutputId, ConvertTo},
 };
 
-/// An account address.
+/// A BIP44 address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
-pub struct AccountAddress {
+pub struct Bip44Address {
     /// The address.
     pub(crate) address: Bech32Address,
     /// The address key index.
@@ -29,13 +29,13 @@ pub struct AccountAddress {
     pub(crate) used: bool,
 }
 
-impl AccountAddress {
+impl Bip44Address {
     pub fn into_bech32(self) -> Bech32Address {
         self.address
     }
 }
 
-impl ConvertTo<Bech32Address> for AccountAddress {
+impl ConvertTo<Bech32Address> for Bip44Address {
     fn convert(self) -> Result<Bech32Address, types::block::Error> {
         Ok(self.address)
     }

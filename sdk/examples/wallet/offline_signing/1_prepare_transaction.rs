@@ -14,7 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::SecretManager,
     },
-    wallet::{account::types::AccountAddress, ClientOptions, Result, SendParams, Wallet},
+    wallet::{account::types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_addresses_from_file() -> Result<Vec<AccountAddress>> {
+async fn read_addresses_from_file() -> Result<Vec<Bip44Address>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESSES_FILE_PATH).await?);

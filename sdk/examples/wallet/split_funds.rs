@@ -17,7 +17,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
+    wallet::{account::types::Bip44Address, Account, ClientOptions, Result, Wallet},
 };
 
 // The base coin amount to send
@@ -127,7 +127,7 @@ async fn sync_print_balance(account: &Account) -> Result<()> {
     Ok(())
 }
 
-async fn ensure_enough_addresses(account: &Account, limit: usize) -> Result<Vec<AccountAddress>> {
+async fn ensure_enough_addresses(account: &Account, limit: usize) -> Result<Vec<Bip44Address>> {
     let alias = account.alias().await;
     if account.addresses().await?.len() < limit {
         let num_addresses_to_generate = limit - account.addresses().await?.len();
