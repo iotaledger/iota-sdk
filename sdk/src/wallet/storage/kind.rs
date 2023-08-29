@@ -22,16 +22,16 @@ pub enum StorageKind {
 
 impl Default for StorageKind {
     fn default() -> Self {
-        cfg_if::cfg_if!(
+        cfg_if::cfg_if! {
             if #[cfg(feature = "rocksdb")] {
                 Self::Rocksdb
             } else if #[cfg(feature = "jammdb")] {
-                Self::Jammdb
+                Self::Jammdb;
             } else if #[cfg(target_family = "wasm")] {
-                Self::Wasm
+                Self::Wasm;
             } else {
                 Self::Memory
             }
-        )
+        }
     }
 }
