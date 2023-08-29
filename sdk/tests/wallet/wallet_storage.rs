@@ -330,7 +330,6 @@ async fn check_existing_db_5() -> Result<()> {
     // Commented because it wasn't created with encrypt_work_factor 0
     // wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
 
-    // TODO: Supposed to be 2 or was that a mistake?
     assert_eq!(wallet.get_accounts().await?.len(), 1);
 
     let client_options = wallet.client_options().await;
