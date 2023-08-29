@@ -12,7 +12,7 @@ use iota_sdk::{
     types::block::address::Hrp,
     wallet::{
         account::{
-            types::{AccountAddress, AccountIdentifier},
+            types::{AccountIdentifier, Bip44Address},
             SyncOptions,
         },
         ClientOptions,
@@ -39,8 +39,8 @@ pub enum WalletMethod {
         alias: Option<String>,
         /// The bech32 HRP.
         bech32_hrp: Option<Hrp>,
-        /// Account addresses.
-        addresses: Option<Vec<AccountAddress>>,
+        /// BIP44 addresses.
+        addresses: Option<Vec<Bip44Address>>,
     },
     /// Read account.
     /// Expected response: [`Account`](crate::Response::Account)
