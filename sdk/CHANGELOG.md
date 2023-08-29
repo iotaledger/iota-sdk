@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_or_create_account` convenience method;
 - `Output::kind_str()` method;
 - `ConflictReason` display implementation with an explanation of the conflict;
+- `TokenScheme` methods `is_simple` and `as_simple`;
 
 ### Changed
 

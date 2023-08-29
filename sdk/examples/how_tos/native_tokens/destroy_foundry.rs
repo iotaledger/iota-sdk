@@ -45,13 +45,14 @@ async fn main() -> Result<()> {
             .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        // Check if all tokens are melted.
+        // Find the native tokens balance for this foundry if one exists.
         let native_tokens: Option<&NativeTokensBalance> = balance
             .native_tokens()
             .iter()
             .find(|native_token| *native_token.token_id() == token_id);
         if let Some(native_token) = native_tokens {
             let output = account.get_foundry_output(token_id).await?;
+            // Check if all tokens are melted.
             if native_token.available() != output.as_foundry().token_scheme().as_simple().circulating_supply() {
                 // We are not able to melt all tokens, because we dont own them or they are not unlocked.
                 println!("We dont own all remaining tokens, aborting foundry destruction.");
@@ -74,7 +75,7 @@ async fn main() -> Result<()> {
                 block_id
             );
 
-            // Update account so input selection works instead of throwing `UnfulfillableRequirement`.
+            // Sync to make the foundry output available again, because it was used in the melting transaction.
             account.sync(None).await?;
         }
         println!("Destroying foundry..");
