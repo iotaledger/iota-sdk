@@ -39,7 +39,7 @@ async function run() {
 
         // Create an ouput with amount 1_000_000 and a timelock of 1 hour
         // TODO !!!
-        const slot_index = 1000; // client.getSlotIndex() + 1
+        const slot_index = BigInt(1000); // client.getSlotIndex() + 1
         const basicOutput = await client.buildBasicOutput({
             unlockConditions: [
                 new AddressUnlockCondition(
