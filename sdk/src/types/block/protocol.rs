@@ -74,7 +74,7 @@ pub struct ProtocolParameters {
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
     /// time.
     pub(crate) max_committable_age: SlotIndex,
-    /// Epoch Nearing Threshold is used by the epoch orchestrator to detect the slot that should trigger a new
+    /// The slot index used by the epoch orchestrator to detect the slot that should trigger a new
     /// committee selection for the next and upcoming epoch.
     pub(crate) epoch_nearing_threshold: SlotIndex,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
