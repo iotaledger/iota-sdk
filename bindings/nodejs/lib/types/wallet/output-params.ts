@@ -1,6 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { SlotIndex } from '../block/slot';
 import { INativeToken } from '../models';
 import { u64 } from '../utils';
 import { HexEncodedString } from '../utils/hex-encoding';
@@ -31,8 +32,8 @@ export interface Features {
 
 /** Time unlocks to include in the output */
 export interface Unlocks {
-    expirationUnixTime?: number;
-    timelockUnixTime?: number;
+    expirationSlotIndex?: SlotIndex;
+    timelockSlotIndex?: SlotIndex;
 }
 
 /** Storage deposit strategy to be used for the output */
