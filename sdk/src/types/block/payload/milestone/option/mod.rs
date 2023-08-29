@@ -15,10 +15,7 @@ pub use self::{
     parameters::ParametersMilestoneOption,
     receipt::{MigratedFundsEntry, ReceiptMilestoneOption, TailTransactionHash},
 };
-use crate::types::{
-    block::{protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+use crate::types::block::{protocol::ProtocolParameters, Error};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
@@ -166,6 +163,7 @@ fn verify_unique_sorted_packable<const VERIFY: bool>(
     verify_unique_sorted::<VERIFY>(milestone_options)
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
@@ -177,7 +175,7 @@ pub mod dto {
         receipt::dto::{MigratedFundsEntryDto, ReceiptMilestoneOptionDto},
     };
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum MilestoneOptionDto {

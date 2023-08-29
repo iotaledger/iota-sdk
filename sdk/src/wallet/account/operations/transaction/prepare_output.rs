@@ -110,7 +110,9 @@ where
         let min_storage_deposit_basic_output =
             MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
-        if params.amount > min_storage_deposit_basic_output {
+        let min_required_storage_deposit = first_output.rent_cost(&rent_structure);
+
+        if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
         }
 
@@ -121,9 +123,9 @@ where
             .return_strategy
             .unwrap_or_default();
         let remainder_address = self.get_remainder_address(transaction_options).await?;
-        if params.amount < min_storage_deposit_basic_output {
+        if params.amount < min_required_storage_deposit {
             if return_strategy == ReturnStrategy::Gift {
-                second_output_builder = second_output_builder.with_amount(min_storage_deposit_basic_output);
+                second_output_builder = second_output_builder.with_amount(min_required_storage_deposit);
             }
             if return_strategy == ReturnStrategy::Return {
                 second_output_builder =

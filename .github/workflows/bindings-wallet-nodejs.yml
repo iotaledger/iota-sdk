@@ -70,7 +70,7 @@ jobs:
           cache-root: bindings/nodejs-old
 
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
           cache: npm
