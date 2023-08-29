@@ -37,19 +37,19 @@ impl SlotIndex {
     /// Gets the [`EpochIndex`] of this slot.
     pub fn to_epoch_index(
         self,
-        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u32)>,
+        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u8)>,
     ) -> Result<EpochIndex, Error> {
         EpochIndex::from_slot_index(self, slots_per_epoch_exponent_iter)
     }
 
     /// Gets the slot index of a unix timestamp.
-    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
-        (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
+    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> SlotIndex {
+        (1 + (timestamp - genesis_unix_timestamp) / slot_duration_in_seconds as u64).into()
     }
 
     /// Converts the slot index into the corresponding unix timestamp.
-    pub fn to_timestamp(self, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> u64 {
-        ((self.0 - 1) * slot_duration_in_seconds as u64) + genesis_unix_timestamp as u64
+    pub fn to_timestamp(self, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> u64 {
+        ((self.0 - 1) * slot_duration_in_seconds as u64) + genesis_unix_timestamp
     }
 }
 
