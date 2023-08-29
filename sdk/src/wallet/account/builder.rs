@@ -129,7 +129,6 @@ where
                     address: Bech32Address::new(bech32_hrp, first_public_address),
                     key_index: 0,
                     internal: false,
-                    used: false,
                 };
 
                 vec![first_public_account_address]

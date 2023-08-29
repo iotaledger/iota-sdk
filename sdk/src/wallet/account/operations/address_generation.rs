@@ -164,7 +164,6 @@ where
                 address: Bech32Address::new(bech32_hrp, address),
                 key_index: highest_current_index_plus_one + index as u32,
                 internal: options.internal,
-                used: false,
             })
             .collect();
 

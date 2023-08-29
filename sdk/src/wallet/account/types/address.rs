@@ -24,9 +24,6 @@ pub struct Bip44Address {
     /// Determines if an address is a public or an internal (change) address.
     #[getset(set = "pub(crate)")]
     pub(crate) internal: bool,
-    // do we want this field? Could be useful if we don't store spent output ids and because of that wouldn't know if
-    // an address was used or not just by looking at it
-    pub(crate) used: bool,
 }
 
 impl Bip44Address {

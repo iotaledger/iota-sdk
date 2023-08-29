@@ -715,7 +715,6 @@ impl AccountDetails {
                 .unwrap(),
                 key_index: 0,
                 internal: false,
-                used: false,
             }],
             internal_addresses: Vec::new(),
             addresses_with_unspent_outputs: Vec::new(),
