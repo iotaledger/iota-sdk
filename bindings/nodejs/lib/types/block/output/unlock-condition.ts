@@ -20,7 +20,7 @@ enum UnlockConditionType {
 }
 
 abstract class UnlockCondition {
-    private type: UnlockConditionType;
+    readonly type: UnlockConditionType;
 
     constructor(type: UnlockConditionType) {
         this.type = type;
@@ -74,20 +74,16 @@ abstract class UnlockCondition {
 }
 
 class AddressUnlockCondition extends UnlockCondition {
-    @Type(() => Address, {
-        discriminator: AddressDiscriminator,
-    })
-    private address: Address;
-    constructor(address: Address) {
-        super(UnlockConditionType.Address);
-        this.address = address;
-    }
-
     /**
      * The address.
      */
-    getAddress(): Address {
-        return this.address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+    constructor(address: Address) {
+        super(UnlockConditionType.Address);
+        this.address = address;
     }
 }
 /**
@@ -96,10 +92,13 @@ class AddressUnlockCondition extends UnlockCondition {
 class StorageDepositReturnUnlockCondition extends UnlockCondition {
     private amount: string;
 
+    /**
+     * The return address.
+     */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private returnAddress: Address;
+    readonly returnAddress: Address;
 
     constructor(returnAddress: Address, amount: u64 | string) {
         super(UnlockConditionType.StorageDepositReturn);
@@ -116,29 +115,19 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
     getAmount(): u64 {
         return BigInt(this.amount);
     }
-
-    /**
-     * The return address.
-     */
-    getReturnAddress(): Address {
-        return this.returnAddress;
-    }
 }
 /**
  * Defines a slot index until which the output can not be unlocked.
  */
 class TimelockUnlockCondition extends UnlockCondition {
-    private slotIndex: SlotIndex;
+    /**
+     * Slot index starting from which the output can be consumed.
+     */
+    readonly slotIndex: SlotIndex;
 
     constructor(slotIndex: SlotIndex) {
         super(UnlockConditionType.Timelock);
         this.slotIndex = slotIndex;
-    }
-    /**
-     * Slot index starting from which the output can be consumed.
-     */
-    getSlotIndex(): SlotIndex {
-        return this.slotIndex;
     }
 }
 /**
@@ -146,90 +135,71 @@ class TimelockUnlockCondition extends UnlockCondition {
  * Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
  */
 class ExpirationUnlockCondition extends UnlockCondition {
+    /**
+     * The return address.
+     */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
-    private returnAddress: Address;
-    private slotIndex: SlotIndex;
+    readonly returnAddress: Address;
+    /**
+     * Before this slot index, the condition is allowed to unlock the output,
+     * after that only the address defined in return address.
+     */
+    readonly slotIndex: SlotIndex;
 
     constructor(returnAddress: Address, slotIndex: SlotIndex) {
         super(UnlockConditionType.Expiration);
         this.returnAddress = returnAddress;
         this.slotIndex = slotIndex;
     }
-    /**
-     * Before this slot index, the condition is allowed to unlock the output,
-     * after that only the address defined in return address.
-     */
-    getSlotIndex(): SlotIndex {
-        return this.slotIndex;
-    }
-
-    /**
-     * The return address.
-     */
-    getReturnAddress(): Address {
-        return this.returnAddress;
-    }
 }
 /**
  * State Controller Address Unlock Condition.
  */
 class StateControllerAddressUnlockCondition extends UnlockCondition {
-    @Type(() => Address, {
-        discriminator: AddressDiscriminator,
-    })
-    private address: Address;
-    constructor(address: Address) {
-        super(UnlockConditionType.StateControllerAddress);
-        this.address = address;
-    }
-
     /**
      * The address.
      */
-    getAddress(): Address {
-        return this.address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+    constructor(address: Address) {
+        super(UnlockConditionType.StateControllerAddress);
+        this.address = address;
     }
 }
 /**
  * Governor Unlock Condition.
  */
 class GovernorAddressUnlockCondition extends UnlockCondition {
-    @Type(() => Address, {
-        discriminator: AddressDiscriminator,
-    })
-    private address: Address;
-    constructor(address: Address) {
-        super(UnlockConditionType.GovernorAddress);
-        this.address = address;
-    }
-
     /**
      * The address.
      */
-    getAddress(): Address {
-        return this.address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+    constructor(address: Address) {
+        super(UnlockConditionType.GovernorAddress);
+        this.address = address;
     }
 }
 /**
  * Immutable Alias Unlock Condition.
  */
 class ImmutableAliasAddressUnlockCondition extends UnlockCondition {
-    @Type(() => Address, {
-        discriminator: AddressDiscriminator,
-    })
-    private address: Address;
-    constructor(address: AliasAddress) {
-        super(UnlockConditionType.ImmutableAliasAddress);
-        this.address = address;
-    }
-
     /**
      * The address.
      */
-    getAddress(): Address {
-        return this.address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly address: Address;
+    constructor(address: AliasAddress) {
+        super(UnlockConditionType.ImmutableAliasAddress);
+        this.address = address;
     }
 }
 
