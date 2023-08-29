@@ -297,7 +297,7 @@ impl Default for CongestionControlParameters {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct VersionSignalingParameters {
-    /// The size of the window in epochs that is used to find which version of protocol parameters was 
+    /// The size of the window in epochs that is used to find which version of protocol parameters was
     /// most signaled, from `current_epoch - window_size` to `current_epoch`.
     window_size: u8,
     /// The number of supporters required for a version to win within a `window_size`.
