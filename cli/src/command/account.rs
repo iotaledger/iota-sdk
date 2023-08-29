@@ -19,7 +19,7 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{types::AccountAddress, Account, ConsolidationParams, OutputsToClaim, TransactionOptions},
+        account::{types::Bip44Address, Account, ConsolidationParams, OutputsToClaim, TransactionOptions},
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
@@ -868,7 +868,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
+async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), Error> {
     let mut log = format!("Address {}: {}", address.key_index(), address.address());
 
     if *address.internal() {

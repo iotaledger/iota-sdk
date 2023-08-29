@@ -9,7 +9,7 @@ use crate::{
     wallet::account::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
-        Account, AccountAddress,
+        Account, Bip44Address,
     },
 };
 #[cfg(feature = "events")]
@@ -49,39 +49,6 @@ where
         #[cfg(feature = "events")]
         let account_index = account_details.index;
 
-        // update used field of the addresses
-        for address_with_unspent_outputs in addresses_with_unspent_outputs.iter() {
-            if address_with_unspent_outputs.internal {
-                let position = account_details
-                    .internal_addresses
-                    .binary_search_by_key(
-                        &(
-                            address_with_unspent_outputs.key_index,
-                            address_with_unspent_outputs.internal,
-                        ),
-                        |a| (a.key_index, a.internal),
-                    )
-                    .map_err(|_| {
-                        crate::wallet::Error::AddressNotFoundInAccount(address_with_unspent_outputs.address)
-                    })?;
-                account_details.internal_addresses[position].used = true;
-            } else {
-                let position = account_details
-                    .public_addresses
-                    .binary_search_by_key(
-                        &(
-                            address_with_unspent_outputs.key_index,
-                            address_with_unspent_outputs.internal,
-                        ),
-                        |a| (a.key_index, a.internal),
-                    )
-                    .map_err(|_| {
-                        crate::wallet::Error::AddressNotFoundInAccount(address_with_unspent_outputs.address)
-                    })?;
-                account_details.public_addresses[position].used = true;
-            }
-        }
-
         // Update addresses_with_unspent_outputs
         // only keep addresses below the address start index, because we synced the addresses above and will update them
         account_details.addresses_with_unspent_outputs.retain(|a| {
@@ -91,6 +58,7 @@ where
                 a.key_index < options.address_start_index
             }
         });
+
         // then add all synced addresses with balance, all other addresses that had balance before will then be removed
         // from this list
         account_details
@@ -256,7 +224,7 @@ where
     pub(crate) async fn update_account_addresses(
         &self,
         internal: bool,
-        new_addresses: Vec<AccountAddress>,
+        new_addresses: Vec<Bip44Address>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[update_account_addresses]");
 
