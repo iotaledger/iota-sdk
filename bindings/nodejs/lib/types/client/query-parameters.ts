@@ -86,11 +86,11 @@ interface StorageDepositReturnAddress {
 interface HasTimelock {
     hasTimelock: boolean;
 }
-/** Return outputs that are timelocked before a certain Slot index. */
+/** Return outputs that are timelocked before a certain slot index. */
 interface TimelockedBefore {
     timelockedBefore: SlotIndex;
 }
-/** Return outputs that are timelocked after a certain Slot index. */
+/** Return outputs that are timelocked after a certain slot index. */
 interface TimelockedAfter {
     timelockedAfter: SlotIndex;
 }
@@ -111,11 +111,11 @@ interface MaxNativeTokenCount {
 interface MinNativeTokenCount {
     minNativeTokenCount: number;
 }
-/** Return outputs that expire before a certain Slot index. */
+/** Return outputs that expire before a certain slot index. */
 interface ExpiresBefore {
     expiresBefore: SlotIndex;
 }
-/** Return outputs that expire after a certain Slot index. */
+/** Return outputs that expire after a certain slot index. */
 interface ExpiresAfter {
     expiresAfter: SlotIndex;
 }
@@ -133,11 +133,11 @@ interface Sender {
 interface Tag {
     tag: string;
 }
-/** Return outputs that were created before a certain Slot index. */
+/** Return outputs that were created before a certain slot index. */
 interface CreatedBefore {
     createdBefore: SlotIndex;
 }
-/** Return outputs that were created after a certain Slot index. */
+/** Return outputs that were created after a certain slot index. */
 interface CreatedAfter {
     createdAfter: SlotIndex;
 }
