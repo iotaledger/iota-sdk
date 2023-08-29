@@ -140,11 +140,11 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
 }
 
 fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> {
-    let protocol_parameters = &mut client_options["protocolParameters"];
+    if let Some(protocol_parameters) = &mut client_options.get_mut("protocolParameters") {
+        ConvertHrp::check(&mut protocol_parameters["bech32_hrp"])?;
 
-    ConvertHrp::check(&mut protocol_parameters["bech32_hrp"])?;
-
-    rename_keys(&mut protocol_parameters["rent_structure"]);
+        rename_keys(&mut protocol_parameters["rent_structure"]);
+    }
 
     Ok(())
 }
