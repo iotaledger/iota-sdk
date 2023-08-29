@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::api::input_selection::Burn,
-    types::block::{output::OutputId, payload::tagged_data::TaggedDataPayload},
-    wallet::account::types::address::AccountAddress,
+    types::block::{address::Address, output::OutputId, payload::tagged_data::TaggedDataPayload},
 };
 
 /// Options for transactions
@@ -39,7 +38,7 @@ pub enum RemainderValueStrategy {
     /// Move the remainder value to a change address.
     ChangeAddress,
     /// Move the remainder value to any specified address.
-    CustomAddress(AccountAddress),
+    CustomAddress(Address),
 }
 
 impl Default for RemainderValueStrategy {

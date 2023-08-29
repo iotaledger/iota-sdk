@@ -6,7 +6,7 @@ use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretMana
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
-    wallet::account::{types::address::AccountAddress, Account},
+    wallet::account::{types::address::Bip44Address, Account},
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::{
@@ -36,7 +36,7 @@ where
         &self,
         amount: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> crate::wallet::Result<Vec<AccountAddress>> {
+    ) -> crate::wallet::Result<Vec<Bip44Address>> {
         let options = options.into().unwrap_or_default();
         log::debug!(
             "[ADDRESS GENERATION] generating {amount} addresses, internal: {}",
@@ -157,14 +157,13 @@ where
 
         drop(account_details);
 
-        let generate_addresses: Vec<AccountAddress> = addresses
+        let generate_addresses: Vec<Bip44Address> = addresses
             .into_iter()
             .enumerate()
-            .map(|(index, address)| AccountAddress {
+            .map(|(index, address)| Bip44Address {
                 address: Bech32Address::new(bech32_hrp, address),
                 key_index: highest_current_index_plus_one + index as u32,
                 internal: options.internal,
-                used: false,
             })
             .collect();
 
@@ -175,7 +174,7 @@ where
     }
 
     /// Generate an internal address and store in the account, internal addresses are used for remainder outputs
-    pub(crate) async fn generate_remainder_address(&self) -> crate::wallet::Result<AccountAddress> {
+    pub(crate) async fn generate_remainder_address(&self) -> crate::wallet::Result<Bip44Address> {
         let result = self
             .generate_ed25519_addresses(1, Some(GenerateAddressOptions::internal()))
             .await?
