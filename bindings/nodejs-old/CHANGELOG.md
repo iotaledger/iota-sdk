@@ -1,5 +1,9 @@
 # Changelog
 
+## \[2.0.3-rc.47]
+
+- [`81ec43f15`](https://github.com/iotaledger/iota-sdk/commit/81ec43f15c6a861c6da297befb099ebbadf9b3f0)([#1091](https://github.com/iotaledger/iota-sdk/pull/1091)) Fixed migration mismatch from `iota-rs` version.
+
 ## \[2.0.3-rc.46]
 
 - [`8e605423c`](https://github.com/iotaledger/iota-sdk/commit/8e605423ca17fb78e22f1f469be7d95a9c098147)([#1083](https://github.com/iotaledger/iota-sdk/pull/1083)) Fixed `Wallet::restoreBackup()` when no secret manager data is stored inside;

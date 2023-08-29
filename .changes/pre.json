@@ -34,6 +34,7 @@
     ".changes/computeAlias-NftId.md",
     ".changes/computeFoundryId.md",
     ".changes/consolidation-params.md",
+    ".changes/db-migration.md",
     ".changes/deadlock.md",
     ".changes/dont-filter-custom-mandatory-inputs.md",
     ".changes/downgrade-rocksb.md",
