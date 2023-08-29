@@ -246,7 +246,7 @@ pub fn migrate_db_chrysalis_to_stardust(mut cx: FunctionContext) -> JsResult<JsP
     let channel = cx.channel();
     let (deferred, promise) = cx.promise();
     crate::RUNTIME.spawn(async move {
-        if let Err(err) = rust_migrate_db_chrysalis_to_stardust(storage_path, password).await {
+        if let Err(err) = rust_migrate_db_chrysalis_to_stardust(storage_path, password, None).await {
             deferred.settle_with(&channel, move |mut cx| {
                 cx.error(serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
             });
