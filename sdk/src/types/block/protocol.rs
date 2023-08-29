@@ -287,6 +287,7 @@ impl Default for CongestionControlParameters {
     }
 }
 
+/// Defines the parameters used to signal a protocol parameters upgrade.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
     feature = "serde",
