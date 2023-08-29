@@ -67,7 +67,7 @@ pub struct ProtocolParameters {
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: EpochIndex,
     /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
-    /// and commitments in its past-cone to accepted tangle time and last committed slot respectively.
+    /// and commitments in its past-cone against accepted tangle time and last committed slot respectively.
     pub(crate) liveness_threshold: SlotIndex,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub(crate) min_committable_age: SlotIndex,
@@ -297,12 +297,12 @@ impl Default for CongestionControlParameters {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct VersionSignalingParameters {
-    /// The size of the window in epochs to find which version of protocol parameters was most signaled, from
-    /// current_epoch - window_size to current_epoch.
+    /// The size of the window in epochs that is used to find which version of protocol parameters was 
+    /// most signaled, from `current_epoch - window_size` to `current_epoch`.
     window_size: u8,
-    /// The target number of supporters for a version to win in a window_size.
+    /// The number of supporters required for a version to win within a `window_size`.
     window_target_ratio: u8,
-    /// The offset in epochs to activate the new version of protocol parameters.
+    /// The offset in epochs required to activate the new version of protocol parameters.
     activation_offset: u8,
 }
 
