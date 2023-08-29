@@ -15,14 +15,14 @@ use crate::{
     },
     types::{
         api::core::response::{
-            AccountStakingResponse, BlockMetadataResponse, CongestionResponse, InfoResponse,
+            AccountStakingResponse, BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
             IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
             UtxoChangesResponse, ValidatorsResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
-            slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
+            slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
         },
         TryFromDto,
@@ -123,16 +123,31 @@ impl ClientInner {
             .await
     }
 
-    /// Returns information of all registered validators and if they are active.
-    /// GET JSON to /api/core/v3/validators
-    pub async fn get_validators(&self) -> Result<ValidatorsResponse> {
-        // TODO: Pagination is not in the TIP yet
-        const PATH: &str = "api/core/v3/validators";
+    /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+    /// current committee members are returned.
+    /// GET /api/core/v3/committee/?epochIndex
+    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>>) -> Result<CommitteeResponse> {
+        const PATH: &str = "api/core/v3/committee";
 
+        let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
         self.node_manager
             .read()
             .await
-            .get_request(PATH, None, self.get_timeout().await, false, false)
+            .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Returns information of all registered validators and if they are active.
+    /// GET JSON to /api/core/v3/validators
+    pub async fn get_validators(&self, page_size: Option<u32>) -> Result<ValidatorsResponse> {
+        // TODO: Pagination is not in the TIP yet
+        const PATH: &str = "api/core/v3/validators";
+
+        let page_size = page_size.map(|i| format!("pageSize={i}"));
+        self.node_manager
+            .read()
+            .await
+            .get_request(PATH, page_size.as_deref(), self.get_timeout().await, false, false)
             .await
     }
 

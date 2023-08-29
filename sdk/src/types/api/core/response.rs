@@ -185,6 +185,87 @@ pub struct BaseTokenResponse {
     pub use_metric_prefix: bool,
 }
 
+/// Response of
+/// - GET /api/core/v3/blocks/validators
+/// A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
+/// (are eligible for committee selection).
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ValidatorsResponse {
+    /// List of registered validators ready for the next epoch
+    validators: Vec<Validator>,
+    ///  The number of validators returned per one API request with pagination.
+    page_size: u32,
+    /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
+    /// last page.
+    cursor: String,
+}
+
+/// Response of GET /api/core/v3/rewards/{outputId}.
+/// Returns the mana rewards of an account or delegation output.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct ManaRewardsResponse {
+    /// The starting epoch index for which the mana rewards are returned.
+    pub epoch_start: u64, // TODO: replace with `EpochIndex`
+    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
+    /// included.
+    pub epoch_end: u64, // TODO: replace with `EpochIndex`
+    /// The amount of totally available rewards the requested output may claim.
+    #[serde(with = "crate::utils::serde::string")]
+    pub rewards: u64,
+}
+
+/// Response of GET /api/core/v3/committee
+/// The validator information of the committee.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommitteeResponse {
+    /// The epoch index of the committee.
+    pub epoch_index: EpochIndex,
+    /// The total amount of delegated and staked IOTA tokens in the selected committee.
+    #[serde(with = "crate::utils::serde::string")]
+    pub total_stake: u64,
+    /// The total amount of staked IOTA tokens in the selected committee.
+    #[serde(with = "crate::utils::serde::string")]
+    pub total_validator_stake: u64,
+    /// The validators of the committee.
+    pub committee: Box<[CommitteeMember]>,
+}
+
+/// Returns information of a committee member.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommitteeMember {
+    /// The account identifier of the validator
+    pub account_id: AccountId,
+    /// The total stake of the pool, including delegators.
+    #[serde(with = "crate::utils::serde::string")]
+    pub pool_stake: u64,
+    /// The stake of a validator.
+    #[serde(with = "crate::utils::serde::string")]
+    pub validator_stake: u64,
+    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    #[serde(with = "crate::utils::serde::string")]
+    pub fixed_cost: u64,
+}
+
 /// Information of a validator.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -196,7 +277,7 @@ pub struct Validator {
     /// The account identifier of the validator
     account_id: AccountId,
     /// The epoch index until which the validator registered to stake.
-    staking_epoch_end: EpochIndex,
+    staking_end_epoch: EpochIndex,
     /// The total stake of the pool, including delegators.
     #[serde(with = "crate::utils::serde::string")]
     pool_stake: u64,
@@ -213,32 +294,12 @@ pub struct Validator {
 }
 
 /// Response of
-/// - GET /api/core/v3/blocks/validators
-/// A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
-/// (are eligible for committee selection).
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct ValidatorsResponse {
-    validators: Vec<Validator>,
-    ///  The number of validators returned per one API request with pagination.
-    page_size: u32,
-    /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
-    /// last page.
-    cursor: String,
-}
-
-/// Response of
 /// - GET /api/core/v3/blocks/validators/{accountId}
 /// The requested staking information of the account.
 pub type AccountStakingResponse = Validator;
 
-/// Response of
-/// - GET /api/core/v3/blocks/issuance
-/// Information that is ideal for attaching a block in the network.
+/// Response of GET /api/core/v3/blocks/issuance
+/// Return information that is used to attach a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -256,6 +317,27 @@ pub struct IssuanceBlockHeaderResponse {
     pub latest_finalized_slot: SlotIndex,
     /// The most recent slot commitment.
     pub commitment: SlotCommitment,
+}
+
+/// Response of GET /api/core/v3/accounts/{accountId}/congestion.
+/// Provides the cost and readiness to issue estimates.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CongestionResponse {
+    /// The slot index for which the congestion estimate is provided.
+    pub slot_index: SlotIndex,
+    /// Indicates if a node is ready to issue a block in a current congestion or should wait.
+    pub ready: bool,
+    /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
+    #[serde(with = "crate::utils::serde::string")]
+    pub reference_mana_cost: u64,
+    /// The Block Issuance Credits of the requested account.
+    #[serde(with = "crate::utils::serde::string")]
+    pub block_issuance_credits: u64,
 }
 
 /// Response of POST /api/core/v3/blocks.
@@ -483,44 +565,4 @@ pub struct UtxoChangesResponse {
     pub index: u32,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
-}
-
-/// Response of GET /api/core/v3/accounts/{accountId}/congestion.
-/// Provides the cost and readiness to issue estimates.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct CongestionResponse {
-    /// The slot index for which the congestion estimate is provided.
-    pub slot_index: SlotIndex,
-    /// Indicates if a node is ready to issue a block in a current congestion or should wait.
-    pub ready: bool,
-    /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
-    #[serde(with = "crate::utils::serde::string")]
-    pub reference_mana_cost: u64,
-    /// The Block Issuance Credits of the requested account.
-    #[serde(with = "crate::utils::serde::string")]
-    pub block_issuance_credits: u64,
-}
-
-/// Response of GET /api/core/v3/rewards/{outputId}.
-/// Returns the mana rewards of an account or delegation output.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct ManaRewardsResponse {
-    /// The starting epoch index for which the mana rewards are returned.
-    pub epoch_start: u64, // TODO: replace with `EpochIndex`
-    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
-    /// included.
-    pub epoch_end: u64, // TODO: replace with `EpochIndex`
-    /// The amount of totally available rewards the requested output may claim.
-    #[serde(with = "crate::utils::serde::string")]
-    pub rewards: u64,
 }
