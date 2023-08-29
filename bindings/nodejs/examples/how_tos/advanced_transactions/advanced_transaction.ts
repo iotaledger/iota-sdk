@@ -38,7 +38,7 @@ async function run() {
         const client = await wallet.getClient();
 
         // Create an output with amount 1_000_000 and a timelock of 1 hour
-        // TODO !!!
+        // TODO Make the slot index properly 1h ahead
         const slotIndex = BigInt(1000);
         const basicOutput = await client.buildBasicOutput({
             unlockConditions: [
