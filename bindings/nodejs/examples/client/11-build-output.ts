@@ -79,7 +79,7 @@ async function run() {
                 addressUnlockCondition,
                 new ExpirationUnlockCondition(
                     new Ed25519Address(hexAddress),
-                    1,
+                    BigInt(1),
                 ),
             ],
         });
@@ -91,7 +91,7 @@ async function run() {
             amount: BigInt(1000000),
             unlockConditions: [
                 addressUnlockCondition,
-                new TimelockUnlockCondition(1),
+                new TimelockUnlockCondition(BigInt(1)),
             ],
         });
 
