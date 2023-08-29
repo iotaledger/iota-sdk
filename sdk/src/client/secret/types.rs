@@ -8,10 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::{
-        block::{
-            address::Address,
-            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
-        },
+        block::output::{dto::OutputDto, Output, OutputId, OutputMetadata},
         TryFromDto, ValidationParams,
     },
     utils::serde::bip44::option_bip44,
@@ -39,17 +36,6 @@ impl core::fmt::Debug for StrongholdDto {
             .field("snapshot_path", &self.snapshot_path)
             .finish()
     }
-}
-
-/// An account address.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct AccountAddress {
-    /// The address.
-    pub address: Address,
-    /// The address key index.
-    pub key_index: u32,
-    /// Determines if an address is a public or an internal (change) address.
-    pub internal: bool,
 }
 
 /// Options provided to generate addresses.

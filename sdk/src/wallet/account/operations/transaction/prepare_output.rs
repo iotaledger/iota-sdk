@@ -290,7 +290,7 @@ where
                         let remainder_address = self.generate_remainder_address().await?;
                         Some(remainder_address.address().inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.address().inner),
+                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
             }
             None => None,
