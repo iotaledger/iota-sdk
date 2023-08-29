@@ -79,7 +79,7 @@ pub struct ProtocolParameters {
     pub(crate) epoch_nearing_threshold: SlotIndex,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
-    /// Version Signaling defines the parameters used by signaling protocol parameters upgrade.
+    /// Defines the parameters used to signal a protocol parameters upgrade.
     pub(crate) version_signaling: VersionSignalingParameters,
 }
 
