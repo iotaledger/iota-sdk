@@ -4,7 +4,7 @@
 use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
 use crate::types::block::{
-    output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
+    output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::ProtocolParameters,
     semantic::TransactionFailureReason,
@@ -185,8 +185,49 @@ pub struct BaseTokenResponse {
     pub use_metric_prefix: bool,
 }
 
-/// Response of
-/// - GET /api/core/v3/blocks/issuance
+/// Response of GET /api/core/v3/committee
+/// The validator information of the committee.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommitteeResponse {
+    /// The epoch index of the committee.
+    pub epoch_index: EpochIndex,
+    /// The total amount of delegated and staked IOTA tokens in the selected committee.
+    #[serde(with = "crate::utils::serde::string")]
+    pub total_stake: u64,
+    /// The total amount of staked IOTA tokens in the selected committee.
+    #[serde(with = "crate::utils::serde::string")]
+    pub total_validator_stake: u64,
+    /// The validators of the committee.
+    pub committee: Box<[CommitteeMember]>,
+}
+
+/// Validator information.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommitteeMember {
+    /// The account identifier of the validator
+    pub account_id: AccountId,
+    /// The total stake of the pool, including delegators.
+    #[serde(with = "crate::utils::serde::string")]
+    pub pool_stake: u64,
+    /// The stake of a validator.
+    #[serde(with = "crate::utils::serde::string")]
+    pub validator_stake: u64,
+    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    #[serde(with = "crate::utils::serde::string")]
+    pub fixed_cost: u64,
+}
+
+/// Response of GET /api/core/v3/blocks/issuance
 /// Information that is ideal for attaching a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
