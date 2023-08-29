@@ -140,7 +140,6 @@ impl ClientInner {
     /// Returns information of all registered validators and if they are active.
     /// GET JSON to /api/core/v3/validators
     pub async fn get_validators(&self, page_size: Option<u32>) -> Result<ValidatorsResponse> {
-        // TODO: Pagination is not in the TIP yet
         const PATH: &str = "api/core/v3/validators";
 
         let page_size = page_size.map(|i| format!("pageSize={i}"));
