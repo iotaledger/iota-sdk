@@ -73,6 +73,9 @@ abstract class UnlockCondition {
     }
 }
 
+/**
+ * Address Unlock Condition.
+ */
 class AddressUnlockCondition extends UnlockCondition {
     /**
      * The address.
@@ -86,6 +89,7 @@ class AddressUnlockCondition extends UnlockCondition {
         this.address = address;
     }
 }
+
 /**
  * Storage Deposit Return Unlock Condition.
  */
@@ -116,6 +120,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
         return BigInt(this.amount);
     }
 }
+
 /**
  * Defines a slot index until which the output can not be unlocked.
  */
@@ -130,6 +135,7 @@ class TimelockUnlockCondition extends UnlockCondition {
         this.slotIndex = slotIndex;
     }
 }
+
 /**
  * Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
  * Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
@@ -154,6 +160,7 @@ class ExpirationUnlockCondition extends UnlockCondition {
         this.slotIndex = slotIndex;
     }
 }
+
 /**
  * State Controller Address Unlock Condition.
  */
@@ -170,6 +177,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition {
         this.address = address;
     }
 }
+
 /**
  * Governor Unlock Condition.
  */
@@ -186,6 +194,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition {
         this.address = address;
     }
 }
+
 /**
  * Immutable Alias Unlock Condition.
  */
