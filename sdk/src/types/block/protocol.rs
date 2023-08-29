@@ -66,7 +66,7 @@ pub struct ProtocolParameters {
     pub(crate) mana_decay_factor_epochs_sum_exponent: u8,
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: EpochIndex,
-    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
+    /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
     /// and commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
     pub(crate) liveness_threshold: SlotIndex,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
