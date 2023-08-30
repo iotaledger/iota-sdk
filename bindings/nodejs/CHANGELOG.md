@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.0 - 2023-MM-DD
+
+### Added
+
+- `Account::{burn(), consolidateOutputs(), createAliasOutput(), meltNativeToken(), mintNativeToken(), createNativeToken(), mintNfts(), transaction(), sendNativeTokens(), sendNft()}` methods;
+
 ## 1.0.7 - 2023-08-29
 
 ### Fixed
