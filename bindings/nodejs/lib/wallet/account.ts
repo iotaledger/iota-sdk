@@ -7,12 +7,12 @@ import {
     AccountMetadata,
     SyncOptions,
     AccountMeta,
-    AccountAddress,
+    Bip44Address,
     SendParams,
     SendNativeTokensParams,
     SendNftParams,
     AddressWithUnspentOutputs,
-    AliasOutputParams,
+    AccountOutputParams,
     FilterOptions,
     GenerateAddressOptions,
     CreateNativeTokenParams,
@@ -29,7 +29,7 @@ import {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
-    BuildAliasOutputData,
+    BuildAccountOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
@@ -40,7 +40,7 @@ import {
 } from '../types/wallet';
 import { INode, Burn, PreparedTransactionData } from '../client';
 import {
-    AliasOutput,
+    AccountOutput,
     NftOutput,
     Output,
     BasicOutput,
@@ -65,15 +65,17 @@ export class Account {
     }
 
     /**
-     * Build an `AliasOutput`.
-     * @param data Options for building an `AliasOutput`.
-     * @returns The built `AliasOutput`.
+     * Build an `AccountOutput`.
+     * @param data Options for building an `AccountOutput`.
+     * @returns The built `AccountOutput`.
      */
-    async buildAliasOutput(data: BuildAliasOutputData): Promise<AliasOutput> {
+    async buildAccountOutput(
+        data: BuildAccountOutputData,
+    ): Promise<AccountOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'buildAliasOutput',
+                name: 'buildAccountOutput',
                 data,
             },
         );
@@ -131,7 +133,7 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
+     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and accounts.
      * @param burn The outputs to burn
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -272,20 +274,20 @@ export class Account {
     }
 
     /**
-     * `createAliasOutput` creates an alias output
-     * @param params The alias output options.
+     * `createAccountOutput` creates an account output
+     * @param params The account output options.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns A transaction object.
      */
-    async prepareCreateAliasOutput(
-        params?: AliasOutputParams,
+    async prepareCreateAccountOutput(
+        params?: AccountOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareCreateAliasOutput',
+                name: 'prepareCreateAccountOutput',
                 data: {
                     params,
                     options: transactionOptions,
@@ -351,14 +353,14 @@ export class Account {
     }
 
     /**
-     * Destroy an alias output.
-     * @param aliasId The AliasId.
+     * Destroy an account output.
+     * @param accountId The AccountId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The transaction.
      */
-    async prepareDestroyAlias(
-        aliasId: string,
+    async prepareDestroyAccount(
+        accountId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -367,7 +369,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        aliases: [aliasId],
+                        accounts: [accountId],
                     },
                     options: transactionOptions,
                 },
@@ -384,7 +386,7 @@ export class Account {
 
     /**
      * Function to destroy a foundry output with a circulating supply of 0.
-     * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias.
+     * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account.
      * @param foundryId The FoundryId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -424,7 +426,7 @@ export class Account {
     async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
-    ): Promise<AccountAddress[]> {
+    ): Promise<Bip44Address[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -469,8 +471,8 @@ export class Account {
         payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
         payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
 
-        payload.requiredStorageDeposit.alias = hexToBigInt(
-            payload.requiredStorageDeposit.alias,
+        payload.requiredStorageDeposit.account = hexToBigInt(
+            payload.requiredStorageDeposit.account,
         );
         payload.requiredStorageDeposit.basic = hexToBigInt(
             payload.requiredStorageDeposit.basic,
@@ -641,7 +643,7 @@ export class Account {
      * List all the addresses of the account.
      * @returns The addresses.
      */
-    async addresses(): Promise<AccountAddress[]> {
+    async addresses(): Promise<Bip44Address[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

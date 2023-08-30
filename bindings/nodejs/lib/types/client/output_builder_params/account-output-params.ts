@@ -4,10 +4,10 @@ import { Feature, HexEncodedString } from '../..';
 import type { BasicOutputBuilderParams } from './basic-output-params';
 
 /**
- * Options for building an Alias Output
+ * Options for building an Account Output
  */
-export interface AliasOutputBuilderParams extends BasicOutputBuilderParams {
-    aliasId: HexEncodedString;
+export interface AccountOutputBuilderParams extends BasicOutputBuilderParams {
+    accountId: HexEncodedString;
     stateIndex?: number;
     stateMetadata?: HexEncodedString;
     foundryCounter?: number;

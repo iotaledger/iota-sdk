@@ -11,11 +11,11 @@ use crate::types::{
     block::{address::Bech32Address, output::OutputId, ConvertTo},
 };
 
-/// An account address.
+/// A BIP44 address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
-pub struct AccountAddress {
+pub struct Bip44Address {
     /// The address.
     pub(crate) address: Bech32Address,
     /// The address key index.
@@ -24,18 +24,15 @@ pub struct AccountAddress {
     /// Determines if an address is a public or an internal (change) address.
     #[getset(set = "pub(crate)")]
     pub(crate) internal: bool,
-    // do we want this field? Could be useful if we don't store spent output ids and because of that wouldn't know if
-    // an address was used or not just by looking at it
-    pub(crate) used: bool,
 }
 
-impl AccountAddress {
+impl Bip44Address {
     pub fn into_bech32(self) -> Bech32Address {
         self.address
     }
 }
 
-impl ConvertTo<Bech32Address> for AccountAddress {
+impl ConvertTo<Bech32Address> for Bip44Address {
     fn convert(self) -> Result<Bech32Address, types::block::Error> {
         Ok(self.address)
     }

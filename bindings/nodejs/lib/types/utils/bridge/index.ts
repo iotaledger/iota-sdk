@@ -1,7 +1,7 @@
 import type {
     __GenerateMnemonicMethod__,
     __MnemonicToHexSeedMethod__,
-    __ComputeAliasIdMethod__,
+    __ComputeAccountIdMethod__,
     __ComputeOutputIdMethod__,
     __ComputeTokenIdMethod__,
     __ComputeNftIdMethod__,
@@ -13,7 +13,7 @@ import type {
     __TransactionIdMethod__,
     __Bech32ToHexMethod__,
     __HexToBech32Method__,
-    __AliasIdToBech32Method__,
+    __AccountIdToBech32Method__,
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
     __IsAddressValidMethod__,
@@ -29,7 +29,7 @@ import type {
 export type __UtilsMethods__ =
     | __GenerateMnemonicMethod__
     | __MnemonicToHexSeedMethod__
-    | __ComputeAliasIdMethod__
+    | __ComputeAccountIdMethod__
     | __ComputeNftIdMethod__
     | __ComputeFoundryIdMethod__
     | __ComputeOutputIdMethod__
@@ -41,7 +41,7 @@ export type __UtilsMethods__ =
     | __TransactionIdMethod__
     | __Bech32ToHexMethod__
     | __HexToBech32Method__
-    | __AliasIdToBech32Method__
+    | __AccountIdToBech32Method__
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__

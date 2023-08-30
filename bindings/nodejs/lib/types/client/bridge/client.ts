@@ -8,14 +8,14 @@ import type {
 import type { Block, BlockId, Output, Payload } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
-    AliasQueryParameter,
+    AccountQueryParameter,
     FoundryQueryParameter,
     NftQueryParameter,
     QueryParameter,
 } from '../query-parameters';
 import type { IAuth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
-import type { AliasOutputBuilderParams } from '../output_builder_params/alias-output-params';
+import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
 import { HexEncodedString } from '../../utils';
@@ -177,10 +177,10 @@ export interface __HexToBech32Method__ {
     };
 }
 
-export interface __AliasIdToBech32Method__ {
-    name: 'aliasIdToBech32';
+export interface __AccountIdToBech32Method__ {
+    name: 'accountIdToBech32';
     data: {
-        aliasId: string;
+        accountId: string;
         bech32Hrp?: string;
     };
 }
@@ -201,17 +201,17 @@ export interface __HexPublicKeyToBech32AddressMethod__ {
     };
 }
 
-export interface __AliasOutputIdsMethod__ {
-    name: 'aliasOutputIds';
+export interface __AccountOutputIdsMethod__ {
+    name: 'accountOutputIds';
     data: {
-        queryParameters: AliasQueryParameter[];
+        queryParameters: AccountQueryParameter[];
     };
 }
 
-export interface __AliasOutputIdMethod__ {
-    name: 'aliasOutputId';
+export interface __AccountOutputIdMethod__ {
+    name: 'accountOutputId';
     data: {
-        aliasId: string;
+        accountId: string;
     };
 }
 
@@ -266,9 +266,9 @@ export interface __BuildBasicOutputMethod__ {
     data: BasicOutputBuilderParams;
 }
 
-export interface __BuildAliasOutputMethod__ {
-    name: 'buildAliasOutput';
-    data: AliasOutputBuilderParams;
+export interface __BuildAccountOutputMethod__ {
+    name: 'buildAccountOutput';
+    data: AccountOutputBuilderParams;
 }
 
 export interface __BuildFoundryOutputMethod__ {

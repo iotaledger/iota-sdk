@@ -1,4 +1,8 @@
-import type { AccountId, CreateAccountPayload, SyncOptions } from '../account';
+import type {
+    AccountIdentifier,
+    CreateAccountPayload,
+    SyncOptions,
+} from '../account';
 import type { GenerateAddressOptions } from '../address';
 import type { WalletEventType, WalletEvent } from '../event';
 import type { IAuth, IClientOptions } from '../../client';
@@ -52,7 +56,7 @@ export type __GetAccountsMethod__ = {
 
 export type __GetAccountMethod__ = {
     name: 'getAccount';
-    data: { accountId: AccountId };
+    data: { accountId: AccountIdentifier };
 };
 
 export type __GetLedgerNanoStatusMethod__ = {

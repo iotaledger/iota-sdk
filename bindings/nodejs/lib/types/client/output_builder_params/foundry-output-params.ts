@@ -8,7 +8,7 @@ import type { BasicOutputBuilderParams } from './basic-output-params';
  */
 export interface FoundryOutputBuilderParams extends BasicOutputBuilderParams {
     /**
-     * The serial number of the foundry with respect to the controlling alias.
+     * The serial number of the foundry with respect to the controlling account.
      */
     serialNumber: number;
     tokenScheme: SimpleTokenScheme;

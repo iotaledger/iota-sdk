@@ -14,7 +14,7 @@ import type {
     WalletOptions,
     __Method__,
     __AccountMethod__,
-    AccountId,
+    AccountIdentifier,
     Event,
 } from '../types/wallet';
 import { Client } from '../client';
@@ -61,7 +61,7 @@ export class WalletMethodHandler {
     }
 
     async callAccountMethod(
-        accountIndex: AccountId,
+        accountIndex: AccountIdentifier,
         method: __AccountMethod__,
     ): Promise<string> {
         return this.callMethod({
