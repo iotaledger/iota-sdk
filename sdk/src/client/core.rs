@@ -13,7 +13,9 @@ use {
     tokio::sync::watch::{Receiver as WatchReceiver, Sender as WatchSender},
 };
 
+#[cfg(not(target_family = "wasm"))]
 pub use super::worker::TaskPriority;
+#[cfg(not(target_family = "wasm"))]
 use super::worker::WorkerPool;
 #[cfg(target_family = "wasm")]
 use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
@@ -58,6 +60,7 @@ pub struct ClientInner {
     pub(crate) mqtt: MqttInner,
     #[cfg(target_family = "wasm")]
     pub(crate) last_sync: tokio::sync::Mutex<Option<u32>>,
+    #[cfg(not(target_family = "wasm"))]
     pub(crate) worker_pool: WorkerPool,
 }
 
@@ -86,10 +89,13 @@ pub(crate) struct MqttInner {
 impl std::fmt::Debug for Client {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("Client");
-        d.field("node_manager", &self.inner.node_manager);
+        d.field("node_manager", &self.node_manager);
         #[cfg(feature = "mqtt")]
-        d.field("broker_options", &self.inner.mqtt.broker_options);
-        d.field("network_info", &self.inner.network_info).finish()
+        d.field("broker_options", &self.mqtt.broker_options);
+        d.field("network_info", &self.network_info);
+        #[cfg(not(target_family = "wasm"))]
+        d.field("worker_pool", &self.worker_pool);
+        d.finish()
     }
 }
 
@@ -99,6 +105,7 @@ impl Client {
         ClientBuilder::new()
     }
 
+    #[cfg(not(target_family = "wasm"))]
     pub async fn rate_limit<F, Fut>(&self, f: F) -> Fut::Output
     where
         F: 'static + Send + Sync + FnOnce(Self) -> Fut,
@@ -108,6 +115,7 @@ impl Client {
         self.prioritized_rate_limit(TaskPriority::Medium, f).await
     }
 
+    #[cfg(not(target_family = "wasm"))]
     pub async fn prioritized_rate_limit<F, Fut>(&self, priority: TaskPriority, f: F) -> Fut::Output
     where
         F: 'static + Send + Sync + FnOnce(Self) -> Fut,
@@ -122,7 +130,7 @@ impl Client {
     }
 }
 
-impl ClientInner {
+impl Client {
     /// Gets the network related information such as network_id and min_pow_score
     /// and if it's the default one, sync it first and set the NetworkInfo.
     pub async fn get_network_info(&self) -> Result<NetworkInfo> {

@@ -14,7 +14,7 @@ use crypto::{
 use serde::{Deserialize, Serialize};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-use super::{Client, ClientInner};
+use super::Client;
 use crate::{
     client::{Error, Result},
     types::block::{
@@ -101,7 +101,7 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address
     Ok(faucet_response)
 }
 
-impl ClientInner {
+impl Client {
     /// Transforms a hex encoded address to a bech32 encoded address
     pub async fn hex_to_bech32(
         &self,
@@ -149,9 +149,7 @@ impl ClientInner {
             None => Ok(hex_public_key_to_bech32_address(hex, self.get_bech32_hrp().await?)?),
         }
     }
-}
 
-impl Client {
     /// Transforms bech32 to hex
     pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> crate::client::Result<String> {
         bech32_to_hex(bech32)
