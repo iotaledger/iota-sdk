@@ -4,8 +4,8 @@
 import {
     Client,
     initLogger,
-    ImmutableAliasAddressUnlockCondition,
-    AliasAddress,
+    ImmutableAccountAddressUnlockCondition,
+    AccountAddress,
     SimpleTokenScheme,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
@@ -30,7 +30,7 @@ async function run() {
             throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
 
-        const aliasId =
+        const accountId =
             '0xff311f59790ccb85343a36fbac2f06d233734794404142b308c13f2c616935b5';
 
         const foundryOutput = await client.buildFoundryOutput({
@@ -42,8 +42,8 @@ async function run() {
             ),
             amount: BigInt(1000000),
             unlockConditions: [
-                new ImmutableAliasAddressUnlockCondition(
-                    new AliasAddress(aliasId),
+                new ImmutableAccountAddressUnlockCondition(
+                    new AccountAddress(accountId),
                 ),
             ],
         });

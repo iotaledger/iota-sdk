@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { BasicOutputBuilderParams } from './basic-output-params';
-import type { AliasOutputBuilderParams } from './alias-output-params';
+import type { AccountOutputBuilderParams } from './account-output-params';
 import type { FoundryOutputBuilderParams } from './foundry-output-params';
 import type { NftOutputBuilderParams } from './nft-output-params';
 
 export {
     BasicOutputBuilderParams,
-    AliasOutputBuilderParams,
+    AccountOutputBuilderParams,
     FoundryOutputBuilderParams,
     NftOutputBuilderParams,
 };

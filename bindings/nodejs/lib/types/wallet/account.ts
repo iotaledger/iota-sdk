@@ -1,8 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountAddress, AddressWithUnspentOutputs } from './address';
-import { AliasId, FoundryId, NftId } from '../block/id';
+import type { Bip44Address, AddressWithUnspentOutputs } from './address';
+import { AccountId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
@@ -12,7 +12,7 @@ import { HexEncodedString, u256, u64 } from '../utils';
  * Account identifier
  * Could be the account index (number) or account alias (string)
  */
-export type AccountId = number | string;
+export type AccountIdentifier = number | string;
 
 /** A balance */
 export interface Balance {
@@ -24,8 +24,8 @@ export interface Balance {
     nativeTokens: NativeTokenBalance[];
     /** Nft outputs */
     nfts: string[];
-    /** Alias outputs */
-    aliases: string[];
+    /** Account outputs */
+    accounts: string[];
     /** Foundry outputs */
     foundries: string[];
     /**
@@ -47,7 +47,7 @@ export interface BaseCoinBalance {
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
-    alias: u64;
+    account: u64;
     basic: u64;
     foundry: u64;
     nft: u64;
@@ -91,7 +91,8 @@ export interface SyncOptions {
     syncPendingTransactions?: boolean;
     /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
     account?: AccountSyncOptions;
-    /** Specifies what outputs should be synced for the address of an alias output. */
+    /** Specifies what outputs should be synced for the address of an account output. */
+    // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
     alias?: AliasSyncOptions;
     /** Specifies what outputs should be synced for the address of an nft output. */
     nft?: NftSyncOptions;
@@ -104,14 +105,14 @@ export interface SyncOptions {
 /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
 export interface AccountSyncOptions {
     basicOutputs?: boolean;
-    aliasOutputs?: boolean;
+    accountOutputs?: boolean;
     nftOutputs?: boolean;
 }
 
-/** Specifies what outputs should be synced for the address of an alias output. */
+/** Specifies what outputs should be synced for the address of an account output. */
 export interface AliasSyncOptions {
     basicOutputs?: boolean;
-    aliasOutputs?: boolean;
+    accountOutputs?: boolean;
     nftOutputs?: boolean;
     foundryOutputs?: boolean;
 }
@@ -119,7 +120,7 @@ export interface AliasSyncOptions {
 /** Specifies what outputs should be synced for the address of an nft output. */
 export interface NftSyncOptions {
     basicOutputs?: boolean;
-    aliasOutputs?: boolean;
+    accountOutputs?: boolean;
     nftOutputs?: boolean;
 }
 
@@ -128,8 +129,8 @@ export interface AccountMeta {
     index: number;
     coinType: CoinType;
     alias: string;
-    publicAddresses: AccountAddress[];
-    internalAddresses: AccountAddress[];
+    publicAddresses: Bip44Address[];
+    internalAddresses: Bip44Address[];
     addressesWithUnspentOutputs: AddressWithUnspentOutputs[];
     outputs: { [outputId: string]: OutputData };
     /** Output IDs of unspent outputs that are currently used as input for transactions */
@@ -158,7 +159,7 @@ export interface AccountMetadata {
 export interface CreateAccountPayload {
     alias?: string;
     bech32Hrp?: string;
-    addresses?: AccountAddress[];
+    addresses?: Bip44Address[];
 }
 
 /** Options to filter outputs */
@@ -167,10 +168,10 @@ export interface FilterOptions {
     lowerBoundBookedTimestamp?: number;
     /** Filter all outputs where the booked milestone index is above the specified timestamp */
     upperBoundBookedTimestamp?: number;
-    /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
+    /** Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6) */
     outputTypes?: Uint8Array;
-    /** Return all alias outputs matching these IDs. */
-    aliasIds?: AliasId[];
+    /** Return all account outputs matching these IDs. */
+    accountIds?: AccountId[];
     /** Return all foundry outputs matching these IDs. */
     foundryIds?: FoundryId[];
     /** Return all NFT outputs matching these IDs. */

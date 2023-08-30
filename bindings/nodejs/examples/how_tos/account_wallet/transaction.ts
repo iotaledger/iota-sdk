@@ -11,9 +11,9 @@ import { Wallet, initLogger, Utils } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias_wallet/transaction.ts
+// yarn run-example ./how_tos/account_wallet/transaction.ts
 
-// In this example we send funds from an alias wallet.
+// In this example we send funds from an account wallet.
 async function run() {
     initLogger();
     try {
@@ -24,7 +24,7 @@ async function run() {
         }
 
         const syncOptions = {
-            alias: {
+            account: {
                 basicOutputs: true,
             },
         };
@@ -41,22 +41,22 @@ async function run() {
 
         const totalBaseTokenBalance = balance.baseCoin.total;
         console.log(
-            `Balance before sending funds from alias: ${totalBaseTokenBalance}`,
+            `Balance before sending funds from account: ${totalBaseTokenBalance}`,
         );
 
-        const aliasId = balance.aliases[0];
-        console.log(`Alias Id: ${aliasId}`);
+        const accountId = balance.accounts[0];
+        console.log(`Account Id: ${accountId}`);
 
-        // Get Alias address
-        const aliasAddress = Utils.aliasIdToBech32(
-            aliasId,
+        // Get Account address
+        const accountAddress = Utils.accountIdToBech32(
+            accountId,
             await (await wallet.getClient()).getBech32Hrp(),
         );
 
-        // Find first output unlockable by the alias address
+        // Find first output unlockable by the account address
         const queryParameters = [
             {
-                address: aliasAddress,
+                address: accountAddress,
             },
         ];
         const input = (
@@ -85,7 +85,7 @@ async function run() {
         const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
             .baseCoin.total;
         console.log(
-            `Balance after sending funds from alias: ${totalBaseTokenBalanceAfter}`,
+            `Balance after sending funds from account: ${totalBaseTokenBalanceAfter}`,
         );
     } catch (error) {
         console.error('Error: ', error);

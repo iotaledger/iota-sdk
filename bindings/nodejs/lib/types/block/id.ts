@@ -3,7 +3,7 @@
 
 import { HexEncodedString } from '../utils';
 
-export type AliasId = HexEncodedString;
+export type AccountId = HexEncodedString;
 
 export type NftId = HexEncodedString;
 

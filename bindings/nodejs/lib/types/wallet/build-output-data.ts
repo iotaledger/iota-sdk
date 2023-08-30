@@ -3,9 +3,9 @@
 
 import { Feature, INativeToken, TokenScheme, UnlockCondition } from '../';
 
-/** An alias output */
-export interface BuildAliasOutputData extends BuildBasicOutputData {
-    aliasId: string;
+/** An account output */
+export interface BuildAccountOutputData extends BuildBasicOutputData {
+    accountId: string;
     stateIndex?: number;
     stateMetadata?: Uint8Array;
     foundryCounter?: number;
