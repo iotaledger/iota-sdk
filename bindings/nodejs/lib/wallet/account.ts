@@ -265,7 +265,7 @@ export class Account {
      * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
-     * @param params FConsolidation options.
+     * @param params Consolidation options.
      * @returns The prepared consolidation transaction.
      */
     async prepareConsolidateOutputs(
