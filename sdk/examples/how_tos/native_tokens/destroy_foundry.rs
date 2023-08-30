@@ -12,11 +12,7 @@
 //! cargo run --release --all-features --example destroy_foundry
 //! ```
 
-use iota_sdk::{
-    types::block::output::TokenId,
-    wallet::{account::types::NativeTokensBalance, Result},
-    Wallet,
-};
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -33,11 +29,11 @@ async fn main() -> Result<()> {
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
+    let foundry_count = balance.foundries().len();
+    println!("Foundries before destroying: {foundry_count}");
+
     // We try to destroy the first foundry in the account
     if let Some(foundry_id) = balance.foundries().first() {
-        let foundry_count = balance.foundries().len();
-        println!("Foundries before destroying: {foundry_count}");
-
         let token_id = TokenId::from(*foundry_id);
 
         // Set the stronghold password
@@ -46,7 +42,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Find the native tokens balance for this foundry if one exists.
-        let native_tokens: Option<&NativeTokensBalance> = balance
+        let native_tokens = balance
             .native_tokens()
             .iter()
             .find(|native_token| *native_token.token_id() == token_id);
@@ -54,8 +50,8 @@ async fn main() -> Result<()> {
             let output = account.get_foundry_output(token_id).await?;
             // Check if all tokens are melted.
             if native_token.available() != output.as_foundry().token_scheme().as_simple().circulating_supply() {
-                // We are not able to melt all tokens, because we dont own them or they are not unlocked.
-                println!("We dont own all remaining tokens, aborting foundry destruction.");
+                // We are not able to melt all tokens, because we don't own them or they are not unlocked.
+                println!("We don't own all remaining tokens, aborting foundry destruction.");
                 return Ok(());
             }
 
@@ -96,6 +92,7 @@ async fn main() -> Result<()> {
 
         // Resync to update the foundries list.
         let balance = account.sync(None).await?;
+
         let foundry_count = balance.foundries().len();
         println!("Foundries after destroying: {foundry_count}");
     } else {
