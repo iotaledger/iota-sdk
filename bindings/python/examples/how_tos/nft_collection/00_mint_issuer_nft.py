@@ -28,8 +28,7 @@ params = MintNftParams(
 )
 
 
-prepared = account.prepare_mint_nfts([params])
-transaction = prepared.send()
+transaction = account.mint_nfts([params])
 
 # Wait for transaction to get included
 block_id = account.retry_transaction_until_included(transaction.transactionId)
