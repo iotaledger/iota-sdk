@@ -76,9 +76,8 @@ async fn main() -> Result<()> {
         }
         println!("Destroying foundry..");
 
-        let transaction = account.prepare_burn(*foundry_id, None).await?;
+        let transaction = account.burn(*foundry_id, None).await?;
 
-        let transaction = account.sign_and_submit_transaction(transaction, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account
