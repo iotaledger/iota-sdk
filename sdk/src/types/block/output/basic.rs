@@ -8,7 +8,7 @@ use packable::Packable;
 use super::{
     rent::{RentBuilder, RentCost},
     unlock_condition::StorageDepositReturnUnlockCondition,
-    verify_output_amount_packable,
+    verify_output_amount_packable, AddressUnlockCondition,
 };
 use crate::types::{
     block::{
@@ -172,18 +172,32 @@ impl BasicOutputBuilder {
                 let rent_cost = self.rent_cost(rent_structure);
                 // Check whether we already have enough funds to cover it
                 if amount < rent_cost {
+                    // Get the projected rent cost of the return output
+                    let return_rent_cost = Self::new_with_amount(0)
+                        .add_unlock_condition(AddressUnlockCondition::new(return_address))
+                        .rent_cost(rent_structure);
                     // Add a temporary storage deposit unlock condition so the new rent requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         return_address,
                         0,
                         token_supply,
                     )?);
-                    let rent_cost = self.rent_cost(rent_structure);
+                    // Get the rent cost of the output with the added storage deposit return unlock condition
+                    let rent_cost_with_sdruc = self.rent_cost(rent_structure);
+                    // If the return rent cost and amount are less than the required min
+                    let (amount, sdruc_amount) = if rent_cost_with_sdruc >= return_rent_cost + amount {
+                        // Then sending rent_cost_with_sdruc covers both minimum requirements
+                        (rent_cost_with_sdruc, rent_cost_with_sdruc - amount)
+                    } else {
+                        // Otherwise we must use the total of the return minimum and the original amount
+                        // which is unfortunately more than the rent_cost_with_sdruc
+                        (return_rent_cost + amount, return_rent_cost)
+                    };
                     // Add the required storage deposit unlock condition and the additional rent amount
-                    self.with_amount(rent_cost)
+                    self.with_amount(amount)
                         .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             return_address,
-                            rent_cost - amount,
+                            sdruc_amount,
                             token_supply,
                         )?)
                 } else {
