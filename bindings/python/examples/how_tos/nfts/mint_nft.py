@@ -24,5 +24,5 @@ outputs = [MintNftParams(
     immutableMetadata=utf8_to_hex("some immutable nft metadata"),
 )]
 
-transaction = account.prepare_mint_nfts(outputs).send()
+transaction = account.mint_nfts(outputs)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
