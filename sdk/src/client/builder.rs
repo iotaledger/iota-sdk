@@ -6,7 +6,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
-use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
+use super::{constants::MAX_PARALLEL_API_REQUESTS, node_manager::builder::NodeManagerBuilder, ClientInner};
 #[cfg(feature = "mqtt")]
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
@@ -17,6 +17,7 @@ use crate::{
             builder::validate_url,
             node::{Node, NodeAuth},
         },
+        worker::WorkerPool,
         Client,
     },
     types::block::protocol::ProtocolParameters,
@@ -48,6 +49,8 @@ pub struct ClientBuilder {
     #[cfg(not(target_family = "wasm"))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pow_worker_count: Option<usize>,
+    #[serde(default = "default_max_parallel_api_requests")]
+    pub max_parallel_api_requests: usize,
 }
 
 fn default_api_timeout() -> Duration {
@@ -56,6 +59,10 @@ fn default_api_timeout() -> Duration {
 
 fn default_remote_pow_timeout() -> Duration {
     DEFAULT_REMOTE_POW_API_TIMEOUT
+}
+
+fn default_max_parallel_api_requests() -> usize {
+    MAX_PARALLEL_API_REQUESTS
 }
 
 impl Default for NetworkInfo {
@@ -82,6 +89,7 @@ impl Default for ClientBuilder {
             remote_pow_timeout: DEFAULT_REMOTE_POW_API_TIMEOUT,
             #[cfg(not(target_family = "wasm"))]
             pow_worker_count: None,
+            max_parallel_api_requests: MAX_PARALLEL_API_REQUESTS,
         }
     }
 }
@@ -269,6 +277,7 @@ impl ClientBuilder {
                 sender: RwLock::new(mqtt_event_tx),
                 receiver: RwLock::new(mqtt_event_rx),
             },
+            worker_pool: WorkerPool::new(self.max_parallel_api_requests),
         });
 
         client_inner.sync_nodes(&nodes, ignore_node_health).await?;
@@ -311,6 +320,7 @@ impl ClientBuilder {
                     receiver: RwLock::new(mqtt_event_rx),
                 },
                 last_sync: tokio::sync::Mutex::new(None),
+                worker_pool: WorkerPool::new(self.max_parallel_api_requests),
             }),
         };
 
@@ -327,6 +337,7 @@ impl ClientBuilder {
             remote_pow_timeout: client.get_remote_pow_timeout().await,
             #[cfg(not(target_family = "wasm"))]
             pow_worker_count: *client.pow_worker_count.read().await,
+            max_parallel_api_requests: client.worker_pool.size().await,
         }
     }
 }

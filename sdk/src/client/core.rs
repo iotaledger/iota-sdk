@@ -13,6 +13,8 @@ use {
     tokio::sync::watch::{Receiver as WatchReceiver, Sender as WatchSender},
 };
 
+pub use super::worker::TaskPriority;
+use super::worker::WorkerPool;
 #[cfg(target_family = "wasm")]
 use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
@@ -56,6 +58,7 @@ pub struct ClientInner {
     pub(crate) mqtt: MqttInner,
     #[cfg(target_family = "wasm")]
     pub(crate) last_sync: tokio::sync::Mutex<Option<u32>>,
+    pub(crate) worker_pool: WorkerPool,
 }
 
 #[derive(Default)]
@@ -94,6 +97,28 @@ impl Client {
     /// Create the builder to instantiate the IOTA Client.
     pub fn builder() -> ClientBuilder {
         ClientBuilder::new()
+    }
+
+    pub async fn rate_limit<F, Fut>(&self, f: F) -> Fut::Output
+    where
+        F: 'static + Send + Sync + FnOnce(Self) -> Fut,
+        Fut: futures::Future + Send,
+        Fut::Output: Send,
+    {
+        self.prioritized_rate_limit(TaskPriority::Medium, f).await
+    }
+
+    pub async fn prioritized_rate_limit<F, Fut>(&self, priority: TaskPriority, f: F) -> Fut::Output
+    where
+        F: 'static + Send + Sync + FnOnce(Self) -> Fut,
+        Fut: futures::Future + Send,
+        Fut::Output: Send,
+    {
+        let client = self.clone();
+        self.worker_pool
+            .process_task(priority, async move { f(client).await })
+            .await
+            .unwrap() // TODO
     }
 }
 

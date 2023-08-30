@@ -8,11 +8,11 @@ use crate::pow::miner::{Miner, MinerBuilder, MinerCancel};
 #[cfg(target_family = "wasm")]
 use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
-    client::{ClientInner, Error, Result},
+    client::{Client, Error, Result},
     types::block::{parent::Parents, payload::Payload, Block, BlockBuilder, Error as BlockError},
 };
 
-impl ClientInner {
+impl Client {
     /// Finishes the block with local PoW if needed.
     /// Without local PoW, it will finish the block with a 0 nonce.
     pub async fn finish_block_builder(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {

@@ -48,6 +48,7 @@ pub mod storage;
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 pub mod stronghold;
 pub mod utils;
+pub(crate) mod worker;
 
 #[cfg(feature = "mqtt")]
 pub use self::node_api::mqtt;

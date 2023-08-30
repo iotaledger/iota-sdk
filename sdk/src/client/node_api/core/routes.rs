@@ -11,7 +11,7 @@ use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
         node_manager::node::{Node, NodeAuth},
-        Client, ClientInner, Error, Result,
+        Client, Error, Result,
     },
     types::{
         api::core::response::{
@@ -43,7 +43,7 @@ pub struct NodeInfoWrapper {
     pub url: String,
 }
 
-impl ClientInner {
+impl Client {
     // Node routes.
 
     /// Returns the health of the node.
@@ -76,20 +76,14 @@ impl ClientInner {
     pub async fn get_routes(&self) -> Result<RoutesResponse> {
         let path = "api/routes";
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
+        self.get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
     /// Returns general information about the node.
     /// GET /api/core/v2/info
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
-        self.node_manager
-            .read()
-            .await
-            .get_request(INFO_PATH, None, self.get_timeout().await, false, false)
+        self.get_request(INFO_PATH, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -101,9 +95,6 @@ impl ClientInner {
         let path = "api/core/v2/tips";
 
         let response = self
-            .node_manager
-            .read()
-            .await
             .get_request::<TipsResponse>(path, None, self.get_timeout().await, false, false)
             .await?;
 
@@ -126,9 +117,6 @@ impl ClientInner {
 
         // fallback to local PoW if remote PoW fails
         let response = match self
-            .node_manager
-            .read()
-            .await
             .post_request_json::<SubmitBlockResponse>(path, timeout, serde_json::to_value(block_dto)?, local_pow)
             .await
         {
@@ -155,10 +143,7 @@ impl ClientInner {
                 };
                 let block_dto = BlockDto::from(&block_with_local_pow);
 
-                self.node_manager
-                    .read()
-                    .await
-                    .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
+                self.post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
                     .await?
             }
             Err(e) => return Err(e),
@@ -180,9 +165,6 @@ impl ClientInner {
 
         // fallback to local Pow if remote Pow fails
         let response = match self
-            .node_manager
-            .read()
-            .await
             .post_request_bytes::<SubmitBlockResponse>(path, timeout, &block.pack_to_vec(), local_pow)
             .await
         {
@@ -207,10 +189,7 @@ impl ClientInner {
                         return Err(e);
                     }
                 };
-                self.node_manager
-                    .read()
-                    .await
-                    .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
+                self.post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
                     .await?
             }
             Err(e) => return Err(e),
@@ -225,9 +204,6 @@ impl ClientInner {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
         let dto = self
-            .node_manager
-            .read()
-            .await
             .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
@@ -242,11 +218,7 @@ impl ClientInner {
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None, self.get_timeout().await).await
     }
 
     /// Returns the metadata of a block.
@@ -254,11 +226,7 @@ impl ClientInner {
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v2/blocks/{block_id}/metadata");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, true, true)
-            .await
+        self.get_request(path, None, self.get_timeout().await, true, true).await
     }
 
     // UTXO routes.
@@ -269,9 +237,6 @@ impl ClientInner {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
         let response: OutputWithMetadataResponse = self
-            .node_manager
-            .read()
-            .await
             .get_request(path, None, self.get_timeout().await, false, true)
             .await?;
 
@@ -286,11 +251,7 @@ impl ClientInner {
     pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None, self.get_timeout().await).await
     }
 
     /// Get the metadata for a given `OutputId` (TransactionId + output_index).
@@ -298,10 +259,7 @@ impl ClientInner {
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request::<OutputMetadata>(path, None, self.get_timeout().await, false, true)
+        self.get_request::<OutputMetadata>(path, None, self.get_timeout().await, false, true)
             .await
     }
 
@@ -311,9 +269,6 @@ impl ClientInner {
         let path = &"api/core/v2/receipts";
 
         let resp = self
-            .node_manager
-            .read()
-            .await
             .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await?;
 
@@ -326,9 +281,6 @@ impl ClientInner {
         let path = &format!("api/core/v2/receipts/{milestone_index}");
 
         let resp = self
-            .node_manager
-            .read()
-            .await
             .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await?;
 
@@ -341,11 +293,7 @@ impl ClientInner {
     pub async fn get_treasury(&self) -> Result<TreasuryResponse> {
         let path = "api/core/v2/treasury";
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, DEFAULT_API_TIMEOUT, false, false)
-            .await
+        self.get_request(path, None, DEFAULT_API_TIMEOUT, false, false).await
     }
 
     /// Returns the block, as object, that was included in the ledger for a given TransactionId.
@@ -354,9 +302,6 @@ impl ClientInner {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
         let dto = self
-            .node_manager
-            .read()
-            .await
             .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
             .await?;
 
@@ -371,11 +316,7 @@ impl ClientInner {
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None, self.get_timeout().await).await
     }
 
     /// Returns the metadata of the block that was included in the ledger for a given TransactionId.
@@ -383,11 +324,7 @@ impl ClientInner {
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block/metadata");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, true, true)
-            .await
+        self.get_request(path, None, self.get_timeout().await, true, true).await
     }
 
     // Milestones routes.
@@ -398,9 +335,6 @@ impl ClientInner {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
         let dto = self
-            .node_manager
-            .read()
-            .await
             .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
@@ -415,11 +349,7 @@ impl ClientInner {
     pub async fn get_milestone_by_id_raw(&self, milestone_id: &MilestoneId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None, self.get_timeout().await).await
     }
 
     /// Gets all UTXO changes of a milestone by its milestone id.
@@ -427,10 +357,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_id(&self, milestone_id: &MilestoneId) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v2/milestones/{milestone_id}/utxo-changes");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
+        self.get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -440,9 +367,6 @@ impl ClientInner {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
         let dto = self
-            .node_manager
-            .read()
-            .await
             .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
             .await?;
 
@@ -457,11 +381,7 @@ impl ClientInner {
     pub async fn get_milestone_by_index_raw(&self, index: u32) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None, self.get_timeout().await).await
     }
 
     /// Gets all UTXO changes of a milestone by its milestone index.
@@ -469,10 +389,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_index(&self, index: u32) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v2/milestones/by-index/{index}/utxo-changes");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
+        self.get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -483,9 +400,6 @@ impl ClientInner {
         let path = "api/core/v2/peers";
 
         let resp = self
-            .node_manager
-            .read()
-            .await
             .get_request::<Vec<PeerResponse>>(path, None, self.get_timeout().await, false, false)
             .await?;
 

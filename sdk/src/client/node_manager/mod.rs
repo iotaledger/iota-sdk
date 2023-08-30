@@ -11,13 +11,16 @@ pub(crate) mod syncing;
 
 use std::{
     collections::{HashMap, HashSet},
+    fmt::Debug,
     sync::RwLock,
     time::Duration,
 };
 
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
 use self::{http_client::HttpClient, node::Node};
+use super::Client;
 use crate::{
     client::{
         error::{Error, Result},
@@ -42,7 +45,7 @@ pub struct NodeManager {
     pub(crate) http_client: HttpClient,
 }
 
-impl std::fmt::Debug for NodeManager {
+impl Debug for NodeManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("NodeManager");
         d.field("primary_node", &self.primary_node);
@@ -55,6 +58,87 @@ impl std::fmt::Debug for NodeManager {
         d.field("quorum", &self.quorum);
         d.field("min_quorum_size", &self.min_quorum_size);
         d.field("quorum_threshold", &self.quorum_threshold).finish()
+    }
+}
+
+impl Client {
+    pub(crate) async fn get_request<T: DeserializeOwned + Debug + Serialize + Send>(
+        &self,
+        path: &str,
+        query: Option<&str>,
+        timeout: Duration,
+        need_quorum: bool,
+        prefer_permanode: bool,
+    ) -> Result<T> {
+        let path = path.to_owned();
+        let query = query.map(ToOwned::to_owned);
+        self.rate_limit(move |client| async move {
+            client
+                .node_manager
+                .read()
+                .await
+                .get_request(&path, query.as_deref(), timeout, need_quorum, prefer_permanode)
+                .await
+        })
+        .await
+    }
+
+    pub(crate) async fn get_request_bytes(
+        &self,
+        path: &str,
+        query: Option<&str>,
+        timeout: Duration,
+    ) -> Result<Vec<u8>> {
+        let path = path.to_owned();
+        let query = query.map(ToOwned::to_owned);
+        self.rate_limit(move |client| async move {
+            client
+                .node_manager
+                .read()
+                .await
+                .get_request_bytes(&path, query.as_deref(), timeout)
+                .await
+        })
+        .await
+    }
+
+    pub(crate) async fn post_request_bytes<T: DeserializeOwned + Send>(
+        &self,
+        path: &str,
+        timeout: Duration,
+        body: &[u8],
+        local_pow: bool,
+    ) -> Result<T> {
+        let path = path.to_owned();
+        let body = body.to_owned();
+        self.rate_limit(move |client| async move {
+            client
+                .node_manager
+                .read()
+                .await
+                .post_request_bytes(&path, timeout, &body, local_pow)
+                .await
+        })
+        .await
+    }
+
+    pub(crate) async fn post_request_json<T: DeserializeOwned + Send>(
+        &self,
+        path: &str,
+        timeout: Duration,
+        json: Value,
+        local_pow: bool,
+    ) -> Result<T> {
+        let path = path.to_owned();
+        self.rate_limit(move |client| async move {
+            client
+                .node_manager
+                .read()
+                .await
+                .post_request_json(&path, timeout, json, local_pow)
+                .await
+        })
+        .await
     }
 }
 
@@ -164,7 +248,7 @@ impl NodeManager {
         Ok(nodes_with_modified_url)
     }
 
-    pub(crate) async fn get_request<T: serde::de::DeserializeOwned + std::fmt::Debug + serde::Serialize>(
+    pub(crate) async fn get_request<T: DeserializeOwned + Debug + Serialize>(
         &self,
         path: &str,
         query: Option<&str>,
@@ -312,7 +396,7 @@ impl NodeManager {
         Err(error.unwrap())
     }
 
-    pub(crate) async fn post_request_bytes<T: serde::de::DeserializeOwned>(
+    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,
@@ -341,7 +425,7 @@ impl NodeManager {
         Err(error.unwrap())
     }
 
-    pub(crate) async fn post_request_json<T: serde::de::DeserializeOwned>(
+    pub(crate) async fn post_request_json<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,

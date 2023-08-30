@@ -6,7 +6,7 @@
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
 use crate::{
-    client::{ClientInner, Result},
+    client::{Client, Result},
     types::{
         api::plugins::participation::{
             responses::{AddressOutputsResponse, EventsResponse, OutputStatusResponse},
@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-impl ClientInner {
+impl Client {
     /// RouteParticipationEvents is the route to list all events, returning their ID, the event name and status.
     pub async fn events(&self, event_type: Option<ParticipationEventType>) -> Result<EventsResponse> {
         let route = "api/participation/v1/events";
@@ -29,10 +29,7 @@ impl ClientInner {
             ParticipationEventType::Staking => "type=1",
         });
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(route, query, self.get_timeout().await, false, false)
+        self.get_request(route, query, self.get_timeout().await, false, false)
             .await
     }
 
@@ -40,10 +37,7 @@ impl ClientInner {
     pub async fn event(&self, event_id: &ParticipationEventId) -> Result<ParticipationEventData> {
         let route = format!("api/participation/v1/events/{event_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
+        self.get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -55,27 +49,21 @@ impl ClientInner {
     ) -> Result<ParticipationEventStatus> {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(
-                &route,
-                milestone_index.map(|index| index.to_string()).as_deref(),
-                self.get_timeout().await,
-                false,
-                false,
-            )
-            .await
+        self.get_request(
+            &route,
+            milestone_index.map(|index| index.to_string()).as_deref(),
+            self.get_timeout().await,
+            false,
+            false,
+        )
+        .await
     }
 
     /// RouteOutputStatus is the route to get the vote status for a given output ID.
     pub async fn output_status(&self, output_id: &OutputId) -> Result<OutputStatusResponse> {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
+        self.get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -86,10 +74,7 @@ impl ClientInner {
     ) -> Result<AddressStakingStatus> {
         let route = format!("api/participation/v1/addresses/{}", bech32_address.convert()?);
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
+        self.get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -100,10 +85,7 @@ impl ClientInner {
     ) -> Result<AddressOutputsResponse> {
         let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.convert()?);
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
+        self.get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 }
