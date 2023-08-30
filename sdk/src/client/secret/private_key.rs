@@ -100,7 +100,7 @@ impl PrivateKeySecretManager {
     pub fn try_from_b58<T: AsRef<[u8]>>(b58: T) -> Result<Self, Error> {
         let mut bytes = [0u8; ed25519::SecretKey::LENGTH];
 
-        if bs58::decode(b58.as_ref()).onto(bytes).unwrap() != ed25519::SecretKey::LENGTH {
+        if bs58::decode(b58.as_ref()).onto(&mut bytes).unwrap() != ed25519::SecretKey::LENGTH {
             panic!();
         }
 

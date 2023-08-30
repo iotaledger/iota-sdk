@@ -6,7 +6,7 @@ use iota_sdk::client::{
 };
 
 #[tokio::test]
-async fn stronghold_secret_manager_dto() -> Result<()> {
+async fn stronghold_secret_manager() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     let dto = r#"{"stronghold": {"password": "some_hopefully_secure_password", "snapshotPath": "snapshot_test_dir/test.stronghold"}}"#;
@@ -35,7 +35,7 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
 
     assert_eq!(
         addresses[0],
-        "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a".to_string()
+        "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a"
     );
 
     // Calling store_mnemonic() twice should fail, because we would otherwise overwrite the stored entry

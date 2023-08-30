@@ -6,7 +6,7 @@ use iota_sdk::client::{
 };
 
 #[tokio::test]
-async fn mnemonic_secret_manager_dto() -> Result<()> {
+async fn mnemonic_secret_manager() -> Result<()> {
     let dto = r#"{"mnemonic": "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast"}"#;
     let secret_manager: SecretManager = dto.parse()?;
 
@@ -22,7 +22,7 @@ async fn mnemonic_secret_manager_dto() -> Result<()> {
 
     assert_eq!(
         addresses[0],
-        "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a".to_string()
+        "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a"
     );
 
     Ok(())

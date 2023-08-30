@@ -148,6 +148,32 @@ pub enum SecretManager {
     Placeholder,
 }
 
+#[cfg(feature = "stronghold")]
+impl From<StrongholdSecretManager> for SecretManager {
+    fn from(secret_manager: StrongholdSecretManager) -> Self {
+        Self::Stronghold(secret_manager)
+    }
+}
+
+#[cfg(feature = "ledger_nano")]
+impl From<LedgerSecretManager> for SecretManager {
+    fn from(secret_manager: LedgerSecretManager) -> Self {
+        Self::LedgerNano(secret_manager)
+    }
+}
+
+impl From<MnemonicSecretManager> for SecretManager {
+    fn from(secret_manager: MnemonicSecretManager) -> Self {
+        Self::Mnemonic(secret_manager)
+    }
+}
+
+impl From<PrivateKeySecretManager> for SecretManager {
+    fn from(secret_manager: PrivateKeySecretManager) -> Self {
+        Self::PrivateKey(Box::new(secret_manager))
+    }
+}
+
 impl Debug for SecretManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
