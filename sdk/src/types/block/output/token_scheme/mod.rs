@@ -45,6 +45,7 @@ impl TokenScheme {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use derive_more::From;
     use serde::{Deserialize, Serialize};

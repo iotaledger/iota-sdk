@@ -137,6 +137,7 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 

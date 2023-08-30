@@ -8,5 +8,8 @@
         "@iota/wallet": "../",
         "dotenv": "^16.0.1",
         "web3": "^1.10.0"
+    },
+    "resolutions": {
+        "tough-cookie": "^4.1.3"
     }
 }

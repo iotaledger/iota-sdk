@@ -31,5 +31,5 @@ for output_id in output_ids:
 transaction = account.claim_outputs(output_ids)
 print(f'Transaction sent: {transaction.transactionId}')
 
-block_id = account.retry_transaction_until_included(transaction)
+block_id = account.retry_transaction_until_included(transaction.transactionId)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

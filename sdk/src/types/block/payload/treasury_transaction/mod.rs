@@ -3,14 +3,11 @@
 
 //! Module describing the treasury payload.
 
-use crate::types::{
-    block::{
-        input::{Input, TreasuryInput},
-        output::{Output, TreasuryOutput},
-        protocol::ProtocolParameters,
-        Error,
-    },
-    ValidationParams,
+use crate::types::block::{
+    input::{Input, TreasuryInput},
+    output::{Output, TreasuryOutput},
+    protocol::ProtocolParameters,
+    Error,
 };
 
 /// [`TreasuryTransactionPayload`] represents a transaction which moves funds from the treasury.
@@ -68,6 +65,7 @@ fn verify_output<const VERIFY: bool>(output: &Output, _: &ProtocolParameters) ->
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
@@ -78,7 +76,7 @@ pub mod dto {
             output::dto::{OutputDto, TreasuryOutputDto},
             Error,
         },
-        TryFromDto,
+        TryFromDto, ValidationParams,
     };
 
     /// The payload type to define a treasury transaction.

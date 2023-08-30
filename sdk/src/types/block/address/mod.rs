@@ -210,6 +210,7 @@ impl From<&Self> for Address {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 

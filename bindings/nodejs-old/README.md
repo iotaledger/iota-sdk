@@ -2,7 +2,7 @@
 
 ## Requirements (only for building the binary yourself)
 
-Ensure you have first installed the required dependencies for the library [here](https://github.com/iotaledger/iota-sdk/blob/dev/README.md) and on Windows also LLVM, our workflow uses `https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. On Windows, you may also need to set an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
+Ensure you have first installed the required dependencies for the library [here](https://github.com/iotaledger/iota-sdk/blob/dev/README.md) and on Windows also LLVM, our workflow uses `https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/LLVM-16.0.6-win64.exe`. On Windows, you may also need to set an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
 ## Installation
 
