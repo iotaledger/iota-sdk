@@ -7,7 +7,7 @@ import {
     AccountMetadata,
     SyncOptions,
     AccountMeta,
-    AccountAddress,
+    Bip44Address,
     SendParams,
     SendNativeTokensParams,
     SendNftParams,
@@ -426,7 +426,7 @@ export class Account {
     async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
-    ): Promise<AccountAddress[]> {
+    ): Promise<Bip44Address[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -643,7 +643,7 @@ export class Account {
      * List all the addresses of the account.
      * @returns The addresses.
      */
-    async addresses(): Promise<AccountAddress[]> {
+    async addresses(): Promise<Bip44Address[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

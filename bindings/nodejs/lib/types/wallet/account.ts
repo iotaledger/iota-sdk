@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountAddress, AddressWithUnspentOutputs } from './address';
+import type { Bip44Address, AddressWithUnspentOutputs } from './address';
 import { AccountId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
@@ -129,8 +129,8 @@ export interface AccountMeta {
     index: number;
     coinType: CoinType;
     alias: string;
-    publicAddresses: AccountAddress[];
-    internalAddresses: AccountAddress[];
+    publicAddresses: Bip44Address[];
+    internalAddresses: Bip44Address[];
     addressesWithUnspentOutputs: AddressWithUnspentOutputs[];
     outputs: { [outputId: string]: OutputData };
     /** Output IDs of unspent outputs that are currently used as input for transactions */
@@ -159,7 +159,7 @@ export interface AccountMetadata {
 export interface CreateAccountPayload {
     alias?: string;
     bech32Hrp?: string;
-    addresses?: AccountAddress[];
+    addresses?: Bip44Address[];
 }
 
 /** Options to filter outputs */
