@@ -117,7 +117,7 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
+     * A generic function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
      * @param burn The outputs to burn
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.

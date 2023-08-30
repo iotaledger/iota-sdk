@@ -80,7 +80,7 @@ class Account:
 
     def burn(
             self, burn: Burn, options: Optional[TransactionOptions] = None) -> Transaction:
-        """A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+        """A generic function that can be used to burn native tokens, nfts, foundries and aliases.
         """
         return self.prepare_burn(burn, options).send()
 

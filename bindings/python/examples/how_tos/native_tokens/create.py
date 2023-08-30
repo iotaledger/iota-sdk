@@ -44,7 +44,7 @@ params = CreateNativeTokenParams(
     utf8_to_hex('Hello, World!'),
 )
 
-prepared_transaction = account.create_native_token(params, None)
+prepared_transaction = account.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
 print(f'Transaction sent: {transaction.transactionId}')
 
