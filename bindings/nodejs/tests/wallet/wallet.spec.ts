@@ -118,9 +118,10 @@ describe('Wallet', () => {
 
         expect(account.getMetadata().index).toStrictEqual(0);
 
-        const client = await wallet.getClient();
-        const hrp = await client.getBech32Hrp();
-        expect(hrp).toEqual("smr");
+        const client = wallet.getClient();
+
+        const localPoW = await client.getLocalPow();
+        expect(localPoW).toBeTruthy();
 
         await wallet.destroy();
 
@@ -164,14 +165,14 @@ describe('Wallet', () => {
         await wallet.destroy();
 
         try {
-            const accounts = await wallet.getAccounts();
+            const _accounts = await wallet.getAccounts();
             throw 'Should return an error because the wallet was destroyed';
         } catch (err: any) {
             expect(err).toContain('Wallet was destroyed');
         }
 
         try {
-            const client = await wallet.getClient();
+            const _client = wallet.getClient();
             throw 'Should return an error because the wallet was destroyed';
         } catch (err: any) {
             expect(err).toContain('Wallet was destroyed');

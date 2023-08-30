@@ -144,7 +144,7 @@ export class Wallet {
     /**
      * Get client.
      */
-    async getClient(): Promise<Client> {
+    getClient(): Client {
         return this.methodHandler.getClient();
     }
 
