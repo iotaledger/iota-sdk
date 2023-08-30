@@ -156,7 +156,9 @@ impl BasicOutputBuilder {
         self
     }
 
-    /// Adds a storage deposit if one is needed to cover the current amount.
+    /// Adds a storage deposit return unlock condition if one is needed to cover the current amount
+    /// (i.e. `amount < rent_cost`). This will increase the total amount to equal the `rent_cost` with
+    /// the additional unlock condition that will return the remainder to the provided `return_address`.
     pub fn with_sufficient_storage_deposit(
         mut self,
         return_address: impl Into<Address>,
