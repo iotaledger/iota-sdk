@@ -84,16 +84,18 @@ export class WalletMethodHandler {
         return destroyWallet(this.methodHandler);
     }
 
-    async getClient(): Promise<Client> {
-        return new Promise((resolve, reject) => {
-            getClientFromWallet(this.methodHandler).then((result: any) => {
-                if (result.message !== undefined) {
-                    reject(JSON.parse(result.message).payload);
-                } else {
-                    resolve(new Client(result));
-                }
-            });
-        });
+    getClient(): Client {
+        try {
+            let result = getClientFromWallet(this.methodHandler);
+            return new Client(result);
+        } catch(error: any) {
+            if (error.message !== undefined) {
+                error = JSON.parse(error.message).payload;
+            } else {
+                error = JSON.parse(error.toString()).payload;
+            }
+            throw error;
+        };
     }
 
     async getSecretManager(): Promise<SecretManager> {

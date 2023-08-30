@@ -200,8 +200,8 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsBox<SharedClientMethodH
             }
         }
         Err(e) => {
-            return cx
-                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
+            cx
+                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"))
         }
     }
 }
