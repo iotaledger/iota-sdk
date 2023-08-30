@@ -58,7 +58,8 @@ async function run() {
             foundryMetadata: utf8ToHex('Hello, World!'),
         };
 
-        const transaction = await account.createNativeToken(params);
+        const prepared = await account.prepareCreateNativeToken(params);
+        const transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
