@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//
-
 use iota_sdk::client::{
     api::GetAddressesOptions,
     constants::SHIMMER_TESTNET_BECH32_HRP,
