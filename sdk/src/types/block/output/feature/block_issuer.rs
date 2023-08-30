@@ -4,6 +4,7 @@
 use alloc::vec::Vec;
 
 use crate::types::block::{
+    output::{rent::RentBuilder, Rent},
     public_key::{PublicKey, PublicKeys},
     slot::SlotIndex,
     Error,
@@ -45,6 +46,18 @@ impl BlockIssuerFeature {
     /// Returns the Block Issuer Keys.
     pub fn public_keys(&self) -> &[PublicKey] {
         &self.public_keys
+    }
+}
+
+impl Rent for BlockIssuerFeature {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Feature Type
+            .data_field::<u8>()
+            // Expiry Slot
+            .data_field::<SlotIndex>()
+            // Public Keys
+            .packable_data_field(&self.public_keys);
     }
 }
 

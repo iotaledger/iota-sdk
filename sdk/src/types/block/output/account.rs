@@ -670,19 +670,19 @@ impl Rent for AccountOutput {
             // Mana
             .data_field::<u64>()
             // Native Tokens
-            .packable_field(&self.native_tokens)
+            .packable_data_field(&self.native_tokens)
             // State Index
             .data_field::<u32>()
             // State Metadata
-            .packable_field(&self.state_metadata)
+            .packable_data_field(&self.state_metadata)
             // Foundry Counter
             .data_field::<u32>()
             // Unlock Conditions
-            .packable_field(&self.unlock_conditions)
+            .packable_data_field(&self.unlock_conditions)
             // Features
-            .packable_field(&self.features)
+            .packable_data_field(&self.features)
             // Immutable Features
-            .packable_field(&self.immutable_features);
+            .packable_data_field(&self.immutable_features);
     }
 }
 

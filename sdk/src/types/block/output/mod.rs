@@ -473,11 +473,11 @@ impl Packable for Output {
 impl Rent for Output {
     fn build_weighted_bytes(&self, rent_structure: &mut RentBuilder) {
         match self {
-            Output::Basic(o) => o.build_weighted_bytes(rent_structure),
-            Output::Account(o) => o.build_weighted_bytes(rent_structure),
-            Output::Foundry(o) => o.build_weighted_bytes(rent_structure),
-            Output::Nft(o) => o.build_weighted_bytes(rent_structure),
-            Output::Delegation(o) => o.build_weighted_bytes(rent_structure),
+            Self::Basic(o) => o.build_weighted_bytes(rent_structure),
+            Self::Account(o) => o.build_weighted_bytes(rent_structure),
+            Self::Foundry(o) => o.build_weighted_bytes(rent_structure),
+            Self::Nft(o) => o.build_weighted_bytes(rent_structure),
+            Self::Delegation(o) => o.build_weighted_bytes(rent_structure),
         }
     }
 }

@@ -6,7 +6,10 @@ use core::ops::RangeInclusive;
 
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
-use crate::types::block::Error;
+use crate::types::block::{
+    output::{rent::RentBuilder, Rent},
+    Error,
+};
 
 pub(crate) type TagFeatureLength =
     BoundedU8<{ *TagFeature::LENGTH_RANGE.start() }, { *TagFeature::LENGTH_RANGE.end() }>;
@@ -18,6 +21,16 @@ pub struct TagFeature(
     // Binary tag.
     pub(crate) BoxedSlicePrefix<u8, TagFeatureLength>,
 );
+
+impl Rent for TagFeature {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        // Feature Type
+        builder
+            .data_field::<u8>()
+            // Tag
+            .packable_data_field(&self.0);
+    }
+}
 
 impl TryFrom<Vec<u8>> for TagFeature {
     type Error = Error;

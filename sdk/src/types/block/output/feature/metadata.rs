@@ -6,7 +6,10 @@ use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
-use crate::types::block::Error;
+use crate::types::block::{
+    output::{rent::RentBuilder, Rent},
+    Error,
+};
 
 pub(crate) type MetadataFeatureLength =
     BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;
@@ -18,6 +21,16 @@ pub struct MetadataFeature(
     // Binary data.
     pub(crate) BoxedSlicePrefix<u8, MetadataFeatureLength>,
 );
+
+impl Rent for MetadataFeature {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        // Feature Type
+        builder
+            .data_field::<u8>()
+            // Data
+            .packable_data_field(&self.0);
+    }
+}
 
 impl TryFrom<Vec<u8>> for MetadataFeature {
     type Error = Error;

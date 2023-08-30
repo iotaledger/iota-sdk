@@ -219,20 +219,19 @@ impl Rent for DelegationOutputBuilder {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
         builder
             // Kind
-            .data_field::<u8>()
+            .delegation_field::<u8>()
             // Amount
-            .data_field::<u64>()
+            .delegation_field::<u64>()
             // Delegated Amount
-            .data_field::<u64>()
+            .delegation_field::<u64>()
             // Delegation ID
-            .data_field::<DelegationId>()
+            .delegation_field::<DelegationId>()
             // Validator ID
-            .data_field::<AccountId>()
+            .delegation_field::<AccountId>()
             // Start Epoch
-            // TODO: Replace these with EpochIndex
-            .data_field::<u64>()
+            .delegation_field::<EpochIndex>()
             // End Epoch
-            .data_field::<u64>()
+            .delegation_field::<EpochIndex>()
             // Unlock Conditions
             .data_field::<u8>()
             .weighted_field(&self.unlock_conditions);
@@ -384,22 +383,21 @@ impl Rent for DelegationOutput {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
         builder
             // Kind
-            .data_field::<u8>()
+            .delegation_field::<u8>()
             // Amount
-            .data_field::<u64>()
+            .delegation_field::<u64>()
             // Delegated Amount
-            .data_field::<u64>()
+            .delegation_field::<u64>()
             // Delegation ID
-            .data_field::<DelegationId>()
+            .delegation_field::<DelegationId>()
             // Validator ID
-            .data_field::<AccountId>()
+            .delegation_field::<AccountId>()
             // Start Epoch
-            // TODO: Replace these with EpochIndex
-            .data_field::<u64>()
+            .delegation_field::<EpochIndex>()
             // End Epoch
-            .data_field::<u64>()
+            .delegation_field::<EpochIndex>()
             // Unlock Conditions
-            .packable_field(&self.unlock_conditions);
+            .packable_data_field(&self.unlock_conditions);
     }
 }
 

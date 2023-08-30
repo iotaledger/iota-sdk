@@ -63,7 +63,14 @@ impl Ord for Feature {
 
 impl Rent for Feature {
     fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
-        builder.packable_field(self);
+        match self {
+            Self::Sender(f) => f.build_weighted_bytes(builder),
+            Self::Issuer(f) => f.build_weighted_bytes(builder),
+            Self::Metadata(f) => f.build_weighted_bytes(builder),
+            Self::Tag(f) => f.build_weighted_bytes(builder),
+            Self::BlockIssuer(f) => f.build_weighted_bytes(builder),
+            Self::Staking(f) => f.build_weighted_bytes(builder),
+        }
     }
 }
 

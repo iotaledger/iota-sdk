@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::slot::EpochIndex;
+use crate::types::block::{
+    output::{rent::RentBuilder, Rent},
+    slot::EpochIndex,
+};
 
 /// Stakes coins to become eligible for committee selection, validate the network and receive Mana rewards.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -53,6 +56,22 @@ impl StakingFeature {
     /// Returns the end epoch of the [`StakingFeature`].
     pub fn end_epoch(&self) -> EpochIndex {
         self.end_epoch
+    }
+}
+
+impl Rent for StakingFeature {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Feature Type
+            .staking_field::<u8>()
+            // Staked Amount
+            .staking_field::<u64>()
+            // Fixed Cost
+            .staking_field::<u64>()
+            // Start Epoch
+            .staking_field::<EpochIndex>()
+            // End Epoch
+            .staking_field::<EpochIndex>();
     }
 }
 

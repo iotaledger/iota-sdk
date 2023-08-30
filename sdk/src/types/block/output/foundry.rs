@@ -518,17 +518,17 @@ impl Rent for FoundryOutput {
             // Amount
             .data_field::<u64>()
             // Native Tokens
-            .packable_field(&self.native_tokens)
+            .packable_data_field(&self.native_tokens)
             // Serial Number
             .data_field::<u32>()
             // Token Scheme
             .data_field::<TokenScheme>()
             // Unlock Conditions
-            .packable_field(&self.unlock_conditions)
+            .packable_data_field(&self.unlock_conditions)
             // Features
-            .packable_field(&self.features)
+            .packable_data_field(&self.features)
             // Immutable Features
-            .packable_field(&self.immutable_features);
+            .packable_data_field(&self.immutable_features);
     }
 }
 

@@ -68,7 +68,7 @@ impl Ord for UnlockCondition {
 
 impl Rent for UnlockCondition {
     fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
-        builder.packable_field(self);
+        builder.packable_data_field(self);
     }
 }
 

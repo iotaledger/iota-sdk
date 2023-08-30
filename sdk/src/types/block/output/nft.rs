@@ -446,13 +446,13 @@ impl Rent for NftOutput {
             // Nft ID
             .data_field::<NftId>()
             // Native Tokens
-            .packable_field(&self.native_tokens)
+            .packable_data_field(&self.native_tokens)
             // Unlock Conditions
-            .packable_field(&self.unlock_conditions)
+            .packable_data_field(&self.unlock_conditions)
             // Features
-            .packable_field(&self.features)
+            .packable_data_field(&self.features)
             // Immutable Features
-            .packable_field(&self.immutable_features);
+            .packable_data_field(&self.immutable_features);
     }
 }
 
