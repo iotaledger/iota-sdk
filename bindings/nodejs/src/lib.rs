@@ -65,6 +65,7 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("getClientFromWallet", wallet::get_client)?;
     cx.export_function("getSecretManagerFromWallet", wallet::get_secret_manager)?;
     cx.export_function("listenWallet", wallet::listen_wallet)?;
+    cx.export_function("migrateDbChrysalisToStardust", wallet::migrate_db_chrysalis_to_stardust)?;
 
     Ok(())
 }
