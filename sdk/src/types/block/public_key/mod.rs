@@ -53,6 +53,8 @@ impl PublicKey {
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     use super::{Ed25519PublicKey, From, PublicKey};
