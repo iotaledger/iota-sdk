@@ -61,6 +61,7 @@ pub(crate) struct AccountDetailsDto {
     native_token_foundries: HashMap<String, Value>,
 }
 
+#[cfg(feature = "rocksdb")]
 pub async fn migrate_db_chrysalis_to_stardust(
     storage_path: impl Into<PathBuf> + Send,
     password: Option<Password>,
@@ -144,11 +145,11 @@ pub(crate) fn migrate_from_chrysalis_data(
     let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
     let mut secret_manager_dto: Option<String> = None;
 
-    let account_indexation_key = key_to_chrysalis_key(b"iota-wallet-account-indexation", stronghold);
+    let account_indexation_key = to_chrysalis_key(b"iota-wallet-account-indexation", stronghold);
     if let Some(account_indexation) = chrysalis_data.get(&account_indexation_key) {
         if let Some(account_keys) = serde_json::from_str::<serde_json::Value>(account_indexation)?.as_array() {
             for account_key in account_keys {
-                let account_key = key_to_chrysalis_key(
+                let account_key = to_chrysalis_key(
                     account_key["key"].as_str().expect("key must be a string").as_bytes(),
                     stronghold,
                 );
@@ -296,10 +297,10 @@ fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wa
     )
     .map_err(|e| Error::Migration(format!("{:?}", e)))?;
 
-    Ok(String::from_utf8_lossy(&pt).to_string())
+    String::from_utf8(pt).map_err(|e| Error::Migration(format!("{:?}", e)))
 }
 
-pub(crate) fn key_to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
+pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
     // key only needs to be hashed for stronghold
     if stronghold {
         let mut buf = [0; 64];

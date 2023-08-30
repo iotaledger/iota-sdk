@@ -6,16 +6,17 @@ use std::{collections::HashMap, path::Path, sync::atomic::Ordering};
 use crate::{
     client::{
         constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter,
+        Error as ClientError,
     },
     types::TryFromDto,
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
         migration::{
-            chrysalis::{key_to_chrysalis_key, migrate_from_chrysalis_data},
+            chrysalis::{migrate_from_chrysalis_data, to_chrysalis_key},
             latest_backup_migration_version, migrate, MigrationData, MIGRATION_VERSION_KEY,
         },
         storage::constants::{CHRYSALIS_STORAGE_KEY, WALLET_INDEXATION_KEY},
-        ClientOptions, Wallet,
+        ClientOptions, Error as WalletError, Wallet,
     },
 };
 
@@ -117,18 +118,16 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
         // `iota-wallet-records` was only used in chrysalis
         Err(iota_stronghold::ClientError::ClientDataNotPresent) => return Ok(None),
         Err(e) => {
-            return Err(crate::wallet::Error::Client(Box::new(
-                crate::client::Error::Stronghold(e.into()),
-            )));
+            return Err(WalletError::Client(Box::new(ClientError::Stronghold(e.into()))));
         }
     };
 
     let stronghold_store = stronghold_client.store();
     let keys = stronghold_store
         .keys()
-        .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
+        .map_err(|e| WalletError::Client(Box::new(ClientError::Stronghold(e.into()))))?;
 
-    let wallet_indexation_key = key_to_chrysalis_key(b"iota-wallet-account-indexation", true);
+    let wallet_indexation_key = to_chrysalis_key(b"iota-wallet-account-indexation", true);
     // check if snapshot contains chrysalis data
     if !keys.iter().any(|k| k == &wallet_indexation_key) {
         return Ok(None);
@@ -138,10 +137,10 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     for key in keys {
         let value = stronghold_store
             .get(&key)
-            .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
+            .map_err(|e| WalletError::Client(Box::new(ClientError::Stronghold(e.into()))))?;
 
         let value_utf8 =
-            String::from_utf8(value.unwrap()).map_err(|_| crate::wallet::Error::Migration("invalid utf8".into()))?;
+            String::from_utf8(value.unwrap()).map_err(|_| WalletError::Migration("invalid utf8".into()))?;
 
         chrysalis_data.insert(key, value_utf8);
     }
@@ -207,13 +206,13 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
     let stronghold = stronghold_adapter.inner().await;
     let stronghold_client = stronghold
         .get_client(b"iota-wallet-records")
-        .map_err(|e| crate::wallet::Error::Client(Box::new(crate::client::Error::Stronghold(e.into()))))?;
+        .map_err(|e| WalletError::Client(Box::new(ClientError::Stronghold(e.into()))))?;
     let stronghold_store = stronghold_client.store();
 
     for key in chrysalis_data.keys() {
         stronghold_store
             .delete(key)
-            .map_err(|_| crate::wallet::Error::Migration("couldn't delete old data".into()))?;
+            .map_err(|_| WalletError::Migration("couldn't delete old data".into()))?;
     }
 
     Ok(Some(chrysalis_data_with_string_keys))
