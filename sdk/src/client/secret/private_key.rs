@@ -102,7 +102,12 @@ impl PrivateKeySecretManager {
     pub fn try_from_b58<T: AsRef<[u8]>>(b58: T) -> Result<Self, Error> {
         let mut bytes = [0u8; ed25519::SecretKey::LENGTH];
 
-        if bs58::decode(b58.as_ref()).onto(&mut bytes).unwrap() != ed25519::SecretKey::LENGTH {
+        // TODO replace with a more fitting variant.
+        if bs58::decode(b58.as_ref())
+            .onto(&mut bytes)
+            .map_err(|_| crypto::Error::PrivateKeyError)?
+            != ed25519::SecretKey::LENGTH
+        {
             // TODO replace with a more fitting variant.
             return Err(crypto::Error::PrivateKeyError.into());
         }
