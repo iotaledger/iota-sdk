@@ -292,7 +292,7 @@ export class Account {
     }
 
     /**
-     * `createAliasOutput` creates an alias output
+     * Creates an alias output.
      * @param params The alias output options.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
