@@ -178,9 +178,12 @@ impl BasicOutputBuilder {
                     )?);
                     let rent_cost = self.rent_cost(rent_structure);
                     // Add the required storage deposit unlock condition and the additional rent amount
-                    self.with_amount(amount + rent_cost).replace_unlock_condition(
-                        StorageDepositReturnUnlockCondition::new(return_address, rent_cost, token_supply)?,
-                    )
+                    self.with_amount(rent_cost)
+                        .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                            return_address,
+                            rent_cost - amount,
+                            token_supply,
+                        )?)
                 } else {
                     self
                 }
