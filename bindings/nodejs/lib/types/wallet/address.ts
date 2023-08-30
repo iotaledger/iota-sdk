@@ -1,6 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { SlotIndex } from '../block/slot';
 import { u256, u64 } from '../utils';
 
 /** An Address of the Account */
@@ -16,7 +17,7 @@ export interface SendParams {
     address: string;
     amount: u64 | string;
     returnAddress?: string;
-    expiration?: number;
+    expiration?: SlotIndex;
 }
 
 /** Address with unspent outputs */
@@ -32,7 +33,7 @@ export interface SendNativeTokensParams {
     address: string;
     nativeTokens: [string, u256][];
     returnAddress?: string;
-    expiration?: number;
+    expiration?: SlotIndex;
 }
 
 /** Address with an NftId */

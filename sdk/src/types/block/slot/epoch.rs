@@ -46,7 +46,7 @@ impl EpochIndex {
     /// Gets the epoch index given a [`SlotIndex`].
     pub fn from_slot_index(
         slot_index: SlotIndex,
-        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u32)>,
+        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u8)>,
     ) -> Result<Self, Error> {
         let mut slot_index = *slot_index;
         let mut res = 0;
