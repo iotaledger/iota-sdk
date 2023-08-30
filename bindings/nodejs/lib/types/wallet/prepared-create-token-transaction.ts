@@ -9,8 +9,12 @@ import { PreparedTransaction } from './prepared-transaction';
  * The class PreparedCreateNativeTokenTransaction represents prepared data for issuing a transaction to create a native token.
  */
 export class PreparedCreateNativeTokenTransaction extends PreparedTransaction {
-    private _tokenId: string;
+    readonly _tokenId: string;
 
+    /**
+     * @param preparedData Prepared data to create a Native Token.
+     * @param account A wallet account.
+     */
     constructor(
         preparedData: PreparedCreateNativeTokenTransactionData,
         account: Account,

@@ -267,7 +267,7 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
         "Failed to convert timestamp to NaiveDateTime".to_string(),
     ))?;
 
-    Ok(DateTime::from_utc(naive_time, Utc))
+    Ok(naive_time.and_utc())
 }
 
 pub async fn check_file_exists(path: &Path) -> Result<(), Error> {

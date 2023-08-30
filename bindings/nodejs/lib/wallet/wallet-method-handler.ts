@@ -24,6 +24,9 @@ import { SecretManager } from '../secret_manager';
 export class WalletMethodHandler {
     methodHandler: any;
 
+    /**
+     * @param options The wallet options.
+     */
     constructor(options?: WalletOptions) {
         const walletOptions = {
             storagePath: options?.storagePath,
@@ -35,6 +38,11 @@ export class WalletMethodHandler {
         this.methodHandler = createWallet(JSON.stringify(walletOptions));
     }
 
+    /**
+     * Call a wallet method on the Rust backend.
+     *
+     * @param method The wallet method to call.
+     */
     async callMethod(method: __Method__): Promise<string> {
         return callWalletMethodAsync(
             // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
@@ -60,6 +68,12 @@ export class WalletMethodHandler {
         });
     }
 
+    /**
+     * Call an account method on the Rust backend.
+     *
+     * @param accountIndex The account index.
+     * @param method The account method to call.
+     */
     async callAccountMethod(
         accountIndex: AccountId,
         method: __AccountMethod__,
@@ -73,6 +87,12 @@ export class WalletMethodHandler {
         });
     }
 
+    /**
+     * Listen to wallet events.
+     *
+     * @param eventTypes The wallet event types to listen for.
+     * @param callback The callback function to call when an event is received.
+     */
     async listen(
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
@@ -84,6 +104,9 @@ export class WalletMethodHandler {
         return destroyWallet(this.methodHandler);
     }
 
+    /**
+     * Get the client associated with the wallet.
+     */
     async getClient(): Promise<Client> {
         return new Promise((resolve, reject) => {
             getClientFromWallet(this.methodHandler).then((result: any) => {
@@ -96,6 +119,9 @@ export class WalletMethodHandler {
         });
     }
 
+    /**
+     * Get the secret manager associated with the wallet.
+     */
     async getSecretManager(): Promise<SecretManager> {
         return new Promise((resolve, reject) => {
             getSecretManagerFromWallet(this.methodHandler).then(
