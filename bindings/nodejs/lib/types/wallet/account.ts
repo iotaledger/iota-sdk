@@ -12,7 +12,7 @@ import { HexEncodedString, u256, u64 } from '../utils';
  * Account identifier
  * Could be the account index (number) or account alias (string)
  */
-export type AccountId = number | string;
+export type AccountIdentifier = number | string;
 
 /** A balance */
 export interface Balance {

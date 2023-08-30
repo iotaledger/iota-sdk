@@ -1,4 +1,4 @@
-import type { AccountId } from '../account';
+import type { AccountIdentifier } from '../account';
 import type {
     __BuildAccountOutputMethod__,
     __BuildBasicOutputMethod__,
@@ -136,7 +136,7 @@ export type __AccountMethod__ =
 export type __CallAccountMethodMethod__ = {
     name: 'callAccountMethod';
     data: {
-        accountId: AccountId;
+        accountId: AccountIdentifier;
         method: __AccountMethod__;
     };
 };
