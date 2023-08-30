@@ -53,35 +53,3 @@ impl Packable for Ed25519PublicKey {
             .map_err(UnpackError::Packable)
     }
 }
-
-pub(crate) mod dto {
-    use alloc::string::String;
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::Error;
-
-    /// Defines an Ed25519 public key.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct Ed25519PublicKeyDto {
-        pub public_key: String,
-    }
-
-    impl From<&Ed25519PublicKey> for Ed25519PublicKeyDto {
-        fn from(value: &Ed25519PublicKey) -> Self {
-            Self {
-                public_key: prefix_hex::encode(value.0.as_slice()),
-            }
-        }
-    }
-
-    impl TryFrom<Ed25519PublicKeyDto> for Ed25519PublicKey {
-        type Error = Error;
-
-        fn try_from(value: Ed25519PublicKeyDto) -> Result<Self, Self::Error> {
-            Self::try_from_bytes(prefix_hex::decode(value.public_key).map_err(|_| Error::InvalidField("publicKey"))?)
-        }
-    }
-}

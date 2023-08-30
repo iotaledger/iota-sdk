@@ -55,20 +55,20 @@ impl PublicKey {
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
-    use super::{ed25519::dto::Ed25519PublicKeyDto, *};
+    use super::{Ed25519PublicKey, From, PublicKey};
     use crate::types::block::Error;
 
     /// Describes all the different public key types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
     pub enum PublicKeyDto {
-        Ed25519(Ed25519PublicKeyDto),
+        Ed25519(String),
     }
 
     impl From<&PublicKey> for PublicKeyDto {
         fn from(value: &PublicKey) -> Self {
             match value {
-                PublicKey::Ed25519(s) => Self::Ed25519(s.into()),
+                PublicKey::Ed25519(s) => Self::Ed25519(prefix_hex::encode(s.as_slice())),
             }
         }
     }
@@ -78,12 +78,48 @@ pub(crate) mod dto {
 
         fn try_from(value: PublicKeyDto) -> Result<Self, Self::Error> {
             match value {
-                PublicKeyDto::Ed25519(s) => Ok(Self::Ed25519(s.try_into()?)),
+                PublicKeyDto::Ed25519(s) => Ok(Self::Ed25519(Ed25519PublicKey::try_from_bytes(
+                    prefix_hex::decode(s).map_err(|_| Error::InvalidField("publicKey"))?,
+                )?)),
             }
         }
     }
 
-    impl_serde_typed_enum_dto!(PublicKey, PublicKeyDto, "public key");
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct TypedDto {
+        #[serde(rename = "type")]
+        kind: u8,
+        public_key: PublicKeyDto,
+    }
+
+    impl<'de> Deserialize<'de> for PublicKey {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let dto = <TypedDto>::deserialize(d)?;
+            // As long as we only have a single PublicKey variant, it's safe to do it like this.
+            if dto.kind != Ed25519PublicKey::KIND {
+                return Err(serde::de::Error::custom(alloc::format!(
+                    "invalid public key type: expected {}, found {}",
+                    Ed25519PublicKey::KIND,
+                    dto.kind
+                )));
+            }
+            dto.public_key.try_into().map_err(serde::de::Error::custom)
+        }
+    }
+
+    impl Serialize for PublicKey {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            let typed_dto = TypedDto {
+                kind: self.kind(),
+                public_key: <PublicKeyDto>::from(self),
+            };
+            typed_dto.serialize(s)
+        }
+    }
 }
 
 pub(crate) type PublicKeyCount = BoundedU8<{ *PublicKeys::COUNT_RANGE.start() }, { *PublicKeys::COUNT_RANGE.end() }>;

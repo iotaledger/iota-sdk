@@ -199,36 +199,3 @@ macro_rules! impl_serde_typed_dto {
         }
     };
 }
-
-#[macro_export]
-macro_rules! impl_serde_typed_enum_dto {
-    ($base:ty, $dto:ty, $type_str:literal) => {
-        #[derive(Debug, Serialize, Deserialize)]
-        struct TypedDto {
-            #[serde(rename = "type")]
-            kind: u8,
-            #[serde(flatten)]
-            value: $dto,
-        }
-
-        impl<'de> Deserialize<'de> for $base {
-            fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-                let dto = <TypedDto>::deserialize(d)?;
-                dto.value.try_into().map_err(serde::de::Error::custom)
-            }
-        }
-
-        impl Serialize for $base {
-            fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-            where
-                S: serde::Serializer,
-            {
-                let typed_dto = TypedDto {
-                    kind: self.kind(),
-                    value: <$dto>::from(self),
-                };
-                typed_dto.serialize(s)
-            }
-        }
-    };
-}
