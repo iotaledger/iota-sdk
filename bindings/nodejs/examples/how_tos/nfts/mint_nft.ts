@@ -60,9 +60,7 @@ async function run() {
             issuer: senderAddress,
             immutableMetadata: NFT1_IMMUTABLE_METADATA,
         };
-        const prepared = await account.prepareMintNfts([params]);
-
-        let transaction = await prepared.send();
+        let transaction = await account.mintNfts([params]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included

@@ -50,9 +50,7 @@ async function run() {
         console.log('Sending the create-alias transaction...');
 
         // Create an alias
-        const transaction = await account
-            .prepareCreateAliasOutput()
-            .then((prepared) => prepared.send());
+        const transaction = await account.createAliasOutput();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

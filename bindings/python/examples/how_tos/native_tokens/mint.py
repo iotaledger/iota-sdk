@@ -29,8 +29,8 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 mint_amount = 10
 
-# Prepare and send transaction.
-transaction = account.prepare_mint_native_token(token_id, mint_amount).send()
+# Send transaction.
+transaction = account.mint_native_token(token_id, mint_amount)
 print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included

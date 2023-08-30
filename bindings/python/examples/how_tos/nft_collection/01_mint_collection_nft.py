@@ -63,8 +63,7 @@ while nft_mint_params:
     chunk, nft_mint_params = nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION], nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:]
     print(
         f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})')
-    prepared = account.prepare_mint_nfts(chunk)
-    transaction = prepared.send()
+    transaction = account.mint_nfts(chunk)
 
     # Wait for transaction to get included
     block_id = account.retry_transaction_until_included(
