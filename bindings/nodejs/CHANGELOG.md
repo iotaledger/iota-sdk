@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `Account::{burn(), consolidateOutputs(), createAliasOutput(), meltNativeToken(), mintNativeToken(), createNativeToken(), mintNfts(), transaction(), sendNativeTokens(), sendNft()}` methods;
+- `Account::{burn(), consolidateOutputs(), createAliasOutput(), meltNativeToken(), mintNativeToken(), createNativeToken(), mintNfts(), sendTransaction(), sendNativeTokens(), sendNft()}` methods;
 
 ## 1.0.7 - 2023-08-29
 
