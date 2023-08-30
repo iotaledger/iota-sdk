@@ -117,9 +117,9 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
-     * @param burn The outputs to burn
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+     * @param burn The outputs or native tokens to burn
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
      */
@@ -132,8 +132,8 @@ export class Account {
 
     /**
      * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
-     * @param burn The outputs to burn
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param burn The outputs or native tokens to burn
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -166,7 +166,7 @@ export class Account {
      * recommended to use melting, if the foundry output is available.
      * @param tokenId The native token id.
      * @param burnAmount The to be burned amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -199,7 +199,7 @@ export class Account {
     /**
      * Burn an nft output.
      * @param nftId The NftId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -252,8 +252,7 @@ export class Account {
      * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
-     * @param force Force consolidation on addresses where the threshold isn't met.
-     * @param outputConsolidationThreshold A default threshold is used if this is omitted.
+     * @param params Consolidation options.
      * @returns The consolidation transaction.
      */
     async consolidateOutputs(
@@ -266,8 +265,7 @@ export class Account {
      * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
-     * @param force Force consolidation on addresses where the threshold isn't met.
-     * @param outputConsolidationThreshold A default threshold is used if this is omitted.
+     * @param params FConsolidation options.
      * @returns The prepared consolidation transaction.
      */
     async prepareConsolidateOutputs(
@@ -294,7 +292,7 @@ export class Account {
     /**
      * Creates an alias output.
      * @param params The alias output options.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
      */
@@ -310,7 +308,7 @@ export class Account {
     /**
      * `createAliasOutput` creates an alias output
      * @param params The alias output options.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -342,7 +340,7 @@ export class Account {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
      */
@@ -365,7 +363,7 @@ export class Account {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -418,7 +416,7 @@ export class Account {
      * Destroy an alias output.
      *
      * @param aliasId The AliasId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -452,7 +450,7 @@ export class Account {
      * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias.
      *
      * @param foundryId The FoundryId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -863,7 +861,7 @@ export class Account {
      *
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The minting transaction.
      */
@@ -886,7 +884,7 @@ export class Account {
      *
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared minting transaction.
      */
@@ -920,9 +918,9 @@ export class Account {
      * Create a native token.
      *
      * @param params The options for creating a native token.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The creating transaction and the token ID.
+     * @returns The created transaction.
      */
     async createNativeToken(
         params: CreateNativeTokenParams,
@@ -937,9 +935,9 @@ export class Account {
      * Create a native token.
      *
      * @param params The options for creating a native token.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The creating transaction and the token ID.
+     * @returns The created transaction and the token ID.
      */
     async prepareCreateNativeToken(
         params: CreateNativeTokenParams,
@@ -978,7 +976,7 @@ export class Account {
      * Mint NFTs.
      *
      * @param params The options for minting nfts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The minting transaction.
      */
@@ -993,7 +991,7 @@ export class Account {
      * Mint NFTs.
      *
      * @param params The options for minting nfts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared minting transaction.
      */
@@ -1031,7 +1029,7 @@ export class Account {
      * storage deposit will be sent to the recipient. When the assets contain
      * an nft id, the data from the existing `NftOutput` will be used, just with
      * the address unlock conditions replaced.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared output.
      */
@@ -1061,7 +1059,7 @@ export class Account {
      * Prepare to send base coins, useful for offline signing.
      *
      * @param params Address with amounts to send.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -1097,11 +1095,11 @@ export class Account {
      * Send a transaction.
      *
      * @param outputs Outputs to use in the transaction.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The transaction data.
      */
-    async transaction(
+    async sendTransaction(
         outputs: Output[],
         options?: TransactionOptions,
     ): Promise<Transaction> {
@@ -1112,7 +1110,7 @@ export class Account {
      * Prepare a transaction, useful for offline signing.
      *
      * @param outputs Outputs to use in the transaction.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -1188,7 +1186,7 @@ export class Account {
      *
      * @param amount Amount of coins.
      * @param address Receiving address.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1219,7 +1217,7 @@ export class Account {
      * Send base coins with amounts from input addresses.
      *
      * @param params Addresses with amounts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1250,7 +1248,7 @@ export class Account {
      * Send native tokens.
      *
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
      */
@@ -1267,7 +1265,7 @@ export class Account {
      * Send native tokens.
      *
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -1298,7 +1296,7 @@ export class Account {
      * Send NFT.
      *
      * @param params Addresses and nft ids.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
      */
@@ -1313,7 +1311,7 @@ export class Account {
      * Send NFT.
      *
      * @param params Addresses and nft ids.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -1344,7 +1342,7 @@ export class Account {
      * Send outputs in a transaction.
      *
      * @param outputs The outputs to send.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
