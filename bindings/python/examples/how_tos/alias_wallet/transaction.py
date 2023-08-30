@@ -34,7 +34,8 @@ alias_address = Utils.alias_id_to_bech32(
 
 # Find first output unlockable by the alias address
 query_parameters = NodeIndexerAPI.QueryParameters(alias_address)
-transaction_input = wallet.get_client().basic_output_ids(query_parameters).items[0]
+transaction_input = wallet.get_client(
+).basic_output_ids(query_parameters).items[0]
 
 params = [SendParams(
     address='rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu',
