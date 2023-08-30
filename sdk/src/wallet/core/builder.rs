@@ -287,6 +287,7 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::Deserialize;
 

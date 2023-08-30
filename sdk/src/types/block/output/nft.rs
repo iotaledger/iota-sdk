@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -483,8 +483,12 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
     verify_allowed_unlock_conditions(unlock_conditions, NftOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
+    use alloc::{
+        string::{String, ToString},
+        vec::Vec,
+    };
 
     use serde::{Deserialize, Serialize};
 

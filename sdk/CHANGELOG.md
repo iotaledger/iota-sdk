@@ -19,12 +19,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.0 - 2023-MM-DD
+
+### Added
+
+- `Wallet::get_or_create_account` convenience method;
+- `Output::kind_str()` method;
+- `ConflictReason` display implementation with an explanation of the conflict;
+
+### Changed
+
+- `StrongholdAdapterBuilder` updated to be slightly more ergonomic;
+- `Wallet::{set_stronghold_password, change_stronghold_password, set_stronghold_password_clear_interval, store_mnemonic}` return an `Err` instead of `Ok` in case of a non-stronghold secret manager; 
+
 ## 1.0.3 - 2023-MM-DD
 
 ### Fixed
 
 - `Clients` returning the default protocol parameters when multiple `Client` instances are used;
 - Ledger Nano events properly created when preparing transactions using a `SecretManager`;
+- `Account::prepare_output()` when `ReturnStrategy::Gift` is used with an existing NFT output;
+- `Wallet::restore_backup()` when no secret manager data is stored inside;
+- Migration mismatch from `iota-rs` version;
 
 ## 1.0.2 - 2023-07-28
 

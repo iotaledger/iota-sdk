@@ -7,13 +7,13 @@ import { OutputResponse } from '../models/api';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {
-    /** The transaction is pending */
+    /** The transaction is pending. */
     Pending = 'Pending',
-    /** The transaction is confirmed */
+    /** The transaction is confirmed. */
     Confirmed = 'Confirmed',
-    /** The transaction is conflicting */
+    /** The transaction is conflicting. */
     Conflicting = 'Conflicting',
-    /** The transaction and its in- and outputs are pruned, so it's unknown if it got confirmed or was conflicting */
+    /** The transaction and its in- and outputs are pruned, so it's unknown if it got confirmed or was conflicting. */
     UnknownPruned = 'UnknownPruned',
 }
 
@@ -36,6 +36,10 @@ export class Transaction {
     incoming!: boolean;
     /** Note that can be set when sending a transaction and is only stored locally */
     note?: string;
+    /**
+     * Outputs that are used as input in the transaction.
+     * May not be all, because some may have already been deleted from the node.
+     */
     @Type(() => OutputResponse)
     inputs!: OutputResponse[];
 }

@@ -30,7 +30,7 @@ pub use self::{
     treasury_transaction::TreasuryTransactionPayload,
 };
 use super::protocol::ProtocolParameters;
-use crate::types::{block::Error, ValidationParams};
+use crate::types::block::Error;
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq)]
@@ -213,6 +213,7 @@ impl Packable for OptionalPayload {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
@@ -221,7 +222,7 @@ pub mod dto {
         milestone::dto::MilestonePayloadDto, tagged_data::dto::TaggedDataPayloadDto,
         transaction::dto::TransactionPayloadDto, treasury_transaction::dto::TreasuryTransactionPayloadDto,
     };
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

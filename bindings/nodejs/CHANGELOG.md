@@ -19,19 +19,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.5 - YYYY-MM-DD
+## 1.0.7 - 2023-08-29
 
+### Fixed
+
+- Migration mismatch from `iota-rs` version;
+
+## 1.0.6 - 2023-08-25
+
+### Fixed
+
+- `Account::prepareBurn()` return type;
+- `Wallet::restoreBackup()` when no secret manager data is stored inside;
+
+## 1.0.5 - 2023-08-18
+
+### Added
+
+- Export `ILoggerConfig` from types;
+- Added `Account::prepareIncreaseVotingPower`;
+
+## Changed
+
+- Deprecate `Account::prepareVotingPower`;
+
+### Fixed
+
+- `Account::prepareOutput()` when `ReturnStrategy::Gift` is used with an existing NFT output;
 
 ## 1.0.4 - 2023-08-08
-
-### Changed
-
-- Prevent loading of bindings when importing UTXOInput type (changed UTXOInput.fromOutputId implementation)
 
 ### Fixed
 
 - Missing production profile when no prebuild binary is available;
 - Ledger Nano events properly created when preparing transactions;
+- Prevent loading of bindings when importing UTXOInput type (changed UTXOInput.fromOutputId implementation);
 
 ## 1.0.3 - 2023-07-31
 
