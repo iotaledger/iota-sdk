@@ -9,7 +9,7 @@ import type {
     GenerateAddressOptions,
 } from '../address';
 import type {
-    BuildAliasOutputData,
+    BuildAccountOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
@@ -19,7 +19,7 @@ import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signed-transaction-essence';
 import type {
-    AliasOutputParams,
+    AccountOutputParams,
     CreateNativeTokenParams,
     TransactionOptions,
     MintNftParams,
@@ -32,9 +32,9 @@ import type {
 import type { ConsolidationParams } from '../consolidation-params';
 import { HexEncodedAmount, Output } from '../../';
 
-export type __BuildAliasOutputMethod__ = {
-    name: 'buildAliasOutput';
-    data: BuildAliasOutputData;
+export type __BuildAccountOutputMethod__ = {
+    name: 'buildAccountOutput';
+    data: BuildAccountOutputData;
 };
 
 export type __BuildBasicOutputMethod__ = {
@@ -74,10 +74,10 @@ export type __PrepareConsolidateOutputsMethod__ = {
     };
 };
 
-export type __PrepareCreateAliasOutputMethod__ = {
-    name: 'prepareCreateAliasOutput';
+export type __PrepareCreateAccountOutputMethod__ = {
+    name: 'prepareCreateAccountOutput';
     data: {
-        params?: AliasOutputParams;
+        params?: AccountOutputParams;
         options?: TransactionOptions;
     };
 };

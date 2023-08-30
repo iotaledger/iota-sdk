@@ -7,9 +7,9 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias/destroy.ts
+// yarn run-example ./how_tos/account_output/destroy.ts
 
-// In this example we destroy alias.
+// In this example we destroy an account output.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {
@@ -35,26 +35,26 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
-        if (balance.aliases.length == 0) {
-            throw new Error(`No Alias available in account 'Alice'`);
+        if (balance.accounts.length == 0) {
+            throw new Error(`No Account output available in account 'Alice'`);
         }
 
-        // We try to destroy the first alias in the account
-        const aliasId = balance.aliases[0];
+        // We try to destroy the first account output in the account
+        const accountId = balance.accounts[0];
 
         console.log(
-            `Aliases BEFORE destroying (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts BEFORE destroying (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        console.log('Sending the destroy-alias transaction...');
+        console.log('Sending the destroy-account transaction...');
 
-        // Destroy an alias
+        // Destroy an account output
         const transaction = await account
-            .prepareDestroyAlias(aliasId)
+            .prepareDestroyAccount(accountId)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -66,12 +66,12 @@ async function run() {
         console.log(
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
-        console.log(`Destroyed alias ${aliasId}`);
+        console.log(`Destroyed account output ${accountId}`);
 
         balance = await account.sync();
         console.log(
-            `Aliases AFTER destroying (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts AFTER destroying (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
     } catch (error) {
         console.log('Error: ', error);

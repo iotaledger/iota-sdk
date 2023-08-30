@@ -4,12 +4,11 @@
 import { SlotIndex } from '../block/slot';
 import { u256, u64 } from '../utils';
 
-/** An Address of the Account */
-export interface AccountAddress {
+/** A Bip44 address */
+export interface Bip44Address {
     address: string;
     keyIndex: number;
     internal: boolean;
-    used: boolean;
 }
 
 /** Address with a base token amount */

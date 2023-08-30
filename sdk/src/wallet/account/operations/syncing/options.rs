@@ -51,7 +51,7 @@ pub struct SyncOptions {
     #[serde(default)]
     pub nft: NftSyncOptions,
     /// Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
-    /// `account`, `account` and `nft` options.
+    /// `account`, `alias` and `nft` options.
     #[serde(default = "default_sync_only_most_basic_outputs")]
     pub sync_only_most_basic_outputs: bool,
     /// Sync native token foundries, so their metadata can be returned in the balance.
