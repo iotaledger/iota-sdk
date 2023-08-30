@@ -61,7 +61,8 @@ impl SecretManage for PrivateKeySecretManager {
         _address_indexes: Range<u32>,
         _options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
-        panic!()
+        // TODO replace with a more fitting variant.
+        Err(Error::SecretManagerMismatch)
     }
 
     async fn sign_ed25519(&self, msg: &[u8], _chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
@@ -76,7 +77,8 @@ impl SecretManage for PrivateKeySecretManager {
         _msg: &[u8],
         _chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
-        panic!()
+        // TODO replace with a more fitting variant.
+        Err(Error::SecretManagerMismatch)
     }
 
     async fn sign_transaction_essence(
@@ -101,7 +103,8 @@ impl PrivateKeySecretManager {
         let mut bytes = [0u8; ed25519::SecretKey::LENGTH];
 
         if bs58::decode(b58.as_ref()).onto(&mut bytes).unwrap() != ed25519::SecretKey::LENGTH {
-            panic!();
+            // TODO replace with a more fitting variant.
+            return Err(crypto::Error::PrivateKeyError.into());
         }
 
         let private_key = Self(ed25519::SecretKey::from_bytes(&bytes));
