@@ -27,7 +27,7 @@ async function run() {
 
     migrateDbChrysalisToStardust(walletDbPath, 'password');
 
-    let walletOptions: WalletOptions = {
+    const walletOptions: WalletOptions = {
         storagePath: walletDbPath,
         clientOptions: {
             nodes: [process.env.NODE_URL],
@@ -40,13 +40,13 @@ async function run() {
         },
     };
     console.log(walletOptions);
-    let wallet = new Wallet(walletOptions);
+    const wallet = new Wallet(walletOptions);
 
     // Accounts migrated from the Chrysalis db
-    let accounts = await wallet.getAccounts();
+    const accounts = await wallet.getAccounts();
     console.log(accounts);
 
-    let historicChrysalisData = await wallet.getChrysalisData();
+    const historicChrysalisData = await wallet.getChrysalisData();
     console.log(historicChrysalisData);
 }
 

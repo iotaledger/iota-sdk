@@ -5,5 +5,4 @@ export * from './account';
 export * from './wallet';
 export * from './wallet-method-handler';
 export * from '../types/wallet';
-import { migrateDbChrysalisToStardust } from '../bindings';
-export { migrateDbChrysalisToStardust };
+export { migrateDbChrysalisToStardust } from '../bindings';
