@@ -10,6 +10,9 @@ import { HexEncodedString } from '../../../utils/hex-encoding';
 import { Ed25519Signature } from '../../signature';
 import { Payload, PayloadType } from '../payload';
 
+/**
+ * A milestone payload.
+ */
 class MilestonePayload extends Payload {
     /**
      * The index name.

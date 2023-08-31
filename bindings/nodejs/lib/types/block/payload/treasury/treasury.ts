@@ -4,7 +4,7 @@ import { TreasuryOutput } from '../../output';
 import { Payload, PayloadType } from '../payload';
 
 /**
- * Receipt payload.
+ * A treasury transaction payload.
  */
 class TreasuryTransactionPayload extends Payload {
     /**
@@ -18,6 +18,10 @@ class TreasuryTransactionPayload extends Payload {
     @Type(() => TreasuryOutput)
     output: TreasuryOutput;
 
+    /**
+     * @param input A Treasury input.
+     * @param output A Treasury output.
+     */
     constructor(input: TreasuryInput, output: TreasuryOutput) {
         super(PayloadType.Transaction);
         this.input = input;

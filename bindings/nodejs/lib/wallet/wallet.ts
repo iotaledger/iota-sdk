@@ -22,6 +22,9 @@ import { SecretManager } from '../secret_manager';
 export class Wallet {
     private methodHandler: WalletMethodHandler;
 
+    /**
+     * @param options Wallet options.
+     */
     constructor(options: WalletOptions) {
         this.methodHandler = new WalletMethodHandler(options);
     }

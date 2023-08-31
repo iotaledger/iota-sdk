@@ -279,6 +279,7 @@ fn verify_payload_packable<const VERIFY: bool>(
     verify_payload::<VERIFY>(payload)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::{
         boxed::Box,
