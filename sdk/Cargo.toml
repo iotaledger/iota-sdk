@@ -186,9 +186,9 @@ stronghold = [
     "dep:heck",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
+private_key_secret_manager = ["bs58"]
 
 client = [
-    "bs58",
     "pow",
     "tokio",
     "zeroize",

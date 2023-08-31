@@ -109,6 +109,7 @@ impl Wallet {
                     )
                     .await?
             }
+            #[cfg(feature = "private_key_secret_manager")]
             SecretManager::PrivateKey(private_key) => {
                 private_key
                     .generate_ed25519_addresses(
