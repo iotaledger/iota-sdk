@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `migrate_db_chrysalis_to_stardust()` function;
 - `Wallet::get_chrysalis_data()` method;
+- `PrivateKeySecretManager` and `SecretManager::PrivateKey`;
+- `SecretManager::from` impl for variants;
 
 ### Fixed
 
