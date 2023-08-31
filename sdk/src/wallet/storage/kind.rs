@@ -26,9 +26,9 @@ impl Default for StorageKind {
             if #[cfg(feature = "rocksdb")] {
                 Self::Rocksdb
             } else if #[cfg(feature = "jammdb")] {
-                Self::Jammdb;
+                Self::Jammdb
             } else if #[cfg(target_family = "wasm")] {
-                Self::Wasm;
+                Self::Wasm
             } else {
                 Self::Memory
             }
