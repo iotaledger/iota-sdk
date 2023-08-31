@@ -59,9 +59,8 @@ async function run() {
                 address: accountAddress,
             },
         ];
-        const input = (
-            await wallet.getClient().basicOutputIds(queryParameters)
-        ).items[0];
+        const input = (await wallet.getClient().basicOutputIds(queryParameters))
+            .items[0];
 
         const params = [
             {

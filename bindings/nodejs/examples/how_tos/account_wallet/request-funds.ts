@@ -45,7 +45,10 @@ async function run() {
             accountId,
             await wallet.getClient().getBech32Hrp(),
         );
-        const faucetResponse = await wallet.getClient().requestFundsFromFaucet(faucetUrl, accountAddress);
+
+        const faucetResponse = await wallet
+            .getClient()
+            .requestFundsFromFaucet(faucetUrl, accountAddress);
         console.log(faucetResponse);
 
         await new Promise((resolve) => setTimeout(resolve, 10000));
