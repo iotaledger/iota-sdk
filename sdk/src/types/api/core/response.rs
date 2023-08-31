@@ -3,6 +3,8 @@
 
 use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
+use serde::{Deserialize, Serialize};
+
 use crate::types::block::{
     output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
@@ -14,12 +16,8 @@ use crate::types::block::{
 
 /// Response of GET /api/core/v3/info.
 /// Returns general information about the node.
-#[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InfoResponse {
     pub name: String,
     pub version: String,
@@ -44,7 +42,6 @@ impl InfoResponse {
     }
 }
 
-#[cfg(feature = "serde")]
 impl core::fmt::Display for InfoResponse {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", serde_json::to_string_pretty(self).unwrap())
@@ -53,12 +50,8 @@ impl core::fmt::Display for InfoResponse {
 
 /// Returned in [`InfoResponse`].
 /// Status information about the node.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StatusResponse {
     pub is_healthy: bool,
     #[serde(with = "crate::utils::serde::option_string")]
@@ -169,12 +162,8 @@ mod serde_protocol_params_response {
 
 /// Returned in [`InfoResponse`].
 /// Information about the base token.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BaseTokenResponse {
     pub name: String,
     pub ticker_symbol: String,
@@ -250,12 +239,8 @@ pub struct IssuanceBlockHeaderResponse {
 
 /// Response of POST /api/core/v3/blocks.
 /// Returns the block identifier of the submitted block.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
@@ -322,12 +307,8 @@ pub enum BlockFailureReason {
 
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
 /// Returns the metadata of a block.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     // TODO: verify if really optional: https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
@@ -343,12 +324,8 @@ pub struct BlockMetadataResponse {
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
 /// Returns an output and its metadata.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
     pub metadata: OutputMetadata,
     pub output: OutputDto,
@@ -370,12 +347,8 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
 }
 
 /// Describes the heartbeat of a node.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Heartbeat {
     pub solid_milestone_index: u32,
     pub pruned_milestone_index: u32,
@@ -385,12 +358,8 @@ pub struct Heartbeat {
 }
 
 /// Describes metrics of a gossip stream.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Metrics {
     pub new_blocks: u64,
     pub received_blocks: u64,
@@ -406,20 +375,15 @@ pub struct Metrics {
 }
 
 /// Returns all information about the gossip stream with the peer.
-#[derive(Clone, Debug, Eq, PartialEq, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone, Debug, Eq, PartialEq, Default, Serialize, Deserialize)]
 pub struct Gossip {
     pub heartbeat: Heartbeat,
     pub metrics: Metrics,
 }
 
 /// Describes the relation with the peer.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum Relation {
     Known,
     Unknown,
@@ -430,12 +394,8 @@ pub enum Relation {
 /// - GET /api/core/v3/peer/{peer_id}
 /// - POST /api/core/v3/peers
 /// Returns information about a peer.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PeerResponse {
     pub id: String,
     pub multi_addresses: Vec<String>,
@@ -449,12 +409,8 @@ pub struct PeerResponse {
 
 /// Response of GET /api/routes.
 /// Returns the available API route groups of the node.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RoutesResponse {
     pub routes: Vec<String>,
 }

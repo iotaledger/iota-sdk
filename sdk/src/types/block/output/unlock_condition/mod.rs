@@ -30,10 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::{
-    block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -497,12 +494,13 @@ mod test {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use self::storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From, Serialize, Deserialize)]
     #[serde(untagged)]

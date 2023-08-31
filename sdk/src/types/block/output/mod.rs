@@ -67,10 +67,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
-use crate::types::{
-    block::{address::Address, semantic::ValidationContext, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, semantic::ValidationContext, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -505,6 +502,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
@@ -516,7 +514,7 @@ pub mod dto {
         account::dto::AccountOutputDto, basic::dto::BasicOutputDto, delegation::dto::DelegationOutputDto,
         foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]

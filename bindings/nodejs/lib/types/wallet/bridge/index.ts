@@ -1,9 +1,5 @@
 import type { AccountIdentifier } from '../account';
 import type {
-    __BuildAccountOutputMethod__,
-    __BuildBasicOutputMethod__,
-    __BuildFoundryOutputMethod__,
-    __BuildNftOutputMethod__,
     __PrepareBurnMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
@@ -64,6 +60,7 @@ import type {
     __GetAccountMethod__,
     __GetAccountIndexesMethod__,
     __GetAccountsMethod__,
+    __GetChrysalisDataMethod__,
     __GetLedgerNanoStatusMethod__,
     __GenerateEd25519AddressMethod__,
     __IsStrongholdPasswordAvailableMethod__,
@@ -80,10 +77,6 @@ import type {
 } from './wallet';
 
 export type __AccountMethod__ =
-    | __BuildAccountOutputMethod__
-    | __BuildBasicOutputMethod__
-    | __BuildFoundryOutputMethod__
-    | __BuildNftOutputMethod__
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
@@ -153,6 +146,7 @@ export type __Method__ =
     | __GetAccountMethod__
     | __GetAccountIndexesMethod__
     | __GetAccountsMethod__
+    | __GetChrysalisDataMethod__
     | __GetLedgerNanoStatusMethod__
     | __GenerateEd25519AddressMethod__
     | __IsStrongholdPasswordAvailableMethod__

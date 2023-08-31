@@ -5,45 +5,64 @@ import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
 import { u256 } from '../utils';
 
-/** Options for the transaction creation */
+/** Options for creating a transaction. */
 export interface TransactionOptions {
+    /** The strategy applied for base coin remainders. */
     remainderValueStrategy?: RemainderValueStrategy;
+    /** An optional tagged data payload. */
     taggedDataPayload?: TaggedDataPayload;
-    /** Custom inputs that should be used for the transaction */
+    /**
+     * Custom inputs that should be used for the transaction.
+     * If custom inputs are provided, only those are used.
+     * If also other additional inputs should be used, `mandatoryInputs` should be used instead.
+     */
     customInputs?: string[];
+    /** Inputs that must be used for the transaction. */
     mandatoryInputs?: string[];
+    /** Specifies what needs to be burned during input selection. */
     burn?: Burn;
-    /** Optional note, that is only stored locally */
+    /** Optional note, that is only stored locally. */
     note?: string;
+    /** Whether to allow sending a micro amount. */
     allowMicroAmount: boolean;
 }
 
-/** The RemainderValueStrategy */
+/** The possible remainder value strategies. */
 export type RemainderValueStrategy =
     | ChangeAddress
     | ReuseAddress
     | CustomAddress;
 
-/** ChangeAddress variant of RemainderValueStrategy */
+/**
+ * Allows to move the remainder value to a change address.
+ */
 export type ChangeAddress = {
+    /** The name of the strategy. */
     strategy: 'ChangeAddress';
+    /** Only required for `CustomAddress`. */
     value: null;
 };
 
-/** ReuseAddress variant of RemainderValueStrategy */
+/**
+ * Allows to keep the remainder value on the source address.
+ */
 export type ReuseAddress = {
+    /** The name of the strategy. */
     strategy: 'ReuseAddress';
+    /** Only required for `CustomAddress`. */
     value: null;
 };
 
 /** CustomAddress variant of RemainderValueStrategy */
 export type CustomAddress = {
+    /** The name of the strategy. */
     strategy: 'CustomAddress';
     value: string;
 };
 
-/** Native token options for creating */
+/** Options for creating Native Tokens. */
 export interface CreateNativeTokenParams {
+    /** The account ID of the corresponding Foundry. */
     accountId?: string;
     /** Hex encoded number */
     circulatingSupply: u256;
@@ -53,7 +72,7 @@ export interface CreateNativeTokenParams {
     foundryMetadata?: string;
 }
 
-/** Nft options for minting */
+/** Options for minting NFTs. */
 export interface MintNftParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account

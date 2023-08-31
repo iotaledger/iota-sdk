@@ -50,7 +50,4 @@ jobs:
         uses: taiki-e/install-action@nextest
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: nextest
-          args: run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
+        run: cargo nextest run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
