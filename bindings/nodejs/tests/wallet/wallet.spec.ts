@@ -168,14 +168,14 @@ describe('Wallet', () => {
             const _accounts = await wallet.getAccounts();
             throw 'Should return an error because the wallet was destroyed';
         } catch (err: any) {
-            expect(err).toContain('Wallet was destroyed');
+            expect(err.message).toContain('Wallet was destroyed');
         }
 
         try {
             const _client = wallet.getClient();
             throw 'Should return an error because the wallet was destroyed';
         } catch (err: any) {
-            expect(err).toContain('Wallet was destroyed');
+            expect(err.message).toContain('Wallet was destroyed');
         }
         removeDir(storagePath)
     }, 35000);
