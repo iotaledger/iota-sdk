@@ -13,8 +13,8 @@ mod storage_stub {
         },
         wallet::{
             core::builder::dto::WalletBuilderDto,
-            storage::constants::{CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
-            Wallet, WalletBuilder,
+            storage::constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
+            WalletBuilder,
         },
     };
 
@@ -82,14 +82,6 @@ mod storage_stub {
             let res = storage.get::<WalletBuilderDto>(WALLET_INDEXATION_KEY).await?;
             log::debug!("get_wallet_data {res:?}");
             Ok(res.map(Into::into))
-        }
-    }
-
-    impl Wallet {
-        pub async fn get_chrysalis_data(
-            &self,
-        ) -> crate::wallet::Result<Option<std::collections::HashMap<String, String>>> {
-            self.storage_manager.read().await.get(CHRYSALIS_STORAGE_KEY).await
         }
     }
 }

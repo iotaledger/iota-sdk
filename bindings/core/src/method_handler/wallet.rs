@@ -63,7 +63,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             }
             Response::Accounts(account_dtos)
         }
-        WalletMethod::GetChrysalisData => Response::ChrysalisData(wallet.get_chrysalis_data().await?),
         WalletMethod::CallAccountMethod { account_id, method } => {
             let account = wallet.get_account(account_id).await?;
             call_account_method_internal(&account, method).await?

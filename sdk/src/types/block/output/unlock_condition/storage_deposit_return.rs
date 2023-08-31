@@ -60,6 +60,8 @@ fn verify_amount_packable<const VERIFY: bool>(
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

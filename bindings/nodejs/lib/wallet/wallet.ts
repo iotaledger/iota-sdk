@@ -149,17 +149,6 @@ export class Wallet {
     }
 
     /**
-     * Get chrysalis data.
-     */
-    async getChrysalisData(): Promise<Record<string, string>> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getChrysalisData',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Get secret manager.
      */
     async getSecretManager(): Promise<SecretManager> {

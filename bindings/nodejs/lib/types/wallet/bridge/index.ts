@@ -60,7 +60,6 @@ import type {
     __GetAccountMethod__,
     __GetAccountIndexesMethod__,
     __GetAccountsMethod__,
-    __GetChrysalisDataMethod__,
     __GetLedgerNanoStatusMethod__,
     __GenerateEd25519AddressMethod__,
     __IsStrongholdPasswordAvailableMethod__,
@@ -146,7 +145,6 @@ export type __Method__ =
     | __GetAccountMethod__
     | __GetAccountIndexesMethod__
     | __GetAccountsMethod__
-    | __GetChrysalisDataMethod__
     | __GetLedgerNanoStatusMethod__
     | __GenerateEd25519AddressMethod__
     | __IsStrongholdPasswordAvailableMethod__

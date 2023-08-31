@@ -59,10 +59,6 @@ export type __GetAccountMethod__ = {
     data: { accountId: AccountIdentifier };
 };
 
-export type __GetChrysalisDataMethod__ = {
-    name: 'getChrysalisData';
-};
-
 export type __GetLedgerNanoStatusMethod__ = {
     name: 'getLedgerNanoStatus';
 };

@@ -14,6 +14,7 @@ import {
     Output,
     IRent,
     OutputId,
+    u64,
 } from '../types';
 import {
     AccountId,
@@ -142,7 +143,7 @@ export class Utils {
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: IRent): bigint {
+    static computeStorageDeposit(output: Output, rent: IRent): u64 {
         const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {

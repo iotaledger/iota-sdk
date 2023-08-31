@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
 #[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
@@ -44,6 +43,7 @@ use serde::Serialize;
 use {
     iota_sdk::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
     iota_sdk::wallet::account::{AccountParticipationOverview, ParticipationEventWithNodes},
+    std::collections::HashMap,
 };
 
 use crate::{error::Error, OmittedDebug};
@@ -259,9 +259,6 @@ pub enum Response {
     /// Response for:
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
-    /// Response for:
-    /// - [`GetChrysalisData`](crate::method::WalletMethod::GetChrysalisData)
-    ChrysalisData(Option<HashMap<String, String>>),
     /// Response for:
     /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
     /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)

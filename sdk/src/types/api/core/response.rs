@@ -71,12 +71,8 @@ pub struct StatusResponse {
 
 /// Returned in [`InfoResponse`].
 /// Metric information about the node.
-#[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MetricsResponse {
     #[serde(with = "crate::utils::serde::string")]
     pub blocks_per_second: f64,
@@ -86,12 +82,8 @@ pub struct MetricsResponse {
     pub confirmation_rate: f64,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProtocolParametersResponse {
     pub parameters: ProtocolParameters,
     pub start_epoch: EpochIndex,
@@ -125,7 +117,6 @@ impl ProtocolParametersMap {
     }
 }
 
-#[cfg(feature = "serde")]
 mod serde_protocol_params_response {
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -176,12 +167,8 @@ pub struct BaseTokenResponse {
 
 /// Response of GET /api/core/v3/committee
 /// The validator information of the committee.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CommitteeResponse {
     /// The epoch index of the committee.
     pub epoch_index: EpochIndex,
@@ -196,12 +183,8 @@ pub struct CommitteeResponse {
 }
 
 /// Validator information.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
     /// The account identifier of the validator
     pub account_id: AccountId,
@@ -218,12 +201,8 @@ pub struct CommitteeMember {
 
 /// Response of GET /api/core/v3/blocks/issuance
 /// Information that is ideal for attaching a block in the network.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
     pub strong_parents: StrongParents,
@@ -246,12 +225,8 @@ pub struct SubmitBlockResponse {
 }
 
 /// Describes the state of a block.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum BlockState {
     // Stored but not confirmed.
     Pending,
@@ -266,12 +241,8 @@ pub enum BlockState {
 }
 
 /// Describes the state of a transaction.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum TransactionState {
     // Stored but not confirmed.
     Pending,
@@ -284,12 +255,8 @@ pub enum TransactionState {
 }
 
 /// Describes the reason of a block failure.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde_repr::Serialize_repr, serde_repr::Deserialize_repr)]
+#[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum BlockFailureReason {
@@ -419,12 +386,8 @@ pub struct RoutesResponse {
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 /// - GET /api/core/v3/commitments/by-index/{index}/utxo-changes
 /// Returns all UTXO changes that happened at a specific slot.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
     pub index: u32,
     pub created_outputs: Vec<OutputId>,
@@ -433,12 +396,8 @@ pub struct UtxoChangesResponse {
 
 /// Response of GET /api/core/v3/accounts/{accountId}/congestion.
 /// Provides the cost and readiness to issue estimates.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CongestionResponse {
     /// The slot index for which the congestion estimate is provided.
     pub slot_index: SlotIndex,
@@ -454,12 +413,8 @@ pub struct CongestionResponse {
 
 /// Response of GET /api/core/v3/rewards/{outputId}.
 /// Returns the mana rewards of an account or delegation output.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
     /// The starting epoch index for which the mana rewards are returned.
     pub epoch_start: u64, // TODO: replace with `EpochIndex`
