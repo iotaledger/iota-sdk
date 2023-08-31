@@ -8,5 +8,5 @@ test-threads = "num-cpus"
 slow-timeout = { period = "60s", terminate-after = 2 }
 
 [[profile.ci.overrides]]
-filter = 'test(/^tests::pow::/)'
+filter = 'test(/^pow::/)'
 slow-timeout = "5m"
