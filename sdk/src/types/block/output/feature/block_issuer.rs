@@ -57,7 +57,7 @@ impl Rent for BlockIssuerFeature {
             // Expiry Slot
             .data_field::<SlotIndex>()
             // Public Keys
-            .packable_data_field(&self.public_keys);
+            .packable_block_issuer_key_field(&self.public_keys);
     }
 }
 

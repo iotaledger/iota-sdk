@@ -12,9 +12,17 @@ const FACTOR_KEY: u8 = 10;
 const FACTOR_DATA: u8 = 1;
 const FACTOR_DELEGATION: u8 = 1;
 const FACTOR_STAKING: u8 = 1;
+const FACTOR_BLOCK_ISSUER_KEY: u8 = 1;
 
 fn config() -> RentStructure {
-    RentStructure::new(BYTE_COST, FACTOR_KEY, FACTOR_DATA, FACTOR_DELEGATION, FACTOR_STAKING)
+    RentStructure::new(
+        BYTE_COST,
+        FACTOR_KEY,
+        FACTOR_DATA,
+        FACTOR_DELEGATION,
+        FACTOR_STAKING,
+        FACTOR_BLOCK_ISSUER_KEY,
+    )
 }
 
 fn output_in_range(output: Output, range: std::ops::RangeInclusive<u64>) {
