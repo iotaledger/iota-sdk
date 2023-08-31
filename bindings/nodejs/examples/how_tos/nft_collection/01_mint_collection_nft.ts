@@ -41,7 +41,7 @@ async function run() {
         // Get the id we generated with `00_mint_issuer_nft`
         const issuerNftId: NftId = process.argv[2];
 
-        const bech32Hrp = await (await wallet.getClient()).getBech32Hrp();
+        const bech32Hrp = await wallet.getClient().getBech32Hrp();
         const issuer = Utils.nftIdToBech32(issuerNftId, bech32Hrp);
 
         const nftMintParams = [];

@@ -43,11 +43,9 @@ async function run() {
         // Get Account address
         const accountAddress = Utils.accountIdToBech32(
             accountId,
-            await (await wallet.getClient()).getBech32Hrp(),
+            await wallet.getClient().getBech32Hrp(),
         );
-        const faucetResponse = await (
-            await wallet.getClient()
-        ).requestFundsFromFaucet(faucetUrl, accountAddress);
+        const faucetResponse = await wallet.getClient().requestFundsFromFaucet(faucetUrl, accountAddress);
         console.log(faucetResponse);
 
         await new Promise((resolve) => setTimeout(resolve, 10000));
