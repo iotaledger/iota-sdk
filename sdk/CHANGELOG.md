@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.3 - 2023-MM-DD
 
+### Added
+
+- `migrate_db_chrysalis_to_stardust()` function;
+- `Wallet::get_chrysalis_data()` method;
+- `PrivateKeySecretManager` and `SecretManager::PrivateKey`;
+- `SecretManager::from` impl for variants;
+
 ### Fixed
 
 - `Clients` returning the default protocol parameters when multiple `Client` instances are used;

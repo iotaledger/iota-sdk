@@ -112,7 +112,7 @@ To start using the IOTA SDK in your Rust project, you can include the following 
 
 ```toml
 [dependencies]
-iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
+iota-sdk = { git = "https://github.com/iotaledger/iota-sdk", branch = "develop" }
 ```
 
 ## Client Usage
