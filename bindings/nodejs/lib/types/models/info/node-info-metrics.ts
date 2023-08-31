@@ -6,15 +6,15 @@
  */
 export interface INodeInfoMetrics {
     /**
-     * Blocks per second.
+     * The current rate of new blocks per second.
      */
-    blocksPerSecond: number;
+    blocksPerSecond: string;
     /**
-     * Referenced blocks per second.
+     * The current rate of confirmed blocks per second.
      */
-    referencedBlocksPerSecond: number;
+    confirmedBlocksPerSecond: string;
     /**
-     * The rate at which rates are being referenced.
+     * The ratio of confirmed blocks in relation to new blocks of the last confirmed slot.
      */
-    referencedRate: number;
+    confirmationRate: string;
 }
