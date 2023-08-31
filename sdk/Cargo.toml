@@ -208,6 +208,7 @@ client = [
     "iota-crypto/bip44",
     "iota-crypto/random",
     "dep:pin-project",
+    "rand"
 ]
 wallet = ["client"]
 
