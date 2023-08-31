@@ -6,7 +6,7 @@
  */
 export interface INodeInfoStatus {
     /**
-     * Is the node healthy.
+     * Tells whether the node is healthy or not.
      */
     isHealthy: boolean;
     /**
