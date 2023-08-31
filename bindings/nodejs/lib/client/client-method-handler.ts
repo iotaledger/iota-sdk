@@ -51,9 +51,9 @@ export class ClientMethodHandler {
         ).catch((error: Error) => {
             try {
                 if (error.message !== undefined) {
-                    error = JSON.parse(error.message).payload;
+                    error = Error(JSON.parse(error.message).payload);
                 } else {
-                    error = JSON.parse(error.toString()).payload;
+                    error = Error(JSON.parse(error.toString()).payload);
                 }
             } catch (e) {
                 console.error(e);
