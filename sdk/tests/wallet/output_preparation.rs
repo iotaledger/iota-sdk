@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, TokenId},
+        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
     },
     wallet::{
         account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
@@ -386,6 +386,39 @@ async fn output_preparation() -> Result<()> {
     // address, sdr, expiration
     assert_eq!(output.unlock_conditions().unwrap().len(), 3);
 
+    let output = account
+        .prepare_output(
+            OutputParams {
+                recipient_address,
+                amount: 42600,
+                assets: None,
+                features: Some(Features {
+                    metadata: Some(prefix_hex::encode(b"Large metadata".repeat(100))),
+                    tag: Some(prefix_hex::encode(b"My Tag")),
+                    issuer: None,
+                    sender: None,
+                }),
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Return),
+                    use_excess_if_low: None,
+                }),
+            },
+            None,
+        )
+        .await?;
+    let rent_structure = wallet.client().get_rent_structure().await?;
+    let minimum_storage_deposit = output.rent_cost(rent_structure);
+    assert_eq!(output.amount(), minimum_storage_deposit);
+    assert_eq!(output.amount(), 187900);
+    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    assert_eq!(sdr.amount(), 145300);
+    // address and storage deposit unlock condition, because of the metadata feature block, 42600 is not enough for the
+    // required storage deposit
+    assert_eq!(output.unlock_conditions().unwrap().len(), 2);
+    // metadata and tag features
+    assert_eq!(output.features().unwrap().len(), 2);
+
     tear_down(storage_path)
 }
 
@@ -763,6 +796,73 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance_1 = account_1.sync(None).await?;
     assert!(balance_1.nfts().is_empty());
     assert_eq!(balance_1.base_coin().total(), 0);
+
+    tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
+async fn prepare_existing_nft_output_gift() -> Result<()> {
+    let storage_path = "test-storage/prepare_existing_nft_output_gift";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let accounts = &create_accounts_with_funds(&wallet, 1).await?;
+    let addresses = accounts[0].addresses().await?;
+    let address = addresses[0].address();
+
+    let nft_options = [MintNftParams::new()
+        .with_address(*address)
+        .with_sender(*address)
+        .with_metadata(b"some nft metadata".to_vec())
+        .with_tag(b"some nft tag".to_vec())
+        .with_issuer(*address)
+        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+
+    let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
+    accounts[0]
+        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+
+    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
+
+    let nft = accounts[0]
+        .prepare_output(
+            OutputParams {
+                recipient_address: *address,
+                amount: 0,
+                assets: Some(Assets {
+                    native_tokens: None,
+                    nft_id: Some(nft_id),
+                }),
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Gift),
+                    use_excess_if_low: None,
+                }),
+            },
+            None,
+        )
+        .await?
+        .as_nft()
+        .clone();
+
+    let rent_structure = wallet.client().get_rent_structure().await?;
+    let minimum_storage_deposit = Output::Nft(nft.clone()).rent_cost(rent_structure);
+    assert_eq!(nft.amount(), minimum_storage_deposit);
+
+    assert_eq!(nft.amount(), 52300);
+    assert_eq!(nft.address(), accounts[0].addresses().await?[0].address().as_ref());
+    assert!(nft.features().is_empty());
+    assert_eq!(
+        nft.immutable_features().metadata().unwrap().data(),
+        b"some immutable nft metadata"
+    );
+    assert_eq!(
+        nft.immutable_features().issuer().unwrap().address(),
+        accounts[0].addresses().await?[0].address().as_ref()
+    );
 
     tear_down(storage_path)
 }

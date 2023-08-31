@@ -26,7 +26,8 @@ impl SenderFeature {
     }
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;

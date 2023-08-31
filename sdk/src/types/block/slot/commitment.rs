@@ -4,10 +4,7 @@
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{packer::SlicePacker, Packable, PackableExt};
 
-use crate::{
-    types::block::slot::{RootsId, SlotCommitmentId, SlotIndex},
-    utils::serde::string,
-};
+use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
 
 /// Contains a summary of a slot.
 /// It is linked to the commitment of the previous slot, which forms a commitment chain.
@@ -19,23 +16,23 @@ use crate::{
 )]
 pub struct SlotCommitment {
     // The version of the protocol running.
-    #[serde(rename = "version")]
+    #[cfg_attr(feature = "serde", serde(rename = "version"))]
     protocol_version: u8,
     /// The slot index of this commitment.
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
     /// The commitment ID of the previous slot.
-    #[serde(rename = "prevId")]
+    #[cfg_attr(feature = "serde", serde(rename = "prevId"))]
     previous_slot_commitment_id: SlotCommitmentId,
     /// A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
     roots_id: RootsId,
     /// The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
     /// slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
     /// the switching of a chain.
-    #[serde(with = "string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     cumulative_weight: u64,
     /// Reference Mana Cost (RMC) to be used in the slot with index at `index + Max Committable Age`.
-    #[serde(with = "string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     reference_mana_cost: u64,
 }
 
