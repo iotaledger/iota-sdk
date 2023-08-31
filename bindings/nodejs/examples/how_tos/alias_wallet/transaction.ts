@@ -50,7 +50,7 @@ async function run() {
         // Get Alias address
         const aliasAddress = Utils.aliasIdToBech32(
             aliasId,
-            await (await wallet.getClient()).getBech32Hrp(),
+            await wallet.getClient().getBech32Hrp(),
         );
 
         // Find first output unlockable by the alias address
@@ -60,7 +60,7 @@ async function run() {
             },
         ];
         const input = (
-            await (await wallet.getClient()).basicOutputIds(queryParameters)
+            await wallet.getClient().basicOutputIds(queryParameters)
         ).items[0];
 
         const params = [
