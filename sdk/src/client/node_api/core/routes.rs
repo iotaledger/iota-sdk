@@ -432,19 +432,20 @@ impl Client {
         }
         url.set_path(INFO_PATH);
 
-        let resp: InfoResponse =
-            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
-                .get(
-                    Node {
-                        url,
-                        auth,
-                        disabled: false,
-                    },
-                    DEFAULT_API_TIMEOUT,
-                )
-                .await?
-                .into_json()
-                .await?;
+        let resp = crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
+            .get(
+                Node {
+                    url,
+                    auth,
+                    disabled: false,
+                },
+                DEFAULT_API_TIMEOUT,
+            )
+            .await?;
+        // TODO: don't convert into_text(), but use into_json() directly, only for testing of the private tangle now
+        let node_info = resp.into_text().await?;
+        println!("info response {node_info}");
+        let resp: InfoResponse = serde_json::from_str(&node_info)?;
 
         Ok(resp)
     }
