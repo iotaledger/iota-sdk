@@ -284,6 +284,7 @@ mod test {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
