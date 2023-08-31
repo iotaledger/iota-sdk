@@ -42,6 +42,7 @@ export class WalletMethodHandler {
      * Call a wallet method on the Rust backend.
      *
      * @param method The wallet method to call.
+     * @returns A promise that resolves to a JSON string response holding the result of the wallet method.
      */
     async callMethod(method: __Method__): Promise<string> {
         return callWalletMethodAsync(
@@ -57,9 +58,9 @@ export class WalletMethodHandler {
         ).catch((error: Error) => {
             try {
                 if (error.message !== undefined) {
-                    error = JSON.parse(error.message).payload;
+                    error = Error(JSON.parse(error.message).payload);
                 } else {
-                    error = JSON.parse(error.toString()).payload;
+                    error = Error(JSON.parse(error.toString()).payload);
                 }
             } catch (e) {
                 console.error(e);
