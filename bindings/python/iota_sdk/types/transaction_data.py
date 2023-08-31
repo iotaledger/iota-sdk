@@ -25,6 +25,7 @@ class InputSigningData:
     output_metadata: OutputMetadata
     chain: Optional[Bip44] = None
 
+
 @json
 @dataclass
 class RemainderData:
