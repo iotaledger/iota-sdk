@@ -193,4 +193,42 @@ describe.skip('Main examples', () => {
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
     });
+
+    it('sends a transaction', async () => {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+            range: {
+                start: 1,
+                end: 2,
+            },
+        });
+
+        const blockIdAndBlock = await client.buildAndPostBlock(secretManager, {
+            output: {
+                address: addresses[0],
+                amount: BigInt(1000000),
+            },
+        });
+
+        expect(blockIdAndBlock[0]).toBeValidBlockId();
+    });
+
+    it('destroy', async () => {
+        const client = new Client({
+            nodes: [
+                {
+                    url: process.env.NODE_URL || 'http://localhost:14265',
+                },
+            ],
+            localPow: true,
+        });
+        
+        await client.destroy();
+
+        try {
+            const _info = await client.getInfo();
+            throw 'Should return an error because the client was destroyed';
+        } catch (err: any) {
+            expect(err.message).toContain('Client was destroyed');
+        }
+    })
 });

@@ -39,9 +39,27 @@ export class ClientMethodHandler {
      */
     async callMethod(method: __ClientMethods__): Promise<string> {
         return callClientMethodAsync(
-            JSON.stringify(method),
+            // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
+            JSON.stringify(method, function mapToObject(_key, value) {
+                if (value instanceof Map) {
+                    return Object.fromEntries(value);
+                } else {
+                    return value;
+                }
+            }),
             this.methodHandler,
-        );
+        ).catch((error: Error) => {
+            try {
+                if (error.message !== undefined) {
+                    error = JSON.parse(error.message).payload;
+                } else {
+                    error = JSON.parse(error.toString()).payload;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            return Promise.reject(error);
+        });
     }
 
     /**
