@@ -29,7 +29,9 @@ async function run() {
         const address = (await account.addresses())[0].address;
         console.log(address);
 
-        const faucetResponse = await wallet.getClient().requestFundsFromFaucet(faucetUrl, address);
+        const faucetResponse = await wallet
+            .getClient()
+            .requestFundsFromFaucet(faucetUrl, address);
         console.log(faucetResponse);
     } catch (error) {
         console.error('Error: ', error);

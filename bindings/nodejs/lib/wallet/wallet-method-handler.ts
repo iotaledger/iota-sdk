@@ -109,16 +109,15 @@ export class WalletMethodHandler {
      */
     getClient(): Client {
         try {
-            let result = getClientFromWallet(this.methodHandler);
+            const result = getClientFromWallet(this.methodHandler);
             return new Client(result);
-        } catch(error: any) {
+        } catch (error: any) {
             if (error.message !== undefined) {
-                error = JSON.parse(error.message).payload;
+                throw Error(JSON.parse(error.message).payload);
             } else {
-                error = JSON.parse(error.toString()).payload;
+                throw Error(JSON.parse(error.toString()).payload);
             }
-            throw error;
-        };
+        }
     }
 
     /**
