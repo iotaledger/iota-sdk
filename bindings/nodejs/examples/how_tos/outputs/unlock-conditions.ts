@@ -14,8 +14,8 @@ import {
     SimpleTokenScheme,
     StateControllerAddressUnlockCondition,
     GovernorAddressUnlockCondition,
-    ImmutableAliasAddressUnlockCondition,
-    AliasAddress,
+    ImmutableAccountAddressUnlockCondition,
+    AccountAddress,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -33,7 +33,7 @@ async function run() {
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        const aliasHexAddress = Utils.bech32ToHex(
+        const accountHexAddress = Utils.bech32ToHex(
             'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux',
         );
 
@@ -82,8 +82,8 @@ async function run() {
         });
 
         // Output with governor and state controller unlock condition
-        const aliasOutput = await client.buildAliasOutput({
-            aliasId:
+        const accountOutput = await client.buildAccountOutput({
+            accountId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
                 new GovernorAddressUnlockCondition(
@@ -95,13 +95,13 @@ async function run() {
             ],
         });
 
-        // Output with immutable alias unlock condition
+        // Output with immutable account unlock condition
         const foundryOutput = await client.buildFoundryOutput({
             serialNumber: 1,
             tokenScheme: tokenSchema,
             unlockConditions: [
-                new ImmutableAliasAddressUnlockCondition(
-                    new AliasAddress(aliasHexAddress),
+                new ImmutableAccountAddressUnlockCondition(
+                    new AccountAddress(accountHexAddress),
                 ),
             ],
         });
@@ -113,7 +113,7 @@ async function run() {
                     basicOutputWithStorageReturn,
                     basicOutputWithTimelock,
                     basicOutputWithExpiration,
-                    aliasOutput,
+                    accountOutput,
                     foundryOutput,
                 ],
                 null,

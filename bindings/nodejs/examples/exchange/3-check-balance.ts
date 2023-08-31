@@ -28,7 +28,7 @@ async function run() {
         console.log('Addresses:', addresses);
 
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
-        // have a storage deposit return, expiration or are nft/alias/foundry outputs.
+        // have a storage deposit return, expiration or are nft/account/foundry outputs.
         const balance = await account.sync({ syncOnlyMostBasicOutputs: true });
 
         console.log('Balance', balance);

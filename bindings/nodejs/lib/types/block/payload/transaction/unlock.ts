@@ -10,7 +10,7 @@ import { Ed25519Signature } from '../../signature';
 enum UnlockType {
     Signature = 0,
     Reference = 1,
-    Alias = 2,
+    Account = 2,
     Nft = 3,
 }
 
@@ -62,16 +62,16 @@ class ReferenceUnlock extends Unlock {
 }
 
 /**
- * An unlock which must reference a previous unlock which unlocks the alias that the input is locked to.
+ * An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
  */
-class AliasUnlock extends Unlock {
+class AccountUnlock extends Unlock {
     /**
      * The reference.
      */
     reference: number;
 
     constructor(reference: number) {
-        super(UnlockType.Alias);
+        super(UnlockType.Account);
         this.reference = reference;
     }
 }
@@ -103,8 +103,8 @@ const UnlockDiscriminator = {
             name: UnlockType.Reference as any,
         },
         {
-            value: AliasUnlock,
-            name: UnlockType.Alias as any,
+            value: AccountUnlock,
+            name: UnlockType.Account as any,
         },
         {
             value: NftUnlock,
@@ -118,7 +118,7 @@ export {
     Unlock,
     SignatureUnlock,
     ReferenceUnlock,
-    AliasUnlock,
+    AccountUnlock,
     NftUnlock,
     UnlockDiscriminator,
 };

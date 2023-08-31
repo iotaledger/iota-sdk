@@ -10,12 +10,12 @@ import {
     INode,
     IAuth,
     BasicOutputBuilderParams,
-    AliasOutputBuilderParams,
+    AccountOutputBuilderParams,
     FoundryOutputBuilderParams,
     NftOutputBuilderParams,
     FoundryQueryParameter,
     NftQueryParameter,
-    AliasQueryParameter,
+    AccountQueryParameter,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import {
@@ -23,7 +23,7 @@ import {
     SecretManagerType,
 } from '../types/secret_manager/secret-manager';
 import {
-    AliasOutput,
+    AccountOutput,
     BasicOutput,
     FoundryOutput,
     NftOutput,
@@ -414,16 +414,16 @@ export class Client {
     }
 
     /**
-     * Transforms an alias id to a bech32 encoded address.
+     * Transforms an account id to a bech32 encoded address.
      */
-    async aliasIdToBech32(
-        aliasId: string,
+    async accountIdToBech32(
+        accountId: string,
         bech32Hrp?: string,
     ): Promise<string> {
         const response = await this.methodHandler.callMethod({
-            name: 'aliasIdToBech32',
+            name: 'accountIdToBech32',
             data: {
-                aliasId,
+                accountId,
                 bech32Hrp,
             },
         });
@@ -465,13 +465,13 @@ export class Client {
     }
 
     /**
-     * Fetch alias output IDs
+     * Fetch account output IDs
      */
-    async aliasOutputIds(
-        queryParameters: AliasQueryParameter[],
+    async accountOutputIds(
+        queryParameters: AccountQueryParameter[],
     ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'aliasOutputIds',
+            name: 'accountOutputIds',
             data: {
                 queryParameters,
             },
@@ -481,13 +481,13 @@ export class Client {
     }
 
     /**
-     * Fetch alias output ID
+     * Fetch account output ID
      */
-    async aliasOutputId(aliasId: string): Promise<string> {
+    async accountOutputId(accountId: string): Promise<string> {
         const response = await this.methodHandler.callMethod({
-            name: 'aliasOutputId',
+            name: 'accountOutputId',
             data: {
-                aliasId,
+                accountId,
             },
         });
 
@@ -615,21 +615,21 @@ export class Client {
     }
 
     /**
-     * Build an Alias Output.
+     * Build an Account Output.
      */
-    async buildAliasOutput(
-        params: AliasOutputBuilderParams,
-    ): Promise<AliasOutput> {
+    async buildAccountOutput(
+        params: AccountOutputBuilderParams,
+    ): Promise<AccountOutput> {
         if (params.amount && typeof params.amount === 'bigint') {
             params.amount = params.amount.toString(10);
         }
         const response = await this.methodHandler.callMethod({
-            name: 'buildAliasOutput',
+            name: 'buildAccountOutput',
             data: params,
         });
 
-        const parsed = JSON.parse(response) as Response<AliasOutput>;
-        return plainToInstance(AliasOutput, parsed.payload);
+        const parsed = JSON.parse(response) as Response<AccountOutput>;
+        return plainToInstance(AccountOutput, parsed.payload);
     }
 
     /**

@@ -3,7 +3,7 @@
 
 import { plainToInstance, Type } from 'class-transformer';
 import { u64 } from '../../utils';
-import { Address, AddressDiscriminator, AliasAddress } from '../address';
+import { Address, AddressDiscriminator, AccountAddress } from '../address';
 import { SlotIndex } from '../slot';
 
 /**
@@ -16,7 +16,7 @@ enum UnlockConditionType {
     Expiration = 3,
     StateControllerAddress = 4,
     GovernorAddress = 5,
-    ImmutableAliasAddress = 6,
+    ImmutableAccountAddress = 6,
 }
 
 abstract class UnlockCondition {
@@ -63,11 +63,11 @@ abstract class UnlockCondition {
                 GovernorAddressUnlockCondition,
                 data,
             ) as any as GovernorAddressUnlockCondition;
-        } else if (data.type == UnlockConditionType.ImmutableAliasAddress) {
+        } else if (data.type == UnlockConditionType.ImmutableAccountAddress) {
             return plainToInstance(
-                ImmutableAliasAddressUnlockCondition,
+                ImmutableAccountAddressUnlockCondition,
                 data,
-            ) as any as ImmutableAliasAddressUnlockCondition;
+            ) as any as ImmutableAccountAddressUnlockCondition;
         }
         throw new Error('Invalid JSON');
     }
@@ -196,9 +196,9 @@ class GovernorAddressUnlockCondition extends UnlockCondition {
 }
 
 /**
- * Immutable Alias Unlock Condition.
+ * Immutable Account Unlock Condition.
  */
-class ImmutableAliasAddressUnlockCondition extends UnlockCondition {
+class ImmutableAccountAddressUnlockCondition extends UnlockCondition {
     /**
      * The address.
      */
@@ -206,8 +206,8 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
-    constructor(address: AliasAddress) {
-        super(UnlockConditionType.ImmutableAliasAddress);
+    constructor(address: AccountAddress) {
+        super(UnlockConditionType.ImmutableAccountAddress);
         this.address = address;
     }
 }
@@ -240,8 +240,8 @@ const UnlockConditionDiscriminator = {
             name: UnlockConditionType.GovernorAddress as any,
         },
         {
-            value: ImmutableAliasAddressUnlockCondition,
-            name: UnlockConditionType.ImmutableAliasAddress as any,
+            value: ImmutableAccountAddressUnlockCondition,
+            name: UnlockConditionType.ImmutableAccountAddress as any,
         },
     ],
 };
@@ -256,5 +256,5 @@ export {
     ExpirationUnlockCondition,
     StateControllerAddressUnlockCondition,
     GovernorAddressUnlockCondition,
-    ImmutableAliasAddressUnlockCondition,
+    ImmutableAccountAddressUnlockCondition,
 };
