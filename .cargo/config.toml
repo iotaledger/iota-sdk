@@ -7,6 +7,8 @@ ci-check-nostd = "check --no-default-features -F serde -p iota-sdk --target risc
 ci-check-types = "check --no-default-features -p iota-sdk"
 
 ci-test = "nextest run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core"
+ci-tangle-test = "nextest run --tests --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core"
+ci-coverage = "llvm-cov nextest --lcov --output-path coverage.info --tests -p iota-sdk --all-features --run-ignored all --profile ci"
 
 ci-clippy = "clippy --all-targets --all-features -- -D warnings"
 

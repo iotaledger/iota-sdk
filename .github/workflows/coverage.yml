@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop, production]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/coverage.yml"
       - ".github/actions/**"
       - "coverage.sh"
@@ -54,16 +55,7 @@ jobs:
         uses: "./.github/actions/ledger-nano"
 
       - name: Collect coverage data
-        run: >
-          cargo llvm-cov nextest
-          --lcov
-          --output-path coverage.info
-          --tests
-          --package iota-sdk
-          --all-features
-          --run-ignored all
-          --test-threads "num-cpus"
-          --retries 2
+        run: cargo ci-coverage
 
       - name: Tear down private tangle
         if: always()
