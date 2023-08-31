@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use iota_sdk_bindings_core::{
     call_wallet_method,
@@ -12,8 +12,7 @@ use iota_sdk_bindings_core::{
     Response, WalletMethod, WalletOptions,
 };
 use tokio::sync::{
-    mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
-    Mutex,
+    mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender}
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
@@ -22,7 +21,27 @@ use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHand
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
 pub struct WalletMethodHandler {
-    wallet: Arc<Mutex<Option<Wallet>>>,
+    wallet: Arc<RwLock<Option<Wallet>>>,
+}
+
+macro_rules! wallet_pre {
+    ($method_handler:ident) => {
+        match $method_handler.wallet.read() {
+            Ok(handler) => {
+                if let Some(wallet) = handler.clone() {
+                    Ok(wallet)
+                } else {
+                    // Notify that the wallet was destroyed
+                    Err(serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
+                            .expect("json to string error"),
+                    ).into()
+                }
+            }
+            Err(e) => {
+                Err(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error").into())
+            }
+        }
+    };
 }
 
 /// Creates a method handler with the given options.
@@ -38,38 +57,34 @@ pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
         .map_err(|e| e.to_string())?;
 
     Ok(WalletMethodHandler {
-        wallet: Arc::new(Mutex::new(Some(wallet_method_handler))),
+        wallet: Arc::new(RwLock::new(Some(wallet_method_handler))),
     })
 }
 
 #[wasm_bindgen(js_name = destroyWallet)]
 pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsValue> {
-    *method_handler.wallet.lock().await = None;
+    match method_handler.wallet.write() {
+        Ok(mut lock) => *lock = None,
+        Err(e) => {
+            return Err(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error").into());
+        }
+    };
     Ok(())
 }
 
 #[wasm_bindgen(js_name = getClientFromWallet)]
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
+    let wallet = wallet_pre!(method_handler)?;
 
-    let client = wallet
-        .as_ref()
-        .ok_or_else(|| "wallet was destroyed".to_string())?
-        .client()
-        .clone();
+    let client = wallet.client().clone();
 
     Ok(ClientMethodHandler { client })
 }
 
 #[wasm_bindgen(js_name = getSecretManagerFromWallet)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
-
-    let secret_manager = wallet
-        .as_ref()
-        .ok_or_else(|| "wallet was destroyed".to_string())?
-        .get_secret_manager()
-        .clone();
+    let wallet = wallet_pre!(method_handler)?;
+    let secret_manager = wallet.get_secret_manager().clone();
 
     Ok(SecretManagerMethodHandler { secret_manager })
 }
@@ -79,12 +94,12 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
 /// Returns an error if the response itself is an error or panic.
 #[wasm_bindgen(js_name = callWalletMethodAsync)]
 pub async fn call_wallet_method_async(method: String, method_handler: &WalletMethodHandler) -> Result<String, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
+    let wallet = wallet_pre!(method_handler)?;
     let method: WalletMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 
-    let response = call_wallet_method(wallet.as_ref().expect("wallet was destroyed"), method).await;
+    let response = call_wallet_method(&wallet, method).await;
     match response {
-        Response::Error(e) => Err(e.to_string().into()),
+        Response::Error(e) => Err(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error").into()),
         Response::Panic(p) => Err(p.into()),
         _ => Ok(serde_json::to_string(&response).map_err(|e| e.to_string())?),
     }
@@ -114,16 +129,11 @@ pub async fn listen_wallet(
     }
 
     let (tx, mut rx): (UnboundedSender<Event>, UnboundedReceiver<Event>) = unbounded_channel();
-    method_handler
-        .wallet
-        .lock()
-        .await
-        .as_ref()
-        .expect("wallet not initialised")
-        .listen(event_types, move |wallet_event| {
-            tx.send(wallet_event.clone()).unwrap();
-        })
-        .await;
+    let wallet = wallet_pre!(method_handler)?;
+    wallet.listen(event_types, move |wallet_event| {
+        tx.send(wallet_event.clone()).unwrap();
+    })
+    .await;
 
     // Spawn on the same thread a continuous loop to check the channel
     wasm_bindgen_futures::spawn_local(async move {
