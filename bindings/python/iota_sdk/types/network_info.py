@@ -14,5 +14,5 @@ class NetworkInfo:
     """
 
     protocol_parameters: NodeInfoProtocol
-    localPow: bool
+    local_pow: bool
     tips_interval: int

@@ -179,7 +179,7 @@ class Account:
                 'options': options
             }
         )
-        return [from_dict(AccountAddress, address) for address in addresses]
+        return [AccountAddress.form_dict(address) for address in addresses]
 
     def claimable_outputs(self, outputs_to_claim: List[OutputId]):
         """Get outputs with additional unlock conditions.
@@ -214,7 +214,7 @@ class Account:
         addresses = self._call_account_method(
             'addresses'
         )
-        return [from_dict(AccountAddress, address) for address in addresses]
+        return [AccountAddress.form_dict(address) for address in addresses]
 
     def addresses_with_unspent_outputs(
             self) -> List[AddressWithUnspentOutputs]:
@@ -223,7 +223,7 @@ class Account:
         addresses = self._call_account_method(
             'addressesWithUnspentOutputs'
         )
-        return [from_dict(AddressWithUnspentOutputs, address)
+        return [AddressWithUnspentOutputs.from_dit(address)
                 for address in addresses]
 
     def outputs(
@@ -235,7 +235,7 @@ class Account:
                 'filterOptions': filter_options
             }
         )
-        return [from_dict(OutputData, o) for o in outputs]
+        return [OutputData.from_dict(o) for o in outputs]
 
     def unspent_outputs(
             self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:

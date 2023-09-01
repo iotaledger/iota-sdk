@@ -15,11 +15,11 @@ class NodeInfoMilestone:
     Attributes:
         index: The milestone index.
         timestamp: The milestone timestamp.
-        milestoneId: The milestone ID.
+        milestone_id: The milestone ID.
     """
     index: int
     timestamp: Optional[int] = None
-    milestoneId: Optional[HexStr] = None
+    milestone_id: Optional[HexStr] = None
 
 
 @json
@@ -28,15 +28,15 @@ class NodeInfoStatus:
     """Node status.
 
     Attributes:
-        isHealthy: Whether the node is healthy.
-        latestMilestone: The latest milestone info.
-        confirmedMilestone: The latest confirmed milestone info.
-        pruningIndex: The pruning index of the node.
+        is_healthy: Whether the node is healthy.
+        latest_milestone: The latest milestone info.
+        confirmed_milestone: The latest confirmed milestone info.
+        pruning_index: The pruning index of the node.
     """
-    isHealthy: bool
-    latestMilestone: NodeInfoMilestone
-    confirmedMilestone: NodeInfoMilestone
-    pruningIndex: int
+    is_healthy: bool
+    latest_milestone: NodeInfoMilestone
+    confirmed_milestone: NodeInfoMilestone
+    pruning_index: int
 
 
 @json
@@ -82,12 +82,12 @@ class NodeInfoProtocol:
         minPowScore: The minimum pow score of the network.
         rentStructure: The rent structure used by given node/network.
     """
-    networkName: str
-    bech32Hrp: str
-    tokenSupply: str
+    network_name: str
+    bech32_hrp: str
+    token_supply: str
     version: int
-    minPowScore: float
-    rentStructure: RentStructure
+    min_pow_score: float
+    rent_structure: RentStructure
 
 
 @json
@@ -113,17 +113,17 @@ class NodeInfoBaseToken:
 
     Attributes:
         name: Name of the base coin.
-        tickerSymbol: Base coin ticker symbol.
+        ticker_symbol: Base coin ticker symbol.
         unit: Base coin unit.
         decimals: Number of decimals.
-        useMetricPrefix: Whether the coin uses a metric prefix.
+        use_metric_prefix: Whether the coin uses a metric prefix.
         subunit: Base coin subunit.
     """
     name: str
-    tickerSymbol: str
+    ticker_symbol: str
     unit: str
     decimals: int
-    useMetricPrefix: bool
+    use_metric_prefix: bool
     subunit: Optional[str] = None
 
 

@@ -366,7 +366,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def get_network_info(self) -> NetworkInfo:
         """Gets the network related information such as network_id and min_pow_score.
         """
-        return from_dict(NetworkInfo, self._call_method('getNetworkInfo'))
+        return NetworkInfo.from_dict(self._call_method('getNetworkInfo'))
 
     def get_network_id(self) -> int:
         """Gets the network id of the node we're connecting to.

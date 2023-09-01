@@ -242,14 +242,14 @@ def output_from_dict(
     output_type = OutputType(output['type'])
 
     if output_type == OutputType.Treasury:
-        return from_dict(TreasuryOutput, output)
+        return TreasuryOutput.from_dict(output)
     if output_type == OutputType.Basic:
-        return from_dict(BasicOutput, output)
+        return BasicOutput.from_dict(output)
     if output_type == OutputType.Alias:
-        return from_dict(AliasOutput, output)
+        return AliasOutput.from_dict(output)
     if output_type == OutputType.Foundry:
-        return from_dict(FoundryOutput, output)
+        return FoundryOutput.from_dict(output)
     if output_type == OutputType.Nft:
-        return from_dict(NftOutput, output)
+        return NftOutput.from_dict(output)
 
-    return from_dict(Output, output)
+    return Output.from_dict(output)

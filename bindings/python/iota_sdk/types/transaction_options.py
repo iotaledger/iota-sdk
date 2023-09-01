@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Dict
 from dataclasses import dataclass
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import json
@@ -31,9 +31,11 @@ class RemainderValueStrategyCustomAddress:
         self.key_index = key_index
         self.internal = internal
         self.used = used
+    # this should  be customized
 
-    def as_dict(self):
-        return dict({"strategy": "CustomAddress", "value": self.to_dict()})
+    @staticmethod
+    def _to_dict_custom(config: Dict[str, any]) -> Dict[str, any]:
+        return dict({"strategy": "CustomAddress", "value": config})
 
 
 class RemainderValueStrategy(Enum):

@@ -103,11 +103,3 @@ class ClientOptions:
     api_timeout: Optional[Duration] = None
     remote_pow_timeout: Optional[Duration] = None
     pow_worker_count: Optional[int] = None
-
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
-
-        if 'brokerOptions' in config:
-            config['brokerOptions'] = config['brokerOptions'].to_dict()
-
-        return config
