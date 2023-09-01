@@ -22,16 +22,10 @@ class RemainderValueStrategyCustomAddress:
         used: Indicates whether an address has been used already.
     """
 
-    def __init__(self,
-                 address: str,
-                 key_index: int,
-                 internal: bool,
-                 used: bool):
-        self.address = address
-        self.key_index = key_index
-        self.internal = internal
-        self.used = used
-    # this should  be customized
+    address: str
+    key_index: int
+    internal: bool
+    used: bool
 
     @staticmethod
     def _to_dict_custom(config: Dict[str, any]) -> Dict[str, any]:
@@ -52,6 +46,8 @@ class RemainderValueStrategy(Enum):
         return dict({"strategy": self.name, "value": self.value[0]})
 
 
+@json
+@dataclass
 class TransactionOptions():
     """Transaction options.
 
@@ -65,22 +61,10 @@ class TransactionOptions():
         allow_micro_amount: Whether to allow sending a micro amount.
     """
 
-    def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
-                 tagged_data_payload: Optional[TaggedDataPayload] = None,
-                 custom_inputs: Optional[List[OutputId]] = None,
-                 mandatory_inputs: Optional[List[OutputId]] = None,
-                 burn: Optional[Burn] = None,
-                 note: Optional[str] = None,
-                 allow_micro_amount: Optional[bool] = None):
-        """Initialize transaction options.
-        """
-        self.remainder_value_strategy = remainder_value_strategy
-        self.tagged_data_payload = tagged_data_payload
-        self.custom_inputs = custom_inputs
-        self.mandatory_inputs = mandatory_inputs
-        self.burn = burn
-        self.note = note
-        self.allow_micro_amount = allow_micro_amount
-
-    def as_dict(self):
-        return dict(self.__dict__)
+    remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None
+    tagged_data_payload: Optional[TaggedDataPayload] = None
+    custom_inputs: Optional[List[OutputId]] = None
+    mandatory_inputs: Optional[List[OutputId]] = None
+    burn: Optional[Burn] = None
+    note: Optional[str] = None
+    allow_micro_amount: Optional[bool] = None

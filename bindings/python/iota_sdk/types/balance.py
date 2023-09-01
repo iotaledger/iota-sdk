@@ -60,9 +60,9 @@ class Balance:
     """The balance of an account.
 
     Attributes:
-        baseCoin: The base coin balance.
+        base_coin: The base coin balance.
         required_storage_deposit: The required storage deposit.
-        nativeTokens: The balances of all native tokens.
+        native_tokens: The balances of all native tokens.
         nfts: All owned NFTs.
         aliases: All owned aliases.
         foundries: All owned foundries.

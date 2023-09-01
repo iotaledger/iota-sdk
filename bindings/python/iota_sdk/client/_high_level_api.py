@@ -52,7 +52,7 @@ class GenerateAddressesOptions():
     coin_type: CoinType
     range: Range
     bech32_hrp: str
-    accountIndex: Optional[int] = None
+    account_index: Optional[int] = None
     options: Optional[GenerateAddressOptions] = None
 
 
