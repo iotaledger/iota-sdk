@@ -75,6 +75,7 @@ impl Rent for StakingFeature {
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

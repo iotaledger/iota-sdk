@@ -21,7 +21,7 @@ use crate::types::block::{output::TokenId, Error};
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
     // Identifier of the native token.
-    #[serde(rename = "id")]
+    #[cfg_attr(feature = "serde", serde(rename = "id"))]
     token_id: TokenId,
     // Amount of native tokens.
     #[packable(verify_with = verify_amount)]

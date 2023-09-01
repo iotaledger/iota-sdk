@@ -5,7 +5,6 @@ export * from './account';
 export * from './wallet';
 export * from './address';
 export * from './bridge';
-export * from './build-output-data';
 export * from './event';
 export * from './output';
 export * from './output-params';

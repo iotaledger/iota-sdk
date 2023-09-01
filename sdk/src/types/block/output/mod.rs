@@ -526,6 +526,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
@@ -537,7 +538,7 @@ pub mod dto {
         account::dto::AccountOutputDto, basic::dto::BasicOutputDto, delegation::dto::DelegationOutputDto,
         foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]

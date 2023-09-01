@@ -79,7 +79,8 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use alloc::borrow::Cow;
 
     use serde::{Deserialize, Serialize};

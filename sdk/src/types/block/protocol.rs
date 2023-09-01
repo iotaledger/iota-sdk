@@ -31,7 +31,7 @@ pub struct ProtocolParameters {
     pub(crate) version: u8,
     /// The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
-    #[serde(with = "crate::utils::serde::string_prefix")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
     #[getset(skip)]
     pub(crate) network_name: StringPrefix<u8>,
     /// The HRP prefix used for Bech32 addresses in the network.
@@ -41,10 +41,10 @@ pub struct ProtocolParameters {
     /// The work score structure used by the node/network.
     pub(crate) work_score_structure: WorkScoreStructure,
     /// TokenSupply defines the current token supply on the network.
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
     /// Genesis timestamp at which the slots start to count.
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) genesis_unix_timestamp: u64,
     /// Duration of each slot in seconds.
     pub(crate) slot_duration_in_seconds: u8,
@@ -251,13 +251,13 @@ impl Default for WorkScoreStructure {
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
     /// Minimum value of the RMC.
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     rmc_min: u64,
     /// Increase step size of the RMC.
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     increase: u64,
     /// Decrease step size of the RMC.
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     decrease: u64,
     /// Threshold for increasing the RMC.
     increase_threshold: u32,
@@ -266,7 +266,7 @@ pub struct CongestionControlParameters {
     /// Rate at which the scheduler runs (in workscore units per second).
     scheduler_rate: u32,
     /// Minimum amount of Mana that an account must have to schedule a block.
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     min_mana: u64,
     /// Maximum size of the buffer. TODO what buffer?
     max_buffer_size: u32,

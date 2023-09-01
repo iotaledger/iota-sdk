@@ -19,17 +19,28 @@ export type OutputId = string;
  * All of the output types.
  */
 enum OutputType {
+    /** A Basic output. */
     Basic = 3,
+    /** An Account output. */
     Account = 4,
+    /** A Foundry output. */
     Foundry = 5,
+    /** An NFT output. */
     Nft = 6,
 }
 
+/**
+ * The base class for outputs.
+ */
 abstract class Output /*implements ICommonOutput*/ {
-    private amount: string;
+    readonly amount: string;
 
-    private type: OutputType;
+    readonly type: OutputType;
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output as big-integer or string.
+     */
     constructor(type: OutputType, amount: u64 | string) {
         this.type = type;
         if (typeof amount == 'bigint') {
@@ -40,19 +51,22 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * The type of output.
+     * Get the type of output.
      */
     getType(): OutputType {
         return this.type;
     }
 
     /**
-     * The amount of the output.
+     * Get the amount of the output.
      */
     getAmount(): u64 {
         return BigInt(this.amount);
     }
 
+    /**
+     * Parse an output from a plain JS JSON object.
+     */
     public static parse(data: any): Output {
         if (data.type == OutputType.Basic) {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
@@ -68,21 +82,26 @@ abstract class Output /*implements ICommonOutput*/ {
 }
 
 /**
- * Common output properties.
+ * The base class for common outputs.
  */
 abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     @Type(() => UnlockCondition, {
         discriminator: UnlockConditionDiscriminator,
     })
-    private unlockConditions: UnlockCondition[];
+    readonly unlockConditions: UnlockCondition[];
 
-    private nativeTokens?: INativeToken[];
+    readonly nativeTokens?: INativeToken[];
 
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
-    private features?: Feature[];
+    readonly features?: Feature[];
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions Conditions to unlock the output.
+     */
     constructor(
         type: OutputType,
         amount: u64,
@@ -116,14 +135,14 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * Features contained by the output.
+     * Get the features contained by the output.
      */
     getFeatures(): Feature[] | undefined {
         return this.features;
     }
 }
 /**
- * Basic output.
+ * A Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
     /**
@@ -131,18 +150,30 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
      */
     readonly mana: u64;
 
+    /**
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
+     */
     constructor(amount: u64, mana: u64, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
         this.mana = mana;
     }
 }
 
+/**
+ * Base class for immutable feature outputs.
+ */
 abstract class ImmutableFeaturesOutput extends CommonOutput {
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
-    private immutableFeatures?: Feature[];
+    readonly immutableFeatures?: Feature[];
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
+     */
     constructor(
         type: OutputType,
         amount: u64,
@@ -158,9 +189,17 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     }
 }
 
+/**
+ * Base class for state metadata outputs.
+ */
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
-    private stateMetadata?: HexEncodedString;
+    readonly stateMetadata?: HexEncodedString;
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
+     */
     constructor(
         type: OutputType,
         amount: u64,
@@ -176,16 +215,36 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     }
 }
 
+/**
+ * An Account output.
+ */
 class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
-    private accountId: HexEncodedString;
-    private stateIndex: number;
-    private foundryCounter: number;
-
+    /**
+     * Unique identifier of the account, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its a newly created account, then the id is zeroed.
+     */
+    readonly accountId: HexEncodedString;
+    /**
+     * A counter that must increase by 1 every time the account output is state transitioned.
+     */
+    readonly stateIndex: number;
+    /**
+     * A counter that denotes the number of foundries created by this account output.
+     */
+    readonly foundryCounter: number;
     /**
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
 
+    /**
+     * @param amount The amount of the output.
+     * @param mana The amount of stored mana.
+     * @param accountId The account ID as hex-encoded string.
+     * @param stateIndex A counter that must increase by 1 every time the account output is state transitioned.
+     * @param foundryCounter A counter that denotes the number of foundries created by this account output.
+     * @param unlockConditions The unlock conditions of the output.
+     */
     constructor(
         amount: u64,
         mana: u64,
@@ -221,16 +280,26 @@ class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
     }
 }
 /**
- * NFT output.
+ * An NFT output.
  */
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
-    private nftId: HexEncodedString;
+    /**
+     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its newly minted, then the id is zeroed.
+     */
+    readonly nftId: HexEncodedString;
 
     /**
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
 
+    /**
+     * @param amount The amount of the output.
+     * @param mana The amount of stored mana.
+     * @param nftId The NFT ID as hex-encoded string.
+     * @param unlockConditions The unlock conditions of the output.
+     */
     constructor(
         amount: u64,
         mana: u64,
@@ -242,24 +311,35 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
         this.mana = mana;
     }
     /**
-     * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its newly minted, then the id is zeroed.
+     * Get the NFT ID of the output.
      */
     getNftId(): HexEncodedString {
         return this.nftId;
     }
 }
 /**
- * Foundry output.
+ * A Foundry output.
  */
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
-    private serialNumber: number;
+    /**
+     * The serial number of the Foundry with respect to the controlling alias.
+     */
+    readonly serialNumber: number;
 
+    /**
+     * The token scheme for the Foundry.
+     */
     @Type(() => TokenScheme, {
         discriminator: TokenSchemeDiscriminator,
     })
-    private tokenScheme: TokenScheme;
+    readonly tokenScheme: TokenScheme;
 
+    /**
+     * @param amount The amount of the output.
+     * @param serialNumber The serial number of the Foundry with respect to the controlling alias.
+     * @param unlockConditions The unlock conditions of the output.
+     * @param tokenScheme The token scheme for the Foundry.
+     */
     constructor(
         amount: u64,
         serialNumber: number,
@@ -277,7 +357,7 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
         return this.serialNumber;
     }
     /**
-     * The token scheme for the foundry.
+     * Get the token scheme for the Foundry.
      */
     getTokenScheme(): TokenScheme {
         return this.tokenScheme;

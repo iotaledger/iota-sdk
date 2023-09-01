@@ -116,7 +116,8 @@ fn verify_supply(minted_tokens: &U256, melted_tokens: &U256, maximum_supply: &U2
     Ok(())
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;

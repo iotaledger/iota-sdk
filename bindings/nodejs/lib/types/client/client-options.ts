@@ -6,7 +6,9 @@ import type { IMqttBrokerOptions, INetworkInfo, INode } from './network';
 export interface IClientOptions {
     /** Node which will be tried first for all requests */
     primaryNode?: string | INode;
+    /** A list of nodes. */
     nodes?: Array<string | INode>;
+    /** A list of permanodes. */
     permanodes?: Array<string | INode>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;
@@ -30,6 +32,8 @@ export interface IClientOptions {
 
 /** Time duration */
 export interface IDuration {
+    /** Seconds. */
     secs: number;
+    /** Nanoseconds. */
     nanos: number;
 }
