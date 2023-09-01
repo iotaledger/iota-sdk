@@ -11,9 +11,9 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias/create.ts
+// yarn run-example ./how_tos/account_output/create.ts
 
-// In this example we create alias.
+// In this example we create an account output.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {
@@ -40,18 +40,18 @@ async function run() {
         let balance = await account.sync();
 
         console.log(
-            `Aliases BEFORE (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts BEFORE (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        console.log('Sending the create-alias transaction...');
+        console.log('Sending the create-account transaction...');
 
-        // Create an alias
+        // Create an account output
         const transaction = await account
-            .prepareCreateAliasOutput()
+            .prepareCreateAccountOutput()
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -66,8 +66,8 @@ async function run() {
 
         balance = await account.sync();
         console.log(
-            `Aliases AFTER (${balance.aliases.length}):\n`,
-            balance.aliases,
+            `Accounts AFTER (${balance.accounts.length}):\n`,
+            balance.accounts,
         );
     } catch (error) {
         console.log('Error: ', error);

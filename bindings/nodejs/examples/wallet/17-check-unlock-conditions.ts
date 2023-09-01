@@ -44,9 +44,7 @@ async function run() {
                 hexEncodedAccountAddresses.includes(
                     (
                         basicOutput.getUnlockConditions()[0] as AddressUnlockCondition
-                    )
-                        .getAddress()
-                        .toString(),
+                    ).address.toString(),
                 )
             ) {
                 controlledByAccount = true;

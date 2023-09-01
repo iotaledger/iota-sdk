@@ -99,6 +99,7 @@ macro_rules! impl_id {
         }
     };
 }
+#[cfg(feature = "serde")]
 pub(crate) use impl_id;
 
 /// Convenience macro to serialize types to string via serde.

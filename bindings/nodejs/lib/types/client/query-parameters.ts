@@ -1,12 +1,14 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { SlotIndex } from '../block/slot';
+
 /**
  * Query parameter for filtering output requests
  */
 export type QueryParameter =
     | Address
-    | AliasAddress
+    | AccountAddress
     | HasStorageDepositReturn
     | StorageDepositReturnAddress
     | HasTimelock
@@ -23,8 +25,8 @@ export type QueryParameter =
     | Governor
     | CommonQueryParameters;
 
-/** Query parameters for filtering Alias Outputs */
-export type AliasQueryParameter =
+/** Query parameters for filtering Account Outputs */
+export type AccountQueryParameter =
     | StateController
     | Governor
     | Issuer
@@ -32,12 +34,12 @@ export type AliasQueryParameter =
     | CommonQueryParameters;
 
 /** Query parameters for filtering Foundry Outputs */
-export type FoundryQueryParameter = AliasAddress | CommonQueryParameters;
+export type FoundryQueryParameter = AccountAddress | CommonQueryParameters;
 
 /** Query parameters for filtering Nft Outputs */
 export type NftQueryParameter =
     | Address
-    | AliasAddress
+    | AccountAddress
     | HasStorageDepositReturn
     | StorageDepositReturnAddress
     | HasTimelock
@@ -66,9 +68,9 @@ type CommonQueryParameters =
 interface Address {
     address: string;
 }
-/** Filter foundry outputs based on bech32-encoded address of the controlling alias. */
-interface AliasAddress {
-    aliasAddress: string;
+/** Filter foundry outputs based on bech32-encoded address of the controlling account. */
+interface AccountAddress {
+    accountAddress: string;
 }
 /** Filters outputs based on the presence of storage deposit return unlock condition. */
 interface HasStorageDepositReturn {
@@ -84,13 +86,13 @@ interface StorageDepositReturnAddress {
 interface HasTimelock {
     hasTimelock: boolean;
 }
-/** Return outputs that are timelocked before a certain Unix timestamp. */
+/** Return outputs that are timelocked before a certain slot index. */
 interface TimelockedBefore {
-    timelockedBefore: number;
+    timelockedBefore: SlotIndex;
 }
-/** Return outputs that are timelocked after a certain Unix timestamp. */
+/** Return outputs that are timelocked after a certain slot index. */
 interface TimelockedAfter {
-    timelockedAfter: number;
+    timelockedAfter: SlotIndex;
 }
 
 /** Filters outputs based on the presence of expiration unlock condition. */
@@ -109,13 +111,13 @@ interface MaxNativeTokenCount {
 interface MinNativeTokenCount {
     minNativeTokenCount: number;
 }
-/** Return outputs that expire before a certain Unix timestamp. */
+/** Return outputs that expire before a certain slot index. */
 interface ExpiresBefore {
-    expiresBefore: number;
+    expiresBefore: SlotIndex;
 }
-/** Return outputs that expire after a certain Unix timestamp. */
+/** Return outputs that expire after a certain slot index. */
 interface ExpiresAfter {
-    expiresAfter: number;
+    expiresAfter: SlotIndex;
 }
 /** Filter outputs based on the presence of a specific Bech32-encoded return
  * address in the expiration unlock condition.
@@ -131,13 +133,13 @@ interface Sender {
 interface Tag {
     tag: string;
 }
-/** Return outputs that were created before a certain Unix timestamp. */
+/** Return outputs that were created before a certain slot index. */
 interface CreatedBefore {
-    createdBefore: number;
+    createdBefore: SlotIndex;
 }
-/** Return outputs that were created after a certain Unix timestamp. */
+/** Return outputs that were created after a certain slot index. */
 interface CreatedAfter {
-    createdAfter: number;
+    createdAfter: SlotIndex;
 }
 /** Pass the cursor(confirmationMS+outputId.pageSize) to start the results from */
 interface Cursor {

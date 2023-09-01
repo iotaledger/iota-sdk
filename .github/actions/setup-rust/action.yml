@@ -5,8 +5,8 @@ inputs:
     description: Type of toolchain to install.
     required: false
     default: stable
-  target:
-    description: Target triple of the toolchain.
+  targets:
+    description: Targets triple of the toolchain.
     required: false
   components:
     description: Additional components to install.
@@ -35,12 +35,10 @@ runs:
 
     - id: install
       name: Install Rust Toolchain
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ inputs.toolchain }}
-        target: ${{ inputs.target }}
-        override: true
-        profile: minimal
+        targets: ${{ inputs.targets }}
         components: ${{ inputs.components }}
 
     - name: Cache dependencies
@@ -52,7 +50,5 @@ runs:
 
     - name: Install ${{ inputs.install }}
       if: ${{ inputs.install != '' }}
-      uses: actions-rs/cargo@v1
-      with:
-        command: install
-        args: ${{ inputs.install }}
+      shell: bash
+      run: cargo install ${{ inputs.install }}

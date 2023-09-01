@@ -9,7 +9,7 @@ from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block import Block
-from iota_sdk.types.common import HexStr, Node, AddressAndAmount
+from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
@@ -41,20 +41,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         self,
         nodes: Optional[str | List[str]] = None,
         primary_node: Optional[str] = None,
-        primary_pow_node: Optional[str] = None,
         permanode: Optional[str] = None,
         ignore_node_health: Optional[bool] = None,
         api_timeout: Optional[timedelta] = None,
         node_sync_interval: Optional[timedelta] = None,
-        remote_pow_timeout: Optional[timedelta] = None,
-        tips_interval: Optional[int] = None,
         quorum: Optional[bool] = None,
         min_quorum_size: Optional[int] = None,
         quorum_threshold: Optional[int] = None,
         user_agent: Optional[str] = None,
-        local_pow: Optional[bool] = None,
-        fallback_to_local_pow: Optional[bool] = None,
-        pow_worker_count: Optional[int] = None,
         client_handle=None
     ):
         """Initialize the IOTA Client.
@@ -64,8 +58,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             A single Node URL or an array of URLs.
         primary_node :
             Node which will be tried first for all requests.
-        primary_pow_node :
-            Node which will be tried first when using remote PoW, even before the primary_node.
         permanode :
             Permanode URL.
         ignore_node_health :
@@ -74,10 +66,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             Timeout for API requests.
         node_sync_interval :
             Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated.
-        remote_pow_timeout :
-            Timeout when sending a block that requires remote proof of work.
-        tips_interval :
-            Tips request interval during PoW in seconds.
         quorum :
             If node quorum is enabled. Will compare the responses from multiple nodes and only returns the response if 'quorum_threshold'% of the nodes return the same one.
         min_quorum_size :
@@ -86,12 +74,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             % of nodes that have to return the same response so it gets accepted.
         user_agent :
             The User-Agent header for requests.
-        local_pow :
-            Local proof of work.
-        fallback_to_local_pow :
-            Fallback to local proof of work if the node doesn't support remote PoW.
-        pow_worker_count :
-            The amount of threads to be used for proof of work.
         client_handle :
             An instance of a node client.
         """
@@ -126,9 +108,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if 'node_sync_interval' in client_config:
             client_config['node_sync_interval'] = {'secs': int(client_config['node_sync_interval'].total_seconds(
             )), 'nanos': get_remaining_nano_seconds(client_config['node_sync_interval'])}
-        if 'remote_pow_timeout' in client_config:
-            client_config['remote_pow_timeout'] = {'secs': int(client_config['remote_pow_timeout'].total_seconds(
-            )), 'nanos': get_remaining_nano_seconds(client_config['remote_pow_timeout'])}
 
         client_config = humps.camelize(client_config)
         client_config_str = dumps(client_config)
@@ -364,7 +343,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         return self._call_method('getNode')
 
     def get_network_info(self) -> NetworkInfo:
-        """Gets the network related information such as network_id and min_pow_score.
+        """Gets the network related information such as network_id.
         """
         return from_dict(NetworkInfo, self._call_method('getNetworkInfo'))
 
@@ -377,26 +356,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Returns the bech32_hrp.
         """
         return self._call_method('getBech32Hrp')
-
-    def get_min_pow_score(self) -> int:
-        """Returns the min pow score.
-        """
-        return int(self._call_method('getMinPowScore'))
-
-    def get_tips_interval(self) -> int:
-        """Returns the tips interval.
-        """
-        return int(self._call_method('getTipsInterval'))
-
-    def get_local_pow(self) -> bool:
-        """Returns if local pow should be used or not.
-        """
-        return self._call_method('getLocalPow')
-
-    def get_fallback_to_local_pow(self) -> bool:
-        """Get fallback to local proof of work timeout.
-        """
-        return self._call_method('getFallbackToLocalPow')
 
     def unhealthy_nodes(self) -> List[Dict[str, Any]]:
         """Returns the unhealthy nodes.

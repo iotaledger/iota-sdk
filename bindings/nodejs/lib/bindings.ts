@@ -4,7 +4,7 @@
 import type { WalletEventType } from './types/wallet';
 import { Event } from './types/wallet';
 import type { WalletMethodHandler } from './wallet/wallet-method-handler';
-import { bigIntToHex, __UtilsMethods__ } from './types/utils';
+import { __UtilsMethods__ } from './types/utils';
 import type { SecretManagerMethodHandler } from './secret_manager/secret-manager-method-handler';
 import type { ClientMethodHandler } from './client/client-method-handler';
 
@@ -99,15 +99,6 @@ const callWalletMethodAsync = (
             }
         });
     });
-
-// Allow bigint to be serialized as hex string.
-//
-// Note:
-// Serializing `bigint` to a different format, e.g. to decimal number string
-// must be done manually.
-(BigInt.prototype as any).toJSON = function () {
-    return bigIntToHex(this);
-};
 
 export {
     initLogger,
