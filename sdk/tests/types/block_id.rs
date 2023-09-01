@@ -4,7 +4,7 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    protocol::ProtocolParameters, rand::bytes::rand_bytes_array, Block, BlockDto, BlockHash, BlockId,
+    protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, Block, BlockDto, BlockHash, BlockId,
 };
 use packable::PackableExt;
 
@@ -67,10 +67,13 @@ fn memory_layout() {
 fn compute() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
-    let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
-        + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
+    let slot_index = SlotIndex::new(11_u64);
+    let issuing_time = slot_index.to_timestamp(
+        protocol_parameters.genesis_unix_timestamp(),
+        protocol_parameters.slot_duration_in_seconds(),
+    );
     let network_id = protocol_parameters.network_id();
+
     let block_dto_json = serde_json::json!({
         "protocolVersion": 3,
         "networkId": network_id.to_string(),
@@ -99,11 +102,11 @@ fn compute() {
     // TODO: Independently verify this value
     assert_eq!(
         block_id.to_string(),
-        "0x89664f06b89ec91ef53b69a6c5da763aad498da7fc344978cf09fcdcbbd6464a0b00000000000000"
+        "0xf0bd00c717f4a11d3a6381c4c06954b873c7bf1052a0b10465d04ba2de38bd420b00000000000000"
     );
     assert_eq!(
         block_id.hash().to_string(),
-        "0x89664f06b89ec91ef53b69a6c5da763aad498da7fc344978cf09fcdcbbd6464a"
+        "0xf0bd00c717f4a11d3a6381c4c06954b873c7bf1052a0b10465d04ba2de38bd42"
     );
-    assert_eq!(*block_id.slot_index(), slot_index);
+    assert_eq!(block_id.slot_index(), slot_index);
 }

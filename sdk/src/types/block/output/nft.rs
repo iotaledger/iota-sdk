@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -10,7 +10,6 @@ use packable::{
     Packable,
 };
 
-use super::verify_output_amount_packable;
 use crate::types::{
     block::{
         address::{Address, NftAddress},
@@ -19,8 +18,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
+            NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
+            StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -220,9 +220,11 @@ impl NftOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Nft(output.clone()).rent_cost(&rent_structure)
+                Output::Nft(output.clone()).rent_cost(rent_structure)
             }
         };
+
+        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -232,7 +234,7 @@ impl NftOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
@@ -504,7 +506,10 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
     verify_allowed_unlock_conditions(unlock_conditions, NftOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -648,8 +653,9 @@ mod tests {
         let sender_2 = rand_sender_feature();
         let issuer_1 = rand_issuer_feature();
         let issuer_2 = rand_issuer_feature();
+        let amount = 500_000;
 
-        let mut builder = NftOutput::build_with_amount(0, NftId::null())
+        let mut builder = NftOutput::build_with_amount(amount, NftId::null())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address_1)
             .add_feature(sender_1)
@@ -658,6 +664,7 @@ mod tests {
             .add_immutable_feature(issuer_2);
 
         let output = builder.clone().finish().unwrap();
+        assert_eq!(output.amount(), amount);
         assert_eq!(output.unlock_conditions().address(), Some(&address_1));
         assert_eq!(output.features().sender(), Some(&sender_2));
         assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
@@ -673,7 +680,7 @@ mod tests {
         assert!(output.immutable_features().is_empty());
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap();
@@ -741,7 +748,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            NftOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), NftId::null())
+            NftOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), NftId::null())
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(rand_address_unlock_condition())
                 .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))

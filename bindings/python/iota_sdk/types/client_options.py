@@ -49,8 +49,6 @@ class ClientOptions:
         Attributes:
         primary_node (str):
             Node which will be tried first for all requests.
-        primary_pow_node (str):
-            Node which will be tried first when using remote PoW, even before the primary_node.
         nodes (List[str]):
             Array of Node URLs.
         permanode (str):
@@ -72,21 +70,10 @@ class ClientOptions:
             Options for the MQTT broker.
         protocol_parameters (NodeInfoProtocol):
             Protocol parameters.
-        local_pow (bool):
-            Local proof of work.
-        fallback_to_local_pow (bool):
-            Fallback to local proof of work if the node doesn't support remote PoW.
-        tips_interval (int):
-            Tips request interval during PoW in seconds.
         api_timeout (Duration):
             Timeout for API requests.
-        remote_pow_timeout (Duration):
-            Timeout when sending a block that requires remote proof of work.
-        pow_worker_count (int):
-            The amount of threads to be used for proof of work.
     """
     primary_node: Optional[str] = None
-    primary_pow_nodew: Optional[str] = None
     nodes: Optional[List[str]] = None
     permanodes: Optional[List[str]] = None
     ignore_node_health: Optional[bool] = None
@@ -97,9 +84,4 @@ class ClientOptions:
     user_agent: Optional[str] = None
     broker_options: Optional[MqttBrokerOptions] = None
     protocol_parameters: Optional[NodeInfoProtocol] = None
-    local_pow: Optional[bool] = None
-    fallback_to_local_pow: Optional[bool] = None
-    tips_interval: Optional[int] = None
     api_timeout: Optional[Duration] = None
-    remote_pow_timeout: Optional[Duration] = None
-    pow_worker_count: Optional[int] = None

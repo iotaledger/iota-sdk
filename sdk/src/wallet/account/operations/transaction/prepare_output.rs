@@ -111,7 +111,9 @@ where
         let min_storage_deposit_basic_output =
             MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
-        if params.amount > min_storage_deposit_basic_output {
+        let min_required_storage_deposit = first_output.rent_cost(rent_structure);
+
+        if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
         }
 
@@ -122,9 +124,9 @@ where
             .return_strategy
             .unwrap_or_default();
         let remainder_address = self.get_remainder_address(transaction_options).await?;
-        if params.amount < min_storage_deposit_basic_output {
+        if params.amount < min_required_storage_deposit {
             if return_strategy == ReturnStrategy::Gift {
-                second_output_builder = second_output_builder.with_amount(min_storage_deposit_basic_output);
+                second_output_builder = second_output_builder.with_amount(min_required_storage_deposit);
             }
             if return_strategy == ReturnStrategy::Return {
                 second_output_builder =
@@ -171,7 +173,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.rent_cost(&rent_structure);
+            available_base_coin += existing_nft_output_data.output.rent_cost(rent_structure);
         }
 
         if final_amount > available_base_coin {
@@ -290,7 +292,7 @@ where
                         let remainder_address = self.generate_remainder_address().await?;
                         Some(remainder_address.address().inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.address().inner),
+                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
             }
             None => None,

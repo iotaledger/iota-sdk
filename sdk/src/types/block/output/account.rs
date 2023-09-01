@@ -13,7 +13,6 @@ use packable::{
     Packable,
 };
 
-use super::verify_output_amount_packable;
 use crate::types::{
     block::{
         address::{AccountAddress, Address},
@@ -22,8 +21,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, AccountId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, AccountId, ChainId,
+            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -295,9 +295,11 @@ impl AccountOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Account(output.clone()).rent_cost(&rent_structure)
+                Output::Account(output.clone()).rent_cost(rent_structure)
             }
         };
+
+        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -310,7 +312,7 @@ impl AccountOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
@@ -733,6 +735,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::boxed::Box;
 
@@ -917,8 +920,9 @@ mod tests {
         let sender_2 = rand_sender_feature();
         let issuer_1 = rand_issuer_feature();
         let issuer_2 = rand_issuer_feature();
+        let amount = 500_000;
 
-        let mut builder = AccountOutput::build_with_amount(0, account_id)
+        let mut builder = AccountOutput::build_with_amount(amount, account_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(gov_address_1)
             .add_unlock_condition(state_address_1)
@@ -928,6 +932,7 @@ mod tests {
             .add_immutable_feature(issuer_2);
 
         let output = builder.clone().finish().unwrap();
+        assert_eq!(output.amount(), amount);
         assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_1));
         assert_eq!(
             output.unlock_conditions().state_controller_address(),
@@ -954,7 +959,7 @@ mod tests {
         let metadata = rand_metadata_feature();
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
                 &account_id,
             ))
@@ -1041,7 +1046,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id)
+            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(gov_address)
                 .add_unlock_condition(state_address)

@@ -16,7 +16,7 @@ fn config() -> RentStructure {
 }
 
 fn output_in_range(output: Output, range: std::ops::RangeInclusive<u64>) {
-    let cost = output.rent_cost(&config());
+    let cost = output.rent_cost(config());
     assert!(range.contains(&cost), "{output:#?} has a required byte cost of {cost}");
 }
 

@@ -75,18 +75,16 @@ class NodeInfoProtocol:
     """Protocol info.
 
     Attributes:
-        networkName: The human friendly name of the network.
-        bech32Hrp: The HRP prefix used for Bech32 addresses in the network.
-        tokenSupply: TokenSupply defines the current token supply on the network.
+        network_name: The human friendly name of the network.
+        bech32_hrp: The HRP prefix used for Bech32 addresses in the network.
+        token_supply: TokenSupply defines the current token supply on the network.
         version: The version of the protocol running.
-        minPowScore: The minimum pow score of the network.
-        rentStructure: The rent structure used by given node/network.
+        rent_structure: The rent structure used by given node/network.
     """
     network_name: str
     bech32_hrp: str
     token_supply: str
     version: int
-    min_pow_score: float
     rent_structure: RentStructure
 
 

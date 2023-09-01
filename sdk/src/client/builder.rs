@@ -238,6 +238,7 @@ impl ClientBuilder {
                     sender: RwLock::new(mqtt_event_tx),
                     receiver: RwLock::new(mqtt_event_rx),
                 },
+                last_sync: tokio::sync::Mutex::new(None),
             }),
         };
 
@@ -263,9 +264,9 @@ pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
-    /// The latest cached milestone timestamp.
+    /// The current tangle time.
     #[serde(skip)]
-    pub latest_milestone_timestamp: Option<u32>,
+    pub tangle_time: Option<u64>,
 }
 
 impl NetworkInfo {
@@ -274,8 +275,8 @@ impl NetworkInfo {
         self
     }
 
-    pub fn with_latest_milestone_timestamp(mut self, latest_milestone_timestamp: impl Into<Option<u32>>) -> Self {
-        self.latest_milestone_timestamp = latest_milestone_timestamp.into();
+    pub fn with_tangle_time(mut self, tangle_time: u64) -> Self {
+        self.tangle_time = Some(tangle_time.into());
         self
     }
 }

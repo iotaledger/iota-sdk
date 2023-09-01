@@ -391,7 +391,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 }
             }
 
-            output.verify_storage_deposit(*visitor.rent_structure(), visitor.token_supply())?;
+            output.verify_storage_deposit(visitor.rent_structure(), visitor.token_supply())?;
         }
     }
 
@@ -415,6 +415,7 @@ fn verify_payload_packable<const VERIFY: bool>(
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
     use core::str::FromStr;

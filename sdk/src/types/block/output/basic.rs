@@ -1,11 +1,10 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
-use super::verify_output_amount_packable;
 use crate::types::{
     block::{
         address::Address,
@@ -14,8 +13,8 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent,
-            RentStructure,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, NativeToken,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -173,9 +172,11 @@ impl BasicOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Basic(output.clone()).rent_cost(&rent_structure)
+                Output::Basic(output.clone()).rent_cost(rent_structure)
             }
         };
+
+        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -185,7 +186,7 @@ impl BasicOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
@@ -350,7 +351,10 @@ fn verify_features_packable<const VERIFY: bool>(blocks: &Features, _: &ProtocolP
     verify_features::<VERIFY>(blocks)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -478,14 +482,16 @@ mod tests {
         let address_2 = rand_address_unlock_condition();
         let sender_1 = rand_sender_feature();
         let sender_2 = rand_sender_feature();
+        let amount = 500_000;
 
-        let mut builder = BasicOutput::build_with_amount(0)
+        let mut builder = BasicOutput::build_with_amount(amount)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address_1)
             .add_feature(sender_1)
             .replace_feature(sender_2);
 
         let output = builder.clone().finish().unwrap();
+        assert_eq!(output.amount(), amount);
         assert_eq!(output.unlock_conditions().address(), Some(&address_1));
         assert_eq!(output.features().sender(), Some(&sender_2));
 
@@ -500,7 +506,7 @@ mod tests {
         let metadata = rand_metadata_feature();
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .with_features([Feature::from(metadata.clone()), sender_1.into()])
             .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
@@ -569,7 +575,7 @@ mod tests {
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder = BasicOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        let builder = BasicOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));

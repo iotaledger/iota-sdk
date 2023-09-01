@@ -19,17 +19,28 @@ export type OutputId = string;
  * All of the output types.
  */
 enum OutputType {
+    /** A Basic output. */
     Basic = 3,
-    Alias = 4,
+    /** An Account output. */
+    Account = 4,
+    /** A Foundry output. */
     Foundry = 5,
+    /** An NFT output. */
     Nft = 6,
 }
 
+/**
+ * The base class for outputs.
+ */
 abstract class Output /*implements ICommonOutput*/ {
-    private amount: string;
+    readonly amount: string;
 
-    private type: OutputType;
+    readonly type: OutputType;
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output as big-integer or string.
+     */
     constructor(type: OutputType, amount: u64 | string) {
         this.type = type;
         if (typeof amount == 'bigint') {
@@ -40,24 +51,27 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * The type of output.
+     * Get the type of output.
      */
     getType(): OutputType {
         return this.type;
     }
 
     /**
-     * The amount of the output.
+     * Get the amount of the output.
      */
     getAmount(): u64 {
         return BigInt(this.amount);
     }
 
+    /**
+     * Parse an output from a plain JS JSON object.
+     */
     public static parse(data: any): Output {
         if (data.type == OutputType.Basic) {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
-        } else if (data.type == OutputType.Alias) {
-            return plainToInstance(AliasOutput, data) as any as AliasOutput;
+        } else if (data.type == OutputType.Account) {
+            return plainToInstance(AccountOutput, data) as any as AccountOutput;
         } else if (data.type == OutputType.Foundry) {
             return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
         } else if (data.type == OutputType.Nft) {
@@ -68,21 +82,26 @@ abstract class Output /*implements ICommonOutput*/ {
 }
 
 /**
- * Common output properties.
+ * The base class for common outputs.
  */
 abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     @Type(() => UnlockCondition, {
         discriminator: UnlockConditionDiscriminator,
     })
-    private unlockConditions: UnlockCondition[];
+    readonly unlockConditions: UnlockCondition[];
 
-    private nativeTokens?: INativeToken[];
+    readonly nativeTokens?: INativeToken[];
 
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
-    private features?: Feature[];
+    readonly features?: Feature[];
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions Conditions to unlock the output.
+     */
     constructor(
         type: OutputType,
         amount: u64,
@@ -116,14 +135,14 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * Features contained by the output.
+     * Get the features contained by the output.
      */
     getFeatures(): Feature[] | undefined {
         return this.features;
     }
 }
 /**
- * Basic output.
+ * A Basic output.
  */
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
     /**
@@ -131,18 +150,30 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
      */
     readonly mana: u64;
 
+    /**
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
+     */
     constructor(amount: u64, mana: u64, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
         this.mana = mana;
     }
 }
 
+/**
+ * Base class for immutable feature outputs.
+ */
 abstract class ImmutableFeaturesOutput extends CommonOutput {
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
-    private immutableFeatures?: Feature[];
+    readonly immutableFeatures?: Feature[];
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
+     */
     constructor(
         type: OutputType,
         amount: u64,
@@ -158,9 +189,17 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     }
 }
 
+/**
+ * Base class for state metadata outputs.
+ */
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
-    private stateMetadata?: HexEncodedString;
+    readonly stateMetadata?: HexEncodedString;
 
+    /**
+     * @param type The type of output.
+     * @param amount The amount of the output.
+     * @param unlockConditions The unlock conditions for the output.
+     */
     constructor(
         type: OutputType,
         amount: u64,
@@ -176,61 +215,91 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     }
 }
 
-class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
-    private aliasId: HexEncodedString;
-    private stateIndex: number;
-    private foundryCounter: number;
-
+/**
+ * An Account output.
+ */
+class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
+    /**
+     * Unique identifier of the account, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its a newly created account, then the id is zeroed.
+     */
+    readonly accountId: HexEncodedString;
+    /**
+     * A counter that must increase by 1 every time the account output is state transitioned.
+     */
+    readonly stateIndex: number;
+    /**
+     * A counter that denotes the number of foundries created by this account output.
+     */
+    readonly foundryCounter: number;
     /**
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
 
+    /**
+     * @param amount The amount of the output.
+     * @param mana The amount of stored mana.
+     * @param accountId The account ID as hex-encoded string.
+     * @param stateIndex A counter that must increase by 1 every time the account output is state transitioned.
+     * @param foundryCounter A counter that denotes the number of foundries created by this account output.
+     * @param unlockConditions The unlock conditions of the output.
+     */
     constructor(
         amount: u64,
         mana: u64,
-        aliasId: HexEncodedString,
+        accountId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
         unlockConditions: UnlockCondition[],
     ) {
-        super(OutputType.Alias, amount, unlockConditions);
-        this.aliasId = aliasId;
+        super(OutputType.Account, amount, unlockConditions);
+        this.accountId = accountId;
         this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
         this.mana = mana;
     }
     /**
-     * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its a newly created alias, then the id is zeroed.
+     * Unique identifier of the account, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unless its a newly created account, then the id is zeroed.
      */
-    getAliasId(): HexEncodedString {
-        return this.aliasId;
+    getAccountId(): HexEncodedString {
+        return this.accountId;
     }
     /**
-     * A counter that must increase by 1 every time the alias is state transitioned.
+     * A counter that must increase by 1 every time the account is state transitioned.
      */
     getStateIndex(): number {
         return this.stateIndex;
     }
     /**
-     * A counter that denotes the number of foundries created by this alias account.
+     * A counter that denotes the number of foundries created by this account.
      */
     getFoundryCounter(): number {
         return this.foundryCounter;
     }
 }
 /**
- * NFT output.
+ * An NFT output.
  */
 class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
-    private nftId: HexEncodedString;
+    /**
+     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its newly minted, then the id is zeroed.
+     */
+    readonly nftId: HexEncodedString;
 
     /**
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
 
+    /**
+     * @param amount The amount of the output.
+     * @param mana The amount of stored mana.
+     * @param nftId The NFT ID as hex-encoded string.
+     * @param unlockConditions The unlock conditions of the output.
+     */
     constructor(
         amount: u64,
         mana: u64,
@@ -242,24 +311,35 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
         this.mana = mana;
     }
     /**
-     * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its newly minted, then the id is zeroed.
+     * Get the NFT ID of the output.
      */
     getNftId(): HexEncodedString {
         return this.nftId;
     }
 }
 /**
- * Foundry output.
+ * A Foundry output.
  */
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
-    private serialNumber: number;
+    /**
+     * The serial number of the Foundry with respect to the controlling alias.
+     */
+    readonly serialNumber: number;
 
+    /**
+     * The token scheme for the Foundry.
+     */
     @Type(() => TokenScheme, {
         discriminator: TokenSchemeDiscriminator,
     })
-    private tokenScheme: TokenScheme;
+    readonly tokenScheme: TokenScheme;
 
+    /**
+     * @param amount The amount of the output.
+     * @param serialNumber The serial number of the Foundry with respect to the controlling alias.
+     * @param unlockConditions The unlock conditions of the output.
+     * @param tokenScheme The token scheme for the Foundry.
+     */
     constructor(
         amount: u64,
         serialNumber: number,
@@ -271,13 +351,13 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
         this.tokenScheme = tokenScheme;
     }
     /**
-     * The serial number of the foundry with respect to the controlling alias.
+     * The serial number of the foundry with respect to the controlling account.
      */
     getSerialNumber(): number {
         return this.serialNumber;
     }
     /**
-     * The token scheme for the foundry.
+     * Get the token scheme for the Foundry.
      */
     getTokenScheme(): TokenScheme {
         return this.tokenScheme;
@@ -288,7 +368,7 @@ const OutputDiscriminator = {
     property: 'type',
     subTypes: [
         { value: BasicOutput, name: OutputType.Basic as any },
-        { value: AliasOutput, name: OutputType.Alias as any },
+        { value: AccountOutput, name: OutputType.Account as any },
         { value: NftOutput, name: OutputType.Nft as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
     ],
@@ -300,7 +380,7 @@ export {
     OutputType,
     CommonOutput,
     BasicOutput,
-    AliasOutput,
+    AccountOutput,
     NftOutput,
     FoundryOutput,
 };

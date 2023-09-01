@@ -1,10 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{
-    collections::{BTreeMap, BTreeSet},
-    vec::Vec,
-};
+use alloc::collections::{BTreeMap, BTreeSet};
 use core::cmp::Ordering;
 
 use packable::{
@@ -15,7 +12,6 @@ use packable::{
 };
 use primitive_types::U256;
 
-use super::verify_output_amount_packable;
 use crate::types::{
     block::{
         address::{AccountAddress, Address},
@@ -24,8 +20,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, FoundryId,
+            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -237,9 +234,11 @@ impl FoundryOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Foundry(output.clone()).rent_cost(&rent_structure)
+                Output::Foundry(output.clone()).rent_cost(rent_structure)
             }
         };
+
+        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -252,7 +251,7 @@ impl FoundryOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
@@ -613,7 +612,10 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -766,8 +768,9 @@ mod tests {
         let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
         let metadata_1 = rand_metadata_feature();
         let metadata_2 = rand_metadata_feature();
+        let amount = 500_000;
 
-        let mut builder = FoundryOutput::build_with_amount(0, 234, rand_token_scheme())
+        let mut builder = FoundryOutput::build_with_amount(amount, 234, rand_token_scheme())
             .with_serial_number(85)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .with_unlock_conditions([account_1])
@@ -777,6 +780,7 @@ mod tests {
             .replace_immutable_feature(metadata_1.clone());
 
         let output = builder.clone().finish().unwrap();
+        assert_eq!(output.amount(), amount);
         assert_eq!(output.serial_number(), 85);
         assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_1));
         assert_eq!(output.features().metadata(), Some(&metadata_2));
@@ -793,7 +797,7 @@ mod tests {
         assert!(output.immutable_features().is_empty());
 
         let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
             .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .finish_with_params(&protocol_parameters)
             .unwrap();
@@ -851,7 +855,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder = FoundryOutput::build_with_minimum_storage_deposit(
-            *protocol_parameters.rent_structure(),
+            protocol_parameters.rent_structure(),
             123,
             rand_token_scheme(),
         )

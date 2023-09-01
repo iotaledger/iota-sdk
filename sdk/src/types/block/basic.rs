@@ -188,9 +188,9 @@ impl Packable for BasicBlock {
 
         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != protocol_params.protocol_version() {
+        if VERIFY && protocol_version != protocol_params.version() {
             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: protocol_params.protocol_version(),
+                expected: protocol_params.version(),
                 actual: protocol_version,
             }));
         }
@@ -248,6 +248,7 @@ impl Packable for BasicBlock {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
 

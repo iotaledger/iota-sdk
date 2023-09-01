@@ -11,9 +11,9 @@ import { Utils, Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/alias-wallet/request-funds.ts
+// yarn run-example ./how_tos/account_wallet/request-funds.ts
 
-// In this example we request funds to an alias wallet.
+// In this example we request funds to an account wallet.
 async function run() {
     initLogger();
     if (!process.env.FAUCET_URL) {
@@ -34,33 +34,33 @@ async function run() {
 
         const totalBaseTokenBalance = balance.baseCoin.total;
         console.log(
-            `Balance before requesting funds on alias address: ${totalBaseTokenBalance}`,
+            `Balance before requesting funds on account address: ${totalBaseTokenBalance}`,
         );
 
-        const aliasId = balance.aliases[0];
-        console.log(`Alias Id: ${aliasId}`);
+        const accountId = balance.accounts[0];
+        console.log(`Account Id: ${accountId}`);
 
-        // Get Alias address
-        const aliasAddress = Utils.aliasIdToBech32(
-            aliasId,
+        // Get Account address
+        const accountAddress = Utils.accountIdToBech32(
+            accountId,
             await (await wallet.getClient()).getBech32Hrp(),
         );
         const faucetResponse = await (
             await wallet.getClient()
-        ).requestFundsFromFaucet(faucetUrl, aliasAddress);
+        ).requestFundsFromFaucet(faucetUrl, accountAddress);
         console.log(faucetResponse);
 
         await new Promise((resolve) => setTimeout(resolve, 10000));
 
         const syncOptions = {
-            alias: {
+            account: {
                 basicOutputs: true,
             },
         };
         const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
             .baseCoin.total;
         console.log(
-            `Balance after requesting funds on alias address: ${totalBaseTokenBalanceAfter}`,
+            `Balance after requesting funds on account address: ${totalBaseTokenBalanceAfter}`,
         );
     } catch (error) {
         console.error('Error: ', error);

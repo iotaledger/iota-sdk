@@ -22,6 +22,7 @@ pub type ValidationBlock = BlockWrapper<ValidationBlockData>;
 impl BlockBuilder<ValidationBlock> {
     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
     #[inline(always)]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         protocol_params: ProtocolParameters,
         issuing_time: u64,
@@ -182,9 +183,9 @@ impl Packable for ValidationBlock {
 
         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != protocol_params.protocol_version() {
+        if VERIFY && protocol_version != protocol_params.version() {
             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: protocol_params.protocol_version(),
+                expected: protocol_params.version(),
                 actual: protocol_version,
             }));
         }
@@ -253,6 +254,7 @@ fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &Protoco
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
 

@@ -1,10 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::{
-    block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error};
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -25,7 +22,7 @@ impl StorageDepositReturnUnlockCondition {
     /// Creates a new [`StorageDepositReturnUnlockCondition`].
     #[inline(always)]
     pub fn new(return_address: impl Into<Address>, amount: u64, token_supply: u64) -> Result<Self, Error> {
-        verify_amount::<true>(&amount, &token_supply)?;
+        verify_amount::<true>(amount, token_supply)?;
 
         Ok(Self {
             return_address: return_address.into(),
@@ -46,9 +43,9 @@ impl StorageDepositReturnUnlockCondition {
     }
 }
 
-fn verify_amount<const VERIFY: bool>(amount: &u64, token_supply: &u64) -> Result<(), Error> {
+fn verify_amount<const VERIFY: bool>(amount: u64, token_supply: u64) -> Result<(), Error> {
     if VERIFY {
-        verify_output_amount(amount, token_supply).map_err(|_| Error::InvalidStorageDepositAmount(*amount))?;
+        verify_output_amount(amount, token_supply).map_err(|_| Error::InvalidStorageDepositAmount(amount))?;
     }
 
     Ok(())
@@ -58,17 +55,18 @@ fn verify_amount_packable<const VERIFY: bool>(
     amount: &u64,
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
+    verify_amount::<VERIFY>(*amount, protocol_parameters.token_supply())
 }
 
-pub(super) mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use alloc::format;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::{block::Error, TryFromDto},
+        types::{block::Error, TryFromDto, ValidationParams},
         utils::serde::string,
     };
 

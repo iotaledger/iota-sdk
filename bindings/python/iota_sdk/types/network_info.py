@@ -10,9 +10,7 @@ from iota_sdk.types.node_info import NodeInfoProtocol
 @json
 @dataclass
 class NetworkInfo:
-    """Network and PoW related information.
+    """Network related information.
     """
 
     protocol_parameters: NodeInfoProtocol
-    local_pow: bool
-    tips_interval: int

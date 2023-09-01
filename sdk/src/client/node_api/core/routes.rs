@@ -15,13 +15,13 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, PeerResponse,
-            RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
+            ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
-            slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
+            slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
         },
         TryFromDto,
@@ -100,6 +100,40 @@ impl ClientInner {
             .read()
             .await
             .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    // Reward routes.
+
+    /// Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
+    /// provided in the response.
+    /// Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
+    /// staking feature is equal or greater than the current epoch, the rewards response will not include the potential
+    /// future rewards for those epochs. `epochStart` and `epochEnd` indicates the actual range for which reward value
+    /// is returned and decayed for.
+    /// GET /api/core/v3/rewards/{outputId}
+    pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
+        let path = &format!("api/core/v3/rewards/{output_id}");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+    /// current committee members are returned.
+    /// GET /api/core/v3/committee/?epochIndex
+    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>>) -> Result<CommitteeResponse> {
+        const PATH: &str = "api/core/v3/committee";
+
+        let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
             .await
     }
 

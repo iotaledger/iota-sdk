@@ -14,7 +14,7 @@ use {
 };
 
 #[cfg(target_family = "wasm")]
-use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
+use crate::{client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS, types::block::PROTOCOL_VERSION};
 use crate::{
     client::{
         builder::{ClientBuilder, NetworkInfo},
@@ -49,6 +49,8 @@ pub struct ClientInner {
     pub(crate) api_timeout: RwLock<Duration>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
+    #[cfg(target_family = "wasm")]
+    pub(crate) last_sync: tokio::sync::Mutex<Option<u32>>,
 }
 
 #[derive(Default)]
@@ -98,20 +100,21 @@ impl ClientInner {
         // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
-            lazy_static::lazy_static! {
-                static ref LAST_SYNC: std::sync::Mutex<Option<u32>> = std::sync::Mutex::new(None);
-            };
             let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
-            if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
+            if let Some(last_sync) = *self.last_sync.lock().await {
                 if current_time < last_sync {
                     return Ok(self.network_info.read().await.clone());
                 }
             }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self.network_info.write().await;
-            client_network_info.protocol_parameters = info.protocol.clone();
+            client_network_info.protocol_parameters = info
+                .protocol_parameters_by_version(PROTOCOL_VERSION)
+                .expect("missing v3 protocol parameters")
+                .parameters
+                .clone();
 
-            *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
+            *self.last_sync.lock().await = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
 
         Ok(self.network_info.read().await.clone())
@@ -124,7 +127,7 @@ impl ClientInner {
 
     /// Gets the protocol version of the node we're connecting to.
     pub async fn get_protocol_version(&self) -> Result<u8> {
-        Ok(self.get_network_info().await?.protocol_parameters.protocol_version())
+        Ok(self.get_network_info().await?.protocol_parameters.version())
     }
 
     /// Gets the network name of the node we're connecting to.
@@ -139,17 +142,12 @@ impl ClientInner {
 
     /// Gets the bech32 HRP of the node we're connecting to.
     pub async fn get_bech32_hrp(&self) -> Result<Hrp> {
-        Ok(*self.get_network_info().await?.protocol_parameters.bech32_hrp())
-    }
-
-    /// Gets the below maximum depth of the node we're connecting to.
-    pub async fn get_below_max_depth(&self) -> Result<u8> {
-        Ok(self.get_network_info().await?.protocol_parameters.below_max_depth())
+        Ok(self.get_network_info().await?.protocol_parameters.bech32_hrp())
     }
 
     /// Gets the rent structure of the node we're connecting to.
     pub async fn get_rent_structure(&self) -> Result<RentStructure> {
-        Ok(*self.get_network_info().await?.protocol_parameters.rent_structure())
+        Ok(self.get_network_info().await?.protocol_parameters.rent_structure())
     }
 
     /// Gets the token supply of the node we're connecting to.

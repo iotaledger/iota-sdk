@@ -27,12 +27,12 @@ async function run() {
 
         const balance = await account.sync();
 
-        // We can first check if we already have an alias in our account, because an alias can have
+        // We can first check if we already have an account output in our account, because an account output can have
         // many foundry outputs and therefore we can reuse an existing one
-        if (balance.aliases.length == 0) {
-            // If we don't have an alias, we need to create one
+        if (balance.accounts.length == 0) {
+            // If we don't have an account output, we need to create one
             const transaction = await account
-                .prepareCreateAliasOutput()
+                .prepareCreateAccountOutput()
                 .then((prepared) => prepared.send());
             console.log(`Transaction sent: ${transaction.transactionId}`);
 

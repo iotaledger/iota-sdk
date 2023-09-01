@@ -1,0 +1,21 @@
+name: Cancel jobs from merged/closed pull request
+
+on:
+  pull_request_target:
+    types: [closed]
+  # workflow_run:
+  #   workflows: ["*"]
+  #   types: [requested]
+
+
+jobs:
+  merge_job:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          ignore_sha: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_id: all
