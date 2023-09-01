@@ -10,28 +10,41 @@ import { SlotIndex } from '../slot';
  * All of the unlock condition types.
  */
 enum UnlockConditionType {
+    /** An address unlock condition. */
     Address = 0,
+    /** A storage deposit return unlock condition. */
     StorageDepositReturn = 1,
+    /** A timelock unlock condition. */
     Timelock = 2,
+    /** An expiration unlock condition. */
     Expiration = 3,
+    /** A state controller address unlock condition. */
     StateControllerAddress = 4,
+    /** A governor address unlock condition. */
     GovernorAddress = 5,
+    /** An immutable account address unlock condition. */
     ImmutableAccountAddress = 6,
 }
 
 abstract class UnlockCondition {
     readonly type: UnlockConditionType;
 
+    /**
+     * @param type The type of the unlock condition.
+     */
     constructor(type: UnlockConditionType) {
         this.type = type;
     }
     /**
-     * The type of unlock condition.
+     * Get the type of unlock condition.
      */
     getType(): UnlockConditionType {
         return this.type;
     }
 
+    /**
+     * Parse an unlock condition from a plain JS JSON object.
+     */
     public static parse(data: any): UnlockCondition {
         if (data.type == UnlockConditionType.Address) {
             return plainToInstance(
@@ -74,16 +87,20 @@ abstract class UnlockCondition {
 }
 
 /**
- * Address Unlock Condition.
+ * An address unlock condition.
  */
 class AddressUnlockCondition extends UnlockCondition {
     /**
-     * The address.
+     * An address unlocked with a private key.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+
+    /**
+     * @param address The address that needs to be unlocked with a private key.
+     */
     constructor(address: Address) {
         super(UnlockConditionType.Address);
         this.address = address;
@@ -91,19 +108,26 @@ class AddressUnlockCondition extends UnlockCondition {
 }
 
 /**
- * Storage Deposit Return Unlock Condition.
+ * A Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition {
-    private amount: string;
+    /**
+     * The amount the consuming transaction must deposit to `returnAddress`.
+     */
+    readonly amount: string;
 
     /**
-     * The return address.
+     * The address to return the amount to.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly returnAddress: Address;
 
+    /**
+     * @param returnAddress The address to return the amount to.
+     * @param amount The amount the consuming transaction must deposit to `returnAddress`.
+     */
     constructor(returnAddress: Address, amount: u64 | string) {
         super(UnlockConditionType.StorageDepositReturn);
         if (typeof amount == 'bigint') {
@@ -114,7 +138,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
         this.returnAddress = returnAddress;
     }
     /**
-     * Amount of tokens the consuming transaction must deposit to the address defined in return address.
+     * Get the amount.
      */
     getAmount(): u64 {
         return BigInt(this.amount);
@@ -142,7 +166,7 @@ class TimelockUnlockCondition extends UnlockCondition {
  */
 class ExpirationUnlockCondition extends UnlockCondition {
     /**
-     * The return address.
+     * Get the return address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
@@ -154,6 +178,10 @@ class ExpirationUnlockCondition extends UnlockCondition {
      */
     readonly slotIndex: SlotIndex;
 
+    /**
+     * @param returnAddress The address that can unlock the expired output.
+     * @param slotIndex The slot index timestamp marking the end of the claim period.
+     */
     constructor(returnAddress: Address, slotIndex: SlotIndex) {
         super(UnlockConditionType.Expiration);
         this.returnAddress = returnAddress;
@@ -162,7 +190,7 @@ class ExpirationUnlockCondition extends UnlockCondition {
 }
 
 /**
- * State Controller Address Unlock Condition.
+ * A State Controller Address Unlock Condition.
  */
 class StateControllerAddressUnlockCondition extends UnlockCondition {
     /**
@@ -172,6 +200,10 @@ class StateControllerAddressUnlockCondition extends UnlockCondition {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+
+    /**
+     * @param address The State Controller address that is allowed to do state transitions.
+     */
     constructor(address: Address) {
         super(UnlockConditionType.StateControllerAddress);
         this.address = address;
@@ -179,7 +211,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition {
 }
 
 /**
- * Governor Unlock Condition.
+ * A Governor Address Unlock Condition.
  */
 class GovernorAddressUnlockCondition extends UnlockCondition {
     /**
@@ -189,6 +221,10 @@ class GovernorAddressUnlockCondition extends UnlockCondition {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+
+    /**
+     * @param address The governor address that is allowed to do governance transitions.
+     */
     constructor(address: Address) {
         super(UnlockConditionType.GovernorAddress);
         this.address = address;
@@ -200,12 +236,16 @@ class GovernorAddressUnlockCondition extends UnlockCondition {
  */
 class ImmutableAccountAddressUnlockCondition extends UnlockCondition {
     /**
-     * The address.
+     * Get the Governor address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
     })
     readonly address: Address;
+
+    /**
+     * @param address The Immutable Account address that owns the output.
+     */
     constructor(address: AccountAddress) {
         super(UnlockConditionType.ImmutableAccountAddress);
         this.address = address;

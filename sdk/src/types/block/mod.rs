@@ -48,14 +48,16 @@ pub mod unlock;
 /// A module that provides types and syntactic validations of validation blocks.
 pub mod validation;
 
+pub(crate) use r#macro::create_bitflags;
 #[cfg(feature = "serde")]
-pub(crate) use r#macro::string_serde_impl;
-pub(crate) use r#macro::{create_bitflags, impl_id};
+pub(crate) use r#macro::{impl_id, string_serde_impl};
 
+#[cfg(feature = "serde")]
+pub use self::core::dto::BlockDto;
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{dto::BlockDto, Block, BlockBuilder},
+    core::{Block, BlockBuilder},
     error::Error,
     issuer_id::IssuerId,
 };

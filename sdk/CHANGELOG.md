@@ -19,6 +19,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.3 - 2023-MM-DD
+
+### Added
+
+- `migrate_db_chrysalis_to_stardust()` function;
+- `Wallet::get_chrysalis_data()` method;
+- `PrivateKeySecretManager` and `SecretManager::PrivateKey`;
+- `SecretManager::from` impl for variants;
+
+### Fixed
+
+- `Clients` returning the default protocol parameters when multiple `Client` instances are used;
+- Ledger Nano events properly created when preparing transactions using a `SecretManager`;
+- `Account::prepare_output()` when `ReturnStrategy::Gift` is used with an existing NFT output;
+- `Wallet::restore_backup()` when no secret manager data is stored inside;
+- Migration mismatch from `iota-rs` version;
+
+## 1.0.2 - 2023-07-28
+
+### Changed
+
+- Bump `iota_stronghold` dependency to `2.0.0`;
+
+## 1.0.1 - 2023-07-25
+
+### Fixed
+
+- `Client::{update_node_manager, update_node_manager}` use the correct `Result` type from `client` and not `wallet`;
+
 ## 1.0.0 - 2023-07-24
 
 ### Added

@@ -733,6 +733,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::boxed::Box;
 

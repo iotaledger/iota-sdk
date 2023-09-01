@@ -12,7 +12,7 @@ jobs:
       RELEASE_UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: set version env variable
         run: echo "CRATE_VERSION=$(cat cli/Cargo.toml | sed -n 's/.*version = "\([^"]*\)".*/\1/p' | head -1)" >> $GITHUB_ENV
       - name: create release
@@ -24,20 +24,8 @@ jobs:
           tag_name: "cli-wallet-v${{ env.CRATE_VERSION }}"
           release_name: "cli-wallet-v${{ env.CRATE_VERSION }}"
           body: |
-            # Changelog
-
-            <!---  ## Added -->
-
-            <!---  ## Changed -->
-
-            <!---  ## Deprecated -->
-
-            <!---  ## Removed -->
-
-            <!---  ## Fixed -->
-
-            # Checksums
-
+            https://github.com/iotaledger/iota-sdk/blob/develop/cli/CHANGELOG.md
+            
             |Asset|SHA-256 checksum|
             |---|---|
             |wallet-linux||
@@ -67,12 +55,9 @@ jobs:
             ext: .exe
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: install rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install required packages (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -86,7 +71,7 @@ jobs:
         if: matrix.os == 'macos-latest'
 
       - name: Install LLVM and Clang (Windows) # required for bindgen to work, see https://github.com/rust-lang/rust-bindgen/issues/1797
-        uses: KyleMayes/install-llvm-action@32c4866ebb71e0949e8833eb49beeebed48532bd
+        uses: KyleMayes/install-llvm-action@c135b3937686fd69c2651507aabc9925a8f9eee8
         if: matrix.os == 'windows-latest'
         with:
           version: "11.0"
@@ -98,10 +83,7 @@ jobs:
 
       # build the CLI
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --manifest-path ./cli/Cargo.toml --profile production
+        run: cargo build --manifest-path ./cli/Cargo.toml --profile production
 
       - name: Import code signing assets (macOS)
         # Based on https://github.com/Apple-Actions/import-codesign-certs/blob/master/src/security.ts

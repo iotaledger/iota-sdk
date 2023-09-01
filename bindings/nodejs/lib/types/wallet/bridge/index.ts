@@ -1,9 +1,5 @@
 import type { AccountIdentifier } from '../account';
 import type {
-    __BuildAccountOutputMethod__,
-    __BuildBasicOutputMethod__,
-    __BuildFoundryOutputMethod__,
-    __BuildNftOutputMethod__,
     __PrepareBurnMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
@@ -80,10 +76,6 @@ import type {
 } from './wallet';
 
 export type __AccountMethod__ =
-    | __BuildAccountOutputMethod__
-    | __BuildBasicOutputMethod__
-    | __BuildFoundryOutputMethod__
-    | __BuildNftOutputMethod__
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__

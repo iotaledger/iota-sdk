@@ -49,6 +49,8 @@ pub struct ClientInner {
     pub(crate) api_timeout: RwLock<Duration>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
+    #[cfg(target_family = "wasm")]
+    pub(crate) last_sync: tokio::sync::Mutex<Option<u32>>,
 }
 
 #[derive(Default)]
@@ -98,11 +100,8 @@ impl ClientInner {
         // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
-            lazy_static::lazy_static! {
-                static ref LAST_SYNC: std::sync::Mutex<Option<u32>> = std::sync::Mutex::new(None);
-            };
             let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
-            if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
+            if let Some(last_sync) = *self.last_sync.lock().await {
                 if current_time < last_sync {
                     return Ok(self.network_info.read().await.clone());
                 }
@@ -115,7 +114,7 @@ impl ClientInner {
                 .parameters
                 .clone();
 
-            *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
+            *self.last_sync.lock().await = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
 
         Ok(self.network_info.read().await.clone())
