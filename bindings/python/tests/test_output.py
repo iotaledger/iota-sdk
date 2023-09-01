@@ -139,7 +139,7 @@ def test_output():
             }
         ]
     }
-    alias_output = AliasOutput.from_dict( alias_output_dict)
+    alias_output = AliasOutput.from_dict(alias_output_dict)
     assert alias_output.to_dict() == alias_output_dict
 
     alias_output_dict = {
@@ -179,7 +179,7 @@ def test_output():
             }
         ]
     }
-    alias_output = AliasOutput.from_dict( alias_output_dict)
+    alias_output = AliasOutput.from_dict(alias_output_dict)
     assert alias_output.to_dict() == alias_output_dict
 
     foundry_output_dict = {
@@ -208,7 +208,7 @@ def test_output():
             }
         ]
     }
-    foundry_output = FoundryOutput.from_dict( foundry_output_dict)
+    foundry_output = FoundryOutput.from_dict(foundry_output_dict)
     assert foundry_output.to_dict() == foundry_output_dict
 
     nft_output_dict = {
