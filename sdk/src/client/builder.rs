@@ -238,6 +238,7 @@ impl ClientBuilder {
                     sender: RwLock::new(mqtt_event_tx),
                     receiver: RwLock::new(mqtt_event_rx),
                 },
+                last_sync: tokio::sync::Mutex::new(None),
             }),
         };
 

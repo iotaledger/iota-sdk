@@ -14,10 +14,7 @@ pub use self::{
     essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
     transaction_id::TransactionId,
 };
-use crate::types::{
-    block::{protocol::ProtocolParameters, unlock::Unlocks, Error},
-    ValidationParams,
-};
+use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
 /// A transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -96,6 +93,7 @@ fn verify_essence_unlocks(essence: &RegularTransactionEssence, unlocks: &Unlocks
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::vec::Vec;
 
@@ -105,7 +103,7 @@ pub mod dto {
     use super::*;
     use crate::types::{
         block::{unlock::Unlock, Error},
-        TryFromDto,
+        TryFromDto, ValidationParams,
     };
 
     /// The payload type to define a value transaction.

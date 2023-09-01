@@ -5,20 +5,32 @@ import { plainToInstance } from 'class-transformer';
 import { HexEncodedString } from '../utils';
 import { AccountId, NftId } from './id';
 
+/**
+ * Address type variants.
+ */
 enum AddressType {
+    /** An Ed25519 address. */
     Ed25519 = 0,
+    /** An Account address. */
     Account = 8,
+    /** An NFT address. */
     Nft = 16,
 }
 
+/**
+ * The base class for addresses.
+ */
 abstract class Address {
-    private type: AddressType;
+    readonly type: AddressType;
 
+    /**
+     * @param type The type of the address.
+     */
     constructor(type: AddressType) {
         this.type = type;
     }
     /**
-     * The type of address.
+     * Get the type of address.
      */
     getType(): AddressType {
         return this.type;
@@ -26,6 +38,9 @@ abstract class Address {
 
     abstract toString(): string;
 
+    /**
+     * Parse an address from a JSON string.
+     */
     public static parse(data: any): Address {
         if (data.type == AddressType.Ed25519) {
             return plainToInstance(
@@ -44,17 +59,20 @@ abstract class Address {
     }
 }
 /**
- * Ed25519 Address.
+ * An Ed25519 Address.
  */
 class Ed25519Address extends Address {
-    private pubKeyHash: HexEncodedString;
+    readonly pubKeyHash: HexEncodedString;
 
+    /**
+     * @param address An Ed25519 address as hex-encoded string.
+     */
     constructor(address: HexEncodedString) {
         super(AddressType.Ed25519);
         this.pubKeyHash = address;
     }
     /**
-     * The public key hash.
+     * Get the public key hash.
      */
     getPubKeyHash(): HexEncodedString {
         return this.pubKeyHash;
@@ -65,14 +83,20 @@ class Ed25519Address extends Address {
     }
 }
 
+/**
+ * An Account address.
+ */
 class AccountAddress extends Address {
-    private accountId: AccountId;
+    readonly accountId: AccountId;
+    /**
+     * @param address An account address as account ID.
+     */
     constructor(address: AccountId) {
         super(AddressType.Account);
         this.accountId = address;
     }
     /**
-     * The account id.
+     * Get the account ID.
      */
     getAccountId(): AccountId {
         return this.accountId;
@@ -83,16 +107,19 @@ class AccountAddress extends Address {
     }
 }
 /**
- * NFT address.
+ * An NFT address.
  */
 class NftAddress extends Address {
-    private nftId: NftId;
+    readonly nftId: NftId;
+    /**
+     * @param address An NFT address as NFT ID.
+     */
     constructor(address: NftId) {
         super(AddressType.Nft);
         this.nftId = address;
     }
     /**
-     * The NFT Id.
+     * Get the NFT ID.
      */
     getNftId(): NftId {
         return this.nftId;

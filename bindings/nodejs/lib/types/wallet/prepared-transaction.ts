@@ -15,9 +15,13 @@ import {
  * the transaction and sign+submit/send the transaction.
  */
 export class PreparedTransaction {
-    private _preparedData: PreparedTransactionData;
-    private _account: Account;
+    readonly _preparedData: PreparedTransactionData;
+    readonly _account: Account;
 
+    /**
+     * @param preparedData Prepared data to sign and submit a transaction.
+     * @param account A wallet account.
+     */
     constructor(preparedData: PreparedTransactionData, account: Account) {
         this._preparedData = preparedData;
         this._account = account;

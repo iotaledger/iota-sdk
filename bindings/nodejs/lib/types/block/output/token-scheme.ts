@@ -4,19 +4,29 @@
 import { u256 } from '../../utils';
 import { hexToBigInt } from '../../utils/hex-encoding';
 
+/**
+ * All of the token scheme types.
+ */
 enum TokenSchemeType {
+    /** A simple token scheme. */
     Simple = 0,
 }
 
+/**
+ * The base class for token schemes.
+ */
 abstract class TokenScheme {
-    private type: TokenSchemeType;
+    readonly type: TokenSchemeType;
 
+    /**
+     * @param type The type of token scheme.
+     */
     constructor(type: TokenSchemeType) {
         this.type = type;
     }
 
     /**
-     * The type of token scheme.
+     * Get the type of token scheme.
      */
     getType(): TokenSchemeType {
         return this.type;
@@ -24,13 +34,18 @@ abstract class TokenScheme {
 }
 
 /**
- * Simple token scheme.
+ * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: u256;
-    private meltedTokens: u256;
-    private maximumSupply: u256;
+    readonly mintedTokens: u256;
+    readonly meltedTokens: u256;
+    readonly maximumSupply: u256;
 
+    /**
+     * @param mintedTokens The number of tokens that were minted.
+     * @param meltedTokens The number of tokens that were melted.
+     * @param maximumSupply The maximum supply of the token.
+     */
     constructor(mintedTokens: u256, meltedTokens: u256, maximumSupply: u256) {
         super(TokenSchemeType.Simple);
         if (typeof mintedTokens === 'bigint') {
@@ -59,21 +74,21 @@ class SimpleTokenScheme extends TokenScheme {
     }
 
     /**
-     * Amount of tokens minted.
+     * Get the amount of tokens minted.
      */
     getMintedTokens(): u256 {
         return this.mintedTokens;
     }
 
     /**
-     * Amount of tokens melted.
+     * Get the amount of tokens melted.
      */
     getMeltedTokens(): u256 {
         return this.meltedTokens;
     }
 
     /**
-     * Maximum supply of tokens controlled.
+     * Get the maximum supply of tokens.
      */
     getMaximumSupply(): u256 {
         return this.maximumSupply;

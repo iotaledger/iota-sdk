@@ -112,7 +112,7 @@ To start using the IOTA SDK in your Rust project, you can include the following 
 
 ```toml
 [dependencies]
-iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
+iota-sdk = { git = "https://github.com/iotaledger/iota-sdk", branch = "develop" }
 ```
 
 ## Client Usage
@@ -201,13 +201,13 @@ You can use the provided code [examples](sdk/examples) to get acquainted with th
 command to run any example:
 
 ```bash
-cargo run --example example_name --release
+cargo run --release --all-features --example example_name
 ```
 
 Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
 
 ```bash
-cargo run --example node_api_core_get_info --release 
+cargo run --release --all-features --example create_account
 ```
 
 You can get a list of the available code examples with the following command:
