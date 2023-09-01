@@ -136,7 +136,7 @@ impl Client {
         Ok(current_time)
     }
 
-    // TODO !!!
+    // TODO
     pub async fn get_slot_index(&self) -> Result<SlotIndex> {
         todo!()
     }

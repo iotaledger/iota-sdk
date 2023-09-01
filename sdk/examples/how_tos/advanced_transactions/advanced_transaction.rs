@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         //     .as_secs()
         //     .try_into()
         //     .unwrap();
-        // TODO !!!
+        // TODO
         let slot_index = SlotIndex::from(1000);
         let basic_output = BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(Bech32Address::try_from_str(

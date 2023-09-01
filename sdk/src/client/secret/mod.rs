@@ -526,7 +526,7 @@ where
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
-        // TODO !!!
+        // TODO
         let slot_index = slot_index.unwrap_or_else(|| SlotIndex::from(0));
         // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
         let (input_address, _) = input.output.required_and_unlocked_address(
@@ -591,7 +591,7 @@ where
     crate::client::Error: From<M::Error>,
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
-    // TODO !!!
+    // TODO
     let slot_index = SlotIndex::from(0);
     // let current_time = unix_timestamp_now().as_secs() as u32;
 
