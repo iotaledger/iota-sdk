@@ -74,14 +74,12 @@ class NodeInfoProtocol:
         bech32Hrp: The HRP prefix used for Bech32 addresses in the network.
         tokenSupply: TokenSupply defines the current token supply on the network.
         version: The version of the protocol running.
-        minPowScore: The minimum pow score of the network.
         rentStructure: The rent structure used by given node/network.
     """
     networkName: str
     bech32Hrp: str
     tokenSupply: str
     version: int
-    minPowScore: float
     rentStructure: RentStructure
 
 
