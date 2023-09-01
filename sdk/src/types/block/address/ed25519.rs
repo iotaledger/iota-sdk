@@ -25,7 +25,6 @@ impl Ed25519Address {
         Self::from(address)
     }
 
-    #[allow(dead_code)]
     pub(crate) fn null() -> Self {
         Self::new([0; Self::LENGTH])
     }

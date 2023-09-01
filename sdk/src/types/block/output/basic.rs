@@ -12,7 +12,7 @@ use super::{
 };
 use crate::types::{
     block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::{
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
@@ -61,6 +61,14 @@ impl BasicOutputBuilder {
             native_tokens: BTreeSet::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
+        }
+    }
+
+    /// Gets the current amount as a concrete value.
+    pub fn amount(&self) -> u64 {
+        match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
         }
     }
 
@@ -206,6 +214,13 @@ impl BasicOutputBuilder {
             }
             OutputBuilderAmount::MinimumStorageDeposit(_) => self,
         })
+    }
+
+    pub fn min_storage_deposit_amount(&self, rent_structure: RentStructure, token_supply: u64) -> Result<u64, Error> {
+        Ok(self
+            .clone()
+            .with_sufficient_storage_deposit(Ed25519Address::null(), rent_structure, token_supply)?
+            .amount())
     }
 
     ///

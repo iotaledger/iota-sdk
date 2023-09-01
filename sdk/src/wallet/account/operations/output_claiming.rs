@@ -11,7 +11,7 @@ use crate::{
         address::Address,
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId, RentCost,
+            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
     },
     wallet::account::{
@@ -294,15 +294,10 @@ where
             Some(new_native_tokens.clone().finish()?)
         };
 
-        // Check if the new amount is enough for the storage deposit, otherwise increase it to this
-        let mut required_amount = if possible_additional_inputs.is_empty() {
-            required_amount_for_nfts
-        } else {
-            required_amount_for_nfts
-                + BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
-                    .with_native_tokens(option_native_token.into_iter().flatten())
-                    .rent_cost(rent_structure)
-        };
+        // Get the required amount using a sufficient storage deposit
+        let mut required_amount = BasicOutputBuilder::new_with_amount(required_amount_for_nfts)
+            .with_native_tokens(option_native_token.into_iter().flatten())
+            .min_storage_deposit_amount(rent_structure, token_supply)?;
 
         let mut additional_inputs = Vec::new();
         if available_amount < required_amount {
@@ -318,10 +313,9 @@ where
                 };
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
-                required_amount = required_amount_for_nfts
-                    + BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
-                        .with_native_tokens(option_native_token.into_iter().flatten())
-                        .rent_cost(rent_structure);
+                required_amount = BasicOutputBuilder::new_with_amount(required_amount_for_nfts)
+                    .with_native_tokens(option_native_token.into_iter().flatten())
+                    .min_storage_deposit_amount(rent_structure, token_supply)?;
 
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {

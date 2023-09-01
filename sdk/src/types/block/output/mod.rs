@@ -68,10 +68,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::{protocol::ProtocolParameters, slot::SlotIndex, BlockId};
-use crate::types::{
-    block::{address::Address, semantic::ValidationContext, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, semantic::ValidationContext, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
