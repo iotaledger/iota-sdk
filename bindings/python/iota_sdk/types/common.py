@@ -71,7 +71,7 @@ class Node():
     disabled: Optional[bool] = None
 
     @staticmethod
-    def _to_dict(encoded):
+    def _to_dict_custom(encoded):
 
         if 'jwt' in encoded or 'username' in encoded or 'password' in encoded:
             encoded['auth'] = {}
