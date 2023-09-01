@@ -25,7 +25,7 @@ use crate::types::{
     ValidationParams,
 };
 
-///
+/// Builder for a [`BasicOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct BasicOutputBuilder {
@@ -214,15 +214,18 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
+    /// Amount of stored Mana held by this output.
     mana: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by this output.
     native_tokens: NativeTokens,
+    /// Define how the output can be unlocked in a transaction.
     #[packable(verify_with = verify_unlock_conditions_packable)]
     unlock_conditions: UnlockConditions,
     #[packable(verify_with = verify_features_packable)]
+    /// Features of the output.
     features: Features,
 }
 
@@ -285,7 +288,7 @@ impl BasicOutput {
     ///
     #[inline(always)]
     pub fn address(&self) -> &Address {
-        // An BasicOutput must have an AddressUnlockCondition.
+        // A BasicOutput must have an AddressUnlockCondition.
         self.unlock_conditions
             .address()
             .map(|unlock_condition| unlock_condition.address())
@@ -365,18 +368,15 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    /// Describes a basic output.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct BasicOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
