@@ -128,7 +128,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let token_supply = account_0.client().get_token_supply().await?;
     let rent_structure = account_0.client().get_rent_structure().await?;
-    let expiration_time = account_0.client().get_slot_index().await? + 86400; // 1 Day from now
+    let expiration_slot = account_0.client().get_slot_index().await? + 86400;
 
     let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -136,7 +136,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
         ))
         .add_unlock_condition(ExpirationUnlockCondition::new(
             *account_0.addresses().await?[0].address().as_ref(),
-            expiration_time,
+            expiration_slot,
         )?)
         .finish_output(token_supply)?;
     let amount = output.amount();
