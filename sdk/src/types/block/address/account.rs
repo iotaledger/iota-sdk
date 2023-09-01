@@ -57,6 +57,7 @@ impl core::fmt::Debug for AccountAddress {
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

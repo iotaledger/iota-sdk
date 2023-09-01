@@ -565,6 +565,7 @@ pub(crate) fn verify_parents(
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::format;
 

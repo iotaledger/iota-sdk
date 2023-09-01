@@ -1,6 +1,6 @@
 [package]
 name = "cli-wallet"
-version = "1.0.0-rc.2"
+version = "1.0.0"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 homepage = "https://iota.org"
@@ -22,7 +22,7 @@ iota-sdk = { path = "../sdk", default-features = false, features = [
 ] }
 
 chrono = { version = "0.4.26", default-features = false, features = ["std"] }
-clap = { version = "4.3.19", default-features = false, features = [
+clap = { version = "4.3.21", default-features = false, features = [
     "std",
     "color",
     "help",
@@ -40,9 +40,9 @@ dialoguer = { version = "0.10.4", default-features = false, features = [
 ] }
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-log = { version = "0.4.19", default-features = false }
+log = { version = "0.4.20", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false, features = ["std"] }
-serde_json = { version = "1.0.103", default-features = false }
-thiserror = { version = "1.0.44", default-features = false }
-tokio = { version = "1.29.1", default-features = false, features = ["fs"] }
+serde_json = { version = "1.0.105", default-features = false }
+thiserror = { version = "1.0.46", default-features = false }
+tokio = { version = "1.31.0", default-features = false, features = ["fs"] }
 zeroize = { version = "1.6.0", default-features = false }

@@ -13,7 +13,7 @@ use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Deserializer, Serialize};
 
 pub use self::{
-    address::{AccountAddress, AddressWithUnspentOutputs},
+    address::{AddressWithUnspentOutputs, Bip44Address},
     balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
 };
 use crate::{

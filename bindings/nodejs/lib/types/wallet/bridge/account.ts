@@ -8,18 +8,12 @@ import type {
     SendNftParams,
     GenerateAddressOptions,
 } from '../address';
-import type {
-    BuildAliasOutputData,
-    BuildBasicOutputData,
-    BuildFoundryOutputData,
-    BuildNftOutputData,
-} from '../build-output-data';
 import type { Burn, INode, PreparedTransactionData } from '../../client';
 import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signed-transaction-essence';
 import type {
-    AliasOutputParams,
+    AccountOutputParams,
     CreateNativeTokenParams,
     TransactionOptions,
     MintNftParams,
@@ -31,26 +25,6 @@ import type {
 } from '../participation';
 import type { ConsolidationParams } from '../consolidation-params';
 import { HexEncodedAmount, Output } from '../../';
-
-export type __BuildAliasOutputMethod__ = {
-    name: 'buildAliasOutput';
-    data: BuildAliasOutputData;
-};
-
-export type __BuildBasicOutputMethod__ = {
-    name: 'buildBasicOutput';
-    data: BuildBasicOutputData;
-};
-
-export type __BuildFoundryOutputMethod__ = {
-    name: 'buildFoundryOutput';
-    data: BuildFoundryOutputData;
-};
-
-export type __BuildNftOutputMethod__ = {
-    name: 'buildNftOutput';
-    data: BuildNftOutputData;
-};
 
 export type __PrepareBurnMethod__ = {
     name: 'prepareBurn';
@@ -74,10 +48,10 @@ export type __PrepareConsolidateOutputsMethod__ = {
     };
 };
 
-export type __PrepareCreateAliasOutputMethod__ = {
-    name: 'prepareCreateAliasOutput';
+export type __PrepareCreateAccountOutputMethod__ = {
+    name: 'prepareCreateAccountOutput';
     data: {
-        params?: AliasOutputParams;
+        params?: AccountOutputParams;
         options?: TransactionOptions;
     };
 };

@@ -52,32 +52,32 @@ describe('Utils methods', () => {
         const outputId =
             '0x00000000000000000000000000000000000000000000000000000000000000000000';
 
-        const aliasId = Utils.computeAliasId(outputId);
+        const accountId = Utils.computeAccountId(outputId);
 
-        expect(aliasId).toBe(
+        expect(accountId).toBe(
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f',
         );
     });
 
-    it('alias id to address', async () => {
-        const aliasId =
+    it('account id to address', async () => {
+        const accountId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
 
-        const aliasAddress = Utils.aliasIdToBech32(aliasId, 'rms');
+        const accountAddress = Utils.accountIdToBech32(accountId, 'rms');
 
-        expect(aliasAddress).toBe(
+        expect(accountAddress).toBe(
             'rms1pr8swlf8v6rt5exqgp9eavk324t8sggnckseshex9dc0n9jd8w7h7wcnhn7',
         );
     });
 
     it('compute foundry id', async () => {
-        const aliasAddress =
+        const accountAddress =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
         const serialNumber = 0;
         const tokenSchemeType = 0;
 
         const foundryId = Utils.computeFoundryId(
-            aliasAddress,
+            accountAddress,
             serialNumber,
             tokenSchemeType,
         );

@@ -59,7 +59,7 @@ jobs:
           cache-root: bindings/nodejs
 
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -105,7 +105,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           cache: yarn
           cache-dependency-path: bindings/nodejs/yarn.lock
@@ -129,7 +129,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           cache: yarn
           cache-dependency-path: bindings/nodejs/yarn.lock

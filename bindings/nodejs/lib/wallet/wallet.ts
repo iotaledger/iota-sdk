@@ -5,7 +5,7 @@ import { WalletMethodHandler } from './wallet-method-handler';
 import { Account } from './account';
 
 import type {
-    AccountId,
+    AccountIdentifier,
     WalletOptions,
     CreateAccountPayload,
     WalletEventType,
@@ -22,6 +22,9 @@ import { SecretManager } from '../secret_manager';
 export class Wallet {
     private methodHandler: WalletMethodHandler;
 
+    /**
+     * @param options Wallet options.
+     */
     constructor(options: WalletOptions) {
         this.methodHandler = new WalletMethodHandler(options);
     }
@@ -95,7 +98,7 @@ export class Wallet {
     /**
      * Get an account by its alias or index.
      */
-    async getAccount(accountId: AccountId): Promise<Account> {
+    async getAccount(accountId: AccountIdentifier): Promise<Account> {
         const response = await this.methodHandler.callMethod({
             name: 'getAccount',
             data: { accountId },

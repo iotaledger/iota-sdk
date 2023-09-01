@@ -94,7 +94,7 @@ where
                         }
                         Some(remainder_address.address().inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.address().inner),
+                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
             }
             None => None,

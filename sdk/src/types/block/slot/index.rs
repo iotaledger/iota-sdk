@@ -37,19 +37,28 @@ impl SlotIndex {
     /// Gets the [`EpochIndex`] of this slot.
     pub fn to_epoch_index(
         self,
-        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u32)>,
+        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u8)>,
     ) -> Result<EpochIndex, Error> {
         EpochIndex::from_slot_index(self, slots_per_epoch_exponent_iter)
     }
 
     /// Gets the slot index of a unix timestamp.
-    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> SlotIndex {
-        (1 + (timestamp - genesis_unix_timestamp as u64) / slot_duration_in_seconds as u64).into()
+    /// Slots are counted starting from `1` with `0` being reserved for times before the genesis.
+    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> SlotIndex {
+        timestamp
+            .checked_sub(genesis_unix_timestamp as u64)
+            .map(|diff| (diff / slot_duration_in_seconds as u64) + 1)
+            .unwrap_or_default()
+            .into()
     }
 
-    /// Converts the slot index into the corresponding unix timestamp.
-    pub fn to_timestamp(self, genesis_unix_timestamp: u32, slot_duration_in_seconds: u8) -> u64 {
-        ((self.0 - 1) * slot_duration_in_seconds as u64) + genesis_unix_timestamp as u64
+    /// Converts the slot index into the unix timestamp representing the beginning of the slot.
+    /// Slot `0` will return the unix epoch.
+    pub fn to_timestamp(self, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> u64 {
+        self.0
+            .checked_sub(1)
+            .map(|adjusted_slot| (adjusted_slot * slot_duration_in_seconds as u64) + genesis_unix_timestamp as u64)
+            .unwrap_or_default()
     }
 }
 
@@ -95,3 +104,51 @@ impl From<SlotIndex> for u64 {
 
 #[cfg(feature = "serde")]
 string_serde_impl!(SlotIndex);
+
+#[cfg(test)]
+mod test {
+    use crate::types::block::protocol::ProtocolParameters;
+
+    #[test]
+    fn to_from_timestamp() {
+        let protocol_params = ProtocolParameters::default();
+
+        // Timestamp before the genesis
+        let timestamp = protocol_params.genesis_unix_timestamp() as u64 - 100;
+        let slot_index = protocol_params.slot_index(timestamp);
+        assert_eq!(*slot_index, 0);
+        assert_eq!(
+            slot_index.to_timestamp(
+                protocol_params.genesis_unix_timestamp(),
+                protocol_params.slot_duration_in_seconds()
+            ),
+            0
+        );
+
+        // Genesis timestamp
+        let timestamp = protocol_params.genesis_unix_timestamp() as u64;
+        let slot_index = protocol_params.slot_index(timestamp);
+        assert_eq!(*slot_index, 1);
+        assert_eq!(
+            slot_index.to_timestamp(
+                protocol_params.genesis_unix_timestamp(),
+                protocol_params.slot_duration_in_seconds()
+            ),
+            timestamp
+        );
+
+        // Timestamp 5 seconds after slot 100 starts
+        let timestamp = protocol_params.genesis_unix_timestamp() as u64
+            + (99 * protocol_params.slot_duration_in_seconds() as u64) // Add 99 because the slots are 1-indexed
+            + 5;
+        let slot_index = protocol_params.slot_index(timestamp);
+        assert_eq!(*slot_index, 100);
+        assert_eq!(
+            slot_index.to_timestamp(
+                protocol_params.genesis_unix_timestamp(),
+                protocol_params.slot_duration_in_seconds()
+            ),
+            timestamp - 5
+        );
+    }
+}

@@ -5,7 +5,7 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { AddressUnlockCondition, AliasAddress, Client, SecretManager, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
+import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
 import '../customMatchers';
 
 const client = new Client({
@@ -46,7 +46,7 @@ describe.skip('Output builder methods', () => {
         expect(basicOutput).toBeDefined();
     });
 
-    it('builds an alias output', async () => {
+    it('builds an account output', async () => {
         const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
@@ -56,11 +56,11 @@ describe.skip('Output builder methods', () => {
 
         const hexAddress = Utils.bech32ToHex(addresses[0]);
 
-        const aliasId =
+        const accountId =
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa';
-        // most simple alias output
-        const aliasOutput = await client.buildAliasOutput({
-            aliasId,
+        // most simple account output
+        const accountOutput = await client.buildAccountOutput({
+            accountId,
             unlockConditions: [
                 new StateControllerAddressUnlockCondition(
                     new Ed25519Address(hexAddress),
@@ -71,11 +71,11 @@ describe.skip('Output builder methods', () => {
             ],
         });
 
-        expect(aliasOutput).toBeDefined();
+        expect(accountOutput).toBeDefined();
     });
 
     it('builds a foundry output', async () => {
-        const aliasId =
+        const accountId =
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa';
 
         // most simple foundry output
@@ -90,8 +90,8 @@ describe.skip('Output builder methods', () => {
             // 10 hex encoded
             tokenScheme: new SimpleTokenScheme(BigInt(10), BigInt(0), BigInt(10)),
             unlockConditions: [
-                new ImmutableAliasAddressUnlockCondition(
-                    new AliasAddress(aliasId),
+                new ImmutableAccountAddressUnlockCondition(
+                    new AccountAddress(accountId),
                 ),
             ],
         });

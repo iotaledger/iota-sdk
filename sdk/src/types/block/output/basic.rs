@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
@@ -350,7 +350,10 @@ fn verify_features_packable<const VERIFY: bool>(blocks: &Features, _: &ProtocolP
     verify_features::<VERIFY>(blocks)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
