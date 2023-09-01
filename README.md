@@ -124,9 +124,7 @@ calling [`Client.get_info()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/co
 and then print the node's information.
 
 ```rust
-use iota_sdk::client::{
-    Client,
-};
+use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -134,10 +132,10 @@ async fn main() -> Result<()> {
         .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
         .finish()
         .await?;
-            
+
     let info = client.get_info().await?;
-    println!("Node Info: {info:?}")
-    
+    println!("Node Info: {info:?}");
+
     Ok(())
 }
 ```
@@ -148,7 +146,7 @@ The following example will create a
 new [`Wallet`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/core/struct.Wallet.html) [`Account`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/account/struct.Account.html)
 that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
 [`StrongholdSecretManager`](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
-to store a mnemonic.
+to store a mnemonic. For this `features = ["stronghold"]` is needed in the Cargo.toml import. To persist the wallet in a database, `"rocksdb"` can be added.
 
 ```rust
 use iota_sdk::{
@@ -158,15 +156,14 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
-use std::path::PathBuf;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Setup Stronghold secret manager.
     // WARNING: Never hardcode passwords in production code.
     let secret_manager = StrongholdSecretManager::builder()
-        .password("password") // A password to encrypt the stored data. 
-        .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
+        .password("password".to_owned()) // A password to encrypt the stored data.
+        .build("vault.stronghold")?; // The path to store the account snapshot.
 
     let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
 
@@ -189,7 +186,6 @@ async fn main() -> Result<()> {
         .with_alias("Alice") // A name to associate with the created account.
         .finish()
         .await?;
-
 
     Ok(())
 }
