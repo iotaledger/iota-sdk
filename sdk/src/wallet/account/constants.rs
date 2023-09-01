@@ -15,6 +15,6 @@ pub(crate) const PARALLEL_REQUESTS_AMOUNT: usize = 500;
 /// this is done to prevent unnecessary simultaneous synchronizations
 pub(crate) const MIN_SYNC_INTERVAL: u128 = 5;
 
-// TODO
-// // Default expiration time for [ExpirationUnlockCondition] when sending native tokens, one day in seconds
-// pub(crate) const DEFAULT_EXPIRATION_TIME: u32 = 86400;
+// TODO Used to be one day in seconds, what now ?
+// Default expiration slots for [ExpirationUnlockCondition] when sending native tokens,
+pub(crate) const DEFAULT_EXPIRATION_SLOTS: u64 = 100;

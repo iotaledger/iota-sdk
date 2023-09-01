@@ -76,6 +76,14 @@ impl core::ops::Add<u64> for SlotIndex {
     }
 }
 
+impl core::ops::Add for SlotIndex {
+    type Output = Self;
+
+    fn add(self, other: SlotIndex) -> Self {
+        Self(self.0 + other.0)
+    }
+}
+
 impl core::ops::AddAssign<u64> for SlotIndex {
     fn add_assign(&mut self, other: u64) {
         self.0 += other;
@@ -87,6 +95,14 @@ impl core::ops::Sub<u64> for SlotIndex {
 
     fn sub(self, other: u64) -> Self {
         Self(self.0 - other)
+    }
+}
+
+impl core::ops::Sub for SlotIndex {
+    type Output = Self;
+
+    fn sub(self, other: SlotIndex) -> Self {
+        Self(self.0 - other.0)
     }
 }
 

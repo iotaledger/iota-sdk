@@ -19,7 +19,9 @@ use crate::{
     },
     utils::serde::string,
     wallet::{
-        account::{operations::transaction::Transaction, Account, TransactionOptions},
+        account::{
+            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
+        },
         Error,
     },
 };
@@ -150,7 +152,7 @@ where
             address,
             amount,
             return_address,
-            expiration: _,
+            expiration,
         } in params
         {
             self.client().bech32_hrp_matches(address.hrp()).await?;
@@ -179,11 +181,10 @@ where
                         .finish_output(token_supply)?,
                 )
             } else {
-                // TODO !!!
-                // let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-                //     local_time + expiration_time
-                // });
-                let expiration_slot_index = slot_index;
+                let expiration_slot_index = expiration
+                    .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
+                        slot_index + expiration_slot_index
+                    });
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)

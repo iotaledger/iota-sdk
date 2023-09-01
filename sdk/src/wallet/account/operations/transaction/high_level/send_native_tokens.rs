@@ -19,7 +19,9 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        account::{operations::transaction::Transaction, Account, TransactionOptions},
+        account::{
+            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
+        },
         Error, Result,
     },
 };
@@ -140,7 +142,7 @@ where
             address,
             native_tokens,
             return_address,
-            expiration: _,
+            expiration,
         } in params
         {
             self.client().bech32_hrp_matches(address.hrp()).await?;
@@ -175,11 +177,10 @@ where
                 .with_expiration()?
                 .finish()?;
 
-            // TODO !!!
-            // let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-            //     local_time + expiration_time
-            // });
-            let expiration_slot_index = slot_index;
+            let expiration_slot_index = expiration
+                .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
+                    slot_index + expiration_slot_index
+                });
 
             outputs.push(
                 BasicOutputBuilder::new_with_amount(storage_deposit_amount)
