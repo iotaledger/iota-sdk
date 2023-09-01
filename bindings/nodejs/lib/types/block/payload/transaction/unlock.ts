@@ -8,21 +8,39 @@ import { Ed25519Signature } from '../../signature';
  * All of the unlock types.
  */
 enum UnlockType {
+    /**
+     * A signature unlock.
+     */
     Signature = 0,
+    /**
+     * A reference unlock.
+     */
     Reference = 1,
+    /**
+     *  An account unlock.
+     */
     Account = 2,
+    /**
+     *  An NFT unlock.
+     */
     Nft = 3,
 }
 
+/**
+ * The base class for unlocks.
+ */
 abstract class Unlock {
-    private type: UnlockType;
+    readonly type: UnlockType;
 
+    /**
+     * @param type The type of unlock.
+     */
     constructor(type: UnlockType) {
         this.type = type;
     }
 
     /**
-     * The type of unlock.
+     * Get the type of unlock.
      */
     getType(): UnlockType {
         return this.type;
@@ -39,6 +57,9 @@ class SignatureUnlock extends Unlock {
     @Type(() => Ed25519Signature)
     signature: Ed25519Signature;
 
+    /**
+     * @param signature An Ed25519 signature.
+     */
     constructor(signature: Ed25519Signature) {
         super(UnlockType.Signature);
         this.signature = signature;
@@ -55,6 +76,9 @@ class ReferenceUnlock extends Unlock {
      */
     reference: number;
 
+    /**
+     * @param reference An index referencing a previous unlock.
+     */
     constructor(reference: number) {
         super(UnlockType.Reference);
         this.reference = reference;
@@ -70,6 +94,9 @@ class AccountUnlock extends Unlock {
      */
     reference: number;
 
+    /**
+     * @param reference An index referencing a previous unlock.
+     */
     constructor(reference: number) {
         super(UnlockType.Account);
         this.reference = reference;
@@ -85,6 +112,9 @@ class NftUnlock extends Unlock {
      */
     reference: number;
 
+    /**
+     * @param reference An index referencing a previous unlock.
+     */
     constructor(reference: number) {
         super(UnlockType.Nft);
         this.reference = reference;

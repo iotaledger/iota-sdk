@@ -415,6 +415,7 @@ fn verify_payload_packable<const VERIFY: bool>(
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
     use core::str::FromStr;

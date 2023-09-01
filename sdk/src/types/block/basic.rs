@@ -267,6 +267,7 @@ impl Packable for BasicBlock {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
 

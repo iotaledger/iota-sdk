@@ -40,31 +40,37 @@ where
         .await;
 
         #[cfg(all(feature = "events", feature = "ledger_nano"))]
-        if let Some(ledger) = self
-            .wallet
-            .secret_manager
-            .read()
-            .await
-            .downcast::<LedgerSecretManager>()
         {
-            let ledger_nano_status = ledger.get_ledger_nano_status().await;
-            if let Some(buffer_size) = ledger_nano_status.buffer_size() {
-                if needs_blind_signing(prepared_transaction_data, buffer_size) {
-                    self.emit(
-                        self.details().await.index,
-                        WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionEssenceHash(
-                            prefix_hex::encode(prepared_transaction_data.essence.hash()),
-                        )),
-                    )
-                    .await;
-                } else {
-                    self.emit(
-                        self.details().await.index,
-                        WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransaction(Box::new(
-                            PreparedTransactionDataDto::from(prepared_transaction_data),
-                        ))),
-                    )
-                    .await;
+            use crate::wallet::account::SecretManager;
+            let secret_manager = self.wallet.secret_manager.read().await;
+            if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
+                secret_manager.downcast::<SecretManager>().and_then(|s| {
+                    if let SecretManager::LedgerNano(n) = s {
+                        Some(n)
+                    } else {
+                        None
+                    }
+                })
+            }) {
+                let ledger_nano_status = ledger.get_ledger_nano_status().await;
+                if let Some(buffer_size) = ledger_nano_status.buffer_size() {
+                    if needs_blind_signing(prepared_transaction_data, buffer_size) {
+                        self.emit(
+                            self.details().await.index,
+                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionEssenceHash(
+                                prefix_hex::encode(prepared_transaction_data.essence.hash()),
+                            )),
+                        )
+                        .await;
+                    } else {
+                        self.emit(
+                            self.details().await.index,
+                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransaction(Box::new(
+                                PreparedTransactionDataDto::from(prepared_transaction_data),
+                            ))),
+                        )
+                        .await;
+                    }
                 }
             }
         }

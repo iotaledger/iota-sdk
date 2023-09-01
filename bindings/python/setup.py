@@ -22,7 +22,7 @@ def get_py_version_cfgs():
 
 setup(
     name="iota_sdk",
-    version="1.0.0",
+    version="1.0.1",
     classifiers=[
         "License :: SPDX-License-Identifier ::  Apache-2.0",
         "Intended Audience :: Developers",

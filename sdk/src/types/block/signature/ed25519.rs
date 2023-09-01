@@ -127,7 +127,8 @@ impl Packable for Ed25519Signature {
     }
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use alloc::string::String;
 
     use serde::{Deserialize, Serialize};

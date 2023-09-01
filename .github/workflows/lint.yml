@@ -3,6 +3,7 @@ on:
   push:
     branches: [develop, production, 2.0]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/lint.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -12,6 +13,7 @@ on:
   pull_request:
     branches: [develop, production, 2.0]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/lint.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -92,10 +94,7 @@ jobs:
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
       - name: Run Cargo Udeps
-        uses: actions-rs/cargo@v1
-        with:
-          command: udeps
-          args: --all-targets --all-features
+        run: cargo ci-udeps
 
   check-format:
     name: Check Format
@@ -112,22 +111,13 @@ jobs:
           components: rustfmt
 
       - name: Install cargo-license-template
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --force cargo-license-template
+        run: cargo install --force cargo-license-template
 
       - name: Run Cargo Fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo ci-fmt
 
       - name: Run cargo-license-template
-        uses: actions-rs/cargo@v1
-        with:
-          command: license-template
-          args: --template .license_template
+        run: cargo ci-license
 
   audit:
     name: Perform Security Audit
@@ -144,17 +134,7 @@ jobs:
           install: cargo-audit
 
       - name: Run Cargo Audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: audit
-          # The ignored security advisories:
-          #
-          # - RUSTSEC-2021-0145: `atty` potential unaligned read.
-          #   - Waiting for https://github.com/mackwic/colored/pull/122 to be merged.
-          # - RUSTSEC-2021-0065: https://rustsec.org/advisories/RUSTSEC-2021-0065
-          #   - anymap is unmaintained 🤷‍♀️
-
-          args: --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2021-0065
+        run: cargo ci-audit
 
   no_std:
     name: Check `no_std` compatability
@@ -167,10 +147,21 @@ jobs:
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
-          target: riscv64gc-unknown-none-elf
+          targets: riscv64gc-unknown-none-elf
 
       - name: Check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --no-default-features -F serde -p iota-sdk --target=riscv64gc-unknown-none-elf
+        run: cargo ci-check-nostd
+
+  types:
+    name: Check types-only compilation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+
+      - name: Check
+        run: cargo ci-check-types

@@ -273,6 +273,7 @@ fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &Protoco
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
 

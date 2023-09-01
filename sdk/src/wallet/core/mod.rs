@@ -184,7 +184,7 @@ impl<S: SecretManage> WalletInner<S> {
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
         I::IntoIter: Send,
-        F: Fn(&Event) + 'static + Clone + Send + Sync,
+        F: Fn(&Event) + 'static + Send + Sync,
     {
         let mut emitter = self.event_emitter.write().await;
         emitter.on(events, handler);

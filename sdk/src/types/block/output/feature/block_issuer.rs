@@ -48,6 +48,7 @@ impl BlockIssuerFeature {
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
     use alloc::vec::Vec;
 
