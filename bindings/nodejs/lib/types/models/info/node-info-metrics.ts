@@ -14,7 +14,7 @@ export interface INodeInfoMetrics {
      */
     confirmedBlocksPerSecond: string;
     /**
-     * The ratio of confirmed blocks in relation to new blocks of the last confirmed slot.
+     * The ratio of confirmed blocks to new blocks of the last confirmed slot.
      */
     confirmationRate: string;
 }
