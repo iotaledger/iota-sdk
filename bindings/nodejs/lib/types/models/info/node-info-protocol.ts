@@ -84,7 +84,7 @@ export interface ProtocolParameters {
     /**
      * The unbonding period in epochs before an account can stop staking.
      */
-    stakingUnbondingPeriod: number;
+    stakingUnbondingPeriod: string;
     /**
      * Determine if a block is eligible by evaluating issuingTime and commitments in its pastcone to ATT and lastCommittedSlot respectively.
      */
@@ -196,7 +196,7 @@ export interface CongestionControlParameters {
     /**
      * MinMana is the minimum amount of Mana that an account must have to have a block scheduled.
      */
-    minMana: number;
+    minMana: string;
     /**
      * MaxBufferSize is the maximum size of the buffer.
      */
@@ -214,9 +214,9 @@ export interface VersionSignalingParameters {
     /**
      * The target number of supporters for a version to win in a windowSize.
      */
-    windowTargetRatio: string;
+    windowTargetRatio: number;
     /**
      * The offset in epochs to activate the new version of protocol parameters.
      */
-    activationOffset: string;
+    activationOffset: number;
 }
