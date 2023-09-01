@@ -341,16 +341,16 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
 }
 
-fn verify_features<const VERIFY: bool>(blocks: &Features) -> Result<(), Error> {
+fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), Error> {
     if VERIFY {
-        verify_allowed_features(blocks, BasicOutput::ALLOWED_FEATURES)
+        verify_allowed_features(features, BasicOutput::ALLOWED_FEATURES)
     } else {
         Ok(())
     }
 }
 
-fn verify_features_packable<const VERIFY: bool>(blocks: &Features, _: &ProtocolParameters) -> Result<(), Error> {
-    verify_features::<VERIFY>(blocks)
+fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
+    verify_features::<VERIFY>(features)
 }
 
 #[cfg(feature = "serde")]
