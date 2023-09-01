@@ -18,13 +18,11 @@ class Block:
     Attributes:
         protocolVersion: The protocol version with which this block was issued.
         parents: The parents of this block.
-        nonce: The nonce of this block.
         payload: The optional payload of this block.
     """
 
     protocolVersion: int
     parents: List[HexStr]
-    nonce: str
     payload: Optional[TaggedDataPayload |
                       TransactionPayload | MilestonePayload] = None
 
