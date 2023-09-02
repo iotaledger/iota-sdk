@@ -10,5 +10,5 @@ export * from './gossip-metrics';
 export * from './gossip-heartbeat';
 export * from './native-token';
 export * from './peer';
-export * from './rent';
+export * from './rent-structure';
 export * from './ledger-inclusion-state';
