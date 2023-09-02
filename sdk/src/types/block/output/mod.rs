@@ -472,12 +472,25 @@ impl Rent for Output {
     }
 }
 
-pub(crate) fn verify_output_amount(amount: &u64, token_supply: &u64) -> Result<(), Error> {
-    if *amount < Output::AMOUNT_MIN || amount > token_supply {
-        Err(Error::InvalidOutputAmount(*amount))
+pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
+    if amount < Output::AMOUNT_MIN {
+        Err(Error::InvalidOutputAmount(amount))
     } else {
         Ok(())
     }
+}
+
+pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
+    if amount > token_supply {
+        Err(Error::InvalidOutputAmount(amount))
+    } else {
+        Ok(())
+    }
+}
+
+pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
+    verify_output_amount_min(amount)?;
+    verify_output_amount_supply(amount, token_supply)
 }
 
 pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
@@ -485,7 +498,7 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
     if VERIFY {
-        verify_output_amount(amount, &protocol_parameters.token_supply())?;
+        verify_output_amount(*amount, protocol_parameters.token_supply())?;
     }
     Ok(())
 }
