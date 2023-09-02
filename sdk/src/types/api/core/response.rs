@@ -5,13 +5,16 @@ use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{
-    output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
-    protocol::ProtocolParameters,
-    semantic::TransactionFailureReason,
-    slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-    BlockId,
+use crate::{
+    types::block::{
+        output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
+        parent::{ShallowLikeParents, StrongParents, WeakParents},
+        protocol::ProtocolParameters,
+        semantic::TransactionFailureReason,
+        slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
+        BlockId,
+    },
+    utils::serde::{option_string, string},
 };
 
 /// Response of GET /api/core/v3/info.
@@ -54,13 +57,13 @@ impl core::fmt::Display for InfoResponse {
 #[serde(rename_all = "camelCase")]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    #[serde(with = "crate::utils::serde::option_string")]
+    #[serde(with = "option_string")]
     pub accepted_tangle_time: Option<u64>,
-    #[serde(with = "crate::utils::serde::option_string")]
+    #[serde(with = "option_string")]
     pub relative_accepted_tangle_time: Option<u64>,
-    #[serde(with = "crate::utils::serde::option_string")]
+    #[serde(with = "option_string")]
     pub confirmed_tangle_time: Option<u64>,
-    #[serde(with = "crate::utils::serde::option_string")]
+    #[serde(with = "option_string")]
     pub relative_confirmed_tangle_time: Option<u64>,
     pub latest_commitment_id: SlotCommitmentId,
     pub latest_finalized_slot: SlotIndex,
@@ -74,11 +77,11 @@ pub struct StatusResponse {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MetricsResponse {
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub blocks_per_second: f64,
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub confirmed_blocks_per_second: f64,
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub confirmation_rate: f64,
 }
 
@@ -170,6 +173,7 @@ pub struct BaseTokenResponse {
 /// A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
 /// (are eligible for committee selection).
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
     /// List of registered validators ready for the next epoch
     validators: Vec<Validator>,
@@ -183,14 +187,15 @@ pub struct ValidatorsResponse {
 /// Response of GET /api/core/v3/rewards/{outputId}.
 /// Returns the mana rewards of an account or delegation output.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
     /// The starting epoch index for which the mana rewards are returned.
-    pub epoch_start: u64, // TODO: replace with `EpochIndex`
+    pub epoch_start: EpochIndex,
     /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
     /// included.
-    pub epoch_end: u64, // TODO: replace with `EpochIndex`
+    pub epoch_end: EpochIndex,
     /// The amount of totally available rewards the requested output may claim.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub rewards: u64,
 }
 
@@ -201,10 +206,10 @@ pub struct CommitteeResponse {
     /// The epoch index of the committee.
     pub epoch_index: EpochIndex,
     /// The total amount of delegated and staked IOTA tokens in the selected committee.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub total_stake: u64,
     /// The total amount of staked IOTA tokens in the selected committee.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub total_validator_stake: u64,
     /// The validators of the committee.
     pub committee: Box<[CommitteeMember]>,
@@ -216,13 +221,13 @@ pub struct CommitteeMember {
     /// The account identifier of the validator
     pub account_id: AccountId,
     /// The total stake of the pool, including delegators.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub pool_stake: u64,
     /// The stake of a validator.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub validator_stake: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub fixed_cost: u64,
 }
 
@@ -234,13 +239,13 @@ pub struct Validator {
     /// The epoch index until which the validator registered to stake.
     staking_end_epoch: EpochIndex,
     /// The total stake of the pool, including delegators.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pool_stake: u64,
     /// The stake of a validator.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     validator_stake: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     fixed_cost: u64,
     /// Shows whether validator was active recently.
     active: bool,
@@ -272,22 +277,18 @@ pub struct IssuanceBlockHeaderResponse {
 
 /// Response of GET /api/core/v3/accounts/{accountId}/congestion.
 /// Provides the cost and readiness to issue estimates.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CongestionResponse {
     /// The slot index for which the congestion estimate is provided.
     pub slot_index: SlotIndex,
     /// Indicates if a node is ready to issue a block in a current congestion or should wait.
     pub ready: bool,
     /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub reference_mana_cost: u64,
     /// The Block Issuance Credits of the requested account.
-    #[serde(with = "crate::utils::serde::string")]
+    #[serde(with = "string")]
     pub block_issuance_credits: u64,
 }
 
