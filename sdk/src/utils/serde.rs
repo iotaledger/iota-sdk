@@ -179,7 +179,6 @@ pub mod cow_boxed_slice_prefix {
 }
 
 pub mod boxed_slice_prefix_serde {
-
     use alloc::vec::Vec;
 
     use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
