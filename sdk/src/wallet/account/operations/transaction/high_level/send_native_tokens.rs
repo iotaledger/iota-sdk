@@ -41,7 +41,7 @@ pub struct SendNativeTokensParams {
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
-    /// receiver before. Default is 1 day
+    /// receiver before. Default is `DEFAULT_EXPIRATION_SLOTS` slots.
     #[getset(get = "pub")]
     expiration: Option<SlotIndex>,
 }
