@@ -20,7 +20,7 @@ balance = account.sync()
 
 outputs = [SendNftParams(
     address="rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-    nftId=balance.nfts[0],
+    nft_id=balance.nfts[0],
 )]
 
 transaction = account.prepare_send_nft(outputs).send()

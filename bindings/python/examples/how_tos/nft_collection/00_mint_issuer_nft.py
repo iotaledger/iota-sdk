@@ -21,7 +21,7 @@ account.sync()
 # Issue the minting transaction and wait for its inclusion
 print('Sending NFT minting transaction...')
 params = MintNftParams(
-    immutableMetadata=utf8_to_hex(
+    immutable_metadata=utf8_to_hex(
         "This NFT will be the issuer from the awesome NFT collection"),
 )
 

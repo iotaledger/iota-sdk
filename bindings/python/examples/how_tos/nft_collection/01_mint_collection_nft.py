@@ -51,7 +51,7 @@ def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
 
 # Create the metadata with another index for each
 nft_mint_params = list(map(lambda index: MintNftParams(
-    immutableMetadata=utf8_to_hex(
+    immutable_metadata=utf8_to_hex(
         get_immutable_metadata(index, issuer_nft_id)),
     issuer=issuer
 ), range(NFT_COLLECTION_SIZE)))

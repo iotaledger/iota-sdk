@@ -97,7 +97,7 @@ class MintNftParams():
     metadata: Optional[str] = None
     tag: Optional[str] = None
     issuer: Optional[str] = None
-    immutableMetadata: Optional[str] = None
+    immutable_metadata: Optional[str] = None
 
 
 @json

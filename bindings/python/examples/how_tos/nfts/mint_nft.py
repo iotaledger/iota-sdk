@@ -19,7 +19,7 @@ account = wallet.get_account('Alice')
 response = account.sync()
 
 outputs = [MintNftParams(
-    immutableMetadata=utf8_to_hex("some immutable nft metadata"),
+    immutable_metadata=utf8_to_hex("some immutable nft metadata"),
 )]
 
 transaction = account.prepare_mint_nfts(outputs).send()

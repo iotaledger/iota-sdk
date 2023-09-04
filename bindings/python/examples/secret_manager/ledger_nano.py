@@ -1,6 +1,5 @@
 from iota_sdk import LedgerNanoSecretManager, SecretManager
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
