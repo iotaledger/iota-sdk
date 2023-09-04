@@ -284,7 +284,7 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        slot_index: impl Into<Option<SlotIndex>> + Send,
+        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<Unlocks, Self::Error> {
         crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data, slot_index).await
     }
@@ -292,8 +292,9 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<TransactionPayload, Self::Error> {
-        crate::client::secret::default_sign_transaction(self, prepared_transaction_data).await
+        crate::client::secret::default_sign_transaction(self, prepared_transaction_data, slot_index).await
     }
 }
 

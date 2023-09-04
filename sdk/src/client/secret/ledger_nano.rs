@@ -241,9 +241,8 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,
-        slot_index: impl Into<Option<SlotIndex>> + Send,
+        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
-        let slot_index = slot_index.into();
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
         let mut account_index = None;
@@ -408,8 +407,9 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<TransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
+        super::default_sign_transaction(self, prepared_transaction_data, slot_index).await
     }
 }
 
@@ -516,14 +516,11 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
-    slot_index: Option<SlotIndex>,
+    slot_index: impl Into<SlotIndex> + Send,
 ) -> Result<Vec<Unlock>, Error> {
+    let slot_index = slot_index.into();
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
-
-    // TODO ???
-    let slot_index = slot_index.unwrap_or_else(|| SlotIndex::from(0));
-    // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
 
     let mut merged_unlocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();

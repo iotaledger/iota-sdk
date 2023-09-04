@@ -125,7 +125,7 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        slot_index: impl Into<Option<SlotIndex>> + Send,
+        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<Unlocks, Self::Error> {
         super::default_sign_transaction_essence(self, prepared_transaction_data, slot_index).await
     }
@@ -133,8 +133,9 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<TransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
+        super::default_sign_transaction(self, prepared_transaction_data, slot_index).await
     }
 }
 

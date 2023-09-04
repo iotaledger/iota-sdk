@@ -79,7 +79,7 @@ where
             .secret_manager
             .read()
             .await
-            .sign_transaction_essence(prepared_transaction_data, None)
+            .sign_transaction_essence(prepared_transaction_data, self.client().get_slot_index().await?)
             .await
         {
             Ok(res) => res,
