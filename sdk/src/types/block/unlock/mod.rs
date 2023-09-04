@@ -15,7 +15,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{account::AccountUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
 use crate::types::block::{
-    input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX, INPUT_INDEX_RANGE},
+    input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
     Error,
 };
 
@@ -24,9 +24,9 @@ pub const UNLOCK_COUNT_MAX: u16 = INPUT_COUNT_MAX; // 128
 /// The range of valid numbers of unlocks of a transaction.
 pub const UNLOCK_COUNT_RANGE: RangeInclusive<u16> = INPUT_COUNT_RANGE; // [1..128]
 /// The maximum index of unlocks of a transaction.
-pub const UNLOCK_INDEX_MAX: u16 = INPUT_INDEX_MAX; // 127
+pub const UNLOCK_INDEX_MAX: u16 = INPUT_INDEX_MAX - 1; // 126
 /// The range of valid indices of unlocks of a transaction.
-pub const UNLOCK_INDEX_RANGE: RangeInclusive<u16> = INPUT_INDEX_RANGE; // [0..127]
+pub const UNLOCK_INDEX_RANGE: RangeInclusive<u16> = 0..=UNLOCK_INDEX_MAX; // [0..126]
 
 pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNLOCK_INDEX_RANGE.end() }>;
 
