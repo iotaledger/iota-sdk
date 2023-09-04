@@ -4,7 +4,7 @@
 /**
  * Defines the parameters of rent cost calculations on objects which take node resources.
  */
-export interface IRent {
+export interface RentStructure {
     /**
      * Defines the rent of a single virtual byte denoted in IOTA token.
      */
@@ -17,4 +17,12 @@ export interface IRent {
      * The factor to be used for key/lookup generating fields.
      */
     vByteFactorKey: number;
+    /**
+     * Defines the factor to be used for block issuer feature public keys.
+     */
+    vByteFactorIssuerKeys: number;
+    /**
+     * Defines the factor to be used for staking feature.
+     */
+    vByteFactorStakingFeature: number;
 }

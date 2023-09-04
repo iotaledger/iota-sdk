@@ -7,7 +7,7 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    IRent,
+    RentStructure,
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
@@ -65,7 +65,7 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rent: IRent;
+        rent: RentStructure;
     };
 }
 
