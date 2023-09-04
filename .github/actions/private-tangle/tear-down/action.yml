@@ -7,6 +7,4 @@ runs:
       shell: bash
       run: |
         sudo ./cleanup.sh
-        # sudo docker compose kill
-        # sudo docker compose down
       working-directory: iota-core/tools/docker-network
