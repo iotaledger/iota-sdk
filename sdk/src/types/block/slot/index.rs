@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::{Deref, Display, From, FromStr};
+use derive_more::{Add, AddAssign, Deref, Display, From, FromStr, Sub, SubAssign};
 
 use super::EpochIndex;
 use crate::types::block::Error;
@@ -23,7 +23,23 @@ use crate::types::block::Error;
 /// | 1  | genesis       | genesis + 10s |
 /// | 2  | genesis + 10s | genesis + 20s |
 #[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
+    Copy,
+    Clone,
+    Debug,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    From,
+    Deref,
+    Display,
+    FromStr,
+    Add,
+    AddAssign,
+    Sub,
+    SubAssign,
+    packable::Packable,
 )]
 #[repr(transparent)]
 pub struct SlotIndex(u64);
@@ -76,14 +92,6 @@ impl core::ops::Add<u64> for SlotIndex {
     }
 }
 
-impl core::ops::Add for SlotIndex {
-    type Output = Self;
-
-    fn add(self, other: SlotIndex) -> Self {
-        Self(self.0 + other.0)
-    }
-}
-
 impl core::ops::AddAssign<u64> for SlotIndex {
     fn add_assign(&mut self, other: u64) {
         self.0 += other;
@@ -95,14 +103,6 @@ impl core::ops::Sub<u64> for SlotIndex {
 
     fn sub(self, other: u64) -> Self {
         Self(self.0 - other)
-    }
-}
-
-impl core::ops::Sub for SlotIndex {
-    type Output = Self;
-
-    fn sub(self, other: SlotIndex) -> Self {
-        Self(self.0 - other.0)
     }
 }
 

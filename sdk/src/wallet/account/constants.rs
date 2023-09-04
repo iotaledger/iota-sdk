@@ -1,9 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Amount at which outputs on a single addresses will get consolidated by default if consolidation is enabled
+/// Amount at which outputs on a single address will get consolidated by default if consolidation is enabled
 pub(crate) const DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD: usize = 100;
-/// Amount at which outputs on a single addresses will get consolidated by default with a ledger secret_manager if
+/// Amount at which outputs on a single address will get consolidated by default with a ledger secret_manager if
 /// consolidation is enabled, needs to be smaller because the memory of the ledger nano s is limited
 #[cfg(feature = "ledger_nano")]
 pub(crate) const DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD: usize = 15;
