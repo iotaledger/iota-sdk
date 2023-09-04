@@ -38,11 +38,11 @@ import { HexEncodedString } from '../utils';
 import {
     IBlockMetadata,
     INodeInfo,
-    INodeInfoProtocol,
     IPeer,
     UTXOInput,
     Response,
     OutputId,
+    ProtocolParameters,
 } from '../types';
 import { OutputResponse, IOutputsResponse } from '../types/models/api';
 
@@ -328,7 +328,7 @@ export class Client {
     /**
      * Get the protocol parameters.
      */
-    async getProtocolParameters(): Promise<INodeInfoProtocol> {
+    async getProtocolParameters(): Promise<ProtocolParameters> {
         const response = await this.methodHandler.callMethod({
             name: 'getProtocolParameters',
         });
