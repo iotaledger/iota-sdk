@@ -384,8 +384,15 @@ pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
 
             if let Some(expiration) = unlock_conditions.expiration() {
                 let slot_index = account.client().get_slot_index().await?;
-                let slot_indices_left = *expiration.slot_index() - *slot_index;
-                println_log_info!("  - expires in: {} slot indices", slot_indices_left);
+
+                if *expiration.slot_index() > *slot_index {
+                    println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
+                } else {
+                    println_log_info!(
+                        "  - expired {} slot indices ago",
+                        *slot_index - *expiration.slot_index()
+                    );
+                }
             }
         }
     }
