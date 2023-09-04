@@ -51,8 +51,10 @@ impl ClientMethodHandler {
                 (msg, is_err)
             }
             Err(e) => {
-                log::error!("{:?}", e);
-                (format!("Couldn't parse to method with error - {e:?}"), true)
+                (
+                    serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
+                    true,
+                )
             }
         }
     }

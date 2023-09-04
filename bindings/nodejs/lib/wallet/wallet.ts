@@ -81,7 +81,7 @@ export class Wallet {
     /**
      * Destroy the Wallet and drop its database connection.
      */
-    async destroy(): Promise<void> {
+    destroy(): void {
         return this.methodHandler.destroy();
     }
 
@@ -151,7 +151,7 @@ export class Wallet {
     /**
      * Get secret manager.
      */
-    async getSecretManager(): Promise<SecretManager> {
+    getSecretManager(): SecretManager {
         return this.methodHandler.getSecretManager();
     }
 
@@ -199,11 +199,11 @@ export class Wallet {
     /**
      * Listen to wallet events with a callback. An empty array will listen to all possible events.
      */
-    async listen(
+    listen(
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
-    ): Promise<void> {
-        return this.methodHandler.listen(eventTypes, callback);
+    ): void {
+        this.methodHandler.listen(eventTypes, callback);
     }
 
     /**
