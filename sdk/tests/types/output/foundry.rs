@@ -22,8 +22,9 @@ fn builder() {
     let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
     let metadata_1 = rand_metadata_feature();
     let metadata_2 = rand_metadata_feature();
+    let amount = 500_000;
 
-    let mut builder = FoundryOutput::build_with_amount(0, 234, rand_token_scheme())
+    let mut builder = FoundryOutput::build_with_amount(amount, 234, rand_token_scheme())
         .with_serial_number(85)
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .with_unlock_conditions([account_1])
@@ -33,6 +34,7 @@ fn builder() {
         .replace_immutable_feature(metadata_1.clone());
 
     let output = builder.clone().finish().unwrap();
+    assert_eq!(output.amount(), amount);
     assert_eq!(output.serial_number(), 85);
     assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_1));
     assert_eq!(output.features().metadata(), Some(&metadata_2));

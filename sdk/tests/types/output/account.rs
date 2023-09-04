@@ -32,8 +32,9 @@ fn builder() {
     let sender_2 = rand_sender_feature();
     let issuer_1 = rand_issuer_feature();
     let issuer_2 = rand_issuer_feature();
+    let amount = 500_000;
 
-    let mut builder = AccountOutput::build_with_amount(0, account_id)
+    let mut builder = AccountOutput::build_with_amount(amount, account_id)
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(gov_address_1)
         .add_unlock_condition(state_address_1)
@@ -43,6 +44,7 @@ fn builder() {
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();
+    assert_eq!(output.amount(), amount);
     assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_1));
     assert_eq!(
         output.unlock_conditions().state_controller_address(),

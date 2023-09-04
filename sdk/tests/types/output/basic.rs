@@ -26,14 +26,16 @@ fn builder() {
     let address_2 = rand_address_unlock_condition();
     let sender_1 = rand_sender_feature();
     let sender_2 = rand_sender_feature();
+    let amount = 500_000;
 
-    let mut builder = BasicOutput::build_with_amount(0)
+    let mut builder = BasicOutput::build_with_amount(amount)
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1)
         .add_feature(sender_1)
         .replace_feature(sender_2);
 
     let output = builder.clone().finish().unwrap();
+    assert_eq!(output.amount(), amount);
     assert_eq!(output.unlock_conditions().address(), Some(&address_1));
     assert_eq!(output.features().sender(), Some(&sender_2));
 

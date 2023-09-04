@@ -25,8 +25,9 @@ fn builder() {
     let sender_2 = rand_sender_feature();
     let issuer_1 = rand_issuer_feature();
     let issuer_2 = rand_issuer_feature();
+    let amount = 500_000;
 
-    let mut builder = NftOutput::build_with_amount(0, NftId::null())
+    let mut builder = NftOutput::build_with_amount(amount, NftId::null())
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1)
         .add_feature(sender_1)
@@ -35,6 +36,7 @@ fn builder() {
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();
+    assert_eq!(output.amount(), amount);
     assert_eq!(output.unlock_conditions().address(), Some(&address_1));
     assert_eq!(output.features().sender(), Some(&sender_2));
     assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));

@@ -10,7 +10,6 @@ use packable::{
     Packable,
 };
 
-use super::verify_output_amount_packable;
 use crate::types::{
     block::{
         address::{Address, NftAddress},
@@ -19,8 +18,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
+            NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
+            StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -224,6 +224,8 @@ impl NftOutputBuilder {
             }
         };
 
+        verify_output_amount_min(output.amount)?;
+
         Ok(output)
     }
 
@@ -232,7 +234,7 @@ impl NftOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
