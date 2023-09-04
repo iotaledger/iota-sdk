@@ -259,11 +259,8 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         outputs: &[Output],
-        slot_index: Option<SlotIndex>,
+        slot_index: SlotIndex,
     ) -> Result<Vec<InputSigningData>, Error> {
-        // TODO ????
-        let slot_index = slot_index.unwrap_or_else(|| SlotIndex::from(0));
-        // let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
         // might be a more efficient way to do this
@@ -412,7 +409,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         Ok(Selected {
-            inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, Some(self.slot_index))?,
+            inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, self.slot_index)?,
             outputs: self.outputs,
             remainder,
         })
