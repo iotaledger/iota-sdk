@@ -88,4 +88,4 @@ class AddressWithUnspentOutputs():
     address: str
     key_index: int
     internal: bool
-    outputIds: bool
+    output_ids: bool

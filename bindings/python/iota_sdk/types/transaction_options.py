@@ -42,7 +42,7 @@ class RemainderValueStrategy(Enum):
     ChangeAddress = None,
     ReuseAddress = None,
 
-    def as_dict(self):
+    def to_dict(self):
         return dict({"strategy": self.name, "value": self.value[0]})
 
 

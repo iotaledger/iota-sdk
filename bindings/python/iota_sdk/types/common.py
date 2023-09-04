@@ -99,13 +99,6 @@ class AddressAndAmount():
     amount: int
     address: str
 
-    def __init__(self, amount: int, address: str):
-        """Initialize AddressAndAmount for options in Client::build_and_post_block()
-
-        """
-        self.amount = amount
-        self.address = address
-
     @staticmethod
     def _to_dict_custom(config):
         config = super().to_dict()

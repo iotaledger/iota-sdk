@@ -24,7 +24,7 @@ params = [SendParams(RECV_ADDRESS, str(SEND_AMOUNT))]
 
 # Recovers addresses from example `0_address_generation`.
 addresses_data = json.load(open(ADDRESSES_FILE_PATH, "r"))
-addresses = list(map(lambda AccountAddress.from_dict(x), addresses_data))
+addresses = list(map(lambda x: AccountAddress.from_dict(x), addresses_data))
 
 if 'NODE_URL' not in os.environ:
     raise Exception(".env NODE_URL is undefined, see .env.example")

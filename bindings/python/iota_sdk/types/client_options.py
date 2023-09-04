@@ -36,7 +36,7 @@ class MqttBrokerOptions:
     """
     automatic_disconnect: Optional[bool] = None
     timeout: Optional[Duration] = None
-    useWs: Optional[bool] = None
+    use_ws: Optional[bool] = None
     port: Optional[int] = None
     max_reconnection_attempts: Optional[int] = None
 

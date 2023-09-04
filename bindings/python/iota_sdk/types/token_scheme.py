@@ -29,8 +29,8 @@ class SimpleTokenScheme(TokenScheme):
     maximum_supply: HexStr
     type: int = field(default_factory=lambda: 0, init=False)
 
-    def to_dict(self):
-        config = super().to_dict()
+    @staticmethod
+    def to_dict_custom(config):
 
         if isinstance(config['mintedTokens'], int):
             config['mintedTokens'] = str(hex(config['mintedTokens']))

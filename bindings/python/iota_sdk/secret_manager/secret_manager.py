@@ -242,7 +242,7 @@ class SecretManager():
         Returns:
             The Ed25519 signature.
         """
-        return Ed25519Signature.form_dict(self._call_method('signEd25519', {
+        return Ed25519Signature.from_dict(self._call_method('signEd25519', {
             'message': message,
             'chain': chain.__dict__,
         }))

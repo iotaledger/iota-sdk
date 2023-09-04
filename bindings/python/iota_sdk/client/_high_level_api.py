@@ -18,10 +18,8 @@ class Range:
         start: The start index of the address range.
         end: The end index of the address range.
     """
-
-    def __init__(self, start: int, end: int):
-        self.start = start
-        self.end = end
+    start: int
+    end: int
 
 
 @json
