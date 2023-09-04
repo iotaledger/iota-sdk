@@ -186,9 +186,8 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            // TODO
+            // TODO may want to make this mandatory at some point
             slot_index: SlotIndex::from(0),
-            // slot_index: unix_timestamp_now().as_secs() as u32,
             requirements: Vec::new(),
             automatically_transitioned: HashMap::new(),
         }
