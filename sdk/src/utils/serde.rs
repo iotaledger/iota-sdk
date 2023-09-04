@@ -131,7 +131,7 @@ pub mod string_prefix {
     }
 }
 
-pub mod boxed_slice_prefix {
+pub mod boxed_slice_prefix_hex_bytes {
     use alloc::boxed::Box;
 
     use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
@@ -158,14 +158,14 @@ pub mod boxed_slice_prefix {
     }
 }
 
-pub mod cow_boxed_slice_prefix {
+pub mod cow_boxed_slice_prefix_hex_bytes {
     use alloc::{borrow::Cow, boxed::Box};
 
     use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
     use prefix_hex::FromHexPrefixed;
     use serde::Deserializer;
 
-    pub use super::boxed_slice_prefix::serialize;
+    pub use super::boxed_slice_prefix_hex_bytes::serialize;
 
     pub fn deserialize<'de, 'a, D, B>(deserializer: D) -> Result<Cow<'a, BoxedSlicePrefix<u8, B>>, D::Error>
     where
@@ -174,11 +174,13 @@ pub mod cow_boxed_slice_prefix {
         Box<[u8]>: FromHexPrefixed,
         <B as TryFrom<usize>>::Error: core::fmt::Display,
     {
-        Ok(Cow::Owned(super::boxed_slice_prefix::deserialize(deserializer)?))
+        Ok(Cow::Owned(super::boxed_slice_prefix_hex_bytes::deserialize(
+            deserializer,
+        )?))
     }
 }
 
-pub mod boxed_slice_prefix_serde {
+pub mod boxed_slice_prefix {
     use alloc::vec::Vec;
 
     use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};

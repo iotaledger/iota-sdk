@@ -55,7 +55,7 @@ pub struct ProtocolParameters {
     /// The scaling of `mana_generation_rate` expressed as an exponent of 2.
     pub(crate) mana_generation_rate_exponent: u8,
     #[packable(unpack_error_with = |_| Error::InvalidManaDecayFactors)]
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::boxed_slice_prefix_serde"))]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::boxed_slice_prefix"))]
     #[getset(skip)]
     /// A lookup table of epoch index diff to mana decay factor.
     pub(crate) mana_decay_factors: BoxedSlicePrefix<u32, u16>,
