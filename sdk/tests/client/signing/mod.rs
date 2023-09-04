@@ -394,7 +394,7 @@ async fn all_combined() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, slot_index)
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     assert_eq!(unlocks.len(), 15);
@@ -479,7 +479,7 @@ async fn all_combined() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

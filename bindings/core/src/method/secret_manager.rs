@@ -5,7 +5,6 @@ use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
     client::api::{GetAddressesOptions, PreparedTransactionDataDto},
-    types::block::slot::SlotIndex,
     utils::serde::bip44::Bip44Def,
 };
 use serde::{Deserialize, Serialize};
@@ -61,7 +60,6 @@ pub enum SecretManagerMethod {
     SignTransaction {
         /// Prepared transaction data
         prepared_transaction_data: PreparedTransactionDataDto,
-        slot_index: SlotIndex,
     },
     /// Store a mnemonic in the Stronghold vault
     #[cfg(feature = "stronghold")]

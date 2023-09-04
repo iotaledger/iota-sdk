@@ -128,12 +128,9 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let slot_index = self.client().get_slot_index().await?;
-
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.transaction_payload,
-            slot_index,
         )?;
 
         if let Some(conflict) = conflict {

@@ -31,7 +31,6 @@ use crate::{
         output::Output,
         payload::transaction::{TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
-        slot::SlotIndex,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
 };
@@ -241,7 +240,6 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,
-        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
@@ -398,7 +396,7 @@ impl SecretManage for LedgerSecretManager {
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
         // Account/Nft/Reference unlocks
         if blind_signing {
-            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), slot_index)?;
+            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter())?;
         }
 
         Ok(Unlocks::new(unlocks)?)
@@ -407,9 +405,8 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        slot_index: impl Into<SlotIndex> + Send,
     ) -> Result<TransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data, slot_index).await
+        super::default_sign_transaction(self, prepared_transaction_data).await
     }
 }
 
@@ -516,9 +513,9 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
-    slot_index: impl Into<SlotIndex> + Send,
 ) -> Result<Vec<Unlock>, Error> {
-    let slot_index = slot_index.into();
+    let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
+    let slot_index = essence.creation_slot();
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
 

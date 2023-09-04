@@ -37,9 +37,8 @@ async fn main() -> Result<()> {
     let prepared_transaction_data = read_prepared_transaction_from_file().await?;
 
     // Signs prepared transaction offline.
-    // Slot index needs to be updated with the current one.
     let unlocks = SecretManager::Stronghold(secret_manager)
-        .sign_transaction_essence(&prepared_transaction_data, 500)
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     let signed_transaction = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;

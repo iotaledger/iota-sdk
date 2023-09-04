@@ -10,7 +10,6 @@ use crate::types::block::{
     address::Address,
     output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
-    slot::SlotIndex,
     unlock::Unlocks,
     Error,
 };
@@ -113,8 +112,6 @@ pub struct ValidationContext<'a> {
     ///
     pub unlocks: &'a Unlocks,
     ///
-    pub slot_index: SlotIndex,
-    ///
     pub input_amount: u64,
     ///
     pub input_native_tokens: BTreeMap<TokenId, U256>,
@@ -141,14 +138,13 @@ impl<'a> ValidationContext<'a> {
         essence: &'a RegularTransactionEssence,
         inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
         unlocks: &'a Unlocks,
-        slot_index: SlotIndex,
     ) -> Self {
         Self {
             essence,
             unlocks,
             essence_hash: TransactionEssence::from(essence.clone()).hash(),
             inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
-            slot_index,
+
             input_amount: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains: inputs
@@ -230,11 +226,11 @@ pub fn semantic_validation(
             return Ok(Some(conflict));
         }
 
-        if unlock_conditions.is_time_locked(context.slot_index) {
+        if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
             return Ok(Some(TransactionFailureReason::TimelockNotExpired));
         }
 
-        if !unlock_conditions.is_expired(context.slot_index) {
+        if !unlock_conditions.is_expired(context.essence.creation_slot()) {
             if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                 let amount = context
                     .storage_deposit_returns

@@ -24,7 +24,6 @@ use iota_sdk::{
         },
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
-        slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -132,10 +131,8 @@ async fn nft_reference_unlocks() -> Result<()> {
         remainder: None,
     };
 
-    let slot_index = SlotIndex::from(100);
-
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, slot_index)
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -157,7 +154,7 @@ async fn nft_reference_unlocks() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, slot_index)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
