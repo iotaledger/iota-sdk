@@ -38,14 +38,8 @@ async fn main() -> Result<()> {
             .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        // // Create an output with amount 1_000_000 and a timelock of 1 hour
-        // let in_an_hour = (std::time::SystemTime::now() + std::time::Duration::from_secs(3600))
-        //     .duration_since(std::time::UNIX_EPOCH)
-        //     .expect("clock went backwards")
-        //     .as_secs()
-        //     .try_into()
-        //     .unwrap();
-        // TODO
+        // TODO better time-based UX ?
+        // Create an output with amount 1_000_000 and a timelock of 1000 slots.
         let slot_index = SlotIndex::from(1000);
         let basic_output = BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(Bech32Address::try_from_str(
