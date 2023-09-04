@@ -25,7 +25,7 @@ pub const UNLOCK_COUNT_MAX: u16 = INPUT_COUNT_MAX; // 128
 pub const UNLOCK_COUNT_RANGE: RangeInclusive<u16> = INPUT_COUNT_RANGE; // [1..128]
 /// The maximum index of unlocks of a transaction.
 pub const UNLOCK_INDEX_MAX: u16 = INPUT_INDEX_MAX - 1; // 126
-/// The range of valid indices of unlocks of a transaction.
+/// The range of valid indices of unlocks of a transaction that can be referenced in Reference, Alias or NFT unlocks.
 pub const UNLOCK_INDEX_RANGE: RangeInclusive<u16> = 0..=UNLOCK_INDEX_MAX; // [0..126]
 
 pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNLOCK_INDEX_RANGE.end() }>;
