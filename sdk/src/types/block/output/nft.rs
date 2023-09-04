@@ -30,7 +30,7 @@ use crate::types::{
     ValidationParams,
 };
 
-///
+/// Builder for an [`NftOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct NftOutputBuilder {
@@ -261,15 +261,19 @@ impl From<&NftOutput> for NftOutputBuilder {
 /// Describes an NFT output, a globally unique token with metadata attached.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct NftOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     amount: u64,
+    /// Amount of stored Mana held by this output.
     mana: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by this output.
     native_tokens: NativeTokens,
-    // Unique identifier of the NFT.
+    /// Unique identifier of the NFT.
     nft_id: NftId,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
+    /// Features of the output.
     features: Features,
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
@@ -519,21 +523,17 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    /// Describes an NFT output, a globally unique token with metadata attached.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct NftOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // Unique identifier of the NFT.
         pub nft_id: NftId,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
