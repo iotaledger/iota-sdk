@@ -237,7 +237,7 @@ impl Rent for DelegationOutputBuilder {
             .delegation_field::<EpochIndex>()
             // Unlock Conditions
             .data_field::<u8>()
-            .weighted_field(&self.unlock_conditions);
+            .iter_field(&self.unlock_conditions);
     }
 }
 

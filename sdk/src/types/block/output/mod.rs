@@ -60,7 +60,7 @@ pub use self::{
     nft::{NftOutput, NftOutputBuilder},
     nft_id::NftId,
     output_id::OutputId,
-    rent::{Rent, RentBuilder, RentStructure, StaticRent},
+    rent::{Rent, RentBuilder, RentStructure},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_id::TokenId,
     token_scheme::{SimpleTokenScheme, TokenScheme},

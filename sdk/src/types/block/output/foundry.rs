@@ -268,20 +268,20 @@ impl Rent for FoundryOutputBuilder {
             .data_field::<u64>()
             // Native Tokens
             .data_field::<u8>()
-            .weighted_field(&self.native_tokens)
+            .iter_field(&self.native_tokens)
             // Serial Number
             .data_field::<u32>()
             // Token Scheme
             .data_field::<TokenScheme>()
             // Unlock Conditions
             .data_field::<u8>()
-            .weighted_field(&self.unlock_conditions)
+            .iter_field(&self.unlock_conditions)
             // Features
             .data_field::<u8>()
-            .weighted_field(&self.features)
+            .iter_field(&self.features)
             // Immutable Features
             .data_field::<u8>()
-            .weighted_field(&self.immutable_features);
+            .iter_field(&self.immutable_features);
     }
 }
 

@@ -177,21 +177,6 @@ impl Packable for RentStructure {
     }
 }
 
-pub trait StaticRent {
-    fn build_weighted_bytes(builder: &mut RentBuilder);
-
-    fn weighted_bytes(config: RentStructure) -> u64 {
-        let mut builder = RentBuilder::new(config);
-        Self::build_weighted_bytes(&mut builder);
-        builder.bytes
-    }
-
-    /// Computes the static rent cost of this type given a [`RentStructure`].
-    fn static_rent_cost(rent_structure: RentStructure) -> u64 {
-        rent_structure.byte_cost() as u64 * Self::weighted_bytes(rent_structure)
-    }
-}
-
 /// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
 pub trait Rent {
     /// Different fields in a type lead to different storage requirements for the ledger state.
@@ -208,35 +193,6 @@ pub trait Rent {
         rent_structure.byte_cost() as u64 * self.weighted_bytes(rent_structure)
     }
 }
-
-impl<T: StaticRent> Rent for T {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        T::build_weighted_bytes(builder)
-    }
-}
-
-macro_rules! impl_rent_via_iter {
-    ($type:ty) => {
-        impl<T: Rent> Rent for $type {
-            fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-                for elem in self.iter() {
-                    elem.build_weighted_bytes(builder)
-                }
-            }
-        }
-
-        impl<T: Rent> Rent for &$type {
-            fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-                for elem in self.iter() {
-                    elem.build_weighted_bytes(builder)
-                }
-            }
-        }
-    };
-}
-impl_rent_via_iter!(alloc::collections::BTreeSet<T>);
-impl_rent_via_iter!(alloc::vec::Vec<T>);
-impl_rent_via_iter!(alloc::boxed::Box<[T]>);
 
 pub struct RentBuilder {
     config: RentStructure,
@@ -283,8 +239,10 @@ impl RentBuilder {
         self
     }
 
-    pub fn static_weighted_field<T: StaticRent>(&mut self) -> &mut Self {
-        T::build_weighted_bytes(self);
+    pub fn iter_field<'a, T: 'a + Rent>(&mut self, field: impl IntoIterator<Item = &'a T>) -> &mut Self {
+        for elem in field {
+            elem.build_weighted_bytes(self);
+        }
         self
     }
 

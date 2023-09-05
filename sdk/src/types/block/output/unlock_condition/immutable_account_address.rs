@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::AccountAddress,
-    output::rent::{RentBuilder, StaticRent},
+    output::{rent::RentBuilder, Rent},
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
@@ -29,8 +29,8 @@ impl ImmutableAccountAddressUnlockCondition {
     }
 }
 
-impl StaticRent for ImmutableAccountAddressUnlockCondition {
-    fn build_weighted_bytes(builder: &mut RentBuilder) {
+impl Rent for ImmutableAccountAddressUnlockCondition {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
         builder
             // Kind
             .data_field::<u8>()

@@ -12,7 +12,7 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use super::StaticRent;
+use super::{Rent, RentBuilder};
 use crate::types::block::{output::TokenId, Error};
 
 ///
@@ -63,8 +63,8 @@ impl Ord for NativeToken {
     }
 }
 
-impl StaticRent for NativeToken {
-    fn build_weighted_bytes(builder: &mut super::rent::RentBuilder) {
+impl Rent for NativeToken {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
         builder.data_field::<TokenId>().data_field::<U256>();
     }
 }

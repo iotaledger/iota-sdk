@@ -255,16 +255,16 @@ impl Rent for NftOutputBuilder {
             .data_field::<NftId>()
             // Native Tokens
             .data_field::<u8>()
-            .weighted_field(&self.native_tokens)
+            .iter_field(&self.native_tokens)
             // Unlock Conditions
             .data_field::<u8>()
-            .weighted_field(&self.unlock_conditions)
+            .iter_field(&self.unlock_conditions)
             // Features
             .data_field::<u8>()
-            .weighted_field(&self.features)
+            .iter_field(&self.features)
             // Immutable Features
             .data_field::<u8>()
-            .weighted_field(&self.immutable_features);
+            .iter_field(&self.immutable_features);
     }
 }
 

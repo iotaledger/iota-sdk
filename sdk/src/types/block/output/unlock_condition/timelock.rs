@@ -4,7 +4,7 @@
 use derive_more::From;
 
 use crate::types::block::{
-    output::rent::{RentBuilder, StaticRent},
+    output::{rent::RentBuilder, Rent},
     slot::SlotIndex,
     Error,
 };
@@ -35,8 +35,8 @@ impl TimelockUnlockCondition {
     }
 }
 
-impl StaticRent for TimelockUnlockCondition {
-    fn build_weighted_bytes(builder: &mut RentBuilder) {
+impl Rent for TimelockUnlockCondition {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
         builder
             // Kind
             .data_field::<u8>()
