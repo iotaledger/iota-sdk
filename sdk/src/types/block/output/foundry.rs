@@ -32,7 +32,7 @@ use crate::types::{
     ValidationParams,
 };
 
-///
+/// Builder for a [`FoundryOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct FoundryOutputBuilder {
@@ -280,15 +280,19 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 /// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     amount: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by this output.
     native_tokens: NativeTokens,
-    // The serial number of the foundry with respect to the controlling account.
+    /// The serial number of the foundry with respect to the controlling account.
     serial_number: u32,
+    /// Define the supply control scheme of the native tokens controlled by the foundry.
     token_scheme: TokenScheme,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
+    /// Features of the output.
     features: Features,
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
@@ -627,19 +631,15 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct FoundryOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
         pub unlock_conditions: Vec<UnlockConditionDto>,
