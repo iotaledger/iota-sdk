@@ -42,12 +42,10 @@ async fn main() -> Result<()> {
 
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
-    let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    let basic_output_builder = BasicOutputBuilder::new_with_minimum_amount(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(address));
-    let account_output_builder =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
-    let foundry_output_builder =
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
+    let account_output_builder = AccountOutputBuilder::new_with_minimum_amount(rent_structure, AccountId::null());
+    let foundry_output_builder = FoundryOutputBuilder::new_with_minimum_amount(rent_structure, 1, token_scheme);
 
     let outputs = [
         //// most simple output

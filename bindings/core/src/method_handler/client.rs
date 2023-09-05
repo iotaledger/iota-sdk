@@ -9,8 +9,7 @@ use iota_sdk::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount,
-                RentCost,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
             },
             payload::Payload,
             Block, BlockDto,
@@ -72,7 +71,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::RentCost(client.get_rent_structure().await?)
                 },
                 mana,
                 native_tokens,
@@ -99,7 +98,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::RentCost(client.get_rent_structure().await?)
                 },
                 mana,
                 native_tokens,
@@ -123,7 +122,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::RentCost(client.get_rent_structure().await?)
                 },
                 native_tokens,
                 serial_number,
@@ -149,7 +148,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::RentCost(client.get_rent_structure().await?)
                 },
                 mana,
                 native_tokens,

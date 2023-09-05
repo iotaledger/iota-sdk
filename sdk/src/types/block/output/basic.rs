@@ -15,7 +15,7 @@ use crate::types::{
                 UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentBuilder, RentCost, RentStructure,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentBuilder, RentStructure,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -44,10 +44,10 @@ impl BasicOutputBuilder {
     }
 
     /// Creates an [`BasicOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// The amount will be set to the rent cost of the resulting output.
     #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure))
+    pub fn new_with_minimum_amount(rent_structure: RentStructure) -> Self {
+        Self::new(OutputBuilderAmount::RentCost(rent_structure))
     }
 
     fn new(amount: OutputBuilderAmount) -> Self {
@@ -64,7 +64,7 @@ impl BasicOutputBuilder {
     pub fn amount(&self) -> u64 {
         match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
+            OutputBuilderAmount::RentCost(rent_structure) => self.rent_cost(rent_structure),
         }
     }
 
@@ -75,10 +75,10 @@ impl BasicOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the rent cost.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, rent_structure: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::RentCost(rent_structure);
         self
     }
 
@@ -183,7 +183,7 @@ impl BasicOutputBuilder {
                     // Add a temporary storage deposit unlock condition so the new rent requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         return_address,
-                        0,
+                        1,
                         token_supply,
                     )?);
                     // Get the rent cost of the output with the added storage deposit return unlock condition
@@ -208,7 +208,7 @@ impl BasicOutputBuilder {
                     self
                 }
             }
-            OutputBuilderAmount::MinimumStorageDeposit(_) => self,
+            OutputBuilderAmount::RentCost(_) => self,
         })
     }
 
@@ -223,7 +223,7 @@ impl BasicOutputBuilder {
     pub fn finish(self) -> Result<BasicOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
+            OutputBuilderAmount::RentCost(rent_structure) => self.rent_cost(rent_structure),
         };
         verify_output_amount_min(amount)?;
 
@@ -247,9 +247,20 @@ impl BasicOutputBuilder {
     ///
     pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<BasicOutput, Error> {
         let output = self.finish()?;
+        let params = params.into();
 
-        if let Some(token_supply) = params.into().token_supply() {
+        if let Some(token_supply) = params.token_supply() {
             verify_output_amount_supply(output.amount, token_supply)?;
+        }
+
+        if let Some(params) = params.protocol_parameters() {
+            let rent_cost = output.rent_cost(params.rent_structure());
+            if output.amount < rent_cost {
+                return Err(Error::InsufficientStorageDepositAmount {
+                    amount: output.amount,
+                    required: rent_cost,
+                });
+            }
         }
 
         Ok(output)
@@ -263,6 +274,7 @@ impl BasicOutputBuilder {
 
 impl Rent for BasicOutputBuilder {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        Output::byte_offset(builder);
         builder
             // Kind
             .data_field::<u8>()
@@ -279,12 +291,6 @@ impl Rent for BasicOutputBuilder {
             // Features
             .data_field::<u8>()
             .weighted_field(&self.features);
-    }
-}
-
-impl RentCost for BasicOutputBuilder {
-    fn build_byte_offset(builder: &mut RentBuilder) {
-        Output::build_byte_offset(builder)
     }
 }
 
@@ -340,8 +346,8 @@ impl BasicOutput {
     /// Creates a new [`BasicOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure) -> BasicOutputBuilder {
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    pub fn build_with_minimum_amount(rent_structure: RentStructure) -> BasicOutputBuilder {
+        BasicOutputBuilder::new_with_minimum_amount(rent_structure)
     }
 
     ///
@@ -412,6 +418,7 @@ impl BasicOutput {
 
 impl Rent for BasicOutput {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        Output::byte_offset(builder);
         builder
             // Kind
             .data_field::<u8>()
@@ -425,12 +432,6 @@ impl Rent for BasicOutput {
             .packable_data_field(&self.unlock_conditions)
             // Features
             .packable_data_field(&self.features);
-    }
-}
-
-impl RentCost for BasicOutput {
-    fn build_byte_offset(builder: &mut RentBuilder) {
-        Output::build_byte_offset(builder)
     }
 }
 
@@ -542,8 +543,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => BasicOutputBuilder::new_with_amount(amount),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+                OutputBuilderAmount::RentCost(rent_structure) => {
+                    BasicOutputBuilder::new_with_minimum_amount(rent_structure)
                 }
             }
             .with_mana(mana);
@@ -577,7 +578,7 @@ mod tests {
             output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
             protocol::protocol_parameters,
             rand::{
-                address::rand_account_address,
+                address::{rand_account_address, rand_address},
                 output::{
                     feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
                     rand_basic_output,
@@ -620,7 +621,7 @@ mod tests {
         let metadata = rand_metadata_feature();
 
         let output = builder
-            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+            .with_minimum_amount(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .with_features([Feature::from(metadata.clone()), sender_1.into()])
             .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
@@ -686,10 +687,49 @@ mod tests {
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder = BasicOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        let builder = BasicOutput::build_with_minimum_amount(protocol_parameters.rent_structure())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
+    }
+
+    #[test]
+    fn storage_deposit() {
+        let protocol_parameters = protocol_parameters();
+        let address_unlock = rand_address_unlock_condition();
+        let return_address = rand_address();
+
+        let builder_1 = BasicOutput::build_with_amount(1).add_unlock_condition(address_unlock);
+
+        let builder_2 = BasicOutput::build_with_minimum_amount(protocol_parameters.rent_structure())
+            .add_unlock_condition(address_unlock);
+
+        assert_eq!(
+            builder_1.rent_cost(protocol_parameters.rent_structure()),
+            builder_2.amount()
+        );
+        assert_eq!(
+            builder_1.clone().finish_output(&protocol_parameters),
+            Err(Error::InsufficientStorageDepositAmount {
+                amount: 1,
+                required: builder_1.rent_cost(protocol_parameters.rent_structure())
+            })
+        );
+
+        let builder_1 = builder_1
+            .with_sufficient_storage_deposit(
+                return_address,
+                protocol_parameters.rent_structure(),
+                protocol_parameters.token_supply(),
+            )
+            .unwrap();
+
+        let sdruc_cost =
+            StorageDepositReturnUnlockCondition::new(return_address, 1, protocol_parameters.token_supply())
+                .unwrap()
+                .rent_cost(protocol_parameters.rent_structure());
+
+        assert_eq!(builder_1.amount(), builder_2.amount() + sdruc_cost);
     }
 }

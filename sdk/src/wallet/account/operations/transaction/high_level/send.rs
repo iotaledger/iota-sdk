@@ -10,7 +10,7 @@ use crate::{
         address::Bech32Address,
         output::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-            BasicOutputBuilder, RentCost,
+            BasicOutputBuilder, Rent,
         },
         slot::SlotIndex,
         ConvertTo,

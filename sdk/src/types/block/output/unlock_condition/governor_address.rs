@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::address::Address;
+use crate::types::block::{
+    address::Address,
+    output::{rent::RentBuilder, Rent},
+};
 
 /// Defines the Governor Address that owns this output, that is, it can unlock it with the proper Unlock in a
 /// transaction that governance transitions the account output.
@@ -25,6 +28,16 @@ impl GovernorAddressUnlockCondition {
     #[inline(always)]
     pub fn address(&self) -> &Address {
         &self.0
+    }
+}
+
+impl Rent for GovernorAddressUnlockCondition {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Address
+            .packable_data_field(&self.0);
     }
 }
 

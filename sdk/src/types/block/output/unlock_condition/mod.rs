@@ -65,7 +65,15 @@ impl Ord for UnlockCondition {
 
 impl Rent for UnlockCondition {
     fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
-        builder.packable_data_field(self);
+        match self {
+            UnlockCondition::Address(uc) => uc.build_weighted_bytes(builder),
+            UnlockCondition::StorageDepositReturn(uc) => uc.build_weighted_bytes(builder),
+            UnlockCondition::Timelock(uc) => uc.build_weighted_bytes(builder),
+            UnlockCondition::Expiration(uc) => uc.build_weighted_bytes(builder),
+            UnlockCondition::StateControllerAddress(uc) => uc.build_weighted_bytes(builder),
+            UnlockCondition::GovernorAddress(uc) => uc.build_weighted_bytes(builder),
+            UnlockCondition::ImmutableAccountAddress(uc) => uc.build_weighted_bytes(builder),
+        }
     }
 }
 

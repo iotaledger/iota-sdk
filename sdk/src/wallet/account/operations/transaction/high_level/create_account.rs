@@ -93,7 +93,7 @@ where
         };
 
         let mut account_output_builder =
-            AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
+            AccountOutputBuilder::new_with_minimum_amount(rent_structure, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))

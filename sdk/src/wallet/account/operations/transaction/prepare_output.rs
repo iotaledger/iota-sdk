@@ -13,7 +13,7 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Output, RentCost, RentStructure, UnlockCondition,
+            BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Output, Rent, RentStructure, UnlockCondition,
         },
         slot::SlotIndex,
         Error,
@@ -101,7 +101,7 @@ where
 
         // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
-            .with_minimum_storage_deposit(rent_structure)
+            .with_minimum_amount(rent_structure)
             .finish_output(token_supply)?;
 
         let mut second_output_builder = if nft_id.is_some() {
@@ -146,7 +146,7 @@ where
                 // need to check the min required storage deposit again
                 let min_storage_deposit_new_amount = second_output_builder
                     .clone()
-                    .with_minimum_storage_deposit(rent_structure)
+                    .with_minimum_amount(rent_structure)
                     .finish_output(token_supply)?
                     .amount();
 
@@ -242,10 +242,7 @@ where
             if nft_id.is_null() {
                 // Mint a new NFT output
                 (
-                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
-                        *nft_id,
-                    )),
+                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_amount(rent_structure, *nft_id)),
                     None,
                 )
             } else {
@@ -266,7 +263,7 @@ where
             }
         } else {
             (
-                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)),
+                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_amount(rent_structure)),
                 None,
             )
         };
@@ -429,13 +426,13 @@ impl OutputBuilder {
         }
         self
     }
-    fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
+    fn with_minimum_amount(mut self, rent_structure: RentStructure) -> Self {
         match self {
             Self::Basic(b) => {
-                self = Self::Basic(b.with_minimum_storage_deposit(rent_structure));
+                self = Self::Basic(b.with_minimum_amount(rent_structure));
             }
             Self::Nft(b) => {
-                self = Self::Nft(b.with_minimum_storage_deposit(rent_structure));
+                self = Self::Nft(b.with_minimum_amount(rent_structure));
             }
         }
         self

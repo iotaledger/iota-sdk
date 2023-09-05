@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+    let nft_output_builder = NftOutputBuilder::new_with_minimum_amount(rent_structure, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = [

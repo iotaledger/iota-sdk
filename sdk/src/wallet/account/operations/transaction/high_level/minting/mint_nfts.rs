@@ -189,7 +189,7 @@ where
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_amount(rent_structure, NftId::null())
                 // Address which will own the nft
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 

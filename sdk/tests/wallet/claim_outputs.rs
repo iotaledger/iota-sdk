@@ -131,7 +131,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     // TODO more fitting value
     let expiration_slot = account_0.client().get_slot_index().await? + 86400;
 
-    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    let output = BasicOutputBuilder::new_with_minimum_amount(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(
             *account_1.addresses().await?[0].address().as_ref(),
         ))
@@ -328,7 +328,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let tx = account_0
         .send_outputs(
             [
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+                BasicOutputBuilder::new_with_minimum_amount(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))
@@ -338,7 +338,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+                BasicOutputBuilder::new_with_minimum_amount(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))

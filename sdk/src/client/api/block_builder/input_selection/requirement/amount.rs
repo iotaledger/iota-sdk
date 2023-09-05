@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AccountTransition,
-            FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, RentCost,
+            FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, Rent,
         },
         slot::SlotIndex,
     },

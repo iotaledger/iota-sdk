@@ -21,7 +21,7 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, Rent, RentBuilder, RentCost, RentStructure,
+            OutputBuilderAmount, OutputId, Rent, RentBuilder, RentStructure,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -79,15 +79,15 @@ impl DelegationOutputBuilder {
     }
 
     /// Creates a [`DelegationOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(
+    /// The amount will be set to the rent cost of the resulting output.
+    pub fn new_with_minimum_amount(
         rent_structure: RentStructure,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_id: AccountId,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
+            OutputBuilderAmount::RentCost(rent_structure),
             delegated_amount,
             delegation_id,
             validator_id,
@@ -117,9 +117,9 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    /// Sets the amount to the rent cost.
+    pub fn with_minimum_amount(mut self, rent_structure: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::RentCost(rent_structure);
         self
     }
 
@@ -178,7 +178,7 @@ impl DelegationOutputBuilder {
     pub fn finish(self) -> Result<DelegationOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
+            OutputBuilderAmount::RentCost(rent_structure) => self.rent_cost(rent_structure),
         };
         verify_output_amount_min(amount)?;
 
@@ -219,6 +219,7 @@ impl DelegationOutputBuilder {
 
 impl Rent for DelegationOutputBuilder {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        Output::byte_offset(builder);
         builder
             // Kind
             .delegation_field::<u8>()
@@ -237,12 +238,6 @@ impl Rent for DelegationOutputBuilder {
             // Unlock Conditions
             .data_field::<u8>()
             .weighted_field(&self.unlock_conditions);
-    }
-}
-
-impl RentCost for DelegationOutputBuilder {
-    fn build_byte_offset(builder: &mut RentBuilder) {
-        Output::build_byte_offset(builder)
     }
 }
 
@@ -298,18 +293,13 @@ impl DelegationOutput {
 
     /// Creates a new [`DelegationOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn build_with_minimum_storage_deposit(
+    pub fn build_with_minimum_amount(
         rent_structure: RentStructure,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_id: AccountId,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_minimum_storage_deposit(
-            rent_structure,
-            delegated_amount,
-            delegation_id,
-            validator_id,
-        )
+        DelegationOutputBuilder::new_with_minimum_amount(rent_structure, delegated_amount, delegation_id, validator_id)
     }
 
     /// Returns the amount of the [`DelegationOutput`].
@@ -383,6 +373,7 @@ impl DelegationOutput {
 
 impl Rent for DelegationOutput {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        Output::byte_offset(builder);
         builder
             // Kind
             .delegation_field::<u8>()
@@ -400,12 +391,6 @@ impl Rent for DelegationOutput {
             .delegation_field::<EpochIndex>()
             // Unlock Conditions
             .packable_data_field(&self.unlock_conditions);
-    }
-}
-
-impl RentCost for DelegationOutput {
-    fn build_byte_offset(builder: &mut RentBuilder) {
-        Output::build_byte_offset(builder)
     }
 }
 
@@ -557,14 +542,12 @@ pub(crate) mod dto {
                 OutputBuilderAmount::Amount(amount) => {
                     DelegationOutputBuilder::new_with_amount(amount, delegated_amount, *delegation_id, *validator_id)
                 }
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    DelegationOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
-                        delegated_amount,
-                        *delegation_id,
-                        *validator_id,
-                    )
-                }
+                OutputBuilderAmount::RentCost(rent_structure) => DelegationOutputBuilder::new_with_minimum_amount(
+                    rent_structure,
+                    delegated_amount,
+                    *delegation_id,
+                    *validator_id,
+                ),
             }
             .with_start_epoch(start_epoch)
             .with_end_epoch(end_epoch);

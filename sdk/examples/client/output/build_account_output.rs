@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32(address)?;
 
     // Account id needs to be null the first time
-    let account_output = AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
+    let account_output = AccountOutputBuilder::new_with_minimum_amount(rent_structure, AccountId::null())
         .with_state_metadata(metadata)
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(metadata)?)

@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
             .with_account_id(account_output.account_id_non_null(&account_output_data.output_id))
             // Minimum required storage deposit will change if the new metadata has a different size, so we will update
             // the amount
-            .with_minimum_storage_deposit(rent_structure)
+            .with_minimum_amount(rent_structure)
             .with_state_metadata(NEW_STATE_METADATA.as_bytes().to_vec())
             .with_state_index(account_output.state_index() + 1)
             .finish_output(token_supply)?;

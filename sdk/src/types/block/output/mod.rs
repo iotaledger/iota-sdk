@@ -38,7 +38,6 @@ use packable::{
     Packable,
 };
 
-use self::rent::RentBuilder;
 pub(crate) use self::{
     account::StateMetadataLength,
     feature::{MetadataFeatureLength, TagFeatureLength},
@@ -61,7 +60,7 @@ pub use self::{
     nft::{NftOutput, NftOutputBuilder},
     nft_id::NftId,
     output_id::OutputId,
-    rent::{Rent, RentCost, RentStructure},
+    rent::{Rent, RentBuilder, RentStructure, StaticRent},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_id::TokenId,
     token_scheme::{SimpleTokenScheme, TokenScheme},
@@ -82,7 +81,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
-    MinimumStorageDeposit(RentStructure),
+    RentCost(RentStructure),
 }
 
 /// Contains the generic [`Output`] with associated [`OutputMetadata`].
@@ -461,20 +460,8 @@ impl Packable for Output {
     }
 }
 
-impl Rent for Output {
-    fn build_weighted_bytes(&self, rent_structure: &mut RentBuilder) {
-        match self {
-            Self::Basic(o) => o.build_weighted_bytes(rent_structure),
-            Self::Account(o) => o.build_weighted_bytes(rent_structure),
-            Self::Foundry(o) => o.build_weighted_bytes(rent_structure),
-            Self::Nft(o) => o.build_weighted_bytes(rent_structure),
-            Self::Delegation(o) => o.build_weighted_bytes(rent_structure),
-        }
-    }
-}
-
-impl RentCost for Output {
-    fn build_byte_offset(builder: &mut RentBuilder) {
+impl Output {
+    pub(crate) fn byte_offset(builder: &mut RentBuilder) {
         builder
             // The ID of the output.
             .key_field::<OutputId>()
@@ -484,6 +471,18 @@ impl RentCost for Output {
             .data_field::<SlotIndex>()
             // The index of the slot in which the transaction was created.
             .data_field::<SlotIndex>();
+    }
+}
+
+impl Rent for Output {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        match self {
+            Self::Basic(o) => o.build_weighted_bytes(builder),
+            Self::Account(o) => o.build_weighted_bytes(builder),
+            Self::Foundry(o) => o.build_weighted_bytes(builder),
+            Self::Nft(o) => o.build_weighted_bytes(builder),
+            Self::Delegation(o) => o.build_weighted_bytes(builder),
+        }
     }
 }
 
@@ -523,7 +522,7 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, token_supply: u64) -> u64 {
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    BasicOutputBuilder::new_with_minimum_amount(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(*address))
         .finish_with_params(token_supply)
         .unwrap()

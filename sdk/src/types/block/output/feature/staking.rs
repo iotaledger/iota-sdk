@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    output::{rent::RentBuilder, Rent},
+    output::{rent::RentBuilder, StaticRent},
     slot::EpochIndex,
 };
 
@@ -59,8 +59,8 @@ impl StakingFeature {
     }
 }
 
-impl Rent for StakingFeature {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+impl StaticRent for StakingFeature {
+    fn build_weighted_bytes(builder: &mut RentBuilder) {
         builder
             // Feature Type
             .staking_field::<u8>()

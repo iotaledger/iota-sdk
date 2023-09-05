@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::address::AccountAddress;
+use crate::types::block::{
+    address::AccountAddress,
+    output::rent::{RentBuilder, StaticRent},
+};
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -23,6 +26,16 @@ impl ImmutableAccountAddressUnlockCondition {
     /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
     pub fn address(&self) -> &AccountAddress {
         &self.0
+    }
+}
+
+impl StaticRent for ImmutableAccountAddressUnlockCondition {
+    fn build_weighted_bytes(builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Address
+            .data_field::<AccountAddress>();
     }
 }
 

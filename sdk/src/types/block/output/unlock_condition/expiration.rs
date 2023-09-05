@@ -3,7 +3,12 @@
 
 use derive_more::From;
 
-use crate::types::block::{address::Address, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    output::{rent::RentBuilder, Rent},
+    slot::SlotIndex,
+    Error,
+};
 
 /// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
 /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
@@ -52,6 +57,18 @@ impl ExpirationUnlockCondition {
         } else {
             None
         }
+    }
+}
+
+impl Rent for ExpirationUnlockCondition {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Return address
+            .packable_data_field(&self.return_address)
+            // Slot index
+            .data_field::<SlotIndex>();
     }
 }
 

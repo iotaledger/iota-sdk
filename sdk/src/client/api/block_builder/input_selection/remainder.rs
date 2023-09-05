@@ -65,7 +65,7 @@ impl InputSelection {
         let native_tokens_remainder = native_tokens_diff.is_some();
 
         let mut remainder_builder =
-            BasicOutputBuilder::new_with_minimum_storage_deposit(self.protocol_parameters.rent_structure())
+            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.rent_structure())
                 .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
                     [0; 32],
                 ))));

@@ -2313,7 +2313,7 @@ fn new_state_metadata() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let account_output =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id_1)
+        AccountOutputBuilder::new_with_minimum_amount(protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2332,7 +2332,7 @@ fn new_state_metadata() {
 
     // New account output, with updated state index
     let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .with_state_index(account_output.as_account().state_index() + 1)
         .finish_output(protocol_parameters.token_supply())
@@ -2359,7 +2359,7 @@ fn new_state_metadata_but_same_state_index() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let account_output =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id_1)
+        AccountOutputBuilder::new_with_minimum_amount(protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2378,7 +2378,7 @@ fn new_state_metadata_but_same_state_index() {
 
     // New account output, without updated state index
     let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .finish_output(protocol_parameters.token_supply())
         .unwrap();

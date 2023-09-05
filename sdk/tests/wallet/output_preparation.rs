@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, NftId, RentCost, TokenId},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, NftId, Rent, TokenId},
         slot::SlotIndex,
     },
     wallet::{

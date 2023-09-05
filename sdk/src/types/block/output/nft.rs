@@ -19,7 +19,7 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent, RentBuilder, RentCost, RentStructure,
+            NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent, RentBuilder, RentStructure,
             StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
@@ -50,9 +50,9 @@ impl NftOutputBuilder {
     }
 
     /// Creates an [`NftOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), nft_id)
+    /// The amount will be set to the rent cost of the resulting output.
+    pub fn new_with_minimum_amount(rent_structure: RentStructure, nft_id: NftId) -> Self {
+        Self::new(OutputBuilderAmount::RentCost(rent_structure), nft_id)
     }
 
     fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Self {
@@ -74,10 +74,10 @@ impl NftOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the rent cost.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, rent_structure: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::RentCost(rent_structure);
         self
     }
 
@@ -197,7 +197,7 @@ impl NftOutputBuilder {
     pub fn finish(self) -> Result<NftOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => self.rent_cost(rent_structure),
+            OutputBuilderAmount::RentCost(rent_structure) => self.rent_cost(rent_structure),
         };
         verify_output_amount_min(amount)?;
 
@@ -243,6 +243,7 @@ impl NftOutputBuilder {
 
 impl Rent for NftOutputBuilder {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        Output::byte_offset(builder);
         builder
             // Kind
             .data_field::<u8>()
@@ -264,12 +265,6 @@ impl Rent for NftOutputBuilder {
             // Immutable Features
             .data_field::<u8>()
             .weighted_field(&self.immutable_features);
-    }
-}
-
-impl RentCost for NftOutputBuilder {
-    fn build_byte_offset(builder: &mut RentBuilder) {
-        Output::build_byte_offset(builder)
     }
 }
 
@@ -324,10 +319,10 @@ impl NftOutput {
     }
 
     /// Creates a new [`NftOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// The amount will be set to the rent cost of the resulting output.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> NftOutputBuilder {
-        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
+    pub fn build_with_minimum_amount(rent_structure: RentStructure, nft_id: NftId) -> NftOutputBuilder {
+        NftOutputBuilder::new_with_minimum_amount(rent_structure, nft_id)
     }
 
     ///
@@ -434,6 +429,7 @@ impl NftOutput {
 
 impl Rent for NftOutput {
     fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        Output::byte_offset(builder);
         builder
             // Kind
             .data_field::<u8>()
@@ -451,12 +447,6 @@ impl Rent for NftOutput {
             .packable_data_field(&self.features)
             // Immutable Features
             .packable_data_field(&self.immutable_features);
-    }
-}
-
-impl RentCost for NftOutput {
-    fn build_byte_offset(builder: &mut RentBuilder) {
-        Output::build_byte_offset(builder)
     }
 }
 
@@ -648,8 +638,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
+                OutputBuilderAmount::RentCost(rent_structure) => {
+                    NftOutputBuilder::new_with_minimum_amount(rent_structure, *nft_id)
                 }
             }
             .with_mana(mana);
@@ -735,7 +725,7 @@ mod tests {
         assert!(output.immutable_features().is_empty());
 
         let output = builder
-            .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+            .with_minimum_amount(protocol_parameters.rent_structure())
             .add_unlock_condition(rand_address_unlock_condition())
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap();
@@ -799,12 +789,11 @@ mod tests {
             .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
 
-        let builder =
-            NftOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), NftId::null())
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-                .add_unlock_condition(rand_address_unlock_condition())
-                .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
-                .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
+        let builder = NftOutput::build_with_minimum_amount(protocol_parameters.rent_structure(), NftId::null())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            .add_unlock_condition(rand_address_unlock_condition())
+            .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
     }
 }

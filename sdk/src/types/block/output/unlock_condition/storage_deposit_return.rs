@@ -1,7 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error};
+use crate::types::block::{
+    address::Address,
+    output::{
+        rent::{Rent, RentBuilder},
+        verify_output_amount,
+    },
+    protocol::ProtocolParameters,
+    Error,
+};
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -40,6 +48,18 @@ impl StorageDepositReturnUnlockCondition {
     #[inline(always)]
     pub fn amount(&self) -> u64 {
         self.amount
+    }
+}
+
+impl Rent for StorageDepositReturnUnlockCondition {
+    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+        builder
+            // Kind
+            .data_field::<u8>()
+            // Return address
+            .packable_data_field(&self.return_address)
+            // Return amount
+            .data_field::<u64>();
     }
 }
 

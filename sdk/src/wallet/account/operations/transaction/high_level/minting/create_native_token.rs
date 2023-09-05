@@ -157,7 +157,7 @@ where
             let outputs = [
                 new_account_output_builder.finish_output(token_supply)?,
                 {
-                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
+                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
                         rent_structure,
                         account_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(

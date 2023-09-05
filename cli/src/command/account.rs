@@ -689,7 +689,7 @@ pub async fn send_native_token_command(
 
         account.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+        let outputs = [BasicOutputBuilder::new_with_minimum_amount(rent_structure)
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .with_native_tokens([NativeToken::new(
                 TokenId::from_str(&token_id)?,
