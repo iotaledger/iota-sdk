@@ -42,14 +42,14 @@ pub mod core;
 pub mod error;
 pub mod node_api;
 pub mod node_manager;
+#[cfg(not(target_family = "wasm"))]
+pub(crate) mod request_pool;
 pub mod secret;
 pub mod storage;
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 pub mod stronghold;
 pub mod utils;
-#[cfg(not(target_family = "wasm"))]
-pub(crate) mod worker;
 
 #[cfg(feature = "mqtt")]
 pub use self::node_api::mqtt;

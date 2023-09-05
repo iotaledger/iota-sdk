@@ -25,6 +25,7 @@ use crate::{
     client::{
         error::{Error, Result},
         node_manager::builder::NodeManagerBuilder,
+        request_pool::RateLimitExt,
     },
     types::api::core::response::InfoResponse,
 };
@@ -74,15 +75,12 @@ impl Client {
         {
             let path = path.to_owned();
             let query = query.map(ToOwned::to_owned);
-            self.rate_limit(move |client| async move {
-                client
-                    .node_manager
-                    .read()
-                    .await
-                    .get_request(&path, query.as_deref(), timeout, need_quorum, prefer_permanode)
-                    .await
-            })
-            .await
+            self.node_manager
+                .read()
+                .await
+                .get_request(&path, query.as_deref(), timeout, need_quorum, prefer_permanode)
+                .rate_limit(&self.request_pool)
+                .await
         }
         #[cfg(target_family = "wasm")]
         self.node_manager
@@ -102,15 +100,12 @@ impl Client {
         {
             let path = path.to_owned();
             let query = query.map(ToOwned::to_owned);
-            self.rate_limit(move |client| async move {
-                client
-                    .node_manager
-                    .read()
-                    .await
-                    .get_request_bytes(&path, query.as_deref(), timeout)
-                    .await
-            })
-            .await
+            self.node_manager
+                .read()
+                .await
+                .get_request_bytes(&path, query.as_deref(), timeout)
+                .rate_limit(&self.request_pool)
+                .await
         }
         #[cfg(target_family = "wasm")]
         self.node_manager
@@ -131,15 +126,12 @@ impl Client {
         {
             let path = path.to_owned();
             let body = body.to_owned();
-            self.rate_limit(move |client| async move {
-                client
-                    .node_manager
-                    .read()
-                    .await
-                    .post_request_bytes(&path, timeout, &body, local_pow)
-                    .await
-            })
-            .await
+            self.node_manager
+                .read()
+                .await
+                .post_request_bytes(&path, timeout, &body, local_pow)
+                .rate_limit(&self.request_pool)
+                .await
         }
         #[cfg(target_family = "wasm")]
         self.node_manager
@@ -159,15 +151,12 @@ impl Client {
         #[cfg(not(target_family = "wasm"))]
         {
             let path = path.to_owned();
-            self.rate_limit(move |client| async move {
-                client
-                    .node_manager
-                    .read()
-                    .await
-                    .post_request_json(&path, timeout, json, local_pow)
-                    .await
-            })
-            .await
+            self.node_manager
+                .read()
+                .await
+                .post_request_json(&path, timeout, json, local_pow)
+                .rate_limit(&self.request_pool)
+                .await
         }
         #[cfg(target_family = "wasm")]
         self.node_manager

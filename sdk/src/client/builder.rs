@@ -279,7 +279,7 @@ impl ClientBuilder {
                 sender: RwLock::new(mqtt_event_tx),
                 receiver: RwLock::new(mqtt_event_rx),
             },
-            worker_pool: crate::client::worker::WorkerPool::new(self.max_parallel_api_requests),
+            request_pool: crate::client::request_pool::RequestPool::new(self.max_parallel_api_requests),
         });
 
         client_inner.sync_nodes(&nodes, ignore_node_health).await?;
@@ -339,7 +339,7 @@ impl ClientBuilder {
             #[cfg(not(target_family = "wasm"))]
             pow_worker_count: *client.pow_worker_count.read().await,
             #[cfg(not(target_family = "wasm"))]
-            max_parallel_api_requests: client.worker_pool.size().await,
+            max_parallel_api_requests: client.request_pool.size().await,
         }
     }
 }

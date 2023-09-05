@@ -14,9 +14,7 @@ use {
 };
 
 #[cfg(not(target_family = "wasm"))]
-pub use super::worker::TaskPriority;
-#[cfg(not(target_family = "wasm"))]
-use super::worker::WorkerPool;
+use super::request_pool::RequestPool;
 #[cfg(target_family = "wasm")]
 use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
@@ -61,7 +59,7 @@ pub struct ClientInner {
     #[cfg(target_family = "wasm")]
     pub(crate) last_sync: tokio::sync::Mutex<Option<u32>>,
     #[cfg(not(target_family = "wasm"))]
-    pub(crate) worker_pool: WorkerPool,
+    pub(crate) request_pool: RequestPool,
 }
 
 #[derive(Default)]
@@ -94,7 +92,7 @@ impl std::fmt::Debug for Client {
         d.field("broker_options", &self.mqtt.broker_options);
         d.field("network_info", &self.network_info);
         #[cfg(not(target_family = "wasm"))]
-        d.field("worker_pool", &self.worker_pool);
+        d.field("request_pool", &self.request_pool);
         d.finish()
     }
 }
@@ -103,30 +101,6 @@ impl Client {
     /// Create the builder to instantiate the IOTA Client.
     pub fn builder() -> ClientBuilder {
         ClientBuilder::new()
-    }
-
-    #[cfg(not(target_family = "wasm"))]
-    pub async fn rate_limit<F, Fut>(&self, f: F) -> Fut::Output
-    where
-        F: 'static + Send + Sync + FnOnce(Self) -> Fut,
-        Fut: futures::Future + Send,
-        Fut::Output: Send,
-    {
-        self.prioritized_rate_limit(TaskPriority::Medium, f).await
-    }
-
-    #[cfg(not(target_family = "wasm"))]
-    pub async fn prioritized_rate_limit<F, Fut>(&self, priority: TaskPriority, f: F) -> Fut::Output
-    where
-        F: 'static + Send + Sync + FnOnce(Self) -> Fut,
-        Fut: futures::Future + Send,
-        Fut::Output: Send,
-    {
-        let client = self.clone();
-        self.worker_pool
-            .process_task(priority, async move { f(client).await })
-            .await
-            .unwrap() // TODO
     }
 }
 
