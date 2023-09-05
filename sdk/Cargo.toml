@@ -625,7 +625,7 @@ path = "examples/client/get_block.rs"
 required-features = ["client"]
 
 [[example]]
-name = "getting_started"
+name = "client_getting_started"
 path = "examples/client/getting_started.rs"
 required-features = ["client"]
 
