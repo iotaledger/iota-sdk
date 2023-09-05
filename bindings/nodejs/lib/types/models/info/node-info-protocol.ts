@@ -58,7 +58,7 @@ export interface ProtocolParameters {
      */
     slotsPerEpochExponent: number;
     /**
-     * Mana Bits is the number of bits used to represent Mana expressed as an exponent of 2.
+     * The number of bits used to represent Mana expressed as an exponent of 2.
      */
     manaBitsExponent: number;
     /**
