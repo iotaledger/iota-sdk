@@ -6,7 +6,7 @@ import { Wallet, CoinType, WalletOptions, Utils } from '@iota/sdk';
 // Run with command:
 // yarn run-example ./wallet/getting-started.ts
 
-// A name to associate with the created account.
+// The database path.
 const WALLET_DB_PATH = 'getting-started-db';
 
 // A name to associate with the created account.
