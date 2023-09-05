@@ -283,9 +283,8 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
     ) -> Result<Unlocks, Self::Error> {
-        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data).await
     }
 
     async fn sign_transaction(
