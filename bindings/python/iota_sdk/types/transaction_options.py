@@ -61,7 +61,8 @@ class TransactionOptions():
         allow_micro_amount: Whether to allow sending a micro amount.
     """
 
-    remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None
+    remainder_value_strategy: Optional[RemainderValueStrategy |
+                                       RemainderValueStrategyCustomAddress] = None
     tagged_data_payload: Optional[TaggedDataPayload] = None
     custom_inputs: Optional[List[OutputId]] = None
     mandatory_inputs: Optional[List[OutputId]] = None

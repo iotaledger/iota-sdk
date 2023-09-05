@@ -12,7 +12,9 @@ HexStr = NewType("HexStr", str)
 def json(cls):
     """Decorator to add custom to_dict and to_json methods to a dataclass."""
     # Apply the dataclass_json decorator first to get the default behavior
-    cls = dataclass_json(letter_case=LetterCase.CAMEL, undefined=Undefined.RAISE)(cls)
+    cls = dataclass_json(
+        letter_case=LetterCase.CAMEL,
+        undefined=Undefined.RAISE)(cls)
 
     # Store original methods
     original_to_dict = cls.to_dict
