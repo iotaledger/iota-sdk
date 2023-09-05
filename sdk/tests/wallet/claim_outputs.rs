@@ -128,6 +128,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let token_supply = account_0.client().get_token_supply().await?;
     let rent_structure = account_0.client().get_rent_structure().await?;
+    // TODO more fitting value
     let expiration_slot = account_0.client().get_slot_index().await? + 86400;
 
     let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)

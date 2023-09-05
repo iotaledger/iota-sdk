@@ -144,7 +144,6 @@ impl<'a> ValidationContext<'a> {
             unlocks,
             essence_hash: TransactionEssence::from(essence.clone()).hash(),
             inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
-
             input_amount: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains: inputs
