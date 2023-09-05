@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_chrysalis_data()` method;
 - `PrivateKeySecretManager` and `SecretManager::PrivateKey`;
 - `SecretManager::from` impl for variants;
+- `Client` requests now obey a maximum concurrency using a request pool (`set via ClientBuilder::with_max_parallel_api_requests`);
 
 ### Fixed
 
