@@ -268,7 +268,7 @@ where
 
                 let nft_output = if possible_additional_inputs.is_empty() {
                     // Only update address and nft id if we have no additional inputs which can provide the storage
-                    // deposit for the remaining amount and possible NTs
+                    // deposit for the remaining amount and possible NFTs
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
@@ -295,14 +295,18 @@ where
             Some(new_native_tokens.clone().finish()?)
         };
 
-        // Get the required amount using a sufficient storage deposit
-        let mut required_amount = BasicOutputBuilder::new_with_amount(required_amount_for_nfts)
-            .with_native_tokens(option_native_token.into_iter().flatten())
-            .min_storage_deposit_amount(rent_structure, token_supply)?;
+        let mut required_amount = if possible_additional_inputs.is_empty() {
+            required_amount_for_nfts
+        } else {
+            // Get the required amount using a sufficient storage deposit
+            BasicOutputBuilder::new_with_amount(required_amount_for_nfts)
+                .with_native_tokens(option_native_token.into_iter().flatten())
+                .min_storage_deposit_amount(rent_structure, token_supply)?
+        };
 
         let mut additional_inputs = Vec::new();
         if available_amount < required_amount {
-            // Sort by amount so we use as less as possible
+            // Sort by amount so we use as little as possible
             possible_additional_inputs.sort_by_key(|o| o.output.amount());
 
             // add more inputs
