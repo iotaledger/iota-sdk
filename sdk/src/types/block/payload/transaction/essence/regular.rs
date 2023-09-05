@@ -10,7 +10,7 @@ use crate::types::{
     block::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
-        mana::{ManaAllotment, ManaAllotments},
+        mana::{verify_allotments_sum, ManaAllotment, ManaAllotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
@@ -149,6 +149,10 @@ impl RegularTransactionEssenceBuilder {
         }
 
         let allotments = ManaAllotments::from_set(self.allotments)?;
+
+        if let Some(protocol_parameters) = params.protocol_parameters() {
+            verify_allotments_sum(allotments.iter(), protocol_parameters)?;
+        }
 
         verify_payload(&self.payload)?;
 
@@ -424,7 +428,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{mana::allotment::dto::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -440,7 +444,7 @@ pub(crate) mod dto {
         pub inputs: Vec<Input>,
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
-        pub allotments: Vec<ManaAllotment>,
+        pub allotments: Vec<ManaAllotmentDto>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -454,8 +458,8 @@ pub(crate) mod dto {
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
                 inputs_commitment: value.inputs_commitment().to_string(),
-                outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
-                allotments: value.mana_allotments().to_vec(),
+                outputs: value.outputs().iter().map(Into::into).collect(),
+                allotments: value.mana_allotments().iter().map(Into::into).collect(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
@@ -479,13 +483,18 @@ pub(crate) mod dto {
                 .into_iter()
                 .map(|o| Output::try_from_dto_with_params(o, &params))
                 .collect::<Result<Vec<Output>, Error>>()?;
+            let mana_allotments = dto
+                .allotments
+                .into_iter()
+                .map(|o| ManaAllotment::try_from_dto_with_params(o, &params))
+                .collect::<Result<Vec<ManaAllotment>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
                 .with_creation_slot(dto.creation_slot)
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
                 .with_outputs(outputs)
-                .with_mana_allotments(dto.allotments);
+                .with_mana_allotments(mana_allotments);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
