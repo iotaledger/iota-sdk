@@ -1664,7 +1664,6 @@ dependencies = [
  "num_cpus",
  "once_cell",
  "packable",
- "pin-project",
  "prefix-hex",
  "primitive-types",
  "rand",

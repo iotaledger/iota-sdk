@@ -6,7 +6,7 @@
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
 use crate::{
-    client::{Client, Result},
+    client::{ClientInner, Result},
     types::{
         api::plugins::participation::{
             responses::{AddressOutputsResponse, EventsResponse, OutputStatusResponse},
@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-impl Client {
+impl ClientInner {
     /// RouteParticipationEvents is the route to list all events, returning their ID, the event name and status.
     pub async fn events(&self, event_type: Option<ParticipationEventType>) -> Result<EventsResponse> {
         let route = "api/participation/v1/events";

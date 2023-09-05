@@ -7,9 +7,9 @@ use core::str::FromStr;
 
 use reqwest::Method;
 
-use crate::client::{Client, Result};
+use crate::client::{ClientInner, Result};
 
-impl Client {
+impl ClientInner {
     /// Extension method which provides request methods for plugins.
     pub async fn call_plugin_route<T>(
         &self,
@@ -20,7 +20,7 @@ impl Client {
         request_object: Option<String>,
     ) -> Result<T>
     where
-        T: serde::de::DeserializeOwned + std::fmt::Debug + serde::Serialize + Send,
+        T: serde::de::DeserializeOwned + std::fmt::Debug + serde::Serialize,
     {
         let mut method = method.to_string();
         method.make_ascii_uppercase();

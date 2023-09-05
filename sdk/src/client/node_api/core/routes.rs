@@ -11,7 +11,7 @@ use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
         node_manager::node::{Node, NodeAuth},
-        Client, Error, Result,
+        Client, ClientInner, Error, Result,
     },
     types::{
         api::core::response::{
@@ -43,7 +43,7 @@ pub struct NodeInfoWrapper {
     pub url: String,
 }
 
-impl Client {
+impl ClientInner {
     // Node routes.
 
     /// Returns the health of the node.

@@ -20,12 +20,13 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
 use self::{http_client::HttpClient, node::Node};
-use super::Client;
+use super::ClientInner;
+#[cfg(not(target_family = "wasm"))]
+use crate::client::request_pool::RateLimitExt;
 use crate::{
     client::{
         error::{Error, Result},
         node_manager::builder::NodeManagerBuilder,
-        request_pool::RateLimitExt,
     },
     types::api::core::response::InfoResponse,
 };
@@ -62,8 +63,8 @@ impl Debug for NodeManager {
     }
 }
 
-impl Client {
-    pub(crate) async fn get_request<T: DeserializeOwned + Debug + Serialize + Send>(
+impl ClientInner {
+    pub(crate) async fn get_request<T: DeserializeOwned + Debug + Serialize>(
         &self,
         path: &str,
         query: Option<&str>,
@@ -73,12 +74,10 @@ impl Client {
     ) -> Result<T> {
         #[cfg(not(target_family = "wasm"))]
         {
-            let path = path.to_owned();
-            let query = query.map(ToOwned::to_owned);
             self.node_manager
                 .read()
                 .await
-                .get_request(&path, query.as_deref(), timeout, need_quorum, prefer_permanode)
+                .get_request(path, query, timeout, need_quorum, prefer_permanode)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -86,7 +85,7 @@ impl Client {
         self.node_manager
             .read()
             .await
-            .get_request(&path, query.as_deref(), timeout, need_quorum, prefer_permanode)
+            .get_request(path, query, timeout, need_quorum, prefer_permanode)
             .await
     }
 
@@ -98,12 +97,10 @@ impl Client {
     ) -> Result<Vec<u8>> {
         #[cfg(not(target_family = "wasm"))]
         {
-            let path = path.to_owned();
-            let query = query.map(ToOwned::to_owned);
             self.node_manager
                 .read()
                 .await
-                .get_request_bytes(&path, query.as_deref(), timeout)
+                .get_request_bytes(path, query, timeout)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -111,11 +108,11 @@ impl Client {
         self.node_manager
             .read()
             .await
-            .get_request_bytes(&path, query.as_deref(), timeout)
+            .get_request_bytes(path, query, timeout)
             .await
     }
 
-    pub(crate) async fn post_request_bytes<T: DeserializeOwned + Send>(
+    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,
@@ -124,12 +121,10 @@ impl Client {
     ) -> Result<T> {
         #[cfg(not(target_family = "wasm"))]
         {
-            let path = path.to_owned();
-            let body = body.to_owned();
             self.node_manager
                 .read()
                 .await
-                .post_request_bytes(&path, timeout, &body, local_pow)
+                .post_request_bytes(path, timeout, body, local_pow)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -137,11 +132,11 @@ impl Client {
         self.node_manager
             .read()
             .await
-            .post_request_bytes(&path, timeout, &body, local_pow)
+            .post_request_bytes(path, timeout, body, local_pow)
             .await
     }
 
-    pub(crate) async fn post_request_json<T: DeserializeOwned + Send>(
+    pub(crate) async fn post_request_json<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,
@@ -150,11 +145,10 @@ impl Client {
     ) -> Result<T> {
         #[cfg(not(target_family = "wasm"))]
         {
-            let path = path.to_owned();
             self.node_manager
                 .read()
                 .await
-                .post_request_json(&path, timeout, json, local_pow)
+                .post_request_json(path, timeout, json, local_pow)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -162,7 +156,7 @@ impl Client {
         self.node_manager
             .read()
             .await
-            .post_request_json(&path, timeout, json, local_pow)
+            .post_request_json(path, timeout, json, local_pow)
             .await
     }
 }

@@ -104,7 +104,7 @@ impl Client {
     }
 }
 
-impl Client {
+impl ClientInner {
     /// Gets the network related information such as network_id and min_pow_score
     /// and if it's the default one, sync it first and set the NetworkInfo.
     pub async fn get_network_info(&self) -> Result<NetworkInfo> {
