@@ -259,9 +259,8 @@ impl FoundryOutputBuilder {
 }
 
 impl Rent for FoundryOutputBuilder {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -281,7 +280,7 @@ impl Rent for FoundryOutputBuilder {
             .iter_field(&self.features)
             // Immutable Features
             .data_field::<u8>()
-            .iter_field(&self.immutable_features);
+            .iter_field(&self.immutable_features)
     }
 }
 
@@ -501,9 +500,8 @@ impl FoundryOutput {
 }
 
 impl Rent for FoundryOutput {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -519,7 +517,7 @@ impl Rent for FoundryOutput {
             // Features
             .packable_data_field(&self.features)
             // Immutable Features
-            .packable_data_field(&self.immutable_features);
+            .packable_data_field(&self.immutable_features)
     }
 }
 

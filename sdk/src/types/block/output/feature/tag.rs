@@ -23,12 +23,12 @@ pub struct TagFeature(
 );
 
 impl Rent for TagFeature {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         // Feature Type
         builder
             .data_field::<u8>()
             // Tag
-            .packable_data_field(&self.0);
+            .packable_data_field(&self.0)
     }
 }
 

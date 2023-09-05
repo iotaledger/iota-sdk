@@ -64,8 +64,8 @@ impl Ord for NativeToken {
 }
 
 impl Rent for NativeToken {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        builder.data_field::<TokenId>().data_field::<U256>();
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        builder.data_field::<TokenId>().data_field::<U256>()
     }
 }
 

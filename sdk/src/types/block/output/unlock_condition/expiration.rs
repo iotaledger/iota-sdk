@@ -61,14 +61,14 @@ impl ExpirationUnlockCondition {
 }
 
 impl Rent for ExpirationUnlockCondition {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Kind
             .data_field::<u8>()
             // Return address
             .packable_data_field(&self.return_address)
             // Slot index
-            .data_field::<SlotIndex>();
+            .data_field::<SlotIndex>()
     }
 }
 

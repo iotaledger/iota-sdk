@@ -23,12 +23,12 @@ pub struct MetadataFeature(
 );
 
 impl Rent for MetadataFeature {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         // Feature Type
         builder
             .data_field::<u8>()
             // Data
-            .packable_data_field(&self.0);
+            .packable_data_field(&self.0)
     }
 }
 

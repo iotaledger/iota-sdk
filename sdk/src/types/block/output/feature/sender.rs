@@ -30,12 +30,12 @@ impl SenderFeature {
 }
 
 impl Rent for SenderFeature {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Feature Type
             .data_field::<u8>()
             // Address
-            .packable_data_field(&self.0);
+            .packable_data_field(&self.0)
     }
 }
 

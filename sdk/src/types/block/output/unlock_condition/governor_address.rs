@@ -32,12 +32,12 @@ impl GovernorAddressUnlockCondition {
 }
 
 impl Rent for GovernorAddressUnlockCondition {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Kind
             .data_field::<u8>()
             // Address
-            .packable_data_field(&self.0);
+            .packable_data_field(&self.0)
     }
 }
 

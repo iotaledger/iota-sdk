@@ -30,12 +30,12 @@ impl ImmutableAccountAddressUnlockCondition {
 }
 
 impl Rent for ImmutableAccountAddressUnlockCondition {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Kind
             .data_field::<u8>()
             // Address
-            .data_field::<AccountAddress>();
+            .data_field::<AccountAddress>()
     }
 }
 

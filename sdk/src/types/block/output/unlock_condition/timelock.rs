@@ -36,12 +36,12 @@ impl TimelockUnlockCondition {
 }
 
 impl Rent for TimelockUnlockCondition {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Kind
             .data_field::<u8>()
             // Slot index
-            .data_field::<SlotIndex>();
+            .data_field::<SlotIndex>()
     }
 }
 

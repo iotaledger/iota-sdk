@@ -461,7 +461,7 @@ impl Packable for Output {
 }
 
 impl Output {
-    pub(crate) fn byte_offset(builder: &mut RentBuilder) {
+    pub(crate) const fn byte_offset(builder: RentBuilder) -> RentBuilder {
         builder
             // The ID of the output.
             .key_field::<OutputId>()
@@ -470,12 +470,12 @@ impl Output {
             // The index of the slot in which the transaction that created it was booked.
             .data_field::<SlotIndex>()
             // The index of the slot in which the transaction was created.
-            .data_field::<SlotIndex>();
+            .data_field::<SlotIndex>()
     }
 }
 
 impl Rent for Output {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         match self {
             Self::Basic(o) => o.build_weighted_bytes(builder),
             Self::Account(o) => o.build_weighted_bytes(builder),

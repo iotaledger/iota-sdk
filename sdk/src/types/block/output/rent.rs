@@ -112,32 +112,32 @@ impl RentStructure {
     }
 
     /// Returns the byte cost of the [`RentStructure`].
-    pub fn byte_cost(&self) -> u32 {
+    pub const fn byte_cost(&self) -> u32 {
         self.v_byte_cost
     }
 
     /// Returns the key byte factor of the [`RentStructure`].
-    pub fn byte_factor_key(&self) -> u8 {
+    pub const fn byte_factor_key(&self) -> u8 {
         self.v_byte_factor_key
     }
 
     /// Returns the data byte factor of the [`RentStructure`].
-    pub fn byte_factor_data(&self) -> u8 {
+    pub const fn byte_factor_data(&self) -> u8 {
         self.v_byte_factor_data
     }
 
     /// Returns the delegation byte factor of the [`RentStructure`].
-    pub fn byte_factor_delegation(&self) -> u8 {
+    pub const fn byte_factor_delegation(&self) -> u8 {
         self.v_byte_factor_delegation
     }
 
     /// Returns the staking byte factor of the [`RentStructure`].
-    pub fn byte_factor_staking(&self) -> u8 {
+    pub const fn byte_factor_staking(&self) -> u8 {
         self.v_byte_factor_staking
     }
 
     /// Returns the block issuer key byte factor of the [`RentStructure`].
-    pub fn byte_factor_block_issuer_key(&self) -> u8 {
+    pub const fn byte_factor_block_issuer_key(&self) -> u8 {
         self.v_byte_factor_block_issuer_key
     }
 }
@@ -180,12 +180,10 @@ impl Packable for RentStructure {
 /// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
 pub trait Rent {
     /// Different fields in a type lead to different storage requirements for the ledger state.
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder);
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder;
 
     fn weighted_bytes(&self, config: RentStructure) -> u64 {
-        let mut builder = RentBuilder::new(config);
-        self.build_weighted_bytes(&mut builder);
-        builder.bytes
+        self.build_weighted_bytes(RentBuilder::new(config)).bytes
     }
 
     /// Computes the rent cost of this instance given a [`RentStructure`].
@@ -200,74 +198,77 @@ pub struct RentBuilder {
 }
 
 impl RentBuilder {
-    pub fn new(config: RentStructure) -> Self {
+    pub const fn new(config: RentStructure) -> Self {
         Self { config, bytes: 0 }
     }
 
-    pub fn bytes(&mut self, bytes: u64) -> &mut Self {
+    pub const fn bytes(mut self, bytes: u64) -> Self {
         self.bytes += bytes;
         self
     }
 
-    pub fn key_field<T>(&mut self) -> &mut Self {
+    pub const fn key_field<T>(mut self) -> Self {
         self.bytes += size_of::<T>() as u64 * self.config.byte_factor_key() as u64;
         self
     }
 
-    pub fn data_field<T>(&mut self) -> &mut Self {
+    pub const fn data_field<T>(mut self) -> Self {
         self.bytes += size_of::<T>() as u64 * self.config.byte_factor_data() as u64;
         self
     }
 
-    pub fn delegation_field<T>(&mut self) -> &mut Self {
+    pub const fn delegation_field<T>(mut self) -> Self {
         self.bytes += size_of::<T>() as u64 * self.config.byte_factor_delegation() as u64;
         self
     }
 
-    pub fn staking_field<T>(&mut self) -> &mut Self {
+    pub const fn staking_field<T>(mut self) -> Self {
         self.bytes += size_of::<T>() as u64 * self.config.byte_factor_staking() as u64;
         self
     }
 
-    pub fn block_issuer_key_field<T>(&mut self) -> &mut Self {
+    pub const fn block_issuer_key_field<T>(mut self) -> Self {
         self.bytes += size_of::<T>() as u64 * self.config.byte_factor_block_issuer_key() as u64;
         self
     }
 
-    pub fn weighted_field<T: Rent>(&mut self, field: T) -> &mut Self {
-        field.build_weighted_bytes(self);
-        self
+    pub fn weighted_field<T: Rent>(self, field: T) -> Self {
+        field.build_weighted_bytes(self)
     }
 
-    pub fn iter_field<'a, T: 'a + Rent>(&mut self, field: impl IntoIterator<Item = &'a T>) -> &mut Self {
+    pub fn iter_field<'a, T: 'a + Rent>(mut self, field: impl IntoIterator<Item = &'a T>) -> Self {
         for elem in field {
-            elem.build_weighted_bytes(self);
+            self = elem.build_weighted_bytes(self);
         }
         self
     }
 
-    pub fn packable_key_field<T: Packable>(&mut self, field: &T) -> &mut Self {
+    pub fn packable_key_field<T: Packable>(mut self, field: &T) -> Self {
         self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_key() as u64;
         self
     }
 
-    pub fn packable_data_field<T: Packable>(&mut self, field: &T) -> &mut Self {
+    pub fn packable_data_field<T: Packable>(mut self, field: &T) -> Self {
         self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_data() as u64;
         self
     }
 
-    pub fn packable_delegation_field<T: Packable>(&mut self, field: &T) -> &mut Self {
+    pub fn packable_delegation_field<T: Packable>(mut self, field: &T) -> Self {
         self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_delegation() as u64;
         self
     }
 
-    pub fn packable_staking_field<T: Packable>(&mut self, field: &T) -> &mut Self {
+    pub fn packable_staking_field<T: Packable>(mut self, field: &T) -> Self {
         self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_staking() as u64;
         self
     }
 
-    pub fn packable_block_issuer_key_field<T: Packable>(&mut self, field: &T) -> &mut Self {
+    pub fn packable_block_issuer_key_field<T: Packable>(mut self, field: &T) -> Self {
         self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_staking() as u64;
         self
+    }
+
+    pub const fn finish(self) -> u64 {
+        self.bytes
     }
 }

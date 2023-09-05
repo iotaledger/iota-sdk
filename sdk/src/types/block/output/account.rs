@@ -337,9 +337,8 @@ impl From<&AccountOutput> for AccountOutputBuilder {
 }
 
 impl Rent for AccountOutputBuilder {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -364,7 +363,7 @@ impl Rent for AccountOutputBuilder {
             .iter_field(&self.features)
             // Immutable Features
             .data_field::<u8>()
-            .iter_field(&self.features);
+            .iter_field(&self.features)
     }
 }
 
@@ -652,9 +651,8 @@ impl StateTransitionVerifier for AccountOutput {
 }
 
 impl Rent for AccountOutput {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -674,7 +672,7 @@ impl Rent for AccountOutput {
             // Features
             .packable_data_field(&self.features)
             // Immutable Features
-            .packable_data_field(&self.immutable_features);
+            .packable_data_field(&self.immutable_features)
     }
 }
 

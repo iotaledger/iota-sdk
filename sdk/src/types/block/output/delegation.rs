@@ -218,9 +218,8 @@ impl DelegationOutputBuilder {
 }
 
 impl Rent for DelegationOutputBuilder {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .delegation_field::<u8>()
             // Amount
@@ -237,7 +236,7 @@ impl Rent for DelegationOutputBuilder {
             .delegation_field::<EpochIndex>()
             // Unlock Conditions
             .data_field::<u8>()
-            .iter_field(&self.unlock_conditions);
+            .iter_field(&self.unlock_conditions)
     }
 }
 
@@ -372,9 +371,8 @@ impl DelegationOutput {
 }
 
 impl Rent for DelegationOutput {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .delegation_field::<u8>()
             // Amount
@@ -390,7 +388,7 @@ impl Rent for DelegationOutput {
             // End Epoch
             .delegation_field::<EpochIndex>()
             // Unlock Conditions
-            .packable_data_field(&self.unlock_conditions);
+            .packable_data_field(&self.unlock_conditions)
     }
 }
 

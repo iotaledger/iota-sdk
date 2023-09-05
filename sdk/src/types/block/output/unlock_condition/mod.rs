@@ -30,7 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use super::Rent;
+use super::{Rent, RentBuilder};
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
 
 ///
@@ -64,7 +64,7 @@ impl Ord for UnlockCondition {
 }
 
 impl Rent for UnlockCondition {
-    fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         match self {
             UnlockCondition::Address(uc) => uc.build_weighted_bytes(builder),
             UnlockCondition::StorageDepositReturn(uc) => uc.build_weighted_bytes(builder),

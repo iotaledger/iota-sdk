@@ -242,9 +242,8 @@ impl NftOutputBuilder {
 }
 
 impl Rent for NftOutputBuilder {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -264,7 +263,7 @@ impl Rent for NftOutputBuilder {
             .iter_field(&self.features)
             // Immutable Features
             .data_field::<u8>()
-            .iter_field(&self.immutable_features);
+            .iter_field(&self.immutable_features)
     }
 }
 
@@ -428,9 +427,8 @@ impl NftOutput {
 }
 
 impl Rent for NftOutput {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -446,7 +444,7 @@ impl Rent for NftOutput {
             // Features
             .packable_data_field(&self.features)
             // Immutable Features
-            .packable_data_field(&self.immutable_features);
+            .packable_data_field(&self.immutable_features)
     }
 }
 

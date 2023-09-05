@@ -215,6 +215,7 @@ impl BasicOutputBuilder {
     pub fn min_storage_deposit_amount(&self, rent_structure: RentStructure, token_supply: u64) -> Result<u64, Error> {
         Ok(self
             .clone()
+            // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
             .with_sufficient_storage_deposit(Ed25519Address::null(), rent_structure, token_supply)?
             .amount())
     }
@@ -273,9 +274,8 @@ impl BasicOutputBuilder {
 }
 
 impl Rent for BasicOutputBuilder {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -290,7 +290,7 @@ impl Rent for BasicOutputBuilder {
             .iter_field(&self.unlock_conditions)
             // Features
             .data_field::<u8>()
-            .iter_field(&self.features);
+            .iter_field(&self.features)
     }
 }
 
@@ -417,9 +417,8 @@ impl BasicOutput {
 }
 
 impl Rent for BasicOutput {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
-        Output::byte_offset(builder);
-        builder
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+        Output::byte_offset(builder)
             // Kind
             .data_field::<u8>()
             // Amount
@@ -431,7 +430,7 @@ impl Rent for BasicOutput {
             // Unlock Conditions
             .packable_data_field(&self.unlock_conditions)
             // Features
-            .packable_data_field(&self.features);
+            .packable_data_field(&self.features)
     }
 }
 

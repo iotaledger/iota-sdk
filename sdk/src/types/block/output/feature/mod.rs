@@ -20,7 +20,7 @@ pub use self::{
     staking::StakingFeature, tag::TagFeature,
 };
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
-use super::Rent;
+use super::{Rent, RentBuilder};
 use crate::types::block::{create_bitflags, Error};
 
 ///
@@ -62,7 +62,7 @@ impl Ord for Feature {
 }
 
 impl Rent for Feature {
-    fn build_weighted_bytes(&self, builder: &mut super::rent::RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         match self {
             Self::Sender(f) => f.build_weighted_bytes(builder),
             Self::Issuer(f) => f.build_weighted_bytes(builder),

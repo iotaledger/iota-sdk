@@ -60,7 +60,7 @@ impl StakingFeature {
 }
 
 impl Rent for StakingFeature {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Feature Type
             .staking_field::<u8>()
@@ -71,7 +71,7 @@ impl Rent for StakingFeature {
             // Start Epoch
             .staking_field::<EpochIndex>()
             // End Epoch
-            .staking_field::<EpochIndex>();
+            .staking_field::<EpochIndex>()
     }
 }
 #[cfg(feature = "serde")]

@@ -52,14 +52,14 @@ impl StorageDepositReturnUnlockCondition {
 }
 
 impl Rent for StorageDepositReturnUnlockCondition {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Kind
             .data_field::<u8>()
             // Return address
             .packable_data_field(&self.return_address)
             // Return amount
-            .data_field::<u64>();
+            .data_field::<u64>()
     }
 }
 

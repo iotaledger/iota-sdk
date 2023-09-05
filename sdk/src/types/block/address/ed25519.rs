@@ -21,12 +21,12 @@ impl Ed25519Address {
 
     /// Creates a new [`Ed25519Address`].
     #[inline(always)]
-    pub fn new(address: [u8; Self::LENGTH]) -> Self {
-        Self::from(address)
+    pub const fn new(address: [u8; Self::LENGTH]) -> Self {
+        Self(address)
     }
 
-    pub(crate) fn null() -> Self {
-        Self::new([0; Self::LENGTH])
+    pub(crate) const fn null() -> Self {
+        Self([0; Self::LENGTH])
     }
 }
 

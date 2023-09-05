@@ -50,14 +50,14 @@ impl BlockIssuerFeature {
 }
 
 impl Rent for BlockIssuerFeature {
-    fn build_weighted_bytes(&self, builder: &mut RentBuilder) {
+    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
         builder
             // Feature Type
             .data_field::<u8>()
             // Expiry Slot
             .data_field::<SlotIndex>()
             // Public Keys
-            .packable_block_issuer_key_field(&self.public_keys);
+            .packable_block_issuer_key_field(&self.public_keys)
     }
 }
 
