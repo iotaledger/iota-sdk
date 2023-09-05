@@ -33,9 +33,9 @@ transaction = account.prepare_burn_native_token(
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-blockId = account.reissue_transaction_until_included(
+block_id = account.reissue_transaction_until_included(
     transaction.transaction_id)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = account.sync()
 available_balance = int(
