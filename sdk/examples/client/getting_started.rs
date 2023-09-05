@@ -4,7 +4,7 @@
 //! This examples shows how to get the node info.
 //!
 //! ```sh
-//! cargo run --release --example getting_started
+//! cargo run --release --example client_getting_started
 //! ```
 
 use iota_sdk::client::{Client, Result};
