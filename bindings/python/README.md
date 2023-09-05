@@ -76,26 +76,7 @@ that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) usin
 [`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
 to safely store a seed derived from a mnemonic, and then print the account's information.
 
-```python
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions
-
-# This example creates a new database and account
-
-client_options = ClientOptions(nodes=['https://api.testnet.shimmer.network'])
-
-secret_manager = StrongholdSecretManager(
-    "wallet.stronghold", "some_hopefully_secure_password")
-
-wallet = Wallet('./alice-walletdb', client_options,
-                CoinType.SHIMMER, secret_manager)
-
-# Store the mnemonic in the Stronghold snapshot. This only needs to be done once
-account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +
-                                "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
-
-account = wallet.create_account('Alice')
-print(account.get_metadata())
-```
+[examples/wallet/getting_started.py](examples/wallet/getting_started.py)
 
 ## Examples
 
