@@ -94,13 +94,13 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::utils::serde::cow_boxed_slice_prefix;
+    use crate::utils::serde::cow_boxed_slice_prefix_hex_bytes;
 
     #[derive(Serialize, Deserialize)]
     struct MetadataFeatureDto<'a> {
         #[serde(rename = "type")]
         kind: u8,
-        #[serde(with = "cow_boxed_slice_prefix")]
+        #[serde(with = "cow_boxed_slice_prefix_hex_bytes")]
         data: Cow<'a, BoxedSlicePrefix<u8, MetadataFeatureLength>>,
     }
 

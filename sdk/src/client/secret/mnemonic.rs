@@ -124,9 +124,8 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
     ) -> Result<Unlocks, Self::Error> {
-        super::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+        super::default_sign_transaction_essence(self, prepared_transaction_data).await
     }
 
     async fn sign_transaction(

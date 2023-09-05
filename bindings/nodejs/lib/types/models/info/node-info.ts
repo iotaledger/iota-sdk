@@ -3,7 +3,7 @@
 
 import type { INodeInfoBaseToken } from './node-info-base-token';
 import type { INodeInfoMetrics } from './node-info-metrics';
-import type { INodeInfoProtocol } from './node-info-protocol';
+import type { ProtocolInfo } from './node-info-protocol';
 import type { INodeInfoStatus } from './node-info-status';
 /**
  * Response from the /info endpoint.
@@ -14,7 +14,7 @@ export interface INodeInfo {
      */
     name: string;
     /**
-     * The version of node.
+     * The semantic version of the node.
      */
     version: string;
     /**
@@ -26,13 +26,9 @@ export interface INodeInfo {
      */
     metrics: INodeInfoMetrics;
     /**
-     * The supported protocol versions.
+     * The protocol parameters.
      */
-    supportedProtocolVersions: number[];
-    /**
-     * The protocol info of the node.
-     */
-    protocol: INodeInfoProtocol;
+    protocolParameters: ProtocolInfo[];
     /**
      * The base token info of the node.
      */

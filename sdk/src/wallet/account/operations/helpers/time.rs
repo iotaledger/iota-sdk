@@ -5,6 +5,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{AccountTransition, Output},
+        slot::SlotIndex,
     },
     wallet::account::types::{AddressWithUnspentOutputs, OutputData},
 };
@@ -17,18 +18,18 @@ pub(crate) fn can_output_be_unlocked_now(
     account_addresses: &[AddressWithUnspentOutputs],
     account_and_nft_addresses: &[Address],
     output_data: &OutputData,
-    current_time: u32,
+    slot_index: SlotIndex,
     account_transition: Option<AccountTransition>,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
-        if unlock_conditions.is_time_locked(current_time) {
+        if unlock_conditions.is_time_locked(slot_index) {
             return Ok(false);
         }
     }
 
     let (required_unlock_address, _unlocked_account_or_nft_address) = output_data
         .output
-        .required_and_unlocked_address(current_time, &output_data.output_id, account_transition)?;
+        .required_and_unlocked_address(slot_index, &output_data.output_id, account_transition)?;
 
     Ok(account_addresses
         .iter()
@@ -43,17 +44,17 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     // be related to this output
     account_addresses: &[AddressWithUnspentOutputs],
     output: &Output,
-    current_time: u32,
+    slot_index: SlotIndex,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
-        if unlock_conditions.is_time_locked(current_time) {
+        if unlock_conditions.is_time_locked(slot_index) {
             return false;
         }
 
         // If there is an expiration unlock condition, we can only unlock it forever from now on, if it's expired and
         // the return address belongs to the account
         if let Some(expiration) = unlock_conditions.expiration() {
-            if let Some(return_address) = expiration.return_address_expired(current_time) {
+            if let Some(return_address) = expiration.return_address_expired(slot_index) {
                 if !account_addresses.iter().any(|a| a.address.inner == *return_address) {
                     return false;
                 };

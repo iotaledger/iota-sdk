@@ -105,7 +105,7 @@ async fn sign_account_state_transition() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(0))
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -115,9 +115,7 @@ async fn sign_account_state_transition() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let current_time = 100;
-
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -197,7 +195,7 @@ async fn sign_account_governance_transition() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(0))
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -207,9 +205,7 @@ async fn sign_account_governance_transition() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let current_time = 100;
-
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -329,7 +325,7 @@ async fn account_reference_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(0))
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -351,9 +347,7 @@ async fn account_reference_unlocks() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let current_time = 100;
-
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

@@ -33,7 +33,6 @@ use crate::{
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
-    utils::unix_timestamp_now,
 };
 
 /// Ledger nano errors.
@@ -241,7 +240,6 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,
-        time: Option<u32>,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
@@ -398,7 +396,7 @@ impl SecretManage for LedgerSecretManager {
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
         // Account/Nft/Reference unlocks
         if blind_signing {
-            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), time)?;
+            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter())?;
         }
 
         Ok(Unlocks::new(unlocks)?)
@@ -515,12 +513,11 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
-    time: Option<u32>,
 ) -> Result<Vec<Unlock>, Error> {
+    let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
+    let slot_index = essence.creation_slot();
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
-
-    let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
 
     let mut merged_unlocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
@@ -530,10 +527,11 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
-        let (input_address, _) =
-            input
-                .output
-                .required_and_unlocked_address(time, input.output_metadata.output_id(), account_transition)?;
+        let (input_address, _) = input.output.required_and_unlocked_address(
+            slot_index,
+            input.output_metadata.output_id(),
+            account_transition,
+        )?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {

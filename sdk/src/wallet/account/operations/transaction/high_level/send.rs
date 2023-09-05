@@ -12,12 +12,13 @@ use crate::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
             BasicOutputBuilder, RentCost,
         },
+        slot::SlotIndex,
         ConvertTo,
     },
     utils::serde::string,
     wallet::{
         account::{
-            constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
+            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
         },
         Error,
     },
@@ -38,11 +39,11 @@ pub struct SendParams {
     /// default to the first address of the account.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+    /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
     /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
     /// expiration is needed but not provided, it will default to one day.
     #[getset(get = "pub")]
-    expiration: Option<u32>,
+    expiration: Option<SlotIndex>,
 }
 
 impl SendParams {
@@ -68,7 +69,7 @@ impl SendParams {
         self
     }
 
-    pub fn with_expiration(mut self, expiration: impl Into<Option<u32>>) -> Self {
+    pub fn with_expiration(mut self, expiration: impl Into<Option<SlotIndex>>) -> Self {
         self.expiration = expiration.into();
         self
     }
@@ -142,7 +143,7 @@ where
         let account_addresses = self.addresses().await?;
         let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
-        let local_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
 
         let mut outputs = Vec::new();
         for SendParams {
@@ -173,13 +174,14 @@ where
             if amount >= output.rent_cost(rent_structure) {
                 outputs.push(output.finish_output(token_supply)?)
             } else {
-                let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-                    local_time + expiration_time
-                });
+                let expiration_slot_index = expiration
+                    .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
+                        slot_index + expiration_slot_index
+                    });
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let output = output
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .with_sufficient_storage_deposit(return_address, rent_structure, token_supply)?
                     .finish_output(token_supply)?;
 

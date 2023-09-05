@@ -15,6 +15,7 @@ use iota_sdk::{
                 Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
+            slot::SlotIndex,
             ConvertTo,
         },
     },
@@ -163,11 +164,11 @@ pub enum AccountCommand {
         /// default to the first address of the account.
         #[arg(long)]
         return_address: Option<Bech32Address>,
-        /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
-        /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
-        /// expiration is needed but not provided, it will default to one day.
+        /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by
+        /// the receiver already. The expiration will only be used if one is necessary given the provided
+        /// amount. If an expiration is needed but not provided, it will default to one day.
         #[arg(long)]
-        expiration: Option<humantime::Duration>,
+        expiration: Option<SlotIndex>,
         /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
         /// conditions if necessary. This flag is implied by the existence of a return address or expiration.
         #[arg(long, default_value_t = false)]
@@ -382,9 +383,16 @@ pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
             println_log_info!("  - base coin amount: {}", amount);
 
             if let Some(expiration) = unlock_conditions.expiration() {
-                let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
-                let time_left = expiration.timestamp() - current_time;
-                println_log_info!("  - expires in: {} seconds", time_left);
+                let slot_index = account.client().get_slot_index().await?;
+
+                if *expiration.slot_index() > *slot_index {
+                    println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
+                } else {
+                    println_log_info!(
+                        "  - expired {} slot indices ago",
+                        *slot_index - *expiration.slot_index()
+                    );
+                }
             }
         }
     }
@@ -640,7 +648,7 @@ pub async fn send_command(
     address: impl ConvertTo<Bech32Address>,
     amount: u64,
     return_address: Option<impl ConvertTo<Bech32Address>>,
-    expiration: Option<u32>,
+    expiration: Option<SlotIndex>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let params = [SendParams::new(amount, address)?
@@ -876,7 +884,7 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     }
 
     let addresses = account.addresses_with_unspent_outputs().await?;
-    let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
+    let slot_index = account.client().get_slot_index().await?;
 
     if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
         (a.key_index(), a.internal())
@@ -885,10 +893,9 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
         for output_id in addresses[index].output_ids() {
             if let Some(output_data) = account.get_output(output_id).await {
                 // Output might be associated with the address, but can't unlocked by it, so we check that here
-                let (required_address, _) =
-                    output_data
-                        .output
-                        .required_and_unlocked_address(current_time, output_id, None)?;
+                let (required_address, _) = output_data
+                    .output
+                    .required_and_unlocked_address(slot_index, output_id, None)?;
                 if *address.address().as_ref() == required_address {
                     let unlock_conditions = output_data
                         .output

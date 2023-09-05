@@ -98,7 +98,7 @@ async fn balance_expiration() -> Result<()> {
     let account_1 = wallet.create_account().finish().await?;
     let account_2 = wallet.create_account().finish().await?;
 
-    let seconds_until_expired = 20;
+    let slots_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
@@ -108,8 +108,7 @@ async fn balance_expiration() -> Result<()> {
             )),
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                 *account_2.addresses().await?[0].address().as_ref(),
-                // Current time + 20s
-                account_0.client().get_time_checked().await? + seconds_until_expired,
+                account_0.client().get_slot_index().await? + slots_until_expired,
             )?),
         ])
         .with_features([SenderFeature::new(*account_0.addresses().await?[0].address().as_ref())])
@@ -142,7 +141,8 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 0);
 
     // Wait until expired
-    tokio::time::sleep(std::time::Duration::from_secs(seconds_until_expired.into())).await;
+    // TODO wait for slots, not seconds
+    tokio::time::sleep(std::time::Duration::from_secs(slots_until_expired)).await;
 
     // Account 1 balance after expiration
     let balance = account_1.sync(None).await?;

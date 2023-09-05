@@ -67,8 +67,8 @@ pub use self::{
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-use super::{protocol::ProtocolParameters, slot::SlotIndex, BlockId};
-use crate::types::block::{address::Address, semantic::ValidationContext, Error};
+use super::{protocol::ProtocolParameters, BlockId};
+use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -307,15 +307,13 @@ impl Output {
     /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_and_unlocked_address(
         &self,
-        current_time: u32,
+        slot_index: SlotIndex,
         output_id: &OutputId,
         account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
             Self::Account(output) => {
@@ -331,15 +329,11 @@ impl Output {
             }
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
             Self::Delegation(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
         }
