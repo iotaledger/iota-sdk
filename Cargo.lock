@@ -1586,7 +1586,6 @@ dependencies = [
  "hmac",
  "iterator-sorted",
  "k256",
- "num-traits",
  "pbkdf2",
  "rand",
  "scrypt",
