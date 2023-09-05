@@ -41,11 +41,11 @@ export * from './wallet';
 export * from './logger';
 
 export type Result = {
-    // "ok" | "error" | "panic"
+    // "error" | "panic" or other binding method response name
     type: string;
     payload: {
         // All method names from types/bridge/__name__.name
-        // Or all variants of rust Error type
+        // Or all variants of rust sdk Error type
         type: string;
         // If "ok", json payload
         payload?: string;
@@ -59,7 +59,6 @@ function errorHandle(error: any): Error {
         // neon or other bindings lib related error
         throw error;
     } else if (error instanceof Error) {
-        // rust Err(Error)
         let err: Result = JSON.parse(error.message);
         if (err.type == 'panic') {
             return Error(err.payload.toString());
@@ -67,9 +66,10 @@ function errorHandle(error: any): Error {
             return Error(err.payload.error);
         }
     } else {
-        // Something bad happened!
-        return Error(error);
+        // Something bad happened! Make sure we dont double parse
+        return TypeError(error);
     }
 }
 
 export { errorHandle };
+

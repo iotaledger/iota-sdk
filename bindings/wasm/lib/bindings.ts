@@ -9,7 +9,8 @@ import { __UtilsMethods__ } from './utils';
 // Import needs to be in a single line, otherwise it breaks
 // prettier-ignore
 // @ts-ignore: path is set to match runtime transpiled js path when bundled.
-import { initLogger, createClient, destroyClient, createSecretManager, createWallet, callClientMethodAsync, callSecretManagerMethodAsync, callUtilsMethodRust, callWalletMethodAsync, destroyWallet, listenWalletAsync, getClientFromWallet, getSecretManagerFromWallet, listenMqtt, migrateStrongholdSnapshotV2ToV3 } from '../wasm/iota_sdk_wasm';
+import { initLogger, createClient, destroyClient, createSecretManager, createWallet, callClientMethodAsync, callSecretManagerMethodAsync, callUtilsMethodRust, callWalletMethodAsync, destroyWallet, listenWalletAsync, getClientFromWallet, getSecretManagerFromWallet as getSecretManagerFromWalletRust, listenMqtt, migrateStrongholdSnapshotV2ToV3 } from '../wasm/iota_sdk_wasm';
+import { SecretManagerMethodHandler, WalletMethodHandler } from '.';
 
 const callUtilsMethod = (method: __UtilsMethods__): any => {
     const response = JSON.parse(callUtilsMethodRust(JSON.stringify(method)));
@@ -19,6 +20,13 @@ const callUtilsMethod = (method: __UtilsMethods__): any => {
         return response.payload;
     }
 };
+
+const getSecretManagerFromWallet = (method: WalletMethodHandler): SecretManagerMethodHandler => {
+    // TODO figure out why this one is extensible but client isnt
+    let res = getSecretManagerFromWalletRust(method)
+    Object.preventExtensions(res);
+    return res;
+}
 
 export {
     initLogger,

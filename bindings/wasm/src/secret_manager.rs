@@ -20,6 +20,15 @@ pub struct SecretManagerMethodHandler {
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
 }
 
+impl SecretManagerMethodHandler {
+    pub(crate) fn new(secret_manager: Arc<RwLock<SecretManager>>) -> Self {
+        Self {
+            secret_manager,
+        }
+    }
+}
+
+
 /// Creates a method handler with the given secret_manager options.
 #[wasm_bindgen(js_name = createSecretManager)]
 #[allow(non_snake_case)]

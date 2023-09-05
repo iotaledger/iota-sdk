@@ -91,7 +91,7 @@ pub fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<Secret
     let wallet = wallet_pre!(method_handler)?;
     let mngr = wallet.get_secret_manager().clone();
 
-    Ok(SecretManagerMethodHandler { secret_manager: mngr })
+    Ok(SecretManagerMethodHandler::new(mngr))
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.
