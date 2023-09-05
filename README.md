@@ -123,22 +123,7 @@ the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the no
 calling [`Client.get_info()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html#method.get_info),
 and then print the node's information.
 
-```rust
-use iota_sdk::client::{Client, Result};
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    let client = Client::builder()
-        .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
-        .finish()
-        .await?;
-
-    let info = client.get_info().await?;
-    println!("Node Info: {info:?}");
-
-    Ok(())
-}
-```
+[sdk/examples/client/getting_started.rs](sdk/examples/client/getting_started.rs)
 
 ## Wallet Usage
 
@@ -148,48 +133,7 @@ that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) usin
 [`StrongholdSecretManager`](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
 to store a mnemonic. For this `features = ["stronghold"]` is needed in the Cargo.toml import. To persist the wallet in a database, `"rocksdb"` can be added.
 
-```rust
-use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
-    },
-    wallet::{ClientOptions, Result, Wallet},
-};
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Setup Stronghold secret manager.
-    // WARNING: Never hardcode passwords in production code.
-    let secret_manager = StrongholdSecretManager::builder()
-        .password("password".to_owned()) // A password to encrypt the stored data.
-        .build("vault.stronghold")?; // The path to store the account snapshot.
-
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
-
-    // Set up and store the wallet.
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Generate a mnemonic and store it in the Stronghold vault.
-    // INFO: It is best practice to back up the mnemonic somewhere secure.
-    let mnemonic = wallet.generate_mnemonic()?;
-    wallet.store_mnemonic(mnemonic).await?;
-
-    // Create an account.
-    let account = wallet
-        .create_account()
-        .with_alias("Alice") // A name to associate with the created account.
-        .finish()
-        .await?;
-
-    Ok(())
-}
-```
+[sdk/examples/wallet/getting_started.rs](sdk/examples/wallet/getting_started.rs)
 
 ## Examples
 

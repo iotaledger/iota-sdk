@@ -66,16 +66,7 @@ the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the no
 calling [`Client.get_info()`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/_node_core_api/#get_info),
 and then print the node's information.
 
-```python
-from iota_sdk import Client
-
-# Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
-
-# Get the node info
-node_info = client.get_info()
-print(f'{node_info}')
-```
+[examples/client/getting_started.py](examples/client/getting_started.py)
 
 ## Wallet Usage
 
