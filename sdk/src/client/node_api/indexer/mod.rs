@@ -36,7 +36,6 @@ impl ClientInner {
                 .get_request::<OutputIdsResponse>(
                     route,
                     query_parameters.to_query_string().as_deref(),
-                    self.get_timeout().await,
                     need_quorum,
                     prefer_permanode,
                 )

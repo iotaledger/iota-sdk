@@ -28,14 +28,10 @@ impl ClientInner {
         let req_method = reqwest::Method::from_str(&method);
 
         let path = format!("{}{}{}", base_plugin_path, endpoint, query_params.join("&"));
-        let timeout = self.get_timeout().await;
 
         match req_method {
-            Ok(Method::GET) => self.get_request(&path, None, timeout, false, false).await,
-            Ok(Method::POST) => {
-                self.post_request_json(&path, timeout, request_object.into(), true)
-                    .await
-            }
+            Ok(Method::GET) => self.get_request(&path, None, false, false).await,
+            Ok(Method::POST) => self.post_request_json(&path, request_object.into(), true).await,
             _ => Err(crate::client::Error::Node(
                 crate::client::node_api::error::Error::NotSupported(method.to_string()),
             )),

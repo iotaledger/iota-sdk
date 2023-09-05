@@ -68,7 +68,6 @@ impl ClientInner {
         &self,
         path: &str,
         query: Option<&str>,
-        timeout: Duration,
         need_quorum: bool,
         prefer_permanode: bool,
     ) -> Result<T> {
@@ -77,7 +76,7 @@ impl ClientInner {
             self.node_manager
                 .read()
                 .await
-                .get_request(path, query, timeout, need_quorum, prefer_permanode)
+                .get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -85,22 +84,17 @@ impl ClientInner {
         self.node_manager
             .read()
             .await
-            .get_request(path, query, timeout, need_quorum, prefer_permanode)
+            .get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode)
             .await
     }
 
-    pub(crate) async fn get_request_bytes(
-        &self,
-        path: &str,
-        query: Option<&str>,
-        timeout: Duration,
-    ) -> Result<Vec<u8>> {
+    pub(crate) async fn get_request_bytes(&self, path: &str, query: Option<&str>) -> Result<Vec<u8>> {
         #[cfg(not(target_family = "wasm"))]
         {
             self.node_manager
                 .read()
                 .await
-                .get_request_bytes(path, query, timeout)
+                .get_request_bytes(path, query, self.get_timeout().await)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -108,38 +102,13 @@ impl ClientInner {
         self.node_manager
             .read()
             .await
-            .get_request_bytes(path, query, timeout)
-            .await
-    }
-
-    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(
-        &self,
-        path: &str,
-        timeout: Duration,
-        body: &[u8],
-        local_pow: bool,
-    ) -> Result<T> {
-        #[cfg(not(target_family = "wasm"))]
-        {
-            self.node_manager
-                .read()
-                .await
-                .post_request_bytes(path, timeout, body, local_pow)
-                .rate_limit(&self.request_pool)
-                .await
-        }
-        #[cfg(target_family = "wasm")]
-        self.node_manager
-            .read()
-            .await
-            .post_request_bytes(path, timeout, body, local_pow)
+            .get_request_bytes(path, query, self.get_timeout().await)
             .await
     }
 
     pub(crate) async fn post_request_json<T: DeserializeOwned>(
         &self,
         path: &str,
-        timeout: Duration,
         json: Value,
         local_pow: bool,
     ) -> Result<T> {
@@ -148,7 +117,7 @@ impl ClientInner {
             self.node_manager
                 .read()
                 .await
-                .post_request_json(path, timeout, json, local_pow)
+                .post_request_json(path, self.get_timeout().await, json, local_pow)
                 .rate_limit(&self.request_pool)
                 .await
         }
@@ -156,7 +125,7 @@ impl ClientInner {
         self.node_manager
             .read()
             .await
-            .post_request_json(path, timeout, json, local_pow)
+            .post_request_json(path, self.get_timeout().await, json, local_pow)
             .await
     }
 }
