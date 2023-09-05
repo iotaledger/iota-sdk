@@ -237,5 +237,5 @@ def test_output():
             }
         ]
     }
-    nft_output = NftOutput.from_c, nft_output_dict)
+    nft_output = NftOutput.from_dict(nft_output_dict)
     assert nft_output.to_dict() == nft_output_dict
