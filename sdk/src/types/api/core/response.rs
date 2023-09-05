@@ -202,6 +202,7 @@ pub struct ManaRewardsResponse {
 /// Response of GET /api/core/v3/committee
 /// The validator information of the committee.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CommitteeResponse {
     /// The epoch index of the committee.
     pub epoch_index: EpochIndex,
@@ -217,6 +218,7 @@ pub struct CommitteeResponse {
 
 /// Returns information of a committee member.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
     /// The account identifier of the validator
     pub account_id: AccountId,
@@ -233,6 +235,7 @@ pub struct CommitteeMember {
 
 /// Information of a validator.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Validator {
     /// The account identifier of the validator
     account_id: AccountId,
