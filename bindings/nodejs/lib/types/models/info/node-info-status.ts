@@ -42,7 +42,7 @@ export interface INodeInfoStatus {
      */
     latestConfirmedBlockSlot?: string;
     /**
-     * The index of the slot before which the tangle history is pruned.
+     * The index of the epoch before which the tangle history is pruned.
      */
-    pruningSlot: string;
+    pruningEpoch: string;
 }

@@ -66,7 +66,7 @@ pub struct StatusResponse {
     pub latest_finalized_slot: SlotIndex,
     pub latest_accepted_block_slot: Option<SlotIndex>,
     pub latest_confirmed_block_slot: Option<SlotIndex>,
-    pub pruning_slot: SlotIndex,
+    pub pruning_epoch: EpochIndex,
 }
 
 /// Returned in [`InfoResponse`].
