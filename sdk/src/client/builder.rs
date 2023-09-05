@@ -248,6 +248,7 @@ impl ClientBuilder {
     }
 
     /// Set maximum parallel API requests.
+    #[cfg(not(target_family = "wasm"))]
     pub fn with_max_parallel_api_requests(mut self, max_parallel_api_requests: usize) -> Self {
         self.max_parallel_api_requests = max_parallel_api_requests;
         self
