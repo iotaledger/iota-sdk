@@ -16,6 +16,7 @@ runs:
         echo "rm *.snapshot" >> cleanup.sh
         chmod +x cleanup.sh
 
+        # remove the last 5 lines and add docker compose with `-d` to run it in the background
         sed -i -n -e :a -e '1,5!{P;N;D;};N;ba' run.sh
         echo "docker compose -f \$DOCKER_COMPOSE_FILE up -d" >> run.sh
       working-directory: iota-core/tools/docker-network
