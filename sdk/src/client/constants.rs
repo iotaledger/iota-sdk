@@ -17,7 +17,7 @@ pub(crate) const DEFAULT_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/",
 #[cfg(not(target_family = "wasm"))]
 pub(crate) const MAX_PARALLEL_API_REQUESTS: usize = 100;
 /// Max allowed difference between the local time and latest milestone time, 5 minutes in seconds
-pub(crate) const FIVE_MINUTES_IN_SECONDS: u32 = 300;
+pub(crate) const FIVE_MINUTES_IN_SECONDS: u64 = 300;
 /// Delay for caching a node info response in WASM runtime
 #[cfg(target_family = "wasm")]
 pub(crate) const CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS: u32 = 60;
