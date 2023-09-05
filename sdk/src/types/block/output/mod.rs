@@ -67,7 +67,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
-use crate::types::block::{address::Address, semantic::ValidationContext, Error};
+use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -306,15 +306,13 @@ impl Output {
     /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_and_unlocked_address(
         &self,
-        current_time: u32,
+        slot_index: SlotIndex,
         output_id: &OutputId,
         account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
             Self::Account(output) => {
@@ -330,15 +328,11 @@ impl Output {
             }
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
             Self::Delegation(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
         }
@@ -472,12 +466,25 @@ impl Rent for Output {
     }
 }
 
-pub(crate) fn verify_output_amount(amount: &u64, token_supply: &u64) -> Result<(), Error> {
-    if *amount < Output::AMOUNT_MIN || amount > token_supply {
-        Err(Error::InvalidOutputAmount(*amount))
+pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
+    if amount < Output::AMOUNT_MIN {
+        Err(Error::InvalidOutputAmount(amount))
     } else {
         Ok(())
     }
+}
+
+pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
+    if amount > token_supply {
+        Err(Error::InvalidOutputAmount(amount))
+    } else {
+        Ok(())
+    }
+}
+
+pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
+    verify_output_amount_min(amount)?;
+    verify_output_amount_supply(amount, token_supply)
 }
 
 pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
@@ -485,7 +492,7 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
     if VERIFY {
-        verify_output_amount(amount, &protocol_parameters.token_supply())?;
+        verify_output_amount(*amount, protocol_parameters.token_supply())?;
     }
     Ok(())
 }

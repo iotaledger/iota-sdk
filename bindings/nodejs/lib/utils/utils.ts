@@ -12,7 +12,7 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    IRent,
+    RentStructure,
     OutputId,
     u64,
 } from '../types';
@@ -143,7 +143,7 @@ export class Utils {
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: IRent): u64 {
+    static computeStorageDeposit(output: Output, rent: RentStructure): u64 {
         const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {

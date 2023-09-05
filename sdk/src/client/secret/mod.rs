@@ -61,7 +61,6 @@ use crate::{
         validation::ValidationBlockData,
         Block, BlockBuilder,
     },
-    utils::unix_timestamp_now,
 };
 
 /// The secret manager interface.
@@ -109,7 +108,6 @@ pub trait SecretManage: Send + Sync {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
     ) -> Result<Unlocks, Self::Error>;
 
     async fn sign_transaction(
@@ -408,27 +406,20 @@ impl SecretManage for SecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
     ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data, time)
+                .sign_transaction_essence(prepared_transaction_data)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data, time)
+                .sign_transaction_essence(prepared_transaction_data)
                 .await?),
-            Self::Mnemonic(secret_manager) => {
-                secret_manager
-                    .sign_transaction_essence(prepared_transaction_data, time)
-                    .await
-            }
+            Self::Mnemonic(secret_manager) => secret_manager.sign_transaction_essence(prepared_transaction_data).await,
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(secret_manager) => {
-                secret_manager
-                    .sign_transaction_essence(prepared_transaction_data, time)
-                    .await
+                secret_manager.sign_transaction_essence(prepared_transaction_data).await
             }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
@@ -513,7 +504,6 @@ impl SecretManager {
 pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
-    time: Option<u32>,
 ) -> crate::client::Result<Unlocks>
 where
     crate::client::Error: From<M::Error>,
@@ -522,6 +512,8 @@ where
     let hashed_essence = prepared_transaction_data.essence.hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
+    let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
+    let slot_index = essence.creation_slot();
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
@@ -529,7 +521,7 @@ where
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) = input.output.required_and_unlocked_address(
-            time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
+            slot_index,
             input.output_metadata.output_id(),
             account_transition,
         )?;
@@ -590,10 +582,9 @@ where
     crate::client::Error: From<M::Error>,
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
-    let current_time = unix_timestamp_now().as_secs() as u32;
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
+        .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
     let PreparedTransactionData {
@@ -605,7 +596,7 @@ where
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload)?;
 
     if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

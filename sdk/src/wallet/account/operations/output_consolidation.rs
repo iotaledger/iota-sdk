@@ -13,6 +13,7 @@ use crate::{
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
         },
+        slot::SlotIndex,
     },
 };
 
@@ -77,13 +78,13 @@ where
     fn should_consolidate_output(
         &self,
         output_data: &OutputData,
-        current_time: u32,
+        slot_index: SlotIndex,
         account_addresses: &[AddressWithUnspentOutputs],
     ) -> Result<bool> {
         Ok(if let Output::Basic(basic_output) = &output_data.output {
             let unlock_conditions = basic_output.unlock_conditions();
 
-            let is_time_locked = unlock_conditions.is_time_locked(current_time);
+            let is_time_locked = unlock_conditions.is_time_locked(slot_index);
             if is_time_locked {
                 // If the output is timelocked, then it cannot be consolidated.
                 return Ok(false);
@@ -91,13 +92,13 @@ where
 
             let has_storage_deposit_return = unlock_conditions.storage_deposit_return().is_some();
             let has_expiration = unlock_conditions.expiration().is_some();
-            let is_expired = unlock_conditions.is_expired(current_time);
+            let is_expired = unlock_conditions.is_expired(slot_index);
             if has_storage_deposit_return && (!has_expiration || !is_expired) {
                 // If the output has not expired and must return a storage deposit, then it cannot be consolidated.
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(account_addresses, &[], output_data, current_time, None)?
+            can_output_be_unlocked_now(account_addresses, &[], output_data, slot_index, None)?
         } else {
             false
         })
@@ -126,7 +127,7 @@ where
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let current_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
         let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
         let account_details = self.details().await;
@@ -142,7 +143,7 @@ where
             }
             let is_locked_output = account_details.locked_outputs.contains(output_id);
             let should_consolidate_output =
-                self.should_consolidate_output(output_data, current_time, account_addresses)?;
+                self.should_consolidate_output(output_data, slot_index, account_addresses)?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
             }

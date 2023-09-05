@@ -19,6 +19,7 @@ use crate::{
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{transaction::TransactionId, Payload},
+        slot::SlotIndex,
         BlockId,
     },
     utils::unix_timestamp_now,
@@ -133,5 +134,10 @@ impl Client {
         }
 
         Ok(current_time)
+    }
+
+    // TODO
+    pub async fn get_slot_index(&self) -> Result<SlotIndex> {
+        todo!()
     }
 }

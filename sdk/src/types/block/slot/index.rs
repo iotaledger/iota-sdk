@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::{Deref, Display, From, FromStr};
+use derive_more::{Add, AddAssign, Deref, Display, From, FromStr, Sub, SubAssign};
 
 use super::EpochIndex;
 use crate::types::block::Error;
@@ -23,7 +23,23 @@ use crate::types::block::Error;
 /// | 1  | genesis       | genesis + 10s |
 /// | 2  | genesis + 10s | genesis + 20s |
 #[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
+    Copy,
+    Clone,
+    Debug,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    From,
+    Deref,
+    Display,
+    FromStr,
+    Add,
+    AddAssign,
+    Sub,
+    SubAssign,
+    packable::Packable,
 )]
 #[repr(transparent)]
 pub struct SlotIndex(u64);
@@ -59,6 +75,40 @@ impl SlotIndex {
             .checked_sub(1)
             .map(|adjusted_slot| (adjusted_slot * slot_duration_in_seconds as u64) + genesis_unix_timestamp as u64)
             .unwrap_or_default()
+    }
+}
+
+impl PartialEq<u64> for SlotIndex {
+    fn eq(&self, other: &u64) -> bool {
+        self.0 == *other
+    }
+}
+
+impl core::ops::Add<u64> for SlotIndex {
+    type Output = Self;
+
+    fn add(self, other: u64) -> Self {
+        Self(self.0 + other)
+    }
+}
+
+impl core::ops::AddAssign<u64> for SlotIndex {
+    fn add_assign(&mut self, other: u64) {
+        self.0 += other;
+    }
+}
+
+impl core::ops::Sub<u64> for SlotIndex {
+    type Output = Self;
+
+    fn sub(self, other: u64) -> Self {
+        Self(self.0 - other)
+    }
+}
+
+impl core::ops::SubAssign<u64> for SlotIndex {
+    fn sub_assign(&mut self, other: u64) {
+        self.0 -= other;
     }
 }
 

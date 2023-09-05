@@ -15,11 +15,12 @@ use crate::{
             },
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
+        slot::SlotIndex,
         ConvertTo,
     },
     wallet::{
         account::{
-            constants::DEFAULT_EXPIRATION_TIME, operations::transaction::Transaction, Account, TransactionOptions,
+            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
         },
         Error, Result,
     },
@@ -39,10 +40,10 @@ pub struct SendNativeTokensParams {
     /// first address of the account
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
-    /// receiver before. Default is 1 day
+    /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
+    /// receiver before. Default is [`DEFAULT_EXPIRATION_SLOTS`] slots.
     #[getset(get = "pub")]
-    expiration: Option<u32>,
+    expiration: Option<SlotIndex>,
 }
 
 impl SendNativeTokensParams {
@@ -72,8 +73,8 @@ impl SendNativeTokensParams {
     }
 
     /// Set the expiration in seconds
-    pub fn with_expiration(mut self, expiration_secs: Option<u32>) -> Self {
-        self.expiration = expiration_secs;
+    pub fn with_expiration(mut self, expiration: Option<SlotIndex>) -> Self {
+        self.expiration = expiration;
         self
     }
 }
@@ -135,7 +136,7 @@ where
         let account_addresses = self.addresses().await?;
         let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
-        let local_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
 
         let mut outputs = Vec::new();
         for SendNativeTokensParams {
@@ -177,9 +178,10 @@ where
                 .with_expiration()?
                 .finish()?;
 
-            let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-                local_time + expiration_time
-            });
+            let expiration_slot_index = expiration
+                .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
+                    slot_index + expiration_slot_index
+                });
 
             outputs.push(
                 BasicOutputBuilder::new_with_amount(storage_deposit_amount)
@@ -190,7 +192,7 @@ where
                         // sent
                         StorageDepositReturnUnlockCondition::new(return_address, storage_deposit_amount, token_supply)?,
                     )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .finish_output(token_supply)?,
             )
         }

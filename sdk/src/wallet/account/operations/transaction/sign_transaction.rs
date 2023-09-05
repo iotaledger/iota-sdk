@@ -80,7 +80,7 @@ where
             .secret_manager
             .read()
             .await
-            .sign_transaction_essence(prepared_transaction_data, None)
+            .sign_transaction_essence(prepared_transaction_data)
             .await
         {
             Ok(res) => res,
