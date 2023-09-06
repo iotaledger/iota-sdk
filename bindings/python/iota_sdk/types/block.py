@@ -6,7 +6,7 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import List, Optional
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
+from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 from iota_sdk.utils import Utils
 
 
@@ -24,7 +24,7 @@ class Block:
     protocol_version: int
     parents: List[HexStr]
     payload: Optional[TaggedDataPayload |
-                      TransactionPayload | MilestonePayload] = None
+                      TransactionPayload] = None
 
     def id(self) -> HexStr:
         return Utils.block_id(self)
