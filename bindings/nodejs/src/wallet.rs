@@ -55,12 +55,10 @@ impl WalletMethodHandler {
 
                 (msg, is_err)
             }
-            Err(e) => {
-                (
-                    serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
-                    true,
-                )
-            }
+            Err(e) => (
+                serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
+                true,
+            ),
         }
     }
 }
@@ -198,10 +196,7 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsBox<SharedClientMethodH
                 )
             }
         }
-        Err(e) => {
-            cx
-                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"))
-        }
+        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
     }
 }
 

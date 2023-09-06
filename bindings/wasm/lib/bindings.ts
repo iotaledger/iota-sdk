@@ -21,12 +21,14 @@ const callUtilsMethod = (method: __UtilsMethods__): any => {
     }
 };
 
-const getSecretManagerFromWallet = (method: WalletMethodHandler): SecretManagerMethodHandler => {
+const getSecretManagerFromWallet = (
+    method: WalletMethodHandler,
+): SecretManagerMethodHandler => {
     // TODO figure out why this one is extensible but client isnt
-    let res = getSecretManagerFromWalletRust(method)
+    let res = getSecretManagerFromWalletRust(method);
     Object.preventExtensions(res);
     return res;
-}
+};
 
 export {
     initLogger,

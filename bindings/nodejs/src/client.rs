@@ -50,12 +50,10 @@ impl ClientMethodHandler {
 
                 (msg, is_err)
             }
-            Err(e) => {
-                (
-                    serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
-                    true,
-                )
-            }
+            Err(e) => (
+                serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
+                true,
+            ),
         }
     }
 }

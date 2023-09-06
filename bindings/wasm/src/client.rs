@@ -8,10 +8,9 @@ use iota_sdk_bindings_core::{
     iota_sdk::client::{Client, ClientBuilder},
     ClientMethod, Response,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsError, JsValue, UnwrapThrowExt};
-use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
-use crate::{ArrayString, PromiseString};
+use crate::ArrayString;
 
 /// The Client method handler.
 #[wasm_bindgen(js_name = ClientMethodHandler)]
@@ -51,7 +50,7 @@ macro_rules! client_pre {
 /// Creates a method handler with the given client options.
 #[wasm_bindgen(js_name = createClient)]
 #[allow(non_snake_case)]
-pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsValue> {
+pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsError> {
     let runtime = tokio::runtime::Builder::new_current_thread().build().map_err(|err| {
         JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
     })?;
@@ -91,7 +90,7 @@ pub fn destroy_client(client_method_handler: &ClientMethodHandler) -> Result<(),
 /// Returns an error if the response itself is an error or panic.
 #[wasm_bindgen(js_name = callClientMethodAsync)]
 #[allow(non_snake_case)]
-pub async fn call_client_method_async(method: String, methodHandler: &ClientMethodHandler) -> Result<String, JsValue> {
+pub async fn call_client_method_async(method: String, methodHandler: &ClientMethodHandler) -> Result<String, JsError> {
     let client = client_pre!(methodHandler)?;
 
     let method: ClientMethod = serde_json::from_str(&method).map_err(|err| {
@@ -101,9 +100,7 @@ pub async fn call_client_method_async(method: String, methodHandler: &ClientMeth
     let response = call_client_method(&client, method).await;
     let ser = serde_json::to_string(&response).expect("json to string error");
     match response {
-        Response::Error(_) | Response::Panic(_) => {
-            Err(JsError::new(&ser).into())
-        }
+        Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
         _ => Ok(ser),
     }
 }

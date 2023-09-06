@@ -40,6 +40,7 @@ export * from './utils';
 export * from './wallet';
 export * from './logger';
 
+// For future reference to see what we return from rust as a serialized string
 export type Result = {
     // "error" | "panic" or other binding method response name
     type: string;
@@ -72,4 +73,3 @@ function errorHandle(error: any): Error {
 }
 
 export { errorHandle };
-
