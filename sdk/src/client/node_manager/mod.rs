@@ -71,39 +71,19 @@ impl ClientInner {
         need_quorum: bool,
         prefer_permanode: bool,
     ) -> Result<T> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode);
         #[cfg(not(target_family = "wasm"))]
-        {
-            self.node_manager
-                .read()
-                .await
-                .get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode)
-                .rate_limit(&self.request_pool)
-                .await
-        }
-        #[cfg(target_family = "wasm")]
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode)
-            .await
+        let request = request.rate_limit(&self.request_pool);
+        request.await
     }
 
     pub(crate) async fn get_request_bytes(&self, path: &str, query: Option<&str>) -> Result<Vec<u8>> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.get_request_bytes(path, query, self.get_timeout().await);
         #[cfg(not(target_family = "wasm"))]
-        {
-            self.node_manager
-                .read()
-                .await
-                .get_request_bytes(path, query, self.get_timeout().await)
-                .rate_limit(&self.request_pool)
-                .await
-        }
-        #[cfg(target_family = "wasm")]
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, query, self.get_timeout().await)
-            .await
+        let request = request.rate_limit(&self.request_pool);
+        request.await
     }
 
     pub(crate) async fn post_request_json<T: DeserializeOwned>(
@@ -112,21 +92,11 @@ impl ClientInner {
         json: Value,
         local_pow: bool,
     ) -> Result<T> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.post_request_json(path, self.get_timeout().await, json, local_pow);
         #[cfg(not(target_family = "wasm"))]
-        {
-            self.node_manager
-                .read()
-                .await
-                .post_request_json(path, self.get_timeout().await, json, local_pow)
-                .rate_limit(&self.request_pool)
-                .await
-        }
-        #[cfg(target_family = "wasm")]
-        self.node_manager
-            .read()
-            .await
-            .post_request_json(path, self.get_timeout().await, json, local_pow)
-            .await
+        let request = request.rate_limit(&self.request_pool);
+        request.await
     }
 }
 

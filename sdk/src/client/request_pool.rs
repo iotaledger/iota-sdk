@@ -36,10 +36,11 @@ impl RequestPool {
 
     pub(crate) async fn borrow(&self) -> Requester {
         // Get permission to request
-        self.write().await.recv.recv().await;
-        Requester {
-            sender: self.read().await.sender.clone(),
-        }
+        let mut lock = self.write().await;
+        lock.recv.recv().await;
+        let sender = lock.sender.clone();
+        drop(lock);
+        Requester { sender }
     }
 
     pub(crate) async fn size(&self) -> usize {
