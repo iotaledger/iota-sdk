@@ -23,6 +23,4 @@ ci-license = "license-template --template .license_template"
 #
 # - RUSTSEC-2021-0065: https://rustsec.org/advisories/RUSTSEC-2021-0065
 #   - anymap is unmaintained 🤷‍♀️
-# - RUSTSEC-2023-0052: https://rustsec.org/advisories/RUSTSEC-2023-0052
-#   - TODO: waiting for fix in dependency
-ci-audit = "audit --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0065 --ignore RUSTSEC-2023-0052"
+ci-audit = "audit --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0065"
