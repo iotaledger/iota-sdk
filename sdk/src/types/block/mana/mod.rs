@@ -11,10 +11,9 @@ use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-pub use self::{
-    allotment::{dto::ManaAllotmentDto, ManaAllotment},
-    protocol::ManaStructure,
-};
+#[cfg(feature = "serde")]
+pub use self::allotment::dto::ManaAllotmentDto;
+pub use self::{allotment::ManaAllotment, protocol::ManaStructure};
 use super::{output::AccountId, protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =
