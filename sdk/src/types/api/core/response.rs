@@ -168,15 +168,14 @@ pub struct BaseTokenResponse {
     pub use_metric_prefix: bool,
 }
 
-/// Response of
-/// - GET /api/core/v3/blocks/validators
+/// Response of GET /api/core/v3/blocks/validators.
 /// A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
 /// (are eligible for committee selection).
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
-    /// List of registered validators ready for the next epoch
-    validators: Vec<Validator>,
+    /// List of registered validators ready for the next epoch.
+    validators: Vec<ValidatorResponse>,
     ///  The number of validators returned per one API request with pagination.
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
@@ -236,7 +235,7 @@ pub struct CommitteeMember {
 /// Information of a validator.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Validator {
+pub struct ValidatorResponse {
     /// The account identifier of the validator
     account_id: AccountId,
     /// The epoch index until which the validator registered to stake.
@@ -255,11 +254,6 @@ pub struct Validator {
     /// The latest protocol version the validator supported.
     latest_supported_protocol_version: u8,
 }
-
-/// Response of
-/// - GET /api/core/v3/blocks/validators/{accountId}
-/// The requested staking information of the account.
-pub type AccountStakingResponse = Validator;
 
 /// Response of GET /api/core/v3/blocks/issuance
 /// Information that is ideal for attaching a block in the network.

@@ -15,9 +15,9 @@ use crate::{
     },
     types::{
         api::core::response::{
-            AccountStakingResponse, BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
-            UtxoChangesResponse, ValidatorsResponse,
+            BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
+            ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            ValidatorResponse, ValidatorsResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
@@ -104,7 +104,7 @@ impl ClientInner {
             .await
     }
 
-    // Reward routes.
+    // Rewards routes.
 
     /// Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
     /// provided in the response.
@@ -123,6 +123,8 @@ impl ClientInner {
             .await
     }
 
+    // Committee routes.
+
     /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
     /// current committee members are returned.
     /// GET /api/core/v3/committee/?epochIndex
@@ -137,6 +139,8 @@ impl ClientInner {
             .await
     }
 
+    // Validators routes.
+
     /// Returns information of all registered validators and if they are active.
     /// GET JSON to /api/core/v3/validators
     pub async fn get_validators(&self, page_size: Option<u32>) -> Result<ValidatorsResponse> {
@@ -150,9 +154,9 @@ impl ClientInner {
             .await
     }
 
-    /// Return the information of requested staker.
+    /// Return information about a validator.
     /// GET /api/core/v3/validators/{accountId}
-    pub async fn get_validator(&self, account_id: &AccountId) -> Result<AccountStakingResponse> {
+    pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
         let path = &format!("api/core/v3/validators/{account_id}");
 
         self.node_manager
