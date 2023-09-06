@@ -17,15 +17,11 @@ class PayloadType(IntEnum):
     """Block payload types.
 
     Attributes:
-        TreasuryTransaction (4): A treasury transaction payload.
         TaggedData (5): A tagged data payload.
         Transaction (6): A transaction payload.
-        Milestone (7): A milestone payload.
     """
-    TreasuryTransaction = 4
     TaggedData = 5
     Transaction = 6
-    Milestone = 7
 
 
 @json

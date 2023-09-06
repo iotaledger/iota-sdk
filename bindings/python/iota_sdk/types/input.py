@@ -12,11 +12,8 @@ class InputType(IntEnum):
 
     Attributes:
         Utxo: An unspent transaction output.
-        Treasury: The treasury output.
     """
     Utxo = 0
-    Treasury = 1
-
 
 @json
 @dataclass
@@ -33,14 +30,3 @@ class UtxoInput:
     transaction_output_index: int
 
 
-@json
-@dataclass
-class TreasuryInput:
-    """A treasury input.
-
-    Attributes:
-        type: The type of input.
-        milestone_id: The milestone id that created the treasury output.
-    """
-    type: int
-    milestone_id: HexStr

@@ -17,13 +17,11 @@ class OutputType(IntEnum):
     """Output types.
 
     Attributes:
-        Treasury (2): A treasury output.
         Basic (3): A basic output.
         Alias (4): An alias output.
         Foundry (5): A foundry output.
         Nft (6): An NFT output.
     """
-    Treasury = 2
     Basic = 3
     Alias = 4
     Foundry = 5
@@ -36,23 +34,6 @@ class Output():
     """An output in a UTXO ledger.
     """
     type: int
-
-
-@json
-@dataclass
-class TreasuryOutput(Output):
-    """Describes a treasury output.
-    Attributes:
-        amount :
-            The base coin amount of the output.
-        type :
-            The type of output.
-    """
-    amount: str
-    type: int = field(
-        default_factory=lambda: int(
-            OutputType.Treasury),
-        init=False)
 
 
 @json
@@ -238,11 +219,9 @@ class OutputWithMetadata:
 
 
 def output_from_dict(
-        output: Dict[str, any]) -> TreasuryOutput | BasicOutput | AliasOutput | FoundryOutput | NftOutput | Output:
+        output: Dict[str, any]) -> BasicOutput | AliasOutput | FoundryOutput | NftOutput | Output:
     output_type = OutputType(output['type'])
 
-    if output_type == OutputType.Treasury:
-        return TreasuryOutput.from_dict(output)
     if output_type == OutputType.Basic:
         return BasicOutput.from_dict(output)
     if output_type == OutputType.Alias:
