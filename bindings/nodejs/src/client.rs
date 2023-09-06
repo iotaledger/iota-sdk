@@ -107,7 +107,7 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 Ok(())
             });
         } else {
-            panic!("Client handler got destroyed")
+            panic!("Client got destroyed")
         }
     });
 
