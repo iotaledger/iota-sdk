@@ -117,21 +117,13 @@ iota-sdk = { git = "https://github.com/iotaledger/iota-sdk", branch = "develop" 
 
 ## Client Usage
 
-The following example creates a [`Client`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html)
-instance connected to
-the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
-calling [`Client.get_info()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html#method.get_info),
-and then print the node's information.
+The following example creates a Client instance connected to the Shimmer Testnet, and retrieves the node's information by calling `Client.get_info()`, and then print the node's information.
 
 [sdk/examples/client/getting_started.rs](sdk/examples/client/getting_started.rs)
 
 ## Wallet Usage
 
-The following example will create a
-new [`Wallet`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/core/struct.Wallet.html) [`Account`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/account/struct.Account.html)
-that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[`StrongholdSecretManager`](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
-to store a mnemonic. For this `features = ["stronghold"]` is needed in the Cargo.toml import. To persist the wallet in a database, `"rocksdb"` can be added.
+The following example will create a new Wallet Account using a StrongholdSecretManager. For this `features = ["stronghold"]` is needed in the Cargo.toml import. To persist the wallet in a database, `"rocksdb"` can be added.
 
 [sdk/examples/wallet/getting_started.rs](sdk/examples/wallet/getting_started.rs)
 

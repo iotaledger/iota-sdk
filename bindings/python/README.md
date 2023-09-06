@@ -60,21 +60,13 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Client Usage
 
-The following example creates a [`Client`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/)
-instance connected to
-the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
-calling [`Client.get_info()`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/_node_core_api/#get_info),
-and then print the node's information.
+The following example creates a Client instance connected to the Shimmer Testnet, and retrieves the node's information by calling `Client.get_info()`, and then print the node's information.
 
 [examples/client/getting_started.py](examples/client/getting_started.py)
 
 ## Wallet Usage
 
-The following example will create a
-new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/account/)
-that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
-to safely store a seed derived from a mnemonic, and then print the account's information.
+The following example will create a new Wallet Account  using a StrongholdSecretManager, and then print the account's information.
 
 [examples/wallet/getting_started.py](examples/wallet/getting_started.py)
 
