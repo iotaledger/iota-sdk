@@ -89,8 +89,8 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
 
       # This step can be removed as soon as official Windows arm64 builds are published:
       # https://github.com/nodejs/build/issues/2450#issuecomment-705853342
