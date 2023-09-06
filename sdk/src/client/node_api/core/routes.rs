@@ -17,6 +17,7 @@ use crate::{
         api::core::response::{
             BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
             ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
+            ValidatorResponse, ValidatorsResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
@@ -103,7 +104,7 @@ impl ClientInner {
             .await
     }
 
-    // Reward routes.
+    // Rewards routes.
 
     /// Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
     /// provided in the response.
@@ -122,6 +123,8 @@ impl ClientInner {
             .await
     }
 
+    // Committee routes.
+
     /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
     /// current committee members are returned.
     /// GET /api/core/v3/committee/?epochIndex
@@ -129,11 +132,37 @@ impl ClientInner {
         const PATH: &str = "api/core/v3/committee";
 
         let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
-
         self.node_manager
             .read()
             .await
             .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
+            .await
+    }
+
+    // Validators routes.
+
+    /// Returns information of all registered validators and if they are active.
+    /// GET JSON to /api/core/v3/validators
+    pub async fn get_validators(&self, page_size: Option<u32>) -> Result<ValidatorsResponse> {
+        const PATH: &str = "api/core/v3/validators";
+
+        let page_size = page_size.map(|i| format!("pageSize={i}"));
+        self.node_manager
+            .read()
+            .await
+            .get_request(PATH, page_size.as_deref(), self.get_timeout().await, false, false)
+            .await
+    }
+
+    /// Return information about a validator.
+    /// GET /api/core/v3/validators/{accountId}
+    pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
+        let path = &format!("api/core/v3/validators/{account_id}");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 

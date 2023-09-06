@@ -2,10 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
 from typing import List, Optional
 
+from dataclasses import dataclass
 
+from iota_sdk.types.common import json
+
+
+@json
 @dataclass
 class FilterOptions:
     """Options to filter outputs.

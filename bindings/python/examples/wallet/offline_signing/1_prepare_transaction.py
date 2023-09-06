@@ -24,7 +24,7 @@ params = [SendParams(RECV_ADDRESS, str(SEND_AMOUNT))]
 
 # Recovers addresses from example `0_address_generation`.
 addresses_data = json.load(open(ADDRESSES_FILE_PATH, "r"))
-addresses = list(map(lambda x: from_dict(AccountAddress, x), addresses_data))
+addresses = list(map(lambda x: AccountAddress.from_dict(x), addresses_data))
 
 if 'NODE_URL' not in os.environ:
     raise Exception(".env NODE_URL is undefined, see .env.example")
@@ -42,7 +42,7 @@ account.sync()
 prepared_transaction = account.prepare_send(params)
 
 json_data = json.dumps(
-    prepared_transaction.prepared_transaction_data().as_dict(),
+    prepared_transaction.prepared_transaction_data().to_dict(),
     indent=4)
 print(f"example.prepared_transaction.json:\n{json_data}")
 f = open(PREPARED_TRANSACTION_FILE_PATH, "w")

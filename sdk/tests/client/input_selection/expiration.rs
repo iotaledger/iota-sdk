@@ -49,7 +49,7 @@ fn one_output_expiration_not_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -86,7 +86,7 @@ fn expiration_equal_timestamp() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(200)
+    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -125,7 +125,7 @@ fn one_output_expiration_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -176,7 +176,7 @@ fn two_outputs_one_expiration_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -219,7 +219,7 @@ fn two_outputs_one_unexpired_one_missing() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -272,7 +272,7 @@ fn two_outputs_two_expired() {
         addresses([BECH32_ADDRESS_ED25519_2]),
         protocol_parameters,
     )
-    .slot_index(200)
+    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -324,7 +324,7 @@ fn two_outputs_two_expired_2() {
         addresses([BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2]),
         protocol_parameters,
     )
-    .slot_index(200)
+    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -363,7 +363,7 @@ fn expiration_expired_with_sdr() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -402,7 +402,7 @@ fn expiration_expired_with_sdr_2() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -441,7 +441,7 @@ fn expiration_expired_with_sdr_and_timelock() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -480,7 +480,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -525,7 +525,7 @@ fn sender_in_expiration() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -565,8 +565,8 @@ fn sender_in_expiration_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .slot_index(100)
-    .required_inputs([*inputs[0].output_id()])
+    .with_slot_index(100)
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -605,7 +605,7 @@ fn remainder_in_expiration() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -655,7 +655,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -709,7 +709,7 @@ fn expiration_expired_only_account_addresses() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -751,7 +751,7 @@ fn one_nft_output_expiration_unexpired() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -793,7 +793,7 @@ fn one_nft_output_expiration_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 

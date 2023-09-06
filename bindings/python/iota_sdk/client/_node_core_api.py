@@ -31,7 +31,7 @@ class NodeCoreAPI():
             url: The node's url.
             auth: A JWT or username/password authentication object.
         """
-        return from_dict(NodeInfo, self._call_method('getNodeInfo', {
+        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
         }))
@@ -103,7 +103,7 @@ class NodeCoreAPI():
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return from_dict(OutputWithMetadata, self._call_method('getOutput', {
+        return OutputWithMetadata.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 

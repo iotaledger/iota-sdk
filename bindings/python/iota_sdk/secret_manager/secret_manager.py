@@ -9,7 +9,6 @@ from iota_sdk.types.payload import TransactionPayload
 from json import dumps, loads
 import humps
 from typing import Optional
-from dacite import from_dict
 
 
 class LedgerNanoSecretManager(dict):
@@ -243,7 +242,7 @@ class SecretManager():
         Returns:
             The Ed25519 signature.
         """
-        return from_dict(Ed25519Signature, self._call_method('signEd25519', {
+        return Ed25519Signature.from_dict(self._call_method('signEd25519', {
             'message': message,
             'chain': chain.__dict__,
         }))
@@ -268,7 +267,7 @@ class SecretManager():
             prepare_transaction_data: The prepared transaction data that needs to be signed.
         """
         return from_dict(TransactionPayload, self._call_method('signTransaction', {
-            'preparedTransactionData': prepared_transaction_data.as_dict()
+            'preparedTransactionData': prepared_transaction_data.to_dict()
         }))
 
     def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):

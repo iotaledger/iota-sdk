@@ -2,44 +2,32 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+from enum import Enum
 from dataclasses import dataclass
-from typing import Dict, List, Optional
-from iota_sdk.types.common import HexStr
+from typing import List, Optional
+from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
 from iota_sdk.utils import Utils
-from enum import Enum
-from dacite import from_dict
 
 
+@json
 @dataclass
 class Block:
     """Represent the object that nodes gossip around the network.
 
     Attributes:
-        protocolVersion: The protocol version with which this block was issued.
+        protocol_version: The protocol version with which this block was issued.
         parents: The parents of this block.
         payload: The optional payload of this block.
     """
 
-    protocolVersion: int
+    protocol_version: int
     parents: List[HexStr]
     payload: Optional[TaggedDataPayload |
                       TransactionPayload | MilestonePayload] = None
 
-    @classmethod
-    def from_dict(cls, block_dict: Dict) -> Block:
-        return from_dict(Block, block_dict)
-
     def id(self) -> HexStr:
         return Utils.block_id(self)
-
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
-
-        if 'payload' in config:
-            config['payload'] = config['payload'].as_dict()
-
-        return config
 
 
 class LedgerInclusionState(str, Enum):
@@ -90,35 +78,28 @@ class ConflictReason(Enum):
     semanticValidationFailed = 255,
 
 
+@json
 @dataclass
 class BlockMetadata:
     """Block Metadata.
 
     Attributes:
-        blockId: The id of the block.
+        block_id: The id of the block.
         parents: The parents of the block.
-        isSolid: Whether the block is solid.
-        referencedByMilestoneIndex: The milestone index referencing the block.
-        milestoneIndex: The milestone index if the block contains a milestone payload.
-        ledgerInclusionState: The ledger inclusion state of the block.
-        conflictReason: The optional conflict reason of the block.
-        shouldPromote: Whether the block should be promoted.
-        shouldReattach: Whether the block should be reattached.
+        is_solid: Whether the block is solid.
+        referenced_by_milestone_index: The milestone index referencing the block.
+        milestone_index: The milestone index if the block contains a milestone payload.
+        ledger_inclusion_state: The ledger inclusion state of the block.
+        conflict_reason: The optional conflict reason of the block.
+        should_promote: Whether the block should be promoted.
+        should_reattach: Whether the block should be reattached.
     """
-    blockId: HexStr
+    block_id: HexStr
     parents: List[HexStr]
-    isSolid: bool
-    referencedByMilestoneIndex: Optional[int] = None
-    milestoneIndex: Optional[int] = None
-    ledgerInclusionState: Optional[LedgerInclusionState] = None
-    conflictReason: Optional[ConflictReason] = None
-    shouldPromote: Optional[bool] = None
-    shouldReattach: Optional[bool] = None
-
-    @classmethod
-    def from_dict(cls, block_metadata_dict: Dict) -> BlockMetadata:
-        obj = cls.__new__(cls)
-        super(BlockMetadata, obj).__init__()
-        for k, v in block_metadata_dict.items():
-            setattr(obj, k, v)
-        return obj
+    is_solid: bool
+    referenced_by_milestone_index: Optional[int] = None
+    milestone_index: Optional[int] = None
+    ledger_inclusion_state: Optional[LedgerInclusionState] = None
+    conflict_reason: Optional[ConflictReason] = None
+    should_promote: Optional[bool] = None
+    should_reattach: Optional[bool] = None

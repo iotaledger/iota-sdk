@@ -5,18 +5,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
 
+@json
 @dataclass
 class Assets():
     """Assets for OutputParams.
     """
-    nativeTokens: Optional[List[NativeToken]] = None
-    nftId: Optional[HexStr] = None
+    native_tokens: Optional[List[NativeToken]] = None
+    nft_id: Optional[HexStr] = None
 
 
+@json
 @dataclass
 class Features():
     """Features for OutputParams.
@@ -27,12 +29,13 @@ class Features():
     sender: Optional[str] = None
 
 
+@json
 @dataclass
 class Unlocks():
     """Unlocks for OutputParams.
     """
-    expirationUnixTime: Optional[int] = None
-    timelockUnixTime: Optional[int] = None
+    expiration_unix_time: Optional[int] = None
+    timelock_unix_time: Optional[int] = None
 
 
 class ReturnStrategy(str, Enum):
@@ -42,21 +45,23 @@ class ReturnStrategy(str, Enum):
     Gift = 'Gift'
 
 
+@json
 @dataclass
 class StorageDeposit():
     """Storage deposit options for OutputParams.
     """
-    returnStrategy: Optional[ReturnStrategy] = None
-    useExcessIfLow: Optional[bool] = None
+    return_strategy: Optional[ReturnStrategy] = None
+    use_excess_if_low: Optional[bool] = None
 
 
+@json
 @dataclass
 class OutputParams():
     """Params for `Account.prepare_output()`.
     """
-    recipientAddress: str
+    recipient_address: str
     amount: str
     assets: Optional[Assets] = None
     features: Optional[Features] = None
     unlocks: Optional[Unlocks] = None
-    storageDeposit: Optional[StorageDeposit] = None
+    storage_deposit: Optional[StorageDeposit] = None
