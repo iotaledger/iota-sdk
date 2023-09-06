@@ -194,31 +194,31 @@ impl InputSelection {
     }
 
     /// Sets the required inputs of an [`InputSelection`].
-    pub fn required_inputs(mut self, inputs: impl Into<HashSet<OutputId>>) -> Self {
+    pub fn with_required_inputs(mut self, inputs: impl Into<HashSet<OutputId>>) -> Self {
         self.required_inputs = inputs.into();
         self
     }
 
     /// Sets the forbidden inputs of an [`InputSelection`].
-    pub fn forbidden_inputs(mut self, inputs: HashSet<OutputId>) -> Self {
+    pub fn with_forbidden_inputs(mut self, inputs: HashSet<OutputId>) -> Self {
         self.forbidden_inputs = inputs;
         self
     }
 
     /// Sets the burn of an [`InputSelection`].
-    pub fn burn(mut self, burn: impl Into<Option<Burn>>) -> Self {
+    pub fn with_burn(mut self, burn: impl Into<Option<Burn>>) -> Self {
         self.burn = burn.into();
         self
     }
 
     /// Sets the remainder address of an [`InputSelection`].
-    pub fn remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
+    pub fn with_remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
         self.remainder_address = address.into();
         self
     }
 
     /// Sets the slot index of an [`InputSelection`].
-    pub fn slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
+    pub fn with_slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
         self.slot_index = slot_index.into();
         self
     }

@@ -12,7 +12,7 @@ def test_feature():
         "data": "0x426c61"
     }
     metadata_feature = from_dict(MetadataFeature, feature_dict)
-    assert metadata_feature.as_dict() == feature_dict
+    assert metadata_feature.to_dict() == feature_dict
 
     issuer_dict = {
         "type": 1,
@@ -21,8 +21,8 @@ def test_feature():
             "pubKeyHash": "0xd970bcafdc18859b3fd3380f759bb520c36a29bd682b130623c6604ce3526ea1"
         }
     }
-    issuer_feature = from_dict(IssuerFeature, issuer_dict)
-    assert issuer_feature.as_dict() == issuer_dict
+    issuer_feature = IssuerFeature.from_dict(issuer_dict)
+    assert issuer_feature.to_dict() == issuer_dict
 
 
 def test_output():
@@ -39,8 +39,8 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(BasicOutput, basic_output_dict)
-    assert basic_output.as_dict() == basic_output_dict
+    basic_output = BasicOutput.from_dict(basic_output_dict)
+    assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
         "type": 3,
@@ -77,8 +77,8 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(BasicOutput, basic_output_dict)
-    assert basic_output.as_dict() == basic_output_dict
+    basic_output = BasicOutput.from_dict(basic_output_dict)
+    assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
         "type": 3,
@@ -103,8 +103,8 @@ def test_output():
             }
         ]
     }
-    basic_output = from_dict(BasicOutput, basic_output_dict)
-    assert basic_output.as_dict() == basic_output_dict
+    basic_output = BasicOutput.from_dict(basic_output_dict)
+    assert basic_output.to_dict() == basic_output_dict
 
     alias_output_dict = {
         "type": 4,
@@ -139,8 +139,8 @@ def test_output():
             }
         ]
     }
-    alias_output = from_dict(AliasOutput, alias_output_dict)
-    assert alias_output.as_dict() == alias_output_dict
+    alias_output = AliasOutput.from_dict(alias_output_dict)
+    assert alias_output.to_dict() == alias_output_dict
 
     alias_output_dict = {
         "type": 4,
@@ -179,8 +179,8 @@ def test_output():
             }
         ]
     }
-    alias_output = from_dict(AliasOutput, alias_output_dict)
-    assert alias_output.as_dict() == alias_output_dict
+    alias_output = AliasOutput.from_dict(alias_output_dict)
+    assert alias_output.to_dict() == alias_output_dict
 
     foundry_output_dict = {
         "type": 5,
@@ -208,8 +208,8 @@ def test_output():
             }
         ]
     }
-    foundry_output = from_dict(FoundryOutput, foundry_output_dict)
-    assert foundry_output.as_dict() == foundry_output_dict
+    foundry_output = FoundryOutput.from_dict(foundry_output_dict)
+    assert foundry_output.to_dict() == foundry_output_dict
 
     nft_output_dict = {
         "type": 6,
@@ -237,5 +237,5 @@ def test_output():
             }
         ]
     }
-    nft_output = from_dict(NftOutput, nft_output_dict)
-    assert nft_output.as_dict() == nft_output_dict
+    nft_output = NftOutput.from_dict(nft_output_dict)
+    assert nft_output.to_dict() == nft_output_dict

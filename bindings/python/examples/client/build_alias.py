@@ -38,4 +38,4 @@ alias_output = client.build_alias_output(
 )
 
 # Print the output
-print(json.dumps(alias_output.as_dict(), indent=4))
+print(json.dumps(alias_output.to_dict(), indent=4))

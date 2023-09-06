@@ -84,7 +84,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': burn.as_dict(),
+                'burn': burn.to_dict(),
                 'options': options
             },
         )
@@ -100,7 +100,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_native_token(NativeToken(token_id, hex(burn_amount))).as_dict(),
+                'burn': Burn().add_native_token(NativeToken(token_id, hex(burn_amount))).to_dict(),
                 'options': options
             },
         )
@@ -113,7 +113,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_nft(nft_id).as_dict(),
+                'burn': Burn().add_nft(nft_id).to_dict(),
                 'options': options
             },
         )
@@ -150,7 +150,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_alias(alias_id).as_dict(),
+                'burn': Burn().add_alias(alias_id).to_dict(),
                 'options': options
             },
         )
@@ -163,7 +163,7 @@ class Account:
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_foundry(foundry_id).as_dict(),
+                'burn': Burn().add_foundry(foundry_id).to_dict(),
                 'options': options
             },
         )
@@ -179,7 +179,7 @@ class Account:
                 'options': options
             }
         )
-        return [from_dict(AccountAddress, address) for address in addresses]
+        return [AccountAddress.from_dict(address) for address in addresses]
 
     def claimable_outputs(self, outputs_to_claim: List[OutputId]):
         """Get outputs with additional unlock conditions.
@@ -214,7 +214,7 @@ class Account:
         addresses = self._call_account_method(
             'addresses'
         )
-        return [from_dict(AccountAddress, address) for address in addresses]
+        return [AccountAddress.from_dict(address) for address in addresses]
 
     def addresses_with_unspent_outputs(
             self) -> List[AddressWithUnspentOutputs]:
@@ -223,7 +223,7 @@ class Account:
         addresses = self._call_account_method(
             'addressesWithUnspentOutputs'
         )
-        return [from_dict(AddressWithUnspentOutputs, address)
+        return [AddressWithUnspentOutputs.from_dict(address)
                 for address in addresses]
 
     def outputs(
@@ -235,7 +235,7 @@ class Account:
                 'filterOptions': filter_options
             }
         )
-        return [from_dict(OutputData, o) for o in outputs]
+        return [OutputData.from_dict(o) for o in outputs]
 
     def unspent_outputs(
             self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:

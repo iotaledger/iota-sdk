@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass, field
-from iota_sdk.types.common import HexStr, CoinType
+from iota_sdk.types.common import HexStr, CoinType, json
 
 
+@json
 @dataclass
 class Signature():
     """Base class of a signature.
@@ -12,31 +13,33 @@ class Signature():
     type: int
 
 
+@json
 @dataclass
 class Ed25519Signature(Signature):
     """An Ed25519 signature.
 
     Attributes:
-        publicKey: The Ed25519 public key.
+        public_key: The Ed25519 public key.
         signature: The Ed25519 signature of some message.
         type: The Ed25519 signature type.
     """
-    publicKey: HexStr
+    public_key: HexStr
     signature: HexStr
     type: int = field(default_factory=lambda: 0, init=False)
 
 
+@json
 @dataclass
 class Bip44():
     """A BIP44 chain.
 
     Attributes:
-        coinType: The coin type segment.
+        coin_type: The coin type segment.
         account: The account segment.
         change: The change segment.
-        addressIndex: The address index segment.
+        address_index: The address index segment.
     """
-    coinType: int = CoinType.IOTA
+    coin_type: int = CoinType.IOTA
     account: int = 0
     change: int = 0
-    addressIndex: int = 0
+    address_index: int = 0
