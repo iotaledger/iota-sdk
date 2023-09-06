@@ -24,4 +24,4 @@ params = [SendParams(
 )]
 
 transaction = account.send_with_params(params)
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

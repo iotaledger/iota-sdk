@@ -1,13 +1,17 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from enum import Enum
+from typing import Optional, List, Dict
+from dataclasses import dataclass
 from iota_sdk.types.burn import Burn
+from iota_sdk.types.common import json
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
-from enum import Enum
-from typing import Optional, List
 
 
+@json
+@dataclass
 class RemainderValueStrategyCustomAddress:
     """Remainder value strategy for custom addresses.
 
@@ -18,18 +22,14 @@ class RemainderValueStrategyCustomAddress:
         used: Indicates whether an address has been used already.
     """
 
-    def __init__(self,
-                 address: str,
-                 key_index: int,
-                 internal: bool,
-                 used: bool):
-        self.address = address
-        self.keyIndex = key_index
-        self.internal = internal
-        self.used = used
+    address: str
+    key_index: int
+    internal: bool
+    used: bool
 
-    def as_dict(self):
-        return dict({"strategy": "CustomAddress", "value": self.__dict__})
+    @staticmethod
+    def _to_dict_custom(config: Dict[str, any]) -> Dict[str, any]:
+        return dict({"strategy": "CustomAddress", "value": config})
 
 
 class RemainderValueStrategy(Enum):
@@ -42,10 +42,12 @@ class RemainderValueStrategy(Enum):
     ChangeAddress = None,
     ReuseAddress = None,
 
-    def as_dict(self):
+    def to_dict(self):
         return dict({"strategy": self.name, "value": self.value[0]})
 
 
+@json
+@dataclass
 class TransactionOptions():
     """Transaction options.
 
@@ -59,22 +61,11 @@ class TransactionOptions():
         allow_micro_amount: Whether to allow sending a micro amount.
     """
 
-    def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
-                 tagged_data_payload: Optional[TaggedDataPayload] = None,
-                 custom_inputs: Optional[List[OutputId]] = None,
-                 mandatory_inputs: Optional[List[OutputId]] = None,
-                 burn: Optional[Burn] = None,
-                 note: Optional[str] = None,
-                 allow_micro_amount: Optional[bool] = None):
-        """Initialize transaction options.
-        """
-        self.remainder_value_strategy = remainder_value_strategy
-        self.tagged_data_payload = tagged_data_payload
-        self.custom_inputs = custom_inputs
-        self.mandatory_inputs = mandatory_inputs
-        self.burn = burn
-        self.note = note
-        self.allow_micro_amount = allow_micro_amount
-
-    def as_dict(self):
-        return dict(self.__dict__)
+    remainder_value_strategy: Optional[RemainderValueStrategy |
+                                       RemainderValueStrategyCustomAddress] = None
+    tagged_data_payload: Optional[TaggedDataPayload] = None
+    custom_inputs: Optional[List[OutputId]] = None
+    mandatory_inputs: Optional[List[OutputId]] = None
+    burn: Optional[Burn] = None
+    note: Optional[str] = None
+    allow_micro_amount: Optional[bool] = None

@@ -37,10 +37,10 @@ basic_output = Client().build_basic_output(
 )
 
 transaction = account.send_outputs([basic_output])
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

@@ -33,8 +33,8 @@ native_tokens = []
 for output_with_metadata in outputs:
     output = output_with_metadata.output
     total_amount += int(output.amount)
-    if output.nativeTokens:
-        native_tokens.append(output.nativeTokens)
+    if output.native_tokens:
+        native_tokens.append(output.native_tokens)
 
 print(
     f'Outputs controlled by {address} have {total_amount} glow and native tokens: {native_tokens}')
