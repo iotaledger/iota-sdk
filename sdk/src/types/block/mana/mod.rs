@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-pub mod allotment;
+mod allotment;
+mod protocol;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
@@ -10,7 +11,10 @@ use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-pub use self::allotment::ManaAllotment;
+pub use self::{
+    allotment::{dto::ManaAllotmentDto, ManaAllotment},
+    protocol::ManaStructure,
+};
 use super::{output::AccountId, protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =

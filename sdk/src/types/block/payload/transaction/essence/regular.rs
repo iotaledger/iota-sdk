@@ -428,7 +428,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{mana::allotment::dto::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 

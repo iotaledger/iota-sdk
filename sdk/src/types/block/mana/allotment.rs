@@ -70,7 +70,7 @@ impl Packable for ManaAllotment {
 }
 
 #[cfg(feature = "serde")]
-pub mod dto {
+pub(super) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
