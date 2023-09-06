@@ -15,6 +15,7 @@ class InputType(IntEnum):
     """
     Utxo = 0
 
+
 @json
 @dataclass
 class UtxoInput:
@@ -28,5 +29,3 @@ class UtxoInput:
     type: int
     transaction_id: HexStr
     transaction_output_index: int
-
-
