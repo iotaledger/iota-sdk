@@ -99,19 +99,17 @@ export class WalletMethodHandler {
      * @param eventTypes The wallet event types to listen for.
      * @param callback The callback function to call when an event is received.
      */
-    listen(
+    async listen(
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
-    ): void {
-        try {
-            listenWalletAsync(eventTypes, callback, this.methodHandler).catch(
-                (error: any) => {
-                    throw errorHandle(error);
-                },
-            );
-        } catch (error: any) {
+    ): Promise<void> {
+        return listenWalletAsync(
+            eventTypes,
+            callback,
+            this.methodHandler,
+        ).catch((error: any) => {
             throw errorHandle(error);
-        }
+        });
     }
 
     /**
@@ -131,7 +129,7 @@ export class WalletMethodHandler {
      */
     getSecretManager(): SecretManager {
         try {
-            const result = getSecretManagerFromWallet(this.methodHandler);
+            let result = getSecretManagerFromWallet(this.methodHandler);
             return new SecretManager(result);
         } catch (error: any) {
             throw errorHandle(error);

@@ -148,13 +148,16 @@ pub async fn listen_wallet(
     // Spawn on the same thread a continuous loop to check the channel
     wasm_bindgen_futures::spawn_local(async move {
         while let Some(wallet_event) = rx.recv().await {
-            callback
-                .call1(
-                    &JsValue::NULL,
-                    &JsValue::from(serde_json::to_string(&wallet_event).unwrap()),
-                )
-                // Safe to unwrap, our callback has no return
-                .unwrap();
+            let res = callback.call2(
+                &JsValue::NULL,
+                &JsValue::UNDEFINED,
+                &JsValue::from(serde_json::to_string(&wallet_event).unwrap()),
+            );
+            // Call callback again with the error this time, to prevent wasm crashing.
+            // This does mean the callback is called a second time instead of once.
+            if let Err(e) = res {
+                callback.call2(&JsValue::NULL, &e, &JsValue::UNDEFINED).unwrap();
+            }
         }
         // No more links to the unbounded_channel, exit loop
     });

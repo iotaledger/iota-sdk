@@ -199,11 +199,11 @@ export class Wallet {
     /**
      * Listen to wallet events with a callback. An empty array will listen to all possible events.
      */
-    listen(
+    async listen(
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
-    ): void {
-        this.methodHandler.listen(eventTypes, callback);
+    ): Promise<void> {
+        return this.methodHandler.listen(eventTypes, callback);
     }
 
     /**
