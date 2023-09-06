@@ -51,7 +51,7 @@ def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
 
 # Create the metadata with another index for each
 nft_mint_params = list(map(lambda index: MintNftParams(
-    immutableMetadata=utf8_to_hex(
+    immutable_metadata=utf8_to_hex(
         get_immutable_metadata(index, issuer_nft_id)),
     issuer=issuer
 ), range(NFT_COLLECTION_SIZE)))
@@ -65,7 +65,7 @@ while nft_mint_params:
 
     # Wait for transaction to get included
     block_id = account.reissue_transaction_until_included(
-        transaction.transactionId)
+        transaction.transaction_id)
 
     print(
         f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

@@ -119,7 +119,7 @@ class Utils():
         """Compute the input commitment from the output objects that are used as inputs to fund the transaction.
         """
         return _call_method('computeInputsCommitment', {
-            'inputs': [i.as_dict() for i in inputs]
+            'inputs': [i.to_dict() for i in inputs]
         })
 
     @staticmethod
@@ -164,7 +164,7 @@ class Utils():
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block.as_dict()
+            'block': block.to_dict()
         })
 
     @staticmethod

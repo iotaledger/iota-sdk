@@ -366,7 +366,7 @@ async fn all_combined() -> Result<()> {
         ],
         protocol_parameters.clone(),
     )
-    .slot_index(slot_index)
+    .with_slot_index(slot_index)
     .select()
     .unwrap();
 

@@ -217,7 +217,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .remainder_address(remainder_address)
+    .with_remainder_address(remainder_address)
     .select()
     .unwrap();
 
@@ -1196,7 +1196,7 @@ fn sender_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1235,7 +1235,7 @@ fn single_mandatory_input() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 

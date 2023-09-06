@@ -29,4 +29,4 @@ output = client.build_foundry_output(
 )
 
 # Print the output
-print(json.dumps(output.as_dict(), indent=4))
+print(json.dumps(output.to_dict(), indent=4))

@@ -17,7 +17,7 @@ balance = account.sync()
 token_id = balance.foundries[0]
 
 available_balance = int(
-    [native_balance for native_balance in balance.nativeTokens if native_balance.tokenId == token_id][0].available, 0)
+    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token_id][0].available, 0)
 print(f'Balance before melting: {available_balance}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
@@ -29,14 +29,14 @@ melt_amount = 10
 
 # Send transaction.
 transaction = account.prepare_melt_native_token(token_id, melt_amount).send()
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-blockId = account.reissue_transaction_until_included(
-    transaction.transactionId)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+block_id = account.reissue_transaction_until_included(
+    transaction.transaction_id)
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = account.sync()
 available_balance = int(
-    [native_balance for native_balance in balance.nativeTokens if native_balance.tokenId == token_id][0].available, 0)
+    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token_id][0].available, 0)
 print(f'Balance after melting: {available_balance}')
