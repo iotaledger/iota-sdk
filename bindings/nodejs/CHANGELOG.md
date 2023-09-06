@@ -19,11 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.9 - 2023-MM-DD
+## 1.0.9 - 2023-09-06
 
 ### Added
 
 - `IClientOptions::maxParallelApiRequests`;
+
+### Fixed
+
+- The main thread gets blocked when calling client or wallet methods;
 
 ## 1.0.8 - 2023-09-05
 
