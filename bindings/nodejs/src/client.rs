@@ -86,7 +86,6 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let method_handler = Arc::clone(&cx.argument::<JsBox<ClientMethodHandlerWrapper>>(1)?.0);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
-    let (sender, receiver) = std::sync::mpsc::channel();
     crate::RUNTIME.spawn(async move {
         if let Some(method_handler) = &*method_handler.read().await {
             let (response, is_error) = method_handler.call_method(method).await;
@@ -108,17 +107,9 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 Ok(())
             });
         } else {
-            // Notify that the client got destroyed
-            // Safe to unwrap because the receiver is waiting on it
-            sender.send(()).unwrap();
+            panic!("Client handler got destroyed")
         }
     });
-
-    if receiver.recv().is_ok() {
-        return cx.throw_error(
-            serde_json::to_string(&Response::Panic("Client got destroyed".to_string())).expect("json to string error"),
-        );
-    }
 
     Ok(cx.undefined())
 }
