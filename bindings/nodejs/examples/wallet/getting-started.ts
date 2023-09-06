@@ -1,7 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const { AccountManager, CoinType } = require('@iota/wallet');
+import { Wallet, CoinType, WalletOptions, Utils } from '@iota/sdk';
+
+// Run with command:
+// yarn run-example ./wallet/getting-started.ts
+
+// The database path.
+const WALLET_DB_PATH = 'getting-started-db';
 
 // A name to associate with the created account.
 const ACCOUNT_ALIAS = 'Alice';
@@ -17,11 +23,10 @@ const STRONGHOLD_PASSWORD = 'a-secure-password';
 const STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold';
 
 async function main() {
-    // Set up and store the wallet.
-    const accountManagerOptions = {
+    const walletOptions: WalletOptions = {
+        storagePath: WALLET_DB_PATH,
         clientOptions: {
             nodes: [NODE_URL],
-            localPow: true,
         },
         coinType: CoinType.Shimmer,
         secretManager: {
@@ -32,22 +37,22 @@ async function main() {
         },
     };
 
-    const manager = new AccountManager(accountManagerOptions);
+    const wallet = new Wallet(walletOptions);
 
     // Generate a mnemonic and store its seed in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
-    const mnemonic = await manager.generateMnemonic();
-    console.log("Mnemonic:" + mnemonic);
-    await manager.storeMnemonic(mnemonic);
+    const mnemonic = Utils.generateMnemonic();
+    console.log('Mnemonic:' + mnemonic);
+    await wallet.storeMnemonic(mnemonic);
 
     // Create an account.
-    const account = await manager.createAccount({
+    const account = await wallet.createAccount({
         alias: ACCOUNT_ALIAS,
     });
 
     // Get the first address and print it.
-    const address = await account.addresses().then(addresses => addresses[0]);
-    console.log(`Address:\n${address.address}\n`);
+    const address = (await account.addresses())[0];
+    console.log(`Address: ${address.address}\n`);
 
     process.exit(0);
 }
