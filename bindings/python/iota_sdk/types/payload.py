@@ -2,15 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from iota_sdk.types.common import HexStr
+from enum import IntEnum
+from typing import Optional, List
+
+from dataclasses import dataclass, field
+
+from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
-from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
-from dacite import from_dict
-from dataclasses import dataclass, field
-from enum import IntEnum
-from typing import Any, Optional, List
 
 
 class PayloadType(IntEnum):
@@ -28,60 +28,33 @@ class PayloadType(IntEnum):
     Milestone = 7
 
 
+@json
 @dataclass
 class TransactionEssence:
     type: int
 
 
+@json
 @dataclass
 class RegularTransactionEssence(TransactionEssence):
-    networkId: str
-    inputsCommitment: HexStr
+    network_id: str
+    inputs_commitment: HexStr
     inputs: List[UtxoInput]
     outputs: List[AliasOutput | FoundryOutput | NftOutput | BasicOutput]
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: 1, init=False)
 
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        if 'payload' in config:
-            config['payload'] = config['payload'].as_dict()
-
-        config['inputs'] = list(map(
-            lambda x: x.__dict__, config['inputs']))
-
-        config['outputs'] = list(map(
-            lambda x: x.as_dict(), config['outputs']))
-
-        return config
-
-
+@json
 @dataclass
 class Payload():
     """Initialize a Payload.
     """
     type: int
 
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        if 'essence' in config:
-            config['essence'] = config['essence'].as_dict()
-        if 'unlocks' in config:
-            def convert_to_dict(c):
-                try:
-                    return c.as_dict()
-                except AttributeError:
-                    return c.__dict__
-            config['unlocks'] = list(map(convert_to_dict, config['unlocks']))
-        if 'signatures' in config:
-            config['signatures'] = list(map(
-                lambda x: x.__dict__, config['signatures']))
-
-        return config
-
-
+@json
+@dataclass
 class TaggedDataPayload(Payload):
     """A tagged data payload.
 
@@ -97,6 +70,7 @@ class TaggedDataPayload(Payload):
         init=False)
 
 
+@json
 @dataclass
 class TransactionPayload(Payload):
     """A transaction payload.

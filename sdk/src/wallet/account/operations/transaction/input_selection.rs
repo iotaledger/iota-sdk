@@ -13,6 +13,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{Output, OutputId},
+        slot::SlotIndex,
     },
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account, AccountDetails, OutputData,
@@ -47,7 +48,7 @@ where
         )
         .await;
 
-        let current_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
         #[allow(unused_mut)]
         let mut forbidden_inputs = account_details.locked_outputs.clone();
 
@@ -74,7 +75,7 @@ where
         let available_outputs_signing_data = filter_inputs(
             &account_details,
             account_details.unspent_outputs.values(),
-            current_time,
+            slot_index,
             &outputs,
             burn,
             custom_inputs.as_ref(),
@@ -99,15 +100,15 @@ where
                 addresses,
                 protocol_parameters.clone(),
             )
-            .required_inputs(custom_inputs)
-            .forbidden_inputs(forbidden_inputs);
+            .with_required_inputs(custom_inputs)
+            .with_forbidden_inputs(forbidden_inputs);
 
             if let Some(address) = remainder_address {
-                input_selection = input_selection.remainder_address(address);
+                input_selection = input_selection.with_remainder_address(address);
             }
 
             if let Some(burn) = burn {
-                input_selection = input_selection.burn(burn.clone());
+                input_selection = input_selection.with_burn(burn.clone());
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -134,15 +135,15 @@ where
                 addresses,
                 protocol_parameters.clone(),
             )
-            .required_inputs(mandatory_inputs)
-            .forbidden_inputs(forbidden_inputs);
+            .with_required_inputs(mandatory_inputs)
+            .with_forbidden_inputs(forbidden_inputs);
 
             if let Some(address) = remainder_address {
-                input_selection = input_selection.remainder_address(address);
+                input_selection = input_selection.with_remainder_address(address);
             }
 
             if let Some(burn) = burn {
-                input_selection = input_selection.burn(burn.clone());
+                input_selection = input_selection.with_burn(burn.clone());
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -166,14 +167,14 @@ where
             addresses,
             protocol_parameters.clone(),
         )
-        .forbidden_inputs(forbidden_inputs);
+        .with_forbidden_inputs(forbidden_inputs);
 
         if let Some(address) = remainder_address {
-            input_selection = input_selection.remainder_address(address);
+            input_selection = input_selection.with_remainder_address(address);
         }
 
         if let Some(burn) = burn {
-            input_selection = input_selection.burn(burn.clone());
+            input_selection = input_selection.with_burn(burn.clone());
         }
 
         let selected_transaction_data = match input_selection.select() {
@@ -225,7 +226,7 @@ where
 fn filter_inputs(
     account: &AccountDetails,
     available_outputs: Values<'_, OutputId, OutputData>,
-    current_time: u32,
+    slot_index: SlotIndex,
     outputs: &[Output],
     burn: Option<&Burn>,
     custom_inputs: Option<&HashSet<OutputId>>,
@@ -246,7 +247,7 @@ fn filter_inputs(
                 // account without unspent outputs can't be related to this output
                 &account.addresses_with_unspent_outputs,
                 &output_data.output,
-                current_time,
+                slot_index,
             );
 
             // Outputs that could get unlocked in the future will not be included
@@ -258,9 +259,7 @@ fn filter_inputs(
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
         let account_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
 
-        if let Some(available_input) =
-            output_data.input_signing_data(account, current_time, account_state_transition)?
-        {
+        if let Some(available_input) = output_data.input_signing_data(account, slot_index, account_state_transition)? {
             available_outputs_signing_data.push(available_input);
         }
     }

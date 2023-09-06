@@ -3,12 +3,12 @@
 
 use derive_more::From;
 
-use crate::types::block::Error;
+use crate::types::block::{slot::SlotIndex, Error};
 
-/// Defines a unix timestamp until which the output can not be unlocked.
+/// Defines a slot index until which the output can not be unlocked.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[packable(unpack_error = Error)]
-pub struct TimelockUnlockCondition(#[packable(verify_with = verify_timestamp)] u32);
+pub struct TimelockUnlockCondition(#[packable(verify_with = verify_slot_index)] SlotIndex);
 
 impl TimelockUnlockCondition {
     /// The [`UnlockCondition`](crate::types::block::output::UnlockCondition) kind of a [`TimelockUnlockCondition`].
@@ -16,22 +16,24 @@ impl TimelockUnlockCondition {
 
     /// Creates a new [`TimelockUnlockCondition`].
     #[inline(always)]
-    pub fn new(timestamp: u32) -> Result<Self, Error> {
-        verify_timestamp::<true>(&timestamp, &())?;
+    pub fn new(slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
+        let slot_index = slot_index.into();
 
-        Ok(Self(timestamp))
+        verify_slot_index::<true>(&slot_index, &())?;
+
+        Ok(Self(slot_index))
     }
 
-    /// Returns the timestamp of a [`TimelockUnlockCondition`].
+    /// Returns the slot index of a [`TimelockUnlockCondition`].
     #[inline(always)]
-    pub fn timestamp(&self) -> u32 {
+    pub fn slot_index(&self) -> SlotIndex {
         self.0
     }
 }
 
 #[inline]
-fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), Error> {
-    if VERIFY && *timestamp == 0 {
+fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {
+    if VERIFY && *slot_index == 0 {
         Err(Error::TimelockUnlockConditionZero)
     } else {
         Ok(())
@@ -49,15 +51,14 @@ pub(crate) mod dto {
     struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
         kind: u8,
-        #[serde(rename = "unixTime")]
-        timestamp: u32,
+        slot_index: u64,
     }
 
     impl From<&TimelockUnlockCondition> for TimelockUnlockConditionDto {
         fn from(value: &TimelockUnlockCondition) -> Self {
             Self {
                 kind: TimelockUnlockCondition::KIND,
-                timestamp: value.timestamp(),
+                slot_index: *value.slot_index(),
             }
         }
     }
@@ -66,7 +67,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: TimelockUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.timestamp).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
+            Self::new(SlotIndex::from(value.slot_index)).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
 

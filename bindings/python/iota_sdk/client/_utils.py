@@ -48,7 +48,7 @@ class ClientUtils():
         """
         return int(self._call_method(
             'minimumRequiredStorageDeposit', {
-                'output': output.as_dict()
+                'output': output.to_dict()
             }
         ))
 

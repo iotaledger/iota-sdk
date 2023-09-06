@@ -7,6 +7,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
         output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
+        slot::SlotIndex,
     },
     wallet::{
         account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
@@ -329,8 +330,8 @@ async fn output_preparation() -> Result<()> {
                     sender: Some(issuer_and_sender_address),
                 }),
                 unlocks: Some(Unlocks {
-                    expiration_unix_time: Some(1),
-                    timelock_unix_time: Some(1),
+                    expiration_slot_index: Some(SlotIndex::from(1)),
+                    timelock_slot_index: Some(SlotIndex::from(1)),
                 }),
                 storage_deposit: None,
             },
@@ -373,8 +374,8 @@ async fn output_preparation() -> Result<()> {
                     sender: None,
                 }),
                 unlocks: Some(Unlocks {
-                    expiration_unix_time: Some(1),
-                    timelock_unix_time: None,
+                    expiration_slot_index: Some(SlotIndex::from(1)),
+                    timelock_slot_index: None,
                 }),
                 storage_deposit: None,
             },

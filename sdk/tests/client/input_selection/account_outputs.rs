@@ -325,7 +325,7 @@ fn burn_account() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_2))
+    .with_burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
 
@@ -1160,7 +1160,7 @@ fn account_burn_should_not_validate_account_sender() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1205,7 +1205,7 @@ fn account_burn_should_not_validate_account_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1536,7 +1536,7 @@ fn state_controller_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1590,7 +1590,7 @@ fn state_controller_sender_required_but_governance() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1702,7 +1702,7 @@ fn governor_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1744,7 +1744,7 @@ fn governance_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1786,7 +1786,7 @@ fn state_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1840,7 +1840,7 @@ fn governor_sender_required_but_state() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1992,7 +1992,7 @@ fn remainder_address_in_governor() {
         protocol_parameters,
     )
     // Add the basic output so it will be consumed
-    .required_inputs([*inputs[1].output_id()])
+    .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 
@@ -2216,7 +2216,7 @@ fn burn_account_but_governor_not_owned() {
         addresses([BECH32_ADDRESS_ED25519_2]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(

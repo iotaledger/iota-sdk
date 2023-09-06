@@ -302,7 +302,7 @@ impl BasicOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.milestone_timestamp)
+            .locked_address(self.address(), context.essence.creation_slot())
             .unlock(unlock, inputs, context)
     }
 

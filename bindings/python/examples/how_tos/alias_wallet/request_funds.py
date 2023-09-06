@@ -15,7 +15,7 @@ wallet = Wallet(os.environ['WALLET_DB_PATH'])
 account = wallet.get_account('Alice')
 balance = account.sync(None)
 
-total_base_token_balance = balance.baseCoin.total
+total_base_token_balance = balance.base_coin.total
 print(
     f'Balance before requesting funds on alias address: {total_base_token_balance}')
 
@@ -33,6 +33,6 @@ time.sleep(10)
 
 sync_options = SyncOptions(alias=AliasSyncOptions(basic_outputs=True))
 
-total_base_token_balance = account.sync(sync_options).baseCoin.total
+total_base_token_balance = account.sync(sync_options).base_coin.total
 print(
     f'Balance after requesting funds on alias address: {total_base_token_balance}')

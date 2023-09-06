@@ -85,11 +85,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             del client_config["client_handle"]
 
         if isinstance(nodes, list):
-            nodes = [node.as_dict() if isinstance(node, Node)
+            nodes = [node.to_dict() if isinstance(node, Node)
                      else node for node in nodes]
         elif nodes:
             if isinstance(nodes, Node):
-                nodes = [nodes.as_dict()]
+                nodes = [nodes.to_dict()]
             else:
                 nodes = [nodes]
         client_config['nodes'] = nodes
@@ -177,17 +177,17 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The alias output as dict.
         """
 
-        unlock_conditions = [unlock_condition.as_dict()
+        unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict()
+            native_tokens = [native_token.to_dict()
                              for native_token in native_tokens]
 
         if features:
-            features = [feature.as_dict() for feature in features]
+            features = [feature.to_dict() for feature in features]
         if immutable_features:
-            immutable_features = [immutable_feature.as_dict()
+            immutable_features = [immutable_feature.to_dict()
                                   for immutable_feature in immutable_features]
 
         if amount:
@@ -222,15 +222,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The basic output as dict.
         """
 
-        unlock_conditions = [unlock_condition.as_dict()
+        unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict()
+            native_tokens = [native_token.to_dict()
                              for native_token in native_tokens]
 
         if features:
-            features = [feature.as_dict() for feature in features]
+            features = [feature.to_dict() for feature in features]
 
         if amount:
             amount = str(amount)
@@ -265,7 +265,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The foundry output as dict.
         """
 
-        unlock_conditions = [unlock_condition.as_dict()
+        unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
@@ -273,9 +273,9 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              for native_token in native_tokens]
 
         if features:
-            features = [feature.as_dict() for feature in features]
+            features = [feature.to_dict() for feature in features]
         if immutable_features:
-            immutable_features = [immutable_feature.as_dict()
+            immutable_features = [immutable_feature.to_dict()
                                   for immutable_feature in immutable_features]
 
         if amount:
@@ -283,7 +283,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         return output_from_dict(self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
-            'tokenScheme': token_scheme.as_dict(),
+            'tokenScheme': token_scheme.to_dict(),
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'nativeTokens': native_tokens,
@@ -312,7 +312,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The NFT output as dict.
         """
 
-        unlock_conditions = [unlock_condition.as_dict()
+        unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
 
         if native_tokens:
@@ -320,9 +320,9 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              for native_token in native_tokens]
 
         if features:
-            features = [feature.as_dict() for feature in features]
+            features = [feature.to_dict() for feature in features]
         if immutable_features:
-            immutable_features = [immutable_feature.as_dict()
+            immutable_features = [immutable_feature.to_dict()
                                   for immutable_feature in immutable_features]
 
         if amount:
@@ -345,7 +345,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def get_network_info(self) -> NetworkInfo:
         """Gets the network related information such as network_id.
         """
-        return from_dict(NetworkInfo, self._call_method('getNetworkInfo'))
+        return NetworkInfo.from_dict(self._call_method('getNetworkInfo'))
 
     def get_network_id(self) -> int:
         """Gets the network id of the node we're connecting to.
@@ -385,7 +385,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             List of HexStr or Block.
         """
         result = self._call_method('postBlockPayload', {
-            'payload': payload.as_dict()
+            'payload': payload.to_dict()
         })
         result[1] = Block.from_dict(result[1])
         return result
