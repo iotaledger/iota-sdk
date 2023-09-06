@@ -48,6 +48,7 @@ pub struct ClientBuilder {
     #[cfg(not(target_family = "wasm"))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pow_worker_count: Option<usize>,
+    /// The maximum parallel API requests
     #[cfg(not(target_family = "wasm"))]
     #[serde(default = "default_max_parallel_api_requests")]
     pub max_parallel_api_requests: usize,
