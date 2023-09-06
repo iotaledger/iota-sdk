@@ -75,6 +75,333 @@ impl core::fmt::Debug for MetadataFeature {
 }
 
 #[cfg(feature = "serde")]
+pub(crate) mod irc_27 {
+    use alloc::collections::{BTreeMap, BTreeSet};
+
+    use getset::Getters;
+    use serde::{Deserialize, Serialize};
+    use url::Url;
+
+    use super::*;
+    use crate::types::block::address::Bech32Address;
+
+    /// The IRC27 NFT standard schema.
+    #[derive(Clone, Debug, Serialize, Deserialize, Getters, PartialEq)]
+    #[serde(rename_all = "camelCase")]
+    #[serde(tag = "standard", rename = "IRC27")]
+    #[getset(get = "pub")]
+    pub struct Irc27Metadata {
+        version: String,
+        /// The media type (MIME) of the asset.
+        ///
+        /// ## Examples
+        /// - Image files: `image/jpeg`, `image/png`, `image/gif`, etc.
+        /// - Video files: `video/x-msvideo` (avi), `video/mp4`, `video/mpeg`, etc.
+        /// - Audio files: `audio/mpeg`, `audio/wav`, etc.
+        /// - 3D Assets: `model/obj`, `model/u3d`, etc.
+        /// - Documents: `application/pdf`, `text/plain`, etc.
+        #[serde(rename = "type")]
+        media_type: String,
+        /// URL pointing to the NFT file location.
+        uri: Url,
+        /// The human-readable name of the native token.
+        name: String,
+        /// The human-readable collection name of the native token.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        collection_name: Option<String>,
+        /// Royalty payment addresses mapped to the payout percentage.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        royalties: BTreeMap<Bech32Address, f64>,
+        /// The human-readable name of the native token creator.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        issuer_name: Option<String>,
+        /// The human-readable description of the token.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        description: Option<String>,
+        /// Additional attributes which follow [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards).
+        #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+        attributes: BTreeSet<Attribute>,
+    }
+
+    impl Irc27Metadata {
+        pub fn new(media_type: impl Into<String>, uri: Url, name: impl Into<String>) -> Self {
+            Self {
+                version: "v1.0".to_owned(),
+                media_type: media_type.into(),
+                uri,
+                name: name.into(),
+                collection_name: Default::default(),
+                royalties: Default::default(),
+                issuer_name: Default::default(),
+                description: Default::default(),
+                attributes: Default::default(),
+            }
+        }
+
+        pub fn with_collection_name(mut self, collection_name: impl Into<String>) -> Self {
+            self.collection_name.replace(collection_name.into());
+            self
+        }
+
+        pub fn add_royalty(mut self, address: Bech32Address, percentage: f64) -> Self {
+            self.royalties.insert(address, percentage);
+            self
+        }
+
+        pub fn with_royalties(mut self, royalties: BTreeMap<Bech32Address, f64>) -> Self {
+            self.royalties = royalties;
+            self
+        }
+
+        pub fn with_issuer_name(mut self, issuer_name: impl Into<String>) -> Self {
+            self.issuer_name.replace(issuer_name.into());
+            self
+        }
+
+        pub fn with_description(mut self, description: impl Into<String>) -> Self {
+            self.description.replace(description.into());
+            self
+        }
+
+        pub fn add_attribute(mut self, attribute: Attribute) -> Self {
+            self.attributes.insert(attribute);
+            self
+        }
+
+        pub fn with_attributes(mut self, attributes: BTreeSet<Attribute>) -> Self {
+            self.attributes = attributes;
+            self
+        }
+
+        pub fn to_bytes(&self) -> Vec<u8> {
+            serde_json::to_string(self).unwrap().into_bytes()
+        }
+    }
+
+    impl TryFrom<Irc27Metadata> for MetadataFeature {
+        type Error = Error;
+        fn try_from(value: Irc27Metadata) -> Result<Self, Error> {
+            Self::new(value.to_bytes())
+        }
+    }
+
+    #[derive(Clone, Debug, Serialize, Deserialize, Getters, PartialEq, Eq)]
+    #[getset(get = "pub")]
+
+    pub struct Attribute {
+        trait_type: String,
+        value: serde_json::Value,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        display_type: Option<String>,
+    }
+
+    impl Attribute {
+        pub fn new(trait_type: impl Into<String>, value: impl Into<serde_json::Value>) -> Self {
+            Self {
+                trait_type: trait_type.into(),
+                display_type: None,
+                value: value.into(),
+            }
+        }
+
+        pub fn with_display_type(mut self, display_type: impl Into<String>) -> Self {
+            self.display_type.replace(display_type.into());
+            self
+        }
+    }
+
+    impl Ord for Attribute {
+        fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+            self.trait_type.cmp(&other.trait_type)
+        }
+    }
+    impl PartialOrd for Attribute {
+        fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    impl core::hash::Hash for Attribute {
+        fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+            self.trait_type.hash(state);
+        }
+    }
+
+    #[cfg(test)]
+    mod test {
+        use super::*;
+        use crate::types::block::{address::ToBech32Ext, rand::address::rand_address};
+
+        #[test]
+        fn serialization() {
+            let address_1 = rand_address().to_bech32_unchecked("iota1");
+            let address_2 = rand_address().to_bech32_unchecked("iota1");
+            let json = serde_json::json!(
+                {
+                    "standard": "IRC27",
+                    "version": "v1.0",
+                    "type": "image/jpeg",
+                    "uri": "https://mywebsite.com/my-nft-files-1.jpeg",
+                    "name": "My NFT #0001",
+                    "collectionName": "My Collection of Art",
+                    "royalties": {
+                        address_1.to_string(): 0.025,
+                        address_2.to_string(): 0.025
+                    },
+                    "issuerName": "My Artist Name",
+                    "description": "A little information about my NFT collection",
+                    "attributes": [
+                        {
+                            "trait_type": "Attack",
+                            "value": 150
+                        },
+                        {
+                            "trait_type": "Background",
+                            "value": "Purple"
+                        },
+                        {
+                            "trait_type": "Element",
+                            "value": "Water"
+                        },
+                        {
+                            "trait_type": "Health",
+                            "value": 500
+                        }
+                    ]
+                  }
+            );
+            let metadata_deser = serde_json::from_value::<Irc27Metadata>(json.clone()).unwrap();
+            let metadata = Irc27Metadata::new(
+                "image/jpeg",
+                "https://mywebsite.com/my-nft-files-1.jpeg".parse().unwrap(),
+                "My NFT #0001",
+            )
+            .with_collection_name("My Collection of Art")
+            .add_royalty(address_1, 0.025)
+            .add_royalty(address_2, 0.025)
+            .with_issuer_name("My Artist Name")
+            .with_description("A little information about my NFT collection")
+            .add_attribute(Attribute::new("Background", "Purple"))
+            .add_attribute(Attribute::new("Element", "Water"))
+            .add_attribute(Attribute::new("Attack", 150))
+            .add_attribute(Attribute::new("Health", 500));
+            assert_eq!(metadata, metadata_deser);
+            assert_eq!(json, serde_json::to_value(metadata).unwrap())
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+pub(crate) mod irc_30 {
+    use getset::Getters;
+    use serde::{Deserialize, Serialize};
+    use url::Url;
+
+    use super::*;
+
+    /// The IRC30 NFT standard schema.
+    #[derive(Clone, Debug, Serialize, Deserialize, Getters, PartialEq, Eq)]
+    #[serde(rename_all = "camelCase")]
+    #[serde(tag = "standard", rename = "IRC30")]
+    #[getset(get = "pub")]
+    pub struct Irc30Metadata {
+        /// The human-readable name of the native token.
+        name: String,
+        /// The human-readable description of the token.
+        description: String,
+        /// The symbol/ticker of the token.
+        symbol: String,
+        /// Number of decimals the token uses (divide the token amount by 10^decimals to get its user representation).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        decimals: Option<u32>,
+        /// URL pointing to more resources about the token.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        url: Option<Url>,
+        /// URL pointing to an image resource of the token logo.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        logo_url: Option<Url>,
+        /// The svg logo of the token encoded as a byte string.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        logo: Option<String>,
+    }
+
+    impl Irc30Metadata {
+        pub fn new(name: impl Into<String>, description: impl Into<String>, symbol: impl Into<String>) -> Self {
+            Self {
+                name: name.into(),
+                description: description.into(),
+                symbol: symbol.into(),
+                decimals: Default::default(),
+                url: Default::default(),
+                logo_url: Default::default(),
+                logo: Default::default(),
+            }
+        }
+
+        pub fn with_decimals(mut self, decimals: u32) -> Self {
+            self.decimals.replace(decimals);
+            self
+        }
+
+        pub fn with_url(mut self, url: Url) -> Self {
+            self.url.replace(url);
+            self
+        }
+
+        pub fn with_logo_url(mut self, logo_url: Url) -> Self {
+            self.logo_url.replace(logo_url);
+            self
+        }
+
+        pub fn with_logo(mut self, logo: impl Into<String>) -> Self {
+            self.logo.replace(logo.into());
+            self
+        }
+
+        pub fn to_bytes(&self) -> Vec<u8> {
+            serde_json::to_string(self).unwrap().into_bytes()
+        }
+    }
+
+    impl TryFrom<Irc30Metadata> for MetadataFeature {
+        type Error = Error;
+        fn try_from(value: Irc30Metadata) -> Result<Self, Error> {
+            Self::new(value.to_bytes())
+        }
+    }
+
+    #[cfg(test)]
+    mod test {
+        use super::*;
+
+        #[test]
+        fn serialization() {
+            let json = serde_json::json!(
+                {
+                    "standard": "IRC30",
+                    "name": "FooCoin",
+                    "description": "FooCoin is the utility and governance token of FooLand, a revolutionary protocol in the play-to-earn crypto gaming field.",
+                    "symbol": "FOO",
+                    "decimals": 3,
+                    "url": "https://foocoin.io/",
+                    "logoUrl": "https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
+                }
+            );
+            let metadata_deser = serde_json::from_value::<Irc30Metadata>(json.clone()).unwrap();
+            let metadata = Irc30Metadata::new(
+                "FooCoin",
+                "FooCoin is the utility and governance token of FooLand, a revolutionary protocol in the play-to-earn crypto gaming field.",
+                "FOO",
+            )
+            .with_decimals(3)
+            .with_url("https://foocoin.io".parse().unwrap())
+            .with_logo_url("https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR".parse().unwrap());
+            assert_eq!(metadata, metadata_deser);
+            assert_eq!(json, serde_json::to_value(metadata).unwrap())
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::boxed::Box;
 
