@@ -20,7 +20,7 @@ use crate::{
         voting_power_command, AccountCli, AccountCommand,
     },
     error::Error,
-    helper::{bytes_from_hex_or_file, print_account_help},
+    helper::bytes_from_hex_or_file,
     println_log_error,
 };
 
@@ -67,7 +67,7 @@ pub async fn account_prompt_internal(
         .completion_with(&AccountCompletion)
         .interact_text()?;
     match command.as_str() {
-        "h" | "help" => print_account_help(),
+        "h" | "help" => AccountCli::print_help()?,
         "c" | "clear" => {
             // Clear console
             let _ = std::process::Command::new("clear").status();

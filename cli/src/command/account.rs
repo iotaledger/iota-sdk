@@ -3,7 +3,7 @@
 
 use std::str::FromStr;
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::{
@@ -35,6 +35,13 @@ use crate::{error::Error, helper::to_utc_date_time, println_log_info};
 pub struct AccountCli {
     #[command(subcommand)]
     pub command: AccountCommand,
+}
+
+impl AccountCli {
+    pub fn print_help() -> Result<(), Error> {
+        Self::command().bin_name("Account:").print_help()?;
+        Ok(())
+    }
 }
 
 #[derive(Debug, Subcommand)]
