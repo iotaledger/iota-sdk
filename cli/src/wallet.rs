@@ -92,7 +92,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                     println_log_info!("Created new wallet.");
                     create_initial_account(wallet).await?
                 } else {
-                    WalletCli::print_help();
+                    WalletCli::print_help()?;
                     (None, None)
                 }
             }

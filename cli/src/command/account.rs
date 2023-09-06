@@ -38,8 +38,9 @@ pub struct AccountCli {
 }
 
 impl AccountCli {
-    pub fn print_help() {
-        Self::command().bin_name("Account:").print_help().unwrap();
+    pub fn print_help() -> Result<(), Error> {
+        Self::command().bin_name("Account:").print_help()?;
+        Ok(())
     }
 }
 

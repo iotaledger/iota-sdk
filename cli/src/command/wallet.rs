@@ -45,8 +45,9 @@ pub struct WalletCli {
 }
 
 impl WalletCli {
-    pub fn print_help() {
-        Self::command().bin_name("wallet").print_help().unwrap()
+    pub fn print_help() -> Result<(), Error> {
+        Self::command().bin_name("wallet").print_help()?;
+        Ok(())
     }
 }
 
