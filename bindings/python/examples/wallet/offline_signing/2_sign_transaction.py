@@ -37,7 +37,7 @@ signed_transaction_data = account.sign_transaction_essence(
 
 print("Signed transaction.")
 
-json_data = json.dumps(signed_transaction_data.as_dict(), indent=4)
+json_data = json.dumps(signed_transaction_data.to_dict(), indent=4)
 print(f"example.signed_transaction.json:\n{json_data}")
 f = open(SIGNED_TRANSACTION_FILE_PATH, "w")
 f.write(json_data)

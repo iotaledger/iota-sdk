@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import IntEnum
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import HexStr, json
 
 
 class InputType(IntEnum):
@@ -18,27 +18,29 @@ class InputType(IntEnum):
     Treasury = 1
 
 
+@json
 @dataclass
 class UtxoInput:
     """Represents an input referencing an output.
 
     Attributes:
         type: The type of input.
-        transactionId: The transaction id that created the output.
-        transactionOutputIndex: The output index.
+        transaction_id: The transaction id that created the output.
+        transaction_output_index: The output index.
     """
     type: int
-    transactionId: HexStr
-    transactionOutputIndex: int
+    transaction_id: HexStr
+    transaction_output_index: int
 
 
+@json
 @dataclass
 class TreasuryInput:
     """A treasury input.
 
     Attributes:
         type: The type of input.
-        milestoneId: The milestone id that created the treasury output.
+        milestone_id: The milestone id that created the treasury output.
     """
     type: int
-    milestoneId: HexStr
+    milestone_id: HexStr

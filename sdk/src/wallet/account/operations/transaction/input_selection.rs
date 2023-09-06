@@ -100,15 +100,15 @@ where
                 addresses,
                 protocol_parameters.clone(),
             )
-            .required_inputs(custom_inputs)
-            .forbidden_inputs(forbidden_inputs);
+            .with_required_inputs(custom_inputs)
+            .with_forbidden_inputs(forbidden_inputs);
 
             if let Some(address) = remainder_address {
-                input_selection = input_selection.remainder_address(address);
+                input_selection = input_selection.with_remainder_address(address);
             }
 
             if let Some(burn) = burn {
-                input_selection = input_selection.burn(burn.clone());
+                input_selection = input_selection.with_burn(burn.clone());
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -135,15 +135,15 @@ where
                 addresses,
                 protocol_parameters.clone(),
             )
-            .required_inputs(mandatory_inputs)
-            .forbidden_inputs(forbidden_inputs);
+            .with_required_inputs(mandatory_inputs)
+            .with_forbidden_inputs(forbidden_inputs);
 
             if let Some(address) = remainder_address {
-                input_selection = input_selection.remainder_address(address);
+                input_selection = input_selection.with_remainder_address(address);
             }
 
             if let Some(burn) = burn {
-                input_selection = input_selection.burn(burn.clone());
+                input_selection = input_selection.with_burn(burn.clone());
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -167,14 +167,14 @@ where
             addresses,
             protocol_parameters.clone(),
         )
-        .forbidden_inputs(forbidden_inputs);
+        .with_forbidden_inputs(forbidden_inputs);
 
         if let Some(address) = remainder_address {
-            input_selection = input_selection.remainder_address(address);
+            input_selection = input_selection.with_remainder_address(address);
         }
 
         if let Some(burn) = burn {
-            input_selection = input_selection.burn(burn.clone());
+            input_selection = input_selection.with_burn(burn.clone());
         }
 
         let selected_transaction_data = match input_selection.select() {

@@ -26,7 +26,7 @@ class Wallet():
         # Setup the options
         options: Dict[str, Any] = {'storagePath': storage_path}
         if client_options:
-            options['clientOptions'] = client_options.as_dict()
+            options['clientOptions'] = client_options.to_dict()
         if coin_type:
             options['coinType'] = coin_type
         if secret_manager:
@@ -184,7 +184,7 @@ class Wallet():
         return self._call_method(
             'setClientOptions',
             {
-                'clientOptions': client_options.as_dict()
+                'clientOptions': client_options.to_dict()
             }
         )
 
