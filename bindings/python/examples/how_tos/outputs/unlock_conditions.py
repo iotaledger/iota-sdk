@@ -9,7 +9,7 @@ client = Client()
 hex_address = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
-alias_hex_address = Utils.bech32_to_hex(
+account_hex_address = Utils.bech32_to_hex(
     'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux')
 
 address_unlock_condition = AddressUnlockCondition(
@@ -58,8 +58,8 @@ basic_output = client.build_basic_output(
 outputs.append(basic_output)
 
 # Output with governor and state controller unlock condition
-alias_output = client.build_alias_output(
-    alias_id='0x0000000000000000000000000000000000000000000000000000000000000000',
+account_output = client.build_account_output(
+    account_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     unlock_conditions=[
         GovernorAddressUnlockCondition(
             Ed25519Address(hex_address),
@@ -69,15 +69,15 @@ alias_output = client.build_alias_output(
         ),
     ],
 )
-outputs.append(alias_output)
+outputs.append(account_output)
 
-# Output with immutable alias unlock condition
+# Output with immutable account unlock condition
 foundry_output = client.build_foundry_output(
     serial_number=1,
     token_scheme=token_scheme,
     unlock_conditions=[
-        ImmutableAliasAddressUnlockCondition(
-            AliasAddress(alias_hex_address),
+        ImmutableAccountAddressUnlockCondition(
+            AccountAddress(account_hex_address),
         ),
     ],
 )

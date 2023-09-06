@@ -5,7 +5,7 @@ from enum import IntEnum
 
 from dataclasses import dataclass, field
 
-from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
+from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import json
 
 
@@ -19,7 +19,7 @@ class UnlockConditionType(IntEnum):
         Expiration (3): An expiration unlock condition.
         StateControllerAddress (4): A state controller address unlock condition.
         GovernorAddress (5): A governor address unlock condition.
-        ImmutableAliasAddress (6): An immutable alias address unlock condition.
+        ImmutableAccountAddress (6): An immutable account address unlock condition.
     """
     Address = 0
     StorageDepositReturn = 1
@@ -27,7 +27,7 @@ class UnlockConditionType(IntEnum):
     Expiration = 3
     StateControllerAddress = 4
     GovernorAddress = 5
-    ImmutableAliasAddress = 6
+    ImmutableAccountAddress = 6
 
 
 @json
@@ -45,7 +45,7 @@ class AddressUnlockCondition(UnlockCondition):
     Args:
         address: An address unlocked with a private key.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Address),
@@ -61,7 +61,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         return_address: The address to return the amount to.
     """
     amount: str
-    return_address: Ed25519Address | AliasAddress | NFTAddress
+    return_address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StorageDepositReturn), init=False)
 
@@ -89,7 +89,7 @@ class ExpirationUnlockCondition(UnlockCondition):
         return_address: The return address if the output was not claimed in time.
     """
     unix_time: int
-    return_address: Ed25519Address | AliasAddress | NFTAddress
+    return_address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Expiration),
@@ -103,7 +103,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     Args:
         address: The state controller address that owns the output.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StateControllerAddress), init=False)
 
@@ -115,18 +115,18 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     Args:
         address: The governor address that owns the output.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.GovernorAddress), init=False)
 
 
 @json
 @dataclass
-class ImmutableAliasAddressUnlockCondition(UnlockCondition):
-    """An immutable alias address unlock condition.
+class ImmutableAccountAddressUnlockCondition(UnlockCondition):
+    """An immutable account address unlock condition.
     Args:
-        address: The permanent alias address that owns this output.
+        address: The permanent account address that owns this output.
     """
-    address: AliasAddress
+    address: AccountAddress
     type: int = field(default_factory=lambda: int(
-        UnlockConditionType.ImmutableAliasAddress), init=False)
+        UnlockConditionType.ImmutableAccountAddress), init=False)
