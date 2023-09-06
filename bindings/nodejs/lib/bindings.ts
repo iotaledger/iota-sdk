@@ -36,7 +36,7 @@ const callClientMethodAsync = (
     new Promise((resolve, reject) => {
         callClientMethod(method, handler, (error: any, result: string) => {
             if (error) {
-                reject(Error(error));
+                reject(error);
             } else {
                 resolve(result);
             }
@@ -53,7 +53,7 @@ const callSecretManagerMethodAsync = (
             handler,
             (error: any, result: string) => {
                 if (error) {
-                    reject(Error(error));
+                    reject(error);
                 } else {
                     resolve(result);
                 }
@@ -75,13 +75,14 @@ const listenWalletAsync = (
     callback: (error: Error, event: Event) => void,
     handler: WalletMethodHandler,
 ): Promise<void> => {
-    return new Promise((resolve, _) => {
+    return new Promise((resolve) => {
         listenWallet(
             eventTypes,
             function (err: any, data: string) {
                 const parsed = JSON.parse(data);
                 callback(
-                    Error(err),
+                    // Send back raw error instead of parsing
+                    err,
                     new Event(parsed.accountIndex, parsed.event),
                 );
             },
@@ -98,7 +99,7 @@ const callWalletMethodAsync = (
     new Promise((resolve, reject) => {
         callWalletMethod(method, handler, (error: any, result: string) => {
             if (error) {
-                reject(Error(error));
+                reject(error);
             } else {
                 resolve(result);
             }

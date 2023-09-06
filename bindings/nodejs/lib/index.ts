@@ -60,7 +60,7 @@ function errorHandle(error: any): Error {
         // neon or other bindings lib related error
         throw error;
     } else if (error instanceof Error) {
-        let err: Result = JSON.parse(error.message);
+        const err: Result = JSON.parse(error.message);
         if (err.type == 'panic') {
             return Error(err.payload.toString());
         } else {

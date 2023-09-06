@@ -105,7 +105,7 @@ pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
                         let args = [
                             if is_error {
-                                cx.string(response.clone()).upcast::<JsValue>()
+                                cx.error(response.clone())?.upcast::<JsValue>()
                             } else {
                                 cx.undefined().upcast::<JsValue>()
                             },
