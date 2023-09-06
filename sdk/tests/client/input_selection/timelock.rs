@@ -42,7 +42,7 @@ fn one_output_timelock_not_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -79,7 +79,7 @@ fn timelock_equal_timestamp() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(200)
+    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -130,7 +130,7 @@ fn two_outputs_one_timelock_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -173,7 +173,7 @@ fn two_outputs_one_timelocked_one_missing() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -213,7 +213,7 @@ fn one_output_timelock_expired() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .slot_index(100)
+    .with_slot_index(100)
     .select()
     .unwrap();
 

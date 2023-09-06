@@ -276,7 +276,7 @@ fn burn_nft() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_nft(nft_id_2))
+    .with_burn(Burn::new().add_nft(nft_id_2))
     .select()
     .unwrap();
 
@@ -1075,7 +1075,7 @@ fn nft_burn_should_validate_nft_sender() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_nft(nft_id_1))
+    .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
 
@@ -1119,7 +1119,7 @@ fn nft_burn_should_validate_nft_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_nft(nft_id_1))
+    .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
 
