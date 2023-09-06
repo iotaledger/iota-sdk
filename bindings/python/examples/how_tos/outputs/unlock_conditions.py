@@ -83,4 +83,4 @@ foundry_output = client.build_foundry_output(
 )
 outputs.append(foundry_output)
 
-print(json.dumps(list(map(lambda o: o.as_dict(), outputs)), indent=2))
+print(json.dumps(list(map(lambda o: o.to_dict(), outputs)), indent=2))

@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output_id import OutputId
 from dataclasses import dataclass
 from typing import Dict, Optional
@@ -12,6 +12,7 @@ class NodeIndexerAPI():
     """Node indexer API.
     """
 
+    @json
     @dataclass
     class QueryParameters:
         """Query parameters
@@ -91,10 +92,6 @@ class NodeIndexerAPI():
         timelocked_after: Optional[int] = None
         timelocked_before: Optional[int] = None
 
-        def as_dict(self):
-            return humps.camelize(
-                [{k: v} for k, v in self.__dict__.items() if v is not None])
-
     class OutputIdsResponse:
         """Response type for output IDs.
 
@@ -118,7 +115,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the basic outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('basicOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -133,7 +130,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the alias outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('aliasOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -158,7 +155,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the NFT outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('nftOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -183,7 +180,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the foundry outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('foundryOutputIds', {
             'queryParameters': query_parameters_camelized,

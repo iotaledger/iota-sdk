@@ -34,9 +34,9 @@ for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
+            Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            output_data.output.nativeTokens
+            output_data.output.native_tokens
         )
     )
 
@@ -47,11 +47,11 @@ print('Sending consolidation transaction...')
 # `output_threshold` isn't reached.
 transaction = account.prepare_consolidate_outputs(
     ConsolidationParams(force=True)).send()
-print('Transaction sent: ', transaction.transactionId)
+print('Transaction sent: ', transaction.transaction_id)
 
 # Wait for the consolidation transaction to get confirmed
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 
 print(
     'Transaction included: {}/block/{}'.format(
@@ -71,8 +71,8 @@ for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
+            Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            output_data.output.nativeTokens
+            output_data.output.native_tokens
         )
     )

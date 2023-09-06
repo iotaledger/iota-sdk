@@ -35,4 +35,4 @@ transaction = account.send(
 )
 print(transaction)
 print(
-    f'Check your block on: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+    f'Check your block on: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

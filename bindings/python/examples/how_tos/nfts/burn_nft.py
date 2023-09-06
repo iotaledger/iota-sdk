@@ -21,4 +21,4 @@ nftId = balance.nfts[0]
 
 # Send transaction.
 transaction = account.prepare_burn_nft(nftId).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')
