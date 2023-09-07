@@ -129,7 +129,7 @@ export class WalletMethodHandler {
      */
     getSecretManager(): SecretManager {
         try {
-            let result = getSecretManagerFromWallet(this.methodHandler);
+            const result = getSecretManagerFromWallet(this.methodHandler);
             return new SecretManager(result);
         } catch (error: any) {
             throw errorHandle(error);
