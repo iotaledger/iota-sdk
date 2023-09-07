@@ -187,7 +187,6 @@ pub(crate) mod irc_27 {
 
     #[derive(Clone, Debug, Serialize, Deserialize, Getters, PartialEq, Eq)]
     #[getset(get = "pub")]
-
     pub struct Attribute {
         trait_type: String,
         value: serde_json::Value,
@@ -306,13 +305,13 @@ pub(crate) mod irc_30 {
     pub struct Irc30Metadata {
         /// The human-readable name of the native token.
         name: String,
-        /// The human-readable description of the token.
-        description: String,
         /// The symbol/ticker of the token.
         symbol: String,
         /// Number of decimals the token uses (divide the token amount by 10^decimals to get its user representation).
+        decimals: u32,
+        /// The human-readable description of the token.
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        decimals: Option<u32>,
+        description: Option<String>,
         /// URL pointing to more resources about the token.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         url: Option<Url>,
@@ -325,20 +324,20 @@ pub(crate) mod irc_30 {
     }
 
     impl Irc30Metadata {
-        pub fn new(name: impl Into<String>, description: impl Into<String>, symbol: impl Into<String>) -> Self {
+        pub fn new(name: impl Into<String>, symbol: impl Into<String>, decimals: u32) -> Self {
             Self {
                 name: name.into(),
-                description: description.into(),
                 symbol: symbol.into(),
-                decimals: Default::default(),
+                decimals,
+                description: Default::default(),
                 url: Default::default(),
                 logo_url: Default::default(),
                 logo: Default::default(),
             }
         }
 
-        pub fn with_decimals(mut self, decimals: u32) -> Self {
-            self.decimals.replace(decimals);
+        pub fn with_description(mut self, description: impl Into<String>) -> Self {
+            self.description.replace(description.into());
             self
         }
 
@@ -389,10 +388,10 @@ pub(crate) mod irc_30 {
             let metadata_deser = serde_json::from_value::<Irc30Metadata>(json.clone()).unwrap();
             let metadata = Irc30Metadata::new(
                 "FooCoin",
-                "FooCoin is the utility and governance token of FooLand, a revolutionary protocol in the play-to-earn crypto gaming field.",
-                "FOO",
+                
+                "FOO",3
             )
-            .with_decimals(3)
+            .with_description("FooCoin is the utility and governance token of FooLand, a revolutionary protocol in the play-to-earn crypto gaming field.")
             .with_url("https://foocoin.io".parse().unwrap())
             .with_logo_url("https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR".parse().unwrap());
             assert_eq!(metadata, metadata_deser);
