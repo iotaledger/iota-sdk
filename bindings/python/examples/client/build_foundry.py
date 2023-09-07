@@ -15,8 +15,8 @@ client = Client(nodes=[node_url])
 serial_number = 1
 token_scheme = SimpleTokenScheme(32, 0, 64)
 unlock_conditions = [
-    ImmutableAliasAddressUnlockCondition(
-        AliasAddress(
+    ImmutableAccountAddressUnlockCondition(
+        AccountAddress(
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa')
     )
 ]

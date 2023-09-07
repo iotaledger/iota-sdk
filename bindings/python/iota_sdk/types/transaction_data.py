@@ -4,8 +4,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, List
-from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
-from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput, OutputMetadata
+from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
+from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput, OutputMetadata
 from iota_sdk.types.payload import RegularTransactionEssence, TransactionPayload
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.common import json
@@ -21,7 +21,7 @@ class InputSigningData:
         output_metadata: The output metadata.
         chain: The BIP44 chain for the address to unlock the output.
     """
-    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
+    output: AccountOutput | FoundryOutput | NftOutput | BasicOutput
     output_metadata: OutputMetadata
     chain: Optional[Bip44] = None
 
@@ -36,8 +36,8 @@ class RemainderData:
         address: The remainder address.
         chain: The BIP44 chain for the remainder address.
     """
-    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
-    address: Ed25519Address | AliasAddress | NFTAddress
+    output: AccountOutput | FoundryOutput | NftOutput | BasicOutput
+    address: Ed25519Address | AccountAddress | NFTAddress
     chain: Optional[Bip44] = None
 
 
