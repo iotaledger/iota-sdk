@@ -36,8 +36,8 @@ describe('Wallet', () => {
 
         expect(account.getMetadata().index).toStrictEqual(0);
 
-        await wallet.destroy()
-        removeDir(storagePath)
+        wallet.destroy();
+        removeDir(storagePath);
     }, 8000);
 
     it('generate address', async () => {
@@ -85,8 +85,8 @@ describe('Wallet', () => {
             'tst1qzp37j45rkfmqn05fapq66vyw0vkmz5zqhmeuey5fked0wt4ry43jeqp2wv',
         );
 
-        await wallet.destroy()
-        removeDir(storagePath)
+        wallet.destroy();
+        removeDir(storagePath);
     }, 8000);
 
     it('recreate wallet', async () => {
@@ -123,13 +123,13 @@ describe('Wallet', () => {
         const localPoW = await client.getLocalPow();
         expect(localPoW).toBeTruthy();
 
-        await wallet.destroy();
+        wallet.destroy();
 
         const recreatedWallet = new Wallet(walletOptions);
         const accounts = await recreatedWallet.getAccounts();
         expect(accounts.length).toStrictEqual(1);
 
-        await recreatedWallet.destroy()
+        recreatedWallet.destroy();
         removeDir(storagePath)
     }, 20000);
 
@@ -162,7 +162,7 @@ describe('Wallet', () => {
 
         expect(account.getMetadata().index).toStrictEqual(0);
 
-        await wallet.destroy();
+        wallet.destroy();
 
         try {
             const _accounts = await wallet.getAccounts();
@@ -177,7 +177,7 @@ describe('Wallet', () => {
         } catch (err: any) {
             expect(err.message).toContain('Wallet was destroyed');
         }
-        removeDir(storagePath)
+        removeDir(storagePath);
     }, 35000);
 })
 

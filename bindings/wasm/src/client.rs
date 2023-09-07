@@ -59,12 +59,12 @@ pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsErr
         ClientBuilder::new()
             .from_json(&clientOptions)
             .map_err(|err| {
-                JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
+                JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
             })?
             .finish()
             .await
             .map_err(|err| {
-                JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
+                JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
             })
     })?;
 
@@ -94,7 +94,7 @@ pub async fn call_client_method_async(method: String, methodHandler: &ClientMeth
     let client = client_pre!(methodHandler)?;
 
     let method: ClientMethod = serde_json::from_str(&method).map_err(|err| {
-        JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
+        JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
     })?;
 
     let response = call_client_method(&client, method).await;

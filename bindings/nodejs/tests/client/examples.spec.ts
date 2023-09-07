@@ -222,7 +222,7 @@ describe.skip('Main examples', () => {
             localPow: true,
         });
         
-        await client.destroy();
+        client.destroy();
 
         try {
             const _info = await client.getInfo();
