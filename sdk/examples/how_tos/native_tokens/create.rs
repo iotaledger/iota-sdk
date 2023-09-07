@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
     }
 
     let metadata =
-        Irc30Metadata::new("My Native Token Foundry", "MNT", 10).with_description("A foundry for minting MNT NFTs.");
+        Irc30Metadata::new("My Native Token", "MNT", 10).with_description("A native token to test the iota-sdk.");
 
     println!("Preparing transaction to create native token...");
 
