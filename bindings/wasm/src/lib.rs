@@ -31,7 +31,4 @@ pub async fn init_logger(_config: String) -> Result<(), JsError> {
 extern "C" {
     #[wasm_bindgen(typescript_type = "string[]")]
     pub type ArrayString;
-
-    #[wasm_bindgen(typescript_type = "Promise<string>")]
-    pub type PromiseString;
 }
