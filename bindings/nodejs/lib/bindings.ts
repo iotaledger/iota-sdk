@@ -34,7 +34,7 @@ const callClientMethodAsync = (
     handler: ClientMethodHandler,
 ): Promise<string> =>
     new Promise((resolve, reject) => {
-        callClientMethod(method, handler, (error: Error, result: string) => {
+        callClientMethod(method, handler, (error: any, result: string) => {
             if (error) {
                 reject(error);
             } else {
@@ -51,7 +51,7 @@ const callSecretManagerMethodAsync = (
         callSecretManagerMethod(
             method,
             handler,
-            (error: Error, result: string) => {
+            (error: any, result: string) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -75,15 +75,21 @@ const listenWalletAsync = (
     callback: (error: Error, event: Event) => void,
     handler: WalletMethodHandler,
 ): Promise<void> => {
-    listenWallet(
-        eventTypes,
-        function (err: any, data: string) {
-            const parsed = JSON.parse(data);
-            callback(err, new Event(parsed.accountIndex, parsed.event));
-        },
-        handler,
-    );
-    return Promise.resolve();
+    return new Promise((resolve) => {
+        listenWallet(
+            eventTypes,
+            function (err: any, data: string) {
+                const parsed = JSON.parse(data);
+                callback(
+                    // Send back raw error instead of parsing
+                    err,
+                    new Event(parsed.accountIndex, parsed.event),
+                );
+            },
+            handler,
+        );
+        resolve();
+    });
 };
 
 const callWalletMethodAsync = (
@@ -91,7 +97,7 @@ const callWalletMethodAsync = (
     handler: WalletMethodHandler,
 ): Promise<string> =>
     new Promise((resolve, reject) => {
-        callWalletMethod(method, handler, (error: Error, result: string) => {
+        callWalletMethod(method, handler, (error: any, result: string) => {
             if (error) {
                 reject(error);
             } else {
@@ -110,8 +116,8 @@ export {
     callSecretManagerMethodAsync,
     callUtilsMethod,
     callWalletMethodAsync,
-    destroyWallet,
     listenWalletAsync,
+    destroyWallet,
     getClientFromWallet,
     getSecretManagerFromWallet,
     listenMqtt,

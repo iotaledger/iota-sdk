@@ -39,3 +39,37 @@ export * from './types';
 export * from './utils';
 export * from './wallet';
 export * from './logger';
+
+// For future reference to see what we return from rust as a serialized string
+export type Result = {
+    // "error" | "panic" or other binding method response name
+    type: string;
+    payload: {
+        // All method names from types/bridge/__name__.name
+        // Or all variants of rust sdk Error type
+        type: string;
+        // If "ok", json payload
+        payload?: string;
+        // If !"ok", error
+        error?: string;
+    };
+};
+
+function errorHandle(error: any): Error {
+    if (error instanceof TypeError) {
+        // neon or other bindings lib related error
+        throw error;
+    } else if (error instanceof Error) {
+        const err: Result = JSON.parse(error.message);
+        if (err.type == 'panic') {
+            return Error(err.payload.toString());
+        } else {
+            return Error(err.payload.error);
+        }
+    } else {
+        // Something bad happened! Make sure we dont double parse
+        return TypeError(error);
+    }
+}
+
+export { errorHandle };

@@ -50,10 +50,10 @@ impl ClientMethodHandler {
 
                 (msg, is_err)
             }
-            Err(e) => {
-                log::error!("{:?}", e);
-                (format!("Couldn't parse to method with error - {e:?}"), true)
-            }
+            Err(e) => (
+                serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
+                true,
+            ),
         }
     }
 }
@@ -94,7 +94,7 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
                         let args = [
                             if is_error {
-                                cx.string(response.clone()).upcast::<JsValue>()
+                                cx.error(response.clone())?.upcast::<JsValue>()
                             } else {
                                 cx.undefined().upcast::<JsValue>()
                             },

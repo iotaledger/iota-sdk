@@ -88,7 +88,7 @@ pub fn call_secret_manager_method(mut cx: FunctionContext) -> JsResult<JsUndefin
 
             let args = vec![
                 if is_error {
-                    cx.string(response.clone()).upcast::<JsValue>()
+                    cx.error(response.clone())?.upcast::<JsValue>()
                 } else {
                     cx.undefined().upcast::<JsValue>()
                 },
