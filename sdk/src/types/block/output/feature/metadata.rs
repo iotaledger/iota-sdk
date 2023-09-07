@@ -74,8 +74,8 @@ impl MetadataFeature {
 
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
-    pub fn new<T: TryInto<Self>>(data: T) -> Result<Self, T::Error> {
-        data.try_into()
+    pub fn new(data: impl Into<Vec<u8>>) -> Result<Self, Error> {
+        Self::try_from(data.into())
     }
 
     /// Returns the data.
