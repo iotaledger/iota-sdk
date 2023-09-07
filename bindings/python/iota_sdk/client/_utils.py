@@ -18,11 +18,11 @@ class ClientUtils():
             'bech32Hrp': bech32_hrp
         })
 
-    def alias_id_to_bech32(self, alias_id: HexStr, bech32_hrp: str) -> str:
-        """Transforms an alias id to a bech32 encoded address.
+    def account_id_to_bech32(self, account_id: HexStr, bech32_hrp: str) -> str:
+        """Transforms an account id to a bech32 encoded address.
         """
-        return self._call_method('aliasIdToBech32', {
-            'aliasId': alias_id,
+        return self._call_method('accountIdToBech32', {
+            'accountId': account_id,
             'bech32Hrp': bech32_hrp
         })
 

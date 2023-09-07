@@ -11,7 +11,7 @@ from iota_sdk.types.common import json
 class UnlockType(IntEnum):
     Signature = 0
     Reference = 1
-    Alias = 2
+    Account = 2
     Nft = 3
 
 
@@ -49,13 +49,13 @@ class ReferenceUnlock(Unlock):
 
 @json
 @dataclass
-class AliasUnlock:
-    """An unlock which must reference a previous unlock which unlocks the alias that the input is locked to.
+class AccountUnlock:
+    """An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
     """
     reference: int
     type: int = field(
         default_factory=lambda: int(
-            UnlockType.Alias),
+            UnlockType.Account),
         init=False)
 
 

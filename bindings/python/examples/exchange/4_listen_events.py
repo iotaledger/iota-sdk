@@ -52,6 +52,6 @@ for _ in range(100):
 
     # Sync to detect new outputs
     # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
-    # have a storage deposit return , expiration or are nft/alias/foundry
+    # have a storage deposit return , expiration or are nft/account/foundry
     # outputs.
     account.sync(SyncOptions(sync_only_most_basic_outputs=True))

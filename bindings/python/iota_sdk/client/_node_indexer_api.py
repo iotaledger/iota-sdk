@@ -20,8 +20,8 @@ class NodeIndexerAPI():
         **Attributes:**
         address :
             Bech32-encoded address that should be searched for.
-        alias_address :
-            Filter foundry outputs based on bech32-encoded address of the controlling alias.
+        account_address :
+            Filter foundry outputs based on bech32-encoded address of the controlling account.
         created_after :
             Returns outputs that were created after a certain Unix timestamp.
          created_before :
@@ -69,7 +69,7 @@ class NodeIndexerAPI():
             Returns outputs that are timelocked before a certain Unix timestamp.
         """
         address: Optional[str] = None
-        alias_address: Optional[str] = None
+        account_address: Optional[str] = None
         created_after: Optional[int] = None
         created_before: Optional[int] = None
         cursor: Optional[str] = None
@@ -122,29 +122,29 @@ class NodeIndexerAPI():
         })
         return self.OutputIdsResponse(response)
 
-    def alias_output_ids(
+    def account_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
-        """Fetch alias output IDs from the given query parameters.
+        """Fetch account output IDs from the given query parameters.
 
         Returns:
-            The corresponding output IDs of the alias outputs.
+            The corresponding output IDs of the account outputs.
         """
 
         query_parameters_camelized = query_parameters.to_dict()
 
-        response = self._call_method('aliasOutputIds', {
+        response = self._call_method('accountOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
         return self.OutputIdsResponse(response)
 
-    def alias_output_id(self, alias_id: HexStr) -> OutputId:
-        """Fetch alias output ID from the given alias ID.
+    def account_output_id(self, account_id: HexStr) -> OutputId:
+        """Fetch account output ID from the given account ID.
 
         Returns:
-            The output ID of the alias output.
+            The output ID of the account output.
         """
-        return OutputId.from_string(self._call_method('aliasOutputId', {
-            'aliasId': alias_id
+        return OutputId.from_string(self._call_method('accountOutputId', {
+            'accountId': account_id
         }))
 
     def nft_output_ids(
