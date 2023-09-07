@@ -131,6 +131,6 @@ impl Client {
             }
         }
 
-        Ok(self.get_protocol_parameters().await?.slot_index(current_time))
+        Ok(network_info.protocol_parameters.slot_index(current_time))
     }
 }
