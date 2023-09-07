@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { errorHandle } from '..';
 import {
     callClientMethodAsync,
     createClient,
@@ -19,16 +20,24 @@ export class ClientMethodHandler {
      * @param options client options or a client method handler.
      */
     constructor(options: IClientOptions | ClientMethodHandler) {
-        // The rust client object is not extensible
-        if (Object.isExtensible(options)) {
-            this.methodHandler = createClient(JSON.stringify(options));
-        } else {
-            this.methodHandler = options as ClientMethodHandler;
+        try {
+            // The rust client object is not extensible
+            if (Object.isExtensible(options)) {
+                this.methodHandler = createClient(JSON.stringify(options));
+            } else {
+                this.methodHandler = options as ClientMethodHandler;
+            }
+        } catch (error: any) {
+            throw errorHandle(error);
         }
     }
 
-    async destroy() {
-        return destroyClient(this.methodHandler);
+    destroy(): void {
+        try {
+            destroyClient(this.methodHandler);
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
     }
 
     /**
@@ -48,17 +57,8 @@ export class ClientMethodHandler {
                 }
             }),
             this.methodHandler,
-        ).catch((error: Error) => {
-            try {
-                if (error.message !== undefined) {
-                    error = Error(JSON.parse(error.message).payload);
-                } else {
-                    error = Error(JSON.parse(error.toString()).payload);
-                }
-            } catch (e) {
-                console.error(e);
-            }
-            return Promise.reject(error);
+        ).catch((error: any) => {
+            throw errorHandle(error);
         });
     }
 
@@ -68,10 +68,18 @@ export class ClientMethodHandler {
      * @param topics The topics to listen to.
      * @param callback The callback to be called when an MQTT event is received.
      */
-    async listen(
+    listen(
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return listenMqtt(topics, callback, this.methodHandler);
+        try {
+            return listenMqtt(topics, callback, this.methodHandler).catch(
+                (error: any) => {
+                    throw errorHandle(error);
+                },
+            );
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
     }
 }

@@ -8,12 +8,12 @@ pub mod secret_manager;
 pub mod utils;
 pub mod wallet;
 
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
 /// Initializes the console error panic hook for better panic messages.
 /// Gets automatically called when using wasm
 #[wasm_bindgen(start)]
-pub fn start() -> Result<(), JsValue> {
+pub fn start() -> Result<(), JsError> {
     console_error_panic_hook::set_once();
     Ok(())
 }
@@ -22,7 +22,7 @@ pub fn start() -> Result<(), JsValue> {
 ///
 /// Calling this will enable all rust logs to be show
 #[wasm_bindgen(js_name = initLogger)]
-pub async fn init_logger(_config: String) -> Result<(), JsValue> {
+pub async fn init_logger(_config: String) -> Result<(), JsError> {
     wasm_logger::init(wasm_logger::Config::default());
     Ok(())
 }

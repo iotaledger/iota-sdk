@@ -70,8 +70,8 @@ export class Client {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
-    async destroy() {
-        return this.methodHandler.destroy();
+    destroy() {
+        this.methodHandler.destroy();
     }
 
     /**

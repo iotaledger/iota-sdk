@@ -81,7 +81,7 @@ export class Wallet {
     /**
      * Destroy the Wallet and drop its database connection.
      */
-    async destroy(): Promise<void> {
+    destroy(): void {
         return this.methodHandler.destroy();
     }
 
@@ -151,7 +151,7 @@ export class Wallet {
     /**
      * Get secret manager.
      */
-    async getSecretManager(): Promise<SecretManager> {
+    getSecretManager(): SecretManager {
         return this.methodHandler.getSecretManager();
     }
 

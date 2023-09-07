@@ -1,6 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { errorHandle } from '..';
 import {
     callSecretManagerMethodAsync,
     createSecretManager,
@@ -19,11 +20,17 @@ export class SecretManagerMethodHandler {
      * @param options A secret manager type or a secret manager method handler.
      */
     constructor(options: SecretManagerType | SecretManagerMethodHandler) {
-        // The rust secret manager object is not extensible
-        if (Object.isExtensible(options)) {
-            this.methodHandler = createSecretManager(JSON.stringify(options));
-        } else {
-            this.methodHandler = options as SecretManagerMethodHandler;
+        try {
+            // The rust secret manager object is not extensible
+            if (Object.isExtensible(options)) {
+                this.methodHandler = createSecretManager(
+                    JSON.stringify(options),
+                );
+            } else {
+                this.methodHandler = options as SecretManagerMethodHandler;
+            }
+        } catch (error: any) {
+            throw errorHandle(error);
         }
     }
 
@@ -35,9 +42,18 @@ export class SecretManagerMethodHandler {
      */
     async callMethod(method: __SecretManagerMethods__): Promise<string> {
         return callSecretManagerMethodAsync(
-            JSON.stringify(method),
+            // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
+            JSON.stringify(method, function mapToObject(_key, value) {
+                if (value instanceof Map) {
+                    return Object.fromEntries(value);
+                } else {
+                    return value;
+                }
+            }),
             this.methodHandler,
-        );
+        ).catch((error: any) => {
+            throw errorHandle(error);
+        });
     }
 }
 
