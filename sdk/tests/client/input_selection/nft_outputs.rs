@@ -1188,12 +1188,15 @@ fn changed_immutable_metadata() {
     let protocol_parameters = protocol_parameters();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
+    #[cfg(feature = "irc_27")]
     let metadata = iota_sdk::types::block::output::feature::Irc27Metadata::new(
         "image/jpeg",
         "https://mywebsite.com/my-nft-files-1.jpeg".parse().unwrap(),
         "file 1",
     )
     .with_issuer_name("Alice");
+    #[cfg(not(feature = "irc_27"))]
+    let metadata = [1, 2, 3];
 
     let nft_output =
         NftOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), nft_id_1)
@@ -1210,12 +1213,15 @@ fn changed_immutable_metadata() {
         chain: None,
     }];
 
+    #[cfg(feature = "irc_27")]
     let metadata = iota_sdk::types::block::output::feature::Irc27Metadata::new(
         "image/jpeg",
         "https://mywebsite.com/my-nft-files-2.jpeg".parse().unwrap(),
         "file 2",
     )
     .with_issuer_name("Alice");
+    #[cfg(not(feature = "irc_27"))]
+    let metadata = [4, 5, 6];
 
     // New nft output with changed immutable metadata feature
     let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())

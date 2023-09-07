@@ -19,6 +19,29 @@ pub struct MetadataFeature(
     BoxedSlicePrefix<u8, MetadataFeatureLength>,
 );
 
+macro_rules! impl_from_vec {
+    ($type:ty) => {
+        impl TryFrom<$type> for MetadataFeature {
+            type Error = Error;
+
+            fn try_from(value: $type) -> Result<Self, Self::Error> {
+                Vec::<u8>::from(value).try_into()
+            }
+        }
+    };
+}
+impl_from_vec!(&str);
+impl_from_vec!(String);
+impl_from_vec!(&[u8]);
+
+impl<const N: usize> TryFrom<[u8; N]> for MetadataFeature {
+    type Error = Error;
+
+    fn try_from(value: [u8; N]) -> Result<Self, Self::Error> {
+        value.to_vec().try_into()
+    }
+}
+
 impl TryFrom<Vec<u8>> for MetadataFeature {
     type Error = Error;
 
@@ -51,8 +74,8 @@ impl MetadataFeature {
 
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
-    pub fn new(data: impl Into<Vec<u8>>) -> Result<Self, Error> {
-        Self::try_from(data.into())
+    pub fn new<T: TryInto<Self>>(data: T) -> Result<Self, T::Error> {
+        data.try_into()
     }
 
     /// Returns the data.
