@@ -945,21 +945,16 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                     if let Some(nts) = output_data.output.native_tokens() {
                         address_nts.extend(nts.iter().map(|nt| nt.token_id()));
                     }
-                    if output_data.output.is_nft() {
-                        address_nfts.push(output_data.output.as_nft().nft_id_non_null(&output_id));
+                    match &output_data.output {
+                        Output::Nft(nft) => address_nfts.push(nft.nft_id_non_null(&output_id)),
+                        Output::Alias(alias) => address_aliases.push(alias.alias_id_non_null(&output_id)),
+                        Output::Foundry(foundry) => address_foundries.push(foundry.id()),
+                        Output::Basic(_) | Output::Treasury(_) => {}
                     }
-                    if output_data.output.is_alias() {
-                        address_aliases.push(output_data.output.as_alias().alias_id_non_null(&output_id));
-                    }
-                    if output_data.output.is_foundry() {
-                        address_foundries.push(output_data.output.as_foundry().id());
-                    }
-
                     let unlock_conditions = output_data
                         .output
                         .unlock_conditions()
                         .expect("output must have unlock conditions");
-
                     let sdr_amount = unlock_conditions
                         .storage_deposit_return()
                         .map(|sdr| sdr.amount())
@@ -973,12 +968,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
 
     log = format!(
         "{log}\n Outputs: {:#?}\n Base coin amount: {}\n NTs: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
-        output_ids,
-        address_amount,
-        address_nts,
-        address_nfts,
-        address_aliases,
-        address_foundries,
+        output_ids, address_amount, address_nts, address_nfts, address_aliases, address_foundries,
     );
 
     println_log_info!("{log}");
