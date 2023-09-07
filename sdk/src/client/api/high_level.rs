@@ -115,15 +115,13 @@ impl Client {
         Ok(selected_inputs)
     }
 
-    /// Returns the local time checked with the tangle timestamp. If the difference is larger than 5
-    /// minutes an error is returned to prevent locking outputs by accident for a wrong time.
-    pub async fn get_time_checked(&self) -> Result<u32> {
-        let current_time = unix_timestamp_now().as_secs() as u32;
+    // Returns the slot index corresponding to the current timestamp.
+    pub async fn get_slot_index(&self) -> Result<SlotIndex> {
+        let current_time = unix_timestamp_now().as_secs();
 
         let network_info = self.get_network_info().await?;
 
         if let Some(tangle_time) = network_info.tangle_time {
-            let tangle_time = tangle_time as u32;
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
             if !(tangle_time - FIVE_MINUTES_IN_SECONDS..tangle_time + FIVE_MINUTES_IN_SECONDS).contains(&current_time) {
                 return Err(Error::TimeNotSynced {
@@ -133,11 +131,6 @@ impl Client {
             }
         }
 
-        Ok(current_time)
-    }
-
-    // TODO
-    pub async fn get_slot_index(&self) -> Result<SlotIndex> {
-        todo!()
+        Ok(network_info.protocol_parameters.slot_index(current_time))
     }
 }
