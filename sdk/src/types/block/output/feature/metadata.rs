@@ -76,13 +76,15 @@ impl core::fmt::Debug for MetadataFeature {
 
 #[cfg(feature = "irc_27")]
 pub(crate) mod irc_27 {
-    use alloc::collections::{BTreeMap, BTreeSet};
+    use alloc::{
+        borrow::ToOwned,
+        collections::{BTreeMap, BTreeSet},
+        string::String,
+    };
 
     use getset::Getters;
     use serde::{Deserialize, Serialize};
     use url::Url;
-    use alloc::string::String;
-    use alloc::borrow::ToOwned;
 
     use super::*;
     use crate::types::block::address::Bech32Address;
@@ -234,57 +236,36 @@ pub(crate) mod irc_27 {
 
         #[test]
         fn serialization() {
-            let address_1 = rand_address().to_bech32_unchecked("iota1");
-            let address_2 = rand_address().to_bech32_unchecked("iota1");
-            let json = serde_json::json!(
-                {
-                    "standard": "IRC27",
-                    "version": "v1.0",
-                    "type": "image/jpeg",
-                    "uri": "https://mywebsite.com/my-nft-files-1.jpeg",
-                    "name": "My NFT #0001",
-                    "collectionName": "My Collection of Art",
-                    "royalties": {
-                        address_1.to_string(): 0.025,
-                        address_2.to_string(): 0.025
-                    },
-                    "issuerName": "My Artist Name",
-                    "description": "A little information about my NFT collection",
-                    "attributes": [
-                        {
-                            "trait_type": "Attack",
-                            "value": 150
-                        },
-                        {
-                            "trait_type": "Background",
-                            "value": "Purple"
-                        },
-                        {
-                            "trait_type": "Element",
-                            "value": "Water"
-                        },
-                        {
-                            "trait_type": "Health",
-                            "value": 500
-                        }
-                    ]
-                  }
-            );
-            let metadata_deser = serde_json::from_value::<Irc27Metadata>(json.clone()).unwrap();
             let metadata = Irc27Metadata::new(
                 "image/jpeg",
                 "https://mywebsite.com/my-nft-files-1.jpeg".parse().unwrap(),
                 "My NFT #0001",
             )
             .with_collection_name("My Collection of Art")
-            .add_royalty(address_1, 0.025)
-            .add_royalty(address_2, 0.025)
+            .add_royalty(rand_address().to_bech32_unchecked("iota1"), 0.025)
+            .add_royalty(rand_address().to_bech32_unchecked("iota1"), 0.025)
             .with_issuer_name("My Artist Name")
             .with_description("A little information about my NFT collection")
             .add_attribute(Attribute::new("Background", "Purple"))
             .add_attribute(Attribute::new("Element", "Water"))
             .add_attribute(Attribute::new("Attack", 150))
             .add_attribute(Attribute::new("Health", 500));
+            let json = serde_json::json!(
+                {
+                    "standard": "IRC27",
+                    "version": metadata.version(),
+                    "type": metadata.media_type(),
+                    "uri": metadata.uri(),
+                    "name": metadata.name(),
+                    "collectionName": metadata.collection_name(),
+                    "royalties": metadata.royalties(),
+                    "issuerName": metadata.issuer_name(),
+                    "description": metadata.description(),
+                    "attributes": metadata.attributes()
+                  }
+            );
+            let metadata_deser = serde_json::from_value::<Irc27Metadata>(json.clone()).unwrap();
+
             assert_eq!(metadata, metadata_deser);
             assert_eq!(json, serde_json::to_value(metadata).unwrap())
         }
@@ -293,10 +274,11 @@ pub(crate) mod irc_27 {
 
 #[cfg(feature = "irc_30")]
 pub(crate) mod irc_30 {
+    use alloc::string::String;
+
     use getset::Getters;
     use serde::{Deserialize, Serialize};
     use url::Url;
-    use alloc::string::String;
 
     use super::*;
 
@@ -377,26 +359,29 @@ pub(crate) mod irc_30 {
 
         #[test]
         fn serialization() {
+            let description = "FooCoin is the utility and governance token of FooLand, \
+                a revolutionary protocol in the play-to-earn crypto gaming field.";
+            let metadata = Irc30Metadata::new("FooCoin", "FOO", 3)
+                .with_description(description)
+                .with_url("https://foocoin.io/".parse().unwrap())
+                .with_logo_url(
+                    "https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
+                        .parse()
+                        .unwrap(),
+                );
             let json = serde_json::json!(
                 {
                     "standard": "IRC30",
-                    "name": "FooCoin",
-                    "description": "FooCoin is the utility and governance token of FooLand, a revolutionary protocol in the play-to-earn crypto gaming field.",
-                    "symbol": "FOO",
-                    "decimals": 3,
-                    "url": "https://foocoin.io/",
-                    "logoUrl": "https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
+                    "name": metadata.name(),
+                    "description": metadata.description(),
+                    "decimals": metadata.decimals(),
+                    "symbol": metadata.symbol(),
+                    "url": metadata.url(),
+                    "logoUrl": metadata.logo_url()
                 }
             );
             let metadata_deser = serde_json::from_value::<Irc30Metadata>(json.clone()).unwrap();
-            let metadata = Irc30Metadata::new(
-                "FooCoin",
-                
-                "FOO",3
-            )
-            .with_description("FooCoin is the utility and governance token of FooLand, a revolutionary protocol in the play-to-earn crypto gaming field.")
-            .with_url("https://foocoin.io".parse().unwrap())
-            .with_logo_url("https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR".parse().unwrap());
+
             assert_eq!(metadata, metadata_deser);
             assert_eq!(json, serde_json::to_value(metadata).unwrap())
         }
