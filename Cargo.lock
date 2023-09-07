@@ -1632,7 +1632,7 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anymap",
  "async-trait",
