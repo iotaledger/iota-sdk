@@ -180,7 +180,8 @@ pub struct ValidatorsResponse {
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
     /// last page.
-    cursor: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    cursor: Option<String>,
 }
 
 /// Response of GET /api/core/v3/rewards/{outputId}.
