@@ -26,12 +26,12 @@ class RequiredStorageDeposit:
     """Required storage deposit for the outputs in the account.
 
     Attributes:
-        alias: The required amount for alias outputs.
+        account: The required amount for account outputs.
         basic: The required amount for basic outputs.
         foundry: The required amount for foundry outputs.
         nft: The required amount for nft outputs.
     """
-    alias: str
+    account: str
     basic: str
     foundry: str
     nft: str
@@ -64,7 +64,7 @@ class Balance:
         required_storage_deposit: The required storage deposit.
         native_tokens: The balances of all native tokens.
         nfts: All owned NFTs.
-        aliases: All owned aliases.
+        accounts: All owned accounts.
         foundries: All owned foundries.
         potentially_locked_outputs: A list of potentially locked outputs.
     """
@@ -72,6 +72,6 @@ class Balance:
     required_storage_deposit: RequiredStorageDeposit
     native_tokens: List[NativeTokensBalance]
     nfts: List[HexStr]
-    aliases: List[HexStr]
+    accounts: List[HexStr]
     foundries: List[HexStr]
     potentially_locked_outputs: dict[HexStr, bool]

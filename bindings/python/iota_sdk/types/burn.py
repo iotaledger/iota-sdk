@@ -14,23 +14,23 @@ class Burn:
     """A DTO for `Burn`.
 
     Attributes:
-        aliases: The aliases to burn.
+        accounts: The accounts to burn.
         nfts: The NFTs to burn.
         foundries: The foundries to burn.
         native_tokens: The native tokens to burn.
     """
 
-    aliases: Optional[List[HexStr]] = None
+    accounts: Optional[List[HexStr]] = None
     nfts: Optional[List[HexStr]] = None
     foundries: Optional[List[HexStr]] = None
     native_tokens: Optional[List[NativeToken]] = None
 
-    def add_alias(self, alias: HexStr) -> Burn:
-        """Add an alias to the burn.
+    def add_account(self, account: HexStr) -> Burn:
+        """Add an account to the burn.
         """
-        if self.aliases is None:
-            self.aliases = []
-        self.aliases.append(alias)
+        if self.accounts is None:
+            self.accounts = []
+        self.accounts.append(account)
         return self
 
     def add_nft(self, nft: HexStr) -> Burn:

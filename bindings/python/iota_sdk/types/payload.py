@@ -8,7 +8,7 @@ from typing import Optional, List
 from dataclasses import dataclass, field
 
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
+from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 
@@ -36,7 +36,7 @@ class RegularTransactionEssence(TransactionEssence):
     network_id: str
     inputs_commitment: HexStr
     inputs: List[UtxoInput]
-    outputs: List[AliasOutput | FoundryOutput | NftOutput | BasicOutput]
+    outputs: List[AccountOutput | FoundryOutput | NftOutput | BasicOutput]
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: 1, init=False)
 

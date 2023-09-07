@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import BasicOutput, AliasOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
+from iota_sdk import BasicOutput, AccountOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
 
 
@@ -106,10 +106,10 @@ def test_output():
     basic_output = BasicOutput.from_dict(basic_output_dict)
     assert basic_output.to_dict() == basic_output_dict
 
-    alias_output_dict = {
+    account_output_dict = {
         "type": 4,
         "amount": "168200",
-        "aliasId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1",
+        "accountId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1",
         "stateIndex": 4,
         "stateMetadata": "0x14bd8ce73814dfe5d6f30f65a11bfd6d0b9e5d29c90aff9d71ec4b3d3a2984386a312295fc8b79cd",
         "foundryCounter": 0,
@@ -134,18 +134,18 @@ def test_output():
                 "type": 0,
                 "address": {
                     "type": 8,
-                    "aliasId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1"
+                    "accountId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1"
                 }
             }
         ]
     }
-    alias_output = AliasOutput.from_dict(alias_output_dict)
-    assert alias_output.to_dict() == alias_output_dict
+    account_output = AccountOutput.from_dict(account_output_dict)
+    assert account_output.to_dict() == account_output_dict
 
-    alias_output_dict = {
+    account_output_dict = {
         "type": 4,
         "amount": "55100",
-        "aliasId": "0x5380cce0ac342b8fa3e9c4f46d5b473ee9e824f0017fe43682dca77e6b875354",
+        "accountId": "0x5380cce0ac342b8fa3e9c4f46d5b473ee9e824f0017fe43682dca77e6b875354",
         "stateIndex": 2,
         "stateMetadata": "0x",
         "foundryCounter": 1,
@@ -179,8 +179,8 @@ def test_output():
             }
         ]
     }
-    alias_output = AliasOutput.from_dict(alias_output_dict)
-    assert alias_output.to_dict() == alias_output_dict
+    account_output = AccountOutput.from_dict(account_output_dict)
+    assert account_output.to_dict() == account_output_dict
 
     foundry_output_dict = {
         "type": 5,
@@ -197,7 +197,7 @@ def test_output():
                 "type": 6,
                 "address": {
                     "type": 8,
-                    "aliasId": "0xf89cfa69c0dd2946ae207f2fcae34b1b1ffa5cefdb5d6fd9ccaa068629803ff5"
+                    "accountId": "0xf89cfa69c0dd2946ae207f2fcae34b1b1ffa5cefdb5d6fd9ccaa068629803ff5"
                 }
             }
         ],

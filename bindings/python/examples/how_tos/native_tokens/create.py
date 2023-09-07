@@ -18,12 +18,12 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 # Sync account with the node
 balance = account.sync()
 
-# We can first check if we already have an alias in our account, because
-# an alias can have many foundry outputs and therefore we can reuse an
+# We can first check if we already have an account output in our account, because
+# an account can have many foundry outputs and therefore we can reuse an
 # existing one.
-if not balance.aliases:
-    # If we don't have an alias, we need to create one
-    transaction = account.prepare_create_alias_output(None, None).send()
+if not balance.accounts:
+    # If we don't have an account, we need to create one
+    transaction = account.prepare_create_account_output(None, None).send()
     print(f'Transaction sent: {transaction.transaction_id}')
 
     # Wait for transaction to get included
