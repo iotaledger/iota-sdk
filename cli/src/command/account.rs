@@ -919,39 +919,67 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let addresses = account.addresses_with_unspent_outputs().await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
+    let mut output_ids = &Vec::new();
+    let mut address_amount = 0;
+    let mut address_nts = Vec::<TokenId>::new();
+    let mut address_nfts = Vec::new();
+    let mut address_aliases = Vec::new();
+    let mut address_foundries = Vec::new();
+
     if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
         (a.key_index(), a.internal())
     }) {
-        let mut address_amount = 0;
-        for output_id in addresses[index].output_ids() {
+        output_ids = addresses[index].output_ids();
+
+        for output_id in output_ids {
             if let Some(output_data) = account.get_output(output_id).await {
-                // Output might be associated with the address, but can't unlocked by it, so we check that here
+                // Output might be associated with the address, but can't be unlocked by it, so we check that here
+                // TODO: Should we just skip outputs for which this call fails? (that's only possible for
+                // TreasuryOutputs, right?)
                 let (required_address, _) =
                     output_data
                         .output
                         .required_and_unlocked_address(current_time, output_id, None)?;
-                if *address.address().as_ref() == required_address {
+
+                if address.address().as_ref() == &required_address {
+                    if let Some(nts) = output_data.output.native_tokens() {
+                        address_nts.extend(nts.iter().map(|nt| nt.token_id()));
+                    }
+                    if output_data.output.is_nft() {
+                        address_nfts.push(output_data.output.as_nft().nft_id_non_null(&output_id));
+                    }
+                    if output_data.output.is_alias() {
+                        address_aliases.push(output_data.output.as_alias().alias_id_non_null(&output_id));
+                    }
+                    if output_data.output.is_foundry() {
+                        address_foundries.push(output_data.output.as_foundry().id());
+                    }
+
                     let unlock_conditions = output_data
                         .output
                         .unlock_conditions()
                         .expect("output must have unlock conditions");
 
-                    if let Some(sdr) = unlock_conditions.storage_deposit_return() {
-                        address_amount += output_data.output.amount() - sdr.amount();
-                    } else {
-                        address_amount += output_data.output.amount();
-                    }
+                    let sdr_amount = unlock_conditions
+                        .storage_deposit_return()
+                        .map(|sdr| sdr.amount())
+                        .unwrap_or(0);
+
+                    address_amount += output_data.output.amount() - sdr_amount;
                 }
             }
         }
-        log = format!(
-            "{log}\nOutputs: {:#?}\nBase coin amount: {}\n",
-            addresses[index].output_ids(),
-            address_amount
-        );
-    } else {
-        log = format!("{log}\nOutputs: []\nBase coin amount: 0\n");
     }
+
+    log = format!(
+        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n NTs: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
+        output_ids,
+        address_amount,
+        address_nts,
+        address_nfts,
+        address_aliases,
+        address_foundries,
+    );
 
     println_log_info!("{log}");
 
