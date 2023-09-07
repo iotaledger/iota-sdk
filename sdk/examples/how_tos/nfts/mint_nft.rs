@@ -13,7 +13,7 @@
 
 use iota_sdk::{
     types::block::output::{
-        feature::{Irc30Metadata, IssuerFeature, SenderFeature},
+        feature::{Irc27Metadata, IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
@@ -55,7 +55,14 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let metadata = Irc30Metadata::new("My NFT", "MYNFT", 10).with_description("My super cool NFT.");
+    let metadata = Irc27Metadata::new(
+        "video/mp4",
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT"
+            .parse()
+            .unwrap(),
+        "Shimmer OG NFT",
+    )
+    .with_description("The original Shimmer NFT");
 
     let nft_params = [MintNftParams::new()
         .try_with_address(NFT1_OWNER_ADDRESS)?

@@ -310,7 +310,7 @@ required-features = ["wallet", "stronghold", "irc_27"]
 [[example]]
 name = "create_native_token"
 path = "examples/how_tos/native_tokens/create.rs"
-required-features = ["rocksdb", "stronghold"]
+required-features = ["rocksdb", "stronghold", "irc_30"]
 
 [[example]]
 name = "destroy_foundry"
@@ -781,7 +781,7 @@ required-features = ["wallet", "storage"]
 [[example]]
 name = "mint_nft"
 path = "examples/how_tos/nfts/mint_nft.rs"
-required-features = ["wallet", "stronghold", "irc_30"]
+required-features = ["wallet", "stronghold", "irc_27"]
 
 [[example]]
 name = "send_nft"
