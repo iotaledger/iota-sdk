@@ -36,7 +36,7 @@ neon = { version = "0.10.1", default-features = false, features = [
 ] }
 once_cell = { version = "1.18.0", default-features = false }
 serde_json = { version = "1.0.105", default-features = false }
-tokio = { version = "1.31.0", default-features = false }
+tokio = { version = "1.32.0", default-features = false }
 
 [profile.production]
 codegen-units = 1
