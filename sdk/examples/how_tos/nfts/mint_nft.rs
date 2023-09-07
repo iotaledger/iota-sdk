@@ -13,7 +13,7 @@
 
 use iota_sdk::{
     types::block::output::{
-        feature::{IssuerFeature, SenderFeature},
+        feature::{Irc30Metadata, IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
@@ -25,8 +25,6 @@ use iota_sdk::{
 const NFT1_OWNER_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The metadata of the first minted NFT
 const NFT1_METADATA: &str = "some NFT metadata";
-// The immutable metadata of the first minted NFT
-const NFT1_IMMUTABLE_METADATA: &str = "some NFT immutable metadata";
 // The tag of the first minted NFT
 const NFT1_TAG: &str = "some NFT tag";
 // The base coin amount we sent with the second NFT
@@ -57,13 +55,15 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
+    let metadata = Irc30Metadata::new("My NFT", "MYNFT", 10).with_description("My super cool NFT.");
+
     let nft_params = [MintNftParams::new()
         .try_with_address(NFT1_OWNER_ADDRESS)?
         .try_with_sender(sender_address)?
         .with_metadata(NFT1_METADATA.as_bytes().to_vec())
         .with_tag(NFT1_TAG.as_bytes().to_vec())
         .try_with_issuer(sender_address)?
-        .with_immutable_metadata(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec())];
+        .with_immutable_metadata(metadata.to_bytes())];
 
     let transaction = account.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

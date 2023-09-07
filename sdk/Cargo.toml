@@ -303,7 +303,7 @@ required-features = ["wallet", "storage", "stronghold"]
 [[example]]
 name = "mint_collection_nft"
 path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
-required-features = ["wallet", "stronghold"]
+required-features = ["wallet", "stronghold", "irc_27"]
 
 # Native Tokens Examples
 
@@ -781,7 +781,7 @@ required-features = ["wallet", "storage"]
 [[example]]
 name = "mint_nft"
 path = "examples/how_tos/nfts/mint_nft.rs"
-required-features = ["wallet", "stronghold"]
+required-features = ["wallet", "stronghold", "irc_30"]
 
 [[example]]
 name = "send_nft"
