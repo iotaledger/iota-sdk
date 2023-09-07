@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, string::String, vec::Vec};
 use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
