@@ -140,6 +140,8 @@ tokio = { version = "1.31.0", default-features = false, features = [
 default = ["client", "wallet", "tls"]
 
 events = []
+irc_27 = ["url", "serde"]
+irc_30 = ["url", "serde"]
 ledger_nano = ["iota-ledger-nano"]
 mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
