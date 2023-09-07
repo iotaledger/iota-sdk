@@ -6,7 +6,7 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import List, Optional
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
+from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 from iota_sdk.utils import Utils
 
 
@@ -18,13 +18,15 @@ class Block:
     Attributes:
         protocol_version: The protocol version with which this block was issued.
         parents: The parents of this block.
+        burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
 
     protocol_version: int
     parents: List[HexStr]
+    burned_mana: str
     payload: Optional[TaggedDataPayload |
-                      TransactionPayload | MilestonePayload] = None
+                      TransactionPayload] = None
 
     def id(self) -> HexStr:
         return Utils.block_id(self)
