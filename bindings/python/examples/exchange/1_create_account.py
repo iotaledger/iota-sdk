@@ -39,7 +39,7 @@ wallet.store_mnemonic(
 account = wallet.create_account('Alice')
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
-# have a storage deposit return, expiration or are nft/alias/foundry outputs.
+# have a storage deposit return, expiration or are nft/account/foundry outputs.
 account.set_default_sync_options(
     SyncOptions(sync_only_most_basic_outputs=True))
 

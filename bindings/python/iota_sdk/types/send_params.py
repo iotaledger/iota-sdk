@@ -64,12 +64,12 @@ class CreateNativeTokenParams():
         circulating_supply: The circulating supply of the native token.
         maximum_supply: The maximum supply of the native token.
         foundry_metadata: The foundry metadata of the native token.
-        alias_id: The ID of the corresponding alias.
+        account_id: The ID of the corresponding account.
     """
     circulating_supply: int
     maximum_supply: int
     foundry_metadata: Optional[str] = None
-    alias_id: Optional[str] = None
+    account_id: Optional[str] = None
 
     @staticmethod
     def _to_dict_custom(config):
@@ -102,14 +102,14 @@ class MintNftParams():
 
 @json
 @dataclass
-class CreateAliasOutputParams():
-    """Parameters for creating aliases.
+class CreateAccountOutputParams():
+    """Parameters for creating accounts.
 
     Attributes:
-        address: A Bech32 encoded address which will control the alias. Default will use the first address of the account.
-        immutable_metadata: Immutable alias metadata.
-        metadata: Alias metadata.
-        state_metadata: Alias state metadata.
+        address: A Bech32 encoded address which will control the account. Default will use the first address of the account.
+        immutable_metadata: Immutable account metadata.
+        metadata: Account metadata.
+        state_metadata: Account state metadata.
     """
     address: str
     immutable_metadata: Optional[str] = None

@@ -7,40 +7,40 @@ class AccountSyncOptions():
     Attributes:
         basic_outputs: Whether to sync basic outputs.
         nft_outputs: Whether to sync NFT outputs.
-        alias_outputs: whether to sync alias outputs.
+        account_outputs: whether to sync account outputs.
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
-                 alias_outputs: Optional[bool] = None):
+                 account_outputs: Optional[bool] = None):
         """Initialize `Self`.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
-        self.aliasOutputs = alias_outputs
+        self.accountOutputs = account_outputs
 
 
 class AliasSyncOptions():
-    """Sync options for addresses from alias outputs.
+    """Sync options for addresses from account outputs.
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
         nft_outputs: Whether to sync NFT outputs.
-        alias_outputs: Whether to sync alias outputs.
+        account_outputs: Whether to sync account outputs.
         foundry_outputs: Whether to sync foundry outputs.
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
-                 alias_outputs: Optional[bool] = None,
+                 account_outputs: Optional[bool] = None,
                  foundry_outputs: Optional[bool] = None):
         """Initialize `Self`.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
-        self.aliasOutputs = alias_outputs
+        self.accountOutputs = account_outputs
         self.foundryOutputs = foundry_outputs
 
 
@@ -50,18 +50,18 @@ class NftSyncOptions():
     Attributes:
         basic_outputs: Whether to sync basic outputs.
         nft_outputs: Whether to sync NFT outputs.
-        alias_outputs: Whether to sync alias outputs.
+        account_outputs: Whether to sync account outputs.
     """
 
     def __init__(self,
                  basic_outputs: Optional[bool] = None,
                  nft_outputs: Optional[bool] = None,
-                 alias_outputs: Optional[bool] = None):
+                 account_outputs: Optional[bool] = None):
         """Initialize `Self`.
         """
         self.basicOutputs = basic_outputs
         self.nftOutputs = nft_outputs
-        self.aliasOutputs = alias_outputs
+        self.accountOutputs = account_outputs
 
 
 class SyncOptions():
@@ -92,7 +92,7 @@ class SyncOptions():
     account :
         Specifies what outputs should be synced for the Ed25519 addresses from the account.
     alias :
-        Specifies what outputs should be synced for the address of an alias output.
+        Specifies what outputs should be synced for the address of an account output.
     nft :
         Specifies what outputs should be synced for the address of an nft output.
     sync_only_most_basic_outputs :
@@ -123,6 +123,8 @@ class SyncOptions():
         self.syncIncomingTransactions = sync_incoming_transactions
         self.syncPendingTransactions = sync_pending_transactions
         self.account = account
+        # TODO Rename when we are done with Account changes
+        # https://github.com/iotaledger/iota-sdk/issues/647.
         self.alias = alias
         self.nft = nft
         self.syncOnlyMostBasicOutputs = sync_only_most_basic_outputs

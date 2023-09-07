@@ -14,11 +14,11 @@ class AddressType(IntEnum):
 
      Attributes:
         ED25519 (0): Ed25519 address.
-        ALIAS (8): Alias address.
+        ACCOUNT (8): Account address.
         NFT (16): Nft address.
     """
     ED25519 = 0
-    ALIAS = 8
+    ACCOUNT = 8
     NFT = 16
 
 
@@ -46,15 +46,15 @@ class Ed25519Address(Address):
 
 @json
 @dataclass
-class AliasAddress(Address):
-    """Represents an Alias address.
+class AccountAddress(Address):
+    """Represents an Account address.
     Attributes:
-        alias_id: The hex encoded alias id.
+        account_id: The hex encoded account id.
     """
-    alias_id: HexStr
+    account_id: HexStr
     type: int = field(
         default_factory=lambda: int(
-            AddressType.ALIAS),
+            AddressType.ACCOUNT),
         init=False)
 
 

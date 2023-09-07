@@ -18,6 +18,6 @@ class FilterOptions:
     lowerBoundBookedTimestamp: Optional[int] = None
     upperBoundBookedTimestamp: Optional[int] = None
     outputTypes: Optional[List[int]] = None
-    aliasIds: Optional[List[str]] = None
+    accountIds: Optional[List[str]] = None
     foundryIds: Optional[List[str]] = None
     nftIds: Optional[List[str]] = None
