@@ -1146,11 +1146,11 @@ export class Client {
      *
      * @param topics An array of MQTT topics to listen to.
      */
-    async listenMqtt(
+    listenMqtt(
         topics: string[],
         callback: (error: Error, result: string) => void,
-    ): Promise<void> {
-        return this.methodHandler.listen(topics, callback);
+    ): void {
+        return this.methodHandler.listenMqtt(topics, callback);
     }
 
     /**

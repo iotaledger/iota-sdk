@@ -5,7 +5,7 @@ import { errorHandle } from '..';
 import {
     callClientMethodAsync,
     createClient,
-    listenMqtt,
+    listenMqtt as listenMqttRust,
     destroyClient,
 } from '../bindings';
 import type { IClientOptions, __ClientMethods__ } from '../types/client';
@@ -68,16 +68,12 @@ export class ClientMethodHandler {
      * @param topics The topics to listen to.
      * @param callback The callback to be called when an MQTT event is received.
      */
-    listen(
+    listenMqtt(
         topics: string[],
         callback: (error: Error, result: string) => void,
-    ): Promise<void> {
+    ): void {
         try {
-            return listenMqtt(topics, callback, this.methodHandler).catch(
-                (error: any) => {
-                    throw errorHandle(error);
-                },
-            );
+            listenMqttRust(topics, callback, this.methodHandler);
         } catch (error: any) {
             throw errorHandle(error);
         }

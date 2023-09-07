@@ -126,7 +126,9 @@ pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let mut topics = Vec::with_capacity(vec.len());
     for topic_string in vec {
         let topic = topic_string.downcast::<JsString, FunctionContext>(&mut cx).unwrap();
-        topics.push(Topic::new(topic.value(&mut cx).as_str()).expect("invalid MQTT topic"));
+        topics.push(Topic::new(topic.value(&mut cx).as_str()).or_else(|e| {
+            cx.throw_error(serde_json::to_string(&Response::Error(e.into())).expect("json to string error"))
+        })?);
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
@@ -157,7 +159,10 @@ pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 fn call_event_callback(channel: &neon::event::Channel, event_data: String, callback: Arc<JsCallback>) {
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
+        // instance of class we call on, its a global fn so "undefined"
         let this = cx.undefined();
+
+        // callback is fn(err, event)
         let args = [
             cx.undefined().upcast::<JsValue>(),
             cx.string(event_data).upcast::<JsValue>(),

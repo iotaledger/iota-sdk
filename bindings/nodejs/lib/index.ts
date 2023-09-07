@@ -60,14 +60,21 @@ function errorHandle(error: any): Error {
         // neon or other bindings lib related error
         throw error;
     } else if (error instanceof Error) {
-        const err: Result = JSON.parse(error.message);
-        if (err.type == 'panic') {
-            return Error(err.payload.toString());
-        } else {
-            return Error(err.payload.error);
+        try {
+            const err: Result = JSON.parse(error.message);
+            if (err.type == 'panic') {
+                return Error(err.payload.toString());
+            } else {
+                return Error(err.payload.error);
+            }
+        } catch (err: any) {
+            // json error, SyntaxError, we must have send a bad error
+            return error;
         }
     } else {
         // Something bad happened! Make sure we dont double parse
+        //Possible scenarios:
+        // - "json to string error: x"
         return TypeError(error);
     }
 }

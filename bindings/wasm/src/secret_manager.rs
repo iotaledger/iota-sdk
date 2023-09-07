@@ -27,8 +27,12 @@ impl SecretManagerMethodHandler {
 #[wasm_bindgen(js_name = createSecretManager)]
 #[allow(non_snake_case)]
 pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandler, JsValue> {
-    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(|err| err.to_string())?;
-    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| err.to_string())?;
+    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(|err| {
+        JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
+    })?;
+    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| {
+        JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
+    })?;
 
     Ok(SecretManagerMethodHandler {
         secret_manager: Arc::new(RwLock::new(secret_manager)),
@@ -44,12 +48,12 @@ pub async fn call_secret_manager_method_async(
     method: String,
     methodHandler: &SecretManagerMethodHandler,
 ) -> Result<String, JsError> {
-    let secret_manager = methodHandler.secret_manager.clone();
+    let secret_manager = &methodHandler.secret_manager;
     let method: SecretManagerMethod = serde_json::from_str(&method).map_err(|err| {
-        JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
+        JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
     })?;
 
-    let response = call_secret_manager_method(&secret_manager, method).await;
+    let response = call_secret_manager_method(secret_manager, method).await;
     let ser = serde_json::to_string(&response).expect("json to string error");
     match response {
         Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
