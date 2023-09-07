@@ -18,7 +18,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 # Sync account with the node
 balance = account.sync()
 
-# We can first check if we already have an account in our account, because
+# We can first check if we already have an account output in our account, because
 # an account can have many foundry outputs and therefore we can reuse an
 # existing one.
 if not balance.accounts:
