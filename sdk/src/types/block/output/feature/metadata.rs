@@ -74,13 +74,15 @@ impl core::fmt::Debug for MetadataFeature {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "irc_27")]
 pub(crate) mod irc_27 {
     use alloc::collections::{BTreeMap, BTreeSet};
 
     use getset::Getters;
     use serde::{Deserialize, Serialize};
     use url::Url;
+    use alloc::string::String;
+    use alloc::borrow::ToOwned;
 
     use super::*;
     use crate::types::block::address::Bech32Address;
@@ -289,11 +291,12 @@ pub(crate) mod irc_27 {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "irc_30")]
 pub(crate) mod irc_30 {
     use getset::Getters;
     use serde::{Deserialize, Serialize};
     use url::Url;
+    use alloc::string::String;
 
     use super::*;
 
