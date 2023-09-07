@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use clap::{builder::BoolishValueParser, Args, Parser, Subcommand};
+use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -42,6 +42,13 @@ pub struct WalletCli {
     pub log_level: LevelFilter,
     #[command(subcommand)]
     pub command: Option<WalletCommand>,
+}
+
+impl WalletCli {
+    pub fn print_help() -> Result<(), Error> {
+        Self::command().bin_name("wallet").print_help()?;
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Subcommand)]

@@ -12,7 +12,7 @@ use crate::{
         restore_command, set_node_url_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
+    helper::{get_account_alias, get_decision, get_password, pick_account},
     println_log_error, println_log_info,
 };
 
@@ -92,7 +92,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                     println_log_info!("Created new wallet.");
                     create_initial_account(wallet).await?
                 } else {
-                    print_wallet_help();
+                    WalletCli::print_help()?;
                     (None, None)
                 }
             }
