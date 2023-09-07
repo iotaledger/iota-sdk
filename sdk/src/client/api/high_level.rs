@@ -122,7 +122,6 @@ impl Client {
         let network_info = self.get_network_info().await?;
 
         if let Some(tangle_time) = network_info.tangle_time {
-            let tangle_time = tangle_time;
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
             if !(tangle_time - FIVE_MINUTES_IN_SECONDS..tangle_time + FIVE_MINUTES_IN_SECONDS).contains(&current_time) {
                 return Err(Error::TimeNotSynced {
