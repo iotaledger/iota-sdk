@@ -201,6 +201,7 @@ pub(crate) mod irc_27 {
         }
 
         pub fn to_bytes(&self) -> Vec<u8> {
+            // Unwrap: Safe because this struct is known to be valid
             serde_json::to_string(self).unwrap().into_bytes()
         }
     }
@@ -209,6 +210,12 @@ pub(crate) mod irc_27 {
         type Error = Error;
         fn try_from(value: Irc27Metadata) -> Result<Self, Error> {
             Self::new(value.to_bytes())
+        }
+    }
+
+    impl From<Irc27Metadata> for Vec<u8> {
+        fn from(value: Irc27Metadata) -> Self {
+            value.to_bytes()
         }
     }
 
@@ -365,6 +372,7 @@ pub(crate) mod irc_30 {
         }
 
         pub fn to_bytes(&self) -> Vec<u8> {
+            // Unwrap: Safe because this struct is known to be valid
             serde_json::to_string(self).unwrap().into_bytes()
         }
     }
@@ -373,6 +381,12 @@ pub(crate) mod irc_30 {
         type Error = Error;
         fn try_from(value: Irc30Metadata) -> Result<Self, Error> {
             Self::new(value.to_bytes())
+        }
+    }
+
+    impl From<Irc30Metadata> for Vec<u8> {
+        fn from(value: Irc30Metadata) -> Self {
+            value.to_bytes()
         }
     }
 

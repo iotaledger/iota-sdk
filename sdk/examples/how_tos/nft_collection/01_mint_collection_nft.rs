@@ -17,7 +17,7 @@
 use iota_sdk::{
     types::block::{
         address::{Bech32Address, NftAddress},
-        output::NftId,
+        output::{feature::Irc27Metadata, NftId},
         payload::transaction::TransactionId,
     },
     wallet::{Account, MintNftParams, Result},
@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
     let nft_mint_params = (0..NFT_COLLECTION_SIZE)
         .map(|index| {
             MintNftParams::new()
-                .with_immutable_metadata(get_immutable_metadata(index, issuer_nft_id).as_bytes().to_vec())
+                .with_immutable_metadata(get_immutable_metadata(index).to_bytes())
                 // The NFT address from the NFT we minted in mint_issuer_nft example
                 .with_issuer(issuer)
         })
@@ -89,21 +89,20 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
-    // Note: we use `serde_json::from_str` to remove all unnecessary whitespace
-    serde_json::from_str::<serde_json::Value>(&format!(
-        r#"{{
-        "standard":"IRC27",
-        "version":"v1.0",
-        "type":"video/mp4",
-        "uri":"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong",
-        "name":"Shimmer OG NFT #{index}",
-        "description":"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
-        "issuerName":"IOTA Foundation",
-        "collectionId":"{issuer_nft_id}",
-        "collectionName":"Shimmer OG"
-    }}"#
-    )).unwrap().to_string()
+fn get_immutable_metadata(index: usize) -> Irc27Metadata {
+    Irc27Metadata::new(
+        "video/mp4",
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT"
+            .parse()
+            .unwrap(),
+        format!("Shimmer OG NFT #{index}"),
+    )
+    .with_description(
+        "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation \
+        to celebrate the official launch of the Shimmer Network.",
+    )
+    .with_issuer_name("IOTA Foundation")
+    .with_collection_name("Shimmer OG")
 }
 
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
