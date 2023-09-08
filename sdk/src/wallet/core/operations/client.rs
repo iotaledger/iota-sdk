@@ -42,6 +42,8 @@ where
             remote_pow_timeout,
             #[cfg(not(target_family = "wasm"))]
             pow_worker_count,
+            #[cfg(not(target_family = "wasm"))]
+            max_parallel_api_requests,
         } = client_options;
         self.client
             .update_node_manager(node_manager_builder.build(HashMap::new()))
@@ -49,6 +51,8 @@ where
         *self.client.network_info.write().await = network_info;
         *self.client.api_timeout.write().await = api_timeout;
         *self.client.remote_pow_timeout.write().await = remote_pow_timeout;
+        #[cfg(not(target_family = "wasm"))]
+        self.client.request_pool.resize(max_parallel_api_requests).await;
         #[cfg(not(target_family = "wasm"))]
         {
             *self.client.pow_worker_count.write().await = pow_worker_count;
