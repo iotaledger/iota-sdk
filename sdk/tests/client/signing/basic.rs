@@ -77,7 +77,7 @@ async fn single_ed25519_unlock() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -178,7 +178,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(protocol_parameters)?,
     );
 
@@ -289,7 +289,7 @@ async fn two_signature_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(protocol_parameters)?,
     );
 

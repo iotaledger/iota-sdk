@@ -72,6 +72,8 @@ class ClientOptions:
             Protocol parameters.
         api_timeout (Duration):
             Timeout for API requests.
+        max_parallel_api_requests (int):
+            The maximum parallel API requests.
     """
     primary_node: Optional[str] = None
     nodes: Optional[List[str]] = None
@@ -85,3 +87,4 @@ class ClientOptions:
     broker_options: Optional[MqttBrokerOptions] = None
     protocol_parameters: Optional[NodeInfoProtocol] = None
     api_timeout: Optional[Duration] = None
+    max_parallel_api_requests: Optional[int] = None
