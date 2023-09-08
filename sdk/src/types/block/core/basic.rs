@@ -8,21 +8,21 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{
+use crate::types::block::{
     core::{verify_parents, BlockWrapper},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
-    protocol::{ProtocolParameters, ProtocolParametersHash},
+    payload::{OptionalPayload, Payload},
+    protocol::ProtocolParameters,
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     Block, BlockBuilder, Error, IssuerId,
 };
 
-pub type ValidationBlock = BlockWrapper<ValidationBlockData>;
+pub type BasicBlock = BlockWrapper<BasicBlockData>;
 
-impl BlockBuilder<ValidationBlock> {
-    /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
+impl BlockBuilder<BasicBlock> {
+    /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
     #[inline(always)]
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         protocol_params: ProtocolParameters,
         issuing_time: u64,
@@ -30,8 +30,6 @@ impl BlockBuilder<ValidationBlock> {
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
         strong_parents: StrongParents,
-        highest_supported_version: u8,
-        protocol_parameters: &ProtocolParameters,
         signature: Ed25519Signature,
     ) -> Self {
         Self(BlockWrapper {
@@ -40,12 +38,12 @@ impl BlockBuilder<ValidationBlock> {
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
-            data: ValidationBlockData {
+            data: BasicBlockData {
                 strong_parents,
                 weak_parents: Default::default(),
                 shallow_like_parents: Default::default(),
-                highest_supported_version,
-                protocol_parameters_hash: protocol_parameters.hash(),
+                payload: OptionalPayload::default(),
+                burned_mana: Default::default(),
             },
             signature,
         })
@@ -64,57 +62,72 @@ impl BlockBuilder<ValidationBlock> {
         self.0.data.shallow_like_parents = shallow_like_parents.into();
         self
     }
+
+    /// Adds a payload to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.0.data.payload = payload.into();
+        self
+    }
+
+    /// Adds burned mana to a [`BlockBuilder`].
+    #[inline(always)]
+    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
+        self.0.data.burned_mana = burned_mana;
+        self
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ValidationBlockData {
+pub struct BasicBlockData {
     /// Blocks that are strongly directly approved.
     pub(crate) strong_parents: StrongParents,
     /// Blocks that are weakly directly approved.
     pub(crate) weak_parents: WeakParents,
     /// Blocks that are directly referenced to adjust opinion.
     pub(crate) shallow_like_parents: ShallowLikeParents,
-    /// The highest supported protocol version the issuer of this block supports.
-    pub(crate) highest_supported_version: u8,
-    /// The hash of the protocol parameters for the Highest Supported Version.
-    pub(crate) protocol_parameters_hash: ProtocolParametersHash,
+    /// The optional [Payload] of the block.
+    pub(crate) payload: OptionalPayload,
+    /// The amount of mana the Account identified by [`IssuerId`](super::IssuerId) is at most
+    /// willing to burn for this block.
+    pub(crate) burned_mana: u64,
 }
 
-impl ValidationBlock {
-    pub const KIND: u8 = 1;
+impl BasicBlock {
+    pub const KIND: u8 = 0;
 
-    /// Returns the strong parents of a [`ValidationBlock`].
+    /// Returns the strong parents of a [`BasicBlock`].
     #[inline(always)]
     pub fn strong_parents(&self) -> &StrongParents {
         &self.data.strong_parents
     }
 
-    /// Returns the weak parents of a [`ValidationBlock`].
+    /// Returns the weak parents of a [`BasicBlock`].
     #[inline(always)]
     pub fn weak_parents(&self) -> &WeakParents {
         &self.data.weak_parents
     }
 
-    /// Returns the shallow like parents of a [`ValidationBlock`].
+    /// Returns the shallow like parents of a [`BasicBlock`].
     #[inline(always)]
     pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
         &self.data.shallow_like_parents
     }
 
-    /// Returns the highest supported protocol version of a [`ValidationBlock`].
+    /// Returns the optional payload of a [`BasicBlock`].
     #[inline(always)]
-    pub fn highest_supported_version(&self) -> u8 {
-        self.data.highest_supported_version
+    pub fn payload(&self) -> Option<&Payload> {
+        self.data.payload.as_ref()
     }
 
-    /// Returns the protocol parameters hash of a [`ValidationBlock`].
+    /// Returns the burned mana of a [`BasicBlock`].
     #[inline(always)]
-    pub fn protocol_parameters_hash(&self) -> ProtocolParametersHash {
-        self.data.protocol_parameters_hash
+    pub fn burned_mana(&self) -> u64 {
+        self.data.burned_mana
     }
 }
 
-impl Packable for ValidationBlockData {
+impl Packable for BasicBlockData {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
@@ -122,8 +135,9 @@ impl Packable for ValidationBlockData {
         self.strong_parents.pack(packer)?;
         self.weak_parents.pack(packer)?;
         self.shallow_like_parents.pack(packer)?;
-        self.highest_supported_version.pack(packer)?;
-        self.protocol_parameters_hash.pack(packer)?;
+        self.payload.pack(packer)?;
+        self.burned_mana.pack(packer)?;
+
         Ok(())
     }
 
@@ -139,35 +153,26 @@ impl Packable for ValidationBlockData {
             verify_parents(&strong_parents, &weak_parents, &shallow_like_parents).map_err(UnpackError::Packable)?;
         }
 
-        let highest_supported_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
 
-        let protocol_parameters_hash = ProtocolParametersHash::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if VERIFY {
-            validate_protocol_params_hash(&protocol_parameters_hash, visitor).map_err(UnpackError::Packable)?;
-        }
+        let burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         Ok(Self {
             strong_parents,
             weak_parents,
             shallow_like_parents,
-            highest_supported_version,
-            protocol_parameters_hash,
+            payload,
+            burned_mana,
         })
     }
 }
 
-impl Packable for ValidationBlock {
+impl Packable for BasicBlock {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version().pack(packer)?;
-        self.network_id().pack(packer)?;
-        self.issuing_time.pack(packer)?;
-        self.slot_commitment_id.pack(packer)?;
-        self.latest_finalized_slot.pack(packer)?;
-        self.issuer_id.pack(packer)?;
+        self.pack_header(packer)?;
         Self::KIND.pack(packer)?;
         self.data.pack(packer)?;
         Signature::Ed25519(self.signature).pack(packer)?;
@@ -213,7 +218,7 @@ impl Packable for ValidationBlock {
             return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
         }
 
-        let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+        let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
         let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
@@ -243,17 +248,6 @@ impl Packable for ValidationBlock {
     }
 }
 
-fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &ProtocolParameters) -> Result<(), Error> {
-    let params_hash = params.hash();
-    if hash != &params_hash {
-        return Err(Error::InvalidProtocolParametersHash {
-            expected: params_hash,
-            actual: *hash,
-        });
-    }
-    Ok(())
-}
-
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
@@ -262,50 +256,53 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{BlockId, Error},
+        block::{payload::dto::PayloadDto, BlockId, Error},
         TryFromDto, ValidationParams,
     };
 
-    /// A special type of block used by validators to secure the network.
+    /// A basic block.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct ValidationBlockDataDto {
+    pub struct BasicBlockDataDto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
         pub weak_parents: BTreeSet<BlockId>,
         pub shallow_like_parents: BTreeSet<BlockId>,
-        pub highest_supported_version: u8,
-        pub protocol_parameters_hash: ProtocolParametersHash,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub payload: Option<PayloadDto>,
+        #[serde(with = "crate::utils::serde::string")]
+        pub burned_mana: u64,
     }
 
-    impl From<&ValidationBlockData> for ValidationBlockDataDto {
-        fn from(value: &ValidationBlockData) -> Self {
+    impl From<&BasicBlockData> for BasicBlockDataDto {
+        fn from(value: &BasicBlockData) -> Self {
             Self {
-                kind: ValidationBlock::KIND,
+                kind: BasicBlock::KIND,
                 strong_parents: value.strong_parents.to_set(),
                 weak_parents: value.weak_parents.to_set(),
                 shallow_like_parents: value.shallow_like_parents.to_set(),
-                highest_supported_version: value.highest_supported_version,
-                protocol_parameters_hash: value.protocol_parameters_hash,
+                payload: value.payload.as_ref().map(Into::into),
+                burned_mana: value.burned_mana,
             }
         }
     }
 
-    impl TryFromDto for ValidationBlockData {
-        type Dto = ValidationBlockDataDto;
+    impl TryFromDto for BasicBlockData {
+        type Dto = BasicBlockDataDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
-                validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
-            }
             Ok(Self {
                 strong_parents: StrongParents::from_set(dto.strong_parents)?,
                 weak_parents: WeakParents::from_set(dto.weak_parents)?,
                 shallow_like_parents: ShallowLikeParents::from_set(dto.shallow_like_parents)?,
-                highest_supported_version: dto.highest_supported_version,
-                protocol_parameters_hash: dto.protocol_parameters_hash,
+                payload: dto
+                    .payload
+                    .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
+                    .transpose()?
+                    .into(),
+                burned_mana: dto.burned_mana,
             })
         }
     }

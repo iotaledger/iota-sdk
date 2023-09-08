@@ -5,8 +5,7 @@ use alloc::vec::Vec;
 
 use super::signature::rand_ed25519_signature;
 use crate::types::block::{
-    basic::BasicBlock,
-    core::Block,
+    core::{BasicBlock, Block},
     parent::StrongParents,
     protocol::ProtocolParameters,
     rand::{

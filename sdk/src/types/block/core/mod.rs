@@ -1,6 +1,9 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod basic;
+mod validation;
+
 use alloc::{boxed::Box, vec::Vec};
 use core::mem::size_of;
 
@@ -13,12 +16,14 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{
+pub use self::{
     basic::{BasicBlock, BasicBlockData},
+    validation::{ValidationBlock, ValidationBlockData},
+};
+use super::{
     block_id::BlockHash,
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
-    validation::{ValidationBlock, ValidationBlockData},
     IssuerId,
 };
 use crate::types::block::{
@@ -575,7 +580,10 @@ pub(crate) mod dto {
     use super::*;
     use crate::{
         types::{
-            block::{basic::dto::BasicBlockDataDto, validation::dto::ValidationBlockDataDto, Error},
+            block::{
+                core::{basic::dto::BasicBlockDataDto, validation::dto::ValidationBlockDataDto},
+                Error,
+            },
             TryFromDto,
         },
         utils::serde::string,
