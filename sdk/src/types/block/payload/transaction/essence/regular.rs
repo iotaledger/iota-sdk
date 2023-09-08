@@ -10,7 +10,7 @@ use crate::types::{
     block::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
-        mana::{verify_allotments_sum, ManaAllotment, ManaAllotments},
+        mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
@@ -151,7 +151,7 @@ impl RegularTransactionEssenceBuilder {
         let allotments = ManaAllotments::from_set(self.allotments)?;
 
         if let Some(protocol_parameters) = params.protocol_parameters() {
-            verify_allotments_sum(allotments.iter(), protocol_parameters)?;
+            verify_mana_allotments_sum(allotments.iter(), protocol_parameters)?;
         }
 
         verify_payload(&self.payload)?;

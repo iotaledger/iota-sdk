@@ -23,7 +23,7 @@ pub(crate) type ManaAllotmentCount =
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidManaAllotmentCount(p.into())))]
 pub struct ManaAllotments(
-    #[packable(verify_with = verify_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
+    #[packable(verify_with = verify_mana_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
 );
 
 impl ManaAllotments {
@@ -36,7 +36,7 @@ impl ManaAllotments {
 
     /// Creates a new [`ManaAllotments`] from a vec.
     pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
-        verify_allotments_unique_sorted(&allotments)?;
+        verify_mana_allotments_unique_sorted(&allotments)?;
 
         Ok(Self(
             allotments
@@ -64,26 +64,28 @@ impl ManaAllotments {
     }
 }
 
-fn verify_allotments<const VERIFY: bool>(
+fn verify_mana_allotments<const VERIFY: bool>(
     allotments: &[ManaAllotment],
     protocol_params: &ProtocolParameters,
 ) -> Result<(), Error> {
     if VERIFY {
-        verify_allotments_unique_sorted(allotments)?;
-        verify_allotments_sum(allotments, protocol_params)?;
+        verify_mana_allotments_unique_sorted(allotments)?;
+        verify_mana_allotments_sum(allotments, protocol_params)?;
     }
 
     Ok(())
 }
 
-fn verify_allotments_unique_sorted<'a>(allotments: impl IntoIterator<Item = &'a ManaAllotment>) -> Result<(), Error> {
+fn verify_mana_allotments_unique_sorted<'a>(
+    allotments: impl IntoIterator<Item = &'a ManaAllotment>,
+) -> Result<(), Error> {
     if !is_unique_sorted(allotments.into_iter()) {
         return Err(Error::ManaAllotmentsNotUniqueSorted);
     }
     Ok(())
 }
 
-pub(crate) fn verify_allotments_sum<'a>(
+pub(crate) fn verify_mana_allotments_sum<'a>(
     allotments: impl IntoIterator<Item = &'a ManaAllotment>,
     protocol_params: &ProtocolParameters,
 ) -> Result<(), Error> {
