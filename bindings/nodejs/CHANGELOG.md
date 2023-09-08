@@ -25,6 +25,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Account::{burn(), consolidateOutputs(), createAliasOutput(), meltNativeToken(), mintNativeToken(), createNativeToken(), mintNfts(), sendTransaction(), sendNativeTokens(), sendNft()}` methods;
 
+## 1.0.10 - 2023-mm-dd
+
+### Fixed
+
+- Type of `value` property in `CustomAddress`;
+
+## 1.0.9 - 2023-09-07
+
+### Added
+
+- `IClientOptions::maxParallelApiRequests`;
+
+### Fixed
+
+- The main thread gets blocked when calling client or wallet methods;
+
+## 1.0.8 - 2023-09-05
+
+### Added
+
+- `migrateDbChrysalisToStardust` function;
+- `Wallet::getChrysalisData` method;
+
 ## 1.0.7 - 2023-08-29
 
 ### Fixed

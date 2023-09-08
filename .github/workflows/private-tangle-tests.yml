@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop, production, 1.1]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/private-tangle-tests.yml"
       - ".github/actions/**"
       - "**.rs"
@@ -15,6 +16,7 @@ on:
   pull_request:
     branches: [develop, production, 1.1]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/private-tangle-tests.yml"
       - ".github/actions/**"
       - "**.rs"
@@ -42,8 +44,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
 
       - name: Install required packages
         run: |
@@ -63,7 +65,7 @@ jobs:
         uses: "./.github/actions/ledger-nano"
 
       - name: Run tests
-        run: cargo nextest run --tests --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
+        run: cargo ci-tangle-test
 
       - name: Tear down private tangle
         if: always()

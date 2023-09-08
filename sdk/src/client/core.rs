@@ -13,6 +13,8 @@ use {
     tokio::sync::watch::{Receiver as WatchReceiver, Sender as WatchSender},
 };
 
+#[cfg(not(target_family = "wasm"))]
+use super::request_pool::RequestPool;
 #[cfg(target_family = "wasm")]
 use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
@@ -56,6 +58,8 @@ pub struct ClientInner {
     pub(crate) mqtt: MqttInner,
     #[cfg(target_family = "wasm")]
     pub(crate) last_sync: tokio::sync::Mutex<Option<u32>>,
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) request_pool: RequestPool,
 }
 
 #[derive(Default)]
@@ -83,10 +87,13 @@ pub(crate) struct MqttInner {
 impl std::fmt::Debug for Client {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("Client");
-        d.field("node_manager", &self.inner.node_manager);
+        d.field("node_manager", &self.node_manager);
         #[cfg(feature = "mqtt")]
-        d.field("broker_options", &self.inner.mqtt.broker_options);
-        d.field("network_info", &self.inner.network_info).finish()
+        d.field("broker_options", &self.mqtt.broker_options);
+        d.field("network_info", &self.network_info);
+        #[cfg(not(target_family = "wasm"))]
+        d.field("request_pool", &self.request_pool);
+        d.finish()
     }
 }
 
