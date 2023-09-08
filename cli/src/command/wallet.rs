@@ -239,7 +239,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
     check_file_exists(backup_path).await?;
 
     let mut builder = Wallet::builder();
-    if let Ok(_) = check_file_exists(snapshot_path).await {
+    if check_file_exists(snapshot_path).await.is_ok() {
         println_log_info!(
             "Detected a stronghold file at {}, requiring unlock..",
             snapshot_path.to_str().unwrap()
