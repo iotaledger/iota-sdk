@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install stable toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           target: "wasm32-unknown-unknown"
 
