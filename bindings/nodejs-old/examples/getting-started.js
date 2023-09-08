@@ -34,9 +34,10 @@ async function main() {
 
     const manager = new AccountManager(accountManagerOptions);
 
-    // Generate a mnemonic and store it in the Stronghold vault.
+    // Generate a mnemonic and store its seed in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
     const mnemonic = await manager.generateMnemonic();
+    console.log("Mnemonic:" + mnemonic);
     await manager.storeMnemonic(mnemonic);
 
     // Create an account.
