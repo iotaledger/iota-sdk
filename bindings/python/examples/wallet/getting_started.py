@@ -34,9 +34,10 @@ wallet = Wallet(
     secret_manager=secret_manager
 )
 
-# Generate a mnemonic and store it in the Stronghold vault.
+# Generate a mnemonic and store its seed in the Stronghold vault.
 # INFO: It is best practice to back up the mnemonic somewhere secure.
 mnemonic = Utils.generate_mnemonic()
+print(f'Mnemonic: {mnemonic}')
 wallet.store_mnemonic(mnemonic)
 
 # Create an account.
