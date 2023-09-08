@@ -5,81 +5,66 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable, PackableExt,
+    Packable,
 };
 
 use crate::types::block::{
-    core::{verify_parents, BlockWrapper},
+    core::verify_parents,
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
-    signature::{Ed25519Signature, Signature},
-    slot::{SlotCommitmentId, SlotIndex},
-    Block, BlockBuilder, Error, IssuerId,
+    Error,
 };
 
-pub type BasicBlock = BlockWrapper<BasicBlockData>;
+// pub type BasicBlock = BlockWrapper<BasicBlockData>;
 
-impl BlockBuilder<BasicBlock> {
-    /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
-    #[inline(always)]
-    pub fn new(
-        protocol_params: ProtocolParameters,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        strong_parents: StrongParents,
-        signature: Ed25519Signature,
-    ) -> Self {
-        Self(BlockWrapper {
-            protocol_params,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            data: BasicBlockData {
-                strong_parents,
-                weak_parents: Default::default(),
-                shallow_like_parents: Default::default(),
-                payload: OptionalPayload::default(),
-                burned_mana: Default::default(),
-            },
-            signature,
-        })
-    }
+// impl BlockBuilder<BasicBlock> {
+//     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
+//     #[inline(always)]
+//     pub fn new(
+//         protocol_params: ProtocolParameters,
+//         issuing_time: u64,
+//         slot_commitment_id: SlotCommitmentId,
+//         latest_finalized_slot: SlotIndex,
+//         issuer_id: IssuerId,
+//         strong_parents: StrongParents,
+//         signature: Ed25519Signature,
+//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
+//       issuer_id, data: BasicBlockData { strong_parents, weak_parents: Default::default(), shallow_like_parents:
+//       Default::default(), payload: OptionalPayload::default(), burned_mana: Default::default(), }, signature, })
+//     }
 
-    /// Adds weak parents to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.0.data.weak_parents = weak_parents.into();
-        self
-    }
+//     /// Adds weak parents to a [`BlockBuilder`].
+//     #[inline(always)]
+//     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+//         self.0.data.weak_parents = weak_parents.into();
+//         self
+//     }
 
-    /// Adds shallow like parents to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.0.data.shallow_like_parents = shallow_like_parents.into();
-        self
-    }
+//     /// Adds shallow like parents to a [`BlockBuilder`].
+//     #[inline(always)]
+//     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+//         self.0.data.shallow_like_parents = shallow_like_parents.into();
+//         self
+//     }
 
-    /// Adds a payload to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
-        self.0.data.payload = payload.into();
-        self
-    }
+//     /// Adds a payload to a [`BlockBuilder`].
+//     #[inline(always)]
+//     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+//         self.0.data.payload = payload.into();
+//         self
+//     }
 
-    /// Adds burned mana to a [`BlockBuilder`].
-    #[inline(always)]
-    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
-        self.0.data.burned_mana = burned_mana;
-        self
-    }
-}
+//     /// Adds burned mana to a [`BlockBuilder`].
+//     #[inline(always)]
+//     pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
+//         self.0.data.burned_mana = burned_mana;
+//         self
+//     }
+// }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct BasicBlockData {
+pub struct BasicBlock {
     /// Blocks that are strongly directly approved.
     pub(crate) strong_parents: StrongParents,
     /// Blocks that are weakly directly approved.
@@ -99,35 +84,35 @@ impl BasicBlock {
     /// Returns the strong parents of a [`BasicBlock`].
     #[inline(always)]
     pub fn strong_parents(&self) -> &StrongParents {
-        &self.data.strong_parents
+        &self.strong_parents
     }
 
     /// Returns the weak parents of a [`BasicBlock`].
     #[inline(always)]
     pub fn weak_parents(&self) -> &WeakParents {
-        &self.data.weak_parents
+        &self.weak_parents
     }
 
     /// Returns the shallow like parents of a [`BasicBlock`].
     #[inline(always)]
     pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
-        &self.data.shallow_like_parents
+        &self.shallow_like_parents
     }
 
     /// Returns the optional payload of a [`BasicBlock`].
     #[inline(always)]
     pub fn payload(&self) -> Option<&Payload> {
-        self.data.payload.as_ref()
+        self.payload.as_ref()
     }
 
     /// Returns the burned mana of a [`BasicBlock`].
     #[inline(always)]
     pub fn burned_mana(&self) -> u64 {
-        self.data.burned_mana
+        self.burned_mana
     }
 }
 
-impl Packable for BasicBlockData {
+impl Packable for BasicBlock {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
@@ -167,86 +152,85 @@ impl Packable for BasicBlockData {
     }
 }
 
-impl Packable for BasicBlock {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
+// impl Packable for BasicBlock {
+//     type UnpackError = Error;
+//     type UnpackVisitor = ProtocolParameters;
 
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.pack_header(packer)?;
-        Self::KIND.pack(packer)?;
-        self.data.pack(packer)?;
-        Signature::Ed25519(self.signature).pack(packer)?;
+//     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+//         self.pack_header(packer)?;
+//         Self::KIND.pack(packer)?;
+//         self.data.pack(packer)?;
+//         Signature::Ed25519(self.signature).pack(packer)?;
 
-        Ok(())
-    }
+//         Ok(())
+//     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        protocol_params: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let start_opt = unpacker.read_bytes();
+//     fn unpack<U: Unpacker, const VERIFY: bool>(
+//         unpacker: &mut U,
+//         protocol_params: &Self::UnpackVisitor,
+//     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> { let start_opt = unpacker.read_bytes();
 
-        let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && protocol_version != protocol_params.version() {
-            return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: protocol_params.version(),
-                actual: protocol_version,
-            }));
-        }
+//         if VERIFY && protocol_version != protocol_params.version() {
+//             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
+//                 expected: protocol_params.version(),
+//                 actual: protocol_version,
+//             }));
+//         }
 
-        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY && network_id != protocol_params.network_id() {
-            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
-                expected: protocol_params.network_id(),
-                actual: network_id,
-            }));
-        }
+//         if VERIFY && network_id != protocol_params.network_id() {
+//             return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+//                 expected: protocol_params.network_id(),
+//                 actual: network_id,
+//             }));
+//         }
 
-        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+//         let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if kind != Self::KIND {
-            return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
-        }
+//         if kind != Self::KIND {
+//             return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
+//         }
 
-        let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+//         let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
-        let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+//         let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-        let block = Self {
-            protocol_params: protocol_params.clone(),
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            data,
-            signature,
-        };
+//         let block = Self {
+//             protocol_params: protocol_params.clone(),
+//             issuing_time,
+//             slot_commitment_id,
+//             latest_finalized_slot,
+//             issuer_id,
+//             data,
+//             signature,
+//         };
 
-        if VERIFY {
-            let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
-                end - start
-            } else {
-                block.packed_len()
-            };
+//         if VERIFY {
+//             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+//                 end - start
+//             } else {
+//                 block.packed_len()
+//             };
 
-            if block_len > Block::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
-            }
-        }
+//             if block_len > Block::LENGTH_MAX {
+//                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
+//             }
+//         }
 
-        Ok(block)
-    }
-}
+//         Ok(block)
+//     }
+// }
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
@@ -263,7 +247,7 @@ pub(crate) mod dto {
     /// A basic block.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct BasicBlockDataDto {
+    pub struct BasicBlockDto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
@@ -275,8 +259,8 @@ pub(crate) mod dto {
         pub burned_mana: u64,
     }
 
-    impl From<&BasicBlockData> for BasicBlockDataDto {
-        fn from(value: &BasicBlockData) -> Self {
+    impl From<&BasicBlock> for BasicBlockDto {
+        fn from(value: &BasicBlock) -> Self {
             Self {
                 kind: BasicBlock::KIND,
                 strong_parents: value.strong_parents.to_set(),
@@ -288,8 +272,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for BasicBlockData {
-        type Dto = BasicBlockDataDto;
+    impl TryFromDto for BasicBlock {
+        type Dto = BasicBlockDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {

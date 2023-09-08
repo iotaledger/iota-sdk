@@ -5,88 +5,72 @@ mod basic;
 mod validation;
 mod wrapper;
 
-use alloc::{boxed::Box, vec::Vec};
-use core::mem::size_of;
+use alloc::boxed::Box;
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
 use packable::{
-    error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
-    packer::{Packer, SlicePacker},
-    unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
-    Packable, PackableExt,
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
+    unpacker::Unpacker,
+    Packable,
 };
 
-pub use self::{
-    basic::{BasicBlock, BasicBlockData},
-    validation::{ValidationBlock, ValidationBlockData},
-    wrapper::BlockWrapper,
-};
+pub use self::{basic::BasicBlock, validation::ValidationBlock, wrapper::BlockWrapper};
 use crate::types::block::{
-    block_id::BlockHash,
     parent::{ShallowLikeParents, StrongParents, WeakParents},
-    payload::Payload,
     protocol::ProtocolParameters,
-    signature::{Ed25519Signature, Signature},
+    signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    BlockId, Error, IssuerId,
+    Error, IssuerId,
 };
 
-/// A builder to build a [`Block`].
-#[derive(Clone)]
-#[must_use]
-pub struct BlockBuilder<B>(pub(crate) B);
+// /// A builder to build a [`Block`].
+// #[derive(Clone)]
+// #[must_use]
+// pub struct BlockBuilder<B>(pub(crate) B);
 
-impl<B> BlockBuilder<BlockWrapper<B>> {
-    pub fn from_block_data(
-        protocol_params: ProtocolParameters,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        data: B,
-        signature: Ed25519Signature,
-    ) -> Self {
-        Self(BlockWrapper {
-            protocol_params,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            data,
-            signature,
-        })
-    }
-}
+// impl<B> BlockBuilder<BlockWrapper<B>> {
+//     pub fn from_block_data(
+//         protocol_params: ProtocolParameters,
+//         issuing_time: u64,
+//         slot_commitment_id: SlotCommitmentId,
+//         latest_finalized_slot: SlotIndex,
+//         issuer_id: IssuerId,
+//         data: B,
+//         signature: Ed25519Signature,
+//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
+//       issuer_id, data, signature, })
+//     }
+// }
 
-impl<B> BlockBuilder<B>
-where
-    B: Packable,
-    Block: From<B>,
-{
-    fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-        let block = Block::from(self.0);
+// impl<B> BlockBuilder<B>
+// where
+//     B: Packable,
+//     Block: From<B>,
+// {
+//     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
+//         let block = Block::from(self.0);
 
-        verify_parents(
-            block.strong_parents(),
-            block.weak_parents(),
-            block.shallow_like_parents(),
-        )?;
+//         verify_parents(
+//             block.strong_parents(),
+//             block.weak_parents(),
+//             block.shallow_like_parents(),
+//         )?;
 
-        let block_bytes = block.pack_to_vec();
+//         let block_bytes = block.pack_to_vec();
 
-        if block_bytes.len() > Block::LENGTH_MAX {
-            return Err(Error::InvalidBlockLength(block_bytes.len()));
-        }
+//         if block_bytes.len() > Block::LENGTH_MAX {
+//             return Err(Error::InvalidBlockLength(block_bytes.len()));
+//         }
 
-        Ok((block, block_bytes))
-    }
+//         Ok((block, block_bytes))
+//     }
 
-    /// Finishes the [`BlockBuilder`] into a [`Block`].
-    pub fn finish(self) -> Result<Block, Error> {
-        self._finish().map(|res| res.0)
-    }
-}
+//     /// Finishes the [`BlockBuilder`] into a [`Block`].
+//     pub fn finish(self) -> Result<Block, Error> {
+//         self._finish().map(|res| res.0)
+//     }
+// }
 
 #[derive(Clone, Debug, Eq, PartialEq, From)]
 pub enum Block {
@@ -112,8 +96,14 @@ impl Packable for Block {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         match self {
-            Self::Basic(block) => block.pack(packer),
-            Self::Validation(block) => block.pack(packer),
+            Self::Basic(output) => {
+                BasicBlock::KIND.pack(packer)?;
+                output.pack(packer)
+            }
+            Self::Validation(output) => {
+                ValidationBlock::KIND.pack(packer)?;
+                output.pack(packer)
+            }
         }?;
 
         Ok(())
@@ -121,212 +111,143 @@ impl Packable for Block {
 
     fn unpack<U: Unpacker, const VERIFY: bool>(
         unpacker: &mut U,
-        protocol_params: &Self::UnpackVisitor,
+        visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let start_opt = unpacker.read_bytes();
-
-        let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if VERIFY && protocol_version != protocol_params.version() {
-            return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: protocol_params.version(),
-                actual: protocol_version,
-            }));
-        }
-
-        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if VERIFY && network_id != protocol_params.network_id() {
-            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
-                expected: protocol_params.network_id(),
-                actual: network_id,
-            }));
-        }
-
-        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let block = match kind {
-            BasicBlock::KIND => {
-                let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-                let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
-
-                Self::from(BlockWrapper {
-                    protocol_params: protocol_params.clone(),
-                    issuing_time,
-                    slot_commitment_id,
-                    latest_finalized_slot,
-                    issuer_id,
-                    data,
-                    signature,
-                })
-            }
-            ValidationBlock::KIND => {
-                let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-                let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
-
-                Self::from(BlockWrapper {
-                    protocol_params: protocol_params.clone(),
-                    issuing_time,
-                    slot_commitment_id,
-                    latest_finalized_slot,
-                    issuer_id,
-                    data,
-                    signature,
-                })
-            }
-            _ => return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable),
-        };
-
-        if VERIFY {
-            let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
-                end - start
-            } else {
-                block.packed_len()
-            };
-
-            if block_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
-            }
-        }
-
-        Ok(block)
+        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
+            BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            // TODO Block error
+            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+        })
     }
 }
 
+// impl Packable for Block {
+//     type UnpackError = Error;
+//     type UnpackVisitor = ProtocolParameters;
+
+//     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+//         match self {
+//             Self::Basic(block) => block.pack(packer),
+//             Self::Validation(block) => block.pack(packer),
+//         }?;
+
+//         Ok(())
+//     }
+
+//     fn unpack<U: Unpacker, const VERIFY: bool>(
+//         unpacker: &mut U,
+//         protocol_params: &Self::UnpackVisitor,
+//     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> { let start_opt = unpacker.read_bytes();
+
+//         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         if VERIFY && protocol_version != protocol_params.version() {
+//             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
+//                 expected: protocol_params.version(),
+//                 actual: protocol_version,
+//             }));
+//         }
+
+//         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         if VERIFY && network_id != protocol_params.network_id() {
+//             return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+//                 expected: protocol_params.network_id(),
+//                 actual: network_id,
+//             }));
+//         }
+
+//         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let block = match kind {
+//             BasicBlock::KIND => {
+//                 let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+//                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+//                 Self::from(BlockWrapper {
+//                     protocol_params: protocol_params.clone(),
+//                     issuing_time,
+//                     slot_commitment_id,
+//                     latest_finalized_slot,
+//                     issuer_id,
+//                     data,
+//                     signature,
+//                 })
+//             }
+//             ValidationBlock::KIND => {
+//                 let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+//                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+//                 Self::from(BlockWrapper {
+//                     protocol_params: protocol_params.clone(),
+//                     issuing_time,
+//                     slot_commitment_id,
+//                     latest_finalized_slot,
+//                     issuer_id,
+//                     data,
+//                     signature,
+//                 })
+//             }
+//             _ => return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable),
+//         };
+
+//         if VERIFY {
+//             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+//                 end - start
+//             } else {
+//                 block.packed_len()
+//             };
+
+//             if block_len > Self::LENGTH_MAX {
+//                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
+//             }
+//         }
+
+//         Ok(block)
+//     }
+// }
+
 impl Block {
-    /// The minimum number of bytes in a block.
-    pub const LENGTH_MIN: usize = 46;
-    /// The maximum number of bytes in a block.
-    pub const LENGTH_MAX: usize = 32768;
-    /// The length of the block header.
-    pub const HEADER_LENGTH: usize = size_of::<u8>()
-        + 2 * size_of::<u64>()
-        + size_of::<SlotCommitmentId>()
-        + size_of::<SlotIndex>()
-        + size_of::<IssuerId>();
-    /// The length of the block signature.
-    pub const SIGNATURE_LENGTH: usize =
-        size_of::<u8>() + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
+    // /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
+    // #[inline(always)]
+    // pub fn build_basic(
+    //     protocol_params: ProtocolParameters,
+    //     issuing_time: u64,
+    //     slot_commitment_id: SlotCommitmentId,
+    //     latest_finalized_slot: SlotIndex,
+    //     issuer_id: IssuerId,
+    //     strong_parents: StrongParents,
+    //     signature: Ed25519Signature,
+    // ) -> BlockBuilder<BasicBlock> { BlockBuilder::<BasicBlock>::new( protocol_params, issuing_time,
+    //   slot_commitment_id, latest_finalized_slot, issuer_id, strong_parents, signature, )
+    // }
 
-    /// Creates a new [`BlockBuilder`] to construct an instance of a [`BasicBlock`].
-    #[inline(always)]
-    pub fn build_basic(
-        protocol_params: ProtocolParameters,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        strong_parents: StrongParents,
-        signature: Ed25519Signature,
-    ) -> BlockBuilder<BasicBlock> {
-        BlockBuilder::<BasicBlock>::new(
-            protocol_params,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            strong_parents,
-            signature,
-        )
-    }
-
-    /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
-    #[inline(always)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn build_validation(
-        protocol_params: ProtocolParameters,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        strong_parents: StrongParents,
-        highest_supported_version: u8,
-        protocol_parameters: &ProtocolParameters,
-        signature: Ed25519Signature,
-    ) -> BlockBuilder<ValidationBlock> {
-        BlockBuilder::<ValidationBlock>::new(
-            protocol_params,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            strong_parents,
-            highest_supported_version,
-            protocol_parameters,
-            signature,
-        )
-    }
-
-    /// Returns the protocol version of a [`Block`].
-    #[inline(always)]
-    pub fn protocol_version(&self) -> u8 {
-        match self {
-            Self::Basic(b) => b.protocol_version(),
-            Self::Validation(b) => b.protocol_version(),
-        }
-    }
-
-    /// Returns the protocol parameters of a [`Block`].
-    #[inline(always)]
-    pub fn protocol_parameters(&self) -> &ProtocolParameters {
-        match self {
-            Self::Basic(b) => b.protocol_parameters(),
-            Self::Validation(b) => b.protocol_parameters(),
-        }
-    }
-
-    /// Returns the network id of a [`Block`].
-    #[inline(always)]
-    pub fn network_id(&self) -> u64 {
-        match self {
-            Self::Basic(b) => b.network_id(),
-            Self::Validation(b) => b.network_id(),
-        }
-    }
-
-    /// Returns the issuing time of a [`Block`].
-    #[inline(always)]
-    pub fn issuing_time(&self) -> u64 {
-        match self {
-            Self::Basic(b) => b.issuing_time(),
-            Self::Validation(b) => b.issuing_time(),
-        }
-    }
-
-    /// Returns the slot commitment ID of a [`Block`].
-    #[inline(always)]
-    pub fn slot_commitment_id(&self) -> SlotCommitmentId {
-        match self {
-            Self::Basic(b) => b.slot_commitment_id(),
-            Self::Validation(b) => b.slot_commitment_id(),
-        }
-    }
-
-    /// Returns the latest finalized slot of a [`Block`].
-    #[inline(always)]
-    pub fn latest_finalized_slot(&self) -> SlotIndex {
-        match self {
-            Self::Basic(b) => b.latest_finalized_slot(),
-            Self::Validation(b) => b.latest_finalized_slot(),
-        }
-    }
-
-    /// Returns the issuer ID of a [`Block`].
-    #[inline(always)]
-    pub fn issuer_id(&self) -> IssuerId {
-        match self {
-            Self::Basic(b) => b.issuer_id(),
-            Self::Validation(b) => b.issuer_id(),
-        }
-    }
+    // /// Creates a new [`BlockBuilder`] to construct an instance of a [`ValidationBlock`].
+    // #[inline(always)]
+    // #[allow(clippy::too_many_arguments)]
+    // pub fn build_validation(
+    //     protocol_params: ProtocolParameters,
+    //     issuing_time: u64,
+    //     slot_commitment_id: SlotCommitmentId,
+    //     latest_finalized_slot: SlotIndex,
+    //     issuer_id: IssuerId,
+    //     strong_parents: StrongParents,
+    //     highest_supported_version: u8,
+    //     protocol_parameters: &ProtocolParameters,
+    //     signature: Ed25519Signature,
+    // ) -> BlockBuilder<ValidationBlock> { BlockBuilder::<ValidationBlock>::new( protocol_params, issuing_time,
+    //   slot_commitment_id, latest_finalized_slot, issuer_id, strong_parents, highest_supported_version,
+    //   protocol_parameters, signature, )
+    // }
 
     /// Returns the strong parents of a [`BlockType`].
     #[inline(always)]
@@ -355,22 +276,9 @@ impl Block {
         }
     }
 
-    /// Returns the optional payload of a [`Block`].
-    #[inline(always)]
-    pub fn payload(&self) -> Option<&Payload> {
-        match self {
-            Self::Basic(b) => b.payload(),
-            Self::Validation(_) => None,
-        }
-    }
-
-    /// Returns the signature of a [`Block`].
-    #[inline(always)]
-    pub fn signature(&self) -> &Ed25519Signature {
-        match self {
-            Self::Basic(b) => b.signature(),
-            Self::Validation(b) => b.signature(),
-        }
+    /// Checks whether the block is a [`BasicBlock`].
+    pub fn is_basic(&self) -> bool {
+        matches!(self, Self::Basic(_))
     }
 
     /// Gets the block as an actual [`BasicBlock`].
@@ -383,9 +291,9 @@ impl Block {
         }
     }
 
-    /// Checks whether the block is a [`BasicBlock`].
-    pub fn is_basic(&self) -> bool {
-        matches!(self, Self::Basic(_))
+    /// Checks whether the block is a [`ValidationBlock`].
+    pub fn is_validation(&self) -> bool {
+        matches!(self, Self::Validation(_))
     }
 
     /// Gets the block as an actual [`ValidationBlock`].
@@ -396,75 +304,6 @@ impl Block {
         } else {
             panic!("as_validation called on a non-validation block");
         }
-    }
-
-    /// Checks whether the block is a [`ValidationBlock`].
-    pub fn is_validation(&self) -> bool {
-        matches!(self, Self::Validation(_))
-    }
-
-    /// Computes the block hash.
-    pub fn hash(&self) -> BlockHash {
-        let id = [
-            &self.header_hash()[..],
-            &self.block_hash()[..],
-            &self.signature_bytes()[..],
-        ]
-        .concat();
-        BlockHash::new(Blake2b256::digest(id).into())
-    }
-
-    /// Computes the identifier of the block.
-    pub fn id(&self) -> BlockId {
-        self.hash()
-            .with_slot_index(self.protocol_parameters().slot_index(self.issuing_time()))
-    }
-
-    /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
-    /// there are no trailing bytes in the sequence.
-    pub fn unpack_strict<T: AsRef<[u8]>>(
-        bytes: T,
-        visitor: &<Self as Packable>::UnpackVisitor,
-    ) -> Result<Self, UnpackError<<Self as Packable>::UnpackError, UnexpectedEOF>> {
-        let mut unpacker = CounterUnpacker::new(SliceUnpacker::new(bytes.as_ref()));
-        let block = Self::unpack::<_, true>(&mut unpacker, visitor)?;
-
-        // When parsing the block is complete, there should not be any trailing bytes left that were not parsed.
-        if u8::unpack::<_, true>(&mut unpacker, &()).is_ok() {
-            return Err(UnpackError::Packable(Error::RemainingBytesAfterBlock));
-        }
-
-        Ok(block)
-    }
-
-    pub(crate) fn header_hash(&self) -> [u8; 32] {
-        match self {
-            Self::Basic(b) => b.header_hash(),
-            Self::Validation(b) => b.header_hash(),
-        }
-    }
-
-    pub(crate) fn block_hash(&self) -> [u8; 32] {
-        let mut bytes = Vec::new();
-        match self {
-            Self::Basic(b) => {
-                bytes.push(BasicBlock::KIND);
-                bytes.extend(b.data.pack_to_vec());
-            }
-            Self::Validation(b) => {
-                bytes.push(ValidationBlock::KIND);
-                bytes.extend(b.data.pack_to_vec());
-            }
-        }
-        Blake2b256::digest(bytes).into()
-    }
-
-    pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
-        let mut bytes = [0u8; Self::SIGNATURE_LENGTH];
-        let mut packer = SlicePacker::new(&mut bytes);
-        Ed25519Signature::KIND.pack(&mut packer).unwrap();
-        self.signature().pack(&mut packer).unwrap();
-        bytes
     }
 }
 
@@ -493,30 +332,24 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{
-                core::{basic::dto::BasicBlockDataDto, validation::dto::ValidationBlockDataDto},
-                Error,
-            },
-            TryFromDto,
-        },
+        types::block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
         utils::serde::string,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum BlockDataDto {
-        Basic(BasicBlockDataDto),
-        Validation(ValidationBlockDataDto),
+        Basic(BasicBlockDto),
+        Validation(ValidationBlockDto),
     }
 
-    impl From<&BasicBlockData> for BlockDataDto {
-        fn from(value: &BasicBlockData) -> Self {
+    impl From<&BasicBlock> for BlockDataDto {
+        fn from(value: &BasicBlock) -> Self {
             Self::Basic(value.into())
         }
     }
 
-    impl From<&ValidationBlockData> for BlockDataDto {
-        fn from(value: &ValidationBlockData) -> Self {
+    impl From<&ValidationBlock> for BlockDataDto {
+        fn from(value: &ValidationBlock) -> Self {
             Self::Validation(value.into())
         }
     }
@@ -531,11 +364,11 @@ pub(crate) mod dto {
                     .ok_or_else(|| serde::de::Error::custom("invalid block type"))? as u8
                 {
                     BasicBlock::KIND => Self::Basic(
-                        BasicBlockDataDto::deserialize(value)
+                        BasicBlockDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic block: {e}")))?,
                     ),
                     ValidationBlock::KIND => {
-                        Self::Validation(ValidationBlockDataDto::deserialize(value).map_err(|e| {
+                        Self::Validation(ValidationBlockDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize validation block: {e}"))
                         })?)
                     }
@@ -553,8 +386,8 @@ pub(crate) mod dto {
             #[derive(Serialize)]
             #[serde(untagged)]
             enum BlockTypeDto_<'a> {
-                T0(&'a BasicBlockDataDto),
-                T1(&'a ValidationBlockDataDto),
+                T0(&'a BasicBlockDto),
+                T1(&'a ValidationBlockDto),
             }
             #[derive(Serialize)]
             struct TypedBlock<'a> {
@@ -616,50 +449,50 @@ pub(crate) mod dto {
         }
     }
 
-    impl Block {
-        pub fn try_from_dto(dto: BlockDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
-            if dto.protocol_version != protocol_params.version() {
-                return Err(Error::ProtocolVersionMismatch {
-                    expected: protocol_params.version(),
-                    actual: dto.protocol_version,
-                });
-            }
+    // impl Block {
+    //     pub fn try_from_dto(dto: BlockDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
+    //         if dto.protocol_version != protocol_params.version() {
+    //             return Err(Error::ProtocolVersionMismatch {
+    //                 expected: protocol_params.version(),
+    //                 actual: dto.protocol_version,
+    //             });
+    //         }
 
-            if dto.network_id != protocol_params.network_id() {
-                return Err(Error::NetworkIdMismatch {
-                    expected: protocol_params.network_id(),
-                    actual: dto.network_id,
-                });
-            }
+    //         if dto.network_id != protocol_params.network_id() {
+    //             return Err(Error::NetworkIdMismatch {
+    //                 expected: protocol_params.network_id(),
+    //                 actual: dto.network_id,
+    //             });
+    //         }
 
-            match dto.block {
-                BlockDataDto::Basic(b) => {
-                    let data = BasicBlockData::try_from_dto_with_params(b, &protocol_params)?;
-                    BlockBuilder::from_block_data(
-                        protocol_params,
-                        dto.issuing_time,
-                        dto.slot_commitment,
-                        dto.latest_finalized_slot,
-                        dto.issuer_id,
-                        data,
-                        *dto.signature.as_ed25519(),
-                    )
-                    .finish()
-                }
-                BlockDataDto::Validation(b) => {
-                    let data = ValidationBlockData::try_from_dto_with_params(b, &protocol_params)?;
-                    BlockBuilder::from_block_data(
-                        protocol_params,
-                        dto.issuing_time,
-                        dto.slot_commitment,
-                        dto.latest_finalized_slot,
-                        dto.issuer_id,
-                        data,
-                        *dto.signature.as_ed25519(),
-                    )
-                    .finish()
-                }
-            }
-        }
-    }
+    //         match dto.block {
+    //             BlockDataDto::Basic(b) => {
+    //                 let data = BasicBlock::try_from_dto_with_params(b, &protocol_params)?;
+    //                 BlockBuilder::from_block_data(
+    //                     protocol_params,
+    //                     dto.issuing_time,
+    //                     dto.slot_commitment,
+    //                     dto.latest_finalized_slot,
+    //                     dto.issuer_id,
+    //                     data,
+    //                     *dto.signature.as_ed25519(),
+    //                 )
+    //                 .finish()
+    //             }
+    //             BlockDataDto::Validation(b) => {
+    //                 let data = ValidationBlock::try_from_dto_with_params(b, &protocol_params)?;
+    //                 BlockBuilder::from_block_data(
+    //                     protocol_params,
+    //                     dto.issuing_time,
+    //                     dto.slot_commitment,
+    //                     dto.latest_finalized_slot,
+    //                     dto.issuer_id,
+    //                     data,
+    //                     *dto.signature.as_ed25519(),
+    //                 )
+    //                 .finish()
+    //             }
+    //         }
+    //     }
+    // }
 }
