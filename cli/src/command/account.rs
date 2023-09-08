@@ -953,8 +953,8 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                         address_nts.extend(nts.iter().map(|nt| nt.token_id()));
                     }
                     match &output_data.output {
-                        Output::Nft(nft) => address_nfts.push(nft.nft_id_non_null(&output_id)),
-                        Output::Alias(alias) => address_aliases.push(alias.alias_id_non_null(&output_id)),
+                        Output::Nft(nft) => address_nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Alias(alias) => address_aliases.push(alias.alias_id_non_null(output_id)),
                         Output::Foundry(foundry) => address_foundries.push(foundry.id()),
                         Output::Basic(_) | Output::Treasury(_) => {}
                     }
