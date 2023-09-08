@@ -95,6 +95,8 @@ class BlockIssuer(Feature):
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
         public_keys: The Block Issuer Keys.
     """
+    # TODO Replace with a proper SlotIndex type
     expiry_slot: str
+    # TODO Replace with a list of PublicKey types
     public_keys: List[HexStr]
     type: int = field(default_factory=lambda: int(FeatureType.BlockIssuer), init=False)
