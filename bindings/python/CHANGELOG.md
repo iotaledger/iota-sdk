@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ConflictReason` display implementation with an explanation of the conflict;
 - `Account::{burn(), consolidate_outputs(), create_alias_output(), create_native_token(), melt_native_token(), mint_native_token(), mint_nfts(), send_transaction(), send_native_tokens(), send_nft()}` methods;
 
+## 1.0.2 - 2023-MM-DD
+
+### Added
+
+- `ClientOptions::maxParallelApiRequests`;
+
 ## 1.0.1 - 2023-08-23
 
 ### Fixed

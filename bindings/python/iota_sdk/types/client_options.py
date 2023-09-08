@@ -84,6 +84,8 @@ class ClientOptions:
             Timeout when sending a block that requires remote proof of work.
         powWorkerCount (int):
             The amount of threads to be used for proof of work.
+        maxParallelApiRequests (int):
+            The maximum parallel API requests.
     """
     primaryNode: Optional[str] = None
     primaryPowNode: Optional[str] = None
@@ -103,6 +105,7 @@ class ClientOptions:
     apiTimeout: Optional[Duration] = None
     remotePowTimeout: Optional[Duration] = None
     powWorkerCount: Optional[int] = None
+    maxParallelApiRequests: Optional[int] = None
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v is not None}

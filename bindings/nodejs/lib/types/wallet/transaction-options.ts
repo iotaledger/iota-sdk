@@ -3,6 +3,7 @@
 
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
+import { AccountAddress } from './address';
 
 /** Options for creating a transaction. */
 export interface TransactionOptions {
@@ -56,7 +57,7 @@ export type ReuseAddress = {
 export type CustomAddress = {
     /** The name of the strategy. */
     strategy: 'CustomAddress';
-    value: string;
+    value: AccountAddress;
 };
 
 /** Options for creating Native Tokens. */
