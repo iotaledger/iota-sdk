@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Output::kind_str()` method;
 - `ConflictReason` display implementation with an explanation of the conflict;
 - `TokenScheme` methods `is_simple` and `as_simple`;
+- `Irc27Metadata` and `Irc30Metadata` helpers;
 
 ### Changed
 
