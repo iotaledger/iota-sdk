@@ -16,8 +16,6 @@ use crate::types::block::{
     Error,
 };
 
-// pub type BasicBlock = BlockWrapper<BasicBlockData>;
-
 // impl BlockBuilder<BasicBlock> {
 //     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
 //     #[inline(always)]
@@ -151,86 +149,6 @@ impl Packable for BasicBlock {
         })
     }
 }
-
-// impl Packable for BasicBlock {
-//     type UnpackError = Error;
-//     type UnpackVisitor = ProtocolParameters;
-
-//     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-//         self.pack_header(packer)?;
-//         Self::KIND.pack(packer)?;
-//         self.data.pack(packer)?;
-//         Signature::Ed25519(self.signature).pack(packer)?;
-
-//         Ok(())
-//     }
-
-//     fn unpack<U: Unpacker, const VERIFY: bool>(
-//         unpacker: &mut U,
-//         protocol_params: &Self::UnpackVisitor,
-//     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> { let start_opt = unpacker.read_bytes();
-
-//         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         if VERIFY && protocol_version != protocol_params.version() {
-//             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-//                 expected: protocol_params.version(),
-//                 actual: protocol_version,
-//             }));
-//         }
-
-//         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         if VERIFY && network_id != protocol_params.network_id() {
-//             return Err(UnpackError::Packable(Error::NetworkIdMismatch {
-//                 expected: protocol_params.network_id(),
-//                 actual: network_id,
-//             }));
-//         }
-
-//         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         if kind != Self::KIND {
-//             return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable);
-//         }
-
-//         let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-
-//         let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
-
-//         let block = Self {
-//             protocol_params: protocol_params.clone(),
-//             issuing_time,
-//             slot_commitment_id,
-//             latest_finalized_slot,
-//             issuer_id,
-//             data,
-//             signature,
-//         };
-
-//         if VERIFY {
-//             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
-//                 end - start
-//             } else {
-//                 block.packed_len()
-//             };
-
-//             if block_len > Block::LENGTH_MAX {
-//                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
-//             }
-//         }
-
-//         Ok(block)
-//     }
-// }
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {

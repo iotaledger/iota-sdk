@@ -7,14 +7,14 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnexpectedEOF, UnpackError},
     packer::{Packer, SlicePacker},
-    unpacker::{CounterUnpacker, SliceUnpacker},
+    unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
     Packable,
 };
 
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
     protocol::ProtocolParameters,
-    signature::Ed25519Signature,
+    signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     Block, Error, IssuerId,
 };
@@ -177,5 +177,85 @@ impl BlockWrapper {
         Ed25519Signature::KIND.pack(&mut packer).unwrap();
         self.signature().pack(&mut packer).unwrap();
         bytes
+    }
+}
+
+impl Packable for BlockWrapper {
+    type UnpackError = Error;
+    type UnpackVisitor = ProtocolParameters;
+
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        // TODO call pack_header
+        self.protocol_version().pack(packer)?;
+        self.network_id().pack(packer)?;
+        self.issuing_time.pack(packer)?;
+        self.slot_commitment_id.pack(packer)?;
+        self.latest_finalized_slot.pack(packer)?;
+        self.issuer_id.pack(packer)?;
+        self.data.pack(packer)?;
+        Signature::Ed25519(self.signature).pack(packer)?;
+
+        Ok(())
+    }
+
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        protocol_params: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        let start_opt = unpacker.read_bytes();
+
+        let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        if VERIFY && protocol_version != protocol_params.version() {
+            return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
+                expected: protocol_params.version(),
+                actual: protocol_version,
+            }));
+        }
+
+        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        if VERIFY && network_id != protocol_params.network_id() {
+            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+                expected: protocol_params.network_id(),
+                actual: network_id,
+            }));
+        }
+
+        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let block = Block::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+
+        let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+        let block_wrapper = Self {
+            protocol_params: protocol_params.clone(),
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            block,
+            signature,
+        };
+
+        if VERIFY {
+            let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+                end - start
+            } else {
+                block.packed_len()
+            };
+
+            if block_len > Block::LENGTH_MAX {
+                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
+            }
+        }
+
+        Ok(block_wrapper)
     }
 }
