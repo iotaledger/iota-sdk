@@ -27,13 +27,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Output::kind_str()` method;
 - `ConflictReason` display implementation with an explanation of the conflict;
 - `TokenScheme` methods `is_simple` and `as_simple`;
+- `Irc27Metadata` and `Irc30Metadata` helpers;
 
 ### Changed
 
 - `StrongholdAdapterBuilder` updated to be slightly more ergonomic;
 - `Wallet::{set_stronghold_password, change_stronghold_password, set_stronghold_password_clear_interval, store_mnemonic}` return an `Err` instead of `Ok` in case of a non-stronghold secret manager; 
 
-## 1.0.3 - 2023-MM-DD
+## 1.0.3 - 2023-09-07
+
+### Added
+
+- `migrate_db_chrysalis_to_stardust()` function;
+- `Wallet::get_chrysalis_data()` method;
+- `PrivateKeySecretManager` and `SecretManager::PrivateKey`;
+- `SecretManager::from` impl for variants;
+- `Client` requests now obey a maximum concurrency using a request pool (set via `ClientBuilder::with_max_parallel_api_requests`);
 
 ### Fixed
 

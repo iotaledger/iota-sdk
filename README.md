@@ -112,88 +112,20 @@ To start using the IOTA SDK in your Rust project, you can include the following 
 
 ```toml
 [dependencies]
-iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
+iota-sdk = { git = "https://github.com/iotaledger/iota-sdk", branch = "develop" }
 ```
 
 ## Client Usage
 
-The following example creates a [`Client`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html)
-instance connected to
-the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
-calling [`Client.get_info()`](https://docs.rs/iota-sdk/latest/iota_sdk/client/core/struct.Client.html#method.get_info),
-and then print the node's information.
+The following example creates a Client instance connected to the Shimmer Testnet, and retrieves the node's information by calling `Client.get_info()`, and then print the node's information.
 
-```rust
-use iota_sdk::client::{
-    Client,
-};
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    let client = Client::builder()
-        .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
-        .finish()
-        .await?;
-            
-    let info = client.get_info().await?;
-    println!("Node Info: {info:?}")
-    
-    Ok(())
-}
-```
+[sdk/examples/client/getting_started.rs](sdk/examples/client/getting_started.rs)
 
 ## Wallet Usage
 
-The following example will create a
-new [`Wallet`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/core/struct.Wallet.html) [`Account`](https://docs.rs/iota-sdk/latest/iota_sdk/wallet/account/struct.Account.html)
-that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[`StrongholdSecretManager`](https://docs.rs/iota-sdk/latest/iota_sdk/client/secret/stronghold/type.StrongholdSecretManager.html)
-to store a mnemonic.
+The following example will create a new Wallet Account using a StrongholdSecretManager. For this `features = ["stronghold"]` is needed in the Cargo.toml import. To persist the wallet in a database, `"rocksdb"` can be added.
 
-```rust
-use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
-    },
-    wallet::{ClientOptions, Result, Wallet},
-};
-use std::path::PathBuf;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Setup Stronghold secret manager.
-    // WARNING: Never hardcode passwords in production code.
-    let secret_manager = StrongholdSecretManager::builder()
-        .password("password") // A password to encrypt the stored data. 
-        .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
-
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
-
-    // Set up and store the wallet.
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Generate a mnemonic and store it in the Stronghold vault.
-    // INFO: It is best practice to back up the mnemonic somewhere secure.
-    let mnemonic = wallet.generate_mnemonic()?;
-    wallet.store_mnemonic(mnemonic).await?;
-
-    // Create an account.
-    let account = wallet
-        .create_account()
-        .with_alias("Alice") // A name to associate with the created account.
-        .finish()
-        .await?;
-
-
-    Ok(())
-}
-```
+[sdk/examples/wallet/getting_started.rs](sdk/examples/wallet/getting_started.rs)
 
 ## Examples
 
