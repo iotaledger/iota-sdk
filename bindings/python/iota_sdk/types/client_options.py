@@ -88,5 +88,3 @@ class ClientOptions:
     protocol_parameters: Optional[NodeInfoProtocol] = None
     api_timeout: Optional[Duration] = None
     max_parallel_api_requests: Optional[int] = None
-
-
