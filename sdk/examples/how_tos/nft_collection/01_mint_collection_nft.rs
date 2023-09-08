@@ -92,7 +92,9 @@ async fn main() -> Result<()> {
 fn get_immutable_metadata(index: usize) -> Irc27Metadata {
     Irc27Metadata::new(
         "video/mp4",
-        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT".parse().unwrap(),
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT"
+            .parse()
+            .unwrap(),
         format!("Shimmer OG NFT #{index}"),
     )
     .with_description(
