@@ -44,7 +44,7 @@ fn builder_no_essence_too_few_unlocks() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
@@ -80,7 +80,7 @@ fn builder_no_essence_too_many_unlocks() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input1)
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
@@ -119,7 +119,7 @@ fn pack_unpack_valid() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
@@ -160,7 +160,7 @@ fn getters() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
