@@ -238,14 +238,22 @@ pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
-    let password = get_password("Stronghold password", false)?;
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password.clone())
-            .build(snapshot_path)?,
-    );
-    let wallet = Wallet::builder()
-        .with_secret_manager(secret_manager)
+    let mut builder = Wallet::builder();
+    if let Ok(_) = check_file_exists(snapshot_path).await {
+        println_log_info!(
+            "Detected a stronghold file at {}, requiring unlock..",
+            snapshot_path.to_str().unwrap()
+        );
+        let password = get_password("Detected Stronghold password", false)?;
+        let secret_manager = SecretManager::Stronghold(
+            StrongholdSecretManager::builder()
+                .password(password.clone())
+                .build(snapshot_path)?,
+        );
+        builder = builder.with_secret_manager(secret_manager);
+    }
+
+    let wallet: Wallet = builder
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
@@ -254,6 +262,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .finish()
         .await?;
 
+    let password = get_password("Stronghold backup password", false)?;
     wallet.restore_backup(backup_path.into(), password, None, None).await?;
 
     println_log_info!(
