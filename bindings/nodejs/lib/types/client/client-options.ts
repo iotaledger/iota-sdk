@@ -36,6 +36,8 @@ export interface IClientOptions {
     powWorkerCount?: number;
     /** Whether the PoW should be done locally or remotely. */
     localPow?: boolean;
+    /** The maximum parallel API requests. */
+    maxParallelApiRequests?: number;
 }
 
 /** Time duration */

@@ -29,22 +29,14 @@ impl ClientInner {
             ParticipationEventType::Staking => "type=1",
         });
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(route, query, self.get_timeout().await, false, false)
-            .await
+        self.get_request(route, query, false, false).await
     }
 
     /// RouteParticipationEvent is the route to access a single participation by its ID.
     pub async fn event(&self, event_id: &ParticipationEventId) -> Result<ParticipationEventData> {
         let route = format!("api/participation/v1/events/{event_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(&route, None, false, false).await
     }
 
     /// RouteParticipationEventStatus is the route to access the status of a single participation by its ID.
@@ -55,28 +47,20 @@ impl ClientInner {
     ) -> Result<ParticipationEventStatus> {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(
-                &route,
-                milestone_index.map(|index| index.to_string()).as_deref(),
-                self.get_timeout().await,
-                false,
-                false,
-            )
-            .await
+        self.get_request(
+            &route,
+            milestone_index.map(|index| index.to_string()).as_deref(),
+            false,
+            false,
+        )
+        .await
     }
 
     /// RouteOutputStatus is the route to get the vote status for a given output ID.
     pub async fn output_status(&self, output_id: &OutputId) -> Result<OutputStatusResponse> {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(&route, None, false, false).await
     }
 
     /// RouteAddressBech32Status is the route to get the staking rewards for the given bech32 address.
@@ -86,11 +70,7 @@ impl ClientInner {
     ) -> Result<AddressStakingStatus> {
         let route = format!("api/participation/v1/addresses/{}", bech32_address.convert()?);
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(&route, None, false, false).await
     }
 
     /// RouteAddressBech32Outputs is the route to get the outputs for the given bech32 address.
@@ -100,10 +80,6 @@ impl ClientInner {
     ) -> Result<AddressOutputsResponse> {
         let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.convert()?);
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(&route, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(&route, None, false, false).await
     }
 }
