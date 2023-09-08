@@ -43,6 +43,8 @@ class BasicOutput(Output):
     Attributes:
         amount :
             The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
         unlock_conditions :
             The conditions to unlock the output.
         features :
@@ -53,6 +55,7 @@ class BasicOutput(Output):
             The type of output.
     """
     amount: str
+    mana: str
     unlock_conditions: List[AddressUnlockCondition | ExpirationUnlockCondition | StorageDepositReturnUnlockCondition |
                             TimelockUnlockCondition]
     features: Optional[List[SenderFeature |
@@ -71,6 +74,8 @@ class AccountOutput(Output):
     Attributes:
         amount :
             The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
         unlock_conditions:
             The conditions to unlock the output.
         account_id :
@@ -91,6 +96,7 @@ class AccountOutput(Output):
             The type of output.
     """
     amount: str
+    mana: str
     account_id: HexStr
     state_index: int
     foundry_counter: int
@@ -150,6 +156,8 @@ class NftOutput(Output):
     Attributes:
         amount :
             The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
         unlock_conditions :
             The conditions to unlock the output.
         nft_id :
@@ -164,6 +172,7 @@ class NftOutput(Output):
             The type of output.
     """
     amount: str
+    mana: str
     nft_id: HexStr
     unlock_conditions: List[AddressUnlockCondition | ExpirationUnlockCondition |
                             StorageDepositReturnUnlockCondition | TimelockUnlockCondition]
