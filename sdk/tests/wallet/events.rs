@@ -98,7 +98,7 @@ fn wallet_events_serde() {
             RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
                 .with_inputs(vec![input1, input2])
                 .add_output(output)
-                .add_mana_allotment(rand_mana_allotment())
+                .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
                 .finish_with_params(&protocol_parameters)
                 .unwrap(),
         );

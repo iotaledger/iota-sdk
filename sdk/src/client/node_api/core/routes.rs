@@ -75,21 +75,13 @@ impl ClientInner {
     pub async fn get_routes(&self) -> Result<RoutesResponse> {
         const PATH: &str = "api/routes";
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(PATH, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(PATH, None, false, false).await
     }
 
     /// Returns general information about the node.
     /// GET /api/core/v3/info
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
-        self.node_manager
-            .read()
-            .await
-            .get_request(INFO_PATH, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(INFO_PATH, None, false, false).await
     }
 
     /// Checks if the account is ready to issue a block.
@@ -97,11 +89,7 @@ impl ClientInner {
     pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
         let path = &format!("api/core/v3/accounts/{account_id}/congestion");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(path, None, false, false).await
     }
 
     // Rewards routes.
@@ -116,11 +104,7 @@ impl ClientInner {
     pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(path, None, false, false).await
     }
 
     // Committee routes.
@@ -132,11 +116,7 @@ impl ClientInner {
         const PATH: &str = "api/core/v3/committee";
 
         let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
-        self.node_manager
-            .read()
-            .await
-            .get_request(PATH, epoch_index.as_deref(), self.get_timeout().await, false, false)
-            .await
+        self.get_request(PATH, epoch_index.as_deref(), false, false).await
     }
 
     // Validators routes.
@@ -147,11 +127,7 @@ impl ClientInner {
         const PATH: &str = "api/core/v3/validators";
 
         let page_size = page_size.map(|i| format!("pageSize={i}"));
-        self.node_manager
-            .read()
-            .await
-            .get_request(PATH, page_size.as_deref(), self.get_timeout().await, false, false)
-            .await
+        self.get_request(PATH, page_size.as_deref(), false, false).await
     }
 
     /// Return information about a validator.
@@ -159,11 +135,7 @@ impl ClientInner {
     pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
         let path = &format!("api/core/v3/validators/{account_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(path, None, false, false).await
     }
 
     // Blocks routes.
@@ -173,25 +145,18 @@ impl ClientInner {
     pub async fn get_issuance(&self) -> Result<IssuanceBlockHeaderResponse> {
         const PATH: &str = "api/core/v3/blocks/issuance";
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(PATH, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(PATH, None, false, false).await
     }
 
     /// Returns the BlockId of the submitted block.
     /// POST JSON to /api/core/v3/blocks
     pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
-        let timeout = self.get_timeout().await;
+
         let block_dto = BlockDto::from(block);
 
         let response = self
-            .node_manager
-            .read()
-            .await
-            .post_request_json::<SubmitBlockResponse>(PATH, timeout, serde_json::to_value(block_dto)?)
+            .post_request_json::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
             .await?;
 
         Ok(response.block_id)
@@ -201,8 +166,10 @@ impl ClientInner {
     /// POST /api/core/v3/blocks
     pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
+
         let timeout = self.get_timeout().await;
 
+        // TODO add Client::post_request_bytes
         let response = self
             .node_manager
             .read()
@@ -218,12 +185,7 @@ impl ClientInner {
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
-        let dto = self
-            .node_manager
-            .read()
-            .await
-            .get_request::<BlockDto>(path, None, self.get_timeout().await, false, true)
-            .await?;
+        let dto = self.get_request::<BlockDto>(path, None, false, true).await?;
 
         Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
@@ -233,11 +195,7 @@ impl ClientInner {
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None).await
     }
 
     /// Returns the metadata of a block.
@@ -245,11 +203,7 @@ impl ClientInner {
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/blocks/{block_id}/metadata");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, true, true)
-            .await
+        self.get_request(path, None, true, true).await
     }
 
     // UTXO routes.
@@ -259,12 +213,7 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        let output = self
-            .node_manager
-            .read()
-            .await
-            .get_request::<OutputDto>(path, None, self.get_timeout().await, false, true)
-            .await?;
+        let output = self.get_request::<OutputDto>(path, None, false, true).await?;
         let token_supply = self.get_token_supply().await?;
 
         Ok(Output::try_from_dto_with_params(output, token_supply)?)
@@ -275,11 +224,7 @@ impl ClientInner {
     pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None).await
     }
 
     /// Finds output metadata by output ID.
@@ -287,11 +232,7 @@ impl ClientInner {
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v3/outputs/{output_id}/metadata");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request::<OutputMetadata>(path, None, self.get_timeout().await, false, true)
-            .await
+        self.get_request(path, None, false, true).await
     }
 
     /// Returns the earliest confirmed block containing the transaction with the given ID.
@@ -299,12 +240,7 @@ impl ClientInner {
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
-        let dto = self
-            .node_manager
-            .read()
-            .await
-            .get_request::<BlockDto>(path, None, self.get_timeout().await, true, true)
-            .await?;
+        let dto = self.get_request::<BlockDto>(path, None, true, true).await?;
 
         Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
@@ -314,11 +250,7 @@ impl ClientInner {
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None).await
     }
 
     /// Returns the metadata of the earliest block containing the tx that was confirmed.
@@ -326,11 +258,7 @@ impl ClientInner {
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block/metadata");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, true, true)
-            .await
+        self.get_request(path, None, true, true).await
     }
 
     // Commitments routes.
@@ -340,11 +268,7 @@ impl ClientInner {
     pub async fn get_slot_commitment_by_id(&self, slot_commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request::<SlotCommitment>(path, None, self.get_timeout().await, false, true)
-            .await
+        self.get_request(path, None, false, true).await
     }
 
     /// Finds a slot commitment by its ID and returns it as raw bytes.
@@ -352,11 +276,7 @@ impl ClientInner {
     pub async fn get_slot_commitment_by_id_raw(&self, slot_commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None).await
     }
 
     /// Get all UTXO changes of a given slot by slot commitment ID.
@@ -367,11 +287,7 @@ impl ClientInner {
     ) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(path, None, false, false).await
     }
 
     /// Finds a slot commitment by slot index and returns it as object.
@@ -379,11 +295,7 @@ impl ClientInner {
     pub async fn get_slot_commitment_by_index(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request::<SlotCommitment>(path, None, self.get_timeout().await, false, true)
-            .await
+        self.get_request(path, None, false, true).await
     }
 
     /// Finds a slot commitment by slot index and returns it as raw bytes.
@@ -391,11 +303,7 @@ impl ClientInner {
     pub async fn get_slot_commitment_by_index_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
+        self.get_request_bytes(path, None).await
     }
 
     /// Get all UTXO changes of a given slot by its index.
@@ -403,11 +311,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_slot_index(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}/utxo-changes");
 
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
+        self.get_request(path, None, false, false).await
     }
 
     // Peers routes.
@@ -416,14 +320,7 @@ impl ClientInner {
     pub async fn get_peers(&self) -> Result<Vec<PeerResponse>> {
         const PATH: &str = "api/core/v3/peers";
 
-        let resp = self
-            .node_manager
-            .read()
-            .await
-            .get_request::<Vec<PeerResponse>>(PATH, None, self.get_timeout().await, false, false)
-            .await?;
-
-        Ok(resp)
+        self.get_request(PATH, None, false, false).await
     }
 
     // // RoutePeer is the route for getting peers by their peerID.
