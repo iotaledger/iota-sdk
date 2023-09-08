@@ -28,6 +28,8 @@ export interface IClientOptions {
     brokerOptions?: IMqttBrokerOptions;
     /** Timeout for API requests */
     apiTimeout?: IDuration;
+    /** The maximum parallel API requests. */
+    maxParallelApiRequests?: number;
 }
 
 /** Time duration */
