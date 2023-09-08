@@ -4,6 +4,7 @@
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
 import { u256 } from '../utils';
+import { Bip44Address } from './address';
 
 /** Options for creating a transaction. */
 export interface TransactionOptions {
@@ -57,7 +58,7 @@ export type ReuseAddress = {
 export type CustomAddress = {
     /** The name of the strategy. */
     strategy: 'CustomAddress';
-    value: string;
+    value: Bip44Address;
 };
 
 /** Options for creating Native Tokens. */

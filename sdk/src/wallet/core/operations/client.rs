@@ -39,12 +39,16 @@ where
             broker_options,
             network_info,
             api_timeout,
+            #[cfg(not(target_family = "wasm"))]
+            max_parallel_api_requests,
         } = client_options;
         self.client
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
         *self.client.network_info.write().await = network_info;
         *self.client.api_timeout.write().await = api_timeout;
+        #[cfg(not(target_family = "wasm"))]
+        self.client.request_pool.resize(max_parallel_api_requests).await;
         #[cfg(feature = "mqtt")]
         {
             *self.client.mqtt.broker_options.write().await = broker_options;

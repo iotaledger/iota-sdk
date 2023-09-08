@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -71,7 +71,7 @@ once_cell = { version = "1.18.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [
     "min_const_gen",
 ], optional = true }
-regex = { version = "1.9.4", default-features = false, features = [
+regex = { version = "1.9.5", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
 reqwest = { version = "0.11.20", default-features = false, features = [
@@ -84,7 +84,7 @@ rumqttc = { version = "0.22.0", default-features = false, features = [
     "websocket",
 ], optional = true }
 serde_repr = { version = "0.1.16", default-features = false, optional = true }
-thiserror = { version = "1.0.47", default-features = false, optional = true }
+thiserror = { version = "1.0.48", default-features = false, optional = true }
 time = { version = "0.3.28", default-features = false, features = [
     "serde",
     "macros",
@@ -530,6 +530,11 @@ required-features = ["client"]
 [[example]]
 name = "get_block"
 path = "examples/client/get_block.rs"
+required-features = ["client"]
+
+[[example]]
+name = "client_getting_started"
+path = "examples/client/getting_started.rs"
 required-features = ["client"]
 
 [[example]]

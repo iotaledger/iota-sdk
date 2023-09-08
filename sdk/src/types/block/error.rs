@@ -118,7 +118,10 @@ pub enum Error {
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
-    InvalidManaAllotmentSum(u128),
+    InvalidManaAllotmentSum {
+        max: u64,
+        sum: u128,
+    },
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
@@ -293,7 +296,9 @@ impl fmt::Display for Error {
             Self::InvalidTransactionNativeTokensCount(count) => {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
-            Self::InvalidManaAllotmentSum(value) => write!(f, "invalid mana allotment sum: {value}"),
+            Self::InvalidManaAllotmentSum { max, sum } => {
+                write!(f, "invalid mana allotment sum: {sum} greater than max of {max}")
+            }
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {
