@@ -119,9 +119,9 @@ class StakingFeature(Feature):
     """
     staked_amount: HexStr
     fixed_cost: HexStr
-    # TODO Replace with an EpochIndex types
+    # TODO Replace with an EpochIndex type
     start_epoch: HexStr
-    # TODO Replace with an EpochIndex types
+    # TODO Replace with an EpochIndex type
     end_epoch: HexStr
     type: int = field(
         default_factory=lambda: int(
