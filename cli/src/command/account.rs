@@ -927,11 +927,11 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
     let mut output_ids: &[OutputId] = &[];
-    let mut address_amount = 0;
-    let mut address_nts = NativeTokensBuilder::new();
-    let mut address_nfts = Vec::new();
-    let mut address_aliases = Vec::new();
-    let mut address_foundries = Vec::new();
+    let mut amount = 0;
+    let mut native_tokens = NativeTokensBuilder::new();
+    let mut nfts = Vec::new();
+    let mut aliases = Vec::new();
+    let mut foundries = Vec::new();
 
     if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
         (a.key_index(), a.internal())
@@ -949,12 +949,12 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
 
                 if address.address().as_ref() == &required_address {
                     if let Some(nts) = output_data.output.native_tokens() {
-                        address_nts.add_native_tokens(nts.clone())?;
+                        native_tokens.add_native_tokens(nts.clone())?;
                     }
                     match &output_data.output {
-                        Output::Nft(nft) => address_nfts.push(nft.nft_id_non_null(output_id)),
-                        Output::Alias(alias) => address_aliases.push(alias.alias_id_non_null(output_id)),
-                        Output::Foundry(foundry) => address_foundries.push(foundry.id()),
+                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Alias(alias) => aliases.push(alias.alias_id_non_null(output_id)),
+                        Output::Foundry(foundry) => foundries.push(foundry.id()),
                         Output::Basic(_) | Output::Treasury(_) => {}
                     }
                     let unlock_conditions = output_data
@@ -966,7 +966,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                         .map(|sdr| sdr.amount())
                         .unwrap_or(0);
 
-                    address_amount += output_data.output.amount() - sdr_amount;
+                    amount += output_data.output.amount() - sdr_amount;
                 }
             }
         }
@@ -975,11 +975,11 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     log = format!(
         "{log}\n Outputs: {:#?}\n Base coin amount: {}\n NTs: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
         output_ids,
-        address_amount,
-        address_nts.finish_vec()?,
-        address_nfts,
-        address_aliases,
-        address_foundries,
+        amount,
+        native_tokens.finish_vec()?,
+        nfts,
+        aliases,
+        foundries,
     );
 
     println_log_info!("{log}");
