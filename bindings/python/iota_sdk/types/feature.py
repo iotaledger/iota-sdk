@@ -107,6 +107,7 @@ class BlockIssuer(Feature):
             FeatureType.BlockIssuer),
         init=False)
 
+
 @json
 @dataclass
 class StakingFeature(Feature):
