@@ -16,7 +16,7 @@ use crate::types::block::{
     Error,
 };
 
-/// A Builder for a [`BasicBlock`].
+/// A builder for a [`BasicBlock`].
 struct BasicBlockBuilder {
     strong_parents: StrongParents,
     weak_parents: WeakParents,

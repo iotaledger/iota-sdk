@@ -9,59 +9,83 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::verify_parents,
+    core::{verify_parents, Block},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
 
-// impl BlockBuilder<ValidationBlock> {
-//     /// Creates a new [`BlockBuilder`] for a [`ValidationBlock`].
-//     #[inline(always)]
-//     #[allow(clippy::too_many_arguments)]
-//     pub fn new(
-//         protocol_params: ProtocolParameters,
-//         issuing_time: u64,
-//         slot_commitment_id: SlotCommitmentId,
-//         latest_finalized_slot: SlotIndex,
-//         issuer_id: IssuerId,
-//         strong_parents: StrongParents,
-//         highest_supported_version: u8,
-//         protocol_parameters: &ProtocolParameters,
-//         signature: Ed25519Signature,
-//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
-//       issuer_id, data: ValidationBlockData { strong_parents, weak_parents: Default::default(), shallow_like_parents:
-//       Default::default(), highest_supported_version, protocol_parameters_hash: protocol_parameters.hash(), },
-//       signature, })
-//     }
+/// A builder for a [`ValidationBlock`].
+pub struct ValidationBlockBuilder {
+    strong_parents: StrongParents,
+    weak_parents: WeakParents,
+    shallow_like_parents: ShallowLikeParents,
+    highest_supported_version: u8,
+    protocol_parameters_hash: ProtocolParametersHash,
+}
 
-//     /// Adds weak parents to a [`BlockBuilder`].
-//     #[inline(always)]
-//     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-//         self.0.data.weak_parents = weak_parents.into();
-//         self
-//     }
+impl ValidationBlockBuilder {
+    /// Creates a new [`ValidationBlockBuilder`].
+    #[inline(always)]
+    pub fn new(
+        strong_parents: StrongParents,
+        highest_supported_version: u8,
+        protocol_parameters: &ProtocolParameters,
+    ) -> Self {
+        Self {
+            strong_parents,
+            weak_parents: WeakParents::default(),
+            shallow_like_parents: ShallowLikeParents::default(),
+            highest_supported_version,
+            protocol_parameters_hash: protocol_parameters.hash(),
+        }
+    }
 
-//     /// Adds shallow like parents to a [`BlockBuilder`].
-//     #[inline(always)]
-//     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-//         self.0.data.shallow_like_parents = shallow_like_parents.into();
-//         self
-//     }
-// }
+    /// Adds weak parents to a [`ValidationBlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.weak_parents = weak_parents.into();
+        self
+    }
+
+    /// Adds shallow like parents to a [`ValidationBlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+
+    /// Finishes the builder into a [`BasicBlock`].
+    pub fn finish(self) -> ValidationBlock {
+        verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
+
+        ValidationBlock {
+            strong_parents: self.strong_parents,
+            weak_parents: self.weak_parents,
+            shallow_like_parents: self.shallow_like_parents,
+            highest_supported_version: self.highest_supported_version,
+            protocol_parameters_hash: self.protocol_parameters_hash,
+        }
+    }
+
+    /// Finishes the builder into an [`Block`].
+    pub fn finish_block(self) -> Block {
+        Ok(Block::Validation(self.finish()?))
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ValidationBlock {
     /// Blocks that are strongly directly approved.
-    pub(crate) strong_parents: StrongParents,
+    strong_parents: StrongParents,
     /// Blocks that are weakly directly approved.
-    pub(crate) weak_parents: WeakParents,
+    weak_parents: WeakParents,
     /// Blocks that are directly referenced to adjust opinion.
-    pub(crate) shallow_like_parents: ShallowLikeParents,
+    shallow_like_parents: ShallowLikeParents,
     /// The highest supported protocol version the issuer of this block supports.
-    pub(crate) highest_supported_version: u8,
+    highest_supported_version: u8,
     /// The hash of the protocol parameters for the Highest Supported Version.
-    pub(crate) protocol_parameters_hash: ProtocolParametersHash,
+    protocol_parameters_hash: ProtocolParametersHash,
 }
 
 impl ValidationBlock {
@@ -108,6 +132,7 @@ impl Packable for ValidationBlock {
         self.shallow_like_parents.pack(packer)?;
         self.highest_supported_version.pack(packer)?;
         self.protocol_parameters_hash.pack(packer)?;
+
         Ok(())
     }
 
@@ -143,12 +168,14 @@ impl Packable for ValidationBlock {
 
 fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &ProtocolParameters) -> Result<(), Error> {
     let params_hash = params.hash();
+
     if hash != &params_hash {
         return Err(Error::InvalidProtocolParametersHash {
             expected: params_hash,
             actual: *hash,
         });
     }
+
     Ok(())
 }
 
@@ -164,7 +191,6 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// A special type of block used by validators to secure the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct ValidationBlockDto {
