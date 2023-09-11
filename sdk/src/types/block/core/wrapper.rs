@@ -288,16 +288,6 @@ impl Packable for BlockWrapper {
 
         let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-        let block_wrapper = Self {
-            protocol_params: protocol_params.clone(),
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            block,
-            signature,
-        };
-
         if VERIFY {
             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
@@ -309,6 +299,16 @@ impl Packable for BlockWrapper {
                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
             }
         }
+
+        let block_wrapper = Self {
+            protocol_params: protocol_params.clone(),
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            block,
+            signature,
+        };
 
         Ok(block_wrapper)
     }
@@ -372,7 +372,7 @@ pub(crate) mod dto {
             }
 
             Ok(BlockWrapper::new(
-                protocol_params,
+                protocol_params.clone(),
                 dto.issuing_time,
                 dto.slot_commitment_id,
                 dto.latest_finalized_slot,

@@ -141,7 +141,7 @@ where
                             let transaction_id = *transaction_id;
                             match client.get_included_block(&transaction_id).await {
                                 Ok(block) => {
-                                    if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
+                                    if let Some(Payload::Transaction(transaction_payload)) = block.block().payload() {
                                         let inputs_with_meta =
                                             get_inputs_for_transaction_payload(&client, transaction_payload).await?;
                                         let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta

@@ -23,6 +23,7 @@ pub use self::{
 };
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
+    payload::Payload,
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
@@ -86,6 +87,16 @@ impl Block {
         match self {
             Self::Basic(block) => block.shallow_like_parents(),
             Self::Validation(block) => block.shallow_like_parents(),
+        }
+    }
+
+    // TODO meh
+    /// Returns the payload of a [`Block`].
+    #[inline(always)]
+    pub fn payload(&self) -> Option<&Payload> {
+        match self {
+            Self::Basic(block) => block.payload(),
+            Self::Validation(block) => None,
         }
     }
 

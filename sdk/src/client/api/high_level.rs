@@ -15,12 +15,11 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        core::Block,
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{transaction::TransactionId, Payload},
         slot::SlotIndex,
-        BlockId,
+        BlockId, BlockWrapper,
     },
     utils::unix_timestamp_now,
 };
@@ -30,7 +29,7 @@ impl Client {
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
         let block = self.get_included_block(transaction_id).await?;
 
-        let inputs = match block.payload() {
+        let inputs = match block.block().payload() {
             Some(Payload::Transaction(t)) => t.essence().inputs(),
             _ => {
                 // TODO ???
@@ -49,7 +48,7 @@ impl Client {
     }
 
     /// Find all blocks by provided block IDs.
-    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<Block>> {
+    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<BlockWrapper>> {
         // Use a `HashSet` to prevent duplicate block_ids.
         let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
