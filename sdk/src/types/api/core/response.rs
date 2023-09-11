@@ -180,7 +180,8 @@ pub struct ValidatorsResponse {
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
     /// last page.
-    cursor: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    cursor: Option<String>,
 }
 
 /// Response of GET /api/core/v3/rewards/{outputId}.
@@ -335,14 +336,16 @@ pub enum TransactionState {
 pub enum BlockFailureReason {
     /// The block is too old to issue.
     TooOldToIssue = 1,
-    /// The block's parents are too old.
-    ParentsTooOld = 2,
-    /// The block failed at the booker.
-    FailedAtBooker = 3,
+    /// One of the block's parents is too old.
+    ParentTooOld = 2,
+    /// One of the block's parents does not exist.
+    ParentDoesNotExist = 3,
+    /// One of the block's parents is invalid.
+    ParentInvalid = 4,
     /// The block is dropped due to congestion.
-    DroppedDueToCongestion = 4,
+    DroppedDueToCongestion = 5,
     /// The block is invalid.
-    Invalid = 5,
+    Invalid = 6,
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
