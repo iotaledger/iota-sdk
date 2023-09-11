@@ -96,7 +96,11 @@ impl BlockWrapper {
         self.issuer_id
     }
 
-    // TODO add block getter
+    /// Returns the [`Block`] of a [`BlockWrapper`].
+    #[inline(always)]
+    pub fn block(&self) -> &Block {
+        &self.block
+    }
 
     /// Returns the signature of a [`Block`].
     #[inline(always)]
