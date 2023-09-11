@@ -4,6 +4,7 @@
 from enum import IntEnum
 
 from dataclasses import dataclass, field
+from typing import List
 
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr, json
@@ -99,4 +100,7 @@ class BlockIssuer(Feature):
     expiry_slot: str
     # TODO Replace with a list of PublicKey types
     public_keys: List[HexStr]
-    type: int = field(default_factory=lambda: int(FeatureType.BlockIssuer), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.BlockIssuer),
+        init=False)
