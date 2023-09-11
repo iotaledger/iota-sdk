@@ -19,21 +19,6 @@ use crate::types::block::{
     Block, Error, IssuerId,
 };
 
-//     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
-//     #[inline(always)]
-//     pub fn new(
-//         protocol_params: ProtocolParameters,
-//         issuing_time: u64,
-//         slot_commitment_id: SlotCommitmentId,
-//         latest_finalized_slot: SlotIndex,
-//         issuer_id: IssuerId,
-//         strong_parents: StrongParents,
-//         signature: Ed25519Signature,
-//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
-//       issuer_id, data: BasicBlockData { strong_parents, weak_parents: Default::default(), shallow_like_parents:
-//       Default::default(), payload: OptionalPayload::default(), burned_mana: Default::default(), }, signature, })
-//     }
-
 // /// A builder to build a [`Block`].
 // #[derive(Clone)]
 // #[must_use]
@@ -87,19 +72,19 @@ use crate::types::block::{
 pub struct BlockWrapper {
     /// Protocol parameters of the network to which this block belongs.
     // TODO remove
-    pub(crate) protocol_params: ProtocolParameters,
+    protocol_params: ProtocolParameters,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
-    pub(crate) issuing_time: u64,
+    issuing_time: u64,
     /// The identifier of the slot to which this block commits.
-    pub(crate) slot_commitment_id: SlotCommitmentId,
+    slot_commitment_id: SlotCommitmentId,
     /// The slot index of the latest finalized slot.
-    pub(crate) latest_finalized_slot: SlotIndex,
+    latest_finalized_slot: SlotIndex,
     /// The identifier of the account that issued this block.
-    pub(crate) issuer_id: IssuerId,
+    issuer_id: IssuerId,
     /// The inner block.
-    pub(crate) block: Block,
+    block: Block,
     /// The block signature, used to validate issuance capabilities.
-    pub(crate) signature: Signature,
+    signature: Signature,
 }
 
 impl BlockWrapper {
@@ -116,6 +101,29 @@ impl BlockWrapper {
     /// The length of the block signature.
     pub const SIGNATURE_LENGTH: usize =
         size_of::<u8>() + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
+
+    // TODO builder?
+    /// Creates a new [`BlockWrapper`].
+    #[inline(always)]
+    pub fn new(
+        protocol_params: ProtocolParameters,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+        block: impl Into<Block>,
+        signature: Signature,
+    ) -> Self {
+        Self {
+            protocol_params,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+            block: block.into(),
+            signature,
+        }
+    }
 
     /// Returns the protocol version of a [`BlockWrapper`].
     #[inline(always)]
