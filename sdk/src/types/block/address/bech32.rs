@@ -18,10 +18,19 @@ use packable::{
 
 use crate::types::block::{address::Address, ConvertTo, Error};
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Hrp {
     inner: [u8; 83],
     len: u8,
+}
+
+impl core::fmt::Debug for Hrp {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Hrp")
+            .field("inner", &prefix_hex::encode(&self.inner[..self.len as usize]))
+            .field("len", &self.len)
+            .finish()
+    }
 }
 
 impl Hrp {

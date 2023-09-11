@@ -8,11 +8,21 @@ use iota_sdk::types::block::{
 };
 
 const BYTE_COST: u32 = 1;
-const FACTOR_KEY: u8 = 10;
 const FACTOR_DATA: u8 = 1;
+const FACTOR_KEY: u8 = 10;
+const FACTOR_DELEGATION: u8 = 1;
+const FACTOR_STAKING_FEATURE: u8 = 1;
+const FACTOR_ISSUER_KEYS: u8 = 1;
 
 fn config() -> RentStructure {
-    RentStructure::new(BYTE_COST, FACTOR_KEY, FACTOR_DATA)
+    RentStructure::new(
+        BYTE_COST,
+        FACTOR_DATA,
+        FACTOR_KEY,
+        FACTOR_DELEGATION,
+        FACTOR_STAKING_FEATURE,
+        FACTOR_ISSUER_KEYS,
+    )
 }
 
 fn output_in_range(output: Output, range: std::ops::RangeInclusive<u64>) {

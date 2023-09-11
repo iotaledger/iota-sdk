@@ -25,6 +25,9 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 )]
 #[getset(get_copy = "pub")]
 pub struct ProtocolParameters {
+    /// The layout type.
+    #[serde(rename = "type")]
+    pub(crate) kind: u8,
     /// The version of the protocol running.
     pub(crate) version: u8,
     /// The human friendly name of the network.
@@ -82,6 +85,7 @@ impl Borrow<()> for ProtocolParameters {
 impl Default for ProtocolParameters {
     fn default() -> Self {
         Self {
+            kind: 0,
             version: PROTOCOL_VERSION,
             // Unwrap: Known to be valid
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
@@ -303,7 +307,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
         2,
         "testnet",
         "rms",
-        crate::types::block::output::RentStructure::new(500, 10, 1),
+        crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,
@@ -320,3 +324,82 @@ impl_id!(
 
 #[cfg(feature = "serde")]
 string_serde_impl!(ProtocolParametersHash);
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn params_serde_hash() {
+        let protocol_params_json = serde_json::json!(
+            {
+                "type": 0,
+                "version": 3,
+                "networkName": "xxxNetwork",
+                "bech32Hrp": "xxx",
+                "rentStructure": {
+                  "vByteCost": 6,
+                  "vByteFactorData": 7,
+                  "vByteFactorKey": 8,
+                  "vByteFactorIssuerKeys": 9,
+                  "vByteFactorStakingFeature": 10,
+                  "vByteFactorDelegation": 10
+                },
+                "workScoreStructure": {
+                  "dataKilobyte": 1,
+                  "block": 2,
+                  "missingParent": 3,
+                  "input": 4,
+                  "contextInput": 5,
+                  "output": 6,
+                  "nativeToken": 7,
+                  "staking": 8,
+                  "blockIssuer": 9,
+                  "allotment": 10,
+                  "signatureEd25519": 11,
+                  "minStrongParentsThreshold": 12
+                },
+                "tokenSupply": "1234567890987654321",
+                "genesisUnixTimestamp": "1681373293",
+                "slotDurationInSeconds": 10,
+                "slotsPerEpochExponent": 13,
+                "manaStructure": {
+                    "manaBitsCount": 1,
+                    "manaGenerationRate": 1,
+                    "manaGenerationRateExponent": 27,
+                    "manaDecayFactors": [ 10, 20 ],
+                    "manaDecayFactorsExponent": 32,
+                    "manaDecayFactorEpochsSum": 1337,
+                    "manaDecayFactorEpochsSumExponent": 20
+                },
+                "stakingUnbondingPeriod": "11",
+                "validationBlocksPerSlot": 10,
+                "livenessThreshold": "3",
+                "minCommittableAge": "10",
+                "maxCommittableAge": "20",
+                "epochNearingThreshold": "24",
+                "congestionControlParameters": {
+                  "rmcMin": "500",
+                  "increase": "500",
+                  "decrease": "500",
+                  "increaseThreshold": 800000,
+                  "decreaseThreshold": 500000,
+                  "schedulerRate": 100000,
+                  "minMana": "1",
+                  "maxBufferSize": 3276800
+                },
+                "versionSignaling": {
+                  "windowSize": 3,
+                  "windowTargetRatio": 4,
+                  "activationOffset": 1
+                }
+              }
+        );
+        let protocol_params = serde_json::from_value::<ProtocolParameters>(protocol_params_json).unwrap();
+        let hash = protocol_params.hash();
+        assert_eq!(
+            hash.to_string(),
+            "0xd379bdceb68aa77dada50ae7e3493b8f0b6ed28d26813620ce893afad541eb29"
+        );
+    }
+}
