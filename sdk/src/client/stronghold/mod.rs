@@ -183,9 +183,9 @@ impl StrongholdAdapterBuilder {
     /// [`timeout()`]: Self::timeout()
     pub fn build<P: AsRef<Path>>(self, snapshot_path: P) -> Result<StrongholdAdapter, Error> {
         if snapshot_path.as_ref().is_dir() {
-            // TODO: Add Error in 2.0 as its breaking. Will crash further down now.
+            // TODO: Add Error in 2.0 as its breaking.
             // Issue #1197
-            // return Err(Error::PathIsNotFile(snapshot_path.as_ref().to_path_buf()));
+            panic!("Path is not a file: {:?}", snapshot_path.as_ref().to_path_buf());
         }
 
         // In any case, Stronghold - as a necessary component - needs to be present at this point.
@@ -492,9 +492,9 @@ impl StrongholdAdapter {
     pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<(), Error> {
         if let Some(p) = snapshot_path {
             if p.is_dir() {
-                // TODO: Add Error in 2.0 as its breaking. Will crash further down now.
+                // TODO: Add Error in 2.0 as its breaking.
                 // Issue #1197
-                // return Err(Error::PathIsNotFile(p.to_path_buf()));
+                panic!("Path is not a file: {:?}", p);
             }
         }
 
