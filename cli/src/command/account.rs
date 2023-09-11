@@ -11,8 +11,8 @@ use iota_sdk::{
         block::{
             address::Bech32Address,
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
-                Output, OutputId, TokenId,
+                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken,
+                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
             ConvertTo,
@@ -928,7 +928,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
 
     let mut output_ids = Vec::new();
     let mut address_amount = 0;
-    let mut address_nts = Vec::<TokenId>::new();
+    let mut address_nts = NativeTokensBuilder::new();
     let mut address_nfts = Vec::new();
     let mut address_aliases = Vec::new();
     let mut address_foundries = Vec::new();
@@ -941,16 +941,15 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
         for output_id in &output_ids {
             if let Some(output_data) = account.get_output(output_id).await {
                 // Output might be associated with the address, but can't be unlocked by it, so we check that here
-                // TODO: Should we just skip outputs for which this call fails? (that's only possible for
-                // TreasuryOutputs, right?)
-                let (required_address, _) =
-                    output_data
-                        .output
-                        .required_and_unlocked_address(current_time, output_id, None)?;
+                // Panic: cannot fail for outputs belonging to an account.
+                let (required_address, _) = output_data
+                    .output
+                    .required_and_unlocked_address(current_time, output_id, None)
+                    .unwrap();
 
                 if address.address().as_ref() == &required_address {
                     if let Some(nts) = output_data.output.native_tokens() {
-                        address_nts.extend(nts.iter().map(|nt| nt.token_id()));
+                        address_nts.add_native_tokens(nts.clone())?;
                     }
                     match &output_data.output {
                         Output::Nft(nft) => address_nfts.push(nft.nft_id_non_null(output_id)),
@@ -975,7 +974,12 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
 
     log = format!(
         "{log}\n Outputs: {:#?}\n Base coin amount: {}\n NTs: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
-        output_ids, address_amount, address_nts, address_nfts, address_aliases, address_foundries,
+        output_ids,
+        address_amount,
+        address_nts.finish_vec()?,
+        address_nfts,
+        address_aliases,
+        address_foundries,
     );
 
     println_log_info!("{log}");
