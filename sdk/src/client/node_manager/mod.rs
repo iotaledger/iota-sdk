@@ -11,13 +11,18 @@ pub(crate) mod syncing;
 
 use std::{
     collections::{HashMap, HashSet},
+    fmt::Debug,
     sync::RwLock,
     time::Duration,
 };
 
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
 use self::{http_client::HttpClient, node::Node};
+use super::ClientInner;
+#[cfg(not(target_family = "wasm"))]
+use crate::client::request_pool::RateLimitExt;
 use crate::{
     client::{
         error::{Error, Result},
@@ -41,7 +46,7 @@ pub struct NodeManager {
     pub(crate) http_client: HttpClient,
 }
 
-impl std::fmt::Debug for NodeManager {
+impl Debug for NodeManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("NodeManager");
         d.field("primary_node", &self.primary_node);
@@ -53,6 +58,38 @@ impl std::fmt::Debug for NodeManager {
         d.field("quorum", &self.quorum);
         d.field("min_quorum_size", &self.min_quorum_size);
         d.field("quorum_threshold", &self.quorum_threshold).finish()
+    }
+}
+
+impl ClientInner {
+    pub(crate) async fn get_request<T: DeserializeOwned + Debug + Serialize>(
+        &self,
+        path: &str,
+        query: Option<&str>,
+        need_quorum: bool,
+        prefer_permanode: bool,
+    ) -> Result<T> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode);
+        #[cfg(not(target_family = "wasm"))]
+        let request = request.rate_limit(&self.request_pool);
+        request.await
+    }
+
+    pub(crate) async fn get_request_bytes(&self, path: &str, query: Option<&str>) -> Result<Vec<u8>> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.get_request_bytes(path, query, self.get_timeout().await);
+        #[cfg(not(target_family = "wasm"))]
+        let request = request.rate_limit(&self.request_pool);
+        request.await
+    }
+
+    pub(crate) async fn post_request_json<T: DeserializeOwned>(&self, path: &str, json: Value) -> Result<T> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.post_request_json(path, self.get_timeout().await, json);
+        #[cfg(not(target_family = "wasm"))]
+        let request = request.rate_limit(&self.request_pool);
+        request.await
     }
 }
 
@@ -130,7 +167,7 @@ impl NodeManager {
         Ok(nodes_with_modified_url)
     }
 
-    pub(crate) async fn get_request<T: serde::de::DeserializeOwned + std::fmt::Debug + serde::Serialize>(
+    pub(crate) async fn get_request<T: DeserializeOwned + Debug + Serialize>(
         &self,
         path: &str,
         query: Option<&str>,
@@ -276,7 +313,7 @@ impl NodeManager {
         Err(error.unwrap())
     }
 
-    pub(crate) async fn post_request_bytes<T: serde::de::DeserializeOwned>(
+    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,
@@ -303,7 +340,7 @@ impl NodeManager {
         Err(error.unwrap())
     }
 
-    pub(crate) async fn post_request_json<T: serde::de::DeserializeOwned>(
+    pub(crate) async fn post_request_json<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,

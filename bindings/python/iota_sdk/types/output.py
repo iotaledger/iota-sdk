@@ -10,7 +10,7 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition
+from iota_sdk.types.unlock_condition import AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -18,12 +18,12 @@ class OutputType(IntEnum):
 
     Attributes:
         Basic (3): A basic output.
-        Alias (4): An alias output.
+        Account (4): An account output.
         Foundry (5): A foundry output.
         Nft (6): An NFT output.
     """
     Basic = 3
-    Alias = 4
+    Account = 4
     Foundry = 5
     Nft = 6
 
@@ -43,6 +43,8 @@ class BasicOutput(Output):
     Attributes:
         amount :
             The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
         unlock_conditions :
             The conditions to unlock the output.
         features :
@@ -53,6 +55,7 @@ class BasicOutput(Output):
             The type of output.
     """
     amount: str
+    mana: str
     unlock_conditions: List[AddressUnlockCondition | ExpirationUnlockCondition | StorageDepositReturnUnlockCondition |
                             TimelockUnlockCondition]
     features: Optional[List[SenderFeature |
@@ -66,21 +69,23 @@ class BasicOutput(Output):
 
 @json
 @dataclass
-class AliasOutput(Output):
-    """Describes an alias output.
+class AccountOutput(Output):
+    """Describes an account output.
     Attributes:
         amount :
             The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
         unlock_conditions:
             The conditions to unlock the output.
-        alias_id :
-            The alias ID if it's an alias output.
+        account_id :
+            The account ID if it's an account output.
         state_index :
-            A counter that must increase by 1 every time the alias is state transitioned.
+            A counter that must increase by 1 every time the account is state transitioned.
         state_metadata :
             Metadata that can only be changed by the state controller.
         foundry_counter :
-            A counter that denotes the number of foundries created by this alias account.
+            A counter that denotes the number of foundries created by this account output.
         features :
             Features that add utility to the output but do not impose unlocking conditions.
         native_tokens :
@@ -91,7 +96,8 @@ class AliasOutput(Output):
             The type of output.
     """
     amount: str
-    alias_id: HexStr
+    mana: str
+    account_id: HexStr
     state_index: int
     foundry_counter: int
     unlock_conditions: List[StateControllerAddressUnlockCondition |
@@ -104,7 +110,7 @@ class AliasOutput(Output):
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
-            OutputType.Alias),
+            OutputType.Account),
         init=False)
 
 
@@ -124,7 +130,7 @@ class FoundryOutput(Output):
         immutable_features :
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
         serial_number :
-            The serial number of the foundry with respect to the controlling alias.
+            The serial number of the foundry with respect to the controlling account.
         token_scheme :
             Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
         type :
@@ -133,7 +139,7 @@ class FoundryOutput(Output):
     amount: str
     serial_number: int
     token_scheme: SimpleTokenScheme
-    unlock_conditions: List[ImmutableAliasAddressUnlockCondition]
+    unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
     features: Optional[List[MetadataFeature]] = None
     immutable_features: Optional[List[MetadataFeature]] = None
     native_tokens: Optional[List[NativeToken]] = None
@@ -150,6 +156,8 @@ class NftOutput(Output):
     Attributes:
         amount :
             The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
         unlock_conditions :
             The conditions to unlock the output.
         nft_id :
@@ -164,6 +172,7 @@ class NftOutput(Output):
             The type of output.
     """
     amount: str
+    mana: str
     nft_id: HexStr
     unlock_conditions: List[AddressUnlockCondition | ExpirationUnlockCondition |
                             StorageDepositReturnUnlockCondition | TimelockUnlockCondition]
@@ -215,17 +224,17 @@ class OutputWithMetadata:
     """
 
     metadata: OutputMetadata
-    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
+    output: AccountOutput | FoundryOutput | NftOutput | BasicOutput
 
 
 def output_from_dict(
-        output: Dict[str, any]) -> BasicOutput | AliasOutput | FoundryOutput | NftOutput | Output:
+        output: Dict[str, any]) -> BasicOutput | AccountOutput | FoundryOutput | NftOutput | Output:
     output_type = OutputType(output['type'])
 
     if output_type == OutputType.Basic:
         return BasicOutput.from_dict(output)
-    if output_type == OutputType.Alias:
-        return AliasOutput.from_dict(output)
+    if output_type == OutputType.Account:
+        return AccountOutput.from_dict(output)
     if output_type == OutputType.Foundry:
         return FoundryOutput.from_dict(output)
     if output_type == OutputType.Nft:

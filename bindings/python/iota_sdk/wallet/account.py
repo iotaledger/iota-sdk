@@ -15,7 +15,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import BasicOutput, NftOutput, Output, output_from_dict
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
-from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
+from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
@@ -80,7 +80,7 @@ class Account:
 
     def prepare_burn(
             self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransaction:
-        """A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and aliases.
+        """A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and accounts.
         """
         prepared = self._call_account_method(
             'prepareBurn', {
@@ -130,27 +130,27 @@ class Account:
         )
         return PreparedTransaction(self, prepared)
 
-    def prepare_create_alias_output(self,
-                                    params: Optional[CreateAliasOutputParams] = None,
-                                    options: Optional[TransactionOptions] = None) -> PreparedTransaction:
-        """Create an alias output.
+    def prepare_create_account_output(self,
+                                      params: Optional[CreateAccountOutputParams] = None,
+                                      options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Create an account output.
         """
         prepared = self._call_account_method(
-            'prepareCreateAliasOutput', {
+            'prepareCreateAccountOutput', {
                 'params': params,
                 'options': options
             }
         )
         return PreparedTransaction(self, prepared)
 
-    def prepare_destroy_alias(self,
-                              alias_id: HexStr,
-                              options: Optional[TransactionOptions] = None) -> PreparedTransaction:
-        """Destroy an alias output.
+    def prepare_destroy_account(self,
+                                account_id: HexStr,
+                                options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Destroy an account output.
         """
         prepared = self._call_account_method(
             'prepareBurn', {
-                'burn': Burn().add_alias(alias_id).to_dict(),
+                'burn': Burn().add_account(account_id).to_dict(),
                 'options': options
             },
         )

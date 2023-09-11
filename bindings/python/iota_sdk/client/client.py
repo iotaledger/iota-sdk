@@ -13,7 +13,7 @@ from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
-from iota_sdk.types.output import AliasOutput, BasicOutput, FoundryOutput, NftOutput, output_from_dict
+from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, output_from_dict
 from iota_sdk.types.payload import Payload, TransactionPayload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
@@ -150,31 +150,33 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self.handle
 
-    def build_alias_output(self,
-                           alias_id: HexStr,
-                           unlock_conditions: List[UnlockCondition],
-                           amount: Optional[int] = None,
-                           native_tokens: Optional[List[NativeToken]] = None,
-                           state_index: Optional[int] = None,
-                           state_metadata: Optional[str] = None,
-                           foundry_counter: Optional[int] = None,
-                           features: Optional[List[Feature]] = None,
-                           immutable_features: Optional[List[Feature]] = None) -> AliasOutput:
-        """Build an AliasOutput.
+    def build_account_output(self,
+                             account_id: HexStr,
+                             unlock_conditions: List[UnlockCondition],
+                             amount: Optional[int] = None,
+                             mana: Optional[int] = None,
+                             native_tokens: Optional[List[NativeToken]] = None,
+                             state_index: Optional[int] = None,
+                             state_metadata: Optional[str] = None,
+                             foundry_counter: Optional[int] = None,
+                             features: Optional[List[Feature]] = None,
+                             immutable_features: Optional[List[Feature]] = None) -> AccountOutput:
+        """Build an AccountOutput.
 
         Args:
-            alias_id: A unique ID for the new alias.
+            account_id: A unique ID for the new account.
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
+            mana: Amount of stored Mana held by this output.
             native_tokens: Native tokens added to the new output.
-            state_index: A counter that must increase by 1 every time the alias is state transitioned.
+            state_index: A counter that must increase by 1 every time the account is state transitioned.
             state_metadata: Metadata that can only be changed by the state controller.
-            foundry_counter: A counter that denotes the number of foundries created by this alias account.
+            foundry_counter: A counter that denotes the number of foundries created by this account output.
             features: A list of features.
             immutable_features: A list of immutable features.
 
         Returns:
-            The alias output as dict.
+            The account output as dict.
         """
 
         unlock_conditions = [unlock_condition.to_dict()
@@ -193,10 +195,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return output_from_dict(self._call_method('buildAliasOutput', {
-            'aliasId': alias_id,
+        if mana:
+            mana = str(mana)
+
+        return output_from_dict(self._call_method('buildAccountOutput', {
+            'accountId': account_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
+            'mana': mana,
             'nativeTokens': native_tokens,
             'stateIndex': state_index,
             'stateMetadata': state_metadata,
@@ -208,6 +214,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def build_basic_output(self,
                            unlock_conditions: List[UnlockCondition],
                            amount: Optional[int] = None,
+                           mana: Optional[int] = None,
                            native_tokens: Optional[List[NativeToken]] = None,
                            features: Optional[List[Feature]] = None) -> BasicOutput:
         """Build a BasicOutput.
@@ -215,6 +222,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         Args:
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
+            mana: Amount of stored Mana held by this output.
             native_tokens: Native tokens added to the new output.
             features: Features that add utility to the output but do not impose unlocking conditions.
 
@@ -235,9 +243,13 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
+        if mana:
+            mana = str(mana)
+
         return output_from_dict(self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
+            'mana': mana,
             'nativeTokens': native_tokens,
             'features': features,
         }))
@@ -253,7 +265,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Build a FoundryOutput.
 
         Args:
-            serial_number: The serial number of the foundry with respect to the controlling alias.
+            serial_number: The serial number of the foundry with respect to the controlling account.
             token_scheme: Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
@@ -295,6 +307,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                          nft_id: HexStr,
                          unlock_conditions: List[UnlockCondition],
                          amount: Optional[int] = None,
+                         mana: Optional[int] = None,
                          native_tokens: Optional[List[NativeToken]] = None,
                          features: Optional[List[Feature]] = None,
                          immutable_features: Optional[List[Feature]] = None) -> NftOutput:
@@ -304,6 +317,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             nft_id: A unique ID for the new NFT.
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
+            mana: Amount of stored Mana held by this output.
             native_tokens: Native tokens added to the new output.
             features: Features that add utility to the output but do not impose unlocking conditions.
             immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
@@ -328,10 +342,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
+        if mana:
+            mana = str(mana)
+
         return output_from_dict(self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
+            'mana': mana,
             'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features

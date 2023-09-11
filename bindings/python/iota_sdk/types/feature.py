@@ -5,7 +5,7 @@ from enum import IntEnum
 
 from dataclasses import dataclass, field
 
-from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
+from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr, json
 
 
@@ -39,7 +39,7 @@ class SenderFeature(Feature):
     Attributes:
         address: A given sender address.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Sender),
@@ -53,7 +53,7 @@ class IssuerFeature(Feature):
     Attributes:
         address: A given issuer address.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Ed25519Address | AccountAddress | NFTAddress
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Issuer),

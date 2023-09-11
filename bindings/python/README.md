@@ -60,51 +60,15 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Client Usage
 
-The following example creates a [`Client`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/)
-instance connected to
-the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
-calling [`Client.get_info()`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/client/_node_core_api/#get_info),
-and then print the node's information.
+The following example creates a Client instance connected to the Shimmer Testnet, and retrieves the node's information by calling `Client.get_info()`, and then print the node's information.
 
-```python
-from iota_sdk import Client
-
-# Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
-
-# Get the node info
-node_info = client.get_info()
-print(f'{node_info}')
-```
+[examples/client/getting_started.py](examples/client/getting_started.py)
 
 ## Wallet Usage
 
-The following example will create a
-new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/wallet/account/)
-that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
-[`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects)
-to safely store a seed derived from a mnemonic, and then print the account's information.
+The following example will create a new Wallet Account  using a StrongholdSecretManager, and then print the account's information.
 
-```python
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions
-
-# This example creates a new database and account
-
-client_options = ClientOptions(nodes=['https://api.testnet.shimmer.network'])
-
-secret_manager = StrongholdSecretManager(
-    "wallet.stronghold", "some_hopefully_secure_password")
-
-wallet = Wallet('./alice-walletdb', client_options,
-                CoinType.SHIMMER, secret_manager)
-
-# Store the mnemonic in the Stronghold snapshot. This only needs to be done once
-account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +
-                                "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
-
-account = wallet.create_account('Alice')
-print(account.get_metadata())
-```
+[examples/wallet/getting_started.py](examples/wallet/getting_started.py)
 
 ## Examples
 
