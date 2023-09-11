@@ -33,6 +33,7 @@ impl Client {
         let inputs = match block.payload() {
             Some(Payload::Transaction(t)) => t.essence().inputs(),
             _ => {
+                // TODO ???
                 unreachable!()
             }
         };

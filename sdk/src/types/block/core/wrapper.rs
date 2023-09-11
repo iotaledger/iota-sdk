@@ -112,7 +112,7 @@ impl BlockWrapper {
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
         block: impl Into<Block>,
-        signature: Signature,
+        signature: impl Into<Signature>,
     ) -> Self {
         Self {
             protocol_params,
@@ -121,7 +121,7 @@ impl BlockWrapper {
             latest_finalized_slot,
             issuer_id,
             block: block.into(),
-            signature,
+            signature: signature.into(),
         }
     }
 

@@ -23,7 +23,7 @@ use crate::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-            Block, BlockDto, BlockId,
+            Block, BlockDto, BlockId, BlockWrapper, BlockWrapperDto,
         },
         TryFromDto,
     },
@@ -150,10 +150,10 @@ impl ClientInner {
 
     /// Returns the BlockId of the submitted block.
     /// POST JSON to /api/core/v3/blocks
-    pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
+    pub async fn post_block(&self, block: &BlockWrapper) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
-        let block_dto = BlockDto::from(block);
+        let block_dto = BlockWrapperDto::from(block);
 
         let response = self
             .post_request_json::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
@@ -182,12 +182,12 @@ impl ClientInner {
 
     /// Finds a block by its ID and returns it as object.
     /// GET /api/core/v3/blocks/{blockId}
-    pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
+    pub async fn get_block(&self, block_id: &BlockId) -> Result<BlockWrapper> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
-        let dto = self.get_request::<BlockDto>(path, None, false, true).await?;
+        let dto = self.get_request::<BlockWrapperDto>(path, None, false, true).await?;
 
-        Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
+        Ok(BlockWrapper::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
@@ -237,12 +237,12 @@ impl ClientInner {
 
     /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
-    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
+    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<BlockWrapper> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
-        let dto = self.get_request::<BlockDto>(path, None, true, true).await?;
+        let dto = self.get_request::<BlockWrapperDto>(path, None, true, true).await?;
 
-        Ok(Block::try_from_dto(dto, self.get_protocol_parameters().await?)?)
+        Ok(BlockWrapper::try_from_dto(dto, self.get_protocol_parameters().await?)?)
     }
 
     /// Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.

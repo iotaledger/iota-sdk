@@ -181,6 +181,7 @@ pub(crate) mod dto {
     use serde_json::Value;
 
     use super::*;
+    pub use crate::types::block::core::wrapper::dto::BlockWrapperDto;
     use crate::types::block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]

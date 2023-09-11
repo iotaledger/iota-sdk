@@ -220,8 +220,8 @@ pub(crate) mod dto {
     //     type Dto = ValidationBlockDto;
     //     type Error = Error;
 
-    //     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-    //         if let Some(protocol_params) = params.protocol_parameters() {
+    //     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error>
+    // {         if let Some(protocol_params) = params.protocol_parameters() {
     //             validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
     //         }
 
