@@ -4,7 +4,8 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, Block, BlockDto, BlockHash, BlockId,
+    protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, BlockHash, BlockId, BlockWrapper,
+    BlockWrapperDto,
 };
 use packable::PackableExt;
 
@@ -95,8 +96,8 @@ fn compute() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
-    let block = Block::try_from_dto(block_dto, protocol_parameters).unwrap();
+    let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
+    let block = BlockWrapper::try_from_dto(block_dto, protocol_parameters).unwrap();
     let block_id = block.id();
 
     // TODO: Independently verify this value

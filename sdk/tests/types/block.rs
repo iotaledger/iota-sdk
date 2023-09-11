@@ -6,11 +6,11 @@ use iota_sdk::types::block::{
     payload::Payload,
     protocol::{protocol_parameters, ProtocolParameters},
     rand::{
-        block::{rand_basic_block_builder_with_strong_parents, rand_basic_block_with_strong_parents, rand_block},
+        block::{rand_basic_block_builder_with_strong_parents, rand_block_wrapper, rand_block_wrapper_with_block},
         parents::rand_strong_parents,
         payload::rand_tagged_data_payload,
     },
-    Block, BlockDto,
+    BlockWrapper, BlockWrapperDto,
 };
 use packable::PackableExt;
 
@@ -89,7 +89,7 @@ use packable::PackableExt;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_block(protocol_parameters.clone());
+    let block = rand_block_wrapper(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -105,23 +105,15 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let block = rand_basic_block_builder_with_strong_parents(protocol_parameters.clone(), parents.clone())
+    let block = rand_basic_block_builder_with_strong_parents(parents.clone())
         .with_payload(payload.clone())
         .finish()
         .unwrap();
+    let wrapper = rand_block_wrapper_with_block(protocol_parameters.clone(), block.clone());
 
-    assert_eq!(block.protocol_version(), protocol_parameters.version());
+    assert_eq!(wrapper.protocol_version(), protocol_parameters.version());
     assert_eq!(*block.strong_parents(), parents);
     assert_eq!(*block.payload().as_ref().unwrap(), &payload);
-}
-
-#[test]
-fn build_into_parents() {
-    let protocol_parameters = protocol_parameters();
-    let parents = rand_strong_parents();
-    let block = rand_basic_block_with_strong_parents(protocol_parameters, parents.clone());
-
-    assert_eq!(block.strong_parents(), &parents);
 }
 
 #[test]
@@ -154,8 +146,8 @@ fn dto_mismatch_version() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
-    let block_res = Block::try_from_dto(block_dto, protocol_parameters.clone());
+    let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
+    let block_res = BlockWrapper::try_from_dto(block_dto, protocol_parameters.clone());
 
     assert_eq!(
         block_res,
@@ -195,8 +187,8 @@ fn dto_mismatch_network_id() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
-    let block_res = Block::try_from_dto(block_dto, protocol_parameters.clone());
+    let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
+    let block_res = BlockWrapper::try_from_dto(block_dto, protocol_parameters.clone());
 
     assert_eq!(
         block_res,

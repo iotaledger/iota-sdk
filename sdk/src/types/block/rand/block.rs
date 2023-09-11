@@ -4,7 +4,7 @@
 use alloc::vec::Vec;
 
 use crate::types::block::{
-    core::{BasicBlock, Block, BlockWrapper},
+    core::{BasicBlockBuilder, Block, BlockWrapper},
     parent::StrongParents,
     protocol::ProtocolParameters,
     rand::{
@@ -31,15 +31,12 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
 }
 
 /// Generates a random basic block with given strong parents.
-pub fn rand_basic_block_with_strong_parents(strong_parents: StrongParents) -> BasicBlock {
-    Block::build_basic(strong_parents)
-        .with_payload(rand_payload_for_block())
-        .finish()
-        .unwrap()
+pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BasicBlockBuilder {
+    Block::build_basic(strong_parents).with_payload(rand_payload_for_block())
 }
 
 /// Generates a random block wrapper.
-pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
+pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block: impl Into<Block>) -> BlockWrapper {
     BlockWrapper::new(
         protocol_params,
         rand_number(),
@@ -47,7 +44,17 @@ pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
         rand_slot_index(),
         // TODO rand_issuer_id
         rand_bytes_array().into(),
-        rand_basic_block_with_strong_parents(rand_strong_parents()),
+        block,
         rand_signature(),
+    )
+}
+
+/// Generates a random block wrapper.
+pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
+    rand_block_wrapper_with_block(
+        protocol_params,
+        rand_basic_block_builder_with_strong_parents(rand_strong_parents())
+            .finish_block()
+            .unwrap(),
     )
 }

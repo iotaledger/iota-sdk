@@ -4,7 +4,7 @@
 use iota_sdk::types::block::{
     payload::tagged_data::TaggedDataPayload,
     rand::bytes::{rand_bytes, rand_bytes_array},
-    Block, Error,
+    BlockWrapper, Error,
 };
 use packable::{
     bounded::{TryIntoBoundedU32Error, TryIntoBoundedU8Error},
@@ -65,8 +65,8 @@ fn new_invalid_tag_length_more_than_max() {
 #[test]
 fn new_invalid_data_length_more_than_max() {
     assert!(matches!(
-        TaggedDataPayload::new(rand_bytes(32), [0u8; Block::LENGTH_MAX + 42]),
-        Err(Error::InvalidTaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == Block::LENGTH_MAX as u32 + 42
+        TaggedDataPayload::new(rand_bytes(32), [0u8; BlockWrapper::LENGTH_MAX + 42]),
+        Err(Error::InvalidTaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == BlockWrapper::LENGTH_MAX as u32 + 42
     ));
 }
 
