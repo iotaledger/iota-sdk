@@ -26,23 +26,6 @@ class PayloadType(IntEnum):
 
 @json
 @dataclass
-class TransactionEssence:
-    type: int
-
-
-@json
-@dataclass
-class RegularTransactionEssence(TransactionEssence):
-    network_id: str
-    inputs_commitment: HexStr
-    inputs: List[UtxoInput]
-    outputs: List[AccountOutput | FoundryOutput | NftOutput | BasicOutput]
-    payload: Optional[TaggedDataPayload] = None
-    type: int = field(default_factory=lambda: 1, init=False)
-
-
-@json
-@dataclass
 class Payload():
     """Initialize a Payload.
     """
