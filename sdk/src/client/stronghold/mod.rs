@@ -67,7 +67,7 @@ use tokio::{
 };
 use zeroize::Zeroizing;
 
-use self::common::PRIVATE_DATA_CLIENT_PATH;
+pub(crate) use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
 use super::{storage::StorageAdapter, utils::Password};
 

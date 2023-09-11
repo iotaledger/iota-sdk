@@ -7,6 +7,7 @@ use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
     iota_sdk::wallet::{
         events::types::{Event, WalletEventType},
+        migration::migrate_db_chrysalis_to_stardust as rust_migrate_db_chrysalis_to_stardust,
         Wallet,
     },
     Response, Result, WalletMethod, WalletOptions,
@@ -223,4 +224,28 @@ pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<SecretM
                 .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
         }
     }
+}
+
+pub fn migrate_db_chrysalis_to_stardust(mut cx: FunctionContext) -> JsResult<JsPromise> {
+    let storage_path = cx.argument::<JsString>(0)?.value(&mut cx);
+    let password = cx
+        .argument_opt(1)
+        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
+        .transpose()?
+        .map(|opt| opt.value(&mut cx))
+        .map(Into::into);
+
+    let channel = cx.channel();
+    let (deferred, promise) = cx.promise();
+    crate::RUNTIME.spawn(async move {
+        if let Err(err) = rust_migrate_db_chrysalis_to_stardust(storage_path, password, None).await {
+            deferred.settle_with(&channel, move |mut cx| {
+                cx.error(serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
+            });
+        } else {
+            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(())));
+        }
+    });
+
+    Ok(promise)
 }
