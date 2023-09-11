@@ -3,6 +3,7 @@
 
 from typing import List, Optional
 from dataclasses import dataclass
+from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
