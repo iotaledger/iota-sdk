@@ -331,6 +331,7 @@ mod test {
 
     #[test]
     fn params_serde_hash() {
+        // Data from https://github.com/iotaledger/tips-draft/blob/tip49/tips/TIP-0049/tip-0049.md#protocol-parameter-example
         let protocol_params_json = serde_json::json!(
             {
                 "type": 0,
