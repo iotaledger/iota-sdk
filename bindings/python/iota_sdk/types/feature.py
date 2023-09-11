@@ -17,11 +17,13 @@ class FeatureType(IntEnum):
         Issuer (1): The issuer feature.
         Metadata (2): The metadata feature.
         Tag (3): The tag feature.
+        BlockIssuer (4): The block issuer feature.
     """
     Sender = 0
     Issuer = 1
     Metadata = 2
     Tag = 3
+    BlockIssuer = 4
 
 
 @json
@@ -83,3 +85,18 @@ class TagFeature(Feature):
     """
     tag: HexStr
     type: int = field(default_factory=lambda: int(FeatureType.Tag), init=False)
+
+
+@json
+@dataclass
+class BlockIssuer(Feature):
+    """Block issuer feature.
+    Attributes:
+        expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
+        public_keys: The Block Issuer Keys.
+    """
+    # TODO Replace with a proper SlotIndex type
+    expiry_slot: str
+    # TODO Replace with a list of PublicKey types
+    public_keys: List[HexStr]
+    type: int = field(default_factory=lambda: int(FeatureType.BlockIssuer), init=False)
