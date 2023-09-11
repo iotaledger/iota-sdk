@@ -23,7 +23,7 @@ use crate::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-            Block, BlockId, BlockWrapper, BlockWrapperDto,
+            BlockId, BlockWrapper, BlockWrapperDto,
         },
         TryFromDto,
     },
@@ -164,7 +164,7 @@ impl ClientInner {
 
     /// Returns the BlockId of the submitted block.
     /// POST /api/core/v3/blocks
-    pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
+    pub async fn post_block_raw(&self, block: &BlockWrapper) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
         let timeout = self.get_timeout().await;
