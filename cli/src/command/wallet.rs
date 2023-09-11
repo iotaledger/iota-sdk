@@ -241,10 +241,10 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
     let mut builder = Wallet::builder();
     if check_file_exists(snapshot_path).await.is_ok() {
         println_log_info!(
-            "Detected a stronghold file at {}, requiring unlock..",
+            "Detected a stronghold file at {}. Enter password to unlock:",
             snapshot_path.to_str().unwrap()
         );
-        let password = get_password("Detected Stronghold password", false)?;
+        let password = get_password("Stronghold password", false)?;
         let secret_manager = SecretManager::Stronghold(
             StrongholdSecretManager::builder()
                 .password(password.clone())
