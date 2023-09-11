@@ -121,7 +121,7 @@ async fn nft_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment())
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(protocol_parameters)?,
     );
 
