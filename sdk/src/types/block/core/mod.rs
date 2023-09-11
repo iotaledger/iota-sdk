@@ -23,7 +23,6 @@ pub use self::{
 };
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
-    payload::Payload,
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
@@ -47,6 +46,14 @@ impl From<ValidationBlock> for Block {
 }
 
 impl Block {
+    /// Return the block kind of a [`Block`].
+    pub fn kind(&self) -> u8 {
+        match self {
+            Self::Basic(_) => BasicBlock::KIND,
+            Self::Validation(_) => ValidationBlock::KIND,
+        }
+    }
+
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
     pub fn build_basic(strong_parents: StrongParents) -> BasicBlockBuilder {
@@ -87,16 +94,6 @@ impl Block {
         match self {
             Self::Basic(block) => block.shallow_like_parents(),
             Self::Validation(block) => block.shallow_like_parents(),
-        }
-    }
-
-    // TODO meh
-    /// Returns the payload of a [`Block`].
-    #[inline(always)]
-    pub fn payload(&self) -> Option<&Payload> {
-        match self {
-            Self::Basic(block) => block.payload(),
-            Self::Validation(block) => None,
         }
     }
 

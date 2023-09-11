@@ -19,7 +19,7 @@ use crate::{
         output::OutputWithMetadata,
         payload::{transaction::TransactionId, Payload},
         slot::SlotIndex,
-        BlockId, BlockWrapper,
+        Block, BlockId, BlockWrapper, Error as BlockError,
     },
     utils::unix_timestamp_now,
 };
@@ -27,24 +27,27 @@ use crate::{
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
-        let block = self.get_included_block(transaction_id).await?;
+        let wrapper = self.get_included_block(transaction_id).await?;
 
-        let inputs = match block.block().payload() {
-            Some(Payload::Transaction(t)) => t.essence().inputs(),
-            _ => {
-                // TODO ???
-                unreachable!()
-            }
-        };
+        if let Block::Basic(block) = wrapper.block() {
+            let inputs = match block.payload() {
+                Some(Payload::Transaction(t)) => t.essence().inputs(),
+                _ => {
+                    unreachable!()
+                }
+            };
 
-        let input_ids = inputs
-            .iter()
-            .map(|i| match i {
-                Input::Utxo(input) => *input.output_id(),
-            })
-            .collect::<Vec<_>>();
+            let input_ids = inputs
+                .iter()
+                .map(|i| match i {
+                    Input::Utxo(input) => *input.output_id(),
+                })
+                .collect::<Vec<_>>();
 
-        self.get_outputs_with_metadata(&input_ids).await
+            self.get_outputs_with_metadata(&input_ids).await
+        } else {
+            Err(BlockError::InvalidBlockKind(wrapper.block().kind()).into())
+        }
     }
 
     /// Find all blocks by provided block IDs.
