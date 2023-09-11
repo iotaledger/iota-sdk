@@ -18,12 +18,14 @@ class FeatureType(IntEnum):
         Metadata (2): The metadata feature.
         Tag (3): The tag feature.
         BlockIssuer (4): The block issuer feature.
+        Staking (5): The staking feature.
     """
     Sender = 0
     Issuer = 1
     Metadata = 2
     Tag = 3
     BlockIssuer = 4
+    Staking = 5
 
 
 @json
@@ -37,7 +39,7 @@ class Feature():
 @json
 @dataclass
 class SenderFeature(Feature):
-    """Sender feature.
+    """Identifies the validated sender of an output.
     Attributes:
         address: A given sender address.
     """
@@ -51,7 +53,7 @@ class SenderFeature(Feature):
 @json
 @dataclass
 class IssuerFeature(Feature):
-    """Issuer feature.
+    """Identifies the validated issuer of the UTXO state machine.
     Attributes:
         address: A given issuer address.
     """
@@ -65,7 +67,7 @@ class IssuerFeature(Feature):
 @json
 @dataclass
 class MetadataFeature(Feature):
-    """Metadata feature.
+    """Defines metadata, arbitrary binary data, that will be stored in the output.
     Attributes:
         data: Some hex encoded metadata.
     """
@@ -79,7 +81,7 @@ class MetadataFeature(Feature):
 @json
 @dataclass
 class TagFeature(Feature):
-    """Tag feature.
+    """Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
     Attributes:
         tag: A hex encoded tag used to index the output.
     """
@@ -90,7 +92,7 @@ class TagFeature(Feature):
 @json
 @dataclass
 class BlockIssuer(Feature):
-    """Block issuer feature.
+    """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
         public_keys: The Block Issuer Keys.
@@ -100,3 +102,24 @@ class BlockIssuer(Feature):
     # TODO Replace with a list of PublicKey types
     public_keys: List[HexStr]
     type: int = field(default_factory=lambda: int(FeatureType.BlockIssuer), init=False)
+
+@json
+@dataclass
+class StakingFeature(Feature):
+    """Stakes IOTA coins to become eligible for committee selection, validate the network and receive Mana rewards.
+    Attributes:
+        staked_amount: The amount of IOTA coins that are locked and staked in the containing account.
+        fixed_cost: The fixed cost of the validator, which it receives as part of its Mana rewards.
+        start_epoch: The epoch index in which the staking started.
+        end_epoch: The epoch index in which the staking ends.
+    """
+    staked_amount: HexStr
+    fixed_cost: HexStr
+    # TODO Replace with an EpochIndex types
+    start_epoch: HexStr
+    # TODO Replace with an EpochIndex types
+    end_epoch: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.Staking),
+        init=False)
