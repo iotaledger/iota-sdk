@@ -19,54 +19,6 @@ use crate::types::block::{
     Block, Error, IssuerId,
 };
 
-// /// A builder to build a [`Block`].
-// #[derive(Clone)]
-// #[must_use]
-// pub struct BlockBuilder<B>(pub(crate) B);
-
-// impl<B> BlockBuilder<BlockWrapper<B>> {
-//     pub fn from_block_data(
-//         protocol_params: ProtocolParameters,
-//         issuing_time: u64,
-//         slot_commitment_id: SlotCommitmentId,
-//         latest_finalized_slot: SlotIndex,
-//         issuer_id: IssuerId,
-//         data: B,
-//         signature: Ed25519Signature,
-//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
-//       issuer_id, data, signature, })
-//     }
-// }
-
-// impl<B> BlockBuilder<B>
-// where
-//     B: Packable,
-//     Block: From<B>,
-// {
-//     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-//         let block = Block::from(self.0);
-
-//         verify_parents(
-//             block.strong_parents(),
-//             block.weak_parents(),
-//             block.shallow_like_parents(),
-//         )?;
-
-//         let block_bytes = block.pack_to_vec();
-
-//         if block_bytes.len() > Block::LENGTH_MAX {
-//             return Err(Error::InvalidBlockLength(block_bytes.len()));
-//         }
-
-//         Ok((block, block_bytes))
-//     }
-
-//     /// Finishes the [`BlockBuilder`] into a [`Block`].
-//     pub fn finish(self) -> Result<Block, Error> {
-//         self._finish().map(|res| res.0)
-//     }
-// }
-
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlockWrapper {
