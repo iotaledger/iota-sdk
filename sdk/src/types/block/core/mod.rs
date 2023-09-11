@@ -7,12 +7,13 @@ mod wrapper;
 
 use alloc::boxed::Box;
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
 pub use self::{
@@ -116,6 +117,10 @@ impl Block {
         } else {
             panic!("invalid downcast of non-ValidationBlock");
         }
+    }
+
+    pub(crate) fn hash(&self) -> [u8; 32] {
+        Blake2b256::digest(self.pack_to_vec()).into()
     }
 }
 

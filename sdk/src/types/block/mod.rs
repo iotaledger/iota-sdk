@@ -53,7 +53,7 @@ pub use self::core::dto::BlockDto;
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{Block, BlockBuilder},
+    core::{Block, BlockWrapper},
     error::Error,
     issuer_id::IssuerId,
 };

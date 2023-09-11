@@ -56,21 +56,21 @@ impl ValidationBlockBuilder {
     }
 
     /// Finishes the builder into a [`BasicBlock`].
-    pub fn finish(self) -> ValidationBlock {
+    pub fn finish(self) -> Result<ValidationBlock, Error> {
         verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
-        ValidationBlock {
+        Ok(ValidationBlock {
             strong_parents: self.strong_parents,
             weak_parents: self.weak_parents,
             shallow_like_parents: self.shallow_like_parents,
             highest_supported_version: self.highest_supported_version,
             protocol_parameters_hash: self.protocol_parameters_hash,
-        }
+        })
     }
 
     /// Finishes the builder into an [`Block`].
-    pub fn finish_block(self) -> Block {
-        Ok(Block::Validation(self.finish()?))
+    pub fn finish_block(self) -> Result<Block, Error> {
+        Ok(Block::from(self.finish()?))
     }
 }
 
@@ -216,23 +216,23 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for ValidationBlock {
-        type Dto = ValidationBlockDto;
-        type Error = Error;
+    // impl TryFromDto for ValidationBlock {
+    //     type Dto = ValidationBlockDto;
+    //     type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
-                validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
-            }
+    //     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+    //         if let Some(protocol_params) = params.protocol_parameters() {
+    //             validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
+    //         }
 
-            Ok(ValidationBlockBuilder::new(
-                StrongParents::from_set(dto.strong_parents)?,
-                dto.highest_supported_version,
-                dto.protocol_parameters_hash,
-            )
-            .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
-            .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
-            .finish())
-        }
-    }
+    //         ValidationBlockBuilder::new(
+    //             StrongParents::from_set(dto.strong_parents)?,
+    //             dto.highest_supported_version,
+    //             &params,
+    //         )
+    //         .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+    //         .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+    //         .finish()
+    //     }
+    // }
 }

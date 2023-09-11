@@ -5,10 +5,10 @@ use core::mem::size_of;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
-    error::{UnexpectedEOF, UnpackError},
+    error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
     packer::{Packer, SlicePacker},
     unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::block::{
@@ -183,7 +183,7 @@ impl BlockWrapper {
     }
 
     pub(crate) fn header_hash(&self) -> [u8; 32] {
-        let mut bytes = [0u8; Block::HEADER_LENGTH];
+        let mut bytes = [0u8; Self::HEADER_LENGTH];
 
         self.pack_header(&mut SlicePacker::new(&mut bytes)).unwrap();
         Blake2b256::digest(bytes).into()
@@ -193,7 +193,7 @@ impl BlockWrapper {
     pub fn hash(&self) -> BlockHash {
         let id = [
             &self.header_hash()[..],
-            &self.block_hash()[..],
+            &self.block.hash()[..],
             &self.signature_bytes()[..],
         ]
         .concat();
@@ -222,21 +222,6 @@ impl BlockWrapper {
 
         Ok(block)
     }
-
-    // pub(crate) fn block_hash(&self) -> [u8; 32] {
-    //     let mut bytes = Vec::new();
-    //     match self {
-    //         Self::Basic(b) => {
-    //             bytes.push(BasicBlock::KIND);
-    //             bytes.extend(b.data.pack_to_vec());
-    //         }
-    //         Self::Validation(b) => {
-    //             bytes.push(ValidationBlock::KIND);
-    //             bytes.extend(b.data.pack_to_vec());
-    //         }
-    //     }
-    //     Blake2b256::digest(bytes).into()
-    // }
 
     pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
         let mut bytes = [0u8; Self::SIGNATURE_LENGTH];
@@ -312,7 +297,7 @@ impl Packable for BlockWrapper {
                 block.packed_len()
             };
 
-            if block_len > Block::LENGTH_MAX {
+            if block_len > Self::LENGTH_MAX {
                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
             }
         }
