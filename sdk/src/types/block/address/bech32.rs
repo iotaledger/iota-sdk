@@ -27,6 +27,7 @@ pub struct Hrp {
 impl core::fmt::Debug for Hrp {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Hrp")
+            .field("display", &self.to_string())
             .field("inner", &prefix_hex::encode(&self.inner[..self.len as usize]))
             .field("len", &self.len)
             .finish()
