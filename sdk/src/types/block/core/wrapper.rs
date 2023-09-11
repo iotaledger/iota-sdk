@@ -319,7 +319,10 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{types::block::core::dto::BlockDto, utils::serde::string};
+    use crate::{
+        types::{block::core::dto::BlockDto, TryFromDto},
+        utils::serde::string,
+    };
 
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -330,84 +333,53 @@ pub(crate) mod dto {
         pub network_id: u64,
         #[serde(with = "string")]
         pub issuing_time: u64,
-        pub slot_commitment: SlotCommitmentId,
+        pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
         pub block: BlockDto,
         pub signature: Signature,
     }
 
-    // impl From<&Block> for BlockDto {
-    //     fn from(value: &Block) -> Self {
-    //         match value {
-    //             Block::Basic(b) => Self {
-    //                 protocol_version: b.protocol_version(),
-    //                 network_id: b.network_id(),
-    //                 issuing_time: b.issuing_time(),
-    //                 slot_commitment: b.slot_commitment_id(),
-    //                 latest_finalized_slot: b.latest_finalized_slot(),
-    //                 issuer_id: b.issuer_id(),
-    //                 block: (&b.data).into(),
-    //                 signature: b.signature.into(),
-    //             },
-    //             Block::Validation(b) => Self {
-    //                 protocol_version: b.protocol_version(),
-    //                 network_id: b.network_id(),
-    //                 issuing_time: b.issuing_time(),
-    //                 slot_commitment: b.slot_commitment_id(),
-    //                 latest_finalized_slot: b.latest_finalized_slot(),
-    //                 issuer_id: b.issuer_id(),
-    //                 block: (&b.data).into(),
-    //                 signature: b.signature.into(),
-    //             },
-    //         }
-    //     }
-    // }
+    impl From<&BlockWrapper> for BlockWrapperDto {
+        fn from(value: &BlockWrapper) -> Self {
+            Self {
+                protocol_version: value.protocol_version(),
+                network_id: value.network_id(),
+                issuing_time: value.issuing_time,
+                slot_commitment_id: value.slot_commitment_id,
+                latest_finalized_slot: value.latest_finalized_slot,
+                issuer_id: value.issuer_id,
+                block: BlockDto::from(&value.block),
+                signature: value.signature,
+            }
+        }
+    }
 
-    // impl Block {
-    //     pub fn try_from_dto(dto: BlockDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
-    //         if dto.protocol_version != protocol_params.version() {
-    //             return Err(Error::ProtocolVersionMismatch {
-    //                 expected: protocol_params.version(),
-    //                 actual: dto.protocol_version,
-    //             });
-    //         }
+    impl BlockWrapper {
+        pub fn try_from_dto(dto: BlockWrapperDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
+            if dto.protocol_version != protocol_params.version() {
+                return Err(Error::ProtocolVersionMismatch {
+                    expected: protocol_params.version(),
+                    actual: dto.protocol_version,
+                });
+            }
 
-    //         if dto.network_id != protocol_params.network_id() {
-    //             return Err(Error::NetworkIdMismatch {
-    //                 expected: protocol_params.network_id(),
-    //                 actual: dto.network_id,
-    //             });
-    //         }
+            if dto.network_id != protocol_params.network_id() {
+                return Err(Error::NetworkIdMismatch {
+                    expected: protocol_params.network_id(),
+                    actual: dto.network_id,
+                });
+            }
 
-    //         match dto.block {
-    //             BlockDto::Basic(b) => {
-    //                 let data = BasicBlock::try_from_dto_with_params(b, &protocol_params)?;
-    //                 BlockBuilder::from_block_data(
-    //                     protocol_params,
-    //                     dto.issuing_time,
-    //                     dto.slot_commitment,
-    //                     dto.latest_finalized_slot,
-    //                     dto.issuer_id,
-    //                     data,
-    //                     *dto.signature.as_ed25519(),
-    //                 )
-    //                 .finish()
-    //             }
-    //             BlockDto::Validation(b) => {
-    //                 let data = ValidationBlock::try_from_dto_with_params(b, &protocol_params)?;
-    //                 BlockBuilder::from_block_data(
-    //                     protocol_params,
-    //                     dto.issuing_time,
-    //                     dto.slot_commitment,
-    //                     dto.latest_finalized_slot,
-    //                     dto.issuer_id,
-    //                     data,
-    //                     *dto.signature.as_ed25519(),
-    //                 )
-    //                 .finish()
-    //             }
-    //         }
-    //     }
-    // }
+            Ok(BlockWrapper::new(
+                protocol_params,
+                dto.issuing_time,
+                dto.slot_commitment_id,
+                dto.latest_finalized_slot,
+                dto.issuer_id,
+                Block::try_from_dto_with_params(dto.block, protocol_params)?,
+                dto.signature,
+            ))
+        }
+    }
 }

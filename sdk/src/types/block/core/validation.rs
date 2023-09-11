@@ -30,14 +30,14 @@ impl ValidationBlockBuilder {
     pub fn new(
         strong_parents: StrongParents,
         highest_supported_version: u8,
-        protocol_parameters: &ProtocolParameters,
+        protocol_parameters_hash: ProtocolParametersHash,
     ) -> Self {
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
             shallow_like_parents: ShallowLikeParents::default(),
             highest_supported_version,
-            protocol_parameters_hash: protocol_parameters.hash(),
+            protocol_parameters_hash,
         }
     }
 
@@ -216,23 +216,23 @@ pub(crate) mod dto {
         }
     }
 
-    // impl TryFromDto for ValidationBlock {
-    //     type Dto = ValidationBlockDto;
-    //     type Error = Error;
+    impl TryFromDto for ValidationBlock {
+        type Dto = ValidationBlockDto;
+        type Error = Error;
 
-    //     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error>
-    // {         if let Some(protocol_params) = params.protocol_parameters() {
-    //             validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
-    //         }
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params.protocol_parameters() {
+                validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
+            }
 
-    //         ValidationBlockBuilder::new(
-    //             StrongParents::from_set(dto.strong_parents)?,
-    //             dto.highest_supported_version,
-    //             &params,
-    //         )
-    //         .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
-    //         .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
-    //         .finish()
-    //     }
-    // }
+            ValidationBlockBuilder::new(
+                StrongParents::from_set(dto.strong_parents)?,
+                dto.highest_supported_version,
+                dto.protocol_parameters_hash,
+            )
+            .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+            .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+            .finish()
+        }
+    }
 }

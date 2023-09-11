@@ -23,7 +23,7 @@ use crate::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-            Block, BlockDto, BlockId, BlockWrapper, BlockWrapperDto,
+            Block, BlockId, BlockWrapper, BlockWrapperDto,
         },
         TryFromDto,
     },

@@ -23,7 +23,7 @@ pub use self::{
 };
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
 
@@ -57,9 +57,9 @@ impl Block {
     pub fn build_validation(
         strong_parents: StrongParents,
         highest_supported_version: u8,
-        protocol_parameters: &ProtocolParameters,
+        protocol_parameters_hash: ProtocolParametersHash,
     ) -> ValidationBlockBuilder {
-        ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters)
+        ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters_hash)
     }
 
     /// Returns the strong parents of a [`Block`].
@@ -182,7 +182,10 @@ pub(crate) mod dto {
 
     use super::*;
     pub use crate::types::block::core::wrapper::dto::BlockWrapperDto;
-    use crate::types::block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto};
+    use crate::types::{
+        block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
+        TryFromDto, ValidationParams,
+    };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum BlockDto {
@@ -251,6 +254,29 @@ pub(crate) mod dto {
                 },
             };
             block.serialize(serializer)
+        }
+    }
+
+    impl From<&Block> for BlockDto {
+        fn from(value: &Block) -> Self {
+            match value {
+                Block::Basic(basic) => BasicBlockDto::from(basic.as_ref()).into(),
+                Block::Validation(validation) => ValidationBlockDto::from(validation.as_ref()).into(),
+            }
+        }
+    }
+
+    impl TryFromDto for Block {
+        type Dto = BlockDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            match dto {
+                Self::Dto::Basic(basic) => Ok(BasicBlock::try_from_dto_with_params_inner(basic, params)?.into()),
+                Self::Dto::Validation(validation) => {
+                    Ok(ValidationBlock::try_from_dto_with_params_inner(validation, params)?.into())
+                }
+            }
         }
     }
 }
