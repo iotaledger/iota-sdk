@@ -9,71 +9,95 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::verify_parents,
+    core::{verify_parents, Block},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     Error,
 };
 
-// impl BlockBuilder<BasicBlock> {
-//     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
-//     #[inline(always)]
-//     pub fn new(
-//         protocol_params: ProtocolParameters,
-//         issuing_time: u64,
-//         slot_commitment_id: SlotCommitmentId,
-//         latest_finalized_slot: SlotIndex,
-//         issuer_id: IssuerId,
-//         strong_parents: StrongParents,
-//         signature: Ed25519Signature,
-//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
-//       issuer_id, data: BasicBlockData { strong_parents, weak_parents: Default::default(), shallow_like_parents:
-//       Default::default(), payload: OptionalPayload::default(), burned_mana: Default::default(), }, signature, })
-//     }
+/// A Builder for a [`BasicBlock`].
+struct BasicBlockBuilder {
+    strong_parents: StrongParents,
+    weak_parents: WeakParents,
+    shallow_like_parents: ShallowLikeParents,
+    payload: OptionalPayload,
+    burned_mana: u64,
+}
 
-//     /// Adds weak parents to a [`BlockBuilder`].
-//     #[inline(always)]
-//     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-//         self.0.data.weak_parents = weak_parents.into();
-//         self
-//     }
+impl BasicBlockBuilder {
+    /// Creates a new [`BasicBlockBuilder`].
+    #[inline(always)]
+    pub fn new(strong_parents: StrongParents) -> Self {
+        Self {
+            strong_parents,
+            weak_parents: WeakParents::default(),
+            shallow_like_parents: ShallowLikeParents::default(),
+            payload: OptionalPayload::default(),
+            burned_mana: 0,
+        }
+    }
 
-//     /// Adds shallow like parents to a [`BlockBuilder`].
-//     #[inline(always)]
-//     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-//         self.0.data.shallow_like_parents = shallow_like_parents.into();
-//         self
-//     }
+    /// Adds weak parents to a [`BasicBlockBuilder`].
+    #[inline(always)]
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
+        self.weak_parents = weak_parents.into();
+        self
+    }
 
-//     /// Adds a payload to a [`BlockBuilder`].
-//     #[inline(always)]
-//     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
-//         self.0.data.payload = payload.into();
-//         self
-//     }
+    /// Adds shallow like parents to a [`BasicBlockBuilder`].
+    #[inline(always)]
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
+        self.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
 
-//     /// Adds burned mana to a [`BlockBuilder`].
-//     #[inline(always)]
-//     pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
-//         self.0.data.burned_mana = burned_mana;
-//         self
-//     }
-// }
+    /// Adds a payload to a [`BasicBlockBuilder`].
+    #[inline(always)]
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.payload = payload.into();
+        self
+    }
+
+    /// Adds burned mana to a [`BasicBlockBuilder`].
+    #[inline(always)]
+    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
+        self.burned_mana = burned_mana;
+        self
+    }
+
+    /// Finishes the builder into a [`BasicBlock`].
+    pub fn finish(self) -> BasicBlock {
+        verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
+
+        BasicBlock {
+            strong_parents: self.strong_parents,
+            weak_parents: self.weak_parents,
+            shallow_like_parents: self.shallow_like_parents,
+            payload: self.payload,
+            burned_mana: self.burned_mana,
+        }
+    }
+
+    /// Finishes the builder into an [`Block`].
+    pub fn finish_block(self) -> Block {
+        Ok(Block::Basic(self.finish()?))
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicBlock {
     /// Blocks that are strongly directly approved.
-    pub(crate) strong_parents: StrongParents,
+    strong_parents: StrongParents,
     /// Blocks that are weakly directly approved.
-    pub(crate) weak_parents: WeakParents,
+    weak_parents: WeakParents,
     /// Blocks that are directly referenced to adjust opinion.
-    pub(crate) shallow_like_parents: ShallowLikeParents,
-    /// The optional [Payload] of the block.
-    pub(crate) payload: OptionalPayload,
-    /// The amount of mana the Account identified by [`IssuerId`](super::IssuerId) is at most
-    /// willing to burn for this block.
-    pub(crate) burned_mana: u64,
+    shallow_like_parents: ShallowLikeParents,
+    /// The optional [`Payload`] of the block.
+    payload: OptionalPayload,
+    /// The amount of Mana the Account identified by [`IssuerId`](super::IssuerId) is at most willing to burn for this
+    /// block.
+    burned_mana: u64,
 }
 
 impl BasicBlock {
@@ -162,7 +186,6 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// A basic block.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct BasicBlockDto {

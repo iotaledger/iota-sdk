@@ -22,6 +22,21 @@ use crate::types::block::{
     Error,
 };
 
+//     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
+//     #[inline(always)]
+//     pub fn new(
+//         protocol_params: ProtocolParameters,
+//         issuing_time: u64,
+//         slot_commitment_id: SlotCommitmentId,
+//         latest_finalized_slot: SlotIndex,
+//         issuer_id: IssuerId,
+//         strong_parents: StrongParents,
+//         signature: Ed25519Signature,
+//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
+//       issuer_id, data: BasicBlockData { strong_parents, weak_parents: Default::default(), shallow_like_parents:
+//       Default::default(), payload: OptionalPayload::default(), burned_mana: Default::default(), }, signature, })
+//     }
+
 // /// A builder to build a [`Block`].
 // #[derive(Clone)]
 // #[must_use]
@@ -318,6 +333,7 @@ pub(crate) fn verify_parents(
     if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
         return Err(Error::NonDisjointParents);
     }
+
     Ok(())
 }
 
