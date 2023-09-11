@@ -257,3 +257,54 @@ impl Packable for BlockWrapper {
         Ok(block_wrapper)
     }
 }
+
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
+    use serde::{Deserialize, Serialize};
+
+    use super::*;
+    use crate::{types::block::core::dto::BlockDto, utils::serde::string};
+
+    /// The block object that nodes gossip around in the network.
+    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct BlockWrapperDto {
+        pub protocol_version: u8,
+        #[serde(with = "string")]
+        pub network_id: u64,
+        #[serde(with = "string")]
+        pub issuing_time: u64,
+        pub slot_commitment: SlotCommitmentId,
+        pub latest_finalized_slot: SlotIndex,
+        pub issuer_id: IssuerId,
+        pub block: BlockDto,
+        pub signature: Signature,
+    }
+
+    // impl From<&Block> for BlockDto {
+    //     fn from(value: &Block) -> Self {
+    //         match value {
+    //             Block::Basic(b) => Self {
+    //                 protocol_version: b.protocol_version(),
+    //                 network_id: b.network_id(),
+    //                 issuing_time: b.issuing_time(),
+    //                 slot_commitment: b.slot_commitment_id(),
+    //                 latest_finalized_slot: b.latest_finalized_slot(),
+    //                 issuer_id: b.issuer_id(),
+    //                 block: (&b.data).into(),
+    //                 signature: b.signature.into(),
+    //             },
+    //             Block::Validation(b) => Self {
+    //                 protocol_version: b.protocol_version(),
+    //                 network_id: b.network_id(),
+    //                 issuing_time: b.issuing_time(),
+    //                 slot_commitment: b.slot_commitment_id(),
+    //                 latest_finalized_slot: b.latest_finalized_slot(),
+    //                 issuer_id: b.issuer_id(),
+    //                 block: (&b.data).into(),
+    //                 signature: b.signature.into(),
+    //             },
+    //         }
+    //     }
+    // }
+}
