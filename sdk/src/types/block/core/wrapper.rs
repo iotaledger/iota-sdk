@@ -99,7 +99,7 @@ pub struct BlockWrapper {
     /// The inner block.
     pub(crate) block: Block,
     /// The block signature, used to validate issuance capabilities.
-    pub(crate) signature: Ed25519Signature,
+    pub(crate) signature: Signature,
 }
 
 impl BlockWrapper {
@@ -117,43 +117,43 @@ impl BlockWrapper {
     pub const SIGNATURE_LENGTH: usize =
         size_of::<u8>() + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
 
-    /// Returns the protocol version of a [`Block`].
+    /// Returns the protocol version of a [`BlockWrapper`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
         self.protocol_params.version()
     }
 
-    /// Returns the protocol parameters of a [`Block`].
+    /// Returns the protocol parameters of a [`BlockWrapper`].
     #[inline(always)]
     pub fn protocol_parameters(&self) -> &ProtocolParameters {
         &self.protocol_params
     }
 
-    /// Returns the network id of a [`Block`].
+    /// Returns the network id of a [`BlockWrapper`].
     #[inline(always)]
     pub fn network_id(&self) -> u64 {
         self.protocol_params.network_id()
     }
 
-    /// Returns the issuing time of a [`Block`].
+    /// Returns the issuing time of a [`BlockWrapper`].
     #[inline(always)]
     pub fn issuing_time(&self) -> u64 {
         self.issuing_time
     }
 
-    /// Returns the slot commitment ID of a [`Block`].
+    /// Returns the slot commitment ID of a [`BlockWrapper`].
     #[inline(always)]
     pub fn slot_commitment_id(&self) -> SlotCommitmentId {
         self.slot_commitment_id
     }
 
-    /// Returns the latest finalized slot of a [`Block`].
+    /// Returns the latest finalized slot of a [`BlockWrapper`].
     #[inline(always)]
     pub fn latest_finalized_slot(&self) -> SlotIndex {
         self.latest_finalized_slot
     }
 
-    /// Returns the issuer ID of a [`Block`].
+    /// Returns the issuer ID of a [`BlockWrapper`].
     #[inline(always)]
     pub fn issuer_id(&self) -> IssuerId {
         self.issuer_id
@@ -165,9 +165,9 @@ impl BlockWrapper {
         &self.block
     }
 
-    /// Returns the signature of a [`Block`].
+    /// Returns the signature of a [`BlockWrapper`].
     #[inline(always)]
-    pub fn signature(&self) -> &Ed25519Signature {
+    pub fn signature(&self) -> &Signature {
         &self.signature
     }
 
@@ -241,8 +241,8 @@ impl BlockWrapper {
     pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
         let mut bytes = [0u8; Self::SIGNATURE_LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
-        Ed25519Signature::KIND.pack(&mut packer).unwrap();
         self.signature().pack(&mut packer).unwrap();
+
         bytes
     }
 }
@@ -254,7 +254,7 @@ impl Packable for BlockWrapper {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.pack_header(packer)?;
         self.block.pack(packer)?;
-        Signature::Ed25519(self.signature).pack(packer)?;
+        self.signature.pack(packer)?;
 
         Ok(())
     }
@@ -293,7 +293,7 @@ impl Packable for BlockWrapper {
 
         let block = Block::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
-        let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+        let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let block_wrapper = Self {
             protocol_params: protocol_params.clone(),
@@ -320,91 +320,6 @@ impl Packable for BlockWrapper {
         Ok(block_wrapper)
     }
 }
-
-// impl Packable for Block {
-//     type UnpackError = Error;
-//     type UnpackVisitor = ProtocolParameters;
-
-//     fn unpack<U: Unpacker, const VERIFY: bool>(
-//         unpacker: &mut U,
-//         protocol_params: &Self::UnpackVisitor,
-//     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> { let start_opt = unpacker.read_bytes();
-
-//         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         if VERIFY && protocol_version != protocol_params.version() {
-//             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-//                 expected: protocol_params.version(),
-//                 actual: protocol_version,
-//             }));
-//         }
-
-//         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         if VERIFY && network_id != protocol_params.network_id() {
-//             return Err(UnpackError::Packable(Error::NetworkIdMismatch {
-//                 expected: protocol_params.network_id(),
-//                 actual: network_id,
-//             }));
-//         }
-
-//         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-//         let block = match kind {
-//             BasicBlock::KIND => {
-//                 let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-//                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
-
-//                 Self::from(BlockWrapper {
-//                     protocol_params: protocol_params.clone(),
-//                     issuing_time,
-//                     slot_commitment_id,
-//                     latest_finalized_slot,
-//                     issuer_id,
-//                     data,
-//                     signature,
-//                 })
-//             }
-//             ValidationBlock::KIND => {
-//                 let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-//                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
-
-//                 Self::from(BlockWrapper {
-//                     protocol_params: protocol_params.clone(),
-//                     issuing_time,
-//                     slot_commitment_id,
-//                     latest_finalized_slot,
-//                     issuer_id,
-//                     data,
-//                     signature,
-//                 })
-//             }
-//             _ => return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable),
-//         };
-
-//         if VERIFY {
-//             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
-//                 end - start
-//             } else {
-//                 block.packed_len()
-//             };
-
-//             if block_len > Self::LENGTH_MAX {
-//                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
-//             }
-//         }
-
-//         Ok(block)
-//     }
-// }
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
