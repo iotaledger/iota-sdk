@@ -117,8 +117,8 @@ class StakingFeature(Feature):
         start_epoch: The epoch index in which the staking started.
         end_epoch: The epoch index in which the staking ends.
     """
-    staked_amount: HexStr
-    fixed_cost: HexStr
+    staked_amount: str
+    fixed_cost: str
     # TODO Replace with an EpochIndex type
     start_epoch: HexStr
     # TODO Replace with an EpochIndex type
