@@ -224,13 +224,15 @@ pub(crate) mod dto {
             if let Some(protocol_params) = params.protocol_parameters() {
                 validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
             }
-            Ok(Self {
-                strong_parents: StrongParents::from_set(dto.strong_parents)?,
-                weak_parents: WeakParents::from_set(dto.weak_parents)?,
-                shallow_like_parents: ShallowLikeParents::from_set(dto.shallow_like_parents)?,
-                highest_supported_version: dto.highest_supported_version,
-                protocol_parameters_hash: dto.protocol_parameters_hash,
-            })
+
+            Ok(ValidationBlockBuilder::new(
+                StrongParents::from_set(dto.strong_parents)?,
+                dto.highest_supported_version,
+                dto.protocol_parameters_hash,
+            )
+            .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+            .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+            .finish())
         }
     }
 }

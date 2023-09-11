@@ -218,17 +218,17 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Ok(Self {
-                strong_parents: StrongParents::from_set(dto.strong_parents)?,
-                weak_parents: WeakParents::from_set(dto.weak_parents)?,
-                shallow_like_parents: ShallowLikeParents::from_set(dto.shallow_like_parents)?,
-                payload: dto
-                    .payload
-                    .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
-                    .transpose()?
-                    .into(),
-                burned_mana: dto.burned_mana,
-            })
+            Ok(BasicBlockBuilder::new(StrongParents::from_set(dto.strong_parents)?)
+                .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+                .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+                .with_payload(
+                    dto.payload
+                        .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
+                        .transpose()?
+                        .into(),
+                )
+                .with_burned_mana(dto.burned_mana)
+                .finish())
         }
     }
 }
