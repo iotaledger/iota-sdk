@@ -189,14 +189,8 @@ impl Packable for BlockWrapper {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        // TODO call pack_header
-        self.protocol_version().pack(packer)?;
-        self.network_id().pack(packer)?;
-        self.issuing_time.pack(packer)?;
-        self.slot_commitment_id.pack(packer)?;
-        self.latest_finalized_slot.pack(packer)?;
-        self.issuer_id.pack(packer)?;
-        self.data.pack(packer)?;
+        self.pack_header(packer)?;
+        self.block.pack(packer)?;
         Signature::Ed25519(self.signature).pack(packer)?;
 
         Ok(())
