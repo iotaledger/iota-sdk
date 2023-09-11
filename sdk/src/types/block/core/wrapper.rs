@@ -19,6 +19,69 @@ use crate::types::block::{
     Block, Error, IssuerId,
 };
 
+//     /// Creates a new [`BlockBuilder`] for a [`BasicBlock`].
+//     #[inline(always)]
+//     pub fn new(
+//         protocol_params: ProtocolParameters,
+//         issuing_time: u64,
+//         slot_commitment_id: SlotCommitmentId,
+//         latest_finalized_slot: SlotIndex,
+//         issuer_id: IssuerId,
+//         strong_parents: StrongParents,
+//         signature: Ed25519Signature,
+//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
+//       issuer_id, data: BasicBlockData { strong_parents, weak_parents: Default::default(), shallow_like_parents:
+//       Default::default(), payload: OptionalPayload::default(), burned_mana: Default::default(), }, signature, })
+//     }
+
+// /// A builder to build a [`Block`].
+// #[derive(Clone)]
+// #[must_use]
+// pub struct BlockBuilder<B>(pub(crate) B);
+
+// impl<B> BlockBuilder<BlockWrapper<B>> {
+//     pub fn from_block_data(
+//         protocol_params: ProtocolParameters,
+//         issuing_time: u64,
+//         slot_commitment_id: SlotCommitmentId,
+//         latest_finalized_slot: SlotIndex,
+//         issuer_id: IssuerId,
+//         data: B,
+//         signature: Ed25519Signature,
+//     ) -> Self { Self(BlockWrapper { protocol_params, issuing_time, slot_commitment_id, latest_finalized_slot,
+//       issuer_id, data, signature, })
+//     }
+// }
+
+// impl<B> BlockBuilder<B>
+// where
+//     B: Packable,
+//     Block: From<B>,
+// {
+//     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
+//         let block = Block::from(self.0);
+
+//         verify_parents(
+//             block.strong_parents(),
+//             block.weak_parents(),
+//             block.shallow_like_parents(),
+//         )?;
+
+//         let block_bytes = block.pack_to_vec();
+
+//         if block_bytes.len() > Block::LENGTH_MAX {
+//             return Err(Error::InvalidBlockLength(block_bytes.len()));
+//         }
+
+//         Ok((block, block_bytes))
+//     }
+
+//     /// Finishes the [`BlockBuilder`] into a [`Block`].
+//     pub fn finish(self) -> Result<Block, Error> {
+//         self._finish().map(|res| res.0)
+//     }
+// }
+
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlockWrapper {
@@ -258,6 +321,91 @@ impl Packable for BlockWrapper {
     }
 }
 
+// impl Packable for Block {
+//     type UnpackError = Error;
+//     type UnpackVisitor = ProtocolParameters;
+
+//     fn unpack<U: Unpacker, const VERIFY: bool>(
+//         unpacker: &mut U,
+//         protocol_params: &Self::UnpackVisitor,
+//     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> { let start_opt = unpacker.read_bytes();
+
+//         let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         if VERIFY && protocol_version != protocol_params.version() {
+//             return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
+//                 expected: protocol_params.version(),
+//                 actual: protocol_version,
+//             }));
+//         }
+
+//         let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         if VERIFY && network_id != protocol_params.network_id() {
+//             return Err(UnpackError::Packable(Error::NetworkIdMismatch {
+//                 expected: protocol_params.network_id(),
+//                 actual: network_id,
+//             }));
+//         }
+
+//         let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let kind = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+//         let block = match kind {
+//             BasicBlock::KIND => {
+//                 let data = BasicBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+//                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+//                 Self::from(BlockWrapper {
+//                     protocol_params: protocol_params.clone(),
+//                     issuing_time,
+//                     slot_commitment_id,
+//                     latest_finalized_slot,
+//                     issuer_id,
+//                     data,
+//                     signature,
+//                 })
+//             }
+//             ValidationBlock::KIND => {
+//                 let data = ValidationBlockData::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+//                 let Signature::Ed25519(signature) = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+
+//                 Self::from(BlockWrapper {
+//                     protocol_params: protocol_params.clone(),
+//                     issuing_time,
+//                     slot_commitment_id,
+//                     latest_finalized_slot,
+//                     issuer_id,
+//                     data,
+//                     signature,
+//                 })
+//             }
+//             _ => return Err(Error::InvalidBlockKind(kind)).map_err(UnpackError::Packable),
+//         };
+
+//         if VERIFY {
+//             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+//                 end - start
+//             } else {
+//                 block.packed_len()
+//             };
+
+//             if block_len > Self::LENGTH_MAX {
+//                 return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
+//             }
+//         }
+
+//         Ok(block)
+//     }
+// }
+
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
@@ -304,6 +452,53 @@ pub(crate) mod dto {
     //                 block: (&b.data).into(),
     //                 signature: b.signature.into(),
     //             },
+    //         }
+    //     }
+    // }
+
+    // impl Block {
+    //     pub fn try_from_dto(dto: BlockDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
+    //         if dto.protocol_version != protocol_params.version() {
+    //             return Err(Error::ProtocolVersionMismatch {
+    //                 expected: protocol_params.version(),
+    //                 actual: dto.protocol_version,
+    //             });
+    //         }
+
+    //         if dto.network_id != protocol_params.network_id() {
+    //             return Err(Error::NetworkIdMismatch {
+    //                 expected: protocol_params.network_id(),
+    //                 actual: dto.network_id,
+    //             });
+    //         }
+
+    //         match dto.block {
+    //             BlockDto::Basic(b) => {
+    //                 let data = BasicBlock::try_from_dto_with_params(b, &protocol_params)?;
+    //                 BlockBuilder::from_block_data(
+    //                     protocol_params,
+    //                     dto.issuing_time,
+    //                     dto.slot_commitment,
+    //                     dto.latest_finalized_slot,
+    //                     dto.issuer_id,
+    //                     data,
+    //                     *dto.signature.as_ed25519(),
+    //                 )
+    //                 .finish()
+    //             }
+    //             BlockDto::Validation(b) => {
+    //                 let data = ValidationBlock::try_from_dto_with_params(b, &protocol_params)?;
+    //                 BlockBuilder::from_block_data(
+    //                     protocol_params,
+    //                     dto.issuing_time,
+    //                     dto.slot_commitment,
+    //                     dto.latest_finalized_slot,
+    //                     dto.issuer_id,
+    //                     data,
+    //                     *dto.signature.as_ed25519(),
+    //                 )
+    //                 .finish()
+    //             }
     //         }
     //     }
     // }

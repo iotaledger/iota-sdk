@@ -17,7 +17,7 @@ use crate::types::block::{
 };
 
 /// A builder for a [`BasicBlock`].
-struct BasicBlockBuilder {
+pub struct BasicBlockBuilder {
     strong_parents: StrongParents,
     weak_parents: WeakParents,
     shallow_like_parents: ShallowLikeParents,
