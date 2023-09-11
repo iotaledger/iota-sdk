@@ -53,6 +53,8 @@ pub struct ProtocolParameters {
     pub(crate) mana_structure: ManaStructure,
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: EpochIndex,
+    /// The number of validation blocks that each validator should issue each slot.
+    pub(crate) validation_blocks_per_slot: u16,
     /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
     /// and commitments in its past-cone against accepted tangle time and last committed slot respectively.
     pub(crate) liveness_threshold: SlotIndex,
@@ -93,6 +95,7 @@ impl Default for ProtocolParameters {
             slots_per_epoch_exponent: Default::default(),
             mana_structure: Default::default(),
             staking_unbonding_period: 10.into(),
+            validation_blocks_per_slot: 10,
             liveness_threshold: 5.into(),
             min_committable_age: 10.into(),
             max_committable_age: 20.into(),
