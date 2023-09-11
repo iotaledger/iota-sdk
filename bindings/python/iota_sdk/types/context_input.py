@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum
 from iota_sdk.types.common import HexStr, json
 
@@ -15,9 +15,20 @@ class ContextInputType(IntEnum):
 
 @json
 @dataclass
-class BlockIssuanceCreditContextInput:
+class ContextInput():
+    """Base class for context inputs.
+    """
+    type: int
+
+
+@json
+@dataclass
+class BlockIssuanceCreditContextInput(ContextInput):
     """A Block Issuance Credit (BIC) Context Input provides the VM with context for the value of
     the BIC vector of a specific slot.
     """
-    type: int
     account_id: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            ContextInputType.BlockIssuanceCredit),
+        init=False)
