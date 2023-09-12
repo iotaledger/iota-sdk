@@ -362,6 +362,16 @@ name = "destroy_alias"
 path = "examples/how_tos/alias/destroy.rs"
 required-features = ["wallet", "stronghold"]
 
+[[example]]
+name = "state_transition"
+path = "examples/how_tos/alias/state_transition.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "governance_transition"
+path = "examples/how_tos/alias/governance_transition.rs"
+required-features = ["wallet", "stronghold"]
+
 # Outputs
 
 [[example]]
@@ -855,11 +865,6 @@ required-features = ["wallet", "storage"]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = ["wallet", "storage"]
-
-[[example]]
-name = "update_alias_output"
-path = "examples/wallet/update_alias_output.rs"
-required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "wallet"
