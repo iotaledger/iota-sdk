@@ -23,7 +23,7 @@ use crate::types::block::{
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlockWrapper {
     /// Protocol parameters of the network to which this block belongs.
-    // TODO remove
+    // TODO Not fully sure this is worth the small UX improvement, needs to be discussed more.
     protocol_params: ProtocolParameters,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
     issuing_time: u64,

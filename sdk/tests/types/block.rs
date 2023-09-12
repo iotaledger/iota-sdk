@@ -105,15 +105,17 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let block = rand_basic_block_builder_with_strong_parents(parents.clone())
-        .with_payload(payload.clone())
-        .finish()
-        .unwrap();
-    let wrapper = rand_block_wrapper_with_block(protocol_parameters.clone(), block.clone());
+    let wrapper = rand_block_wrapper_with_block(
+        protocol_parameters.clone(),
+        rand_basic_block_builder_with_strong_parents(parents.clone())
+            .with_payload(payload.clone())
+            .finish()
+            .unwrap(),
+    );
 
     assert_eq!(wrapper.protocol_version(), protocol_parameters.version());
-    assert_eq!(*block.strong_parents(), parents);
-    assert_eq!(*block.payload().as_ref().unwrap(), &payload);
+    assert_eq!(*wrapper.block().as_basic().strong_parents(), parents);
+    assert_eq!(*wrapper.block().as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]
