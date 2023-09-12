@@ -17,13 +17,16 @@ class Block:
 
     Attributes:
         protocol_version: The protocol version with which this block was issued.
-        parents: The parents of this block.
+        strong_parents: Blocks that are strongly directly approved.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
         burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
-
     protocol_version: int
-    parents: List[HexStr]
+    strong_parents: List[HexStr]
+    weak_parents: List[HexStr]
+    shallow_like_parents: List[HexStr]
     burned_mana: str
     payload: Optional[TaggedDataPayload |
                       TransactionPayload] = None
@@ -105,7 +108,9 @@ class BlockMetadata:
 
     Attributes:
         block_id: The id of the block.
-        parents: The parents of the block.
+        strong_parents: Blocks that are strongly directly approved.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
         is_solid: Whether the block is solid.
         referenced_by_milestone_index: The milestone index referencing the block.
         milestone_index: The milestone index if the block contains a milestone payload.
@@ -115,7 +120,9 @@ class BlockMetadata:
         should_reattach: Whether the block should be reattached.
     """
     block_id: HexStr
-    parents: List[HexStr]
+    strong_parents: List[HexStr]
+    weak_parents: List[HexStr]
+    shallow_like_parents: List[HexStr]
     is_solid: bool
     referenced_by_milestone_index: Optional[int] = None
     milestone_index: Optional[int] = None
