@@ -43,9 +43,10 @@ async function run() {
         console.log(`Balance before melting: ${token.available}`);
 
         // Melt some of the circulating supply
-        const transaction = await account
-            .prepareMeltNativeToken(token.tokenId, MELT_AMOUNT)
-            .then((prepared) => prepared.send());
+        const transaction = await account.meltNativeToken(
+            token.tokenId,
+            MELT_AMOUNT,
+        );
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
