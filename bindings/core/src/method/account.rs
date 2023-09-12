@@ -129,7 +129,7 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
-    /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and accounts.
+    /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
     /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.

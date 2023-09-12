@@ -54,7 +54,7 @@ impl InputSelection {
         }
 
         // Remove potential sender feature because it will not be needed anymore as it only needs to be verified once.
-        let features = input.features().iter().cloned().filter(|feature| !feature.is_sender());
+        let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let mut builder = AccountOutputBuilder::from(input)
             .with_account_id(account_id)
@@ -101,7 +101,7 @@ impl InputSelection {
         }
 
         // Remove potential sender feature because it will not be needed anymore as it only needs to be verified once.
-        let features = input.features().iter().cloned().filter(|feature| !feature.is_sender());
+        let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let output = NftOutputBuilder::from(input)
             .with_nft_id(nft_id)
