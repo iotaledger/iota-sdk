@@ -49,9 +49,7 @@ async function run() {
                 'This NFT will be the issuer from the awesome NFT collection',
             ),
         };
-        const prepared = await account.prepareMintNfts([params]);
-
-        const transaction = await prepared.send();
+        const transaction = await account.mintNfts([params]);
 
         // Wait for transaction to get included
         const blockId = await account.reissueTransactionUntilIncluded(

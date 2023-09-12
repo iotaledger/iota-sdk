@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, Utils, utf8_to_hex, MintNftParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex
 
 load_dotenv()
 
@@ -26,8 +28,7 @@ params = MintNftParams(
 )
 
 
-prepared = account.prepare_mint_nfts([params])
-transaction = prepared.send()
+transaction = account.mint_nfts([params])
 
 # Wait for transaction to get included
 block_id = account.reissue_transaction_until_included(

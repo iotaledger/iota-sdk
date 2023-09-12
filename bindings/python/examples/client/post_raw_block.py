@@ -2,6 +2,9 @@ from iota_sdk import Client, TaggedDataPayload, utf8_to_hex
 from dotenv import load_dotenv
 import os
 
+from dotenv import load_dotenv
+
+
 load_dotenv()
 
 node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
