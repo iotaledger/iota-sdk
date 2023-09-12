@@ -91,7 +91,7 @@ impl Block {
     }
 
     /// Gets the block as an actual [`ValidationBlock`].
-    /// NOTE: Will panic if the block is not a [`BasicBlock`].
+    /// NOTE: Will panic if the block is not a [`ValidationBlock`].
     pub fn as_validation(&self) -> &ValidationBlock {
         if let Self::Validation(block) = self {
             block
