@@ -61,7 +61,7 @@ async function run() {
             transaction.transactionId,
         );
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         balance = await account.sync();
