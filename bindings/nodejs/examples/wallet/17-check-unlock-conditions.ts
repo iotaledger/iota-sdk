@@ -38,12 +38,12 @@ async function run() {
             const basicOutput = output as BasicOutput;
             let controlledByAccount = false;
             if (
-                basicOutput.getUnlockConditions().length === 1 &&
-                basicOutput.getUnlockConditions()[0] instanceof
+                basicOutput.unlockConditions.length === 1 &&
+                basicOutput.unlockConditions[0] instanceof
                     AddressUnlockCondition &&
                 hexEncodedAccountAddresses.includes(
                     (
-                        basicOutput.getUnlockConditions()[0] as AddressUnlockCondition
+                        basicOutput.unlockConditions[0] as AddressUnlockCondition
                     ).address.toString(),
                 )
             ) {
