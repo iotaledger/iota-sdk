@@ -29,5 +29,7 @@ class BlockBuilderOptions:
     custom_remainder_address: Optional[str] = None
     tag: Optional[HexStr] = None
     data: Optional[HexStr] = None
-    parents: Optional[List[HexStr]] = None
+    strong_parents: Optional[List[HexStr]] = None
+    weak_parents: Optional[List[HexStr]] = None
+    shallow_like_parents: Optional[List[HexStr]] = None
     burn: Optional[Burn] = None
