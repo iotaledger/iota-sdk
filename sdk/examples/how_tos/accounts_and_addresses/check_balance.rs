@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example check_balance
 //! ```
 
-use iota_sdk::{wallet::Result, Wallet};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

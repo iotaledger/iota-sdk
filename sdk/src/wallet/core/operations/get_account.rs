@@ -1,20 +1,17 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::{
-    client::secret::SecretManage,
-    wallet::{
-        account::{types::AccountIdentifier, Account},
-        Wallet,
-    },
+use crate::wallet::{
+    account::{types::AccountIdentifier, Account},
+    Wallet,
 };
 
-impl<S: SecretManage> Wallet<S> {
+impl Wallet {
     /// Get an account with an AccountIdentifier
     pub async fn get_account<I: Into<AccountIdentifier> + Send>(
         &self,
         identifier: I,
-    ) -> crate::wallet::Result<Account<S>> {
+    ) -> crate::wallet::Result<Account> {
         let account_id = identifier.into();
         let accounts = self.accounts.read().await;
 
@@ -45,11 +42,8 @@ impl<S: SecretManage> Wallet<S> {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
-    pub async fn get_or_create_account(&self, alias: impl Into<String> + Send) -> crate::wallet::Result<Account<S>> {
+impl Wallet {
+    pub async fn get_or_create_account(&self, alias: impl Into<String> + Send) -> crate::wallet::Result<Account> {
         let alias = alias.into();
         match self.get_account(&alias).await {
             Err(crate::wallet::Error::AccountNotFound(_)) => self.create_account().with_alias(alias).finish().await,

@@ -18,8 +18,8 @@
 
 use iota_sdk::{
     client::node_manager::node::Node,
-    wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result},
-    Url, Wallet,
+    wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result, Wallet},
+    Url,
 };
 
 // The node that runs the participation plugin

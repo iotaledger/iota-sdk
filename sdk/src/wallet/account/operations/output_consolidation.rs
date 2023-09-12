@@ -4,9 +4,9 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
+use crate::client::secret::DowncastSecretManager;
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::{
         address::Bech32Address,
         input::INPUT_COUNT_MAX,
@@ -70,10 +70,7 @@ impl ConsolidationParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     fn should_consolidate_output(
         &self,
         output_data: &OutputData,
@@ -155,21 +152,8 @@ where
             None => {
                 #[cfg(feature = "ledger_nano")]
                 {
-                    use crate::wallet::account::SecretManager;
                     let secret_manager = self.wallet.secret_manager.read().await;
-                    if secret_manager
-                        .downcast::<LedgerSecretManager>()
-                        .or_else(|| {
-                            secret_manager.downcast::<SecretManager>().and_then(|s| {
-                                if let SecretManager::LedgerNano(n) = s {
-                                    Some(n)
-                                } else {
-                                    None
-                                }
-                            })
-                        })
-                        .is_some()
-                    {
+                    if secret_manager.as_ledger_nano().is_ok() {
                         DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
                     } else {
                         DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
@@ -195,17 +179,8 @@ where
 
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
-            use crate::wallet::account::SecretManager;
             let secret_manager = self.wallet.secret_manager.read().await;
-            if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
-                secret_manager.downcast::<SecretManager>().and_then(|s| {
-                    if let SecretManager::LedgerNano(n) = s {
-                        Some(n)
-                    } else {
-                        None
-                    }
-                })
-            }) {
+            if let Ok(ledger) = secret_manager.as_ledger_nano() {
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;
                 // With blind signing we are only limited by the protocol
                 if ledger_nano_status.blind_signing_enabled() {

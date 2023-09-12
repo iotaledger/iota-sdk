@@ -18,7 +18,7 @@ pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const ACCOUNTS_KEY: &str = "accounts";
 
-impl<S: 'static + SecretManagerConfig> Wallet<S> {
+impl Wallet {
     pub(crate) async fn store_data_to_stronghold(&self, stronghold: &StrongholdAdapter) -> crate::wallet::Result<()> {
         // Set migration version
         stronghold
@@ -31,7 +31,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         let coin_type = self.coin_type.load(Ordering::Relaxed);
         stronghold.set_bytes(COIN_TYPE_KEY, &coin_type.to_le_bytes()).await?;
 
-        if let Some(secret_manager_dto) = self.secret_manager.read().await.to_config() {
+        if let Some(secret_manager_dto) = self.secret_manager.read().await.dyn_to_config() {
             stronghold.set(SECRET_MANAGER_KEY, &secret_manager_dto).await?;
         }
 

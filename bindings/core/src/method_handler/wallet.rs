@@ -4,6 +4,7 @@
 use std::time::Duration;
 
 use iota_sdk::{
+    client::secret::SecretManager,
     types::block::address::ToBech32Ext,
     wallet::{account::AccountDetailsDto, Wallet},
 };
@@ -120,7 +121,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_backup(
+                .restore_backup::<SecretManager>(
                     source,
                     password,
                     ignore_if_coin_type_mismatch,

@@ -3,10 +3,13 @@
 
 use iota_sdk::{
     client::{
-        api::PreparedTransactionData,
-        secret::{SecretManage, SecretManager},
+        api::{GetAddressesOptions, PreparedTransactionData},
+        secret::{DowncastSecretManager, DynSecretManagerConfig, SecretManage},
     },
-    types::{block::unlock::Unlock, TryFromDto},
+    types::{
+        block::{address::ToBech32Ext, unlock::Unlock},
+        TryFromDto,
+    },
 };
 use tokio::sync::RwLock;
 
@@ -14,26 +17,50 @@ use crate::{method::SecretManagerMethod, response::Response, Result};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal(
-    secret_manager: &RwLock<SecretManager>,
+    secret_manager: &RwLock<Box<dyn DynSecretManagerConfig>>,
     method: SecretManagerMethod,
 ) -> Result<Response> {
     let secret_manager = secret_manager.read().await;
     let response = match method {
-        SecretManagerMethod::GenerateEd25519Addresses { options } => {
-            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
+        SecretManagerMethod::GenerateEd25519Addresses {
+            options:
+                GetAddressesOptions {
+                    coin_type,
+                    account_index,
+                    range,
+                    bech32_hrp,
+                    options,
+                },
+        } => {
+            let addresses = secret_manager
+                .generate_ed25519_addresses(coin_type, account_index, range, options)
+                .await?
+                .into_iter()
+                .map(|a| a.to_bech32(bech32_hrp))
+                .collect();
             Response::GeneratedEd25519Addresses(addresses)
         }
-        SecretManagerMethod::GenerateEvmAddresses { options } => {
-            let addresses = secret_manager.generate_evm_addresses(options).await?;
+        SecretManagerMethod::GenerateEvmAddresses {
+            options:
+                GetAddressesOptions {
+                    coin_type,
+                    account_index,
+                    range,
+                    options,
+                    ..
+                },
+        } => {
+            let addresses = secret_manager
+                .generate_evm_addresses(coin_type, account_index, range, options)
+                .await?
+                .into_iter()
+                .map(|a| prefix_hex::encode(a.as_ref()))
+                .collect();
             Response::GeneratedEvmAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {
-            if let SecretManager::LedgerNano(secret_manager) = &*secret_manager {
-                Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
-            } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            }
+            Response::LedgerNanoStatus(secret_manager.as_ledger_nano()?.get_ledger_nano_status().await)
         }
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,
@@ -70,12 +97,8 @@ pub(crate) async fn call_secret_manager_method_internal(
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
             let mnemonic = crypto::keys::bip39::Mnemonic::from(mnemonic);
-            if let SecretManager::Stronghold(secret_manager) = &*secret_manager {
-                secret_manager.store_mnemonic(mnemonic).await?;
-                Response::Ok
-            } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            }
+            secret_manager.as_stronghold()?.store_mnemonic(mnemonic).await?;
+            Response::Ok
         }
     };
     Ok(response)

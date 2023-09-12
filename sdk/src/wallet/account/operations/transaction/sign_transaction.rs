@@ -4,10 +4,7 @@
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use {
     crate::client::api::PreparedTransactionDataDto,
-    crate::client::secret::{
-        ledger_nano::{needs_blind_signing, LedgerSecretManager},
-        DowncastSecretManager,
-    },
+    crate::client::secret::{ledger_nano::needs_blind_signing, DowncastSecretManager},
 };
 
 #[cfg(feature = "events")]
@@ -20,10 +17,7 @@ use crate::{
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Signs a transaction essence.
     pub async fn sign_transaction_essence(
         &self,
@@ -40,17 +34,8 @@ where
 
         #[cfg(all(feature = "events", feature = "ledger_nano"))]
         {
-            use crate::wallet::account::SecretManager;
             let secret_manager = self.wallet.secret_manager.read().await;
-            if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
-                secret_manager.downcast::<SecretManager>().and_then(|s| {
-                    if let SecretManager::LedgerNano(n) = s {
-                        Some(n)
-                    } else {
-                        None
-                    }
-                })
-            }) {
+            if let Ok(ledger) = secret_manager.as_ledger_nano() {
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;
                 if let Some(buffer_size) = ledger_nano_status.buffer_size() {
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {

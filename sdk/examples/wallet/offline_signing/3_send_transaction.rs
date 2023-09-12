@@ -15,8 +15,7 @@ use iota_sdk::{
         Client,
     },
     types::{block::payload::transaction::TransactionId, TryFromDto},
-    wallet::{Account, Result},
-    Wallet,
+    wallet::{Account, Result, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";

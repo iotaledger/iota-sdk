@@ -11,10 +11,7 @@
 //! cargo run --release --all-features --example send_nft
 //! ```
 
-use iota_sdk::{
-    wallet::{Result, SendNftParams},
-    Wallet,
-};
+use iota_sdk::wallet::{Result, SendNftParams, Wallet};
 
 // The address to send the tokens to
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";

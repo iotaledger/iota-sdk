@@ -6,15 +6,9 @@ mod outputs;
 
 use std::collections::HashSet;
 
-use crate::{
-    client::secret::SecretManage,
-    wallet::account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs, Account},
-};
+use crate::wallet::account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs, Account};
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Get the addresses that should be synced with the current known unspent output ids
     /// Also adds account and nft addresses from unspent account or nft outputs that have no Timelock, Expiration or
     /// StorageDepositReturn [`UnlockCondition`]

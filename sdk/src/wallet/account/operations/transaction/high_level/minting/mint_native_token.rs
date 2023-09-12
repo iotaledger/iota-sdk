@@ -4,7 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::output::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
@@ -14,10 +14,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Mints additional native tokens.
     ///
     /// The max supply must not be reached yet. The foundry needs to be

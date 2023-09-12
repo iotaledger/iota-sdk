@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_secret_manager_method,
-    iota_sdk::client::secret::{SecretManager, SecretManagerDto},
+    iota_sdk::client::secret::{DynSecretManagerConfig, SecretManager, SecretManagerDto},
     Response, SecretManagerMethod,
 };
 use tokio::sync::RwLock;
@@ -17,7 +17,7 @@ use crate::PromiseString;
 /// The SecretManager method handler.
 #[wasm_bindgen(js_name = SecretManagerMethodHandler)]
 pub struct SecretManagerMethodHandler {
-    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
+    pub(crate) secret_manager: Arc<RwLock<Box<dyn DynSecretManagerConfig>>>,
 }
 
 /// Creates a method handler with the given secret_manager options.
@@ -28,7 +28,7 @@ pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandl
     let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| err.to_string())?;
 
     Ok(SecretManagerMethodHandler {
-        secret_manager: Arc::new(RwLock::new(secret_manager)),
+        secret_manager: Arc::new(RwLock::new(Box::new(secret_manager) as _)),
     })
 }
 

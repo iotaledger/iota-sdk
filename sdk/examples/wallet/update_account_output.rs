@@ -13,8 +13,7 @@
 
 use iota_sdk::{
     types::block::output::{AccountOutputBuilder, Output},
-    wallet::{Account, Result},
-    Wallet,
+    wallet::{Account, Result, Wallet},
 };
 
 // Replace with an account id held in an unspent output of the account

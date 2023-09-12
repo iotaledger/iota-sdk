@@ -40,6 +40,7 @@ use self::private_key::PrivateKeySecretManager;
 #[cfg(feature = "stronghold")]
 use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
+use super::stronghold::StrongholdAdapter;
 #[cfg(feature = "stronghold")]
 use crate::client::secret::types::StrongholdDto;
 use crate::{
@@ -113,6 +114,218 @@ pub trait SecretManage: Send + Sync {
     ) -> Result<TransactionPayload, Self::Error>;
 }
 
+#[async_trait]
+pub trait DynSecretManage: std::fmt::Debug + Send + Sync {
+    async fn dyn_generate_ed25519_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<Ed25519Address>, Error>;
+
+    async fn dyn_generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<EvmAddress>, Error>;
+
+    async fn dyn_sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Error>;
+
+    async fn dyn_sign_secp256k1_ecdsa(
+        &self,
+        msg: &[u8],
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Error>;
+
+    async fn dyn_signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Error>;
+
+    async fn dyn_sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+    ) -> Result<Unlocks, Error>;
+
+    async fn dyn_sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<TransactionPayload, Error>;
+}
+#[async_trait]
+impl<T: SecretManage + std::fmt::Debug> DynSecretManage for T
+where
+    Error: From<T::Error>,
+{
+    async fn dyn_generate_ed25519_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<Ed25519Address>, Error> {
+        Ok(self
+            .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+            .await?)
+    }
+
+    async fn dyn_generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<EvmAddress>, Error> {
+        Ok(self
+            .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+            .await?)
+    }
+
+    async fn dyn_sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Error> {
+        Ok(self.sign_ed25519(msg, chain).await?)
+    }
+
+    async fn dyn_sign_secp256k1_ecdsa(
+        &self,
+        msg: &[u8],
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Error> {
+        Ok(self.sign_secp256k1_ecdsa(msg, chain).await?)
+    }
+
+    async fn dyn_signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Error> {
+        Ok(self.signature_unlock(essence_hash, chain).await?)
+    }
+
+    async fn dyn_sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+    ) -> Result<Unlocks, Error> {
+        Ok(self.sign_transaction_essence(prepared_transaction_data).await?)
+    }
+
+    async fn dyn_sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<TransactionPayload, Error> {
+        Ok(self.sign_transaction(prepared_transaction_data).await?)
+    }
+}
+#[async_trait]
+impl SecretManage for dyn DynSecretManagerConfig {
+    type Error = Error;
+
+    async fn generate_ed25519_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        self.dyn_generate_ed25519_addresses(coin_type, account_index, address_indexes, options.into())
+            .await
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        self.dyn_generate_evm_addresses(coin_type, account_index, address_indexes, options.into())
+            .await
+    }
+
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+        self.dyn_sign_ed25519(msg, chain).await
+    }
+
+    async fn sign_secp256k1_ecdsa(
+        &self,
+        msg: &[u8],
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
+        self.dyn_sign_secp256k1_ecdsa(msg, chain).await
+    }
+
+    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+        self.dyn_signature_unlock(essence_hash, chain).await
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+    ) -> Result<Unlocks, Self::Error> {
+        self.dyn_sign_transaction_essence(prepared_transaction_data).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<TransactionPayload, Self::Error> {
+        self.dyn_sign_transaction(prepared_transaction_data).await
+    }
+}
+#[async_trait]
+impl<T: SecretManage + ?Sized> SecretManage for Box<T> {
+    type Error = T::Error;
+
+    async fn generate_ed25519_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        self.as_ref()
+            .generate_ed25519_addresses(coin_type, account_index, address_indexes, options.into())
+            .await
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        self.as_ref()
+            .generate_evm_addresses(coin_type, account_index, address_indexes, options.into())
+            .await
+    }
+
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+        self.as_ref().sign_ed25519(msg, chain).await
+    }
+
+    async fn sign_secp256k1_ecdsa(
+        &self,
+        msg: &[u8],
+        chain: Bip44,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
+        self.as_ref().sign_secp256k1_ecdsa(msg, chain).await
+    }
+
+    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+        self.as_ref().signature_unlock(essence_hash, chain).await
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+    ) -> Result<Unlocks, Self::Error> {
+        self.as_ref().sign_transaction_essence(prepared_transaction_data).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<TransactionPayload, Self::Error> {
+        self.as_ref().sign_transaction(prepared_transaction_data).await
+    }
+}
+
 pub trait SecretManagerConfig: SecretManage {
     type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
 
@@ -121,6 +334,23 @@ pub trait SecretManagerConfig: SecretManage {
     fn from_config(config: &Self::Config) -> Result<Self, Self::Error>
     where
         Self: Sized;
+}
+
+pub trait DynSerialize: erased_serde::Serialize + std::fmt::Debug + Send + Sync {}
+impl<T: erased_serde::Serialize + std::fmt::Debug + Send + Sync> DynSerialize for T {}
+erased_serde::serialize_trait_object!(DynSerialize);
+
+pub trait DynSecretManagerConfig: DynSecretManage {
+    fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>>;
+}
+impl<T: SecretManagerConfig + std::fmt::Debug> DynSecretManagerConfig for T
+where
+    Error: From<T::Error>,
+    T::Config: 'static,
+{
+    fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>> {
+        self.to_config().map(|v| Box::new(v) as _)
+    }
 }
 
 /// Supported secret managers
@@ -440,12 +670,119 @@ impl SecretManage for SecretManager {
 }
 
 pub trait DowncastSecretManager: SecretManage {
+    fn is<T: 'static + SecretManage>(&self) -> bool;
+
     fn downcast<T: 'static + SecretManage>(&self) -> Option<&T>;
+
+    fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T>;
+
+    fn as_stronghold(&self) -> crate::client::Result<&StrongholdAdapter> {
+        self.downcast::<StrongholdAdapter>()
+            .or_else(|| {
+                self.downcast::<SecretManager>().and_then(|s| {
+                    if let SecretManager::Stronghold(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
+
+    fn as_stronghold_mut(&mut self) -> crate::client::Result<&mut StrongholdAdapter> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<StrongholdAdapter>() {
+            Ok(self.downcast_mut::<StrongholdAdapter>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::Stronghold(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
+
+    fn as_mnemonic(&self) -> crate::client::Result<&MnemonicSecretManager> {
+        self.downcast::<MnemonicSecretManager>()
+            .or_else(|| {
+                self.downcast::<SecretManager>().and_then(|s| {
+                    if let SecretManager::Mnemonic(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
+
+    fn as_mnemonic_mut(&mut self) -> crate::client::Result<&mut MnemonicSecretManager> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<MnemonicSecretManager>() {
+            Ok(self.downcast_mut::<MnemonicSecretManager>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::Mnemonic(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
+
+    #[cfg(feature = "ledger_nano")]
+    fn as_ledger_nano(&self) -> crate::client::Result<&LedgerSecretManager> {
+        self.downcast::<LedgerSecretManager>()
+            .or_else(|| {
+                self.downcast::<SecretManager>().and_then(|s| {
+                    if let SecretManager::LedgerNano(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
+
+    #[cfg(feature = "ledger_nano")]
+    fn as_ledger_nano_mut(&mut self) -> crate::client::Result<&mut LedgerSecretManager> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<LedgerSecretManager>() {
+            Ok(self.downcast_mut::<LedgerSecretManager>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::LedgerNano(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
 }
 
 impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
+    fn is<T: 'static + SecretManage>(&self) -> bool {
+        (self as &(dyn std::any::Any + Send + Sync)).is::<T>()
+    }
+
     fn downcast<T: 'static + SecretManage>(&self) -> Option<&T> {
         (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
+    }
+
+    fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T> {
+        (self as &mut (dyn std::any::Any + Send + Sync)).downcast_mut::<T>()
     }
 }
 

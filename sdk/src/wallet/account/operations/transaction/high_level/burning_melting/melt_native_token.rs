@@ -4,7 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::output::{
         AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
         TokenScheme,
@@ -15,10 +15,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Melts native tokens.
     ///
     /// This happens with the foundry output which minted them, by increasing it's

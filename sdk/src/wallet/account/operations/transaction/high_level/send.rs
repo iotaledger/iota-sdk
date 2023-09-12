@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::{
         address::Bech32Address,
         output::{
@@ -77,10 +77,7 @@ impl SendParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Sends a certain amount of base coins to a single address.
     ///
     /// Calls [Account::send_with_params()](crate::wallet::Account::send_with_params) internally.

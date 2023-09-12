@@ -5,7 +5,7 @@ use std::pin::Pin;
 
 use futures::Future;
 use iota_sdk::{
-    client::{secret::SecretManager, Client},
+    client::{secret::DynSecretManagerConfig, Client},
     wallet::Wallet,
 };
 use tokio::sync::RwLock;
@@ -79,7 +79,7 @@ pub fn call_utils_method(method: UtilsMethod) -> Response {
 
 /// Call a secret manager method.
 pub async fn call_secret_manager_method(
-    secret_manager: &RwLock<SecretManager>,
+    secret_manager: &RwLock<Box<dyn DynSecretManagerConfig>>,
     method: SecretManagerMethod,
 ) -> Response {
     log::debug!("Secret manager method: {method:?}");

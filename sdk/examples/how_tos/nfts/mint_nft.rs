@@ -17,8 +17,7 @@ use iota_sdk::{
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
-    wallet::{MintNftParams, Result},
-    Wallet,
+    wallet::{MintNftParams, Result, Wallet},
 };
 
 // The owner address of the first NFT we'll mint

@@ -58,6 +58,9 @@ serde_json = { version = "1.0.105", default-features = false, features = [
 anymap = { version = "0.12.1", default-features = false, optional = true }
 async-trait = { version = "0.1.73", default-features = false, optional = true }
 bs58 = { version = "0.5.0", default-features = false, optional = true }
+erased-serde = { version = "0.3.31", default-features = false, features = [
+    "alloc"
+], optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [
     "thread-pool",
@@ -164,6 +167,7 @@ std = [
     "iota_stronghold?/std",
     "iota-crypto/std",
     "once_cell?/std",
+    "erased-serde?/std"
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
@@ -179,6 +183,7 @@ private_key_secret_manager = ["bs58"]
 
 client = [
     "async-trait",
+    "dep:erased-serde",
     "futures",
     "instant",
     "iota-crypto/bip39",

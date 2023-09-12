@@ -4,7 +4,6 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::secret::SecretManage,
     types::block::{
         address::{Address, Bech32Address},
         output::{
@@ -25,10 +24,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Prepare a basic or NFT output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full

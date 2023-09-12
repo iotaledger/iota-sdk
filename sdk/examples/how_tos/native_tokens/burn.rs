@@ -18,8 +18,8 @@
 
 use iota_sdk::{
     types::block::output::{NativeToken, TokenId},
-    wallet::Result,
-    Wallet, U256,
+    wallet::{Result, Wallet},
+    U256,
 };
 
 // The minimum available native token amount to search for in the account

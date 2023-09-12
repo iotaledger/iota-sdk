@@ -15,8 +15,7 @@ use iota_sdk::{
         },
         slot::SlotIndex,
     },
-    wallet::Result,
-    Wallet,
+    wallet::{Result, Wallet},
 };
 
 #[tokio::main]

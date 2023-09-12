@@ -5,10 +5,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
-        secret::SecretManage,
-    },
+    client::api::{PreparedTransactionData, PreparedTransactionDataDto},
     types::block::{
         address::AccountAddress,
         output::{
@@ -85,10 +82,7 @@ impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTr
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Creates a new foundry output with minted native tokens.
     ///
     /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally, the options may define the

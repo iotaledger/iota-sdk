@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::{
         address::Bech32Address,
         output::{
@@ -109,10 +109,7 @@ impl MintNftParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Mints NFTs.
     ///
     /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the

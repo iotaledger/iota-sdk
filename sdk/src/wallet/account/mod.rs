@@ -55,10 +55,7 @@ pub use self::{
 };
 use super::core::WalletInner;
 use crate::{
-    client::{
-        secret::{SecretManage, SecretManager},
-        Client,
-    },
+    client::{secret::SecretManage, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -136,12 +133,12 @@ pub struct AccountDetails {
 
 /// A thread guard over an account, so we can lock the account during operations.
 #[derive(Debug)]
-pub struct Account<S: SecretManage = SecretManager> {
+pub struct Account {
     inner: Arc<AccountInner>,
-    pub(crate) wallet: Arc<WalletInner<S>>,
+    pub(crate) wallet: Arc<WalletInner>,
 }
 
-impl<S: SecretManage> Clone for Account<S> {
+impl Clone for Account {
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
@@ -150,8 +147,8 @@ impl<S: SecretManage> Clone for Account<S> {
     }
 }
 
-impl<S: SecretManage> Account<S> {
-    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
+impl Account {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<impl SecretManage>> {
         self.wallet.get_secret_manager()
     }
 }
@@ -167,7 +164,7 @@ pub struct AccountInner {
 }
 
 // impl Deref so we can use `account.details()` instead of `account.details.read()`
-impl<S: SecretManage> Deref for Account<S> {
+impl Deref for Account {
     type Target = AccountInner;
 
     fn deref(&self) -> &Self::Target {
@@ -175,12 +172,9 @@ impl<S: SecretManage> Deref for Account<S> {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner<S>>) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager

@@ -254,7 +254,9 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .finish()
         .await?;
 
-    wallet.restore_backup(backup_path.into(), password, None, None).await?;
+    wallet
+        .restore_backup::<SecretManager>(backup_path.into(), password, None, None)
+        .await?;
 
     println_log_info!(
         "Wallet has been restored from the backup file \"{}\".",
@@ -299,7 +301,7 @@ pub async fn unlock_wallet(
     };
 
     let maybe_wallet = Wallet::builder()
-        .with_secret_manager(secret_manager)
+        .with_secret_manager::<SecretManager>(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .finish()
         .await;

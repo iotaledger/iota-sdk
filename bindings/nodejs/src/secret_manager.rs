@@ -6,7 +6,7 @@ use std::{ops::Deref, sync::Arc};
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::{
-        secret::{SecretManager, SecretManagerDto},
+        secret::{DynSecretManagerConfig, SecretManager, SecretManagerDto},
         stronghold::StrongholdAdapter,
     },
     Response, Result, SecretManagerMethod,
@@ -16,7 +16,7 @@ use tokio::sync::RwLock;
 
 pub struct SecretManagerMethodHandler {
     channel: Channel,
-    secret_manager: Arc<RwLock<SecretManager>>,
+    secret_manager: Arc<RwLock<Box<dyn DynSecretManagerConfig>>>,
 }
 
 impl Finalize for SecretManagerMethodHandler {}
@@ -28,11 +28,14 @@ impl SecretManagerMethodHandler {
 
         Ok(Arc::new(Self {
             channel,
-            secret_manager: Arc::new(RwLock::new(secret_manager)),
+            secret_manager: Arc::new(RwLock::new(Box::new(secret_manager) as _)),
         }))
     }
 
-    pub fn new_with_secret_manager(channel: Channel, secret_manager: Arc<RwLock<SecretManager>>) -> Arc<Self> {
+    pub fn new_with_secret_manager(
+        channel: Channel,
+        secret_manager: Arc<RwLock<Box<dyn DynSecretManagerConfig>>>,
+    ) -> Arc<Self> {
         Arc::new(Self {
             channel,
             secret_manager,

@@ -68,7 +68,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // Wrong password fails
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             "wrong password".to_owned(),
             None,
@@ -79,7 +79,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // Correct password works, even after trying with a wrong one before
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             stronghold_password,
             None,
@@ -161,7 +161,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .await?;
 
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
             stronghold_password,
             None,
@@ -246,7 +246,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type/backup.stronghold"),
             stronghold_password,
             Some(true),
@@ -330,7 +330,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore_same_coin_type/backup.stronghold"),
             stronghold_password,
             Some(true),
@@ -412,7 +412,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
             stronghold_password,
             Some(false),
@@ -497,7 +497,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
         .await?;
 
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
             stronghold_password,
             None,
@@ -549,7 +549,7 @@ async fn restore_no_secret_manager_data() -> Result<()> {
     let stronghold_password = "some_hopefully_secure_password".to_owned();
 
     restore_wallet
-        .restore_backup(
+        .restore_backup::<SecretManager>(
             PathBuf::from("./tests/wallet/fixtures/no_secret_manager_data.stronghold"),
             stronghold_password.clone(),
             None,

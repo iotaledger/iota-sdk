@@ -11,9 +11,8 @@ use iota_sdk::{
     types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
-        Result,
+        Result, Wallet,
     },
-    Wallet,
 };
 
 #[tokio::main]

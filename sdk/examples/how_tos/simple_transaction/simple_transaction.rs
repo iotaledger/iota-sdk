@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example simple_transaction
 //! ```
 
-use iota_sdk::{wallet::Result, Wallet};
+use iota_sdk::wallet::{Result, Wallet};
 
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;

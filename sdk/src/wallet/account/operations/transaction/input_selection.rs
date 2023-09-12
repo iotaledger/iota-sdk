@@ -8,7 +8,7 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::input_selection::{is_account_transition, Burn, InputSelection, Selected},
-        secret::{types::InputSigningData, SecretManage},
+        secret::types::InputSigningData,
     },
     types::block::{
         address::Address,
@@ -20,10 +20,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Selects inputs for a transaction and locks them in the account, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,

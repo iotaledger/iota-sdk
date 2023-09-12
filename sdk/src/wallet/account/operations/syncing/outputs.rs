@@ -5,7 +5,7 @@ use crypto::keys::bip44::Bip44;
 use instant::Instant;
 
 use crate::{
-    client::{secret::SecretManage, Client},
+    client::Client,
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -20,10 +20,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
         &self,

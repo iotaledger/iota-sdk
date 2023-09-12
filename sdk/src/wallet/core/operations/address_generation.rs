@@ -4,7 +4,7 @@
 use std::sync::atomic::Ordering;
 
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    client::secret::{DowncastSecretManager, GenerateAddressOptions, SecretManage},
     types::block::address::{Ed25519Address, Hrp},
     wallet::Wallet,
 };
@@ -32,13 +32,14 @@ impl Wallet {
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::wallet::Result<Ed25519Address> {
-        let address = match &*self.secret_manager.read().await {
-            #[cfg(feature = "ledger_nano")]
-            SecretManager::LedgerNano(ledger_nano) => {
+        let secret_manager = self.secret_manager.read().await;
+        let options = options.into();
+        #[cfg(feature = "ledger_nano")]
+        {
+            if let Ok(ledger_nano) = secret_manager.as_ledger_nano() {
                 // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
-                let options = options.into();
                 if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
                     #[cfg(feature = "events")]
                     {
@@ -69,70 +70,36 @@ impl Wallet {
                     }
 
                     // Generate with prompt so the user can verify
-                    ledger_nano
+                    let addresses = ledger_nano
                         .generate_ed25519_addresses(
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
                             options,
                         )
-                        .await?
-                } else {
-                    ledger_nano
-                        .generate_ed25519_addresses(
-                            self.coin_type.load(Ordering::Relaxed),
-                            account_index,
-                            address_index..address_index + 1,
-                            options,
-                        )
-                        .await?
+                        .await?;
+                    return Ok(*addresses
+                        .first()
+                        .ok_or(crate::wallet::Error::MissingParameter("address"))?);
                 }
             }
-            #[cfg(feature = "stronghold")]
-            SecretManager::Stronghold(stronghold) => {
-                stronghold
-                    .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
-                        account_index,
-                        address_index..address_index + 1,
-                        options,
-                    )
-                    .await?
-            }
-            SecretManager::Mnemonic(mnemonic) => {
-                mnemonic
-                    .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
-                        account_index,
-                        address_index..address_index + 1,
-                        options,
-                    )
-                    .await?
-            }
-            #[cfg(feature = "private_key_secret_manager")]
-            SecretManager::PrivateKey(private_key) => {
-                private_key
-                    .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
-                        account_index,
-                        address_index..address_index + 1,
-                        options,
-                    )
-                    .await?
-            }
-            SecretManager::Placeholder => return Err(crate::client::Error::PlaceholderSecretManager.into()),
-        };
+        }
+        let addresses = secret_manager
+            .generate_ed25519_addresses(
+                self.coin_type.load(Ordering::Relaxed),
+                account_index,
+                address_index..address_index + 1,
+                options,
+            )
+            .await?;
 
-        Ok(*address
+        Ok(*addresses
             .first()
             .ok_or(crate::wallet::Error::MissingParameter("address"))?)
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Wallet {
     /// Get the bech32 hrp from the first account address or if not existent, from the client
     pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<Hrp> {
         Ok(match self.get_accounts().await?.first() {

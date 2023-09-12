@@ -23,23 +23,23 @@ use crate::wallet::{
     storage::{StorageManager, StorageOptions},
 };
 use crate::{
-    client::secret::{SecretManage, SecretManager},
+    client::secret::{DynSecretManagerConfig, SecretManagerConfig},
     wallet::{core::WalletInner, Account, ClientOptions, Wallet},
 };
 
 /// Builder for the wallet.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WalletBuilder<S: SecretManage = SecretManager> {
+pub struct WalletBuilder {
     pub(crate) client_options: Option<ClientOptions>,
     pub(crate) coin_type: Option<u32>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: Option<StorageOptions>,
     #[serde(skip)]
-    pub(crate) secret_manager: Option<Arc<RwLock<S>>>,
+    pub(crate) secret_manager: Option<Arc<RwLock<Box<dyn DynSecretManagerConfig>>>>,
 }
 
-impl<S: SecretManage> Default for WalletBuilder<S> {
+impl Default for WalletBuilder {
     fn default() -> Self {
         Self {
             client_options: Default::default(),
@@ -51,10 +51,7 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
     }
 }
 
-impl<S: 'static + SecretManage> WalletBuilder<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl WalletBuilder {
     /// Initialises a new instance of the wallet builder with the default storage adapter.
     pub fn new() -> Self {
         Self {
@@ -84,14 +81,20 @@ where
     }
 
     /// Set the secret_manager to be used.
-    pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<S>>) -> Self {
-        self.secret_manager = secret_manager.into().map(|sm| Arc::new(RwLock::new(sm)));
+    pub fn with_secret_manager<S: 'static + DynSecretManagerConfig + Send>(
+        mut self,
+        secret_manager: impl Into<Option<S>>,
+    ) -> Self {
+        self.secret_manager = secret_manager.into().map(|sm| Arc::new(RwLock::new(Box::new(sm) as _)));
         self
     }
 
     /// Set the secret_manager to be used wrapped in an Arc<RwLock<>> so it can be cloned and mutated also outside of
     /// the Wallet.
-    pub fn with_secret_manager_arc(mut self, secret_manager: impl Into<Option<Arc<RwLock<S>>>>) -> Self {
+    pub fn with_secret_manager_arc(
+        mut self,
+        secret_manager: impl Into<Option<Arc<RwLock<Box<dyn DynSecretManagerConfig>>>>>,
+    ) -> Self {
         self.secret_manager = secret_manager.into();
         self
     }
@@ -108,13 +111,68 @@ where
     }
 }
 
-impl<S: 'static + SecretManage> WalletBuilder<S>
+impl WalletBuilder
 where
-    crate::wallet::Error: From<S::Error>,
     Self: SaveLoadWallet,
 {
+    /// Loads the wallet from storage
+    #[cfg(feature = "storage")]
+    pub async fn load_storage<S: 'static + SecretManagerConfig + std::fmt::Debug>(
+        mut self,
+        storage_options: impl Into<StorageOptions>,
+    ) -> crate::wallet::Result<Self>
+    where
+        crate::client::Error: From<S::Error>,
+        S::Config: 'static,
+    {
+        log::debug!("[WalletBuilder::load]");
+        let storage_options = storage_options.into();
+
+        // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
+        // would be created with an empty parameter which just leads to errors later
+        if !storage_options.path.is_dir() {
+            if self.client_options.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("client_options"));
+            }
+            if self.coin_type.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("coin_type"));
+            }
+            if self.secret_manager.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("secret_manager"));
+            }
+        }
+
+        #[cfg(feature = "rocksdb")]
+        let storage =
+            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
+        #[cfg(not(feature = "rocksdb"))]
+        let storage = Memory::default();
+
+        let storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
+
+        let read_manager_builder = Self::load::<S>(&storage_manager).await?;
+
+        let loaded_client_options = read_manager_builder
+            .as_ref()
+            .and_then(|data| data.client_options.clone())
+            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?;
+
+        self.client_options.replace(loaded_client_options);
+
+        let secret_manager = read_manager_builder
+            .as_ref()
+            .and_then(|data| data.secret_manager.clone())
+            .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?;
+
+        self.secret_manager.replace(secret_manager);
+
+        self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
+
+        Ok(self)
+    }
+
     /// Builds the wallet
-    pub async fn finish(mut self) -> crate::wallet::Result<Wallet<S>> {
+    pub async fn finish(self) -> crate::wallet::Result<Wallet> {
         log::debug!("[WalletBuilder]");
 
         #[cfg(feature = "storage")]
@@ -143,38 +201,6 @@ where
         #[cfg(feature = "storage")]
         let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
 
-        #[cfg(feature = "storage")]
-        let read_manager_builder = Self::load(&storage_manager).await?;
-        #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<Self> = None;
-
-        // Prioritize provided client_options and secret_manager over stored ones
-        let new_provided_client_options = if self.client_options.is_none() {
-            let loaded_client_options = read_manager_builder
-                .as_ref()
-                .and_then(|data| data.client_options.clone())
-                .ok_or(crate::wallet::Error::MissingParameter("client_options"))?;
-
-            // Update self so it gets used and stored again
-            self.client_options.replace(loaded_client_options);
-            false
-        } else {
-            true
-        };
-
-        if self.secret_manager.is_none() {
-            let secret_manager = read_manager_builder
-                .as_ref()
-                .and_then(|data| data.secret_manager.clone())
-                .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?;
-
-            // Update self so it gets used and stored again
-            self.secret_manager.replace(secret_manager);
-        }
-
-        if self.coin_type.is_none() {
-            self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
-        }
         let coin_type = self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
             "coin_type (IOTA: 4218, Shimmer: 4219)",
         ))?;
@@ -226,20 +252,16 @@ where
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         });
 
-        let mut accounts: Vec<Account<S>> = try_join_all(
+        let mut accounts: Vec<Account> = try_join_all(
             accounts
                 .into_iter()
                 .map(|a| Account::new(a, wallet_inner.clone()).boxed()),
         )
         .await?;
 
-        // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
-        // In the other case it was loaded from the database and addresses are up to date.
-        if new_provided_client_options {
-            for account in accounts.iter_mut() {
-                // Safe to unwrap because we create the client if accounts aren't empty
-                account.update_account_bech32_hrp().await?;
-            }
+        for account in accounts.iter_mut() {
+            // Safe to unwrap because we create the client if accounts aren't empty
+            account.update_account_bech32_hrp().await?;
         }
 
         Ok(Wallet {
@@ -249,7 +271,7 @@ where
     }
 
     #[cfg(feature = "storage")]
-    pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
+    pub(crate) async fn from_wallet(wallet: &Wallet) -> Self {
         Self {
             client_options: Some(wallet.client_options().await),
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
@@ -290,7 +312,7 @@ pub(crate) mod dto {
 
     use super::*;
     #[cfg(feature = "storage")]
-    use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
+    use crate::wallet::storage::StorageOptions;
 
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -304,7 +326,7 @@ pub(crate) mod dto {
         pub(crate) storage_options: Option<StorageOptions>,
     }
 
-    impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
+    impl From<WalletBuilderDto> for WalletBuilder {
         fn from(value: WalletBuilderDto) -> Self {
             Self {
                 client_options: value.client_options,
@@ -316,7 +338,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl<'de, S: SecretManage> Deserialize<'de> for WalletBuilder<S> {
+    impl<'de> Deserialize<'de> for WalletBuilder {
         fn deserialize<D>(d: D) -> Result<Self, D::Error>
         where
             D: serde::Deserializer<'de>,

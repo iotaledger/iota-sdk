@@ -10,14 +10,13 @@ use crate::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
-        secret::SecretManage,
         Client, ClientBuilder,
     },
     wallet::{Wallet, WalletBuilder},
     Url,
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl Wallet {
     pub fn client(&self) -> &Client {
         &self.client
     }
@@ -27,10 +26,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
+impl Wallet
 where
-    crate::wallet::Error: From<S::Error>,
-    WalletBuilder<S>: SaveLoadWallet,
+    WalletBuilder: SaveLoadWallet,
 {
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {

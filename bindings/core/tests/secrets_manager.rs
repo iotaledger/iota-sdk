@@ -9,9 +9,9 @@ use tokio::sync::RwLock;
 
 #[tokio::test]
 async fn generate_ed25519_addresses() -> Result<()> {
-    let secret_manager = Arc::new(RwLock::new(SecretManager::try_from_mnemonic(
+    let secret_manager = Arc::new(RwLock::new(Box::new(SecretManager::try_from_mnemonic(
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river".to_owned(),
-    )?));
+    )?) as _));
 
     let method = SecretManagerMethod::GenerateEd25519Addresses {
         options: GetAddressesOptions::default().with_range(0..1),
@@ -31,9 +31,9 @@ async fn generate_ed25519_addresses() -> Result<()> {
 
 #[tokio::test]
 async fn generate_evm_addresses() -> Result<()> {
-    let secret_manager = Arc::new(RwLock::new(SecretManager::try_from_mnemonic(
+    let secret_manager = Arc::new(RwLock::new(Box::new(SecretManager::try_from_mnemonic(
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river".to_owned(),
-    )?));
+    )?) as _));
 
     let method = SecretManagerMethod::GenerateEvmAddresses {
         options: GetAddressesOptions::default()

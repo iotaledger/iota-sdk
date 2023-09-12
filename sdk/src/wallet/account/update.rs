@@ -4,7 +4,6 @@
 use std::collections::HashMap;
 
 use crate::{
-    client::secret::SecretManage,
     types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
@@ -21,10 +20,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Set the alias for the account
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut account_details = self.details_mut().await;

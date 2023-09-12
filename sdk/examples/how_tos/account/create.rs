@@ -12,7 +12,7 @@
 //! cargo run --release --all-features --example create_account_output
 //! ```
 
-use iota_sdk::{wallet::Result, Wallet};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

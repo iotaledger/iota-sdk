@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use futures::FutureExt;
 
 use crate::{
-    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
+    client::node_api::indexer::query_parameters::QueryParameter,
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
@@ -22,10 +22,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Returns output ids of account outputs
     pub(crate) async fn get_account_and_foundry_output_ids(
         &self,

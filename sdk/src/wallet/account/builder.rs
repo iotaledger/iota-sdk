@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::secret::{SecretManage, SecretManager},
+    client::secret::{DynSecretManagerConfig, SecretManage},
     types::block::address::{Address, Bech32Address, Ed25519Address, Hrp},
     wallet::{
         account::{types::Bip44Address, Account, AccountDetails},
@@ -15,19 +15,16 @@ use crate::{
 };
 
 /// The AccountBuilder
-pub struct AccountBuilder<S: SecretManage = SecretManager> {
+pub struct AccountBuilder {
     addresses: Option<Vec<Bip44Address>>,
     alias: Option<String>,
     bech32_hrp: Option<Hrp>,
-    wallet: Wallet<S>,
+    wallet: Wallet,
 }
 
-impl<S: 'static + SecretManage> AccountBuilder<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl AccountBuilder {
     /// Create an IOTA client builder
-    pub fn new(wallet: Wallet<S>) -> Self {
+    pub fn new(wallet: Wallet) -> Self {
         Self {
             addresses: None,
             alias: None,
@@ -58,7 +55,7 @@ where
     /// Build the Account and add it to the accounts from Wallet
     /// Also generates the first address of the account and if it's not the first account, the address for the first
     /// account will also be generated and compared, so no accounts get generated with different seeds
-    pub async fn finish(&mut self) -> crate::wallet::Result<Account<S>> {
+    pub async fn finish(&mut self) -> crate::wallet::Result<Account> {
         let mut accounts = self.wallet.accounts.write().await;
         let account_index = accounts.len() as u32;
         // If no alias is provided, the account index will be set as alias
@@ -162,14 +159,11 @@ where
 }
 
 /// Generate the first public address of an account
-pub(crate) async fn get_first_public_address<S: SecretManage>(
-    secret_manager: &RwLock<S>,
+pub(crate) async fn get_first_public_address(
+    secret_manager: &RwLock<Box<dyn DynSecretManagerConfig>>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Ed25519Address>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+) -> crate::wallet::Result<Ed25519Address> {
     Ok(secret_manager
         .read()
         .await

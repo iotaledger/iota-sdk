@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::{
         address::Bech32Address,
         output::{
@@ -35,10 +35,7 @@ pub struct CreateAccountParams {
     pub state_metadata: Option<Vec<u8>>,
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Creates an account output.
     /// ```ignore
     /// let params = CreateAccountParams {

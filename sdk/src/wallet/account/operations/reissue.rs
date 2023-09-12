@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{secret::SecretManage, Error as ClientError},
+    client::Error as ClientError,
     types::{
         api::core::response::{BlockState, TransactionState},
         block::{
@@ -19,10 +19,7 @@ use crate::{
 const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    Error: From<S::Error>,
-{
+impl Account {
     /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     pub async fn reissue_transaction_until_included(

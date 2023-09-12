@@ -20,8 +20,7 @@ use iota_sdk::{
         output::{feature::Irc27Metadata, NftId},
         payload::transaction::TransactionId,
     },
-    wallet::{Account, MintNftParams, Result},
-    Wallet,
+    wallet::{Account, MintNftParams, Result, Wallet},
 };
 
 // The NFT collection size

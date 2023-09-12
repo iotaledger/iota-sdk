@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
+use crate::client::secret::DowncastSecretManager;
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
@@ -14,10 +14,7 @@ use crate::{
     wallet::events::types::{AddressData, WalletEvent},
 };
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl Account {
     /// Generate addresses and stores them in the account
     /// ```ignore
     /// let public_addresses = account.generate_ed25519_addresses(2, None).await?;
@@ -64,27 +61,14 @@ where
         };
 
         let address_range = highest_current_index_plus_one..highest_current_index_plus_one + amount;
+        let secret_manager = self.wallet.secret_manager.read().await;
 
         // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
         // needs to have it visible on the computer first, so we need to generate it without the
         // prompt first
         #[cfg(feature = "ledger_nano")]
         let addresses = {
-            use crate::wallet::account::SecretManager;
-            let secret_manager = self.wallet.secret_manager.read().await;
-            if secret_manager
-                .downcast::<LedgerSecretManager>()
-                .or_else(|| {
-                    secret_manager.downcast::<SecretManager>().and_then(|s| {
-                        if let SecretManager::LedgerNano(n) = s {
-                            Some(n)
-                        } else {
-                            None
-                        }
-                    })
-                })
-                .is_some()
-            {
+            if let Ok(ledger_nano) = secret_manager.as_ledger_nano() {
                 #[cfg(feature = "events")]
                 let changed_options = {
                     // Change options so ledger will not show the prompt the first time
@@ -98,11 +82,7 @@ where
                     #[cfg(feature = "events")]
                     {
                         // Generate without prompt to be able to display it
-                        let address = self
-                            .wallet
-                            .secret_manager
-                            .read()
-                            .await
+                        let address = ledger_nano
                             .generate_ed25519_addresses(
                                 account_details.coin_type,
                                 account_details.index,
@@ -119,11 +99,7 @@ where
                         .await;
                     }
                     // Generate with prompt so the user can verify
-                    let address = self
-                        .wallet
-                        .secret_manager
-                        .read()
-                        .await
+                    let address = ledger_nano
                         .generate_ed25519_addresses(
                             account_details.coin_type,
                             account_details.index,
@@ -135,10 +111,7 @@ where
                 }
                 addresses
             } else {
-                self.wallet
-                    .secret_manager
-                    .read()
-                    .await
+                secret_manager
                     .generate_ed25519_addresses(
                         account_details.coin_type,
                         account_details.index,
@@ -150,11 +123,7 @@ where
         };
 
         #[cfg(not(feature = "ledger_nano"))]
-        let addresses = self
-            .wallet
-            .secret_manager
-            .read()
-            .await
+        let addresses = secret_manager
             .generate_ed25519_addresses(
                 account_details.coin_type,
                 account_details.index,
