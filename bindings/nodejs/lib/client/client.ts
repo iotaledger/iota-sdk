@@ -43,6 +43,7 @@ import {
     Response,
     OutputId,
     ProtocolParameters,
+    u64,
 } from '../types';
 import { OutputResponse, IOutputsResponse } from '../types/models/api';
 
@@ -205,7 +206,7 @@ export class Client {
      */
     async findInputs(
         addresses: string[],
-        amount: bigint,
+        amount: u64,
     ): Promise<UTXOInput[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findInputs',
