@@ -11,6 +11,7 @@ class ContextInputType(IntEnum):
     """Context input types.
     """
     BlockIssuanceCredit = 1
+    Reward = 2
 
 
 @json
@@ -31,4 +32,16 @@ class BlockIssuanceCreditContextInput(ContextInput):
     type: int = field(
         default_factory=lambda: int(
             ContextInputType.BlockIssuanceCredit),
+        init=False)
+
+
+@json
+@dataclass
+class RewardContextInput(ContextInput):
+    """A Reward Context Input indicates which transaction Input is claiming Mana rewards.
+    """
+    index: int
+    type: int = field(
+        default_factory=lambda: int(
+            ContextInputType.Reward),
         init=False)
