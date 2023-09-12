@@ -7,7 +7,7 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.common import CoinType
-from typing import List, Optional
+from typing import List, Optional, Union
 from dacite import from_dict
 
 
@@ -128,7 +128,7 @@ class HighLevelAPI():
         })
         return [Block.from_dict(block) for block in blocks]
 
-    def retry(self, block_id: HexStr) -> List[HexStr | Block]:
+    def retry(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Retries (promotes or reattaches) a block for provided block id. Block should only be
         retried only if they are valid and haven't been confirmed for a while.
 
@@ -143,7 +143,7 @@ class HighLevelAPI():
         return result
 
     def retry_until_included(
-            self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None) -> List[List[HexStr | Block]]:
+            self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None) -> List[List[Union[HexStr, Block]]]:
         """Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
         milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
         position and additional reattached blocks.
@@ -169,8 +169,8 @@ class HighLevelAPI():
                              for block_id_and_block in result]
         return blockIdsAndBlocks
 
-    def consolidate_funds(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
-                          StrongholdSecretManager, generate_addresses_options: GenerateAddressesOptions) -> str:
+    def consolidate_funds(self, secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager,
+                          StrongholdSecretManager], generate_addresses_options: GenerateAddressesOptions) -> str:
         """Function to consolidate all funds from a range of addresses to the address with the lowest index in that range.
         Returns the address to which the funds got consolidated, if any were available.
 
@@ -198,7 +198,7 @@ class HighLevelAPI():
             'amount': amount
         })
 
-    def reattach(self, block_id: HexStr) -> List[HexStr | Block]:
+    def reattach(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Reattaches blocks for a provided block id. Blocks can be reattached only if they are valid and
         haven't been confirmed for a while .
 
@@ -214,7 +214,7 @@ class HighLevelAPI():
         result[1] = Block.from_dict(result[1])
         return result
 
-    def reattach_unchecked(self, block_id: HexStr) -> List[HexStr | Block]:
+    def reattach_unchecked(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Reattach a block without checking if it should be reattached.
 
         Args:
@@ -229,7 +229,7 @@ class HighLevelAPI():
         result[1] = Block.from_dict(result[1])
         return result
 
-    def promote(self, block_id: HexStr) -> List[HexStr | Block]:
+    def promote(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Promotes a block. The method should validate if a promotion is necessary through get_block.
         If not, the method should error out and should not allow unnecessary promotions.
 
@@ -245,7 +245,7 @@ class HighLevelAPI():
         result[1] = Block.from_dict(result[1])
         return result
 
-    def promote_unchecked(self, block_id: HexStr) -> List[HexStr | Block]:
+    def promote_unchecked(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Promote a block without checking if it should be promoted.
 
         Args:

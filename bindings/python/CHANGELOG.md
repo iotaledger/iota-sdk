@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ClientOptions::maxParallelApiRequests`;
 
+### Changed
+
+- Replaced `|` with `Union` type for Python 3.9 compatibility;
+
 ### Fixed
 
 - `Utils::parse_bech32_address()`;
