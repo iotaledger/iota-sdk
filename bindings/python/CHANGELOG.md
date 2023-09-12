@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ClientOptions::maxParallelApiRequests`;
 
+### Fixed
+
+- `Utils::parse_bech32_address()`;
+
 ## 1.0.1 - 2023-08-23
 
 ### Fixed
