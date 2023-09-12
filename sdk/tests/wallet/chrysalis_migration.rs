@@ -362,6 +362,13 @@ async fn migrate_empty_chrysalis_db() -> Result<()> {
         Err(iota_sdk::wallet::error::Error::Migration(msg)) if msg == "no chrysalis data to migrate"
     ));
 
+    // add empty /db folder
+    fs::create_dir("migrate_empty_chrysalis_db/db")?;
+    assert!(matches!(
+        migrate_db_chrysalis_to_stardust("migrate_empty_chrysalis_db", None, None).await,
+        Err(iota_sdk::wallet::error::Error::Migration(msg)) if msg == "no chrysalis data to migrate"
+    ));
+
     // stardust wallet data is still there
     let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
     assert_eq!(wallet.get_accounts().await?.len(), 1);
