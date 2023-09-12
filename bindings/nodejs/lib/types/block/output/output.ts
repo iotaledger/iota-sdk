@@ -88,7 +88,7 @@ abstract class CommonOutput extends Output {
     readonly unlockConditions: UnlockCondition[];
 
     // Getter transforms it into nativeTokens with a proper number
-    nativeTokens?: INativeToken[];
+    private nativeTokens?: INativeToken[];
 
     /**
      * Get the features contained by the output.

@@ -109,7 +109,7 @@ class AddressUnlockCondition extends UnlockCondition {
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition {
     // Getter transforms it into a proper number
-    amount: string;
+    private amount: string;
 
     /**
      * The address to return the amount to.
