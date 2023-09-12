@@ -84,9 +84,9 @@ impl ClientInner {
         request.await
     }
 
-    pub(crate) async fn post_request_json<T: DeserializeOwned>(&self, path: &str, json: Value) -> Result<T> {
+    pub(crate) async fn post_request<T: DeserializeOwned>(&self, path: &str, json: Value) -> Result<T> {
         let node_manager = self.node_manager.read().await;
-        let request = node_manager.post_request_json(path, self.get_timeout().await, json);
+        let request = node_manager.post_request(path, self.get_timeout().await, json);
         #[cfg(not(target_family = "wasm"))]
         let request = request.rate_limit(&self.request_pool);
         request.await
@@ -348,7 +348,7 @@ impl NodeManager {
         Err(error.unwrap())
     }
 
-    pub(crate) async fn post_request_json<T: DeserializeOwned>(
+    pub(crate) async fn post_request<T: DeserializeOwned>(
         &self,
         path: &str,
         timeout: Duration,

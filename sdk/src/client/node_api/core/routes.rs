@@ -156,7 +156,7 @@ impl ClientInner {
         let block_dto = BlockDto::from(block);
 
         let response = self
-            .post_request_json::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
+            .post_request::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
             .await?;
 
         Ok(response.block_id)
