@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, utf8_to_hex, CreateNativeTokenParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import CreateNativeTokenParams, Wallet, utf8_to_hex
 
 load_dotenv()
 
@@ -23,7 +25,7 @@ balance = account.sync()
 # existing one.
 if not balance.accounts:
     # If we don't have an account, we need to create one
-    transaction = account.prepare_create_account_output(None, None).send()
+    transaction = account.create_alias_output(None, None)
     print(f'Transaction sent: {transaction.transaction_id}')
 
     # Wait for transaction to get included

@@ -3,25 +3,29 @@
 
 use std::path::Path;
 
-use iota_sdk::wallet::Wallet;
+use iota_sdk::wallet::{account::types::AccountIdentifier, Wallet};
 
 use crate::{
     command::wallet::{
-        add_account, backup_command, change_password_command, init_command,
+        accounts_command, add_account, backup_command, change_password_command, init_command,
         migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_account_command, node_info_command,
         restore_command, set_node_url_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
+    helper::{get_account_alias, get_decision, get_password, pick_account},
     println_log_error, println_log_info,
 };
 
-pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
+pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
     let storage_path = Path::new(&cli.wallet_db_path);
     let snapshot_path = Path::new(&cli.stronghold_snapshot_path);
 
-    let (wallet, account) = if let Some(command) = cli.command {
+    let (wallet, account_id) = if let Some(command) = cli.command {
         match command {
+            WalletCommand::Accounts => {
+                accounts_command(storage_path, snapshot_path).await?;
+                return Ok((None, None));
+            }
             WalletCommand::Init(init_parameters) => {
                 let wallet = init_command(storage_path, snapshot_path, init_parameters).await?;
                 (Some(wallet), None)
@@ -54,8 +58,11 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 let wallet = sync_command(storage_path, snapshot_path).await?;
                 (Some(wallet), None)
             }
-            WalletCommand::Mnemonic => {
-                mnemonic_command().await?;
+            WalletCommand::Mnemonic {
+                output_file_name,
+                output_stdout,
+            } => {
+                mnemonic_command(output_file_name, output_stdout).await?;
                 return Ok((None, None));
             }
             WalletCommand::NodeInfo => {
@@ -74,8 +81,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 } else if let Some(alias) = cli.account {
                     (Some(wallet), Some(alias))
                 } else if let Some(account) = pick_account(&wallet).await? {
-                    let alias = account.alias().await;
-                    (Some(wallet), Some(alias))
+                    (Some(wallet), Some(account.alias().await.into()))
                 } else {
                     (Some(wallet), None)
                 }
@@ -86,7 +92,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     println_log_info!("Created new wallet.");
                     create_initial_account(wallet).await?
                 } else {
-                    print_wallet_help();
+                    WalletCli::print_help()?;
                     (None, None)
                 }
             }
@@ -100,16 +106,16 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             }
         }
     };
-    Ok((wallet, account))
+    Ok((wallet, account_id))
 }
 
-async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<String>), Error> {
+async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
     // Ask the user whether an initial account should be created.
     if get_decision("Create initial account?")? {
         let alias = get_account_alias("New account alias", &wallet).await?;
-        let alias = add_account(&wallet, Some(alias)).await?;
-        println_log_info!("Created initial account. Type `help` to see all available commands.");
-        Ok((Some(wallet), Some(alias)))
+        let account_id = add_account(&wallet, Some(alias)).await?;
+        println_log_info!("Created initial account.\nType `help` to see all available account commands.");
+        Ok((Some(wallet), Some(account_id)))
     } else {
         Ok((Some(wallet), None))
     }

@@ -1,6 +1,8 @@
-from iota_sdk import MnemonicSecretManager, CoinType, SecretManager
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import CoinType, MnemonicSecretManager, SecretManager
 
 load_dotenv()
 

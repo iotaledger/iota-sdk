@@ -3,11 +3,13 @@
 
 # In this example we send the signed transaction in a block.
 
-from iota_sdk import Wallet, SignedTransactionData
-from dotenv import load_dotenv
-from dacite import from_dict
 import json
 import os
+
+from dacite import from_dict
+from dotenv import load_dotenv
+
+from iota_sdk import SignedTransactionData, Wallet
 
 load_dotenv()
 
@@ -22,7 +24,7 @@ wallet = Wallet(ONLINE_WALLET_DB_PATH, None, None, "placeholder")
 account = wallet.get_account("Alice")
 
 signed_transaction_data = json.load(
-    open(SIGNED_TRANSACTION_FILE_PATH, "r"))
+    open(SIGNED_TRANSACTION_FILE_PATH, "r", encoding="utf-8"))
 signed_transaction_data = from_dict(
     SignedTransactionData, signed_transaction_data)
 

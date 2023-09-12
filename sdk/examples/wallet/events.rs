@@ -50,13 +50,7 @@ async fn main() -> Result<()> {
         .await;
 
     // Get or create an account
-    let alias = "Alice";
-    let account = if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    };
+    let account = wallet.get_or_create_account("Alice").await?;
 
     let balance = account.sync(None).await?;
     println!("Balance BEFORE:\n{:#?}", balance.base_coin());

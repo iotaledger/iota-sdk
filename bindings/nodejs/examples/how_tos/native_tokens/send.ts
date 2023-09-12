@@ -52,9 +52,7 @@ async function run() {
             }
             console.log(`Balance before sending: ${token.available}`);
 
-            const transaction = await account
-                .prepareSendNativeTokens(outputs)
-                .then((prepared) => prepared.send());
+            const transaction = await account.sendNativeTokens(outputs);
 
             console.log(`Transaction sent: ${transaction.transactionId}`);
 

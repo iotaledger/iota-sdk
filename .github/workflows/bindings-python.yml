@@ -40,7 +40,7 @@ concurrency:
 
 jobs:
   lint:
-    name: PEP8 style check
+    name: Python PEP8 format
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -63,12 +63,13 @@ jobs:
           python3 -m pip install --upgrade setuptools pip wheel
           python3 -m pip install tox-gh-actions
 
-      - name: Run Tox
+      - name: Run tox format check
         working-directory: bindings/python
-        run: tox -e lint
+        run: tox -e format
+
 
   test:
-    name: Test
+    name: Linter & Tests
     needs: lint
     if: ${{ ! github.event.schedule }}
     runs-on: ${{ matrix.os }}
@@ -111,7 +112,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
+      - name: Run linter for examples
+        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
+        working-directory: bindings/python
+        run: tox -e lint-examples
+
       # TODO temporarily disabled https://github.com/iotaledger/iota-sdk/issues/647
-      # - name: Run Tox
+      # - name: Run tests
       #   working-directory: bindings/python
       #   run: tox
+
