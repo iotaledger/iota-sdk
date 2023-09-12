@@ -354,10 +354,17 @@ async fn migrate_empty_chrysalis_db() -> Result<()> {
     let storage_path = "migrate_empty_chrysalis_db";
     setup(storage_path)?;
 
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/check_existing_4_db_test", storage_path).unwrap();
+
     assert!(matches!(
         migrate_db_chrysalis_to_stardust("migrate_empty_chrysalis_db", None, None).await,
         Err(iota_sdk::wallet::error::Error::Migration(msg)) if msg == "no chrysalis data to migrate"
     ));
+
+    // stardust wallet data is still there
+    let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+    assert_eq!(wallet.get_accounts().await?.len(), 1);
 
     tear_down(storage_path)
 }

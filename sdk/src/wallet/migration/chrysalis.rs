@@ -77,6 +77,11 @@ pub async fn migrate_db_chrysalis_to_stardust(
         ));
     }
     let chrysalis_data = get_chrysalis_data(chrysalis_storage_path, password)?;
+    if chrysalis_data.is_empty() {
+        return Err(crate::wallet::Error::Migration(
+            "no chrysalis data to migrate".to_string(),
+        ));
+    }
 
     // create new accounts base on previous data
     let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path_string, false)?;
