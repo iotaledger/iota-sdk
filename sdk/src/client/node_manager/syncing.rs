@@ -89,7 +89,7 @@ impl ClientInner {
                             }
                         }
                     } else {
-                        log::debug!("{} is not healthy: {:?}", node.url, info);
+                        log::warn!("{} is not healthy: {:?}", node.url, info);
                     }
                 }
                 Err(err) => {

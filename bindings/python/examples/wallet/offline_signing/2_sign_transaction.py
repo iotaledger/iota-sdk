@@ -3,11 +3,13 @@
 
 # In this example we sign the prepared transaction.
 
-from iota_sdk import Wallet, PreparedTransactionData
-from dotenv import load_dotenv
-from dacite import from_dict
 import json
 import os
+
+from dacite import from_dict
+from dotenv import load_dotenv
+
+from iota_sdk import PreparedTransactionData, Wallet
 
 load_dotenv()
 
@@ -18,7 +20,7 @@ SIGNED_TRANSACTION_FILE_PATH = "./wallet/offline_signing/example.signed_transact
 
 
 prepared_transaction_data = json.load(
-    open(PREPARED_TRANSACTION_FILE_PATH, "r"))
+    open(PREPARED_TRANSACTION_FILE_PATH, "r", encoding="utf-8"))
 prepared_transaction_data = from_dict(
     PreparedTransactionData, prepared_transaction_data)
 
@@ -39,6 +41,6 @@ print("Signed transaction.")
 
 json_data = json.dumps(signed_transaction_data.to_dict(), indent=4)
 print(f"example.signed_transaction.json:\n{json_data}")
-f = open(SIGNED_TRANSACTION_FILE_PATH, "w")
+f = open(SIGNED_TRANSACTION_FILE_PATH, "w", encoding="utf-8")
 f.write(json_data)
 f.close()

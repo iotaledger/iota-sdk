@@ -309,7 +309,7 @@ impl<'de> Deserialize<'de> for AccountIdentifier {
             None => {
                 let alias_or_index_str = v
                     .as_str()
-                    .ok_or_else(|| D::Error::custom("accountIdentifier is no number or string"))?;
+                    .ok_or_else(|| D::Error::custom("account identifier is not a number or string"))?;
                 Self::from(alias_or_index_str)
             }
         })
@@ -339,5 +339,14 @@ impl From<&String> for AccountIdentifier {
 impl From<u32> for AccountIdentifier {
     fn from(value: u32) -> Self {
         Self::Index(value)
+    }
+}
+
+impl core::fmt::Display for AccountIdentifier {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Alias(alias) => alias.fmt(f),
+            Self::Index(index) => index.fmt(f),
+        }
     }
 }
