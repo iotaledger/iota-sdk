@@ -70,33 +70,6 @@ impl Block {
         ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters_hash)
     }
 
-    /// Returns the strong parents of a [`Block`].
-    #[inline(always)]
-    pub fn strong_parents(&self) -> &StrongParents {
-        match self {
-            Self::Basic(b) => b.strong_parents(),
-            Self::Validation(b) => b.strong_parents(),
-        }
-    }
-
-    /// Returns the weak parents of a [`Block`].
-    #[inline(always)]
-    pub fn weak_parents(&self) -> &WeakParents {
-        match self {
-            Self::Basic(block) => block.weak_parents(),
-            Self::Validation(block) => block.weak_parents(),
-        }
-    }
-
-    /// Returns the shallow like parents of a [`Block`].
-    #[inline(always)]
-    pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
-        match self {
-            Self::Basic(block) => block.shallow_like_parents(),
-            Self::Validation(block) => block.shallow_like_parents(),
-        }
-    }
-
     /// Checks whether the block is a [`BasicBlock`].
     pub fn is_basic(&self) -> bool {
         matches!(self, Self::Basic(_))
