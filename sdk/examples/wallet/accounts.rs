@@ -17,7 +17,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         utils::request_funds_from_faucet,
     },
-    wallet::{Account, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 // The number of addresses to generate
@@ -41,11 +41,11 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get or create first account
-    let _ = get_or_create_account(&wallet, "Alice").await?;
+    let _ = wallet.get_or_create_account("Alice").await?;
 
     // Get or create second account
     let alias2 = "Bob";
-    let account2 = get_or_create_account(&wallet, alias2).await?;
+    let account2 = wallet.get_or_create_account(alias2).await?;
 
     let accounts = wallet.get_accounts().await?;
     println!("WALLET ACCOUNTS:");
@@ -93,13 +93,4 @@ async fn main() -> Result<()> {
     println!("{alias2}'s base coin balance:\n{:#?}", balance.base_coin());
 
     Ok(())
-}
-
-async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
-    Ok(if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    })
 }

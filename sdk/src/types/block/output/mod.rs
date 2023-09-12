@@ -160,6 +160,17 @@ impl Output {
         }
     }
 
+    /// Returns the output kind of an [`Output`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Basic(_) => "Basic",
+            Self::Account(_) => "Account",
+            Self::Foundry(_) => "Foundry",
+            Self::Nft(_) => "Nft",
+            Self::Delegation(_) => "Delegation",
+        }
+    }
+
     /// Returns the amount of an [`Output`].
     pub fn amount(&self) -> u64 {
         match self {

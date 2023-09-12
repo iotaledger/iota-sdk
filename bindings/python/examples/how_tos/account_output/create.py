@@ -1,6 +1,8 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 load_dotenv()
 
@@ -19,5 +21,5 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Send transaction.
-transaction = account.prepare_create_account_output(None, None).send()
+transaction = account.create_account_output(None, None)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')
