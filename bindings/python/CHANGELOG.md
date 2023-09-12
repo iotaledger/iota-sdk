@@ -19,11 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.2 - 2023-MM-DD
+## 1.0.2 - 2023-09-12
 
 ### Added
 
 - `ClientOptions::maxParallelApiRequests`;
+
+### Changed
+
+- Replaced `|` with `Union` type for Python 3.9 compatibility;
 
 ### Fixed
 

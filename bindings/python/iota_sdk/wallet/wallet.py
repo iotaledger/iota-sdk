@@ -8,7 +8,7 @@ from iota_sdk.types.address import AccountAddress
 from iota_sdk.wallet.account import Account, _call_method_routine
 from iota_sdk.wallet.sync_options import SyncOptions
 from json import dumps
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 class Wallet():
@@ -19,7 +19,7 @@ class Wallet():
     """
 
     def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None,
-                 secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
+                 secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None):
         """Initialize `self`.
         """
 
@@ -62,7 +62,7 @@ class Wallet():
         )
         return Account(account_data, self.handle)
 
-    def get_account(self, account_id: str | int) -> Account:
+    def get_account(self, account_id: Union[str, int]) -> Account:
         """Get the account associated with the given account ID or index.
         """
         account_data = self._call_method(
@@ -92,7 +92,7 @@ class Wallet():
             message['data'] = data
         return message
 
-    def get_account_data(self, account_id: str | int):
+    def get_account_data(self, account_id: Union[str, int]):
         """Get account data associated with the given account ID or index.
         """
         return self._call_method(
