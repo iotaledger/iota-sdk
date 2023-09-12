@@ -85,7 +85,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 
     let block = client.get_block(&block_id).await.unwrap();
 
-    let transaction_id = match block.block().as_basic().payload() {
+    let transaction_id = match block.as_basic().payload() {
         Some(Payload::Transaction(t)) => t.id(),
         _ => unreachable!(),
     };

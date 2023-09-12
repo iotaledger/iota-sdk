@@ -114,8 +114,8 @@ fn getters() {
     );
 
     assert_eq!(wrapper.protocol_version(), protocol_parameters.version());
-    assert_eq!(*wrapper.block().as_basic().strong_parents(), parents);
-    assert_eq!(*wrapper.block().as_basic().payload().as_ref().unwrap(), &payload);
+    assert_eq!(*wrapper.as_basic().strong_parents(), parents);
+    assert_eq!(*wrapper.as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]

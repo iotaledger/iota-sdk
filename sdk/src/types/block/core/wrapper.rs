@@ -13,6 +13,7 @@ use packable::{
 
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
+    core::{BasicBlock, ValidationBlock},
     protocol::ProtocolParameters,
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
@@ -189,6 +190,28 @@ impl BlockWrapper {
         self.signature().pack(&mut packer).unwrap();
 
         bytes
+    }
+
+    /// Checks whether the inner block is a [`BasicBlock`].
+    pub fn is_basic(&self) -> bool {
+        self.block.is_basic()
+    }
+
+    /// Gets the inner block as an actual [`BasicBlock`].
+    /// NOTE: Will panic if the inner block is not a [`BasicBlock`].
+    pub fn as_basic(&self) -> &BasicBlock {
+        self.block.as_basic()
+    }
+
+    /// Checks whether the inner block is a [`ValidationBlock`].
+    pub fn is_validation(&self) -> bool {
+        self.block.is_validation()
+    }
+
+    /// Gets the inner block as an actual [`ValidationBlock`].
+    /// NOTE: Will panic if the inner block is not a [`ValidationBlock`].
+    pub fn as_validation(&self) -> &ValidationBlock {
+        self.block.as_validation()
     }
 }
 

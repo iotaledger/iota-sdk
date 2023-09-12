@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
 
     println!("{wrapper:#?}\n");
 
-    if let Some(Payload::TaggedData(payload)) = wrapper.block().as_basic().payload() {
+    if let Some(Payload::TaggedData(payload)) = wrapper.as_basic().payload() {
         println!(
             "Tag: {}",
             String::from_utf8(payload.tag().to_vec()).expect("found invalid UTF-8")
