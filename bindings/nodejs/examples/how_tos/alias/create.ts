@@ -40,7 +40,7 @@ async function run() {
         let balance = await account.sync();
 
         console.log(
-            `Aliases BEFORE (${balance.aliases.length}):\n`,
+            `Aliases BEFORE:\n`,
             balance.aliases,
         );
 
@@ -66,7 +66,7 @@ async function run() {
 
         balance = await account.sync();
         console.log(
-            `Aliases AFTER (${balance.aliases.length}):\n`,
+            `Aliases AFTER:\n`,
             balance.aliases,
         );
     } catch (error) {

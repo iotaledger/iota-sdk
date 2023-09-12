@@ -29,5 +29,4 @@ address.json
 !**/tests/**/**.stronghold
 .DS_Store
 book
-
-
+.venv*
