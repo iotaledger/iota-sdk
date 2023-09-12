@@ -19,11 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.10 - 2023-mm-dd
+## 1.0.10 - 2023-09-12
 
 ### Fixed
 
 - Type of `value` property in `CustomAddress`;
+
+### Changed
+
+- `migrateDbChrysalisToStardust()` returns an error if no chrysalis data was found;
 
 ## 1.0.9 - 2023-09-07
 

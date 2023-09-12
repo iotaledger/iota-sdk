@@ -348,6 +348,20 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     tear_down(storage_path)
 }
 
+#[tokio::test]
+async fn migrate_empty_chrysalis_db() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+    let storage_path = "migrate_empty_chrysalis_db";
+    setup(storage_path)?;
+
+    assert!(matches!(
+        migrate_db_chrysalis_to_stardust("migrate_empty_chrysalis_db", None, None).await,
+        Err(iota_sdk::wallet::error::Error::Migration(msg)) if msg == "no chrysalis data to migrate"
+    ));
+
+    tear_down(storage_path)
+}
+
 fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&dest)?;
     for entry in fs::read_dir(src)? {
