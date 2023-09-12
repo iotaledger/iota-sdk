@@ -30,6 +30,9 @@ enum UnlockType {
  * The base class for unlocks.
  */
 abstract class Unlock {
+    /**
+     * Get the type of unlock.
+     */
     readonly type: UnlockType;
 
     /**
@@ -37,13 +40,6 @@ abstract class Unlock {
      */
     constructor(type: UnlockType) {
         this.type = type;
-    }
-
-    /**
-     * Get the type of unlock.
-     */
-    getType(): UnlockType {
-        return this.type;
     }
 }
 
@@ -55,7 +51,7 @@ class SignatureUnlock extends Unlock {
      * The signature.
      */
     @Type(() => Ed25519Signature)
-    signature: Ed25519Signature;
+    readonly signature: Ed25519Signature;
 
     /**
      * @param signature An Ed25519 signature.
@@ -74,7 +70,7 @@ class ReferenceUnlock extends Unlock {
     /**
      * The reference.
      */
-    reference: number;
+    readonly reference: number;
 
     /**
      * @param reference An index referencing a previous unlock.
@@ -92,7 +88,7 @@ class AccountUnlock extends Unlock {
     /**
      * The reference.
      */
-    reference: number;
+    readonly reference: number;
 
     /**
      * @param reference An index referencing a previous unlock.
@@ -110,7 +106,7 @@ class NftUnlock extends Unlock {
     /**
      * The reference.
      */
-    reference: number;
+    readonly reference: number;
 
     /**
      * @param reference An index referencing a previous unlock.

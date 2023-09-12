@@ -27,6 +27,9 @@ enum UnlockConditionType {
 }
 
 abstract class UnlockCondition {
+    /**
+     * Get the type of unlock condition.
+     */
     readonly type: UnlockConditionType;
 
     /**
@@ -34,12 +37,6 @@ abstract class UnlockCondition {
      */
     constructor(type: UnlockConditionType) {
         this.type = type;
-    }
-    /**
-     * Get the type of unlock condition.
-     */
-    getType(): UnlockConditionType {
-        return this.type;
     }
 
     /**
@@ -111,10 +108,8 @@ class AddressUnlockCondition extends UnlockCondition {
  * A Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition {
-    /**
-     * The amount the consuming transaction must deposit to `returnAddress`.
-     */
-    readonly amount: string;
+    // Getter transforms it into a proper number
+    amount: string;
 
     /**
      * The address to return the amount to.
@@ -138,7 +133,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
         this.returnAddress = returnAddress;
     }
     /**
-     * Get the amount.
+     * The amount the consuming transaction must deposit to `returnAddress`.
      */
     getAmount(): u64 {
         return BigInt(this.amount);

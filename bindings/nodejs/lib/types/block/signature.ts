@@ -18,6 +18,9 @@ enum SignatureType {
  * The base class for signatures.
  */
 abstract class Signature {
+    /**
+     * Get the type of signature.
+     */
     readonly type: SignatureType;
 
     /**
@@ -25,13 +28,6 @@ abstract class Signature {
      */
     constructor(type: SignatureType) {
         this.type = type;
-    }
-
-    /**
-     * Get the type of signature.
-     */
-    getType(): SignatureType {
-        return this.type;
     }
 }
 
@@ -42,11 +38,11 @@ class Ed25519Signature extends Signature {
     /**
      * The public key.
      */
-    publicKey: HexEncodedString;
+    readonly publicKey: HexEncodedString;
     /**
      * The signature.
      */
-    signature: HexEncodedString;
+    readonly signature: HexEncodedString;
 
     /**
      * @param publicKey A Ed25519 public key as hex-encoded string.

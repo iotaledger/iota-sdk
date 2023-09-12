@@ -15,6 +15,9 @@ enum PayloadType {
  * The base class for block payloads.
  */
 abstract class Payload {
+    /**
+     * Get the type of payload.
+     */
     readonly type: PayloadType;
 
     /**
@@ -22,13 +25,6 @@ abstract class Payload {
      */
     constructor(type: PayloadType) {
         this.type = type;
-    }
-
-    /**
-     * Get the type of payload.
-     */
-    getType(): PayloadType {
-        return this.type;
     }
 }
 
