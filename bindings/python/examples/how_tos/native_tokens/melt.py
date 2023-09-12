@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, HexStr
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 load_dotenv()
 
@@ -28,7 +30,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 melt_amount = 10
 
 # Send transaction.
-transaction = account.prepare_melt_native_token(token_id, melt_amount).send()
+transaction = account.melt_native_token(token_id, melt_amount)
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
