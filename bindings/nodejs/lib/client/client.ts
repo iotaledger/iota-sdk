@@ -204,10 +204,7 @@ export class Client {
      * @param amount The amount to find inputs for.
      * @returns An array of UTXO inputs.
      */
-    async findInputs(
-        addresses: string[],
-        amount: u64,
-    ): Promise<UTXOInput[]> {
+    async findInputs(addresses: string[], amount: u64): Promise<UTXOInput[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findInputs',
             data: {

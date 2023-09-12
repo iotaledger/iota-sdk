@@ -33,18 +33,18 @@ class SlotCommitment {
     /**
      * The commitment ID of the previous slot.
      */
-     readonly prevId: SlotCommitmentId;
+    readonly prevId: SlotCommitmentId;
     /**
      * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
      */
-     readonly rootsId: RootsId;
+    readonly rootsId: RootsId;
 
     /**
      * The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
      * slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
      * the switching of a chain.
      */
-     readonly cumulativeWeight: u64;
+    readonly cumulativeWeight: u64;
 
     constructor(
         index: SlotIndex,

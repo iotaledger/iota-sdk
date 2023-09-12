@@ -16,7 +16,7 @@ export class Block {
     /**
      * The parent block ids.
      */
-     readonly parents!: HexEncodedString[];
+    readonly parents!: HexEncodedString[];
     /**
      * The payload contents.
      */
@@ -28,5 +28,5 @@ export class Block {
      * The amount of mana the Account identified by IssuerID is at most
      * willing to burn for this block.
      */
-     readonly burnedMana!: string;
+    readonly burnedMana!: string;
 }
