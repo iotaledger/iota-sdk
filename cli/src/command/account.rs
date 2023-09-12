@@ -973,7 +973,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     }
 
     log = format!(
-        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n NTs: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
+        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
         output_ids,
         amount,
         native_tokens.finish_vec()?,
