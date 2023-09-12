@@ -12,6 +12,7 @@
 //! ```
 
 use iota_sdk::{
+    types::block::output::feature::Irc30Metadata,
     wallet::{CreateNativeTokenParams, Result},
     Wallet, U256,
 };
@@ -59,13 +60,16 @@ async fn main() -> Result<()> {
         println!("Account synced");
     }
 
+    let metadata =
+        Irc30Metadata::new("My Native Token", "MNT", 10).with_description("A native token to test the iota-sdk.");
+
     println!("Preparing transaction to create native token...");
 
     let params = CreateNativeTokenParams {
         account_id: None,
         circulating_supply: U256::from(CIRCULATING_SUPPLY),
         maximum_supply: U256::from(MAXIMUM_SUPPLY),
-        foundry_metadata: None,
+        foundry_metadata: Some(metadata.to_bytes()),
     };
 
     let transaction = account.create_native_token(params, None).await?;

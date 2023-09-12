@@ -3,7 +3,7 @@
 
 use std::str::FromStr;
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::{
@@ -20,7 +20,10 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{types::Bip44Address, Account, ConsolidationParams, OutputsToClaim, TransactionOptions},
+        account::{
+            types::{AccountIdentifier, Bip44Address},
+            Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
+        },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
     U256,
@@ -33,6 +36,13 @@ use crate::{error::Error, helper::to_utc_date_time, println_log_info};
 pub struct AccountCli {
     #[command(subcommand)]
     pub command: AccountCommand,
+}
+
+impl AccountCli {
+    pub fn print_help() -> Result<(), Error> {
+        Self::command().bin_name("Account:").print_help()?;
+        Ok(())
+    }
 }
 
 #[derive(Debug, Subcommand)]
@@ -183,7 +193,8 @@ pub enum AccountCommand {
         token_id: String,
         /// Amount to send, e.g. 1000000.
         amount: String,
-        /// Whether to gift the storage deposit for the output or not, e.g. ` true`.
+        /// Whether to gift the storage deposit for the output or not, e.g. `true`.
+        #[arg(value_parser = clap::builder::BoolishValueParser::new())]
         gift_storage_deposit: Option<bool>,
     },
     /// Send an NFT.
@@ -193,13 +204,19 @@ pub enum AccountCommand {
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
     },
+    /// Switch to a different account.
+    Switch {
+        /// The identifier (alias or index) of the account you want to switch to.
+        account_id: AccountIdentifier,
+    },
     /// Synchronize the account.
     Sync,
-    /// Show the details of the transaction.
+    /// Show the details of a transaction.
     #[clap(visible_alias = "tx")]
     Transaction {
-        /// Transaction ID to be displayed e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
-        transaction_id: String,
+        /// Selector for transaction.
+        /// Either by ID (e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b) or index.
+        selector: TransactionSelector,
     },
     /// List the account transactions.
     #[clap(visible_alias = "txs")]
@@ -244,6 +261,25 @@ pub enum AccountCommand {
     },
     /// Get the voting output of the account.
     VotingOutput,
+}
+
+/// Select by transaction ID or list index
+#[derive(Debug, Copy, Clone)]
+pub enum TransactionSelector {
+    Id(TransactionId),
+    Index(usize),
+}
+
+impl FromStr for TransactionSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Id(s.parse()?)
+        })
+    }
 }
 
 /// `addresses` command
@@ -635,10 +671,11 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
-        let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        println_log_info!("Outputs: {output_ids:#?}");
+        println_log_info!("Outputs:");
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
+        }
     }
-
     Ok(())
 }
 
@@ -747,15 +784,17 @@ pub async fn sync_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `transaction` command
-pub async fn transaction_command(account: &Account, transaction_id_str: &str) -> Result<(), Error> {
-    let transaction_id = TransactionId::from_str(transaction_id_str)?;
-    let maybe_transaction = account
-        .transactions()
-        .await
-        .into_iter()
-        .find(|tx| tx.transaction_id == transaction_id);
+pub async fn transaction_command(account: &Account, selector: TransactionSelector) -> Result<(), Error> {
+    let mut transactions = account.transactions().await;
+    let transaction = match selector {
+        TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
+        TransactionSelector::Index(index) => {
+            transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+            transactions.into_iter().nth(index)
+        }
+    };
 
-    if let Some(tx) = maybe_transaction {
+    if let Some(tx) = transaction {
         println_log_info!("{:#?}", tx);
     } else {
         println_log_info!("No transaction found");
@@ -794,8 +833,10 @@ pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
-        let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        println_log_info!("Unspent outputs: {output_ids:#?}");
+        println_log_info!("Unspent outputs:");
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
+        }
     }
 
     Ok(())
@@ -877,7 +918,14 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), Error> {
-    let mut log = format!("Address {}: {}", address.key_index(), address.address());
+    let mut log = format!(
+        "Address {}:\n {:<10}{}\n {:<10}{:?}",
+        address.key_index(),
+        "Bech32:",
+        address.address(),
+        "Hex:",
+        address.address().inner()
+    );
 
     if *address.internal() {
         log = format!("{log}\nChange address");

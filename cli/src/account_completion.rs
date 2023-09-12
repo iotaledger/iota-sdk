@@ -3,56 +3,53 @@
 
 use dialoguer::Completion;
 
-pub(crate) struct AccountCompletion<'a> {
-    options: [&'a str; 37],
-}
+pub(crate) struct AccountCompletion;
 
-pub(crate) const ACCOUNT_COMPLETION: AccountCompletion = AccountCompletion {
-    options: [
-        "addresses",
-        "balance",
-        "burn-native-token",
-        "burn-nft",
-        "claim",
-        "claimable-outputs",
-        "consolidate",
-        "create-account-output",
-        "create-native-token",
-        "destroy-account",
-        "destroy-foundry",
-        "exit",
-        "faucet",
-        "melt-native-token",
-        "mint-native-token",
-        "mint-nft",
-        "new-address",
-        "node-info",
-        "output",
-        "outputs",
-        "send",
-        "send-native-token",
-        "send-nft",
-        "sync",
-        "transaction",
-        "transactions",
-        "tx",
-        "txs",
-        "unspent-outputs",
-        "vote",
-        "stop-participating",
-        "participation-overview",
-        "voting-power",
-        "increase-voting-power",
-        "decrease-voting-power",
-        "voting-output",
-        "help",
-    ],
-};
+pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
+    "accounts",
+    "addresses",
+    "balance",
+    "burn-native-token",
+    "burn-nft",
+    "claim",
+    "claimable-outputs",
+    "consolidate",
+    "create-account-output",
+    "create-native-token",
+    "destroy-account",
+    "destroy-foundry",
+    "exit",
+    "faucet",
+    "melt-native-token",
+    "mint-native-token",
+    "mint-nft",
+    "new-address",
+    "node-info",
+    "output",
+    "outputs",
+    "send",
+    "send-native-token",
+    "send-nft",
+    "switch",
+    "sync",
+    "transaction",
+    "transactions",
+    "tx",
+    "txs",
+    "unspent-outputs",
+    "vote",
+    "stop-participating",
+    "participation-overview",
+    "voting-power",
+    "increase-voting-power",
+    "decrease-voting-power",
+    "voting-output",
+    "help",
+];
 
-impl<'a> Completion for AccountCompletion<'a> {
+impl Completion for AccountCompletion {
     fn get(&self, input: &str) -> Option<String> {
-        let matches = self
-            .options
+        let matches = ACCOUNT_COMPLETION
             .iter()
             .filter(|option| option.starts_with(input))
             .collect::<Vec<_>>();
