@@ -55,8 +55,6 @@ async fn main() -> Result<()> {
 
     let alias_output = alias_output_data.output.as_alias();
     let updated_alias_output = AliasOutputBuilder::from(alias_output)
-        // Update the alias id, as it might still be null
-        .with_alias_id(alias_output.alias_id_non_null(&alias_output_data.output_id))
         // Minimum required storage deposit will change if the new metadata has a different size, so we will update
         // the amount
         .with_minimum_storage_deposit(rent_structure)

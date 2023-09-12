@@ -60,8 +60,6 @@ async fn main() -> Result<()> {
 
     let alias_output = alias_output_data.output.as_alias();
     let updated_alias_output = AliasOutputBuilder::from(alias_output)
-        // Update the alias id, as it might still be null
-        .with_alias_id(alias_output.alias_id_non_null(&alias_output_data.output_id))
         .replace_unlock_condition(UnlockCondition::StateControllerAddress(
             StateControllerAddressUnlockCondition::new(new_state_controller.address()),
         ))
