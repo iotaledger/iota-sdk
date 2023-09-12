@@ -940,7 +940,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
 
         for output_id in output_ids {
             if let Some(output_data) = account.get_output(output_id).await {
-                // Output might be associated with the address, but can't be unlocked by it, so we check that here
+                // Output might be associated with the address, but can't be unlocked by it, so we check that here.
                 // Panic: cannot fail for outputs belonging to an account.
                 let (required_address, _) = output_data
                     .output
