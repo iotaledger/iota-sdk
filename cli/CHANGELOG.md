@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `WalletCommand::Mnemonic` now takes 2 optional arguments to avoid user interaction;
 - `AccountCommand::Transaction` now accepts either an index or an ID;
+- Use `CommandFactory` to print help programmatically;
+- `print_wallet_help` changed to `WalletCli::print_help`;
+- `print_account_help` changed to `AccountCli::print_help`;
 
 ## 1.0.0 - 2023-07-27
 

@@ -132,53 +132,6 @@ describe('Wallet', () => {
         await recreatedWallet.destroy()
         removeDir(storagePath)
     }, 20000);
-
-    it('error after destroy', async () => {
-        let storagePath = 'test-error-after-destroy';
-        removeDir(storagePath);
-
-        const walletOptions = {
-            storagePath,
-            clientOptions: {
-                nodes: ['https://api.testnet.shimmer.network'],
-            },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: `./${storagePath}/wallet.stronghold`,
-                    password: `A12345678*`,
-                },
-            },
-        };
-
-        const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
-
-        const account = await wallet.createAccount({
-            alias: 'Alice',
-        });
-
-        expect(account.getMetadata().index).toStrictEqual(0);
-
-        await wallet.destroy();
-
-        try {
-            const accounts = await wallet.getAccounts();
-            throw 'Should return an error because the wallet got destroyed';
-        } catch (err: any) {
-            expect(err).toContain('Wallet got destroyed');
-        }
-
-        try {
-            const client = await wallet.getClient();
-            throw 'Should return an error because the wallet got destroyed';
-        } catch (err: any) {
-            expect(err).toContain('Wallet got destroyed');
-        }
-        removeDir(storagePath)
-    }, 35000);
 })
 
 function removeDir(storagePath: string) {

@@ -4,7 +4,6 @@
 use std::path::Path;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
@@ -17,11 +16,7 @@ use tokio::{
 };
 use zeroize::Zeroize;
 
-use crate::{
-    command::{account::AccountCli, wallet::WalletCli},
-    error::Error,
-    println_log_error, println_log_info,
-};
+use crate::{error::Error, println_log_error, println_log_info};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
@@ -87,18 +82,6 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
 
             Ok(Some(accounts.swap_remove(index)))
         }
-    }
-}
-
-pub fn print_wallet_help() {
-    if let Err(err) = WalletCli::try_parse_from(["Wallet:", "help"]) {
-        println!("{err}");
-    }
-}
-
-pub fn print_account_help() {
-    if let Err(err) = AccountCli::try_parse_from(["Account:", "help"]) {
-        println!("{err}");
     }
 }
 

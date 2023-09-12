@@ -254,7 +254,7 @@ where
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
-            client_options: Some(ClientOptions::from_client(wallet.client()).await),
+            client_options: Some(wallet.client_options().await),
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),
