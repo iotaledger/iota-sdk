@@ -16,6 +16,7 @@ use crate::{
     },
 };
 
+// TODO this is wrong because of https://github.com/iotaledger/iota-sdk/issues/1208
 const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize =
     BlockWrapper::LENGTH_MAX - BlockWrapper::LENGTH_MIN - (7 * BlockId::LENGTH);
 // Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
