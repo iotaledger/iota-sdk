@@ -91,6 +91,14 @@ impl ClientInner {
         let request = request.rate_limit(&self.request_pool);
         request.await
     }
+
+    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(&self, path: &str, body: &[u8]) -> Result<T> {
+        let node_manager = self.node_manager.read().await;
+        let request = node_manager.post_request_bytes(path, self.get_timeout().await, body);
+        #[cfg(not(target_family = "wasm"))]
+        let request = request.rate_limit(&self.request_pool);
+        request.await
+    }
 }
 
 impl NodeManager {
