@@ -214,7 +214,8 @@ class HighLevelAPI():
         result[1] = Block.from_dict(result[1])
         return result
 
-    def reattach_unchecked(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
+    def reattach_unchecked(
+            self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Reattach a block without checking if it should be reattached.
 
         Args:
@@ -245,7 +246,8 @@ class HighLevelAPI():
         result[1] = Block.from_dict(result[1])
         return result
 
-    def promote_unchecked(self, block_id: HexStr) -> List[Union[HexStr, Block]]:
+    def promote_unchecked(
+            self, block_id: HexStr) -> List[Union[HexStr, Block]]:
         """Promote a block without checking if it should be promoted.
 
         Args:

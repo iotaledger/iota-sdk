@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Union
 
+
 class FeatureType(IntEnum):
     """Types of features.
 

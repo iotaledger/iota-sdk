@@ -6,6 +6,7 @@ from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import Union
 
+
 class UnlockConditionType(IntEnum):
     """Unlock condition variants.
 
