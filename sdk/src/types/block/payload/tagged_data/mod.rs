@@ -37,6 +37,7 @@ impl TaggedDataPayload {
     /// Valid lengths for the data.
     // Less than max block length, because of the other fields in the block and payload kind, tagged payload field
     // lengths.
+    // TODO https://github.com/iotaledger/iota-sdk/issues/1226
     pub const DATA_LENGTH_RANGE: RangeInclusive<u32> =
         0..=(BlockWrapper::LENGTH_MAX - BlockWrapper::LENGTH_MIN - 9) as u32;
 

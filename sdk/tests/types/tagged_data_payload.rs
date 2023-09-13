@@ -65,6 +65,7 @@ fn new_invalid_tag_length_more_than_max() {
 #[test]
 fn new_invalid_data_length_more_than_max() {
     assert!(matches!(
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1226
         TaggedDataPayload::new(rand_bytes(32), [0u8; BlockWrapper::LENGTH_MAX + 42]),
         Err(Error::InvalidTaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == BlockWrapper::LENGTH_MAX as u32 + 42
     ));
