@@ -22,7 +22,7 @@ pub struct SlotCommitment {
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
     /// The commitment ID of the previous slot.
-    #[cfg_attr(feature = "serde", serde(rename = "prevId"))]
+    #[cfg_attr(feature = "serde", serde(rename = "previousCommitmentId"))]
     previous_slot_commitment_id: SlotCommitmentId,
     /// The digest of multiple sparse merkle tree roots of this slot.
     roots_id: RootsId,
@@ -90,10 +90,11 @@ impl SlotCommitment {
     pub fn id(&self) -> SlotCommitmentId {
         let mut bytes = [0u8; SlotCommitmentId::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
-        let hash: [u8; 32] = Blake2b256::digest(self.pack_to_vec()).into();
+        let content = self.pack_to_vec();
+        let content_hash: [u8; 32] = Blake2b256::digest(content).into();
 
         // PANIC: packing to an array of bytes can't fail.
-        hash.pack(&mut packer).unwrap();
+        content_hash.pack(&mut packer).unwrap();
         self.index.pack(&mut packer).unwrap();
 
         SlotCommitmentId::from(bytes)
