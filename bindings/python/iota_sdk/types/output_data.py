@@ -25,7 +25,6 @@ class OutputData():
         remainder: Whether the output represents a remainder amount.
         chain: A list of chain state indexes.
     """
-
     output_id: HexStr
     metadata: OutputMetadata
     output: AccountOutput | FoundryOutput | NftOutput | BasicOutput

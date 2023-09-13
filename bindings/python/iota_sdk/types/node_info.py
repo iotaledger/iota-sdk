@@ -141,7 +141,6 @@ class NodeInfo:
         base_token: Information about the base token.
         features: List of features supported by the node.
     """
-
     name: str
     version: str
     status: NodeInfoStatus
