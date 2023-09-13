@@ -105,7 +105,7 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let wrapper = rand_block_wrapper_with_block(
+    let block = rand_block_wrapper_with_block(
         protocol_parameters.clone(),
         rand_basic_block_builder_with_strong_parents(parents.clone())
             .with_payload(payload.clone())
@@ -113,9 +113,9 @@ fn getters() {
             .unwrap(),
     );
 
-    assert_eq!(wrapper.protocol_version(), protocol_parameters.version());
-    assert_eq!(*wrapper.as_basic().strong_parents(), parents);
-    assert_eq!(*wrapper.as_basic().payload().as_ref().unwrap(), &payload);
+    assert_eq!(block.protocol_version(), protocol_parameters.version());
+    assert_eq!(*block.as_basic().strong_parents(), parents);
+    assert_eq!(*block.as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]

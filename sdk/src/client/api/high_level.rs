@@ -33,9 +33,7 @@ impl Client {
         if let Block::Basic(block) = wrapper.block() {
             let inputs = match block.payload() {
                 Some(Payload::Transaction(t)) => t.essence().inputs(),
-                _ => {
-                    unreachable!()
-                }
+                _ => return Err(Error::MissingTransactionPayload),
             };
 
             let input_ids = inputs

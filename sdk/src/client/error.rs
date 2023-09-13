@@ -163,6 +163,9 @@ pub enum Error {
     /// Unexpected block kind.
     #[error("unexpected block kind, got {actual}, expected {expected}")]
     UnexpectedBlockKind { actual: u8, expected: u8 },
+    /// Missing transaction payload.
+    #[error("missing transaction payload")]
+    MissingTransactionPayload,
 
     /// Participation error
     #[cfg(feature = "participation")]
