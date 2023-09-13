@@ -160,6 +160,9 @@ pub enum Error {
     /// Missing BIP32 chain to sign with.
     #[error("missing BIP32 chain to sign with")]
     MissingBip32Chain,
+    /// Unexpected block kind.
+    #[error("unexpected block kind, got {actual}, expected {expected}")]
+    UnexpectedBlockKind { actual: u8, expected: u8 },
 
     /// Participation error
     #[cfg(feature = "participation")]

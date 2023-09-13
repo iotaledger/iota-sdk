@@ -15,11 +15,12 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
+        core::{BasicBlock, Block, BlockWrapper},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{transaction::TransactionId, Payload},
         slot::SlotIndex,
-        Block, BlockId, BlockWrapper, Error as BlockError,
+        BlockId,
     },
     utils::unix_timestamp_now,
 };
@@ -46,7 +47,10 @@ impl Client {
 
             self.get_outputs_with_metadata(&input_ids).await
         } else {
-            Err(BlockError::InvalidBlockKind(wrapper.block().kind()).into())
+            Err(Error::UnexpectedBlockKind {
+                actual: wrapper.block().kind(),
+                expected: BasicBlock::KIND,
+            })
         }
     }
 
