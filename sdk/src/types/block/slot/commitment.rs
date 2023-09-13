@@ -56,6 +56,11 @@ impl SlotCommitment {
         }
     }
 
+    /// Returns the protocol version of the [`SlotCommitment`].
+    pub fn protocol_version(&self) -> u8 {
+        self.protocol_version
+    }
+
     /// Returns the index of the [`SlotCommitment`].
     pub fn index(&self) -> SlotIndex {
         self.index
@@ -66,7 +71,7 @@ impl SlotCommitment {
         &self.previous_slot_commitment_id
     }
 
-    /// Returns the [`RootsId`] of the [`SlotCommitment`].
+    /// Returns the roots ID of the [`SlotCommitment`].
     pub fn roots_id(&self) -> &RootsId {
         &self.roots_id
     }
@@ -76,7 +81,12 @@ impl SlotCommitment {
         self.cumulative_weight
     }
 
-    /// Derives the [`SlotCommitmentId`] of the [`SlotCommitment`].
+    /// Returns the reference mana cost of the [`SlotCommitment`].
+    pub fn reference_mana_cost(&self) -> u64 {
+        self.reference_mana_cost
+    }
+
+    /// Computes the [`SlotCommitmentId`] of the [`SlotCommitment`].
     pub fn id(&self) -> SlotCommitmentId {
         let mut bytes = [0u8; SlotCommitmentId::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
