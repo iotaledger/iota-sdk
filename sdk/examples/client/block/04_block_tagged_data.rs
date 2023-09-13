@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create and send the block with tag and data.
-    let wrapper = client
+    let block = client
         .finish_basic_block_builder(
             todo!("issuer id"),
             todo!("block signature"),
@@ -46,9 +46,9 @@ async fn main() -> Result<()> {
         )
         .await?;
 
-    println!("{wrapper:#?}\n");
+    println!("{block:#?}\n");
 
-    if let Some(Payload::TaggedData(payload)) = wrapper.as_basic().payload() {
+    if let Some(Payload::TaggedData(payload)) = block.as_basic().payload() {
         println!(
             "Tag: {}",
             String::from_utf8(payload.tag().to_vec()).expect("found invalid UTF-8")
@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with tag and data sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        wrapper.id()
+        block.id()
     );
 
     Ok(())
