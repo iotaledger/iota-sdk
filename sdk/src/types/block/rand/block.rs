@@ -9,6 +9,7 @@ use crate::types::block::{
     protocol::ProtocolParameters,
     rand::{
         bytes::rand_bytes_array,
+        issuer_id::rand_issuer_id,
         number::rand_number,
         parents::rand_strong_parents,
         payload::rand_payload_for_block,
@@ -42,8 +43,7 @@ pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block:
         rand_number(),
         rand_slot_commitment_id(),
         rand_slot_index(),
-        // TODO rand_issuer_id
-        rand_bytes_array().into(),
+        rand_issuer_id(),
         block,
         rand_signature(),
     )
