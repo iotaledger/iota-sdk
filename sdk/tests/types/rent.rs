@@ -2,31 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{Output, Rent, RentStructure},
+    output::{Output, Rent},
     protocol::protocol_parameters,
     rand::output::{rand_account_output, rand_basic_output, rand_foundry_output, rand_nft_output},
 };
 
-const BYTE_COST: u32 = 1;
-const FACTOR_DATA: u8 = 1;
-const FACTOR_KEY: u8 = 10;
-const FACTOR_DELEGATION: u8 = 1;
-const FACTOR_STAKING_FEATURE: u8 = 1;
-const FACTOR_ISSUER_KEYS: u8 = 1;
-
-fn config() -> RentStructure {
-    RentStructure::new(
-        BYTE_COST,
-        FACTOR_DATA,
-        FACTOR_KEY,
-        FACTOR_DELEGATION,
-        FACTOR_STAKING_FEATURE,
-        FACTOR_ISSUER_KEYS,
-    )
-}
-
 fn output_in_range(output: Output, range: std::ops::RangeInclusive<u64>) {
-    let cost = output.rent_cost(config());
+    let cost = output.rent_cost(Default::default());
     assert!(range.contains(&cost), "{output:#?} has a required byte cost of {cost}");
 }
 
