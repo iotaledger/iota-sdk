@@ -69,6 +69,39 @@ pub enum TransactionFailureReason {
     SemanticValidationFailed = 255,
 }
 
+// TODO bring back
+// impl fmt::Display for TransactionFailureReason {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         match self {
+//             Self::None => write!(f, "The block has no conflict"),
+//             Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent"),
+//             Self::InputUtxoAlreadySpentInThisMilestone => write!(
+//                 f,
+//                 "The referenced UTXO was already spent while confirming this milestone"
+//             ),
+//             Self::InputUtxoNotFound => write!(f, "The referenced UTXO cannot be found"),
+//             Self::CreatedConsumedAmountMismatch => {
+//                 write!(f, "The sum of the inputs and output values does not match")
+//             }
+//             Self::InvalidSignature => write!(f, "The unlock block signature is invalid"),
+//             Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired"),
+//             Self::InvalidNativeTokens => write!(f, "The native tokens are invalid"),
+//             Self::StorageDepositReturnUnfulfilled => write!(
+//                 f,
+//                 "The return amount in a transaction is not fulfilled by the output side"
+//             ),
+//             Self::InvalidUnlock => write!(f, "The input unlock is invalid"),
+//             Self::InputsCommitmentsMismatch => write!(f, "The inputs commitment is invalid"),
+//             Self::UnverifiedSender => write!(
+//                 f,
+//                 " The output contains a Sender with an ident (address) which is not unlocked"
+//             ),
+//             Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid"),
+//             Self::SemanticValidationFailed => write!(f, "The semantic validation failed"),
+//         }
+//     }
+// }
+
 impl TryFrom<u8> for TransactionFailureReason {
     type Error = Error;
 
@@ -112,8 +145,6 @@ pub struct ValidationContext<'a> {
     ///
     pub unlocks: &'a Unlocks,
     ///
-    pub milestone_timestamp: u32,
-    ///
     pub input_amount: u64,
     ///
     pub input_native_tokens: BTreeMap<TokenId, U256>,
@@ -140,14 +171,12 @@ impl<'a> ValidationContext<'a> {
         essence: &'a RegularTransactionEssence,
         inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
         unlocks: &'a Unlocks,
-        milestone_timestamp: u32,
     ) -> Self {
         Self {
             essence,
             unlocks,
             essence_hash: TransactionEssence::from(essence.clone()).hash(),
             inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
-            milestone_timestamp,
             input_amount: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains: inputs
@@ -229,11 +258,11 @@ pub fn semantic_validation(
             return Ok(Some(conflict));
         }
 
-        if unlock_conditions.is_time_locked(context.milestone_timestamp) {
+        if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
             return Ok(Some(TransactionFailureReason::TimelockNotExpired));
         }
 
-        if !unlock_conditions.is_expired(context.milestone_timestamp) {
+        if !unlock_conditions.is_expired(context.essence.creation_slot()) {
             if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                 let amount = context
                     .storage_deposit_returns

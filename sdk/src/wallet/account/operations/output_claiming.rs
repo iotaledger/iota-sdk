@@ -14,6 +14,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
             Output, OutputId,
         },
+        slot::SlotIndex,
     },
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
@@ -46,7 +47,7 @@ where
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
         let account_details = self.details().await;
 
-        let local_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
@@ -69,7 +70,7 @@ where
                             // outputs controlled by an account or nft are currently not considered
                             &[],
                             output_data,
-                            local_time,
+                            slot_index,
                             // Not relevant without account addresses
                             None,
                         )?
@@ -78,7 +79,7 @@ where
                             OutputsToClaim::MicroTransactions => {
                                 if let Some(sdr) = unlock_conditions.storage_deposit_return() {
                                     // If expired, it's not a micro transaction anymore
-                                    if unlock_conditions.is_expired(local_time) {
+                                    if unlock_conditions.is_expired(slot_index) {
                                         continue;
                                     }
                                     // Only micro transaction if not the same
@@ -99,7 +100,7 @@ where
                             }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
-                                if !unlock_conditions.is_expired(local_time) {
+                                if !unlock_conditions.is_expired(slot_index) {
                                     claimable_amount -= unlock_conditions
                                         .storage_deposit_return()
                                         .map(|s| s.amount())
@@ -201,7 +202,7 @@ where
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
-        let current_time = self.client().get_time_checked().await?;
+        let slot_index = self.client().get_slot_index().await?;
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
@@ -252,7 +253,7 @@ where
                 }
                 new_native_tokens.add_native_tokens(native_tokens.clone())?;
             }
-            if let Some(sdr) = sdr_not_expired(&output_data.output, current_time) {
+            if let Some(sdr) = sdr_not_expired(&output_data.output, slot_index) {
                 // for own output subtract the return amount
                 available_amount += output_data.output.amount() - sdr.amount();
 
@@ -407,12 +408,12 @@ where
 }
 
 /// Get the `StorageDepositReturnUnlockCondition`, if not expired
-pub(crate) fn sdr_not_expired(output: &Output, current_time: u32) -> Option<&StorageDepositReturnUnlockCondition> {
+pub(crate) fn sdr_not_expired(output: &Output, slot_index: SlotIndex) -> Option<&StorageDepositReturnUnlockCondition> {
     output.unlock_conditions().and_then(|unlock_conditions| {
         unlock_conditions.storage_deposit_return().and_then(|sdr| {
             let expired = unlock_conditions
                 .expiration()
-                .map_or(false, |expiration| current_time >= expiration.timestamp());
+                .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
             // We only have to send the storage deposit return back if the output is not expired
             (!expired).then_some(sdr)

@@ -62,10 +62,23 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and accounts.
-     * @param burn The outputs to burn
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * A generic function that can be used to burn native tokens, nfts, foundries and accounts.
+     * @param burn The outputs or native tokens to burn
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
+     * @returns The transaction.
+     */
+    async burn(
+        burn: Burn,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareBurn(burn, transactionOptions)).send();
+    }
+
+    /**
+     * A generic function that can be used to prepare to burn native tokens, nfts, foundries and accounts.
+     * @param burn The outputs or native tokens to burn
+     * @param transactionOptions Additional transaction options
      * @returns The prepared transaction.
      */
     async prepareBurn(
@@ -97,7 +110,7 @@ export class Account {
      * recommended to use melting, if the foundry output is available.
      * @param tokenId The native token id.
      * @param burnAmount The to be burned amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -126,10 +139,11 @@ export class Account {
             this,
         );
     }
+
     /**
      * Burn an nft output.
      * @param nftId The NftId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -182,8 +196,20 @@ export class Account {
      * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
-     * @param force Force consolidation on addresses where the threshold isn't met.
-     * @param outputConsolidationThreshold A default threshold is used if this is omitted.
+     * @param params Consolidation options.
+     * @returns The consolidation transaction.
+     */
+    async consolidateOutputs(
+        params: ConsolidationParams,
+    ): Promise<Transaction> {
+        return (await this.prepareConsolidateOutputs(params)).send();
+    }
+
+    /**
+     * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
+     * by sending them to an own address again if the output amount is greater or
+     * equal to the output consolidation threshold.
+     * @param params Consolidation options.
      * @returns The prepared consolidation transaction.
      */
     async prepareConsolidateOutputs(
@@ -208,9 +234,25 @@ export class Account {
     }
 
     /**
-     * `createAccountOutput` creates an account output
+     * Creates an account output.
      * @param params The account output options.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async createAliasOutput(
+        params?: AccountOutputParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareCreateAccountOutput(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Creates an account output.
+     * @param params The account output options.
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -242,7 +284,30 @@ export class Account {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async meltNativeToken(
+        tokenId: string,
+        meltAmount: bigint,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareMeltNativeToken(
+                tokenId,
+                meltAmount,
+                transactionOptions,
+            )
+        ).send();
+    }
+
+    /**
+     * Melt native tokens. This happens with the foundry output which minted them, by increasing its
+     * `melted_tokens` field.
+     * @param tokenId The native token id.
+     * @param meltAmount To be melted amount.
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -293,8 +358,9 @@ export class Account {
 
     /**
      * Destroy an account output.
+     *
      * @param accountId The AccountId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -327,7 +393,7 @@ export class Account {
      * Function to destroy a foundry output with a circulating supply of 0.
      * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account.
      * @param foundryId The FoundryId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -738,7 +804,30 @@ export class Account {
      *
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The minting transaction.
+     */
+    async mintNativeToken(
+        tokenId: string,
+        mintAmount: bigint,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareMintNativeToken(
+                tokenId,
+                mintAmount,
+                transactionOptions,
+            )
+        ).send();
+    }
+
+    /**
+     * Mint additional native tokens.
+     *
+     * @param tokenId The native token id.
+     * @param mintAmount To be minted amount.
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared minting transaction.
      */
@@ -772,9 +861,26 @@ export class Account {
      * Create a native token.
      *
      * @param params The options for creating a native token.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The creating transaction and the token ID.
+     * @returns The created transaction.
+     */
+    async createNativeToken(
+        params: CreateNativeTokenParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareCreateNativeToken(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Create a native token.
+     *
+     * @param params The options for creating a native token.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The created transaction and the token ID.
      */
     async prepareCreateNativeToken(
         params: CreateNativeTokenParams,
@@ -813,7 +919,22 @@ export class Account {
      * Mint NFTs.
      *
      * @param params The options for minting nfts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The minting transaction.
+     */
+    async mintNfts(
+        params: MintNftParams[],
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareMintNfts(params, transactionOptions)).send();
+    }
+
+    /**
+     * Mint NFTs.
+     *
+     * @param params The options for minting nfts.
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared minting transaction.
      */
@@ -851,7 +972,7 @@ export class Account {
      * storage deposit will be sent to the recipient. When the assets contain
      * an nft id, the data from the existing `NftOutput` will be used, just with
      * the address unlock conditions replaced.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared output.
      */
@@ -881,7 +1002,7 @@ export class Account {
      * Prepare to send base coins, useful for offline signing.
      *
      * @param params Address with amounts to send.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -914,10 +1035,25 @@ export class Account {
     }
 
     /**
+     * Send a transaction.
+     *
+     * @param outputs Outputs to use in the transaction.
+     * @param options Additional transaction options
+     * or custom inputs.
+     * @returns The transaction data.
+     */
+    async sendTransaction(
+        outputs: Output[],
+        options?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareTransaction(outputs, options)).send();
+    }
+
+    /**
      * Prepare a transaction, useful for offline signing.
      *
      * @param outputs Outputs to use in the transaction.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -993,7 +1129,7 @@ export class Account {
      *
      * @param amount Amount of coins.
      * @param address Receiving address.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1024,7 +1160,7 @@ export class Account {
      * Send base coins with amounts from input addresses.
      *
      * @param params Addresses with amounts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1055,7 +1191,24 @@ export class Account {
      * Send native tokens.
      *
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async sendNativeTokens(
+        params: SendNativeTokensParams[],
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareSendNativeTokens(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Send native tokens.
+     *
+     * @param params Addresses amounts and native tokens.
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -1086,7 +1239,22 @@ export class Account {
      * Send NFT.
      *
      * @param params Addresses and nft ids.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async sendNft(
+        params: SendNftParams[],
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareSendNft(params, transactionOptions)).send();
+    }
+
+    /**
+     * Send NFT.
+     *
+     * @param params Addresses and nft ids.
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
@@ -1117,7 +1285,7 @@ export class Account {
      * Send outputs in a transaction.
      *
      * @param outputs The outputs to send.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */

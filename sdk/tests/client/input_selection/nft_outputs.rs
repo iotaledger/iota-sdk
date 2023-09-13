@@ -276,7 +276,7 @@ fn burn_nft() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_nft(nft_id_2))
+    .with_burn(Burn::new().add_nft(nft_id_2))
     .select()
     .unwrap();
 
@@ -1075,7 +1075,7 @@ fn nft_burn_should_validate_nft_sender() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_nft(nft_id_1))
+    .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
 
@@ -1119,7 +1119,7 @@ fn nft_burn_should_validate_nft_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_nft(nft_id_1))
+    .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
 
@@ -1187,8 +1187,18 @@ fn changed_immutable_metadata() {
     let protocol_parameters = protocol_parameters();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
+    #[cfg(feature = "irc_27")]
+    let metadata = iota_sdk::types::block::output::feature::Irc27Metadata::new(
+        "image/jpeg",
+        "https://mywebsite.com/my-nft-files-1.jpeg".parse().unwrap(),
+        "file 1",
+    )
+    .with_issuer_name("Alice");
+    #[cfg(not(feature = "irc_27"))]
+    let metadata = [1, 2, 3];
+
     let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_structure(), nft_id_1)
-        .with_immutable_features(MetadataFeature::new([1, 2, 3]))
+        .with_immutable_features(MetadataFeature::try_from(metadata))
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -1201,14 +1211,24 @@ fn changed_immutable_metadata() {
         chain: None,
     }];
 
+    #[cfg(feature = "irc_27")]
+    let metadata = iota_sdk::types::block::output::feature::Irc27Metadata::new(
+        "image/jpeg",
+        "https://mywebsite.com/my-nft-files-2.jpeg".parse().unwrap(),
+        "file 2",
+    )
+    .with_issuer_name("Alice");
+    #[cfg(not(feature = "irc_27"))]
+    let metadata = [4, 5, 6];
+
     // New nft output with changed immutable metadata feature
-    let updated_account_output = NftOutputBuilder::from(nft_output.as_nft())
+    let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())
         .with_minimum_storage_deposit(protocol_parameters.rent_structure())
-        .with_immutable_features(MetadataFeature::new([4, 5, 6]))
+        .with_immutable_features(MetadataFeature::try_from(metadata))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let outputs = [updated_account_output];
+    let outputs = [updated_nft_output];
 
     let selected = InputSelection::new(
         inputs,

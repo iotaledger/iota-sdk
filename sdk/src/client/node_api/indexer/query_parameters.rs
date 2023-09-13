@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{Error, Result},
-    types::block::address::Bech32Address,
+    types::block::{address::Bech32Address, slot::SlotIndex},
 };
 
 // https://github.com/iotaledger/inx-indexer/tree/develop/pkg/indexer
@@ -81,19 +81,19 @@ pub enum QueryParameter {
     Address(Bech32Address),
     /// Filter foundry outputs based on bech32-encoded address of the controlling account.
     AccountAddress(Bech32Address),
-    /// Returns outputs that were created after a certain Unix timestamp.
-    CreatedAfter(u32),
-    /// Returns outputs that were created before a certain Unix timestamp.
-    CreatedBefore(u32),
+    /// Returns outputs that were created after a certain slot index.
+    CreatedAfter(SlotIndex),
+    /// Returns outputs that were created before a certain slot index.
+    CreatedBefore(SlotIndex),
     /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
     Cursor(String),
     /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
     /// condition.
     ExpirationReturnAddress(Bech32Address),
-    /// Returns outputs that expire after a certain Unix timestamp.
-    ExpiresAfter(u32),
-    /// Returns outputs that expire before a certain Unix timestamp.
-    ExpiresBefore(u32),
+    /// Returns outputs that expire after a certain slot index.
+    ExpiresAfter(SlotIndex),
+    /// Returns outputs that expire before a certain slot index.
+    ExpiresBefore(SlotIndex),
     /// Filters outputs based on bech32-encoded governor (governance controller) address.
     Governor(Bech32Address),
     /// Filters outputs based on the presence of expiration unlock condition.
@@ -122,10 +122,10 @@ pub enum QueryParameter {
     StorageDepositReturnAddress(Bech32Address),
     /// Filters outputs based on matching Tag Block.
     Tag(String),
-    /// Returns outputs that are timelocked after a certain Unix timestamp.
-    TimelockedAfter(u32),
-    /// Returns outputs that are timelocked before a certain Unix timestamp.
-    TimelockedBefore(u32),
+    /// Returns outputs that are timelocked after a certain slot index.
+    TimelockedAfter(SlotIndex),
+    /// Returns outputs that are timelocked before a certain slot index.
+    TimelockedBefore(SlotIndex),
 }
 
 impl QueryParameter {

@@ -24,6 +24,7 @@ use crate::{
             address::Address,
             output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+            slot::SlotIndex,
             BlockId, Error as BlockError,
         },
         TryFromDto,
@@ -55,12 +56,12 @@ impl OutputData {
     pub fn input_signing_data(
         &self,
         account: &AccountDetails,
-        current_time: u32,
+        slot_index: SlotIndex,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let (unlock_address, _unlocked_account_or_nft_address) =
             self.output
-                .required_and_unlocked_address(current_time, &self.output_id, account_transition)?;
+                .required_and_unlocked_address(slot_index, &self.output_id, account_transition)?;
 
         let chain = if unlock_address == self.address {
             self.chain
@@ -308,7 +309,7 @@ impl<'de> Deserialize<'de> for AccountIdentifier {
             None => {
                 let alias_or_index_str = v
                     .as_str()
-                    .ok_or_else(|| D::Error::custom("accountIdentifier is no number or string"))?;
+                    .ok_or_else(|| D::Error::custom("account identifier is not a number or string"))?;
                 Self::from(alias_or_index_str)
             }
         })
@@ -338,5 +339,14 @@ impl From<&String> for AccountIdentifier {
 impl From<u32> for AccountIdentifier {
     fn from(value: u32) -> Self {
         Self::Index(value)
+    }
+}
+
+impl core::fmt::Display for AccountIdentifier {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Alias(alias) => alias.fmt(f),
+            Self::Index(index) => index.fmt(f),
+        }
     }
 }

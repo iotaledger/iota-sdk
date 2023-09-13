@@ -1,7 +1,10 @@
-from iota_sdk import *
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (AliasAddress, Client,
+                      ImmutableAliasAddressUnlockCondition, SimpleTokenScheme)
 
 load_dotenv()
 
@@ -15,8 +18,8 @@ client = Client(nodes=[node_url])
 serial_number = 1
 token_scheme = SimpleTokenScheme(32, 0, 64)
 unlock_conditions = [
-    ImmutableAliasAddressUnlockCondition(
-        AliasAddress(
+    ImmutableAccountAddressUnlockCondition(
+        AccountAddress(
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa')
     )
 ]
@@ -29,4 +32,4 @@ output = client.build_foundry_output(
 )
 
 # Print the output
-print(json.dumps(output.as_dict(), indent=4))
+print(json.dumps(output.to_dict(), indent=4))

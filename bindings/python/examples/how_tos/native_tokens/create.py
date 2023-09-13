@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, utf8_to_hex, CreateNativeTokenParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import CreateNativeTokenParams, Wallet, utf8_to_hex
 
 load_dotenv()
 
@@ -18,18 +20,18 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 # Sync account with the node
 balance = account.sync()
 
-# We can first check if we already have an alias in our account, because
-# an alias can have many foundry outputs and therefore we can reuse an
+# We can first check if we already have an account output in our account, because
+# an account can have many foundry outputs and therefore we can reuse an
 # existing one.
-if not balance.aliases:
-    # If we don't have an alias, we need to create one
-    transaction = account.prepare_create_alias_output(None, None).send()
-    print(f'Transaction sent: {transaction.transactionId}')
+if not balance.accounts:
+    # If we don't have an account, we need to create one
+    transaction = account.create_alias_output(None, None)
+    print(f'Transaction sent: {transaction.transaction_id}')
 
     # Wait for transaction to get included
-    blockId = account.reissue_transaction_until_included(
-        transaction.transactionId)
-    print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+    block_id = account.reissue_transaction_until_included(
+        transaction.transaction_id)
+    print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     account.sync()
     print("Account synced")
@@ -44,11 +46,12 @@ params = CreateNativeTokenParams(
 
 prepared_transaction = account.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-blockId = account.reissue_transaction_until_included(transaction.transactionId)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+block_id = account.reissue_transaction_until_included(
+    transaction.transaction_id)
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 print(f'Created token: {prepared_transaction.token_id()}')
 

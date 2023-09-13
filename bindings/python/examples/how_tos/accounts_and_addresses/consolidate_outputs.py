@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, Utils, ConsolidationParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import ConsolidationParams, Utils, Wallet
 
 # In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
 # them to the same address again.
@@ -34,9 +36,9 @@ for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
+            Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            output_data.output.nativeTokens
+            output_data.output.native_tokens
         )
     )
 
@@ -45,19 +47,15 @@ print('Sending consolidation transaction...')
 # Consolidate unspent outputs and print the consolidation transaction ID
 # Set `force` to true to force the consolidation even though the
 # `output_threshold` isn't reached.
-transaction = account.prepare_consolidate_outputs(
-    ConsolidationParams(force=True)).send()
-print('Transaction sent: ', transaction.transactionId)
+transaction = account.consolidate_outputs(ConsolidationParams(force=True))
+print('Transaction sent: ', transaction.transaction_id)
 
 # Wait for the consolidation transaction to get confirmed
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 
 print(
-    'Transaction included: {}/block/{}'.format(
-        os.environ['EXPLORER_URL'],
-        block_id
-    )
+    f'Transaction included: {os.environ["EXPLORER_ID"]}/block/{block_id}'
 )
 
 # Sync account
@@ -71,8 +69,8 @@ for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data.address.pubKeyHash, 'rms'),
+            Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            output_data.output.nativeTokens
+            output_data.output.native_tokens
         )
     )

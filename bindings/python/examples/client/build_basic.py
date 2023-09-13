@@ -1,7 +1,12 @@
-from iota_sdk import *
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (AddressUnlockCondition, Client, Ed25519Address,
+                      ExpirationUnlockCondition, MetadataFeature,
+                      SenderFeature, StorageDepositReturnUnlockCondition,
+                      TagFeature, TimelockUnlockCondition, Utils, utf8_to_hex)
 
 load_dotenv()
 
@@ -24,7 +29,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with metadata feature block
 basic_output = client.build_basic_output(
@@ -36,33 +41,33 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with storage deposit return
 basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
         StorageDepositReturnUnlockCondition(
-            return_address=Ed25519Address(hex_address),
+            returnAddress=Ed25519Address(hex_address),
             amount=1000000
         )
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with expiration
 basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
         ExpirationUnlockCondition(
-            return_address=Ed25519Address(hex_address),
-            unix_time=1
+            returnAddress=Ed25519Address(hex_address),
+            unixTime=1
         )
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with timelock
 basic_output = client.build_basic_output(
@@ -72,7 +77,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with tag feature
 basic_output = client.build_basic_output(
@@ -84,7 +89,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with sender feature
 basic_output = client.build_basic_output(
@@ -96,4 +101,4 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))

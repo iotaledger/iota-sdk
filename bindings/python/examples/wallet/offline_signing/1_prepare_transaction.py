@@ -3,11 +3,14 @@
 
 # In this example we will get inputs and prepare a transaction.
 
-from iota_sdk import Wallet, CoinType, ClientOptions, SendParams, AccountAddress
-from dotenv import load_dotenv
-from dacite import from_dict
 import json
 import os
+
+from dacite import from_dict
+from dotenv import load_dotenv
+
+from iota_sdk import (AccountAddress, ClientOptions, CoinType, SendParams,
+                      Wallet)
 
 load_dotenv()
 
@@ -23,8 +26,8 @@ SEND_AMOUNT = 1_000_000
 params = [SendParams(RECV_ADDRESS, str(SEND_AMOUNT))]
 
 # Recovers addresses from example `0_address_generation`.
-addresses_data = json.load(open(ADDRESSES_FILE_PATH, "r"))
-addresses = list(map(lambda x: from_dict(AccountAddress, x), addresses_data))
+addresses_data = json.load(open(ADDRESSES_FILE_PATH, "r", encoding="utf-8"))
+addresses = list(map(lambda x: AccountAddress.from_dict(x), addresses_data))
 
 if 'NODE_URL' not in os.environ:
     raise Exception(".env NODE_URL is undefined, see .env.example")
@@ -42,9 +45,9 @@ account.sync()
 prepared_transaction = account.prepare_send(params)
 
 json_data = json.dumps(
-    prepared_transaction.prepared_transaction_data().as_dict(),
+    prepared_transaction.prepared_transaction_data().to_dict(),
     indent=4)
 print(f"example.prepared_transaction.json:\n{json_data}")
-f = open(PREPARED_TRANSACTION_FILE_PATH, "w")
+f = open(PREPARED_TRANSACTION_FILE_PATH, "w", encoding="utf-8")
 f.write(json_data)
 f.close()

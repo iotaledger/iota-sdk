@@ -1,7 +1,9 @@
-from iota_sdk import Wallet, OutputParams, Unlocks
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import OutputParams, Unlocks, Wallet
 
 load_dotenv()
 
@@ -19,10 +21,10 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # using prepare_output
 output = account.prepare_output(OutputParams(
-    "rms1qprutadk4uc9rp6h7wh7sech42sl0z40ztpgyygr5tf0cn5jrqshgm8y43d", "1000000", unlocks=Unlocks(expirationUnixTime=1676570528)))
-print(f"Output: {json.dumps(output.as_dict(), indent=4)}")
+    "rms1qprutadk4uc9rp6h7wh7sech42sl0z40ztpgyygr5tf0cn5jrqshgm8y43d", "1000000", unlocks=Unlocks(expiration_unix_time=1676570528)))
+print(f"Output: {json.dumps(output.to_dict(), indent=4)}")
 
 account.sync()
 
 transaction = account.send_outputs([output])
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

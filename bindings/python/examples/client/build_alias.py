@@ -1,7 +1,12 @@
-from iota_sdk import *
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (Client, Ed25519Address, GovernorAddressUnlockCondition,
+                      IssuerFeature, MetadataFeature, SenderFeature,
+                      StateControllerAddressUnlockCondition, Utils,
+                      utf8_to_hex)
 
 load_dotenv()
 
@@ -13,7 +18,7 @@ client = Client(nodes=[node_url])
 hexAddress = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
-alias_id = '0x0000000000000000000000000000000000000000000000000000000000000000'
+account_id = '0x0000000000000000000000000000000000000000000000000000000000000000'
 state_metadata = data = utf8_to_hex('Hello, World!')
 unlock_conditions = [
     StateControllerAddressUnlockCondition(Ed25519Address(hexAddress)),
@@ -28,9 +33,9 @@ immutable_features = [
     MetadataFeature(utf8_to_hex('Hello, World!'))
 ]
 
-# Build alias output
-alias_output = client.build_alias_output(
-    alias_id=alias_id,
+# Build account output
+account_output = client.build_account_output(
+    account_id=account_id,
     state_metadata=state_metadata,
     unlock_conditions=unlock_conditions,
     features=features,
@@ -38,4 +43,4 @@ alias_output = client.build_alias_output(
 )
 
 # Print the output
-print(json.dumps(alias_output.as_dict(), indent=4))
+print(json.dumps(account_output.to_dict(), indent=4))

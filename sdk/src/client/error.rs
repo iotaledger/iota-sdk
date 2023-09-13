@@ -132,9 +132,9 @@ pub enum Error {
     #[error("local time {current_time} doesn't match the tangle time: {tangle_time}")]
     TimeNotSynced {
         /// The local time.
-        current_time: u32,
+        current_time: u64,
         /// The tangle time.
-        tangle_time: u32,
+        tangle_time: u64,
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]

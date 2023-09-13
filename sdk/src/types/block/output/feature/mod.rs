@@ -15,6 +15,10 @@ use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
+#[cfg(feature = "irc_27")]
+pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
+#[cfg(feature = "irc_30")]
+pub use self::metadata::irc_30::Irc30Metadata;
 pub use self::{
     block_issuer::BlockIssuerFeature, issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature,
     staking::StakingFeature, tag::TagFeature,

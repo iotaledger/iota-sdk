@@ -4,7 +4,6 @@
 use std::path::Path;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
@@ -17,11 +16,7 @@ use tokio::{
 };
 use zeroize::Zeroize;
 
-use crate::{
-    command::{account::AccountCli, wallet::WalletCli},
-    error::Error,
-    println_log_error, println_log_info,
-};
+use crate::{error::Error, println_log_error, println_log_info};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
@@ -77,28 +72,16 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
         1 => Ok(Some(accounts.swap_remove(0))),
         _ => {
             // fetch all available account aliases to display to the user
-            let aliases = wallet.get_account_aliases().await?;
+            let account_aliases = wallet.get_account_aliases().await?;
 
             let index = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select an account:")
-                .items(&aliases)
+                .items(&account_aliases)
                 .default(0)
                 .interact_on(&Term::stderr())?;
 
             Ok(Some(accounts.swap_remove(index)))
         }
-    }
-}
-
-pub fn print_wallet_help() {
-    if let Err(err) = WalletCli::try_parse_from(["Wallet:", "help"]) {
-        println!("{err}");
-    }
-}
-
-pub fn print_account_help() {
-    if let Err(err) = AccountCli::try_parse_from(["Account:", "help"]) {
-        println!("{err}");
     }
 }
 
@@ -121,7 +104,7 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
         .interact_on(&Term::stderr())?;
 
     let mnemnonic = match selected_choice {
-        0 => generate_mnemonic().await?,
+        0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
         _ => unreachable!(),
     };
@@ -129,28 +112,45 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
     Ok(mnemnonic)
 }
 
-pub async fn generate_mnemonic() -> Result<Mnemonic, Error> {
+pub async fn generate_mnemonic(
+    output_file_name: Option<String>,
+    output_stdout: Option<bool>,
+) -> Result<Mnemonic, Error> {
     let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
-    let choices = [
-        "Write it to the console only",
-        "Write it to a file only",
-        "Write it to the console and a file",
-    ];
 
-    let selected_choice = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select how to proceed with it")
-        .items(&choices)
-        .default(0)
-        .interact_on(&Term::stderr())?;
+    let selected_choice = match (&output_file_name, &output_stdout) {
+        // Undecided, we give the user a choice
+        (None, None) | (None, Some(false)) => {
+            let choices = [
+                "Write it to the console only",
+                "Write it to a file only",
+                "Write it to the console and a file",
+            ];
+
+            Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Select how to proceed with it")
+                .items(&choices)
+                .default(0)
+                .interact_on(&Term::stderr())?
+        }
+        // Only console
+        (None, Some(true)) => 0,
+        // Only file
+        (Some(_), Some(false)) | (Some(_), None) => 1,
+        // File and console
+        (Some(_), Some(true)) => 2,
+    };
 
     if [0, 2].contains(&selected_choice) {
         println!("YOUR MNEMONIC:");
         println!("{}", mnemonic.as_ref());
     }
     if [1, 2].contains(&selected_choice) {
-        write_mnemonic_to_file(DEFAULT_MNEMONIC_FILE_PATH, &mnemonic).await?;
-        println_log_info!("Mnemonic has been written to '{DEFAULT_MNEMONIC_FILE_PATH}'.");
+        let file_path = output_file_name.unwrap_or(DEFAULT_MNEMONIC_FILE_PATH.to_string());
+
+        write_mnemonic_to_file(&file_path, &mnemonic).await?;
+        println_log_info!("Mnemonic has been written to '{file_path}'.");
     }
 
     println_log_info!("IMPORTANT:");

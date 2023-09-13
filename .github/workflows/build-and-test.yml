@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop, production, 2.0]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -13,6 +14,7 @@ on:
   pull_request:
     branches: [develop, production, 2.0]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -50,4 +52,4 @@ jobs:
         uses: taiki-e/install-action@nextest
 
       - name: Run tests
-        run: cargo nextest run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
+        run: cargo ci-test

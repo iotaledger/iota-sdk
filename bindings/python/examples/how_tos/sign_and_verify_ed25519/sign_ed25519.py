@@ -1,6 +1,9 @@
-from iota_sdk import Client, StrongholdSecretManager, SecretManager, Bip44, CoinType, Utils, utf8_to_hex
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (Bip44, CoinType, SecretManager,
+                      StrongholdSecretManager, Utils, utf8_to_hex)
 
 load_dotenv()
 
@@ -36,8 +39,8 @@ bip44_chain = Bip44(
 message = utf8_to_hex(FOUNDRY_METADATA)
 ed25519_signature = secret_manager.sign_ed25519(message, bip44_chain)
 print(
-    f'Public key: {ed25519_signature.publicKey}\nSignature: {ed25519_signature.signature}')
+    f'Public key: {ed25519_signature.public_key}\nSignature: {ed25519_signature.signature}')
 
 bech32_address = Utils.hex_public_key_to_bech32_address(
-    ed25519_signature.publicKey, "rms")
+    ed25519_signature.public_key, "rms")
 print(f'Address: {bech32_address}')

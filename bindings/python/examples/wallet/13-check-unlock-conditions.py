@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, Utils, OutputParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import OutputParams, Utils, Wallet
 
 load_dotenv()
 
@@ -19,6 +21,7 @@ output = account.prepare_output(OutputParams(
 
 
 def hexAddress(address):
+    """Converts an address to hex"""
     return Utils.bech32_to_hex(address.address)
 
 
@@ -26,8 +29,9 @@ hexEncodedAccountAddresses = map(hexAddress, accountAddresses)
 
 controlled_by_account = False
 
-if len(output.unlockConditions) == 1 and output.unlockConditions[0].type == 0:
-    if output.unlockConditions[0].address.pubKeyHash in hexEncodedAccountAddresses:
+if len(
+        output.unlock_conditions) == 1 and output.unlock_conditions[0].type == 0:
+    if output.unlock_conditions[0].address.pub_key_hash in hexEncodedAccountAddresses:
         controlled_by_account = True
 
 print(
