@@ -48,6 +48,7 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
+            _ => todo!("What do we do here?"),
         }
     }
 }

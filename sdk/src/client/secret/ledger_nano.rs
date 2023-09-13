@@ -544,6 +544,7 @@ fn merge_unlocks(
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
                 Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                _ => todo!("What do we do here?"),
             },
             None => {
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft

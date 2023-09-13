@@ -5,6 +5,7 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
+use super::Restricted;
 use crate::types::block::{output::AccountId, Error};
 
 /// An account address.
@@ -37,6 +38,12 @@ impl AccountAddress {
     }
 }
 
+impl Restricted<AccountAddress> {
+    /// The [`Address`](crate::types::block::address::Address) kind of a
+    /// [`RestrictedAccountAddress`](Restricted<AccountAddress>).
+    pub const KIND: u8 = 9;
+}
+
 impl FromStr for AccountAddress {
     type Err = Error;
 
@@ -62,6 +69,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
+    use crate::types::block::address::dto::RestrictedDto;
 
     /// Describes an account address.
     #[derive(Serialize, Deserialize)]
@@ -88,4 +96,32 @@ mod dto {
     }
 
     impl_serde_typed_dto!(AccountAddress, AccountAddressDto, "account address");
+
+    impl From<&Restricted<AccountAddress>> for RestrictedDto<AccountAddressDto> {
+        fn from(value: &Restricted<AccountAddress>) -> Self {
+            Self {
+                address: AccountAddressDto {
+                    kind: Restricted::<AccountAddress>::KIND,
+                    account_id: value.address.0,
+                },
+                allowed_capabilities: value.allowed_capabilities.into_iter().map(|c| c.0).collect(),
+            }
+        }
+    }
+
+    impl From<RestrictedDto<AccountAddressDto>> for Restricted<AccountAddress> {
+        fn from(value: RestrictedDto<AccountAddressDto>) -> Self {
+            let mut res = Self::new(AccountAddress::from(value.address));
+            if let Some(allowed_capabilities) = value.allowed_capabilities.first() {
+                res = res.with_allowed_capabilities(*allowed_capabilities);
+            }
+            res
+        }
+    }
+
+    impl_serde_typed_dto!(
+        Restricted<AccountAddress>,
+        RestrictedDto<AccountAddressDto>,
+        "restricted account address"
+    );
 }
