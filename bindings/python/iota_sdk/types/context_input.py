@@ -29,7 +29,7 @@ class CommitmentContextInput(ContextInput):
     """A Commitment Input allows referencing a commitment to a certain slot.
 
     Attributes:
-        type: The type of commitment input.
+        type: The type of context input.
         commitment_id: The commitment identifier to reference to.
     """
     commitment_id: HexStr
@@ -46,7 +46,7 @@ class BlockIssuanceCreditContextInput(ContextInput):
     the BIC vector of a specific slot.
 
     Attributes:
-        type: The type of commitment input.
+        type: The type of context input.
         account_id: The BIC of an account to use.
     """
     account_id: HexStr
@@ -62,7 +62,7 @@ class RewardContextInput(ContextInput):
     """A Reward Context Input indicates which transaction Input is claiming Mana rewards.
 
     Attributes:
-        type: The type of commitment input.
+        type: The type of context input.
         index: The index of the transaction input for which to claim rewards.
     """
     index: int
