@@ -38,6 +38,7 @@ impl Restricted<Ed25519Address> {
 #[derive(Copy, Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
 #[as_ref(forward)]
 pub struct ImplicitAccountCreationAddress(Ed25519Address);
+
 impl ImplicitAccountCreationAddress {
     /// The [`Address`](crate::types::block::address::Address) kind of an [`ImplicitAccountCreationAddress`].
     pub const KIND: u8 = 24;
