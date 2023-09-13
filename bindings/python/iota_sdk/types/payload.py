@@ -11,6 +11,7 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
+from iota_sdk.types.mana import ManaAllotment
 
 
 class PayloadType(IntEnum):
@@ -37,6 +38,7 @@ class RegularTransactionEssence(TransactionEssence):
     inputs_commitment: HexStr
     inputs: List[UtxoInput]
     outputs: List[AccountOutput | FoundryOutput | NftOutput | BasicOutput]
+    allotments: List[ManaAllotment]
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: 1, init=False)
 
