@@ -32,7 +32,6 @@ class CommitmentContextInput(ContextInput):
         type: The type of commitment input.
         commitment_id: The commitment identifier to reference to.
     """
-    # TODO Replace with a proper SlotIndex type
     commitment_id: HexStr
     type: int = field(
         default_factory=lambda: int(
