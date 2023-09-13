@@ -156,7 +156,7 @@ impl ClientInner {
         let block_dto = BlockDto::from(block);
 
         let response = self
-            .post_request_json::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
+            .post_request::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
             .await?;
 
         Ok(response.block_id)
@@ -167,14 +167,8 @@ impl ClientInner {
     pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
-        let timeout = self.get_timeout().await;
-
-        // TODO add Client::post_request_bytes
         let response = self
-            .node_manager
-            .read()
-            .await
-            .post_request_bytes::<SubmitBlockResponse>(PATH, timeout, &block.pack_to_vec())
+            .post_request_bytes::<SubmitBlockResponse>(PATH, &block.pack_to_vec())
             .await?;
 
         Ok(response.block_id)
