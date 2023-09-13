@@ -33,22 +33,22 @@ pub enum Address {
     /// An Ed25519 address.
     #[packable(tag = Ed25519Address::KIND)]
     Ed25519(Ed25519Address),
-    /// An Ed25519 address.
+    /// A restricted Ed25519 address.
     #[packable(tag = Restricted::<Ed25519Address>::KIND)]
     RestrictedEd25519(Restricted<Ed25519Address>),
     /// An account address.
     #[packable(tag = AccountAddress::KIND)]
     Account(AccountAddress),
-    /// An account address.
+    /// A restricted account address.
     #[packable(tag = Restricted::<AccountAddress>::KIND)]
     RestrictedAccount(Restricted<AccountAddress>),
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
-    /// An NFT address.
+    /// A restricted NFT address.
     #[packable(tag = Restricted::<NftAddress>::KIND)]
     RestrictedNft(Restricted<NftAddress>),
-    /// An NFT address.
+    /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
 }
@@ -323,7 +323,7 @@ impl CapabilityFlag {
     pub const ALL: u8 = u8::MAX;
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Packable)]
 #[repr(transparent)]
 pub struct Capabilities(u8);
 
@@ -345,22 +345,6 @@ impl Capabilities {
 
     pub fn has_capabilities(&self, flags: impl Into<u8>) -> bool {
         self.0 & flags.into() != 0
-    }
-}
-
-impl Packable for Capabilities {
-    type UnpackError = <u8 as Packable>::UnpackError;
-    type UnpackVisitor = ();
-
-    fn pack<P: packable::packer::Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.0.pack(packer)
-    }
-
-    fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        _visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        u8::unpack::<_, VERIFY>(unpacker, &()).coerce().map(Into::into)
     }
 }
 
