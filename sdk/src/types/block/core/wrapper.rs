@@ -15,7 +15,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlock, ValidationBlock},
     protocol::ProtocolParameters,
-    signature::{Ed25519Signature, Signature},
+    signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
     Block, Error, IssuerId,
 };
@@ -51,11 +51,7 @@ impl BlockWrapper {
         + size_of::<SlotCommitmentId>()
         + size_of::<SlotIndex>()
         + size_of::<IssuerId>();
-    /// The length of the block signature.
-    pub const SIGNATURE_LENGTH: usize =
-        size_of::<u8>() + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
 
-    // TODO builder?
     /// Creates a new [`BlockWrapper`].
     #[inline(always)]
     pub fn new(
@@ -155,13 +151,13 @@ impl BlockWrapper {
         let id = [
             &self.header_hash()[..],
             &self.block.hash()[..],
-            &self.signature_bytes()[..],
+            &self.signature.pack_to_vec(),
         ]
         .concat();
         BlockHash::new(Blake2b256::digest(id).into())
     }
 
-    /// Computes the identifier of the block.
+    /// Computes the block identifier.
     pub fn id(&self) -> BlockId {
         self.hash()
             .with_slot_index(self.protocol_parameters().slot_index(self.issuing_time()))
@@ -182,14 +178,6 @@ impl BlockWrapper {
         }
 
         Ok(block)
-    }
-
-    pub(crate) fn signature_bytes(&self) -> [u8; Self::SIGNATURE_LENGTH] {
-        let mut bytes = [0u8; Self::SIGNATURE_LENGTH];
-        let mut packer = SlicePacker::new(&mut bytes);
-        self.signature().pack(&mut packer).unwrap();
-
-        bytes
     }
 
     /// Checks whether the inner block is a [`BasicBlock`].
