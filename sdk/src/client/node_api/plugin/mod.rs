@@ -31,7 +31,7 @@ impl ClientInner {
 
         match req_method {
             Ok(Method::GET) => self.get_request(&path, None, false, false).await,
-            Ok(Method::POST) => self.post_request_json(&path, request_object.into()).await,
+            Ok(Method::POST) => self.post_request(&path, request_object.into()).await,
             _ => Err(crate::client::Error::Node(
                 crate::client::node_api::error::Error::NotSupported(method.to_string()),
             )),
