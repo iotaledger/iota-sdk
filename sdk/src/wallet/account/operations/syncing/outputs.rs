@@ -164,8 +164,8 @@ where
                                         }
                                     } else {
                                         Err(ClientError::UnexpectedBlockKind {
-                                            actual: wrapper.block().kind(),
                                             expected: BasicBlock::KIND,
+                                            actual: wrapper.block().kind(),
                                         }
                                         .into())
                                     }

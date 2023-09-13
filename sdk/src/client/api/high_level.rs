@@ -46,8 +46,8 @@ impl Client {
             self.get_outputs_with_metadata(&input_ids).await
         } else {
             Err(Error::UnexpectedBlockKind {
-                actual: wrapper.block().kind(),
                 expected: BasicBlock::KIND,
+                actual: wrapper.block().kind(),
             })
         }
     }
