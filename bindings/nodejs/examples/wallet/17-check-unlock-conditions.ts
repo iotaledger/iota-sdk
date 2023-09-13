@@ -43,7 +43,8 @@ async function run() {
                     AddressUnlockCondition &&
                 hexEncodedAccountAddresses.includes(
                     (
-                        basicOutput.unlockConditions[0] as AddressUnlockCondition
+                        basicOutput
+                            .unlockConditions[0] as AddressUnlockCondition
                     ).address.toString(),
                 )
             ) {
