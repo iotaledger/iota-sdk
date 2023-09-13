@@ -350,6 +350,8 @@ impl Capabilities {
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use crate::utils::serde::prefix_hex_bytes;
