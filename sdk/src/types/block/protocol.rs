@@ -26,7 +26,7 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 #[getset(get_copy = "pub")]
 pub struct ProtocolParameters {
     /// The layout type.
-    #[serde(rename = "type")]
+    #[cfg_attr(feature = "serde", serde(rename = "type"))]
     pub(crate) kind: u8,
     /// The version of the protocol running.
     pub(crate) version: u8,
