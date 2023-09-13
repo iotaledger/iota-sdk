@@ -5,14 +5,14 @@ use crypto::keys::bip44::Bip44;
 use instant::Instant;
 
 use crate::{
-    client::{secret::SecretManage, Client},
+    client::{secret::SecretManage, Client, Error as ClientError},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
+            core::{BasicBlock, Block},
             input::Input,
             output::{OutputId, OutputWithMetadata},
             payload::{transaction::TransactionId, Payload, TransactionPayload},
-            Block, Error as BlockError,
         },
     },
     wallet::{
@@ -163,7 +163,11 @@ where
                                             Ok((transaction_id, None))
                                         }
                                     } else {
-                                        Err(BlockError::InvalidBlockKind(wrapper.block().kind()).into())
+                                        Err(ClientError::UnexpectedBlockKind {
+                                            actual: wrapper.block().kind(),
+                                            expected: BasicBlock::KIND,
+                                        }
+                                        .into())
                                     }
                                 }
                                 Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
