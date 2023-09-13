@@ -28,7 +28,7 @@ enum UnlockConditionType {
 
 abstract class UnlockCondition {
     /**
-     * Get the type of unlock condition.
+     * The type of unlock condition.
      */
     readonly type: UnlockConditionType;
 
@@ -161,7 +161,7 @@ class TimelockUnlockCondition extends UnlockCondition {
  */
 class ExpirationUnlockCondition extends UnlockCondition {
     /**
-     * Get the return address.
+     * The return address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
@@ -210,7 +210,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition {
  */
 class GovernorAddressUnlockCondition extends UnlockCondition {
     /**
-     * The address.
+     * The Governor address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
@@ -231,7 +231,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition {
  */
 class ImmutableAccountAddressUnlockCondition extends UnlockCondition {
     /**
-     * Get the Governor address.
+     * The Immutable Account address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,

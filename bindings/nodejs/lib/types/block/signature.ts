@@ -19,7 +19,7 @@ enum SignatureType {
  */
 abstract class Signature {
     /**
-     * Get the type of signature.
+     * The type of signature.
      */
     readonly type: SignatureType;
 

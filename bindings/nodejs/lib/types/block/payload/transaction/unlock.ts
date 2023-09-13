@@ -31,7 +31,7 @@ enum UnlockType {
  */
 abstract class Unlock {
     /**
-     * Get the type of unlock.
+     * The type of unlock.
      */
     readonly type: UnlockType;
 

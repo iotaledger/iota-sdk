@@ -17,7 +17,7 @@ enum TokenSchemeType {
  */
 abstract class TokenScheme {
     /**
-     * Get the type of token scheme.
+     * The type of token scheme.
      */
     readonly type: TokenSchemeType;
 
@@ -34,15 +34,15 @@ abstract class TokenScheme {
  */
 class SimpleTokenScheme extends TokenScheme {
     /**
-     * Get the amount of tokens minted.
+     * The amount of tokens minted.
      */
     readonly mintedTokens: u256;
     /**
-     * Get the amount of tokens melted.
+     * The amount of tokens melted.
      */
     readonly meltedTokens: u256;
     /**
-     * Get the maximum supply of tokens.
+     * The maximum supply of tokens.
      */
     readonly maximumSupply: u256;
 

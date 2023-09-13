@@ -26,7 +26,7 @@ enum TransactionEssenceType {
  */
 abstract class TransactionEssence {
     /**
-     * Get the type of essence.
+     * The type of essence.
      */
     readonly type: TransactionEssenceType;
 

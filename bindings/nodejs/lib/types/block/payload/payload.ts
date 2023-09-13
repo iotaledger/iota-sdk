@@ -16,7 +16,7 @@ enum PayloadType {
  */
 abstract class Payload {
     /**
-     * Get the type of payload.
+     * The type of payload.
      */
     readonly type: PayloadType;
 

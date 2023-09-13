@@ -36,6 +36,9 @@ abstract class Output {
     // Getter transforms it into a proper number
     amount: string;
 
+    /**
+     * The type of output.
+     */
     readonly type: OutputType;
 
     /**
@@ -91,7 +94,7 @@ abstract class CommonOutput extends Output {
     private nativeTokens?: INativeToken[];
 
     /**
-     * Get the features contained by the output.
+     * The features contained by the output.
      */
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,

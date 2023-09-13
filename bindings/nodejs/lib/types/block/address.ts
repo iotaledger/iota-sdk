@@ -22,7 +22,7 @@ enum AddressType {
  */
 abstract class Address {
     /**
-     * Get the type of address.
+     * The type of address.
      */
     readonly type: AddressType;
 
@@ -60,7 +60,7 @@ abstract class Address {
  */
 class Ed25519Address extends Address {
     /**
-     * Get the public key hash.
+     * The public key hash.
      */
     readonly pubKeyHash: HexEncodedString;
 
@@ -82,7 +82,7 @@ class Ed25519Address extends Address {
  */
 class AccountAddress extends Address {
     /**
-     * Get the account ID.
+     * The account ID.
      */
     readonly accountId: AccountId;
     /**
@@ -102,7 +102,7 @@ class AccountAddress extends Address {
  */
 class NftAddress extends Address {
     /**
-     * Get the NFT ID.
+     * The NFT ID.
      */
     readonly nftId: NftId;
     /**
