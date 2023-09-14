@@ -148,9 +148,9 @@ impl IntoIterator for BlockIssuerKeys {
 }
 
 impl BlockIssuerKeys {
-    /// The minimum number of block_issuer_keys of a transaction.
+    /// The minimum number of block_issuer_keys in a [`BlockIssuerFeature`].
     pub const COUNT_MIN: u8 = 1;
-    /// The maximum number of block_issuer_keys of a transaction.
+    /// The maximum number of block_issuer_keys in a [`BlockIssuerFeature`].
     pub const COUNT_MAX: u8 = 128;
     /// The range of valid numbers of block_issuer_keys.
     pub const COUNT_RANGE: RangeInclusive<u8> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
