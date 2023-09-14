@@ -23,8 +23,6 @@ pub mod output;
 pub mod parents;
 /// Module providing random payload generation utilities.
 pub mod payload;
-/// Module providing random public key generation utilities.
-pub mod public_key;
 /// Module providing random signature generation utilities.
 pub mod signature;
 /// Module providing random slot generation utilities.

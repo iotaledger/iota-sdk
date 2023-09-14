@@ -14,12 +14,13 @@ use crate::types::block::{
     input::UtxoInput,
     mana::ManaAllotmentCount,
     output::{
-        feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
-        NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
+        feature::{BlockIssuerKeyCount, FeatureCount},
+        unlock_condition::UnlockConditionCount,
+        AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
+        TagFeatureLength,
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     protocol::ProtocolParametersHash,
-    public_key::PublicKeyCount,
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -104,7 +105,7 @@ pub enum Error {
         expected: ProtocolParametersHash,
         actual: ProtocolParametersHash,
     },
-    InvalidPublicKeyCount(<PublicKeyCount as TryFrom<usize>>::Error),
+    InvalidBlockIssuerKeyCount(<BlockIssuerKeyCount as TryFrom<usize>>::Error),
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -274,7 +275,7 @@ impl fmt::Display for Error {
                     "invalid protocol parameters hash: expected {expected} but got {actual}"
                 )
             }
-            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
+            Self::InvalidBlockIssuerKeyCount(count) => write!(f, "invalid block issuer key count: {count}"),
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
