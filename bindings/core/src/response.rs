@@ -30,7 +30,7 @@ use iota_sdk::{
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
             unlock::Unlock,
-            BlockDto, BlockId,
+            BlockId, BlockWrapperDto,
         },
     },
     wallet::account::{
@@ -107,10 +107,10 @@ pub enum Response {
     /// Response for:
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
-    Block(BlockDto),
+    Block(BlockWrapperDto),
     /// Response for:
     /// - [`PostBlockPayload`](crate::method::ClientMethod::PostBlockPayload)
-    BlockIdWithBlock(BlockId, BlockDto),
+    BlockIdWithBlock(BlockId, BlockWrapperDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
@@ -140,7 +140,7 @@ pub enum Response {
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
-    Blocks(Vec<BlockDto>),
+    Blocks(Vec<BlockWrapperDto>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInput>),
