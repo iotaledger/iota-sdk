@@ -1,8 +1,10 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { AliasId } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
+import { HexEncodedString } from '../utils';
 import { AccountAddress } from './address';
 
 /** Options for creating a transaction. */
@@ -63,13 +65,13 @@ export type CustomAddress = {
 /** Options for creating Native Tokens. */
 export interface CreateNativeTokenParams {
     /** The Alias ID of the corresponding Foundry. */
-    aliasId?: string;
+    aliasId?: AliasId;
     /** Hex encoded number */
     circulatingSupply: bigint;
     /** Hex encoded number */
     maximumSupply: bigint;
     /** Hex encoded bytes */
-    foundryMetadata?: string;
+    foundryMetadata?: HexEncodedString;
 }
 
 /** Options for minting NFTs. */
@@ -81,13 +83,13 @@ export interface MintNftParams {
     /** Bech32 encoded sender address **/
     sender?: string;
     /** Hex encoded bytes */
-    metadata?: string;
+    metadata?: HexEncodedString;
     /** Hex encoded bytes */
-    tag?: string;
+    tag?: HexEncodedString;
     /** Bech32 encoded issuer address **/
     issuer?: string;
     /** Hex encoded bytes */
-    immutableMetadata?: string;
+    immutableMetadata?: HexEncodedString;
 }
 
 /** Options for the alias output creation */
@@ -97,9 +99,9 @@ export interface AliasOutputParams {
      */
     address?: string;
     /** Hex encoded bytes */
-    immutableMetadata?: string;
+    immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */
-    metadata?: string;
+    metadata?: HexEncodedString;
     /** Hex encoded bytes */
-    stateMetadata?: string;
+    stateMetadata?: HexEncodedString;
 }
