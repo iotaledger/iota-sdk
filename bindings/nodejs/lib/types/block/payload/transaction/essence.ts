@@ -25,6 +25,9 @@ enum TransactionEssenceType {
  * The base class for transaction essences.
  */
 abstract class TransactionEssence {
+    /**
+     * The type of essence.
+     */
     readonly type: TransactionEssenceType;
 
     /**
@@ -42,33 +45,33 @@ class RegularTransactionEssence extends TransactionEssence {
     /**
      * The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
      */
-    networkId: u64;
+    readonly networkId: u64;
 
-    creationSlot: SlotIndex;
+    readonly creationSlot: SlotIndex;
 
     @Type(() => Input, {
         discriminator: ContextInputDiscriminator,
     })
-    contextInputs: ContextInput[];
+    readonly contextInputs: ContextInput[];
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
-    inputs: Input[];
+    readonly inputs: Input[];
 
-    inputsCommitment: HexEncodedString;
+    readonly inputsCommitment: HexEncodedString;
 
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
-    outputs: Output[];
+    readonly outputs: Output[];
 
-    allotments: ManaAllotment[];
+    readonly allotments: ManaAllotment[];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    payload?: Payload;
+    readonly payload?: Payload;
 
     /**
      * @param networkId The ID of the network the transaction was issued to.

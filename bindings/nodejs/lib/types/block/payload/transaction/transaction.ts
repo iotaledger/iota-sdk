@@ -20,14 +20,14 @@ class TransactionPayload extends Payload {
     @Type(() => TransactionEssence, {
         discriminator: TransactionEssenceDiscriminator,
     })
-    essence: TransactionEssence;
+    readonly essence: TransactionEssence;
     /**
      * The unlocks.
      */
     @Type(() => Unlock, {
         discriminator: UnlockDiscriminator,
     })
-    unlocks: Unlock[];
+    readonly unlocks: Unlock[];
 
     /**
      * @param essence The transaction essence.

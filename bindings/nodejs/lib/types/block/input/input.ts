@@ -24,13 +24,6 @@ abstract class Input {
     constructor(type: InputType) {
         this.type = type;
     }
-
-    /**
-     * Get the type of input.
-     */
-    getType(): InputType {
-        return this.type;
-    }
 }
 
 /**
@@ -40,11 +33,11 @@ class UTXOInput extends Input {
     /**
      * The transaction ID.
      */
-    transactionId: HexEncodedString;
+    readonly transactionId: HexEncodedString;
     /**
      * The output index.
      */
-    transactionOutputIndex: number;
+    readonly transactionOutputIndex: number;
 
     /**
      * @param transactionId The ID of the transaction it is an input of.
