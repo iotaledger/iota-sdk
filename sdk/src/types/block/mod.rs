@@ -12,8 +12,6 @@ mod issuer_id;
 
 /// A module that provides types and syntactic validations of addresses.
 pub mod address;
-/// A module that provides types and syntactic validations of basic blocks.
-pub mod basic;
 /// A module that provides types and syntactic validations of context inputs.
 pub mod context_input;
 /// A module that provides types and syntactic validations of blocks.
@@ -45,19 +43,17 @@ pub mod signature;
 pub mod slot;
 /// A module that provides types and syntactic validations of unlocks.
 pub mod unlock;
-/// A module that provides types and syntactic validations of validation blocks.
-pub mod validation;
 
 pub(crate) use r#macro::create_bitflags;
 #[cfg(feature = "serde")]
 pub(crate) use r#macro::{impl_id, string_serde_impl};
 
 #[cfg(feature = "serde")]
-pub use self::core::dto::BlockDto;
+pub use self::core::dto::{BlockDto, BlockWrapperDto};
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{Block, BlockBuilder},
+    core::{Block, BlockWrapper},
     error::Error,
     issuer_id::IssuerId,
 };

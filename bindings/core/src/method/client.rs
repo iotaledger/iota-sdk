@@ -13,7 +13,7 @@ use iota_sdk::{
             NativeToken, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, transaction::TransactionId},
-        BlockDto, BlockId,
+        BlockId, BlockWrapperDto,
     },
     utils::serde::{option_string, string},
 };
@@ -151,7 +151,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: BlockDto,
+        block: BlockWrapperDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -327,6 +327,6 @@ pub enum ClientMethod {
     /// Returns a block ID from a block
     BlockId {
         /// Block
-        block: BlockDto,
+        block: BlockWrapperDto,
     },
 }

@@ -9,7 +9,13 @@ use crate::{
     client::{ClientInner, Result},
     types::{
         api::core::response::IssuanceBlockHeaderResponse,
-        block::{core::Block, parent::StrongParents, payload::Payload, signature::Ed25519Signature, IssuerId},
+        block::{
+            core::{Block, BlockWrapper},
+            parent::StrongParents,
+            payload::Payload,
+            signature::Ed25519Signature,
+            IssuerId,
+        },
     },
 };
 
@@ -21,7 +27,7 @@ impl ClientInner {
         issuing_time: Option<u64>,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
-    ) -> Result<Block> {
+    ) -> Result<BlockWrapper> {
         let IssuanceBlockHeaderResponse {
             strong_parents: default_strong_parents,
             weak_parents,
@@ -44,18 +50,19 @@ impl ClientInner {
             issuing_time
         });
 
-        Ok(Block::build_basic(
+        Ok(BlockWrapper::new(
             self.get_protocol_parameters().await?,
             issuing_time,
             commitment.id(),
             latest_finalized_slot,
             issuer_id,
-            strong_parents,
+            // TODO correct value for burned_mana
+            Block::build_basic(strong_parents, 0)
+                .with_weak_parents(weak_parents)
+                .with_shallow_like_parents(shallow_like_parents)
+                .with_payload(payload)
+                .finish_block()?,
             signature,
-        )
-        .with_weak_parents(weak_parents)
-        .with_shallow_like_parents(shallow_like_parents)
-        .with_payload(payload)
-        .finish()?)
+        ))
     }
 }

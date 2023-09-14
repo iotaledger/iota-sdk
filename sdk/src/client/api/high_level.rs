@@ -15,7 +15,7 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        core::Block,
+        core::{BasicBlock, Block, BlockWrapper},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{transaction::TransactionId, Payload},
@@ -28,27 +28,33 @@ use crate::{
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
-        let block = self.get_included_block(transaction_id).await?;
+        let wrapper = self.get_included_block(transaction_id).await?;
 
-        let inputs = match block.payload() {
-            Some(Payload::Transaction(t)) => t.essence().inputs(),
-            _ => {
-                unreachable!()
-            }
-        };
+        if let Block::Basic(block) = wrapper.block() {
+            let inputs = if let Some(Payload::Transaction(t)) = block.payload() {
+                t.essence().inputs()
+            } else {
+                return Err(Error::MissingTransactionPayload);
+            };
 
-        let input_ids = inputs
-            .iter()
-            .map(|i| match i {
-                Input::Utxo(input) => *input.output_id(),
+            let input_ids = inputs
+                .iter()
+                .map(|i| match i {
+                    Input::Utxo(input) => *input.output_id(),
+                })
+                .collect::<Vec<_>>();
+
+            self.get_outputs_with_metadata(&input_ids).await
+        } else {
+            Err(Error::UnexpectedBlockKind {
+                expected: BasicBlock::KIND,
+                actual: wrapper.block().kind(),
             })
-            .collect::<Vec<_>>();
-
-        self.get_outputs_with_metadata(&input_ids).await
+        }
     }
 
     /// Find all blocks by provided block IDs.
-    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<Block>> {
+    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<BlockWrapper>> {
         // Use a `HashSet` to prevent duplicate block_ids.
         let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
