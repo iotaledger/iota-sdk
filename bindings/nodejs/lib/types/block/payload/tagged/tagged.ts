@@ -11,11 +11,11 @@ class TaggedDataPayload extends Payload {
     /**
      * The tag to use to categorize the data.
      */
-    tag: HexEncodedString;
+    readonly tag: HexEncodedString;
     /**
      * The index data.
      */
-    data: HexEncodedString;
+    readonly data: HexEncodedString;
     /**
      * @param tag A tag as hex-encoded string.
      * @param data Index data as hex-encoded string.
