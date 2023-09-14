@@ -33,7 +33,7 @@ describe.skip('Main examples', () => {
     it('gets info about the node', async () => {
         const info = await client.getInfo();
 
-        expect(info.nodeInfo.protocol.bech32Hrp).toBe('rms');
+        expect(info.nodeInfo.protocolParameters[0].parameters[0].bech32Hrp).toBe('rms');
     });
 
     it('generates a mnemonic', async () => {
