@@ -12,21 +12,21 @@ export class Block {
     /**
      * The protocol version under which this block operates.
      */
-    protocolVersion!: number;
+    readonly protocolVersion!: number;
     /**
      * The parent block ids.
      */
-    parents!: HexEncodedString[];
+    readonly parents!: HexEncodedString[];
     /**
      * The payload contents.
      */
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    payload?: Payload;
+    readonly payload?: Payload;
     /**
      * The amount of mana the Account identified by IssuerID is at most
      * willing to burn for this block.
      */
-    burnedMana!: string;
+    readonly burnedMana!: string;
 }
