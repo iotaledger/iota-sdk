@@ -1630,6 +1630,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "iota-sdk-native"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "iota-sdk-bindings-core",
+ "log",
+ "once_cell",
+ "serde_json",
+ "tokio",
+ "zeroize",
+]
+
+[[package]]
 name = "iota-sdk-nodejs"
 version = "0.1.0"
 dependencies = [
