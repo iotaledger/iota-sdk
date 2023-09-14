@@ -320,19 +320,19 @@ pub(crate) mod dto {
 
     impl BlockWrapper {
         pub fn try_from_dto(dto: BlockWrapperDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
-            // if dto.protocol_version != protocol_params.version() {
-            //     return Err(Error::ProtocolVersionMismatch {
-            //         expected: protocol_params.version(),
-            //         actual: dto.protocol_version,
-            //     });
-            // }
+            if dto.protocol_version != protocol_params.version() {
+                return Err(Error::ProtocolVersionMismatch {
+                    expected: protocol_params.version(),
+                    actual: dto.protocol_version,
+                });
+            }
 
-            // if dto.network_id != protocol_params.network_id() {
-            //     return Err(Error::NetworkIdMismatch {
-            //         expected: protocol_params.network_id(),
-            //         actual: dto.network_id,
-            //     });
-            // }
+            if dto.network_id != protocol_params.network_id() {
+                return Err(Error::NetworkIdMismatch {
+                    expected: protocol_params.network_id(),
+                    actual: dto.network_id,
+                });
+            }
 
             Ok(BlockWrapper::new(
                 protocol_params.clone(),
