@@ -21,7 +21,7 @@ use crate::types::block::{slot::SlotIndex, Error};
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 #[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidPublicKeyKind)]
+#[packable(tag_type = u8, with_error = Error::InvalidBlockIssuerKeyKind)]
 pub enum BlockIssuerKey {
     /// An Ed25519 block issuer key.
     #[packable(tag = Ed25519BlockIssuerKey::KIND)]
@@ -37,20 +37,20 @@ impl core::fmt::Debug for BlockIssuerKey {
 }
 
 impl BlockIssuerKey {
-    /// Returns the block issuer key kind of a [`PublicKey`].
+    /// Returns the block issuer key kind of a [`BlockIssuerKey`].
     pub fn kind(&self) -> u8 {
         match self {
             Self::Ed25519(_) => Ed25519BlockIssuerKey::KIND,
         }
     }
 
-    /// Checks whether the block issuer key is an [`Ed25519PublicKey`].
+    /// Checks whether the block issuer key is an [`Ed25519BlockIssuerKey`].
     pub fn is_ed25519(&self) -> bool {
         matches!(self, Self::Ed25519(_))
     }
 
-    /// Gets the block issuer key as an actual [`Ed25519PublicKey`].
-    /// NOTE: Will panic if the block issuer key is not a [`Ed25519PublicKey`].
+    /// Gets the block issuer key as an actual [`Ed25519BlockIssuerKey`].
+    /// NOTE: Will panic if the block issuer key is not a [`Ed25519BlockIssuerKey`].
     pub fn as_ed25519(&self) -> &Ed25519BlockIssuerKey {
         let Self::Ed25519(key) = self;
         key
@@ -64,12 +64,12 @@ impl BlockIssuerKey {
 pub struct Ed25519BlockIssuerKey(ed25519::PublicKey);
 
 impl Ed25519BlockIssuerKey {
-    /// The block issuer key kind of an [`Ed25519PublicKey`].
+    /// The block issuer key kind of an [`Ed25519BlockIssuerKey`].
     pub const KIND: u8 = 0;
     /// Length of an ED25519 block issuer key.
     pub const PUBLIC_KEY_LENGTH: usize = ed25519::PublicKey::LENGTH;
 
-    /// Creates a new [`Ed25519PublicKey`] from bytes.
+    /// Creates a new [`Ed25519BlockIssuerKey`] from bytes.
     pub fn try_from_bytes(bytes: [u8; Self::PUBLIC_KEY_LENGTH]) -> Result<Self, Error> {
         Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
     }
@@ -102,7 +102,7 @@ impl Packable for Ed25519BlockIssuerKey {
 pub(crate) type BlockIssuerKeyCount =
     BoundedU8<{ *BlockIssuerKeys::COUNT_RANGE.start() }, { *BlockIssuerKeys::COUNT_RANGE.end() }>;
 
-/// Lexicographically ordered list of unique [`PublicKey`]
+/// Lexicographically ordered list of unique [`BlockIssuerKey`]
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable, Hash)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidBlockIssuerKeyCount(p.into())))]
 pub struct BlockIssuerKeys(
@@ -114,7 +114,7 @@ fn verify_block_issuer_keys<const VERIFY: bool>(
     _visitor: &(),
 ) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(block_issuer_keys.iter()) {
-        return Err(Error::PublicKeysNotUniqueSorted);
+        return Err(Error::BlockIssuerKeysNotUniqueSorted);
     }
 
     Ok(())
@@ -155,7 +155,7 @@ impl BlockIssuerKeys {
     /// The range of valid numbers of block_issuer_keys.
     pub const COUNT_RANGE: RangeInclusive<u8> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
 
-    /// Creates a new [`PublicKeys`] from a vec.
+    /// Creates a new [`BlockIssuerKeys`] from a vec.
     pub fn from_vec(block_issuer_keys: Vec<BlockIssuerKey>) -> Result<Self, Error> {
         let mut block_issuer_keys =
             BoxedSlicePrefix::<BlockIssuerKey, BlockIssuerKeyCount>::try_from(block_issuer_keys.into_boxed_slice())
@@ -169,7 +169,7 @@ impl BlockIssuerKeys {
         Ok(Self(block_issuer_keys))
     }
 
-    /// Creates a new [`PublicKeys`] from an ordered set.
+    /// Creates a new [`BlockIssuerKeys`] from an ordered set.
     pub fn from_set(block_issuer_keys: BTreeSet<BlockIssuerKey>) -> Result<Self, Error> {
         let block_issuer_keys = BoxedSlicePrefix::<BlockIssuerKey, BlockIssuerKeyCount>::try_from(
             block_issuer_keys.into_iter().collect::<Box<[_]>>(),
@@ -285,7 +285,7 @@ mod dto {
         #[serde(rename = "type")]
         kind: u8,
         expiry_slot: SlotIndex,
-        keys: Vec<BlockIssuerKeyDto>,
+        block_issuer_keys: Vec<BlockIssuerKeyDto>,
     }
 
     impl From<&BlockIssuerFeature> for BlockIssuerFeatureDto {
@@ -293,7 +293,7 @@ mod dto {
             Self {
                 kind: BlockIssuerFeature::KIND,
                 expiry_slot: value.expiry_slot,
-                keys: value.block_issuer_keys.iter().map(|key| key.into()).collect(),
+                block_issuer_keys: value.block_issuer_keys.iter().map(|key| key.into()).collect(),
             }
         }
     }
@@ -303,7 +303,7 @@ mod dto {
 
         fn try_from(value: BlockIssuerFeatureDto) -> Result<Self, Self::Error> {
             let keys = value
-                .keys
+                .block_issuer_keys
                 .into_iter()
                 .map(BlockIssuerKey::try_from)
                 .collect::<Result<Vec<BlockIssuerKey>, Error>>()?;

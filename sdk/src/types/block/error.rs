@@ -109,7 +109,7 @@ pub enum Error {
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
-    InvalidPublicKeyKind(u8),
+    InvalidBlockIssuerKeyKind(u8),
     InvalidStartEpoch(EpochIndex),
     InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
     InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
@@ -148,7 +148,7 @@ pub enum Error {
         expected: u8,
         actual: u8,
     },
-    PublicKeysNotUniqueSorted,
+    BlockIssuerKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
@@ -279,7 +279,7 @@ impl fmt::Display for Error {
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
-            Self::InvalidPublicKeyKind(k) => write!(f, "invalid public key kind: {k}"),
+            Self::InvalidBlockIssuerKeyKind(k) => write!(f, "invalid block issuer key kind: {k}"),
             Self::InvalidStartEpoch(index) => write!(f, "invalid start epoch: {index}"),
             Self::InvalidStringPrefix(p) => write!(f, "invalid string prefix: {p}"),
             Self::InvalidTaggedDataLength(length) => {
@@ -338,7 +338,7 @@ impl fmt::Display for Error {
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
             }
-            Self::PublicKeysNotUniqueSorted => write!(f, "public keys are not unique and/or sorted"),
+            Self::BlockIssuerKeysNotUniqueSorted => write!(f, "block issuer keys are not unique and/or sorted"),
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }
