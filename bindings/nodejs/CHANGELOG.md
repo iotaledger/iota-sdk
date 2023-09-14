@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Client::getNetworkId()` return type;
-- `Transaction::networkId` type;
+- `RegularTransactionEssence::networkId` type;
 - `FilterOptions::outputTypes` type;
 
 ## 1.0.10 - 2023-09-12
