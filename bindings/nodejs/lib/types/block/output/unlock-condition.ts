@@ -27,6 +27,9 @@ enum UnlockConditionType {
 }
 
 abstract class UnlockCondition {
+    /**
+     * The type of unlock condition.
+     */
     readonly type: UnlockConditionType;
 
     /**
@@ -34,12 +37,6 @@ abstract class UnlockCondition {
      */
     constructor(type: UnlockConditionType) {
         this.type = type;
-    }
-    /**
-     * Get the type of unlock condition.
-     */
-    getType(): UnlockConditionType {
-        return this.type;
     }
 
     /**
@@ -111,10 +108,8 @@ class AddressUnlockCondition extends UnlockCondition {
  * A Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition {
-    /**
-     * The amount the consuming transaction must deposit to `returnAddress`.
-     */
-    readonly amount: string;
+    // Getter transforms it into a proper number
+    private amount: string;
 
     /**
      * The address to return the amount to.
@@ -138,7 +133,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
         this.returnAddress = returnAddress;
     }
     /**
-     * Get the amount.
+     * The amount the consuming transaction must deposit to `returnAddress`.
      */
     getAmount(): u64 {
         return BigInt(this.amount);
@@ -166,7 +161,7 @@ class TimelockUnlockCondition extends UnlockCondition {
  */
 class ExpirationUnlockCondition extends UnlockCondition {
     /**
-     * Get the return address.
+     * The return address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
@@ -215,7 +210,7 @@ class StateControllerAddressUnlockCondition extends UnlockCondition {
  */
 class GovernorAddressUnlockCondition extends UnlockCondition {
     /**
-     * The address.
+     * The Governor address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
@@ -236,7 +231,7 @@ class GovernorAddressUnlockCondition extends UnlockCondition {
  */
 class ImmutableAccountAddressUnlockCondition extends UnlockCondition {
     /**
-     * Get the Governor address.
+     * The Immutable Account address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,
