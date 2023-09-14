@@ -6,7 +6,7 @@ import {
     BlockType,
     Client,
     initLogger,
-    parseBlock,
+    parseBlockWrapper,
 } from '@iota/sdk';
 
 require('dotenv').config({ path: '.env' });
@@ -39,7 +39,7 @@ async function run() {
 
         const parsed = JSON.parse(data);
         if (parsed.topic == 'blocks') {
-            const block = parseBlock(JSON.parse(parsed.payload));
+            const block = parseBlockWrapper(JSON.parse(parsed.payload));
 
             if (block.type === BlockType.Basic) {
                 const basic = block as BasicBlock;

@@ -6,21 +6,12 @@ import { Ed25519Signature } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
 import { Type } from 'class-transformer';
-import { BasicBlockData } from './basic-block';
+import { BasicBlock, Block, BlockDiscriminator, BlockType } from './';
 
 /**
- * All of the block types.
+ * Represent the object that nodes gossip around the network.
  */
-enum BlockType {
-    /// A Basic block.
-    Basic = 0,
-}
-
-class BlockWrapper<T> {
-    /**
-     * The type of block
-     */
-    readonly type: BlockType;
+class BlockWrapper {
     /**
      * Protocol version of the block.
      */
@@ -46,17 +37,10 @@ class BlockWrapper<T> {
      */
     readonly issuerId!: IssuerId;
 
-    @Type((info) => {
-        // Generics doesnt get covered in class-transformer out of the box
-        const type = info?.object['type'];
-        switch (type) {
-            case BlockType.Basic:
-                return BasicBlockData;
-            default:
-                throw new Error('Unknown block type: ${type}');
-        }
+    @Type(() => Block, {
+        discriminator: BlockDiscriminator,
     })
-    readonly block!: T;
+    readonly block!: Block;
 
     /**
      * The block signature; used to validate issuance capabilities.
@@ -65,17 +49,15 @@ class BlockWrapper<T> {
     readonly signature!: Ed25519Signature;
 
     constructor(
-        type: BlockType,
         protocolVersion: number,
         networkId: u64,
         issuingTime: u64,
         slotCommitmentId: SlotCommitmentId,
         latestFinalizedSlot: SlotIndex,
         issuerId: IssuerId,
-        block: T,
+        block: Block,
         signature: Ed25519Signature,
     ) {
-        this.type = type;
         this.protocolVersion = protocolVersion;
         this.networkId = networkId;
         this.issuingTime = issuingTime;
@@ -85,6 +67,27 @@ class BlockWrapper<T> {
         this.signature = signature;
         this.block = block;
     }
+
+    /**
+     * Checks whether the block is a `BasicBlock`.
+     * @returns true if it is, otherwise false
+     */
+     is_basic(): boolean {
+        return this.block.type === BlockType.Basic
+    }
+
+    /**
+     * Gets the block as an actual `BasicBlock`.
+     * NOTE: Will throw an error if the block is not a `BasicBlock`.
+     * @returns The block
+     */
+    as_basic(): BasicBlock {
+        if (this.is_basic()) {
+            return this as unknown as BasicBlock;
+        } else {
+            throw new Error("invalid downcast of non-BasicBlock");
+        }
+    }
 }
 
-export { BlockType, BlockWrapper };
+export { BlockWrapper };
