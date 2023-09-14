@@ -241,7 +241,7 @@ pub(crate) mod dto {
     impl From<&Block> for BlockDto {
         fn from(value: &Block) -> Self {
             match value {
-                Block::Basic(basic) => BasicBlockDto::from(basic.as_ref()).into(),
+                Block::Basic(basic) => BasicBlockDto::from(&**basic).into(),
                 Block::Validation(validation) => ValidationBlockDto::from(validation.as_ref()).into(),
             }
         }

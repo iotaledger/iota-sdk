@@ -163,7 +163,7 @@ impl BlockWrapper {
             .with_slot_index(self.protocol_parameters().slot_index(self.issuing_time()))
     }
 
-    /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
+    /// Unpacks a [`BlockWrapper`] from a sequence of bytes doing syntactical checks and verifying that
     /// there are no trailing bytes in the sequence.
     pub fn unpack_strict<T: AsRef<[u8]>>(
         bytes: T,

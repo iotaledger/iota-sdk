@@ -86,7 +86,7 @@ impl BasicBlockBuilder {
         })
     }
 
-    /// Finishes the builder into an [`Block`].
+    /// Finishes the builder into a [`Block`].
     pub fn finish_block(self) -> Result<Block, Error> {
         Ok(Block::from(self.finish()?))
     }
