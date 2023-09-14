@@ -31,9 +31,10 @@ impl Client {
         let wrapper = self.get_included_block(transaction_id).await?;
 
         if let Block::Basic(block) = wrapper.block() {
-            let inputs = match block.payload() {
-                Some(Payload::Transaction(t)) => t.essence().inputs(),
-                _ => return Err(Error::MissingTransactionPayload),
+            let inputs = if let Some(Payload::Transaction(t)) = block.payload() {
+                t.essence().inputs()
+            } else {
+                return Err(Error::MissingTransactionPayload);
             };
 
             let input_ids = inputs
