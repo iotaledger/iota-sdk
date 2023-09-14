@@ -3,8 +3,6 @@
 
 use core::str::FromStr;
 
-use packable::PackableExt;
-
 use iota_sdk::types::{
     block::payload::{
         transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
@@ -12,6 +10,7 @@ use iota_sdk::types::{
     },
     TryFromDto,
 };
+use packable::PackableExt;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 
