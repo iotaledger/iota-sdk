@@ -41,6 +41,13 @@ impl ValidationBlockBuilder {
         }
     }
 
+    /// Adds strong parents to a [`ValidationBlockBuilder`].
+    #[inline(always)]
+    pub fn with_strong_parents(mut self, strong_parents: impl Into<StrongParents>) -> Self {
+        self.strong_parents = strong_parents.into();
+        self
+    }
+
     /// Adds weak parents to a [`ValidationBlockBuilder`].
     #[inline(always)]
     pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
@@ -52,6 +59,20 @@ impl ValidationBlockBuilder {
     #[inline(always)]
     pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
         self.shallow_like_parents = shallow_like_parents.into();
+        self
+    }
+
+    /// Adds a highest supported version to a [`ValidationBlockBuilder`].
+    #[inline(always)]
+    pub fn with_highest_supported_version(mut self, highest_supported_version: u8) -> Self {
+        self.highest_supported_version = highest_supported_version;
+        self
+    }
+
+    /// Adds a protocol parameter hash to a [`ValidationBlockBuilder`].
+    #[inline(always)]
+    pub fn with_protocol_parameters_hash(mut self, protocol_parameters_hash: ProtocolParametersHash) -> Self {
+        self.protocol_parameters_hash = protocol_parameters_hash;
         self
     }
 
