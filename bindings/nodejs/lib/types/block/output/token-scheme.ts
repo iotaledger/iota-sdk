@@ -16,6 +16,9 @@ enum TokenSchemeType {
  * The base class for token schemes.
  */
 abstract class TokenScheme {
+    /**
+     * The type of token scheme.
+     */
     readonly type: TokenSchemeType;
 
     /**
@@ -24,21 +27,23 @@ abstract class TokenScheme {
     constructor(type: TokenSchemeType) {
         this.type = type;
     }
-
-    /**
-     * Get the type of token scheme.
-     */
-    getType(): TokenSchemeType {
-        return this.type;
-    }
 }
 
 /**
  * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
+    /**
+     * The amount of tokens minted.
+     */
     readonly mintedTokens: u256;
+    /**
+     * The amount of tokens melted.
+     */
     readonly meltedTokens: u256;
+    /**
+     * The maximum supply of tokens.
+     */
     readonly maximumSupply: u256;
 
     /**
@@ -71,27 +76,6 @@ class SimpleTokenScheme extends TokenScheme {
         } else {
             this.maximumSupply = BigInt(0);
         }
-    }
-
-    /**
-     * Get the amount of tokens minted.
-     */
-    getMintedTokens(): u256 {
-        return this.mintedTokens;
-    }
-
-    /**
-     * Get the amount of tokens melted.
-     */
-    getMeltedTokens(): u256 {
-        return this.meltedTokens;
-    }
-
-    /**
-     * Get the maximum supply of tokens.
-     */
-    getMaximumSupply(): u256 {
-        return this.maximumSupply;
     }
 }
 

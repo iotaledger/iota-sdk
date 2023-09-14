@@ -68,7 +68,7 @@ async function run() {
 
                 // New minted NFT id is empty in the output
                 if (
-                    nftOutput.getNftId() ===
+                    nftOutput.nftId ===
                     '0x0000000000000000000000000000000000000000000000000000000000000000'
                 ) {
                     const outputId = Utils.computeOutputId(

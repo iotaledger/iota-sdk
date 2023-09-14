@@ -21,6 +21,9 @@ enum AddressType {
  * The base class for addresses.
  */
 abstract class Address {
+    /**
+     * The type of address.
+     */
     readonly type: AddressType;
 
     /**
@@ -28,12 +31,6 @@ abstract class Address {
      */
     constructor(type: AddressType) {
         this.type = type;
-    }
-    /**
-     * Get the type of address.
-     */
-    getType(): AddressType {
-        return this.type;
     }
 
     abstract toString(): string;
@@ -62,6 +59,9 @@ abstract class Address {
  * An Ed25519 Address.
  */
 class Ed25519Address extends Address {
+    /**
+     * The public key hash.
+     */
     readonly pubKeyHash: HexEncodedString;
 
     /**
@@ -71,15 +71,9 @@ class Ed25519Address extends Address {
         super(AddressType.Ed25519);
         this.pubKeyHash = address;
     }
-    /**
-     * Get the public key hash.
-     */
-    getPubKeyHash(): HexEncodedString {
-        return this.pubKeyHash;
-    }
 
     toString(): string {
-        return this.getPubKeyHash();
+        return this.pubKeyHash;
     }
 }
 
@@ -87,6 +81,9 @@ class Ed25519Address extends Address {
  * An Account address.
  */
 class AccountAddress extends Address {
+    /**
+     * The account ID.
+     */
     readonly accountId: AccountId;
     /**
      * @param address An account address as account ID.
@@ -95,21 +92,18 @@ class AccountAddress extends Address {
         super(AddressType.Account);
         this.accountId = address;
     }
-    /**
-     * Get the account ID.
-     */
-    getAccountId(): AccountId {
-        return this.accountId;
-    }
 
     toString(): string {
-        return this.getAccountId();
+        return this.accountId;
     }
 }
 /**
  * An NFT address.
  */
 class NftAddress extends Address {
+    /**
+     * The NFT ID.
+     */
     readonly nftId: NftId;
     /**
      * @param address An NFT address as NFT ID.
@@ -118,15 +112,9 @@ class NftAddress extends Address {
         super(AddressType.Nft);
         this.nftId = address;
     }
-    /**
-     * Get the NFT ID.
-     */
-    getNftId(): NftId {
-        return this.nftId;
-    }
 
     toString(): string {
-        return this.getNftId();
+        return this.nftId;
     }
 }
 
