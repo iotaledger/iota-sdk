@@ -32,9 +32,13 @@ enum OutputType {
 /**
  * The base class for outputs.
  */
-abstract class Output /*implements ICommonOutput*/ {
-    readonly amount: string;
+abstract class Output {
+    // Getter transforms it into a proper number
+    amount: string;
 
+    /**
+     * The type of output.
+     */
     readonly type: OutputType;
 
     /**
@@ -48,13 +52,6 @@ abstract class Output /*implements ICommonOutput*/ {
         } else {
             this.amount = amount;
         }
-    }
-
-    /**
-     * Get the type of output.
-     */
-    getType(): OutputType {
-        return this.type;
     }
 
     /**
@@ -84,14 +81,21 @@ abstract class Output /*implements ICommonOutput*/ {
 /**
  * The base class for common outputs.
  */
-abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
+abstract class CommonOutput extends Output {
+    /**
+     * The unlock conditions for the output.
+     */
     @Type(() => UnlockCondition, {
         discriminator: UnlockConditionDiscriminator,
     })
     readonly unlockConditions: UnlockCondition[];
 
-    readonly nativeTokens?: INativeToken[];
+    // Getter transforms it into nativeTokens with a proper number
+    private nativeTokens?: INativeToken[];
 
+    /**
+     * The features contained by the output.
+     */
     @Type(() => Feature, {
         discriminator: FeatureDiscriminator,
     })
@@ -111,12 +115,6 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
         this.unlockConditions = unlockConditions;
     }
     /**
-     * The unlock conditions for the output.
-     */
-    getUnlockConditions(): UnlockCondition[] {
-        return this.unlockConditions;
-    }
-    /**
      * The native tokens held by the output.
      */
     getNativeTokens(): INativeToken[] | undefined {
@@ -133,18 +131,11 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
         }
         return this.nativeTokens;
     }
-
-    /**
-     * Get the features contained by the output.
-     */
-    getFeatures(): Feature[] | undefined {
-        return this.features;
-    }
 }
 /**
  * A Basic output.
  */
-class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
+class BasicOutput extends CommonOutput {
     /**
      * The amount of (stored) Mana held by the output.
      */
@@ -181,18 +172,12 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
     ) {
         super(type, amount, unlockConditions);
     }
-    /**
-     * Immutable features contained by the output.
-     */
-    getImmutableFeatures(): Feature[] | undefined {
-        return this.immutableFeatures;
-    }
 }
 
 /**
  * Base class for state metadata outputs.
  */
-abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
+abstract class StateMetadataOutput extends ImmutableFeaturesOutput {
     readonly stateMetadata?: HexEncodedString;
 
     /**
@@ -207,18 +192,12 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     ) {
         super(type, amount, unlockConditions);
     }
-    /**
-     * Metadata that can only be changed by the state controller.
-     */
-    getStateMetadata(): HexEncodedString | undefined {
-        return this.stateMetadata;
-    }
 }
 
 /**
  * An Account output.
  */
-class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
+class AccountOutput extends StateMetadataOutput {
     /**
      * Unique identifier of the account, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its a newly created account, then the id is zeroed.
@@ -259,30 +238,11 @@ class AccountOutput extends StateMetadataOutput /*implements IAccountOutput*/ {
         this.foundryCounter = foundryCounter;
         this.mana = mana;
     }
-    /**
-     * Unique identifier of the account, which is the BLAKE2b-160 hash of the Output ID that created it.
-     * Unless its a newly created account, then the id is zeroed.
-     */
-    getAccountId(): HexEncodedString {
-        return this.accountId;
-    }
-    /**
-     * A counter that must increase by 1 every time the account is state transitioned.
-     */
-    getStateIndex(): number {
-        return this.stateIndex;
-    }
-    /**
-     * A counter that denotes the number of foundries created by this account.
-     */
-    getFoundryCounter(): number {
-        return this.foundryCounter;
-    }
 }
 /**
  * An NFT output.
  */
-class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
+class NftOutput extends ImmutableFeaturesOutput {
     /**
      * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its newly minted, then the id is zeroed.
@@ -310,17 +270,11 @@ class NftOutput extends ImmutableFeaturesOutput /*implements INftOutput*/ {
         this.nftId = nftId;
         this.mana = mana;
     }
-    /**
-     * Get the NFT ID of the output.
-     */
-    getNftId(): HexEncodedString {
-        return this.nftId;
-    }
 }
 /**
  * A Foundry output.
  */
-class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
+class FoundryOutput extends ImmutableFeaturesOutput {
     /**
      * The serial number of the Foundry with respect to the controlling alias.
      */
@@ -349,18 +303,6 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
         super(OutputType.Foundry, amount, unlockConditions);
         this.serialNumber = serialNumber;
         this.tokenScheme = tokenScheme;
-    }
-    /**
-     * The serial number of the foundry with respect to the controlling account.
-     */
-    getSerialNumber(): number {
-        return this.serialNumber;
-    }
-    /**
-     * Get the token scheme for the Foundry.
-     */
-    getTokenScheme(): TokenScheme {
-        return this.tokenScheme;
     }
 }
 

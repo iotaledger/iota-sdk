@@ -3,6 +3,7 @@
 
 import { SlotIndex } from '../block/slot';
 import { INativeToken } from '../models';
+import { u64 } from '../utils';
 import { HexEncodedString } from '../utils/hex-encoding';
 
 /** Options for the creation of an output. */
@@ -10,7 +11,7 @@ export interface OutputParams {
     /** A recipient address. */
     recipientAddress: string;
     /** An amount. */
-    amount: bigint | string;
+    amount: u64 | string;
     /** Assets to include. */
     assets?: Assets;
     /** Features to include. */
