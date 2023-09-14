@@ -56,8 +56,8 @@ impl Block {
 
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: StrongParents) -> BasicBlockBuilder {
-        BasicBlockBuilder::new(strong_parents)
+    pub fn build_basic(strong_parents: StrongParents, burned_mana: u64) -> BasicBlockBuilder {
+        BasicBlockBuilder::new(strong_parents, burned_mana)
     }
 
     /// Creates a new [`ValidationBlockBuilder`].

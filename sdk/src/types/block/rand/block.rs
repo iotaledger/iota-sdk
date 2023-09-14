@@ -33,7 +33,7 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
 
 /// Generates a random basic block with given strong parents.
 pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BasicBlockBuilder {
-    Block::build_basic(strong_parents).with_payload(rand_payload_for_block())
+    Block::build_basic(strong_parents, rand_number()).with_payload(rand_payload_for_block())
 }
 
 /// Generates a random block wrapper.

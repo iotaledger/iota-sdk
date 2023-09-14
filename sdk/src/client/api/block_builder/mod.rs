@@ -56,7 +56,8 @@ impl ClientInner {
             commitment.id(),
             latest_finalized_slot,
             issuer_id,
-            Block::build_basic(strong_parents)
+            // TODO correct value for burned_mana
+            Block::build_basic(strong_parents, 0)
                 .with_weak_parents(weak_parents)
                 .with_shallow_like_parents(shallow_like_parents)
                 .with_payload(payload)

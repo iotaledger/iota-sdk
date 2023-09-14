@@ -28,14 +28,21 @@ pub struct BasicBlockBuilder {
 impl BasicBlockBuilder {
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents) -> Self {
+    pub fn new(strong_parents: StrongParents, burned_mana: u64) -> Self {
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
             shallow_like_parents: ShallowLikeParents::default(),
             payload: OptionalPayload::default(),
-            burned_mana: 0,
+            burned_mana,
         }
+    }
+
+    /// Adds strong parents to a [`BasicBlockBuilder`].
+    #[inline(always)]
+    pub fn with_strong_parents(mut self, strong_parents: impl Into<StrongParents>) -> Self {
+        self.strong_parents = strong_parents.into();
+        self
     }
 
     /// Adds weak parents to a [`BasicBlockBuilder`].
@@ -218,7 +225,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            BasicBlockBuilder::new(StrongParents::from_set(dto.strong_parents)?)
+            BasicBlockBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.burned_mana)
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
                 .with_payload(
@@ -226,7 +233,6 @@ pub(crate) mod dto {
                         .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
                         .transpose()?,
                 )
-                .with_burned_mana(dto.burned_mana)
                 .finish()
         }
     }
