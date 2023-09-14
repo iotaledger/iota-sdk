@@ -96,7 +96,8 @@ impl<B> BlockBuilder<B> {
     pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.protocol_parameters.version().pack(packer)?;
         self.protocol_parameters.network_id().pack(packer)?;
-        self.issuing_time.pack(packer)?;
+        // TODO: what do here
+        self.issuing_time.expect("issuing time not set").pack(packer)?;
         self.slot_commitment_id.pack(packer)?;
         self.latest_finalized_slot.pack(packer)?;
         self.issuer_id.pack(packer)?;

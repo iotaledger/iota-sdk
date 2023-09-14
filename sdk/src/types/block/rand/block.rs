@@ -36,16 +36,7 @@ pub fn rand_basic_block_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: StrongParents,
 ) -> BlockWrapper {
-    BlockWrapper::build_basic(
-        protocol_params,
-        rand_slot_commitment_id(),
-        rand_slot_index(),
-        rand_issuer_id(),
-        strong_parents,
-        rand_number(),
-    )
-    .with_payload(rand_payload_for_block())
-    .sign_random()
+    rand_basic_block_builder_with_strong_parents(protocol_params, strong_parents).sign_random()
 }
 
 /// Generates a random basic block builder with given strong parents.
@@ -61,6 +52,7 @@ pub fn rand_basic_block_builder_with_strong_parents(
         strong_parents,
         rand_number(),
     )
+    .with_issuing_time(rand_number::<u64>())
     .with_payload(rand_payload_for_block())
 }
 
