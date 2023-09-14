@@ -5,14 +5,18 @@ use alloc::vec::Vec;
 
 use super::signature::rand_sign_ed25519;
 use crate::types::block::{
-    basic::BasicBlockData,
-    core::Block,
+    core::{BasicBlockBuilder, BlockBuilder, BlockWrapper},
     parent::StrongParents,
     protocol::ProtocolParameters,
     rand::{
-        bytes::rand_bytes_array, number::rand_number, parents::rand_strong_parents, payload::rand_payload_for_block,
+        bytes::rand_bytes_array,
+        issuer_id::rand_issuer_id,
+        number::rand_number,
+        parents::rand_strong_parents,
+        payload::rand_payload_for_block,
+        slot::{rand_slot_commitment_id, rand_slot_index},
     },
-    BlockBuilder, BlockId,
+    BlockId,
 };
 
 /// Generates a random block id.
@@ -27,42 +31,50 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
     parents
 }
 
-/// Generates a random basic block with given parents.
+/// Generates a random basic block with given strong parents.
 pub fn rand_basic_block_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: StrongParents,
-) -> Block {
-    rand_basic_block_builder_with_strong_parents(protocol_params, strong_parents)
-        .with_payload(rand_payload_for_block())
-        .sign_random()
+) -> BlockWrapper {
+    BlockWrapper::build_basic(
+        protocol_params,
+        rand_slot_commitment_id(),
+        rand_slot_index(),
+        rand_issuer_id(),
+        strong_parents,
+        rand_number(),
+    )
+    .with_payload(rand_payload_for_block())
+    .sign_random()
 }
 
-/// Generates a random basic block builder with given parents.
+/// Generates a random basic block builder with given strong parents.
 pub fn rand_basic_block_builder_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: StrongParents,
-) -> BlockBuilder<BasicBlockData> {
-    Block::build_basic(
+) -> BlockBuilder<BasicBlockBuilder> {
+    BlockWrapper::build_basic(
         protocol_params,
-        rand_number(),
-        rand_bytes_array().into(),
-        rand_number::<u64>().into(),
-        rand_bytes_array().into(),
+        rand_slot_commitment_id(),
+        rand_slot_index(),
+        rand_issuer_id(),
         strong_parents,
+        rand_number(),
     )
+    .with_payload(rand_payload_for_block())
 }
 
-/// Generates a random block.
-pub fn rand_block(protocol_params: ProtocolParameters) -> Block {
+/// Generates a random block wrapper.
+pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
     rand_basic_block_with_strong_parents(protocol_params, rand_strong_parents())
 }
 
 pub trait SignBlockRandom {
-    fn sign_random(self) -> Block;
+    fn sign_random(self) -> BlockWrapper;
 }
 
-impl SignBlockRandom for BlockBuilder<BasicBlockData> {
-    fn sign_random(self) -> Block {
+impl SignBlockRandom for BlockBuilder<BasicBlockBuilder> {
+    fn sign_random(self) -> BlockWrapper {
         let signing_input = self.signing_input();
         self.finish(rand_sign_ed25519(&signing_input)).unwrap()
     }

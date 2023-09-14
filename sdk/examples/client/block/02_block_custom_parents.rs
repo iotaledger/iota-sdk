@@ -9,13 +9,10 @@
 //! ```
 
 use crypto::keys::bip44::Bip44;
-use iota_sdk::{
-    client::{
-        constants::IOTA_COIN_TYPE,
-        secret::{SecretManager, SignBlockExt},
-        Client, Result,
-    },
-    types::block::parent::StrongParents,
+use iota_sdk::client::{
+    constants::IOTA_COIN_TYPE,
+    secret::{SecretManager, SignBlockExt},
+    Client, Result,
 };
 
 #[tokio::main]

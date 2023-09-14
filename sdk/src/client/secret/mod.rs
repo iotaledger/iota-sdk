@@ -53,13 +53,12 @@ use crate::{
     },
     types::block::{
         address::{Address, Ed25519Address},
-        basic::BasicBlockData,
+        core::{BasicBlockBuilder, BlockBuilder, ValidationBlockBuilder},
         output::Output,
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        validation::ValidationBlockData,
-        Block, BlockBuilder,
+        BlockWrapper,
     },
 };
 
@@ -608,14 +607,22 @@ where
 
 #[async_trait]
 pub trait SignBlockExt {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+    async fn sign_ed25519<S: SecretManage>(
+        self,
+        secret_manager: &S,
+        chain: Bip44,
+    ) -> crate::client::Result<BlockWrapper>
     where
         crate::client::Error: From<S::Error>;
 }
 
 #[async_trait]
-impl SignBlockExt for BlockBuilder<BasicBlockData> {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+impl SignBlockExt for BlockBuilder<BasicBlockBuilder> {
+    async fn sign_ed25519<S: SecretManage>(
+        self,
+        secret_manager: &S,
+        chain: Bip44,
+    ) -> crate::client::Result<BlockWrapper>
     where
         crate::client::Error: From<S::Error>,
     {
@@ -625,8 +632,12 @@ impl SignBlockExt for BlockBuilder<BasicBlockData> {
 }
 
 #[async_trait]
-impl SignBlockExt for BlockBuilder<ValidationBlockData> {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+impl SignBlockExt for BlockBuilder<ValidationBlockBuilder> {
+    async fn sign_ed25519<S: SecretManage>(
+        self,
+        secret_manager: &S,
+        chain: Bip44,
+    ) -> crate::client::Result<BlockWrapper>
     where
         crate::client::Error: From<S::Error>,
     {

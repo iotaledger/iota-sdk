@@ -9,7 +9,12 @@ use crate::{
     client::{ClientInner, Result},
     types::{
         api::core::response::IssuanceBlockHeaderResponse,
-        block::{basic::BasicBlockData, core::Block, parent::StrongParents, payload::Payload, BlockBuilder, IssuerId},
+        block::{
+            core::{BasicBlockBuilder, BlockBuilder, BlockWrapper},
+            parent::StrongParents,
+            payload::Payload,
+            IssuerId,
+        },
     },
 };
 
@@ -20,7 +25,7 @@ impl ClientInner {
         issuing_time: Option<u64>,
         strong_parents: Option<StrongParents>,
         payload: Option<Payload>,
-    ) -> Result<BlockBuilder<BasicBlockData>> {
+    ) -> Result<BlockBuilder<BasicBlockBuilder>> {
         let IssuanceBlockHeaderResponse {
             strong_parents: default_strong_parents,
             weak_parents,
@@ -43,14 +48,15 @@ impl ClientInner {
             issuing_time
         });
 
-        Ok(Block::build_basic(
+        Ok(BlockWrapper::build_basic(
             self.get_protocol_parameters().await?,
-            issuing_time,
             commitment.id(),
             latest_finalized_slot,
             issuer_id,
             strong_parents,
+            0, // TODO: burned mana calculation
         )
+        .with_issuing_time(issuing_time)
         .with_weak_parents(weak_parents)
         .with_shallow_like_parents(shallow_like_parents)
         .with_payload(payload))

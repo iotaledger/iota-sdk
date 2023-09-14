@@ -22,7 +22,7 @@ pub struct SlotCommitment {
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
     /// The commitment ID of the previous slot.
-    #[cfg_attr(feature = "serde", serde(rename = "prevId"))]
+    #[cfg_attr(feature = "serde", serde(rename = "previousCommitmentId"))]
     previous_slot_commitment_id: SlotCommitmentId,
     /// A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
     roots_id: RootsId,
