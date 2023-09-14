@@ -12,5 +12,4 @@ from iota_sdk.types.node_info import NodeInfoProtocol
 class NetworkInfo:
     """Network related information.
     """
-
     protocol_parameters: NodeInfoProtocol
