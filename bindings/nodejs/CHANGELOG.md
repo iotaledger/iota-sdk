@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.11 - 2023-09-14
+
+### Fixed
+
+- `Client::getNetworkId()`;
+
 ## 1.0.10 - 2023-09-12
 
 ### Changed
