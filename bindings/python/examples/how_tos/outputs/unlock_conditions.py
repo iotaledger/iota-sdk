@@ -3,7 +3,7 @@ import json
 from dotenv import load_dotenv
 from iota_sdk import (
     AddressUnlockCondition,
-    AliasAddress,
+    AccountAddress,
     Client,
     Ed25519Address,
     Utils,
@@ -13,7 +13,7 @@ from iota_sdk import (
     TimelockUnlockCondition,
     GovernorAddressUnlockCondition,
     StateControllerAddressUnlockCondition,
-    ImmutableAliasAddressUnlockCondition,
+    ImmutableAccountAddressUnlockCondition,
 )
 
 load_dotenv()

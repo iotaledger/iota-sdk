@@ -377,7 +377,7 @@ class Account:
     def get_balance(self) -> Balance:
         """Get account balance information.
         """
-        return from_dict(Balance, self._call_account_method(
+        return Balance.from_dict(self._call_account_method(
             'getBalance'
         ))
 
@@ -533,7 +533,7 @@ class Account:
             self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
         """Sign a transaction essence.
         """
-        return from_dict(SignedTransactionData, self._call_account_method(
+        return SignedTransactionData.from_dict(self._call_account_method(
             'signTransactionEssence', {
                 'preparedTransactionData': prepared_transaction_data
             }

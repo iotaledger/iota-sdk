@@ -3,8 +3,8 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import (AliasAddress, Client,
-                      ImmutableAliasAddressUnlockCondition, SimpleTokenScheme)
+from iota_sdk import (AccountAddress, Client,
+                      ImmutableAccountAddressUnlockCondition, SimpleTokenScheme)
 
 load_dotenv()
 
