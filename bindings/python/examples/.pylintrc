@@ -5,6 +5,7 @@ disable=missing-module-docstring,
 	invalid-name, # files that starts with number
 	duplicate-code,
 	consider-using-with,
-	consider-using-f-string
+	consider-using-f-string,
+	fixme
 
 
