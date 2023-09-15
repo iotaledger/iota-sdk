@@ -4,7 +4,7 @@
 import { Payload, PayloadDiscriminator } from '../payload';
 import { Type } from 'class-transformer';
 import { StrongParents, WeakParents, ShallowLikeParents } from '../parents';
-import { Block, BlockType } from '.';
+import { Block } from '.';
 
 /**
  * Basic Block layout.

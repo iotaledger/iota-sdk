@@ -11,11 +11,11 @@ enum ContextInputType {
      */
     COMMITMENT = 0,
     /**
-     * The context input kind of a `BlockIssuanceCreditContextInput`.
+     * The context input type of a `BlockIssuanceCreditContextInput`.
      */
     BLOCK_ISSUANCE_CREDIT = 1,
     /**
-     * The context input kind of a `RewardContextInput`.
+     * The context input type of a `RewardContextInput`.
      */
     REWARD = 2,
 }

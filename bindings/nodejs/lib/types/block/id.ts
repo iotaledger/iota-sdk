@@ -28,4 +28,7 @@ export type TokenId = HexEncodedString;
  */
 export type FoundryId = HexEncodedString;
 
+/**
+ * An Issuer ID represented as hex-encoded string.
+ */
 export type IssuerId = HexEncodedString;
