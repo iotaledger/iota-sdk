@@ -154,7 +154,7 @@ fn unpack_invalid_not_sorted() {
 
 #[test]
 fn unpack_invalid_not_unique() {
-    let inner = rand_block_ids(7);
+    let inner = rand_block_ids(3);
     let non_unique = inner.iter().chain(&inner).copied().collect::<Vec<_>>();
     let inner = VecPrefix::<_, u8>::try_from(non_unique).unwrap();
 

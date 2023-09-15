@@ -7,7 +7,7 @@ use alloc::{collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
-use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, Packable};
+use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
 
 use crate::types::block::{BlockId, Error};
 
@@ -20,8 +20,16 @@ use crate::types::block::{BlockId, Error};
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[deref(forward)]
-#[packable(unpack_error = Error, with = |_| Error::InvalidParentCount)]
+#[packable(unpack_error = Error, with = map_parents_set_error)]
 pub struct Parents<const MIN: u8, const MAX: u8>(BTreeSetPrefix<BlockId, BoundedU8<MIN, MAX>>);
+
+fn map_parents_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error {
+    match error {
+        UnpackSetError::DuplicateItem(_) => Error::ParentsNotUniqueSorted,
+        UnpackSetError::Item(e) => e,
+        UnpackSetError::Prefix(_) => Error::InvalidParentCount,
+    }
+}
 
 impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     /// The range representing the valid number of parents.
