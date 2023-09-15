@@ -29,22 +29,22 @@ class SlotCommitment {
      * The slot index of this commitment.
      * It is calculated based on genesis timestamp and the duration of a slot.
      */
-    index: SlotIndex;
+    readonly index: SlotIndex;
     /**
      * The commitment ID of the previous slot.
      */
-    prevId: SlotCommitmentId;
+    readonly prevId: SlotCommitmentId;
     /**
      * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
      */
-    rootsId: RootsId;
+    readonly rootsId: RootsId;
 
     /**
      * The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
      * slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
      * the switching of a chain.
      */
-    cumulativeWeight: u64;
+    readonly cumulativeWeight: u64;
 
     constructor(
         index: SlotIndex,
