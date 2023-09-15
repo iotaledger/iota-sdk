@@ -11,10 +11,6 @@ import { Block, BlockType } from '.';
  */
 export class BasicBlock extends Block {
     /**
-     * The type of block
-     */
-    readonly type!: BlockType;
-    /**
      * Blocks that are strongly directly approved, in the range of 1..8.
      */
     readonly strongParents!: StrongParents;
