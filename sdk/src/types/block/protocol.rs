@@ -175,30 +175,30 @@ impl ProtocolParameters {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct WorkScoreStructure {
-    /// Modifier for network traffic per byte.
-    data_kilobyte: u32,
+    /// Modifier for network traffic per kilobyte.
+    pub(crate) data_kilobyte: u32,
     /// Modifier for work done to process a block.
-    block: u32,
+    pub(crate) block: u32,
     /// Modifier for slashing when there are insufficient strong tips.
-    missing_parent: u32,
+    pub(crate) missing_parent: u32,
     /// Modifier for loading UTXOs and performing mana calculations.
-    input: u32,
+    pub(crate) input: u32,
     /// Modifier for loading and checking the context input.
-    context_input: u32,
+    pub(crate) context_input: u32,
     /// Modifier for storing UTXOs.
-    output: u32,
+    pub(crate) output: u32,
     /// Modifier for calculations using native tokens.
-    native_token: u32,
+    pub(crate) native_token: u32,
     /// Modifier for storing staking features.
-    staking: u32,
+    pub(crate) staking: u32,
     /// Modifier for storing block issuer features.
-    block_issuer: u32,
+    pub(crate) block_issuer: u32,
     /// Modifier for accessing the account-based ledger to transform mana to Block Issuance Credits.
-    allotment: u32,
+    pub(crate) allotment: u32,
     /// Modifier for the block signature check.
-    signature_ed25519: u32,
+    pub(crate) signature_ed25519: u32,
     /// The minimum count of strong parents in a basic block.
-    min_strong_parents_threshold: u8,
+    pub(crate) min_strong_parents_threshold: u8,
 }
 
 impl Default for WorkScoreStructure {
@@ -218,6 +218,10 @@ impl Default for WorkScoreStructure {
             min_strong_parents_threshold: 4,
         }
     }
+}
+
+pub trait WorkScore {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32;
 }
 
 /// Defines the parameters used to calculate the Reference Mana Cost (RMC).

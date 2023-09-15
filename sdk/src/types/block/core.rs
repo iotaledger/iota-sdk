@@ -16,6 +16,7 @@ use packable::{
 use super::{
     basic::{BasicBlock, BasicBlockData},
     block_id::BlockHash,
+    protocol::{WorkScore, WorkScoreStructure},
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     validation::{ValidationBlock, ValidationBlockData},
@@ -280,6 +281,18 @@ impl<B> BlockWrapper<B> {
         self.pack_header(&mut SlicePacker::new(&mut bytes)).unwrap();
         Blake2b256::digest(bytes).into()
     }
+
+    #[inline(always)]
+    pub(crate) fn workscore_header(&self, _workscore_structure: WorkScoreStructure) -> u32 {
+        // Header has 0 work score.
+        0
+    }
+
+    #[inline(always)]
+    pub(crate) fn workscore_signature(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        // TODO: check
+        workscore_structure.signature_ed25519
+    }
 }
 
 impl Block {
@@ -361,6 +374,14 @@ impl Block {
         match self {
             Self::Basic(b) => b.protocol_parameters(),
             Self::Validation(b) => b.protocol_parameters(),
+        }
+    }
+
+    /// Calculates the work score of a [`Block`].
+    pub fn workscore(&self) -> u32 {
+        match self {
+            Self::Basic(b) => b.workscore(),
+            Self::Validation(b) => b.workscore(),
         }
     }
 

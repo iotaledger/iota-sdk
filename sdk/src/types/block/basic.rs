@@ -12,7 +12,7 @@ use super::{
     core::{verify_parents, BlockWrapper},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
     signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     Block, BlockBuilder, Error, IssuerId,
@@ -124,6 +124,37 @@ impl BasicBlock {
     #[inline(always)]
     pub fn burned_mana(&self) -> u64 {
         self.data.burned_mana
+    }
+
+    /// Returns the work score of a [`BasicBlock`].
+    pub fn workscore(&self) -> u32 {
+        let workscore_structure = self.protocol_parameters().work_score_structure;
+        let workscore_bytes = workscore_structure.data_kilobyte * self.packed_len() as u32;
+        let mut workscore_kilobytes = workscore_bytes / 1024;
+
+        workscore_kilobytes += self.workscore_header(workscore_structure);
+        workscore_kilobytes += self.data.workscore(workscore_structure);
+        workscore_kilobytes += self.workscore_signature(workscore_structure);
+        workscore_kilobytes
+    }
+}
+
+impl WorkScore for BasicBlockData {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        // offset for block, plus missing parents, plus payload.
+        let mut score = workscore_structure.block;
+
+        let min_strong_parents_threshold = workscore_structure.min_strong_parents_threshold as usize;
+        if self.strong_parents.len() < min_strong_parents_threshold {
+            let missing_parents_count = min_strong_parents_threshold - self.strong_parents.len();
+            score += workscore_structure.missing_parent * missing_parents_count as u32;
+        }
+
+        if let Some(payload) = &*self.payload {
+            score += payload.workscore(workscore_structure);
+        }
+
+        score
     }
 }
 
