@@ -220,10 +220,6 @@ impl Default for WorkScoreStructure {
     }
 }
 
-pub trait WorkScore {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32;
-}
-
 /// Defines the parameters used to calculate the Reference Mana Cost (RMC).
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(

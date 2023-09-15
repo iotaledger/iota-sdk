@@ -12,7 +12,7 @@ use crate::types::block::{
     core::{verify_parents, Block},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
-    protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
+    protocol::{ProtocolParameters, WorkScoreStructure},
     Error,
 };
 
@@ -141,21 +141,7 @@ impl BasicBlock {
     }
 
     /// Returns the work score of a [`BasicBlock`].
-    pub fn workscore(&self) -> u32 {
-        // let workscore_structure = self.protocol_parameters().work_score_structure;
-        // let workscore_bytes = workscore_structure.data_kilobyte * self.packed_len() as u32;
-        // let mut workscore_kilobytes = workscore_bytes / 1024;
-
-        // workscore_kilobytes += self.workscore_header(workscore_structure);
-        // workscore_kilobytes += self.data.workscore(workscore_structure);
-        // workscore_kilobytes += self.workscore_signature(workscore_structure);
-        // workscore_kilobytes
-        todo!()
-    }
-}
-
-impl WorkScore for BasicBlock {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         // offset for block, plus missing parents, plus payload.
         let mut score = workscore_structure.block;
 

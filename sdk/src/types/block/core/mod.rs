@@ -21,6 +21,7 @@ pub use self::{
     validation::{ValidationBlock, ValidationBlockBuilder},
     wrapper::BlockWrapper,
 };
+use super::protocol::WorkScoreStructure;
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
@@ -105,10 +106,10 @@ impl Block {
     }
 
     /// Calculates the work score of a [`Block`].
-    pub fn workscore(&self) -> u32 {
+    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         match self {
-            Self::Basic(block) => block.workscore(),
-            Self::Validation(block) => block.workscore(),
+            Self::Basic(block) => block.workscore(workscore_structure),
+            Self::Validation(block) => block.workscore(workscore_structure),
         }
     }
 }
