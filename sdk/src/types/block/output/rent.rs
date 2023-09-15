@@ -84,27 +84,15 @@ impl RentStructure {
         self
     }
 
-    /// Sets the virtual byte weight for the key fields.
-    pub fn with_byte_factor_key(mut self, byte_factor_key: u8) -> Self {
-        self.v_byte_factor_key = byte_factor_key;
-        self
-    }
-
     /// Sets the virtual byte weight for the data fields.
     pub fn with_byte_factor_data(mut self, byte_factor_data: u8) -> Self {
         self.v_byte_factor_data = byte_factor_data;
         self
     }
 
-    /// Sets the virtual byte weight for the delegation fields.
-    pub fn with_byte_factor_delegation(mut self, byte_factor_delegation: u8) -> Self {
-        self.v_byte_factor_delegation = byte_factor_delegation;
-        self
-    }
-
-    /// Sets the virtual byte weight for the staking fields.
-    pub fn with_byte_factor_staking_feature(mut self, byte_factor_staking_feature: u8) -> Self {
-        self.v_byte_factor_staking_feature = byte_factor_staking_feature;
+    /// Sets the virtual byte weight for the key fields.
+    pub fn with_byte_factor_key(mut self, byte_factor_key: u8) -> Self {
+        self.v_byte_factor_key = byte_factor_key;
         self
     }
 
@@ -114,24 +102,36 @@ impl RentStructure {
         self
     }
 
+    /// Sets the virtual byte weight for the staking fields.
+    pub fn with_byte_factor_staking_feature(mut self, byte_factor_staking_feature: u8) -> Self {
+        self.v_byte_factor_staking_feature = byte_factor_staking_feature;
+        self
+    }
+
+    /// Sets the virtual byte weight for the delegation fields.
+    pub fn with_byte_factor_delegation(mut self, byte_factor_delegation: u8) -> Self {
+        self.v_byte_factor_delegation = byte_factor_delegation;
+        self
+    }
+
     /// Returns the byte cost of the [`RentStructure`].
-    pub fn byte_cost(&self) -> u32 {
+    pub const fn byte_cost(&self) -> u32 {
         self.v_byte_cost
     }
 
-    /// Returns the byte factor key of the [`RentStructure`].
-    pub fn byte_factor_key(&self) -> u8 {
-        self.v_byte_factor_key
-    }
-
     /// Returns the byte factor data of the [`RentStructure`].
-    pub fn byte_factor_data(&self) -> u8 {
+    pub const fn byte_factor_data(&self) -> u8 {
         self.v_byte_factor_data
     }
 
-    /// Returns the delegation byte factor of the [`RentStructure`].
-    pub const fn byte_factor_delegation(&self) -> u8 {
-        self.v_byte_factor_delegation
+    /// Returns the byte factor key of the [`RentStructure`].
+    pub const fn byte_factor_key(&self) -> u8 {
+        self.v_byte_factor_key
+    }
+
+    /// Returns the block issuer key byte factor of the [`RentStructure`].
+    pub const fn byte_factor_issuer_keys(&self) -> u8 {
+        self.v_byte_factor_issuer_keys
     }
 
     /// Returns the staking byte factor of the [`RentStructure`].
@@ -139,9 +139,9 @@ impl RentStructure {
         self.v_byte_factor_staking_feature
     }
 
-    /// Returns the block issuer key byte factor of the [`RentStructure`].
-    pub const fn byte_factor_issuer_keys(&self) -> u8 {
-        self.v_byte_factor_issuer_keys
+    /// Returns the delegation byte factor of the [`RentStructure`].
+    pub const fn byte_factor_delegation(&self) -> u8 {
+        self.v_byte_factor_delegation
     }
 }
 
