@@ -41,9 +41,9 @@ async function run() {
         if (parsed.topic == 'blocks') {
             const block = parseBlockWrapper(JSON.parse(parsed.payload));
 
-            if (block.type === BlockType.Basic) {
-                const basic = block as BasicBlock;
-                console.log('payload:', basic.block.payload);
+            if (block.isBasic()) {
+                const basic = block.asBasic();
+                console.log('payload:', basic.payload);
             }
         }
     };

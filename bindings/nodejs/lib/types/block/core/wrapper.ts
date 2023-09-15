@@ -72,8 +72,8 @@ class BlockWrapper {
      * Checks whether the block is a `BasicBlock`.
      * @returns true if it is, otherwise false
      */
-     is_basic(): boolean {
-        return this.block.type === BlockType.Basic
+    isBasic(): boolean {
+        return this.block.type === BlockType.Basic;
     }
 
     /**
@@ -81,11 +81,11 @@ class BlockWrapper {
      * NOTE: Will throw an error if the block is not a `BasicBlock`.
      * @returns The block
      */
-    as_basic(): BasicBlock {
-        if (this.is_basic()) {
+    asBasic(): BasicBlock {
+        if (this.isBasic()) {
             return this as unknown as BasicBlock;
         } else {
-            throw new Error("invalid downcast of non-BasicBlock");
+            throw new Error('invalid downcast of non-BasicBlock');
         }
     }
 }

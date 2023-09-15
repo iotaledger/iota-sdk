@@ -280,7 +280,9 @@ export class Client {
                 payload,
             },
         });
-        const parsed = JSON.parse(response) as Response<[BlockId, BlockWrapper]>;
+        const parsed = JSON.parse(response) as Response<
+            [BlockId, BlockWrapper]
+        >;
         const block = parseBlockWrapper(parsed.payload[1]);
         return [parsed.payload[0], block];
     }
@@ -436,7 +438,9 @@ export class Client {
      * @param transactionId The ID of the transaction.
      * @returns The included block that contained the transaction.
      */
-    async getIncludedBlockMetadata(transactionId: string): Promise<BlockWrapper> {
+    async getIncludedBlockMetadata(
+        transactionId: string,
+    ): Promise<BlockWrapper> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {

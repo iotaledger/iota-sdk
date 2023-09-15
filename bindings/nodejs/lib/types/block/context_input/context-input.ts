@@ -3,10 +3,13 @@
 
 import { AccountId } from '../..';
 import { u16 } from '../../utils/type-aliases';
+import { SlotCommitmentId } from '../slot';
 
 enum ContextInputType {
-    // ToDo: commitment context input;
-
+    /**
+     * The context input type of a `CommitmentContextInput`.
+     */
+    COMMITMENT = 0,
     /**
      * The context input kind of a `BlockIssuanceCreditContextInput`.
      */
@@ -22,6 +25,18 @@ abstract class ContextInput {
 
     constructor(type: ContextInputType) {
         this.type = type;
+    }
+}
+
+/**
+ * A Commitment Context Input references a commitment to a certain slot.
+ */
+class CommitmentContextInput extends ContextInput {
+    readonly commitmentId: SlotCommitmentId;
+
+    constructor(commitmentId: SlotCommitmentId) {
+        super(ContextInputType.COMMITMENT);
+        this.commitmentId = commitmentId;
     }
 }
 
@@ -50,9 +65,26 @@ class RewardContextInput extends ContextInput {
     }
 }
 
+const ContextInputDiscriminator = {
+    property: 'type',
+    subTypes: [
+        {
+            value: CommitmentContextInput,
+            name: ContextInputType.COMMITMENT as any,
+        },
+        {
+            value: BlockIssuanceCreditContextInput,
+            name: ContextInputType.BLOCK_ISSUANCE_CREDIT as any,
+        },
+        { value: RewardContextInput, name: ContextInputType.REWARD as any },
+    ],
+};
+
 export {
     ContextInputType,
     ContextInput,
+    CommitmentContextInput,
     RewardContextInput,
     BlockIssuanceCreditContextInput,
+    ContextInputDiscriminator,
 };

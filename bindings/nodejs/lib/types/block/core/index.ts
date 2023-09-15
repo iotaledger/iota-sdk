@@ -30,8 +30,8 @@ export abstract class Block {
      * Checks whether the block is a `BasicBlock`.
      * @returns true if it is, otherwise false
      */
-    is_basic(): boolean {
-        return this.type === BlockType.Basic
+    isBasic(): boolean {
+        return this.type === BlockType.Basic;
     }
 
     /**
@@ -39,25 +39,20 @@ export abstract class Block {
      * NOTE: Will throw an error if the block is not a `BasicBlock`.
      * @returns The block
      */
-    as_basic(): BasicBlock {
-        if (this.is_basic()) {
+    asBasic(): BasicBlock {
+        if (this.isBasic()) {
             return this as unknown as BasicBlock;
         } else {
-            throw new Error("invalid downcast of non-BasicBlock");
+            throw new Error('invalid downcast of non-BasicBlock');
         }
     }
-};
+}
 
 export const BlockDiscriminator = {
     property: 'type',
-    subTypes: [
-        { value: BasicBlock, name: BlockType.Basic as any },
-    ],
+    subTypes: [{ value: BasicBlock, name: BlockType.Basic as any }],
 };
 
 export function parseBlockWrapper(data: any): BlockWrapper {
-    return plainToInstance(
-        BlockWrapper,
-        data,
-    ) as any as BlockWrapper;
+    return plainToInstance(BlockWrapper, data) as any as BlockWrapper;
 }
