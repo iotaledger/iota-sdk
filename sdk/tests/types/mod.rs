@@ -12,6 +12,7 @@ mod output_id;
 mod parents;
 mod payload;
 mod rent;
+mod slot;
 mod tagged_data_payload;
 mod transaction_essence;
 mod transaction_id;
