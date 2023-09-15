@@ -1,13 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    BasicBlock,
-    BlockType,
-    Client,
-    initLogger,
-    parseBlockWrapper,
-} from '@iota/sdk';
+import { Client, initLogger, parseBlockWrapper } from '@iota/sdk';
 
 require('dotenv').config({ path: '.env' });
 

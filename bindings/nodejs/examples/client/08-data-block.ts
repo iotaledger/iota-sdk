@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    BasicBlock,
-    BlockType,
     Client,
     hexToUtf8,
     initLogger,
