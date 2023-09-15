@@ -14,12 +14,12 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{address::Ed25519Address, public_key::Ed25519PublicKey, Error};
+use crate::types::block::{address::Ed25519Address, Error};
 
 /// An Ed25519 signature.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
-    public_key: Ed25519PublicKey,
+    public_key: PublicKey,
     signature: Signature,
 }
 
@@ -32,7 +32,7 @@ impl Ed25519Signature {
     pub const SIGNATURE_LENGTH: usize = Signature::LENGTH;
 
     /// Creates a new [`Ed25519Signature`].
-    pub fn new(public_key: Ed25519PublicKey, signature: Signature) -> Self {
+    pub fn new(public_key: PublicKey, signature: Signature) -> Self {
         Self { public_key, signature }
     }
 
@@ -42,7 +42,7 @@ impl Ed25519Signature {
         signature: [u8; Self::SIGNATURE_LENGTH],
     ) -> Result<Self, Error> {
         Ok(Self::new(
-            Ed25519PublicKey::try_from_bytes(public_key)?,
+            PublicKey::try_from_bytes(public_key)?,
             Signature::from_bytes(signature),
         ))
     }
@@ -52,7 +52,7 @@ impl Ed25519Signature {
         &self.public_key
     }
 
-    /// Return the actual signature of an [`Ed25519Signature`].
+    /// Return the signature of an [`Ed25519Signature`].
     pub fn signature(&self) -> &Signature {
         &self.signature
     }
@@ -121,9 +121,8 @@ impl Packable for Ed25519Signature {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
         let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        Self::try_from_bytes(public_key, signature)
-            .map_err(UnpackError::Packable)
-            .coerce()
+
+        Self::try_from_bytes(public_key, signature).map_err(UnpackError::Packable)
     }
 }
 
