@@ -25,6 +25,9 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 )]
 #[getset(get_copy = "pub")]
 pub struct ProtocolParameters {
+    /// The layout type.
+    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    pub(crate) kind: u8,
     /// The version of the protocol running.
     pub(crate) version: u8,
     /// The human friendly name of the network.
@@ -82,6 +85,7 @@ impl Borrow<()> for ProtocolParameters {
 impl Default for ProtocolParameters {
     fn default() -> Self {
         Self {
+            kind: 0,
             version: PROTOCOL_VERSION,
             // Unwrap: Known to be valid
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
@@ -303,7 +307,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
         2,
         "testnet",
         "rms",
-        crate::types::block::output::RentStructure::new(500, 10, 1),
+        crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,
