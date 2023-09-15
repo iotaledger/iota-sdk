@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Dict, Optional, List
-from dacite import from_dict
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken

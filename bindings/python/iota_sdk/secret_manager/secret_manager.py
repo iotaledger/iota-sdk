@@ -1,15 +1,16 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from json import dumps, loads
+from typing import Optional
+from dacyte import from_dict
+import humps
+
 from iota_sdk import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import TransactionPayload
-from json import dumps, loads
-import humps
-from typing import Optional
-
 
 class LedgerNanoSecretManager(dict):
     """Secret manager that uses a Ledger Nano hardware wallet or a Speculos simulator.
@@ -116,8 +117,7 @@ class SecretManager():
 
         if "payload" in json_response:
             return json_response['payload']
-        else:
-            return response
+        return response
 
     def generate_ed25519_addresses(self,
                                    account_index: Optional[int] = None,

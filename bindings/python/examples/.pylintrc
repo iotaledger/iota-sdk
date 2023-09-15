@@ -6,6 +6,10 @@ disable=missing-module-docstring,
 	duplicate-code,
 	consider-using-with,
 	consider-using-f-string,
-	fixme
+	fixme, # TODOS 
+	too-many-instance-attributes,
+	too-many-arguments,
+	unused-argument # dict(locals()) doesnt work with this
+	
 
 
