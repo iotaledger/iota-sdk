@@ -47,7 +47,7 @@ class BlockIssuanceCreditContextInput(ContextInput):
 
     Attributes:
         type: The type of context input.
-        account_id: The BIC of an account to use.
+        account_id: The ID of the Account for which this input provides the BIC.
     """
     account_id: HexStr
     type: int = field(
