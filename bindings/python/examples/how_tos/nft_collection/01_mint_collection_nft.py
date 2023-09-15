@@ -43,12 +43,12 @@ def get_immutable_metadata(index: int, collection_id: str) -> str:
         "version": "v1.0",
         "type": "video/mp4",
         "uri": "ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong",
-        "name": "Shimmer OG NFT #" +
-        str(index),
+        "name": "Shimmer OG NFT #" + str(index),
         "description": "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
         "issuerName": "IOTA Foundation",
         "collectionId": collection_id,
-        "collectionName": "Shimmer OG"}
+        "collectionName": "Shimmer OG"
+    }
     return json.dumps(data, separators=(',', ':'))
 
 
