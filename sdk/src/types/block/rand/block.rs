@@ -3,16 +3,20 @@
 
 use alloc::vec::Vec;
 
-use super::signature::rand_ed25519_signature;
 use crate::types::block::{
-    basic::BasicBlock,
-    core::Block,
+    core::{BasicBlockBuilder, Block, BlockWrapper},
     parent::StrongParents,
     protocol::ProtocolParameters,
     rand::{
-        bytes::rand_bytes_array, number::rand_number, parents::rand_strong_parents, payload::rand_payload_for_block,
+        bytes::rand_bytes_array,
+        issuer_id::rand_issuer_id,
+        number::rand_number,
+        parents::rand_strong_parents,
+        payload::rand_payload_for_block,
+        signature::rand_signature,
+        slot::{rand_slot_commitment_id, rand_slot_index},
     },
-    BlockBuilder, BlockId,
+    BlockId,
 };
 
 /// Generates a random block id.
@@ -27,34 +31,30 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
     parents
 }
 
-/// Generates a random basic block with given parents.
-pub fn rand_basic_block_with_strong_parents(
-    protocol_params: ProtocolParameters,
-    strong_parents: StrongParents,
-) -> Block {
-    rand_basic_block_builder_with_strong_parents(protocol_params, strong_parents)
-        .with_payload(rand_payload_for_block())
-        .finish()
-        .unwrap()
+/// Generates a random basic block with given strong parents.
+pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParents) -> BasicBlockBuilder {
+    Block::build_basic(strong_parents, rand_number()).with_payload(rand_payload_for_block())
 }
 
-/// Generates a random basic block builder with given parents.
-pub fn rand_basic_block_builder_with_strong_parents(
-    protocol_params: ProtocolParameters,
-    strong_parents: StrongParents,
-) -> BlockBuilder<BasicBlock> {
-    Block::build_basic(
+/// Generates a random block wrapper.
+pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block: impl Into<Block>) -> BlockWrapper {
+    BlockWrapper::new(
         protocol_params,
         rand_number(),
-        rand_bytes_array().into(),
-        rand_number::<u64>().into(),
-        rand_bytes_array().into(),
-        strong_parents,
-        rand_ed25519_signature(),
+        rand_slot_commitment_id(),
+        rand_slot_index(),
+        rand_issuer_id(),
+        block,
+        rand_signature(),
     )
 }
 
-/// Generates a random block.
-pub fn rand_block(protocol_params: ProtocolParameters) -> Block {
-    rand_basic_block_with_strong_parents(protocol_params, rand_strong_parents())
+/// Generates a random block wrapper.
+pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
+    rand_block_wrapper_with_block(
+        protocol_params,
+        rand_basic_block_builder_with_strong_parents(rand_strong_parents())
+            .finish_block()
+            .unwrap(),
+    )
 }
