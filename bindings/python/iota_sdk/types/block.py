@@ -97,8 +97,7 @@ CONFLICT_REASON_STRINGS = {
     ConflictReason.invalidInputsCommitment: 'The inputs commitment is invalid',
     ConflictReason.invalidSender: ' The output contains a Sender with an ident (address) which is not unlocked',
     ConflictReason.invalidChainState: 'The chain state transition is invalid',
-    ConflictReason.semanticValidationFailed: 'The semantic validation failed'
-}
+    ConflictReason.semanticValidationFailed: 'The semantic validation failed'}
 
 
 @json

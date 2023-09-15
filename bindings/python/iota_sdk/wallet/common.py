@@ -8,6 +8,7 @@ import humps
 
 from iota_sdk import call_wallet_method
 
+
 def _call_method_routine(func):
     """The routine of dump json string and call call_wallet_method().
     """

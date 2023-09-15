@@ -12,6 +12,7 @@ from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import TransactionPayload
 
+
 class LedgerNanoSecretManager(dict):
     """Secret manager that uses a Ledger Nano hardware wallet or a Speculos simulator.
     """

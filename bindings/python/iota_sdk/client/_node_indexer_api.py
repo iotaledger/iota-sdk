@@ -7,6 +7,7 @@ from typing import Dict, Optional
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output_id import OutputId
 
+
 class NodeIndexerAPI():
     """Node indexer API.
     """

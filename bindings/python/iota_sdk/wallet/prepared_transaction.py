@@ -13,6 +13,7 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 if TYPE_CHECKING:
     from iota_sdk.wallet.wallet import Account
 
+
 class PreparedTransaction:
     """A helper class for offline signing.
 
@@ -41,7 +42,8 @@ class PreparedTransaction:
         """Get the prepared transaction data.
         """
         return self.prepared_transaction_data_dto if isinstance(
-            self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(PreparedTransactionData, self.prepared_transaction_data_dto)
+            self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(
+            PreparedTransactionData, self.prepared_transaction_data_dto)
 
     """
     The send function returns a promise that resolves to a Transaction object after signing

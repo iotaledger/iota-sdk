@@ -6,6 +6,7 @@ from typing import Optional
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output
 
+
 class ClientUtils():
     """Client utility functions.
     """

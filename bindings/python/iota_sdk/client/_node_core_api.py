@@ -10,6 +10,7 @@ from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 
+
 class NodeCoreAPI():
     """Node core API.
     """

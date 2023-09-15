@@ -17,6 +17,7 @@ from iota_sdk.types.output import Output
 if TYPE_CHECKING:
     from iota_sdk.types.block import Block
 
+
 class Utils():
     """Utility functions.
     """
@@ -222,5 +223,5 @@ def _call_method(name: str, data=None):
 
     if "payload" in json_response:
         return json_response['payload']
-    
+
     return response

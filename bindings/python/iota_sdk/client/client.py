@@ -25,6 +25,7 @@ from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
 from iota_sdk.types.transaction_data import PreparedTransactionData
 
+
 class ClientError(Exception):
     """Represents a client error."""
     pass
@@ -379,8 +380,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('unhealthyNodes')
 
-    def sign_transaction(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
-                         StrongholdSecretManager, prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
+    def sign_transaction(
+            self,
+            secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager,
+            prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
         Args:

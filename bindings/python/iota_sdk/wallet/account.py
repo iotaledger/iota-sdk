@@ -24,6 +24,7 @@ from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
 
+
 @dataclass
 class AccountMetadata:
     """Account metadata.
@@ -481,7 +482,9 @@ class Account:
         return self.prepare_send_native_tokens(params, options).send()
 
     def prepare_send_native_tokens(
-            self, params: List[SendNativeTokensParams], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+            self,
+            params: List[SendNativeTokensParams],
+            options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Send native tokens.
         """
         prepared = self._call_account_method(

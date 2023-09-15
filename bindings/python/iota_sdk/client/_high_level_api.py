@@ -9,6 +9,7 @@ from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.common import CoinType
 
+
 @json
 @dataclass
 class Range:
