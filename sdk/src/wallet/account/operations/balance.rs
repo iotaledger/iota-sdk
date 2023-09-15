@@ -7,7 +7,7 @@ use crate::{
     client::secret::SecretManage,
     types::block::{
         address::Bech32Address,
-        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+        output::{FoundryId, NativeTokensBuilder, Output, Rent},
         ConvertTo,
     },
     wallet::{
@@ -123,10 +123,11 @@ where
                         _ => {
                             // If there is only an [AddressUnlockCondition], then we can spend the output at any time
                             // without restrictions
-                            if let [UnlockCondition::Address(_)] = output
+                            if output
                                 .unlock_conditions()
                                 .expect("output needs to have unlock conditions")
-                                .as_ref()
+                                .single_address()
+                                .is_ok()
                             {
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {

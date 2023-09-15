@@ -9,16 +9,16 @@ mod state_controller_address;
 mod storage_deposit_return;
 mod timelock;
 
-use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
-use iterator_sorted::is_unique_sorted;
 use packable::{
     bounded::BoundedU8,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
-    prefix::BoxedSlicePrefix,
+    prefix::BTreeSetPrefix,
+    set::UnpackSetError,
     unpacker::Unpacker,
     Packable,
 };
@@ -61,6 +61,11 @@ impl Ord for UnlockCondition {
         self.kind().cmp(&other.kind())
     }
 }
+impl core::borrow::Borrow<u8> for UnlockCondition {
+    fn borrow(&self) -> &u8 {
+        &self.ord_kind()
+    }
+}
 
 impl core::fmt::Debug for UnlockCondition {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -79,14 +84,18 @@ impl core::fmt::Debug for UnlockCondition {
 impl UnlockCondition {
     /// Return the output kind of an `Output`.
     pub fn kind(&self) -> u8 {
+        *self.ord_kind()
+    }
+
+    fn ord_kind<'a>(&'a self) -> &'a u8 {
         match self {
-            Self::Address(_) => AddressUnlockCondition::KIND,
-            Self::StorageDepositReturn(_) => StorageDepositReturnUnlockCondition::KIND,
-            Self::Timelock(_) => TimelockUnlockCondition::KIND,
-            Self::Expiration(_) => ExpirationUnlockCondition::KIND,
-            Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
-            Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-            Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
+            Self::Address(_) => &AddressUnlockCondition::KIND,
+            Self::StorageDepositReturn(_) => &StorageDepositReturnUnlockCondition::KIND,
+            Self::Timelock(_) => &TimelockUnlockCondition::KIND,
+            Self::Expiration(_) => &ExpirationUnlockCondition::KIND,
+            Self::StateControllerAddress(_) => &StateControllerAddressUnlockCondition::KIND,
+            Self::GovernorAddress(_) => &GovernorAddressUnlockCondition::KIND,
+            Self::ImmutableAccountAddress(_) => &ImmutableAccountAddressUnlockCondition::KIND,
         }
     }
 
@@ -298,11 +307,20 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MA
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockConditionCount(p.into())))]
+#[packable(unpack_error = Error, with = map_unlock_conditions_set_error)]
 #[packable(unpack_visitor = ProtocolParameters)]
-pub struct UnlockConditions(
-    #[packable(verify_with = verify_unique_sorted_packable)] BoxedSlicePrefix<UnlockCondition, UnlockConditionCount>,
-);
+pub struct UnlockConditions(BTreeSetPrefix<UnlockCondition, UnlockConditionCount>);
+
+fn map_unlock_conditions_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+where
+    <UnlockConditionCount as TryFrom<usize>>::Error: From<P>,
+{
+    match error {
+        UnpackSetError::DuplicateItem(_) => Error::UnlockConditionsNotUniqueSorted,
+        UnpackSetError::Item(e) => e,
+        UnpackSetError::Prefix(p) => Error::InvalidUnlockConditionCount(p.into()),
+    }
+}
 
 impl TryFrom<Vec<UnlockCondition>> for UnlockConditions {
     type Error = Error;
@@ -324,10 +342,10 @@ impl TryFrom<BTreeSet<UnlockCondition>> for UnlockConditions {
 
 impl IntoIterator for UnlockConditions {
     type Item = UnlockCondition;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+    type IntoIter = alloc::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Vec::from(Into::<Box<[UnlockCondition]>>::into(self.0)).into_iter()
+        BTreeSet::from(self.0).into_iter()
     }
 }
 
@@ -337,83 +355,86 @@ impl UnlockConditions {
 
     /// Creates a new [`UnlockConditions`] from a vec.
     pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
-        let mut unlock_conditions =
-            BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(unlock_conditions.into_boxed_slice())
-                .map_err(Error::InvalidUnlockConditionCount)?;
-
-        unlock_conditions.sort_by_key(UnlockCondition::kind);
-        // Sort is obviously fine now but uniqueness still needs to be checked.
-        verify_unique_sorted::<true>(&unlock_conditions)?;
-
-        Ok(Self(unlock_conditions))
+        Ok(Self(
+            unlock_conditions
+                .into_iter()
+                .collect::<BTreeSet<_>>()
+                .try_into()
+                .map_err(Error::InvalidUnlockConditionCount)?,
+        ))
     }
 
     /// Creates a new [`UnlockConditions`] from an ordered set.
     pub fn from_set(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Error> {
         Ok(Self(
             unlock_conditions
-                .into_iter()
-                .collect::<Box<[_]>>()
                 .try_into()
                 .map_err(Error::InvalidUnlockConditionCount)?,
         ))
     }
 
-    /// Gets a reference to an [`UnlockCondition`] from an unlock condition kind, if any.
-    #[inline(always)]
-    pub fn get(&self, key: u8) -> Option<&UnlockCondition> {
-        self.0
-            .binary_search_by_key(&key, UnlockCondition::kind)
-            // PANIC: indexation is fine since the index has been found.
-            .map(|index| &self.0[index])
-            .ok()
+    /// Gets the underlying set.
+    pub fn as_set(&self) -> &BTreeSet<UnlockCondition> {
+        &self.0
     }
 
     /// Gets a reference to an [`AddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn address(&self) -> Option<&AddressUnlockCondition> {
-        self.get(AddressUnlockCondition::KIND).map(UnlockCondition::as_address)
+        self.get(&AddressUnlockCondition::KIND).map(UnlockCondition::as_address)
+    }
+
+    /// Gets a reference to the [`AddressUnlockCondition`], if it is the only unlock condition.
+    #[inline(always)]
+    pub fn single_address(&self) -> Result<&AddressUnlockCondition, Error> {
+        (self.len() == 1)
+            .then(|| {
+                self.get(&AddressUnlockCondition::KIND)
+                    .map(UnlockCondition::as_address)
+                    .ok_or(Error::MissingAddressUnlockCondition)
+            })
+            .ok_or(Error::TooManyUnlockConditions)?
     }
 
     /// Gets a reference to a [`StorageDepositReturnUnlockCondition`], if any.
     #[inline(always)]
     pub fn storage_deposit_return(&self) -> Option<&StorageDepositReturnUnlockCondition> {
-        self.get(StorageDepositReturnUnlockCondition::KIND)
+        self.get(&StorageDepositReturnUnlockCondition::KIND)
             .map(UnlockCondition::as_storage_deposit_return)
     }
 
     /// Gets a reference to a [`TimelockUnlockCondition`], if any.
     #[inline(always)]
     pub fn timelock(&self) -> Option<&TimelockUnlockCondition> {
-        self.get(TimelockUnlockCondition::KIND)
+        self.get(&TimelockUnlockCondition::KIND)
             .map(UnlockCondition::as_timelock)
     }
 
     /// Gets a reference to an [`ExpirationUnlockCondition`], if any.
     #[inline(always)]
     pub fn expiration(&self) -> Option<&ExpirationUnlockCondition> {
-        self.get(ExpirationUnlockCondition::KIND)
+        self.get(&ExpirationUnlockCondition::KIND)
             .map(UnlockCondition::as_expiration)
     }
 
     /// Gets a reference to a [`StateControllerAddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn state_controller_address(&self) -> Option<&StateControllerAddressUnlockCondition> {
-        self.get(StateControllerAddressUnlockCondition::KIND)
+        self.get(&StateControllerAddressUnlockCondition::KIND)
             .map(UnlockCondition::as_state_controller_address)
     }
 
     /// Gets a reference to a [`GovernorAddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn governor_address(&self) -> Option<&GovernorAddressUnlockCondition> {
-        self.get(GovernorAddressUnlockCondition::KIND)
+        self.get(&GovernorAddressUnlockCondition::KIND)
             .map(UnlockCondition::as_governor_address)
     }
 
     /// Gets a reference to an [`ImmutableAccountAddressUnlockCondition`], if any.
     #[inline(always)]
     pub fn immutable_account_address(&self) -> Option<&ImmutableAccountAddressUnlockCondition> {
-        self.get(ImmutableAccountAddressUnlockCondition::KIND)
+        self.get(&ImmutableAccountAddressUnlockCondition::KIND)
             .map(UnlockCondition::as_immutable_account_address)
     }
 
@@ -444,30 +465,13 @@ impl UnlockConditions {
     }
 }
 
-#[inline]
-fn verify_unique_sorted<const VERIFY: bool>(unlock_conditions: &[UnlockCondition]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(unlock_conditions.iter().map(UnlockCondition::kind)) {
-        Err(Error::UnlockConditionsNotUniqueSorted)
-    } else {
-        Ok(())
-    }
-}
-
-#[inline]
-fn verify_unique_sorted_packable<const VERIFY: bool>(
-    unlock_conditions: &[UnlockCondition],
-    _: &ProtocolParameters,
-) -> Result<(), Error> {
-    verify_unique_sorted::<VERIFY>(unlock_conditions)
-}
-
 pub(crate) fn verify_allowed_unlock_conditions(
     unlock_conditions: &UnlockConditions,
     allowed_unlock_conditions: UnlockConditionFlags,
 ) -> Result<(), Error> {
     for (index, unlock_condition) in unlock_conditions.iter().enumerate() {
         if !allowed_unlock_conditions.contains(unlock_condition.flag()) {
-            return Err(Error::UnallowedUnlockCondition {
+            return Err(Error::DisallowedUnlockCondition {
                 index,
                 kind: unlock_condition.kind(),
             });
@@ -570,6 +574,17 @@ pub mod dto {
                 Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
                 Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
             }
+        }
+    }
+
+    impl PartialOrd for UnlockConditionDto {
+        fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    impl Ord for UnlockConditionDto {
+        fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+            self.kind().cmp(&other.kind())
         }
     }
 }

@@ -310,7 +310,7 @@ impl BasicOutput {
     /// Simple deposit outputs are basic outputs with only an address unlock condition, no native tokens and no
     /// features. They are used to return storage deposits.
     pub fn simple_deposit_address(&self) -> Option<&Address> {
-        if let [UnlockCondition::Address(address)] = self.unlock_conditions().as_ref() {
+        if let Ok(address) = self.unlock_conditions().single_address() {
             if self.native_tokens.is_empty() && self.features.is_empty() {
                 return Some(address.address());
             }
@@ -378,11 +378,11 @@ pub(crate) mod dto {
         #[serde(with = "string")]
         pub mana: u64,
         // Native tokens held by the output.
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<Feature>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub native_tokens: BTreeSet<NativeToken>,
+        pub unlock_conditions: BTreeSet<UnlockConditionDto>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub features: BTreeSet<Feature>,
     }
 
     impl From<&BasicOutput> for BasicOutputDto {
@@ -391,9 +391,9 @@ pub(crate) mod dto {
                 kind: BasicOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
+                native_tokens: value.native_tokens().as_set().clone(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().to_vec(),
+                features: value.features().as_set().clone(),
             }
         }
     }
@@ -420,9 +420,9 @@ pub(crate) mod dto {
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
-            unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<Feature>>,
+            native_tokens: Option<BTreeSet<NativeToken>>,
+            unlock_conditions: BTreeSet<UnlockConditionDto>,
+            features: Option<BTreeSet<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
@@ -542,9 +542,9 @@ mod tests {
         let output_split = BasicOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
+            Some(output.native_tokens().as_set().clone()),
             output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
+            Some(output.features().as_set().clone()),
             protocol_parameters.token_supply(),
         )
         .unwrap();

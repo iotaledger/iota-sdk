@@ -30,6 +30,12 @@ impl Ord for ManaAllotment {
     }
 }
 
+impl core::borrow::Borrow<AccountId> for ManaAllotment {
+    fn borrow(&self) -> &AccountId {
+        &self.account_id
+    }
+}
+
 impl ManaAllotment {
     pub fn new(account_id: AccountId, mana: u64, protocol_params: &ProtocolParameters) -> Result<Self, Error> {
         if mana > protocol_params.mana_structure().max_mana() {

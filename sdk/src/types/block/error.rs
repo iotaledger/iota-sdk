@@ -163,10 +163,11 @@ pub enum Error {
         index: usize,
         kind: u8,
     },
-    UnallowedUnlockCondition {
+    DisallowedUnlockCondition {
         index: usize,
         kind: u8,
     },
+    TooManyUnlockConditions,
     UnlockConditionsNotUniqueSorted,
     UnsupportedOutputKind(u8),
     DuplicateOutputChain(ChainId),
@@ -364,9 +365,10 @@ impl fmt::Display for Error {
             Self::UnallowedFeature { index, kind } => {
                 write!(f, "unallowed feature at index {index} with kind {kind}")
             }
-            Self::UnallowedUnlockCondition { index, kind } => {
+            Self::DisallowedUnlockCondition { index, kind } => {
                 write!(f, "unallowed unlock condition at index {index} with kind {kind}")
             }
+            Self::TooManyUnlockConditions => write!(f, "too many unlock conditions"),
             Self::UnlockConditionsNotUniqueSorted => write!(f, "unlock conditions are not unique and/or sorted"),
             Self::UnsupportedOutputKind(k) => write!(f, "unsupported output kind: {k}"),
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),

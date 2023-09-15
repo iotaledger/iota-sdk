@@ -142,9 +142,9 @@ pub(crate) fn verify_parents(
     shallow_like_parents: &ShallowLikeParents,
 ) -> Result<(), Error> {
     let (strong_parents, weak_parents, shallow_like_parents) = (
-        strong_parents.to_set(),
-        weak_parents.to_set(),
-        shallow_like_parents.to_set(),
+        strong_parents.as_set().clone(),
+        weak_parents.as_set().clone(),
+        shallow_like_parents.as_set().clone(),
     );
 
     if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {

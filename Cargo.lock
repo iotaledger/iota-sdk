@@ -1561,7 +1561,6 @@ dependencies = [
  "iota-ledger-nano",
  "iota-sdk",
  "iota_stronghold",
- "iterator-sorted",
  "lazy_static",
  "log",
  "num_cpus",
@@ -2065,9 +2064,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "packable"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eac6939609218dd61191d0ec495e00c9eac5c80f29986775be1f62bfae69dee3"
+checksum = "d99ae55c2e3dc657f87a74d549bfe44187dba690310738d384454b8101f7c0f8"
 dependencies = [
  "autocfg",
  "packable-derive",

@@ -637,16 +637,16 @@ pub(crate) mod dto {
         #[serde(with = "string")]
         pub amount: u64,
         // Native tokens held by the output.
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub native_tokens: BTreeSet<NativeToken>,
         // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<Feature>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<Feature>,
+        pub unlock_conditions: BTreeSet<UnlockConditionDto>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub features: BTreeSet<Feature>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub immutable_features: BTreeSet<Feature>,
     }
 
     impl From<&FoundryOutput> for FoundryOutputDto {
@@ -654,12 +654,12 @@ pub(crate) mod dto {
             Self {
                 kind: FoundryOutput::KIND,
                 amount: value.amount(),
-                native_tokens: value.native_tokens().to_vec(),
+                native_tokens: value.native_tokens().as_set().clone(),
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().clone(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().to_vec(),
-                immutable_features: value.immutable_features().to_vec(),
+                features: value.features().as_set().clone(),
+                immutable_features: value.immutable_features().as_set().clone(),
             }
         }
     }
@@ -695,12 +695,12 @@ pub(crate) mod dto {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
-            native_tokens: Option<Vec<NativeToken>>,
+            native_tokens: Option<BTreeSet<NativeToken>>,
             serial_number: u32,
             token_scheme: TokenScheme,
-            unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
+            unlock_conditions: BTreeSet<UnlockConditionDto>,
+            features: Option<BTreeSet<Feature>>,
+            immutable_features: Option<BTreeSet<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();

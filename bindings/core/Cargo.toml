@@ -23,7 +23,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "bip44",
 ] }
 log = { version = "0.4.20", default-features = false }
-packable = { version = "0.8.1", default-features = false }
+packable = { version = "0.8.2", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false }
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.188", default-features = false }

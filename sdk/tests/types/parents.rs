@@ -2,46 +2,43 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use core::ops::Deref;
-use std::collections::BTreeSet;
 
 use iota_sdk::types::block::{
     parent::StrongParents,
     rand::block::{rand_block_id, rand_block_ids},
-    BlockId, Error,
+    Error,
 };
 use packable::{error::UnpackError, prefix::VecPrefix, PackableExt};
 
 #[test]
 fn len() {
     for i in 1..=8 {
-        assert_eq!(StrongParents::from_vec(rand_block_ids(i)).unwrap().len(), i);
+        assert_eq!(StrongParents::from_set(rand_block_ids(i)).unwrap().len(), i);
     }
 }
 
 #[test]
 fn new_valid_iter() {
     let inner = rand_block_ids(8);
-    let parents = StrongParents::from_vec(inner.clone()).unwrap();
+    let parents = StrongParents::from_set(inner.clone()).unwrap();
 
-    let parents_vec = parents.iter().copied().collect::<Vec<BlockId>>();
-
-    assert_eq!(inner, parents_vec[0..].to_vec());
+    assert!(inner.into_iter().eq(parents.into_iter()));
 }
 
 #[test]
 fn new_from_set() {
     let inner = rand_block_ids(8);
-    let parents = StrongParents::from_set(BTreeSet::from_iter(inner.clone())).unwrap();
+    let parents = StrongParents::from_set(inner.clone()).unwrap();
 
-    assert_eq!(*parents.to_vec(), inner);
+    assert_eq!(parents.as_set(), &inner);
 }
 
 #[test]
 fn new_valid_deref() {
     let inner = rand_block_ids(8);
-    let parents = StrongParents::from_vec(inner.clone()).unwrap();
+    let parents = StrongParents::from_set(inner.clone()).unwrap();
 
-    assert_eq!(parents.deref(), &inner.into_boxed_slice());
+    assert_eq!(parents.deref(), &inner);
 }
 
 #[test]
@@ -64,29 +61,27 @@ fn new_invalid_more_than_max() {
 
 #[test]
 fn new_not_sorted() {
-    let mut inner_1 = rand_block_ids(8);
-    let inner_2 = inner_1.clone();
-    inner_1.reverse();
+    let inner = rand_block_ids(8);
+    let reversed = inner.iter().copied().rev().collect::<Vec<_>>();
 
-    let parents = StrongParents::from_vec(inner_1).unwrap();
+    let parents = StrongParents::from_vec(reversed).unwrap();
 
-    assert_eq!(*parents.to_vec(), inner_2);
+    assert_eq!(parents.as_set(), &inner);
 }
 
 #[test]
 fn new_not_unique() {
-    let mut inner_1 = rand_block_ids(7);
-    let inner_2 = inner_1.clone();
-    inner_1.push(*inner_1.last().unwrap());
+    let inner = rand_block_ids(7);
+    let non_unique = inner.iter().chain(&inner).copied().collect::<Vec<_>>();
 
-    let parents = StrongParents::from_vec(inner_1).unwrap();
+    let parents = StrongParents::from_vec(non_unique).unwrap();
 
-    assert_eq!(*parents.to_vec(), inner_2);
+    assert_eq!(parents.as_set(), &inner);
 }
 
 #[test]
 fn packed_len() {
-    let parents = StrongParents::from_vec(rand_block_ids(5)).unwrap();
+    let parents = StrongParents::from_set(rand_block_ids(5)).unwrap();
 
     assert_eq!(parents.packed_len(), 1 + 5 * 40);
     assert_eq!(parents.pack_to_vec().len(), 1 + 5 * 40);
@@ -94,7 +89,7 @@ fn packed_len() {
 
 #[test]
 fn pack_unpack_valid() {
-    let parents_1 = StrongParents::from_vec(rand_block_ids(8)).unwrap();
+    let parents_1 = StrongParents::from_set(rand_block_ids(8)).unwrap();
     let parents_2 = StrongParents::unpack_verified(parents_1.pack_to_vec().as_slice(), &()).unwrap();
 
     assert_eq!(parents_1, parents_2);
@@ -144,9 +139,9 @@ fn pack_unpack_invalid_more_than_max() {
 
 #[test]
 fn unpack_invalid_not_sorted() {
-    let mut inner = rand_block_ids(8);
-    inner.reverse();
-    let inner = VecPrefix::<_, u8>::try_from(inner).unwrap();
+    let inner = rand_block_ids(8);
+    let reversed = inner.into_iter().rev().collect::<Vec<_>>();
+    let inner = VecPrefix::<_, u8>::try_from(reversed).unwrap();
 
     let packed = inner.pack_to_vec();
     let parents = StrongParents::unpack_verified(packed.as_slice(), &());
@@ -159,9 +154,9 @@ fn unpack_invalid_not_sorted() {
 
 #[test]
 fn unpack_invalid_not_unique() {
-    let mut inner = rand_block_ids(7);
-    inner.push(*inner.last().unwrap());
-    let inner = VecPrefix::<_, u8>::try_from(inner).unwrap();
+    let inner = rand_block_ids(7);
+    let non_unique = inner.iter().chain(&inner).copied().collect::<Vec<_>>();
+    let inner = VecPrefix::<_, u8>::try_from(non_unique).unwrap();
 
     let packed = inner.pack_to_vec();
     let parents = StrongParents::unpack_verified(packed.as_slice(), &());

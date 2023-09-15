@@ -129,4 +129,15 @@ pub(crate) mod dto {
             StorageDepositReturnUnlockConditionDto::from(self).serialize(s)
         }
     }
+
+    impl Ord for StorageDepositReturnUnlockConditionDto {
+        fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+            self.kind.cmp(&other.kind)
+        }
+    }
+    impl PartialOrd for StorageDepositReturnUnlockConditionDto {
+        fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+            Some(self.cmp(&other))
+        }
+    }
 }

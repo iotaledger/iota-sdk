@@ -31,7 +31,7 @@ use iota_sdk::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
-                StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
+                StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
             AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens,
             NftId, NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
@@ -362,7 +362,7 @@ fn is_remainder_or_return(
 
         // assert_eq!(output.as_basic().native_tokens().len(), 0);
 
-        if let [UnlockCondition::Address(address_unlock_condition)] = output.unlock_conditions().as_ref() {
+        if let Ok(address_unlock_condition) = output.unlock_conditions().single_address() {
             if address_unlock_condition.address() != Bech32Address::try_from_str(address).unwrap().inner() {
                 return false;
             }

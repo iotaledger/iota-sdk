@@ -8,12 +8,11 @@ mod sender;
 mod staking;
 mod tag;
 
-use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
-use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
 
 #[cfg(feature = "irc_27")]
 pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
@@ -68,6 +67,12 @@ impl Ord for Feature {
     }
 }
 
+impl core::borrow::Borrow<u8> for Feature {
+    fn borrow(&self) -> &u8 {
+        &self.ord_kind()
+    }
+}
+
 impl core::fmt::Debug for Feature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
@@ -84,13 +89,17 @@ impl core::fmt::Debug for Feature {
 impl Feature {
     /// Return the output kind of an `Output`.
     pub fn kind(&self) -> u8 {
+        *self.ord_kind()
+    }
+
+    fn ord_kind<'a>(&'a self) -> &'a u8 {
         match self {
-            Self::Sender(_) => SenderFeature::KIND,
-            Self::Issuer(_) => IssuerFeature::KIND,
-            Self::Metadata(_) => MetadataFeature::KIND,
-            Self::Tag(_) => TagFeature::KIND,
-            Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
-            Self::Staking(_) => StakingFeature::KIND,
+            Self::Sender(_) => &SenderFeature::KIND,
+            Self::Issuer(_) => &IssuerFeature::KIND,
+            Self::Metadata(_) => &MetadataFeature::KIND,
+            Self::Tag(_) => &TagFeature::KIND,
+            Self::BlockIssuer(_) => &BlockIssuerFeature::KIND,
+            Self::Staking(_) => &StakingFeature::KIND,
         }
     }
 
@@ -215,8 +224,19 @@ pub(crate) type FeatureCount = BoundedU8<0, { Features::COUNT_MAX }>;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidFeatureCount(p.into())))]
-pub struct Features(#[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<Feature, FeatureCount>);
+#[packable(unpack_error = Error, with = map_features_set_error)]
+pub struct Features(BTreeSetPrefix<Feature, FeatureCount>);
+
+fn map_features_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+where
+    <FeatureCount as TryFrom<usize>>::Error: From<P>,
+{
+    match error {
+        UnpackSetError::DuplicateItem(_) => Error::FeaturesNotUniqueSorted,
+        UnpackSetError::Item(e) => e,
+        UnpackSetError::Prefix(p) => Error::InvalidFeatureCount(p.into()),
+    }
+}
 
 impl TryFrom<Vec<Feature>> for Features {
     type Error = Error;
@@ -238,10 +258,10 @@ impl TryFrom<BTreeSet<Feature>> for Features {
 
 impl IntoIterator for Features {
     type Item = Feature;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+    type IntoIter = alloc::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Vec::from(Into::<Box<[Feature]>>::into(self.0)).into_iter()
+        BTreeSet::from(self.0).into_iter()
     }
 }
 
@@ -251,74 +271,53 @@ impl Features {
 
     /// Creates a new [`Features`] from a vec.
     pub fn from_vec(features: Vec<Feature>) -> Result<Self, Error> {
-        let mut features = BoxedSlicePrefix::<Feature, FeatureCount>::try_from(features.into_boxed_slice())
-            .map_err(Error::InvalidFeatureCount)?;
-
-        features.sort_by_key(Feature::kind);
-        // Sort is obviously fine now but uniqueness still needs to be checked.
-        verify_unique_sorted::<true>(&features, &())?;
-
-        Ok(Self(features))
-    }
-
-    /// Creates a new [`Features`] from an ordered set.
-    pub fn from_set(features: BTreeSet<Feature>) -> Result<Self, Error> {
         Ok(Self(
             features
                 .into_iter()
-                .collect::<Box<[_]>>()
+                .collect::<BTreeSet<_>>()
                 .try_into()
                 .map_err(Error::InvalidFeatureCount)?,
         ))
     }
 
-    /// Gets a reference to a [`Feature`] from a feature kind, if any.
-    #[inline(always)]
-    pub fn get(&self, key: u8) -> Option<&Feature> {
-        self.0
-            .binary_search_by_key(&key, Feature::kind)
-            // PANIC: indexation is fine since the index has been found.
-            .map(|index| &self.0[index])
-            .ok()
+    /// Creates a new [`Features`] from an ordered set.
+    pub fn from_set(features: BTreeSet<Feature>) -> Result<Self, Error> {
+        Ok(Self(features.try_into().map_err(Error::InvalidFeatureCount)?))
+    }
+
+    /// Gets the underlying set.
+    pub fn as_set(&self) -> &BTreeSet<Feature> {
+        &self.0
     }
 
     /// Gets a reference to a [`SenderFeature`], if any.
     pub fn sender(&self) -> Option<&SenderFeature> {
-        self.get(SenderFeature::KIND).map(Feature::as_sender)
+        self.get(&SenderFeature::KIND).map(Feature::as_sender)
     }
 
     /// Gets a reference to a [`IssuerFeature`], if any.
     pub fn issuer(&self) -> Option<&IssuerFeature> {
-        self.get(IssuerFeature::KIND).map(Feature::as_issuer)
+        self.get(&IssuerFeature::KIND).map(Feature::as_issuer)
     }
 
     /// Gets a reference to a [`MetadataFeature`], if any.
     pub fn metadata(&self) -> Option<&MetadataFeature> {
-        self.get(MetadataFeature::KIND).map(Feature::as_metadata)
+        self.get(&MetadataFeature::KIND).map(Feature::as_metadata)
     }
 
     /// Gets a reference to a [`TagFeature`], if any.
     pub fn tag(&self) -> Option<&TagFeature> {
-        self.get(TagFeature::KIND).map(Feature::as_tag)
+        self.get(&TagFeature::KIND).map(Feature::as_tag)
     }
 
     /// Gets a reference to a [`BlockIssuerFeature`], if any.
     pub fn block_issuer(&self) -> Option<&BlockIssuerFeature> {
-        self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
+        self.get(&BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
     }
 
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
-        self.get(StakingFeature::KIND).map(Feature::as_staking)
-    }
-}
-
-#[inline]
-fn verify_unique_sorted<const VERIFY: bool>(features: &[Feature], _: &()) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(features.iter().map(Feature::kind)) {
-        Err(Error::FeaturesNotUniqueSorted)
-    } else {
-        Ok(())
+        self.get(&StakingFeature::KIND).map(Feature::as_staking)
     }
 }
 

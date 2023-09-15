@@ -211,9 +211,9 @@ pub(crate) mod dto {
         fn from(value: &BasicBlock) -> Self {
             Self {
                 kind: BasicBlock::KIND,
-                strong_parents: value.strong_parents.to_set(),
-                weak_parents: value.weak_parents.to_set(),
-                shallow_like_parents: value.shallow_like_parents.to_set(),
+                strong_parents: value.strong_parents.as_set().clone(),
+                weak_parents: value.weak_parents.as_set().clone(),
+                shallow_like_parents: value.shallow_like_parents.as_set().clone(),
                 payload: value.payload.as_ref().map(Into::into),
                 burned_mana: value.burned_mana,
             }

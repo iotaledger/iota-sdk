@@ -264,7 +264,7 @@ impl RegularTransactionEssence {
     }
 
     /// Returns the [`ManaAllotment`]s of a [`RegularTransactionEssence`].
-    pub fn mana_allotments(&self) -> &[ManaAllotment] {
+    pub fn mana_allotments(&self) -> &ManaAllotments {
         &self.allotments
     }
 

@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::collections::BTreeSet;
 
 use crate::types::block::{
     core::{BasicBlockBuilder, Block, BlockWrapper},
@@ -25,10 +25,12 @@ pub fn rand_block_id() -> BlockId {
 }
 
 /// Generates a vector of random block ids of a given length.
-pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
-    let mut parents = (0..len).map(|_| rand_block_id()).collect::<Vec<_>>();
-    parents.sort_by(|a, b| a.as_ref().cmp(b.as_ref()));
-    parents
+pub fn rand_block_ids(len: usize) -> BTreeSet<BlockId> {
+    let mut res = BTreeSet::new();
+    while res.len() < len {
+        res.insert(rand_block_id());
+    }
+    res
 }
 
 /// Generates a random basic block with given strong parents.

@@ -4,26 +4,25 @@
 mod allotment;
 mod protocol;
 
-use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use alloc::{collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
-use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU16, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
 
 #[cfg(feature = "serde")]
 pub use self::allotment::dto::ManaAllotmentDto;
 pub use self::{allotment::ManaAllotment, protocol::ManaStructure};
-use super::{output::AccountId, protocol::ProtocolParameters, Error};
+use super::{protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =
     BoundedU16<{ *ManaAllotments::COUNT_RANGE.start() }, { *ManaAllotments::COUNT_RANGE.end() }>;
 
 /// A list of [`ManaAllotment`]s with unique [`AccountId`]s.
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidManaAllotmentCount(p.into())))]
+#[packable(unpack_error = Error, with = map_mana_allotment_set_error)]
 pub struct ManaAllotments(
-    #[packable(verify_with = verify_mana_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
+    #[packable(verify_with = verify_mana_allotments)] BTreeSetPrefix<ManaAllotment, ManaAllotmentCount>,
 );
 
 impl ManaAllotments {
@@ -36,11 +35,10 @@ impl ManaAllotments {
 
     /// Creates a new [`ManaAllotments`] from a vec.
     pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
-        verify_mana_allotments_unique_sorted(&allotments)?;
-
         Ok(Self(
             allotments
-                .into_boxed_slice()
+                .into_iter()
+                .collect::<BTreeSet<_>>()
                 .try_into()
                 .map_err(Error::InvalidManaAllotmentCount)?,
         ))
@@ -48,40 +46,29 @@ impl ManaAllotments {
 
     /// Creates a new [`ManaAllotments`] from an ordered set.
     pub fn from_set(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Error> {
-        Ok(Self(
-            allotments
-                .into_iter()
-                .collect::<Box<[_]>>()
-                .try_into()
-                .map_err(Error::InvalidManaAllotmentCount)?,
-        ))
+        Ok(Self(allotments.try_into().map_err(Error::InvalidManaAllotmentCount)?))
     }
+}
 
-    /// Gets a reference to an [`ManaAllotment`], if one exists, using an [`AccountId`].
-    #[inline(always)]
-    pub fn get(&self, account_id: &AccountId) -> Option<&ManaAllotment> {
-        self.0.iter().find(|a| a.account_id() == account_id)
+fn map_mana_allotment_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+where
+    <ManaAllotmentCount as TryFrom<usize>>::Error: From<P>,
+{
+    match error {
+        UnpackSetError::DuplicateItem(_) => Error::ManaAllotmentsNotUniqueSorted,
+        UnpackSetError::Item(e) => e,
+        UnpackSetError::Prefix(p) => Error::InvalidManaAllotmentCount(p.into()),
     }
 }
 
 fn verify_mana_allotments<const VERIFY: bool>(
-    allotments: &[ManaAllotment],
+    allotments: &BTreeSet<ManaAllotment>,
     protocol_params: &ProtocolParameters,
 ) -> Result<(), Error> {
     if VERIFY {
-        verify_mana_allotments_unique_sorted(allotments)?;
         verify_mana_allotments_sum(allotments, protocol_params)?;
     }
 
-    Ok(())
-}
-
-fn verify_mana_allotments_unique_sorted<'a>(
-    allotments: impl IntoIterator<Item = &'a ManaAllotment>,
-) -> Result<(), Error> {
-    if !is_unique_sorted(allotments.into_iter()) {
-        return Err(Error::ManaAllotmentsNotUniqueSorted);
-    }
     Ok(())
 }
 
@@ -129,9 +116,9 @@ impl TryFrom<BTreeSet<ManaAllotment>> for ManaAllotments {
 
 impl IntoIterator for ManaAllotments {
     type Item = ManaAllotment;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+    type IntoIter = alloc::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Vec::from(Into::<Box<[ManaAllotment]>>::into(self.0)).into_iter()
+        BTreeSet::from(self.0).into_iter()
     }
 }

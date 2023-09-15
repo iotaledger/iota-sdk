@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{
-    boxed::Box,
     collections::{BTreeMap, BTreeSet},
     vec::Vec,
 };
 
 use derive_more::{Deref, DerefMut, From};
-use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
 use primitive_types::U256;
 
 use crate::types::block::{output::TokenId, Error};
@@ -59,6 +57,12 @@ impl PartialOrd for NativeToken {
 impl Ord for NativeToken {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.token_id.cmp(&other.token_id)
+    }
+}
+
+impl core::borrow::Borrow<TokenId> for NativeToken {
+    fn borrow(&self) -> &TokenId {
+        &self.token_id
     }
 }
 
@@ -153,10 +157,19 @@ pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidNativeTokenCount(p.into())))]
-pub struct NativeTokens(
-    #[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<NativeToken, NativeTokenCount>,
-);
+#[packable(unpack_error = Error, with = map_native_tokens_set_error)]
+pub struct NativeTokens(BTreeSetPrefix<NativeToken, NativeTokenCount>);
+
+fn map_native_tokens_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+where
+    <NativeTokenCount as TryFrom<usize>>::Error: From<P>,
+{
+    match error {
+        UnpackSetError::DuplicateItem(_) => Error::NativeTokensNotUniqueSorted,
+        UnpackSetError::Item(e) => e,
+        UnpackSetError::Prefix(p) => Error::InvalidNativeTokenCount(p.into()),
+    }
+}
 
 impl TryFrom<Vec<NativeToken>> for NativeTokens {
     type Error = Error;
@@ -178,10 +191,10 @@ impl TryFrom<BTreeSet<NativeToken>> for NativeTokens {
 
 impl IntoIterator for NativeTokens {
     type Item = NativeToken;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+    type IntoIter = alloc::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Vec::from(Into::<Box<[NativeToken]>>::into(self.0)).into_iter()
+        BTreeSet::from(self.0).into_iter()
     }
 }
 
@@ -191,56 +204,28 @@ impl NativeTokens {
 
     /// Creates a new [`NativeTokens`] from a vec.
     pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, Error> {
-        let mut native_tokens =
-            BoxedSlicePrefix::<NativeToken, NativeTokenCount>::try_from(native_tokens.into_boxed_slice())
-                .map_err(Error::InvalidNativeTokenCount)?;
-
-        native_tokens.sort_by(|a, b| a.token_id().cmp(b.token_id()));
-        // Sort is obviously fine now but uniqueness still needs to be checked.
-        verify_unique_sorted::<true>(&native_tokens, &())?;
-
-        Ok(Self(native_tokens))
+        Ok(Self(
+            native_tokens
+                .into_iter()
+                .collect::<BTreeSet<_>>()
+                .try_into()
+                .map_err(Error::InvalidNativeTokenCount)?,
+        ))
     }
 
     /// Creates a new [`NativeTokens`] from an ordered set.
     pub fn from_set(native_tokens: BTreeSet<NativeToken>) -> Result<Self, Error> {
-        Ok(Self(
-            native_tokens
-                .into_iter()
-                .collect::<Box<[_]>>()
-                .try_into()
-                .map_err(Error::InvalidNativeTokenCount)?,
-        ))
+        Ok(Self(native_tokens.try_into().map_err(Error::InvalidNativeTokenCount)?))
+    }
+
+    /// Gets the underlying set.
+    pub fn as_set(&self) -> &BTreeSet<NativeToken> {
+        &self.0
     }
 
     /// Creates a new [`NativeTokensBuilder`].
     #[inline(always)]
     pub fn build() -> NativeTokensBuilder {
         NativeTokensBuilder::new()
-    }
-
-    /// Checks whether the provided token ID is contained in the native tokens.
-    pub fn contains(&self, token_id: &TokenId) -> bool {
-        // Binary search is possible because native tokens are always ordered by token ID.
-        self.0
-            .binary_search_by_key(token_id, |native_token| native_token.token_id)
-            .is_ok()
-    }
-
-    /// Gets the native token associated with the provided token ID if contained.
-    pub fn get(&self, token_id: &TokenId) -> Option<&NativeToken> {
-        // Binary search is possible because native tokens are always ordered by token ID.
-        self.0
-            .binary_search_by_key(token_id, |native_token| native_token.token_id)
-            .map_or(None, |index| Some(&self.0[index]))
-    }
-}
-
-#[inline]
-fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken], _: &()) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(native_tokens.iter().map(NativeToken::token_id)) {
-        Err(Error::NativeTokensNotUniqueSorted)
-    } else {
-        Ok(())
     }
 }

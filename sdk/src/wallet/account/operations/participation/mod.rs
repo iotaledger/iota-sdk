@@ -23,7 +23,7 @@ use crate::{
             responses::TrackedParticipation,
             types::{ParticipationEventData, ParticipationEventId, Participations, PARTICIPATION_TAG},
         },
-        block::output::{unlock_condition::UnlockCondition, Output, OutputId},
+        block::output::{Output, OutputId},
     },
     wallet::{
         account::{Account, OutputData},
@@ -309,9 +309,9 @@ fn is_valid_participation_output(output: &Output) -> bool {
     // Only basic outputs can be participation outputs.
     if let Output::Basic(basic_output) = &output {
         // Valid participation outputs can only have the AddressUnlockCondition.
-        let [UnlockCondition::Address(_)] = basic_output.unlock_conditions().as_ref() else {
+        if basic_output.unlock_conditions().single_address().is_err() {
             return false;
-        };
+        }
 
         basic_output
             .features()

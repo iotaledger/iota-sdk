@@ -13,7 +13,7 @@
 use iota_sdk::{
     types::block::{
         address::Bech32Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::Result,
     Wallet,
@@ -46,10 +46,10 @@ async fn main() -> Result<()> {
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
         .finish_output(account.client().get_token_supply().await?)?;
 
-    let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output
+    let controlled_by_account = if let Ok(address_unlock_condition) = output
         .unlock_conditions()
         .expect("output needs to have unlock conditions")
-        .as_ref()
+        .single_address()
     {
         // Check that address in the unlock condition belongs to the account
         account_addresses

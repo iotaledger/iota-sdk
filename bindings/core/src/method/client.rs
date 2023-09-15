@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::BTreeSet;
+
 use derivative::Derivative;
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::Topic;
@@ -36,14 +38,14 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
+        native_tokens: Option<BTreeSet<NativeToken>>,
         account_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<Feature>>,
-        immutable_features: Option<Vec<Feature>>,
+        unlock_conditions: BTreeSet<UnlockConditionDto>,
+        features: Option<BTreeSet<Feature>>,
+        immutable_features: Option<BTreeSet<Feature>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -56,9 +58,9 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<Feature>>,
+        native_tokens: Option<BTreeSet<NativeToken>>,
+        unlock_conditions: BTreeSet<UnlockConditionDto>,
+        features: Option<BTreeSet<Feature>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -68,12 +70,12 @@ pub enum ClientMethod {
         // If not provided, minimum storage deposit will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        native_tokens: Option<Vec<NativeToken>>,
+        native_tokens: Option<BTreeSet<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenScheme,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<Feature>>,
-        immutable_features: Option<Vec<Feature>>,
+        unlock_conditions: BTreeSet<UnlockConditionDto>,
+        features: Option<BTreeSet<Feature>>,
+        immutable_features: Option<BTreeSet<Feature>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::Response::Output)
@@ -86,11 +88,11 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
+        native_tokens: Option<BTreeSet<NativeToken>>,
         nft_id: NftId,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<Feature>>,
-        immutable_features: Option<Vec<Feature>>,
+        unlock_conditions: BTreeSet<UnlockConditionDto>,
+        features: Option<BTreeSet<Feature>>,
+        immutable_features: Option<BTreeSet<Feature>>,
     },
     /// Removes all listeners for the provided topics.
     /// Expected response: [`Ok`](crate::Response::Ok)

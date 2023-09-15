@@ -1,17 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use alloc::{collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use crypto::signatures::ed25519;
 use derive_more::{AsRef, Deref, From};
-use iterator_sorted::is_unique_sorted;
 use packable::{
     bounded::BoundedU8,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
-    prefix::BoxedSlicePrefix,
+    prefix::BTreeSetPrefix,
+    set::UnpackSetError,
     unpacker::Unpacker,
     Packable,
 };
@@ -104,20 +104,18 @@ pub(crate) type BlockIssuerKeyCount =
 
 /// Lexicographically ordered list of unique [`BlockIssuerKey`]
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable, Hash)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidBlockIssuerKeyCount(p.into())))]
-pub struct BlockIssuerKeys(
-    #[packable(verify_with = verify_block_issuer_keys)] BoxedSlicePrefix<BlockIssuerKey, BlockIssuerKeyCount>,
-);
+#[packable(unpack_error = Error, with = map_block_issuer_keys_set_error)]
+pub struct BlockIssuerKeys(BTreeSetPrefix<BlockIssuerKey, BlockIssuerKeyCount>);
 
-fn verify_block_issuer_keys<const VERIFY: bool>(
-    block_issuer_keys: &[BlockIssuerKey],
-    _visitor: &(),
-) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(block_issuer_keys.iter()) {
-        return Err(Error::BlockIssuerKeysNotUniqueSorted);
+fn map_block_issuer_keys_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+where
+    <BlockIssuerKeyCount as TryFrom<usize>>::Error: From<P>,
+{
+    match error {
+        UnpackSetError::DuplicateItem(_) => Error::BlockIssuerKeysNotUniqueSorted,
+        UnpackSetError::Item(e) => e,
+        UnpackSetError::Prefix(p) => Error::InvalidBlockIssuerKeyCount(p.into()),
     }
-
-    Ok(())
 }
 
 impl TryFrom<Vec<BlockIssuerKey>> for BlockIssuerKeys {
@@ -140,10 +138,10 @@ impl TryFrom<BTreeSet<BlockIssuerKey>> for BlockIssuerKeys {
 
 impl IntoIterator for BlockIssuerKeys {
     type Item = BlockIssuerKey;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+    type IntoIter = alloc::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Vec::from(Into::<Box<[BlockIssuerKey]>>::into(self.0)).into_iter()
+        BTreeSet::from(self.0).into_iter()
     }
 }
 
@@ -157,27 +155,22 @@ impl BlockIssuerKeys {
 
     /// Creates a new [`BlockIssuerKeys`] from a vec.
     pub fn from_vec(block_issuer_keys: Vec<BlockIssuerKey>) -> Result<Self, Error> {
-        let mut block_issuer_keys =
-            BoxedSlicePrefix::<BlockIssuerKey, BlockIssuerKeyCount>::try_from(block_issuer_keys.into_boxed_slice())
-                .map_err(Error::InvalidBlockIssuerKeyCount)?;
-
-        block_issuer_keys.sort();
-
-        // Still need to verify the duplicate block issuer keys.
-        verify_block_issuer_keys::<true>(&block_issuer_keys, &())?;
-
-        Ok(Self(block_issuer_keys))
+        Ok(Self(
+            block_issuer_keys
+                .into_iter()
+                .collect::<BTreeSet<_>>()
+                .try_into()
+                .map_err(Error::InvalidBlockIssuerKeyCount)?,
+        ))
     }
 
     /// Creates a new [`BlockIssuerKeys`] from an ordered set.
     pub fn from_set(block_issuer_keys: BTreeSet<BlockIssuerKey>) -> Result<Self, Error> {
-        let block_issuer_keys = BoxedSlicePrefix::<BlockIssuerKey, BlockIssuerKeyCount>::try_from(
-            block_issuer_keys.into_iter().collect::<Box<[_]>>(),
-        )
-        .map_err(Error::InvalidBlockIssuerKeyCount)?;
-
-        // We don't need to verify the block issuer keys here, because they are already verified by the BTreeSet.
-        Ok(Self(block_issuer_keys))
+        Ok(Self(
+            block_issuer_keys
+                .try_into()
+                .map_err(Error::InvalidBlockIssuerKeyCount)?,
+        ))
     }
 }
 
@@ -216,7 +209,7 @@ impl BlockIssuerFeature {
     }
 
     /// Returns the Block Issuer Keys.
-    pub fn block_issuer_keys(&self) -> &[BlockIssuerKey] {
+    pub fn block_issuer_keys(&self) -> &BlockIssuerKeys {
         &self.block_issuer_keys
     }
 }

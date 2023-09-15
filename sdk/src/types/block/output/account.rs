@@ -762,8 +762,8 @@ pub(crate) mod dto {
         #[serde(with = "string")]
         pub mana: u64,
         // Native tokens held by the output.
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub native_tokens: BTreeSet<NativeToken>,
         // Unique identifier of the account.
         pub account_id: AccountId,
         // A counter that must increase by 1 every time the account is state transitioned.
@@ -774,13 +774,13 @@ pub(crate) mod dto {
         // A counter that denotes the number of foundries created by this account.
         pub foundry_counter: u32,
         //
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: BTreeSet<UnlockConditionDto>,
         //
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<Feature>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub features: BTreeSet<Feature>,
         //
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<Feature>,
+        #[serde(skip_serializing_if = "BTreeSet::is_empty", default)]
+        pub immutable_features: BTreeSet<Feature>,
     }
 
     impl From<&AccountOutput> for AccountOutputDto {
@@ -789,14 +789,14 @@ pub(crate) mod dto {
                 kind: AccountOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
+                native_tokens: value.native_tokens().as_set().clone(),
                 account_id: *value.account_id(),
                 state_index: value.state_index(),
                 state_metadata: value.state_metadata().into(),
                 foundry_counter: value.foundry_counter(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().to_vec(),
-                immutable_features: value.immutable_features().to_vec(),
+                features: value.features().as_set().clone(),
+                immutable_features: value.immutable_features().as_set().clone(),
             }
         }
     }
@@ -828,14 +828,14 @@ pub(crate) mod dto {
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
+            native_tokens: Option<BTreeSet<NativeToken>>,
             account_id: &AccountId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
             foundry_counter: Option<u32>,
-            unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
+            unlock_conditions: BTreeSet<UnlockConditionDto>,
+            features: Option<BTreeSet<Feature>>,
+            immutable_features: Option<BTreeSet<Feature>>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
             let params = params.into();
@@ -1001,14 +1001,14 @@ mod tests {
         let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
+            Some(output.native_tokens().as_set().clone()),
             output.account_id(),
             output.state_index().into(),
             output.state_metadata().to_owned().into(),
             output.foundry_counter().into(),
             output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
-            Some(output.immutable_features().to_vec()),
+            Some(output.features().as_set().clone()),
+            Some(output.immutable_features().as_set().clone()),
             &protocol_parameters,
         )
         .unwrap();
