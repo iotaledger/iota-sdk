@@ -2,10 +2,6 @@ import os
 from dotenv import load_dotenv
 from iota_sdk import Wallet
 
-from dotenv import load_dotenv
-
-from iota_sdk import Wallet
-
 load_dotenv()
 
 # In this example we will burn native tokens

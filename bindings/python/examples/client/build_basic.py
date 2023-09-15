@@ -48,7 +48,7 @@ basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
         StorageDepositReturnUnlockCondition(
-            returnAddress=Ed25519Address(hex_address),
+            return_address=Ed25519Address(hex_address),
             amount=1000000
         )
     ],
@@ -61,8 +61,8 @@ basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
         ExpirationUnlockCondition(
-            returnAddress=Ed25519Address(hex_address),
-            unixTime=1
+            return_address=Ed25519Address(hex_address),
+            unix_time=1
         )
     ],
     amount=1000000,

@@ -3,25 +3,18 @@
 
 use core::mem::size_of;
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable, PackableExt,
-};
-
-use crate::types::block::Error;
+use packable::{Packable, PackableExt};
 
 const DEFAULT_BYTE_COST: u32 = 100;
 const DEFAULT_BYTE_COST_FACTOR_KEY: u8 = 10;
 const DEFAULT_BYTE_COST_FACTOR_DATA: u8 = 1;
 // TODO: fill in the real values
 const DEFAULT_BYTE_COST_FACTOR_DELEGATION: u8 = 1;
-const DEFAULT_BYTE_COST_FACTOR_STAKING: u8 = 1;
-const DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY: u8 = 1;
+const DEFAULT_BYTE_COST_FACTOR_STAKING_FEATURE: u8 = 1;
+const DEFAULT_BYTE_COST_FACTOR_ISSUER_KEYS: u8 = 1;
 
 /// Specifies the current parameters for the byte cost computation.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -30,27 +23,27 @@ const DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY: u8 = 1;
 pub struct RentStructure {
     /// Cost in tokens per virtual byte.
     v_byte_cost: u32,
-    /// The weight factor used for key fields in the outputs.
-    v_byte_factor_key: u8,
     /// The weight factor used for data fields in the outputs.
     v_byte_factor_data: u8,
+    /// The weight factor used for key fields in the outputs.
+    v_byte_factor_key: u8,
+    /// The weight factor used for block issuer key fields in the outputs.
+    v_byte_factor_issuer_keys: u8,
+    /// The weight factor used for staking fields in the outputs.
+    v_byte_factor_staking_feature: u8,
     /// The weight factor used for delegation fields in the outputs.
     v_byte_factor_delegation: u8,
-    /// The weight factor used for staking fields in the outputs.
-    v_byte_factor_staking: u8,
-    /// The weight factor used for block issuer key fields in the outputs.
-    v_byte_factor_block_issuer_key: u8,
 }
 
 impl Default for RentStructure {
     fn default() -> Self {
         Self {
             v_byte_cost: DEFAULT_BYTE_COST,
-            v_byte_factor_key: DEFAULT_BYTE_COST_FACTOR_KEY,
             v_byte_factor_data: DEFAULT_BYTE_COST_FACTOR_DATA,
+            v_byte_factor_key: DEFAULT_BYTE_COST_FACTOR_KEY,
+            v_byte_factor_issuer_keys: DEFAULT_BYTE_COST_FACTOR_ISSUER_KEYS,
+            v_byte_factor_staking_feature: DEFAULT_BYTE_COST_FACTOR_STAKING_FEATURE,
             v_byte_factor_delegation: DEFAULT_BYTE_COST_FACTOR_DELEGATION,
-            v_byte_factor_staking: DEFAULT_BYTE_COST_FACTOR_STAKING,
-            v_byte_factor_block_issuer_key: DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY,
         }
     }
 }
@@ -59,19 +52,19 @@ impl RentStructure {
     /// Creates a new [`RentStructure`].
     pub fn new(
         byte_cost: u32,
-        byte_factor_key: u8,
         byte_factor_data: u8,
+        byte_factor_key: u8,
+        byte_factor_issuer_keys: u8,
+        byte_factor_staking_feature: u8,
         byte_factor_delegation: u8,
-        byte_factor_staking: u8,
-        byte_factor_block_issuer_key: u8,
     ) -> Self {
         Self {
             v_byte_cost: byte_cost,
-            v_byte_factor_key: byte_factor_key,
             v_byte_factor_data: byte_factor_data,
+            v_byte_factor_key: byte_factor_key,
+            v_byte_factor_issuer_keys: byte_factor_issuer_keys,
+            v_byte_factor_staking_feature: byte_factor_staking_feature,
             v_byte_factor_delegation: byte_factor_delegation,
-            v_byte_factor_staking: byte_factor_staking,
-            v_byte_factor_block_issuer_key: byte_factor_block_issuer_key,
         }
     }
 
@@ -81,15 +74,27 @@ impl RentStructure {
         self
     }
 
+    /// Sets the virtual byte weight for the data fields.
+    pub fn with_byte_factor_data(mut self, byte_factor_data: u8) -> Self {
+        self.v_byte_factor_data = byte_factor_data;
+        self
+    }
+
     /// Sets the virtual byte weight for the key fields.
     pub fn with_byte_factor_key(mut self, byte_factor_key: u8) -> Self {
         self.v_byte_factor_key = byte_factor_key;
         self
     }
 
-    /// Sets the virtual byte weight for the data fields.
-    pub fn with_byte_factor_data(mut self, byte_factor_data: u8) -> Self {
-        self.v_byte_factor_data = byte_factor_data;
+    /// Sets the virtual byte weight for the block issuer key fields.
+    pub fn with_byte_factor_issuer_keys(mut self, byte_factor_issuer_keys: u8) -> Self {
+        self.v_byte_factor_issuer_keys = byte_factor_issuer_keys;
+        self
+    }
+
+    /// Sets the virtual byte weight for the staking fields.
+    pub fn with_byte_factor_staking_feature(mut self, byte_factor_staking_feature: u8) -> Self {
+        self.v_byte_factor_staking_feature = byte_factor_staking_feature;
         self
     }
 
@@ -99,81 +104,34 @@ impl RentStructure {
         self
     }
 
-    /// Sets the virtual byte weight for the staking fields.
-    pub fn with_byte_factor_staking(mut self, byte_factor_staking: u8) -> Self {
-        self.v_byte_factor_staking = byte_factor_staking;
-        self
-    }
-
-    /// Sets the virtual byte weight for the block issuer key fields.
-    pub fn with_byte_factor_block_issuer_key(mut self, byte_factor_block_issuer_key: u8) -> Self {
-        self.v_byte_factor_block_issuer_key = byte_factor_block_issuer_key;
-        self
-    }
-
     /// Returns the byte cost of the [`RentStructure`].
     pub const fn byte_cost(&self) -> u32 {
         self.v_byte_cost
     }
 
-    /// Returns the key byte factor of the [`RentStructure`].
+    /// Returns the byte factor data of the [`RentStructure`].
+    pub const fn byte_factor_data(&self) -> u8 {
+        self.v_byte_factor_data
+    }
+
+    /// Returns the byte factor key of the [`RentStructure`].
     pub const fn byte_factor_key(&self) -> u8 {
         self.v_byte_factor_key
     }
 
-    /// Returns the data byte factor of the [`RentStructure`].
-    pub const fn byte_factor_data(&self) -> u8 {
-        self.v_byte_factor_data
+    /// Returns the block issuer key byte factor of the [`RentStructure`].
+    pub const fn byte_factor_issuer_keys(&self) -> u8 {
+        self.v_byte_factor_issuer_keys
+    }
+
+    /// Returns the staking byte factor of the [`RentStructure`].
+    pub const fn byte_factor_staking_feature(&self) -> u8 {
+        self.v_byte_factor_staking_feature
     }
 
     /// Returns the delegation byte factor of the [`RentStructure`].
     pub const fn byte_factor_delegation(&self) -> u8 {
         self.v_byte_factor_delegation
-    }
-
-    /// Returns the staking byte factor of the [`RentStructure`].
-    pub const fn byte_factor_staking(&self) -> u8 {
-        self.v_byte_factor_staking
-    }
-
-    /// Returns the block issuer key byte factor of the [`RentStructure`].
-    pub const fn byte_factor_block_issuer_key(&self) -> u8 {
-        self.v_byte_factor_block_issuer_key
-    }
-}
-
-impl Packable for RentStructure {
-    type UnpackError = Error;
-    type UnpackVisitor = ();
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.v_byte_cost.pack(packer)?;
-        self.v_byte_factor_data.pack(packer)?;
-        self.v_byte_factor_key.pack(packer)?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        // TODO: Actual order
-        let v_byte_cost = u32::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let v_byte_factor_data = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let v_byte_factor_key = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let v_byte_factor_delegation = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let v_byte_factor_staking = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let v_byte_factor_block_issuer_key = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-
-        Ok(Self {
-            v_byte_cost,
-            v_byte_factor_key,
-            v_byte_factor_data,
-            v_byte_factor_delegation,
-            v_byte_factor_staking,
-            v_byte_factor_block_issuer_key,
-        })
     }
 }
 
@@ -223,12 +181,12 @@ impl RentBuilder {
     }
 
     pub const fn staking_field<T>(mut self) -> Self {
-        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_staking() as u64;
+        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_staking_feature() as u64;
         self
     }
 
-    pub const fn block_issuer_key_field<T>(mut self) -> Self {
-        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_block_issuer_key() as u64;
+    pub const fn issuer_keys_field<T>(mut self) -> Self {
+        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_issuer_keys() as u64;
         self
     }
 
@@ -259,12 +217,12 @@ impl RentBuilder {
     }
 
     pub fn packable_staking_field<T: Packable>(mut self, field: &T) -> Self {
-        self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_staking() as u64;
+        self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_staking_feature() as u64;
         self
     }
 
-    pub fn packable_block_issuer_key_field<T: Packable>(mut self, field: &T) -> Self {
-        self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_staking() as u64;
+    pub fn packable_issuer_keys_field<T: Packable>(mut self, field: &T) -> Self {
+        self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_issuer_keys() as u64;
         self
     }
 
