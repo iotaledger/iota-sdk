@@ -19,11 +19,15 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
 #[cfg(feature = "irc_30")]
 pub use self::metadata::irc_30::Irc30Metadata;
+pub(crate) use self::{block_issuer::BlockIssuerKeyCount, metadata::MetadataFeatureLength, tag::TagFeatureLength};
 pub use self::{
-    block_issuer::BlockIssuerFeature, issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature,
-    staking::StakingFeature, tag::TagFeature,
+    block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+    issuer::IssuerFeature,
+    metadata::MetadataFeature,
+    sender::SenderFeature,
+    staking::StakingFeature,
+    tag::TagFeature,
 };
-pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use super::{Rent, RentBuilder};
 use crate::types::block::{create_bitflags, Error};
 
