@@ -9,9 +9,9 @@
 
 # Import the python iota client
 # Make sure you have first installed it with `pip install iota_sdk`
-from iota_sdk import Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from iota_sdk import Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
 
 load_dotenv()
 
