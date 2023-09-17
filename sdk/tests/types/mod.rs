@@ -11,6 +11,7 @@ mod input;
 mod output_id;
 mod parents;
 mod payload;
+mod protocol;
 mod rent;
 mod slot;
 mod tagged_data_payload;
