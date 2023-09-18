@@ -12,7 +12,7 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
-    client::secret::SecretManage,
+    client::{node_api::indexer::QueryParameter, secret::SecretManage},
     types::block::{
         address::{Address, Bech32Address},
         output::OutputId,
@@ -41,6 +41,38 @@ where
             let output_ids = self
                 .get_basic_output_ids_with_address_unlock_condition_only(bech32_address)
                 .await?;
+            return Ok(output_ids);
+        }
+
+        // If interested in alias, basic and NFT outputs, get them all at once
+        if (address.is_ed25519()
+            && sync_options.account.alias_outputs
+            && sync_options.account.basic_outputs
+            && sync_options.account.nft_outputs)
+            || (address.is_nft()
+                && sync_options.nft.alias_outputs
+                && sync_options.nft.basic_outputs
+                && sync_options.nft.nft_outputs)
+            || (address.is_alias()
+                && sync_options.alias.alias_outputs
+                && sync_options.alias.basic_outputs
+                && sync_options.alias.nft_outputs)
+        {
+            let mut output_ids = self
+                .client()
+                .output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+                .await?
+                .items;
+
+            if address.is_alias() && sync_options.alias.foundry_outputs {
+                output_ids.extend(
+                    self.client()
+                        .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
+                        .await?
+                        .items,
+                );
+            }
+
             return Ok(output_ids);
         }
 
@@ -130,6 +162,33 @@ where
                             account
                                 .get_alias_and_foundry_output_ids(bech32_address, &sync_options)
                                 .await
+                        })
+                        .await
+                    }
+                    .boxed(),
+                );
+            }
+        } else if address.is_alias() && sync_options.alias.foundry_outputs {
+            // foundries
+            #[cfg(target_family = "wasm")]
+            {
+                results.push(Ok(self
+                    .client()
+                    .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
+                    .await?
+                    .items))
+            }
+
+            #[cfg(not(target_family = "wasm"))]
+            {
+                tasks.push(
+                    async move {
+                        let client = self.client().clone();
+                        tokio::spawn(async move {
+                            Ok(client
+                                .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
+                                .await?
+                                .items)
                         })
                         .await
                     }

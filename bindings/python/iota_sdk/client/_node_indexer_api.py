@@ -66,6 +66,8 @@ class NodeIndexerAPI():
             Returns outputs that are timelocked after a certain Unix timestamp.
          timelocked_before :
             Returns outputs that are timelocked before a certain Unix timestamp.
+         unlockable_by_address :
+            Returns outputs that are unlockable by the bech32 address.
         """
         address: Optional[str] = None
         alias_address: Optional[str] = None
@@ -90,6 +92,7 @@ class NodeIndexerAPI():
         tag: Optional[str] = None
         timelocked_after: Optional[int] = None
         timelocked_before: Optional[int] = None
+        unlockable_by_address: Optional[str] = None
 
         def as_dict(self):
             return humps.camelize(
@@ -109,6 +112,22 @@ class NodeIndexerAPI():
             self.cursor = dict["cursor"]
             self.items = [OutputId.from_string(
                 output_id) for output_id in dict["items"]]
+
+    def output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+        """Fetch alias/basic/NFT output IDs from the given query parameters.
+        Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter".
+
+        Returns:
+            The corresponding output IDs of the basic outputs.
+        """
+
+        query_parameters_camelized = query_parameters.as_dict()
+
+        response = self._call_method('outputIds', {
+            'queryParameters': query_parameters_camelized,
+        })
+        return self.OutputIdsResponse(response)
 
     def basic_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:

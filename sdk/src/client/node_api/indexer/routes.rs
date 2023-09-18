@@ -3,6 +3,7 @@
 
 //! IOTA node indexer routes
 
+use super::query_parameters::verify_query_parameters_outputs;
 use crate::{
     client::{
         node_api::indexer::{
@@ -23,6 +24,23 @@ use crate::{
 // hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
 impl ClientInner {
+    // RouteOutputs is the route for getting basic, alias and nft outputs filtered by the given parameters.
+    // GET with query parameter returns all outputIDs that fit these filter criteria.
+    // Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
+    // "createdBefore", "createdAfter".
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v1/outputs
+    pub async fn output_ids(
+        &self,
+        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+    ) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v1/outputs";
+
+        let query_parameters = verify_query_parameters_outputs(query_parameters.into())?;
+
+        self.get_output_ids(route, query_parameters, true, false).await
+    }
+
     /// Get basic outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",

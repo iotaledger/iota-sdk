@@ -33,6 +33,13 @@ export interface __GetOutputMethod__ {
     };
 }
 
+export interface __GetOutputIdsMethod__ {
+    name: 'outputIds';
+    data: {
+        queryParameters: QueryParameter[];
+    };
+}
+
 export interface __GetBasicOutputIdsMethod__ {
     name: 'basicOutputIds';
     data: {

@@ -95,6 +95,23 @@ export class Client {
     }
 
     /**
+     * Fetch alias/basic/NFT output IDs based on the given query parameters.
+     * Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter".
+     */
+    async outputIds(
+        queryParameters: QueryParameter[],
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'outputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Fetch basic output IDs based on the given query parameters.
      */
     async basicOutputIds(

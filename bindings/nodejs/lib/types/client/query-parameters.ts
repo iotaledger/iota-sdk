@@ -21,6 +21,7 @@ export type QueryParameter =
     | Issuer
     | StateController
     | Governor
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Query parameters for filtering Alias Outputs */
@@ -155,7 +156,11 @@ interface StateController {
 interface Governor {
     governor: string;
 }
-/** Define the page size for the results */
+/** Define the page size for the results. */
 interface PageSize {
     pageSize: number;
+}
+/** Returns outputs that are unlockable by the bech32 address. */
+interface UnlockableByAddress {
+    unlockableByAddress: string;
 }
