@@ -7,7 +7,7 @@ import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
 import { Type } from 'class-transformer';
 import { BlockDiscriminator } from './';
-import { BasicBlock } from './basic'
+import { BasicBlock } from './basic';
 import { Block, BlockType } from './block';
 
 /**
