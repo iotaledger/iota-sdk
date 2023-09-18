@@ -21,7 +21,6 @@ export type QueryParameter =
     | Issuer
     | StateController
     | Governor
-    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Query parameters for filtering Alias Outputs */
@@ -55,6 +54,17 @@ export type NftQueryParameter =
 
 /** Shared query parameters*/
 type CommonQueryParameters =
+    | HasNativeTokens
+    | MinNativeTokenCount
+    | MaxNativeTokenCount
+    | CreatedAfter
+    | CreatedBefore
+    | PageSize
+    | Cursor;
+
+/** Query parameters for filtering alias/basic/NFT Outputs*/
+export type GenericQueryParameter =
+    | UnlockableByAddress
     | HasNativeTokens
     | MinNativeTokenCount
     | MaxNativeTokenCount

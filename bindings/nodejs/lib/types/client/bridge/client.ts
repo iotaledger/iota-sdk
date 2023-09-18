@@ -12,6 +12,7 @@ import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AliasQueryParameter,
     FoundryQueryParameter,
+    GenericQueryParameter,
     NftQueryParameter,
     QueryParameter,
 } from '../query-parameters';
@@ -36,7 +37,7 @@ export interface __GetOutputMethod__ {
 export interface __GetOutputIdsMethod__ {
     name: 'outputIds';
     data: {
-        queryParameters: QueryParameter[];
+        queryParameters: GenericQueryParameter[];
     };
 }
 

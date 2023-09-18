@@ -18,6 +18,7 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
+    GenericQueryParameter,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import {
@@ -96,10 +97,9 @@ export class Client {
 
     /**
      * Fetch alias/basic/NFT output IDs based on the given query parameters.
-     * Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter".
      */
     async outputIds(
-        queryParameters: QueryParameter[],
+        queryParameters: GenericQueryParameter[],
     ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'outputIds',
