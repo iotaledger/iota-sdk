@@ -49,13 +49,14 @@ const ACCOUNT_COMMANDS: &[&str] = &[
 
 impl Completer for AccountCompleter {
     type Candidate = String;
+
     fn complete(&self, input: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
-        let mut completions = vec![];
-        for command in ACCOUNT_COMMANDS {
-            if command.starts_with(input) {
-                completions.push(command.to_string());
-            }
-        }
-        Ok((0, completions))
+        Ok((
+            0,
+            ACCOUNT_COMMANDS
+                .iter()
+                .filter_map(|cmd| cmd.starts_with(input).then_some(cmd.to_string()))
+                .collect(),
+        ))
     }
 }
