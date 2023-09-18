@@ -21,7 +21,7 @@ enum ContextInputType {
 }
 
 abstract class ContextInput {
-    type: ContextInputType;
+    readonly type: ContextInputType;
 
     constructor(type: ContextInputType) {
         this.type = type;
