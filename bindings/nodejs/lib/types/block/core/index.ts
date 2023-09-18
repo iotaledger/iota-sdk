@@ -10,7 +10,6 @@ export * from './wrapper';
 export * from './basic';
 export * from './block';
 
-
 export const BlockDiscriminator = {
     property: 'type',
     subTypes: [{ value: BasicBlock, name: BlockType.Basic as any }],

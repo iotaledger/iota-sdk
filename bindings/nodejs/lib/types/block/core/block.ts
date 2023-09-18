@@ -5,7 +5,7 @@ import { BasicBlock } from './basic';
 /**
  * All of the block types.
  */
- export enum BlockType {
+export enum BlockType {
     /// A Basic block.
     Basic = 0,
 }
