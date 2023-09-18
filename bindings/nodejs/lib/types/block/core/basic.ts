@@ -11,15 +11,15 @@ import { Block } from './block';
  */
 export class BasicBlock extends Block {
     /**
-     * Blocks that are strongly directly approved, in the range of 1..8.
+     * Blocks that are strongly directly approved.
      */
     readonly strongParents!: StrongParents;
     /**
-     * Blocks that are weakly directly approved, in the range of 0..8.
+     * Blocks that are weakly directly approved.
      */
     readonly weakParents!: WeakParents;
     /**
-     * Blocks that are directly referenced to adjust opinion, in the range of 0..8.
+     * Blocks that are directly referenced to adjust opinion.
      */
     readonly shallowLikeParents!: ShallowLikeParents;
     /**
