@@ -135,6 +135,7 @@ where
         let storage = Memory::default();
 
         let storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
+        self.storage_options.replace(storage_options);
 
         let read_manager_builder = Self::load::<S>(&storage_manager).await?;
 
@@ -161,6 +162,8 @@ where
 
         #[cfg(feature = "storage")]
         let storage_options = self.storage_options.clone().unwrap_or_default();
+
+        println!("{storage_options:?}");
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
