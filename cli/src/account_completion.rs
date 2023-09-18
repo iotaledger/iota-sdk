@@ -1,11 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use dialoguer::Completion;
+use rustyline::{completion::Completer, Context};
 
-pub(crate) struct AccountCompletion;
+pub struct AccountCompleter;
 
-pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
+const ACCOUNT_COMMANDS: &[&str] = &[
     "accounts",
     "addresses",
     "balance",
@@ -47,17 +47,15 @@ pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
     "help",
 ];
 
-impl Completion for AccountCompletion {
-    fn get(&self, input: &str) -> Option<String> {
-        let matches = ACCOUNT_COMPLETION
-            .iter()
-            .filter(|option| option.starts_with(input))
-            .collect::<Vec<_>>();
-
-        if matches.len() == 1 {
-            Some(matches[0].to_string())
-        } else {
-            None
+impl Completer for AccountCompleter {
+    type Candidate = String;
+    fn complete(&self, input: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
+        let mut completions = vec![];
+        for command in ACCOUNT_COMMANDS {
+            if command.starts_with(input) {
+                completions.push(command.to_string());
+            }
         }
+        Ok((0, completions))
     }
 }
