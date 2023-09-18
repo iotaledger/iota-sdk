@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { PayloadDiscriminator } from '..';
 import { HexEncodedString } from '../../../utils';
 import { Input, InputDiscriminator } from '../../input';
 import { Output, OutputDiscriminator } from '../../output';
-import { Payload } from '../payload';
+import { TaggedDataPayload } from '../tagged';
 
 /**
  * All of the essence types.
@@ -57,10 +56,8 @@ class RegularTransactionEssence extends TransactionEssence {
     })
     outputs: Output[];
 
-    @Type(() => Payload, {
-        discriminator: PayloadDiscriminator,
-    })
-    payload: Payload | undefined;
+    @Type(() => TaggedDataPayload)
+    payload?: TaggedDataPayload;
 
     /**
      * @param networkId The ID of the network the transaction was issued to.
@@ -75,7 +72,7 @@ class RegularTransactionEssence extends TransactionEssence {
         inputsCommitment: HexEncodedString,
         inputs: Input[],
         outputs: Output[],
-        payload: Payload | undefined,
+        payload: TaggedDataPayload | undefined,
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;

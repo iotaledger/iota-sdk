@@ -7,6 +7,9 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./client/07-get-block-data.ts
 
+// Set a specific block id or leave undefined for getting a tip.
+let ID: string | undefined = '0x1234';
+
 // In this example we will send a block and get the data and metadata for it.
 async function run() {
     initLogger();
@@ -22,15 +25,17 @@ async function run() {
     try {
         // Fetch a block ID from the node.
         const blockIds = await client.getTips();
-        console.log('Block IDs:', blockIds, '\n');
+
+        const blockId = ID || blockIds[0];
+        console.log('Block ID:', blockId, '\n');
 
         // Get the metadata for the block.
-        const blockMetadata = await client.getBlockMetadata(blockIds[0]);
-        console.log('Block metadata: ', blockMetadata, '\n');
+        const blockMetadata = await client.getBlockMetadata(blockId);
+        console.log('Block metadata:', blockMetadata, '\n');
 
         // Request the block by its id.
-        const blockData = await client.getBlock(blockIds[0]);
-        console.log('Block data: ', blockData, '\n');
+        const blockData = await client.getBlock(blockId);
+        console.log('Block data:', blockData, '\n');
     } catch (error) {
         console.error('Error: ', error);
     }
