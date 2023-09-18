@@ -44,7 +44,7 @@ abstract class TransactionEssence {
  */
 class RegularTransactionEssence extends TransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
-    networkId: number;
+    networkId: string;
     inputsCommitment: HexEncodedString;
 
     @Type(() => Input, {
@@ -71,7 +71,7 @@ class RegularTransactionEssence extends TransactionEssence {
      *
      */
     constructor(
-        networkId: number,
+        networkId: string,
         inputsCommitment: HexEncodedString,
         inputs: Input[],
         outputs: Output[],
