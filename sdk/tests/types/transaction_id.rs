@@ -57,59 +57,57 @@ fn pack_unpack_valid() {
 #[test]
 fn transaction_id() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#transaction-id
-    let transaction_payload_json = r#"
-    {
-        "type":6,
-        "essence":{
-          "type":2,
-          "networkId":"3650798313638353144",
-          "creationSlot":"28",
-          "contextInputs":[],
-          "inputs":[
-            {
-              "type":0,
-              "transactionId":"0x24ff9b3038506fb1b406306a496001c3e24e2be07c838317922bf21d686a078f",
-              "transactionOutputIndex":10
-            }
-          ],
-          "inputsCommitment":"0xb70c6f86a1ea03a59a71d73dcd07e2082bbdf0ce971faa21748348bca22fb023",
-          "outputs":[
-            {
-              "type":3,
-              "amount":"10000",
-              "mana":"0",
-              "unlockConditions":[
-                {
-                  "type":0,
-                  "address":{
-                    "type":0,
-                    "pubKeyHash":"0xd9f84458286dc41cd34789dec566cd096cf47de991aa36a97aebfaea14128f6d"
-                  }
-                }
-              ]
-            }
-          ],
-          "allotments":[],
-          "payload":{
-            "type":5,
-            "tag":"0x1d7b3e11697264111e130b0e",
-            "data":"0x1d7b3e11697264111e130b0e"
-          }
-        },
-        "unlocks":[
+    let transaction_payload_json = serde_json::json!({
+      "type":6,
+      "essence":{
+        "type":2,
+        "networkId":"3650798313638353144",
+        "creationSlot":"28",
+        "contextInputs":[],
+        "inputs":[
           {
             "type":0,
-            "signature":{
-              "type":0,
-              "publicKey":"0x803361fe1effc899dca7f931d8ad07c01ba23aaa93f986adb04d4c17cf6368d8",
-              "signature":"0xccddbac3aaac413e0193e16da3449f30c183d0e7eaa7f303dc12ae0dbc9fb890e449a52f9056e7d952ea796fd3e5645f60d9eb98ed91cb3261720fb528d2a105"
-            }
+            "transactionId":"0x24ff9b3038506fb1b406306a496001c3e24e2be07c838317922bf21d686a078f",
+            "transactionOutputIndex":10
           }
-        ]
-      }
-      "#;
+        ],
+        "inputsCommitment":"0xb70c6f86a1ea03a59a71d73dcd07e2082bbdf0ce971faa21748348bca22fb023",
+        "outputs":[
+          {
+            "type":3,
+            "amount":"10000",
+            "mana":"0",
+            "unlockConditions":[
+              {
+                "type":0,
+                "address":{
+                  "type":0,
+                  "pubKeyHash":"0xd9f84458286dc41cd34789dec566cd096cf47de991aa36a97aebfaea14128f6d"
+                }
+              }
+            ]
+          }
+        ],
+        "allotments":[],
+        "payload":{
+          "type":5,
+          "tag":"0x1d7b3e11697264111e130b0e",
+          "data":"0x1d7b3e11697264111e130b0e"
+        }
+      },
+      "unlocks":[
+        {
+          "type":0,
+          "signature":{
+            "type":0,
+            "publicKey":"0x803361fe1effc899dca7f931d8ad07c01ba23aaa93f986adb04d4c17cf6368d8",
+            "signature":"0xccddbac3aaac413e0193e16da3449f30c183d0e7eaa7f303dc12ae0dbc9fb890e449a52f9056e7d952ea796fd3e5645f60d9eb98ed91cb3261720fb528d2a105"
+          }
+        }
+      ]
+    });
 
-    let transaction_payload_dto = serde_json::from_str::<TransactionPayloadDto>(transaction_payload_json).unwrap();
+    let transaction_payload_dto = serde_json::from_value::<TransactionPayloadDto>(transaction_payload_json).unwrap();
     let transaction_payload = TransactionPayload::try_from_dto(transaction_payload_dto).unwrap();
     let transaction_payload_bytes = Payload::from(transaction_payload.clone()).pack_to_vec();
 
