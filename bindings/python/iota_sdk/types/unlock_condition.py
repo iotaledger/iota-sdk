@@ -4,6 +4,7 @@
 from enum import IntEnum
 
 from dataclasses import dataclass, field
+from typing import Union
 
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import json
@@ -45,7 +46,7 @@ class AddressUnlockCondition(UnlockCondition):
     Args:
         address: An address unlocked with a private key.
     """
-    address: Ed25519Address | AccountAddress | NFTAddress
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Address),
@@ -61,7 +62,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         return_address: The address to return the amount to.
     """
     amount: str
-    return_address: Ed25519Address | AccountAddress | NFTAddress
+    returnAddress: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StorageDepositReturn), init=False)
 
@@ -88,8 +89,8 @@ class ExpirationUnlockCondition(UnlockCondition):
         unix_time: Unix timestamp marking the expiration of the claim.
         return_address: The return address if the output was not claimed in time.
     """
-    unix_time: int
-    return_address: Ed25519Address | AccountAddress | NFTAddress
+    unixTime: int
+    returnAddress: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Expiration),
@@ -103,7 +104,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     Args:
         address: The state controller address that owns the output.
     """
-    address: Ed25519Address | AccountAddress | NFTAddress
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StateControllerAddress), init=False)
 
@@ -115,7 +116,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     Args:
         address: The governor address that owns the output.
     """
-    address: Ed25519Address | AccountAddress | NFTAddress
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.GovernorAddress), init=False)
 

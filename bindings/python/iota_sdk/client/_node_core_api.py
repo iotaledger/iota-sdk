@@ -6,7 +6,7 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
-from typing import List
+from typing import List, Union
 from dacite import from_dict
 
 
@@ -95,7 +95,8 @@ class NodeCoreAPI():
             'blockBytes': block_bytes
         })
 
-    def get_output(self, output_id: OutputId | HexStr) -> OutputWithMetadata:
+    def get_output(
+            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
         """Get the output corresponding to the given output id.
 
         Returns:
@@ -107,8 +108,8 @@ class NodeCoreAPI():
             'outputId': output_id_str
         }))
 
-    def get_output_metadata(self, output_id: OutputId |
-                            HexStr) -> OutputMetadata:
+    def get_output_metadata(
+            self, output_id: Union[OutputId, HexStr]) -> OutputMetadata:
         """Get the output metadata corresponding to the given output id.
 
         Returns:
