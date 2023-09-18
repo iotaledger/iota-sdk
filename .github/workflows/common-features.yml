@@ -62,5 +62,5 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Check wallet + stronghold
+      - name: Check features [ ${{ matrix.set }} ]
         run: cargo check --no-default-features -p iota-sdk -F ${{ matrix.set }}
