@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, asdict
-from typing import Optional, List
+from typing import Optional, List, Union
 from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput, OutputMetadata
 from iota_sdk.types.payload import RegularTransactionEssence, TransactionPayload
@@ -19,7 +19,7 @@ class InputSigningData:
         outputMetadata: The output metadata.
         chain: The BIP44 chain for the address to unlock the output.
     """
-    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
+    output: Union[AliasOutput, FoundryOutput, NftOutput, BasicOutput]
     outputMetadata: OutputMetadata
     chain: Optional[Bip44] = None
 
@@ -43,8 +43,8 @@ class RemainderData:
         address: The remainder address.
         chain: The BIP44 chain for the remainder address.
     """
-    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
-    address: Ed25519Address | AliasAddress | NFTAddress
+    output: Union[AliasOutput, FoundryOutput, NftOutput, BasicOutput]
+    address: Union[Ed25519Address, AliasAddress, NFTAddress]
     chain: Optional[Bip44] = None
 
     def as_dict(self):
