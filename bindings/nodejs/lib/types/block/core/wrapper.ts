@@ -6,7 +6,9 @@ import { Ed25519Signature } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
 import { Type } from 'class-transformer';
-import { BasicBlock, Block, BlockDiscriminator, BlockType } from './';
+import { BlockDiscriminator } from './';
+import { BasicBlock } from './basic'
+import { Block, BlockType } from './block';
 
 /**
  * Represent the object that nodes gossip around the network.
