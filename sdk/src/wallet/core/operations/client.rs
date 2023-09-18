@@ -3,6 +3,8 @@
 
 use std::collections::{HashMap, HashSet};
 
+use url::Url;
+
 use super::storage::SaveLoadWallet;
 use crate::{
     client::{
@@ -14,7 +16,6 @@ use crate::{
         Client, ClientBuilder,
     },
     wallet::{Wallet, WalletBuilder},
-    Url,
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {

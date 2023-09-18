@@ -177,8 +177,11 @@ jobs:
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
 
-      - name: Check
+      - name: Check wallet + storage
         run: cargo check --no-default-features -p iota-sdk -F wallet,storage
 
-      - name: Check
+      - name: Check wallet + stronghold
         run: cargo check --no-default-features -p iota-sdk -F wallet,stronghold
+
+      - name: Check client + private key manager
+        run: cargo check --no-default-features -p iota-sdk -F client,private_key_secret_manager

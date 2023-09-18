@@ -14,9 +14,9 @@ use iota_sdk::{
         account::{types::AccountIdentifier, SyncOptions},
         ClientOptions,
     },
-    Url,
 };
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 use super::account_method::AccountMethod;
 
