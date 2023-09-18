@@ -4,6 +4,7 @@
 from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from enum import IntEnum
 from dataclasses import dataclass, field
+from typing import Union
 
 
 class UnlockConditionType(IntEnum):
@@ -56,7 +57,7 @@ class AddressUnlockCondition(UnlockCondition):
     Args:
         address: An address unlocked with a private key.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Address),
@@ -71,7 +72,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         return_address: The address to return the amount to.
     """
     amount: str
-    returnAddress: Ed25519Address | AliasAddress | NFTAddress
+    returnAddress: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StorageDepositReturn), init=False)
 
@@ -97,7 +98,7 @@ class ExpirationUnlockCondition(UnlockCondition):
         return_address: The return address if the output was not claimed in time.
     """
     unixTime: int
-    returnAddress: Ed25519Address | AliasAddress | NFTAddress
+    returnAddress: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Expiration),
@@ -110,7 +111,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     Args:
         address: The state controller address that owns the output.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StateControllerAddress), init=False)
 
@@ -121,7 +122,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     Args:
         address: The governor address that owns the output.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.GovernorAddress), init=False)
 

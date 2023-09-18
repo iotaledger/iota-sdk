@@ -71,6 +71,11 @@ pub async fn migrate_db_chrysalis_to_stardust(
     // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
     let chrysalis_storage_path = &(*storage_path_string).join("db");
 
+    if !chrysalis_storage_path.is_dir() {
+        return Err(crate::wallet::Error::Migration(
+            "no chrysalis data to migrate".to_string(),
+        ));
+    }
     let chrysalis_data = get_chrysalis_data(chrysalis_storage_path, password)?;
 
     // create new accounts base on previous data
@@ -256,6 +261,11 @@ fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>)
         };
 
         chrysalis_data.insert(key.to_vec(), value);
+    }
+    if !chrysalis_data.contains_key(&b"iota-wallet-account-indexation".to_vec()) {
+        return Err(crate::wallet::Error::Migration(
+            "no chrysalis data to migrate".to_string(),
+        ));
     }
     Ok(chrysalis_data)
 }
