@@ -8,6 +8,7 @@ mod block_id;
 mod ed25519_signature;
 mod foundry_id;
 mod input;
+mod output;
 mod output_id;
 mod parents;
 mod payload;
