@@ -33,5 +33,5 @@ pyo3 = { version = "0.19.2", default-features = false, features = [
     "macros",
     "extension-module",
 ] }
-serde_json = { version = "1.0.105", default-features = false }
+serde_json = { version = "1.0.107", default-features = false }
 tokio = { version = "1.32.0", default-features = false }
