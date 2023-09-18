@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from json import dumps
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
@@ -22,7 +22,7 @@ class Wallet():
                  storage_path: Optional[str] = None,
                  client_options: Optional[Dict[str, Any]] = None,
                  coin_type: Optional[int] = None,
-                 secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager] = None):
+                 secret_manager: Optional[Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager]] = None):
         """Initialize `self`.
         """
 
@@ -65,7 +65,7 @@ class Wallet():
         )
         return Account(account_data, self.handle)
 
-    def get_account(self, account_id: str | int) -> Account:
+    def get_account(self, account_id: Union[str, int]) -> Account:
         """Get the account associated with the given account ID or index.
         """
         account_data = self._call_method(
@@ -95,7 +95,7 @@ class Wallet():
             message['data'] = data
         return message
 
-    def get_account_data(self, account_id: str | int):
+    def get_account_data(self, account_id: Union[str, int]):
         """Get account data associated with the given account ID or index.
         """
         return self._call_method(

@@ -4,7 +4,7 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 from iota_sdk.utils import Utils
@@ -23,13 +23,18 @@ class Block:
         burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
+
     protocol_version: int
     strong_parents: List[HexStr]
     weak_parents: List[HexStr]
     shallow_like_parents: List[HexStr]
     burned_mana: str
-    payload: Optional[TaggedDataPayload |
-                      TransactionPayload] = None
+    payload: Optional[Union[TaggedDataPayload,
+                      TransactionPayload]] = None
+
+    @classmethod
+    def from_dict(cls, block_dict: Dict) -> Block:
+        return from_dict(Block, block_dict)
 
     def id(self) -> HexStr:
         return Utils.block_id(self)

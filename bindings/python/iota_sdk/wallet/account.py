@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
+from typing import List, Optional, Union
 from dataclasses import dataclass
 from dacite import from_dict
 
@@ -383,7 +383,7 @@ class Account:
         ))
 
     def prepare_output(self, params: OutputParams,
-                       transaction_options: Optional[TransactionOptions] = None) -> BasicOutput | NftOutput:
+                       transaction_options: Optional[TransactionOptions] = None) -> Union[BasicOutput, NftOutput]:
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full

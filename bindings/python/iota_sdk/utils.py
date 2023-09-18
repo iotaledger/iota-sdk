@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, List
 from dacite import from_dict
 from iota_sdk import call_utils_method
 from iota_sdk.types.signature import Ed25519Signature
-from iota_sdk.types.address import Address
+from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
@@ -70,9 +70,18 @@ class Utils():
     def parse_bech32_address(address: str) -> Address:
         """Parse a string into a valid address.
         """
-        return from_dict(Address, _call_method('parseBech32Address', {
+        response = _call_method('parseBech32Address', {
             'address': address
-        }))
+        })
+
+        address_type = AddressType(response['type'])
+
+        if address_type == AddressType.ED25519:
+            return from_dict(Ed25519Address, response)
+        if address_type == AddressType.ALIAS:
+            return from_dict(AliasAddress, response)
+        if address_type == AddressType.NFT:
+            return from_dict(NFTAddress, response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:

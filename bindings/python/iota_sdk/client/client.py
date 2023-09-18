@@ -3,7 +3,7 @@
 
 from json import dumps, loads
 from datetime import timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import humps
 from dacite import from_dict
 
@@ -40,7 +40,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def __init__(
         self,
-        nodes: Optional[str | List[str]] = None,
+        nodes: Optional[Union[str, List[str]]] = None,
         primary_node: Optional[str] = None,
         permanode: Optional[str] = None,
         ignore_node_health: Optional[bool] = None,
@@ -382,7 +382,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def sign_transaction(
             self,
-            secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager,
+            secret_manager: Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager],
             prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
@@ -395,7 +395,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(self, payload: Payload) -> List[HexStr | Block]:
+    def submit_payload(self, payload: Payload) -> List[Union[HexStr, Block]]:
         """Submit a payload in a block.
 
         Args:

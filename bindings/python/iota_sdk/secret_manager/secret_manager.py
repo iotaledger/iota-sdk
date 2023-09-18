@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from json import dumps, loads
-from typing import Optional
+from typing import Optional, Union
 from dacyte import from_dict
 import humps
 
@@ -83,8 +83,8 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                 SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
+                 SeedSecretManager, StrongholdSecretManager]] = None, secret_manager_handle=None):
         """Initialize a secret manager.
 
         Args:
