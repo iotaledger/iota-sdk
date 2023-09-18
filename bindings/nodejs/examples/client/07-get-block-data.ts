@@ -8,7 +8,7 @@ require('dotenv').config({ path: '.env' });
 // yarn run-example ./client/07-get-block-data.ts
 
 // Set a specific block id or leave undefined for getting a tip.
-let ID: string | undefined = '0x1234';
+const ID: string | undefined = '0x1234';
 
 // In this example we will send a block and get the data and metadata for it.
 async function run() {
