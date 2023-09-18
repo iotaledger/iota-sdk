@@ -45,18 +45,9 @@ where
         }
 
         // If interested in alias, basic and NFT outputs, get them all at once
-        if (address.is_ed25519()
-            && sync_options.account.alias_outputs
-            && sync_options.account.basic_outputs
-            && sync_options.account.nft_outputs)
-            || (address.is_nft()
-                && sync_options.nft.alias_outputs
-                && sync_options.nft.basic_outputs
-                && sync_options.nft.nft_outputs)
-            || (address.is_alias()
-                && sync_options.alias.alias_outputs
-                && sync_options.alias.basic_outputs
-                && sync_options.alias.nft_outputs)
+        if (address.is_ed25519() && sync_options.account.all_outputs())
+            || (address.is_nft() && sync_options.nft.all_outputs())
+            || (address.is_alias() && sync_options.alias.all_outputs_ignoring_foundry())
         {
             let mut output_ids = self
                 .client()
