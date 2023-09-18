@@ -3,7 +3,7 @@
 
 import { Type } from 'class-transformer';
 import { PayloadDiscriminator } from '..';
-import { HexEncodedString, u64 } from '../../../utils';
+import { HexEncodedString } from '../../../utils';
 import { ContextInput, ContextInputDiscriminator } from '../../context_input';
 import { Input, InputDiscriminator } from '../../input';
 import { ManaAllotment } from '../../mana-allotment';
@@ -45,7 +45,7 @@ class RegularTransactionEssence extends TransactionEssence {
     /**
      * The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
      */
-    readonly networkId: u64;
+    readonly networkId: string;
 
     readonly creationSlot: SlotIndex;
 
@@ -82,7 +82,7 @@ class RegularTransactionEssence extends TransactionEssence {
      *
      */
     constructor(
-        networkId: u64,
+        networkId: string,
         creationSlot: SlotIndex,
         contextInputs: ContextInput[],
         inputs: Input[],
