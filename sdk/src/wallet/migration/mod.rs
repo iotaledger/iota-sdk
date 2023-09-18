@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(not(target_family = "wasm"))]
+#[cfg(any(feature = "rocksdb", all(feature = "stronghold", feature = "storage")))]
 pub(crate) mod chrysalis;
 mod migrate_0;
 mod migrate_1;
@@ -14,7 +15,8 @@ use std::collections::HashMap;
 use anymap::Map;
 use async_trait::async_trait;
 #[cfg(not(target_family = "wasm"))]
-pub use chrysalis::migrate_db_chrysalis_to_stardust;
+#[cfg(feature = "rocksdb")]
+pub use chrysalis::rocksdb::migrate_db_chrysalis_to_stardust;
 use once_cell::sync::Lazy;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 

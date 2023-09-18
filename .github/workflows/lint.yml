@@ -1,7 +1,7 @@
 name: Linting
 on:
   push:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/lint.yml"
@@ -165,3 +165,20 @@ jobs:
 
       - name: Check
         run: cargo ci-check-types
+
+  common-sets:
+    name: Check common feature sets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+
+      - name: Check
+        run: cargo check --no-default-features -p iota-sdk -F wallet,storage
+
+      - name: Check
+        run: cargo check --no-default-features -p iota-sdk -F wallet,stronghold

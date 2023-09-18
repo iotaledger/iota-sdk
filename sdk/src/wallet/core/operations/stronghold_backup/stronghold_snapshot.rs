@@ -1,21 +1,27 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashMap, path::Path, sync::atomic::Ordering};
+use std::sync::atomic::Ordering;
+#[cfg(feature = "storage")]
+use std::{collections::HashMap, path::Path};
 
+#[cfg(feature = "storage")]
 use crate::{
-    client::{
-        constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter,
-        Error as ClientError,
+    client::constants::IOTA_COIN_TYPE,
+    wallet::{
+        migration::{
+            chrysalis::{migrate_from_chrysalis_data, to_chrysalis_key},
+            MigrationData,
+        },
+        storage::constants::{CHRYSALIS_STORAGE_KEY, WALLET_INDEXATION_KEY},
     },
+};
+use crate::{
+    client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
     types::TryFromDto,
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
-        migration::{
-            chrysalis::{migrate_from_chrysalis_data, to_chrysalis_key},
-            latest_backup_migration_version, migrate, MigrationData, MIGRATION_VERSION_KEY,
-        },
-        storage::constants::{CHRYSALIS_STORAGE_KEY, WALLET_INDEXATION_KEY},
+        migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
         ClientOptions, Error as WalletError, Wallet,
     },
 };
@@ -62,10 +68,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     Option<u32>,
     Option<S::Config>,
     Option<Vec<AccountDetails>>,
-    Option<HashMap<String, String>>,
 )> {
-    let chrysalis_data = migrate_snapshot_from_chrysalis_to_stardust(stronghold).await?;
-
     migrate(stronghold).await?;
 
     // Get client_options
@@ -77,7 +80,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
         let coin_type = u32::from_le_bytes(
             coin_type_bytes
                 .try_into()
-                .map_err(|_| crate::wallet::Error::Backup("invalid coin_type"))?,
+                .map_err(|_| WalletError::Backup("invalid coin_type"))?,
         );
         log::debug!("[restore_backup] restored coin_type: {coin_type}");
         Some(coin_type)
@@ -99,18 +102,14 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
         })
         .transpose()?;
 
-    Ok((
-        client_options,
-        coin_type,
-        restored_secret_manager,
-        restored_accounts,
-        chrysalis_data,
-    ))
+    Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
 }
 
-async fn migrate_snapshot_from_chrysalis_to_stardust(
+#[cfg(feature = "storage")]
+pub(crate) async fn migrate_snapshot_from_chrysalis_to_stardust(
     stronghold_adapter: &StrongholdAdapter,
 ) -> crate::wallet::Result<Option<HashMap<String, String>>> {
+    use crate::client::Error as ClientError;
     log::debug!("migrate_snapshot_from_chrysalis_to_stardust");
     let stronghold = stronghold_adapter.inner().await;
     let stronghold_client = match stronghold.load_client(b"iota-wallet-records") {

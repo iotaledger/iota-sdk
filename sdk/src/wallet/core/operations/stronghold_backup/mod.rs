@@ -9,15 +9,17 @@ use futures::{future::try_join_all, FutureExt};
 
 use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
-use crate::wallet::WalletBuilder;
+use crate::{
+    client::storage::StorageAdapter,
+    wallet::{storage::constants::CHRYSALIS_STORAGE_KEY, WalletBuilder},
+};
 use crate::{
     client::{
         secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
-        storage::StorageAdapter,
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{storage::constants::CHRYSALIS_STORAGE_KEY, Account, Wallet},
+    wallet::{Account, Wallet},
 };
 
 impl Wallet {
@@ -103,7 +105,10 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts, chrysalis_data) =
+        #[cfg(feature = "storage")]
+        let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
+
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
@@ -280,7 +285,10 @@ impl Wallet<StrongholdSecretManager> {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts, chrysalis_data) =
+        #[cfg(feature = "storage")]
+        let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
+
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
