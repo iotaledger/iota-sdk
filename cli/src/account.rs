@@ -51,6 +51,16 @@ impl Highlighter for PromptHelper {
     }
 }
 
+impl Default for PromptHelper {
+    fn default() -> Self {
+        Self {
+            completer: AccountCompleter {},
+            hinter: HistoryHinter {},
+            colored_prompt: String::new(),
+        }
+    }
+}
+
 // loop on the account prompt
 pub async fn account_prompt(wallet: &Wallet, mut account: Account) -> Result<(), Error> {
     let config = Config::builder()
@@ -60,15 +70,9 @@ pub async fn account_prompt(wallet: &Wallet, mut account: Account) -> Result<(),
         .edit_mode(rustyline::EditMode::Emacs)
         .build();
 
-    // Panic: should never happen
+    // Panic: should never happen since it's all in-memory
     let mut rl = Editor::with_history(config, MemHistory::with_config(config)).unwrap();
-
-    let helper = PromptHelper {
-        completer: AccountCompleter,
-        hinter: HistoryHinter {},
-        colored_prompt: String::new(),
-    };
-    rl.set_helper(Some(helper));
+    rl.set_helper(Some(PromptHelper::default()));
 
     loop {
         match account_prompt_internal(wallet, &account, &mut rl).await {
@@ -100,17 +104,15 @@ pub async fn account_prompt_internal(
     account: &Account,
     rl: &mut Editor<PromptHelper, MemHistory>,
 ) -> Result<AccountPromptResponse, Error> {
-    let alias = {
-        let account = account.details().await;
-        account.alias().clone()
-    };
+    let alias = account.details().await.alias().clone();
 
-    let prompt = format!("Account \"{}\": ", alias);
-    // Panic: should never happen since there's always a helper
-    rl.helper_mut().unwrap().colored_prompt = prompt.green().to_string();
+    let prompt = format!("Account \"{alias}\": ");
+    if let Some(helper) = rl.helper_mut() {
+        helper.colored_prompt = prompt.green().to_string();
+    }
 
-    let command = rl.readline(&prompt);
-    match command {
+    let input = rl.readline(&prompt);
+    match input {
         Ok(command) => {
             match command.as_str() {
                 "h" | "help" => AccountCli::print_help()?,
@@ -264,7 +266,9 @@ pub async fn account_prompt_internal(
         Err(ReadlineError::Interrupted) => {
             return Ok(AccountPromptResponse::Done);
         }
-        Err(_) => {}
+        Err(err) => {
+            println_log_error!("{err}");
+        }
     }
 
     Ok(AccountPromptResponse::Reprompt)

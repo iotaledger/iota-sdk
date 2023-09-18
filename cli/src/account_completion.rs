@@ -3,7 +3,7 @@
 
 use rustyline::{completion::Completer, Context};
 
-pub struct AccountCompleter;
+pub struct AccountCompleter {}
 
 const ACCOUNT_COMMANDS: &[&str] = &[
     "accounts",
