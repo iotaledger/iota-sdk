@@ -1,9 +1,6 @@
-from iota_sdk import Client, TaggedDataPayload, utf8_to_hex
-from dotenv import load_dotenv
 import os
-
 from dotenv import load_dotenv
-
+from iota_sdk import Client, TaggedDataPayload, utf8_to_hex
 
 load_dotenv()
 

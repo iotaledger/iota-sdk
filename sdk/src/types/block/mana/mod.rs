@@ -28,7 +28,7 @@ pub struct ManaAllotments(
 
 impl ManaAllotments {
     /// The minimum number of mana allotments of a transaction.
-    pub const COUNT_MIN: u16 = 1;
+    pub const COUNT_MIN: u16 = 0;
     /// The maximum number of mana allotments of a transaction.
     pub const COUNT_MAX: u16 = 128;
     /// The range of valid numbers of mana allotments of a transaction.

@@ -25,7 +25,7 @@ balance = account.sync()
 # existing one.
 if not balance.accounts:
     # If we don't have an account, we need to create one
-    transaction = account.create_alias_output(None, None)
+    transaction = account.create_account_output(None, None)
     print(f'Transaction sent: {transaction.transaction_id}')
 
     # Wait for transaction to get included

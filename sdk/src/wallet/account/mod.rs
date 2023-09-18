@@ -607,7 +607,7 @@ fn serialize() {
         2,
         "testnet",
         "rms",
-        crate::types::block::output::RentStructure::new(500, 10, 1),
+        crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,

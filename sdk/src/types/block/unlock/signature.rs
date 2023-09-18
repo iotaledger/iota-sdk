@@ -33,7 +33,6 @@ pub(crate) mod dto {
 
     use super::*;
 
-    /// Defines an unlock containing signature(s) unlocking input(s).
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct SignatureUnlockDto {
         #[serde(rename = "type")]

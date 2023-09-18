@@ -5,10 +5,11 @@ use crypto::keys::bip44::Bip44;
 use instant::Instant;
 
 use crate::{
-    client::Client,
+    client::{Client, Error as ClientError},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
+            core::{BasicBlock, Block},
             input::Input,
             output::{OutputId, OutputWithMetadata},
             payload::{transaction::TransactionId, Payload, TransactionPayload},
@@ -137,24 +138,33 @@ impl Account {
                         futures::future::try_join_all(transaction_ids.iter().map(|transaction_id| async {
                             let transaction_id = *transaction_id;
                             match client.get_included_block(&transaction_id).await {
-                                Ok(block) => {
-                                    if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
-                                        let inputs_with_meta =
-                                            get_inputs_for_transaction_payload(&client, transaction_payload).await?;
-                                        let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
-                                            .into_iter()
-                                            .map(OutputWithMetadataResponse::from)
-                                            .collect();
+                                Ok(wrapper) => {
+                                    if let Block::Basic(block) = wrapper.block() {
+                                        if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
+                                            let inputs_with_meta =
+                                                get_inputs_for_transaction_payload(&client, transaction_payload)
+                                                    .await?;
+                                            let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
+                                                .into_iter()
+                                                .map(OutputWithMetadataResponse::from)
+                                                .collect();
 
-                                        let transaction = build_transaction_from_payload_and_inputs(
-                                            transaction_id,
-                                            *transaction_payload.clone(),
-                                            inputs_response,
-                                        )?;
+                                            let transaction = build_transaction_from_payload_and_inputs(
+                                                transaction_id,
+                                                *transaction_payload.clone(),
+                                                inputs_response,
+                                            )?;
 
-                                        Ok((transaction_id, Some(transaction)))
+                                            Ok((transaction_id, Some(transaction)))
+                                        } else {
+                                            Ok((transaction_id, None))
+                                        }
                                     } else {
-                                        Ok((transaction_id, None))
+                                        Err(ClientError::UnexpectedBlockKind {
+                                            expected: BasicBlock::KIND,
+                                            actual: wrapper.block().kind(),
+                                        }
+                                        .into())
                                     }
                                 }
                                 Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
