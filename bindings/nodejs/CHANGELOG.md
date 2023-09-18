@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.12 - 2023-09-14
+
+### Changed
+
+- `RegularTransactionEssence.payload` field type to an optional `TaggedDataPayload`;
+
 ## 1.0.11 - 2023-09-14
 
 ### Fixed
