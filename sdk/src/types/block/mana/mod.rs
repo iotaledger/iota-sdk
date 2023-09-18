@@ -8,7 +8,12 @@ use alloc::{collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
-use packable::{bounded::BoundedU16, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
+use packable::{
+    bounded::BoundedU16,
+    prefix::BTreeSetPrefix,
+    set::{UnpackOrderedSetError, UnpackSetError},
+    Packable,
+};
 
 #[cfg(feature = "serde")]
 pub use self::allotment::dto::ManaAllotmentDto;
@@ -24,6 +29,20 @@ pub(crate) type ManaAllotmentCount =
 pub struct ManaAllotments(
     #[packable(verify_with = verify_mana_allotments)] BTreeSetPrefix<ManaAllotment, ManaAllotmentCount>,
 );
+
+fn map_mana_allotment_set_error<T, P>(error: UnpackOrderedSetError<T, Error, P>) -> Error
+where
+    <ManaAllotmentCount as TryFrom<usize>>::Error: From<P>,
+{
+    match error {
+        UnpackOrderedSetError::Set(e) => match e {
+            UnpackSetError::DuplicateItem(_) => Error::ManaAllotmentsNotUniqueSorted,
+            UnpackSetError::Item(e) => e,
+            UnpackSetError::Prefix(p) => Error::InvalidManaAllotmentCount(p.into()),
+        },
+        UnpackOrderedSetError::Unordered => Error::ManaAllotmentsNotUniqueSorted,
+    }
+}
 
 impl ManaAllotments {
     /// The minimum number of mana allotments of a transaction.
@@ -47,17 +66,6 @@ impl ManaAllotments {
     /// Creates a new [`ManaAllotments`] from an ordered set.
     pub fn from_set(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Error> {
         Ok(Self(allotments.try_into().map_err(Error::InvalidManaAllotmentCount)?))
-    }
-}
-
-fn map_mana_allotment_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
-where
-    <ManaAllotmentCount as TryFrom<usize>>::Error: From<P>,
-{
-    match error {
-        UnpackSetError::DuplicateItem(_) => Error::ManaAllotmentsNotUniqueSorted,
-        UnpackSetError::Item(e) => e,
-        UnpackSetError::Prefix(p) => Error::InvalidManaAllotmentCount(p.into()),
     }
 }
 

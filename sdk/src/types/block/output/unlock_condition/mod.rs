@@ -18,7 +18,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     prefix::BTreeSetPrefix,
-    set::UnpackSetError,
+    set::{UnpackOrderedSetError, UnpackSetError},
     unpacker::Unpacker,
     Packable,
 };
@@ -311,14 +311,17 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MA
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct UnlockConditions(BTreeSetPrefix<UnlockCondition, UnlockConditionCount>);
 
-fn map_unlock_conditions_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+fn map_unlock_conditions_set_error<T, P>(error: UnpackOrderedSetError<T, Error, P>) -> Error
 where
     <UnlockConditionCount as TryFrom<usize>>::Error: From<P>,
 {
     match error {
-        UnpackSetError::DuplicateItem(_) => Error::UnlockConditionsNotUniqueSorted,
-        UnpackSetError::Item(e) => e,
-        UnpackSetError::Prefix(p) => Error::InvalidUnlockConditionCount(p.into()),
+        UnpackOrderedSetError::Set(e) => match e {
+            UnpackSetError::DuplicateItem(_) => Error::UnlockConditionsNotUniqueSorted,
+            UnpackSetError::Item(e) => e,
+            UnpackSetError::Prefix(p) => Error::InvalidUnlockConditionCount(p.into()),
+        },
+        UnpackOrderedSetError::Unordered => Error::UnlockConditionsNotUniqueSorted,
     }
 }
 

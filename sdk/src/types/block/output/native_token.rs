@@ -7,7 +7,12 @@ use alloc::{
 };
 
 use derive_more::{Deref, DerefMut, From};
-use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
+use packable::{
+    bounded::BoundedU8,
+    prefix::BTreeSetPrefix,
+    set::{UnpackOrderedSetError, UnpackSetError},
+    Packable,
+};
 use primitive_types::U256;
 
 use crate::types::block::{output::TokenId, Error};
@@ -160,14 +165,17 @@ pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
 #[packable(unpack_error = Error, with = map_native_tokens_set_error)]
 pub struct NativeTokens(BTreeSetPrefix<NativeToken, NativeTokenCount>);
 
-fn map_native_tokens_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+fn map_native_tokens_set_error<T, P>(error: UnpackOrderedSetError<T, Error, P>) -> Error
 where
     <NativeTokenCount as TryFrom<usize>>::Error: From<P>,
 {
     match error {
-        UnpackSetError::DuplicateItem(_) => Error::NativeTokensNotUniqueSorted,
-        UnpackSetError::Item(e) => e,
-        UnpackSetError::Prefix(p) => Error::InvalidNativeTokenCount(p.into()),
+        UnpackOrderedSetError::Set(e) => match e {
+            UnpackSetError::DuplicateItem(_) => Error::NativeTokensNotUniqueSorted,
+            UnpackSetError::Item(e) => e,
+            UnpackSetError::Prefix(p) => Error::InvalidNativeTokenCount(p.into()),
+        },
+        UnpackOrderedSetError::Unordered => Error::NativeTokensNotUniqueSorted,
     }
 }
 

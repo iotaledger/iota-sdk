@@ -2064,9 +2064,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "packable"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d99ae55c2e3dc657f87a74d549bfe44187dba690310738d384454b8101f7c0f8"
+checksum = "11259b086696fc9256f790485d8f14f11f0fa60a60351af9693e3d49fd24fdb6"
 dependencies = [
  "autocfg",
  "packable-derive",

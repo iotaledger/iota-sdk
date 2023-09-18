@@ -11,7 +11,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     prefix::BTreeSetPrefix,
-    set::UnpackSetError,
+    set::{UnpackOrderedSetError, UnpackSetError},
     unpacker::Unpacker,
     Packable,
 };
@@ -107,14 +107,17 @@ pub(crate) type BlockIssuerKeyCount =
 #[packable(unpack_error = Error, with = map_block_issuer_keys_set_error)]
 pub struct BlockIssuerKeys(BTreeSetPrefix<BlockIssuerKey, BlockIssuerKeyCount>);
 
-fn map_block_issuer_keys_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+fn map_block_issuer_keys_set_error<T, P>(error: UnpackOrderedSetError<T, Error, P>) -> Error
 where
     <BlockIssuerKeyCount as TryFrom<usize>>::Error: From<P>,
 {
     match error {
-        UnpackSetError::DuplicateItem(_) => Error::BlockIssuerKeysNotUniqueSorted,
-        UnpackSetError::Item(e) => e,
-        UnpackSetError::Prefix(p) => Error::InvalidBlockIssuerKeyCount(p.into()),
+        UnpackOrderedSetError::Set(e) => match e {
+            UnpackSetError::DuplicateItem(_) => Error::BlockIssuerKeysNotUniqueSorted,
+            UnpackSetError::Item(e) => e,
+            UnpackSetError::Prefix(p) => Error::InvalidBlockIssuerKeyCount(p.into()),
+        },
+        UnpackOrderedSetError::Unordered => Error::BlockIssuerKeysNotUniqueSorted,
     }
 }
 

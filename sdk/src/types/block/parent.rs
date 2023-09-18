@@ -7,7 +7,12 @@ use alloc::{collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
-use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
+use packable::{
+    bounded::BoundedU8,
+    prefix::BTreeSetPrefix,
+    set::{UnpackOrderedSetError, UnpackSetError},
+    Packable,
+};
 
 use crate::types::block::{BlockId, Error};
 
@@ -23,11 +28,14 @@ use crate::types::block::{BlockId, Error};
 #[packable(unpack_error = Error, with = map_parents_set_error)]
 pub struct Parents<const MIN: u8, const MAX: u8>(BTreeSetPrefix<BlockId, BoundedU8<MIN, MAX>>);
 
-fn map_parents_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error {
+fn map_parents_set_error<T, P>(error: UnpackOrderedSetError<T, Error, P>) -> Error {
     match error {
-        UnpackSetError::DuplicateItem(_) => Error::ParentsNotUniqueSorted,
-        UnpackSetError::Item(e) => e,
-        UnpackSetError::Prefix(_) => Error::InvalidParentCount,
+        UnpackOrderedSetError::Set(e) => match e {
+            UnpackSetError::DuplicateItem(_) => Error::ParentsNotUniqueSorted,
+            UnpackSetError::Item(e) => e,
+            UnpackSetError::Prefix(_) => Error::InvalidParentCount,
+        },
+        UnpackOrderedSetError::Unordered => Error::ParentsNotUniqueSorted,
     }
 }
 

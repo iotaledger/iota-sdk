@@ -12,7 +12,12 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
-use packable::{bounded::BoundedU8, prefix::BTreeSetPrefix, set::UnpackSetError, Packable};
+use packable::{
+    bounded::BoundedU8,
+    prefix::BTreeSetPrefix,
+    set::{UnpackOrderedSetError, UnpackSetError},
+    Packable,
+};
 
 #[cfg(feature = "irc_27")]
 pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
@@ -227,14 +232,17 @@ pub(crate) type FeatureCount = BoundedU8<0, { Features::COUNT_MAX }>;
 #[packable(unpack_error = Error, with = map_features_set_error)]
 pub struct Features(BTreeSetPrefix<Feature, FeatureCount>);
 
-fn map_features_set_error<T, P>(error: UnpackSetError<T, Error, P>) -> Error
+fn map_features_set_error<T, P>(error: UnpackOrderedSetError<T, Error, P>) -> Error
 where
     <FeatureCount as TryFrom<usize>>::Error: From<P>,
 {
     match error {
-        UnpackSetError::DuplicateItem(_) => Error::FeaturesNotUniqueSorted,
-        UnpackSetError::Item(e) => e,
-        UnpackSetError::Prefix(p) => Error::InvalidFeatureCount(p.into()),
+        UnpackOrderedSetError::Set(e) => match e {
+            UnpackSetError::DuplicateItem(_) => Error::FeaturesNotUniqueSorted,
+            UnpackSetError::Item(e) => e,
+            UnpackSetError::Prefix(p) => Error::InvalidFeatureCount(p.into()),
+        },
+        UnpackOrderedSetError::Unordered => Error::FeaturesNotUniqueSorted,
     }
 }
 
