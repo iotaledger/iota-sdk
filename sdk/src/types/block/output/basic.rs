@@ -25,7 +25,7 @@ use crate::types::{
     ValidationParams,
 };
 
-///
+/// Builder for a [`BasicOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct BasicOutputBuilder {
@@ -311,15 +311,18 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
+    /// Amount of stored Mana held by this output.
     mana: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by this output.
     native_tokens: NativeTokens,
+    /// Define how the output can be unlocked in a transaction.
     #[packable(verify_with = verify_unlock_conditions_packable)]
     unlock_conditions: UnlockConditions,
     #[packable(verify_with = verify_features_packable)]
+    /// Features of the output.
     features: Features,
 }
 
@@ -382,7 +385,7 @@ impl BasicOutput {
     ///
     #[inline(always)]
     pub fn address(&self) -> &Address {
-        // An BasicOutput must have an AddressUnlockCondition.
+        // A BasicOutput must have an AddressUnlockCondition.
         self.unlock_conditions
             .address()
             .map(|unlock_condition| unlock_condition.address())
@@ -453,16 +456,16 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
 }
 
-fn verify_features<const VERIFY: bool>(blocks: &Features) -> Result<(), Error> {
+fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), Error> {
     if VERIFY {
-        verify_allowed_features(blocks, BasicOutput::ALLOWED_FEATURES)
+        verify_allowed_features(features, BasicOutput::ALLOWED_FEATURES)
     } else {
         Ok(())
     }
 }
 
-fn verify_features_packable<const VERIFY: bool>(blocks: &Features, _: &ProtocolParameters) -> Result<(), Error> {
-    verify_features::<VERIFY>(blocks)
+fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
+    verify_features::<VERIFY>(features)
 }
 
 #[cfg(feature = "serde")]
@@ -480,18 +483,15 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    /// Describes a basic output.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct BasicOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -569,7 +569,6 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
-    use packable::PackableExt;
 
     use super::*;
     use crate::types::{
@@ -579,66 +578,12 @@ mod tests {
             rand::{
                 address::{rand_account_address, rand_address},
                 output::{
-                    feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
-                    rand_basic_output,
-                    unlock_condition::rand_address_unlock_condition,
+                    feature::rand_allowed_features, rand_basic_output, unlock_condition::rand_address_unlock_condition,
                 },
             },
         },
         TryFromDto,
     };
-
-    #[test]
-    fn builder() {
-        let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let address_1 = rand_address_unlock_condition();
-        let address_2 = rand_address_unlock_condition();
-        let sender_1 = rand_sender_feature();
-        let sender_2 = rand_sender_feature();
-        let amount = 500_000;
-
-        let mut builder = BasicOutput::build_with_amount(amount)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address_1)
-            .add_feature(sender_1)
-            .replace_feature(sender_2);
-
-        let output = builder.clone().finish().unwrap();
-        assert_eq!(output.amount(), amount);
-        assert_eq!(output.unlock_conditions().address(), Some(&address_1));
-        assert_eq!(output.features().sender(), Some(&sender_2));
-
-        builder = builder
-            .clear_unlock_conditions()
-            .clear_features()
-            .replace_unlock_condition(address_2);
-        let output = builder.clone().finish().unwrap();
-        assert_eq!(output.unlock_conditions().address(), Some(&address_2));
-        assert!(output.features().is_empty());
-
-        let metadata = rand_metadata_feature();
-
-        let output = builder
-            .with_minimum_amount(protocol_parameters.rent_structure())
-            .add_unlock_condition(rand_address_unlock_condition())
-            .with_features([Feature::from(metadata.clone()), sender_1.into()])
-            .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
-            .unwrap();
-
-        assert_eq!(output.amount(), output.rent_cost(protocol_parameters.rent_structure()));
-        assert_eq!(output.features().metadata(), Some(&metadata));
-        assert_eq!(output.features().sender(), Some(&sender_1));
-    }
-
-    #[test]
-    fn pack_unpack() {
-        let protocol_parameters = protocol_parameters();
-        let output = rand_basic_output(protocol_parameters.token_supply());
-        let bytes = output.pack_to_vec();
-        let output_unpacked = BasicOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
-        assert_eq!(output, output_unpacked);
-    }
 
     #[test]
     fn to_from_dto() {

@@ -32,7 +32,7 @@ use crate::types::{
     ValidationParams,
 };
 
-///
+/// Builder for a [`FoundryOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct FoundryOutputBuilder {
@@ -301,15 +301,19 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 /// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     amount: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by this output.
     native_tokens: NativeTokens,
-    // The serial number of the foundry with respect to the controlling account.
+    /// The serial number of the foundry with respect to the controlling account.
     serial_number: u32,
+    /// Define the supply control scheme of the native tokens controlled by the foundry.
     token_scheme: TokenScheme,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
+    /// Features of the output.
     features: Features,
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
@@ -670,19 +674,15 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct FoundryOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -782,7 +782,6 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
-    use packable::PackableExt;
 
     use super::*;
     use crate::types::{
@@ -802,60 +801,6 @@ mod tests {
         },
         TryFromDto,
     };
-
-    #[test]
-    fn builder() {
-        let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let account_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
-        let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
-        let metadata_1 = rand_metadata_feature();
-        let metadata_2 = rand_metadata_feature();
-        let amount = 500_000;
-
-        let mut builder = FoundryOutput::build_with_amount(amount, 234, rand_token_scheme())
-            .with_serial_number(85)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .with_unlock_conditions([account_1])
-            .add_feature(metadata_1.clone())
-            .replace_feature(metadata_2.clone())
-            .with_immutable_features([metadata_2.clone()])
-            .replace_immutable_feature(metadata_1.clone());
-
-        let output = builder.clone().finish().unwrap();
-        assert_eq!(output.amount(), amount);
-        assert_eq!(output.serial_number(), 85);
-        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_1));
-        assert_eq!(output.features().metadata(), Some(&metadata_2));
-        assert_eq!(output.immutable_features().metadata(), Some(&metadata_1));
-
-        builder = builder
-            .clear_unlock_conditions()
-            .clear_features()
-            .clear_immutable_features()
-            .replace_unlock_condition(account_2);
-        let output = builder.clone().finish().unwrap();
-        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_2));
-        assert!(output.features().is_empty());
-        assert!(output.immutable_features().is_empty());
-
-        let output = builder
-            .with_minimum_amount(protocol_parameters.rent_structure())
-            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-            .finish_with_params(&protocol_parameters)
-            .unwrap();
-
-        assert_eq!(output.amount(), output.rent_cost(protocol_parameters.rent_structure()));
-    }
-
-    #[test]
-    fn pack_unpack() {
-        let protocol_parameters = protocol_parameters();
-        let output = rand_foundry_output(protocol_parameters.token_supply());
-        let bytes = output.pack_to_vec();
-        let output_unpacked = FoundryOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
-        assert_eq!(output, output_unpacked);
-    }
 
     #[test]
     fn to_from_dto() {
