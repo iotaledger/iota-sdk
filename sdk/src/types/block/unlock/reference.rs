@@ -39,8 +39,6 @@ pub(crate) mod dto {
 
     use super::*;
 
-    /// References a previous unlock in order to substitute the duplication of the same unlock data for inputs which
-    /// unlock through the same data.
     #[derive(Serialize, Deserialize)]
     struct ReferenceUnlockDto {
         #[serde(rename = "type")]
