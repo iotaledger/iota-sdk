@@ -12,6 +12,7 @@
 //! ```
 
 use iota_sdk::{
+    client::secret::SecretManager,
     types::block::output::{
         feature::{Irc27Metadata, IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
@@ -36,7 +37,8 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
-        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
+        .await?
         .finish()
         .await?;
 

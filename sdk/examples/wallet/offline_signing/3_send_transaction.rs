@@ -28,6 +28,8 @@ async fn main() -> Result<()> {
 
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
+        .load_storage::<SecretManager>(ONLINE_WALLET_DB_PATH)
+        .await?
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_secret_manager(SecretManager::Placeholder)
         .finish()

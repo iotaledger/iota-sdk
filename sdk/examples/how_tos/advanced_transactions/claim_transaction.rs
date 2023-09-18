@@ -6,7 +6,10 @@
 //!
 //! `cargo run --release --all-features --example claim_transaction`
 
-use iota_sdk::wallet::{account::OutputsToClaim, Result, Wallet};
+use iota_sdk::{
+    client::secret::SecretManager,
+    wallet::{account::OutputsToClaim, Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,7 +17,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder()
+        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
+        .await?
+        .finish()
+        .await?;
 
     // Get the account we generated with `create_account`
     let account = wallet.get_account("Alice").await?;

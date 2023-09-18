@@ -12,6 +12,7 @@
 //! ```
 
 use iota_sdk::{
+    client::secret::SecretManager,
     types::block::output::feature::Irc30Metadata,
     wallet::{CreateNativeTokenParams, Result, Wallet},
     U256,
@@ -28,7 +29,8 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
+        .await?
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;

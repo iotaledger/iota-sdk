@@ -7,6 +7,7 @@
 //! `cargo run --release --all-features --example advanced_transaction`
 
 use iota_sdk::{
+    client::secret::SecretManager,
     types::block::{
         address::Bech32Address,
         output::{
@@ -24,7 +25,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder()
+        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
+        .await?
+        .finish()
+        .await?;
 
     // Get the account we generated with `create_account`
     let account = wallet.get_account("Alice").await?;

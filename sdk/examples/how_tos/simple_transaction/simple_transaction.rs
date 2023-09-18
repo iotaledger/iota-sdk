@@ -11,7 +11,10 @@
 //! cargo run --release --all-features --example simple_transaction
 //! ```
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{
+    client::secret::SecretManager,
+    wallet::{Result, Wallet},
+};
 
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
@@ -24,7 +27,8 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
+        .await?
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;

@@ -91,11 +91,12 @@ async fn changed_coin_type() -> Result<()> {
     drop(wallet);
 
     let err = Wallet::builder()
+        .load_storage::<SecretManager>(storage_path)
+        .await?
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic.clone(),
         )?))
         .with_coin_type(IOTA_COIN_TYPE)
-        .with_storage_path(storage_path)
         .finish()
         .await;
 
@@ -111,10 +112,11 @@ async fn changed_coin_type() -> Result<()> {
 
     // Building the wallet with the same coin type still works
     let wallet = Wallet::builder()
+        .load_storage::<SecretManager>(storage_path)
+        .await?
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic,
         )?))
-        .with_storage_path(storage_path)
         .finish()
         .await?;
     // Also still possible to create a new account

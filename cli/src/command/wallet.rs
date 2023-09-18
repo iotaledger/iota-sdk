@@ -188,9 +188,10 @@ pub async fn init_command(
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
     Ok(Wallet::builder()
+        .load_storage::<SecretManager>(storage_path)
+        .await?
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
-        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .with_coin_type(parameters.coin_type)
         .finish()
         .await?)
@@ -245,12 +246,9 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
             .build(snapshot_path)?,
     );
     let wallet = Wallet::builder()
+        .load_storage::<SecretManager>(storage_path)
+        .await?
         .with_secret_manager(secret_manager)
-        // Will be overwritten by the backup's value.
-        .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
-        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        // Will be overwritten by the backup's value.
-        .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
@@ -301,8 +299,9 @@ pub async fn unlock_wallet(
     };
 
     let maybe_wallet = Wallet::builder()
+        .load_storage::<SecretManager>(storage_path)
+        .await?
         .with_secret_manager::<SecretManager>(secret_manager)
-        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .finish()
         .await;
 

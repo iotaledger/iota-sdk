@@ -128,20 +128,6 @@ where
         log::debug!("[WalletBuilder::load]");
         let storage_options = storage_options.into();
 
-        // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
-        // would be created with an empty parameter which just leads to errors later
-        if !storage_options.path.is_dir() {
-            if self.client_options.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("client_options"));
-            }
-            if self.coin_type.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("coin_type"));
-            }
-            if self.secret_manager.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("secret_manager"));
-            }
-        }
-
         #[cfg(feature = "rocksdb")]
         let storage =
             crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
@@ -152,21 +138,19 @@ where
 
         let read_manager_builder = Self::load::<S>(&storage_manager).await?;
 
-        let loaded_client_options = read_manager_builder
-            .as_ref()
-            .and_then(|data| data.client_options.clone())
-            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?;
+        if let Some(builder) = read_manager_builder {
+            if let Some(client_options) = builder.client_options {
+                self.client_options.replace(client_options);
+            }
 
-        self.client_options.replace(loaded_client_options);
+            if let Some(secret_manager) = builder.secret_manager {
+                self.secret_manager.replace(secret_manager);
+            }
 
-        let secret_manager = read_manager_builder
-            .as_ref()
-            .and_then(|data| data.secret_manager.clone())
-            .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?;
-
-        self.secret_manager.replace(secret_manager);
-
-        self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
+            if let Some(coin_type) = builder.coin_type {
+                self.coin_type.replace(coin_type);
+            }
+        }
 
         Ok(self)
     }
@@ -197,6 +181,21 @@ where
             crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.path.clone())?;
         #[cfg(all(not(feature = "rocksdb"), feature = "storage"))]
         let storage = Memory::default();
+
+        // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
+        // would be created with an empty parameter which just leads to errors later
+        #[cfg(feature = "storage")]
+        if !storage_options.path.is_dir() {
+            if self.client_options.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("client_options"));
+            }
+            if self.coin_type.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("coin_type"));
+            }
+            if self.secret_manager.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("secret_manager"));
+            }
+        }
 
         #[cfg(feature = "storage")]
         let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;

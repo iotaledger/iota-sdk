@@ -39,8 +39,9 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
+        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
+        .await?
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()

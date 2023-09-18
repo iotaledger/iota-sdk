@@ -77,7 +77,7 @@ impl WalletOptions {
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {
-            builder = builder.with_storage_path(storage_path);
+            builder = builder.load_storage::<SecretManager>(storage_path).await?;
         }
 
         if let Some(secret_manager) = self.secret_manager {

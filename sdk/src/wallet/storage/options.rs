@@ -32,12 +32,17 @@ impl Default for StorageOptions {
 
 impl StorageOptions {
     /// Creates a new [`StorageOptions`].
-    pub fn new(path: PathBuf, kind: StorageKind) -> Self {
+    pub fn new(path: impl Into<PathBuf> + Send, kind: StorageKind) -> Self {
         Self {
-            path,
+            path: path.into(),
             encryption_key: None,
             kind,
         }
+    }
+
+    /// Creates a new [`StorageOptions`] from a path, with a default storage kind depending on features.
+    pub fn from_path(path: impl Into<PathBuf> + Send) -> Self {
+        Self::new(path, Default::default())
     }
 
     /// Adds an encryption key to the [`StorageOptions`].
@@ -46,18 +51,49 @@ impl StorageOptions {
         self
     }
 
-    /// Returns the path of the [`StorageOptions`];
+    /// Returns the path of the [`StorageOptions`].
     pub fn path(&self) -> &Path {
         &self.path
     }
 
-    /// Returns the encryption key of the [`StorageOptions`];
+    /// Returns the encryption key of the [`StorageOptions`].
     pub fn encryption_key(&self) -> Option<&[u8; 32]> {
         self.encryption_key.as_deref()
     }
 
-    /// Returns the kind of the [`StorageOptions`];
+    /// Returns the kind of the [`StorageOptions`].
     pub fn kind(&self) -> StorageKind {
         self.kind
+    }
+}
+
+impl From<&str> for StorageOptions {
+    fn from(value: &str) -> Self {
+        Self::from_path(value)
+    }
+}
+impl From<&String> for StorageOptions {
+    fn from(value: &String) -> Self {
+        Self::from_path(value)
+    }
+}
+impl From<String> for StorageOptions {
+    fn from(value: String) -> Self {
+        Self::from_path(value)
+    }
+}
+impl From<&Path> for StorageOptions {
+    fn from(value: &Path) -> Self {
+        Self::from_path(value)
+    }
+}
+impl From<PathBuf> for StorageOptions {
+    fn from(value: PathBuf) -> Self {
+        Self::from_path(value)
+    }
+}
+impl From<&PathBuf> for StorageOptions {
+    fn from(value: &PathBuf) -> Self {
+        Self::from_path(value)
     }
 }
