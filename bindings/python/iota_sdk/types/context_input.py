@@ -26,7 +26,7 @@ class ContextInput():
 @json
 @dataclass
 class CommitmentContextInput(ContextInput):
-    """A Commitment Input allows referencing a commitment to a certain slot.
+    """A Commitment Context Input allows referencing a commitment to a certain slot.
 
     Attributes:
         type: The type of context input.
