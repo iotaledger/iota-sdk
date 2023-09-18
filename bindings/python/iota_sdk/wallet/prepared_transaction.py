@@ -5,7 +5,7 @@ from __future__ import annotations
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from dacite import from_dict
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, Union
 # Required to prevent circular import
 if TYPE_CHECKING:
     from iota_sdk.wallet.wallet import Account
@@ -22,7 +22,7 @@ class PreparedTransaction:
     def __init__(
         self,
         account: Account,
-        prepared_transaction_data: PreparedTransactionData | Dict
+        prepared_transaction_data: Union[PreparedTransactionData, Dict]
     ):
         """Initalize `Self`.
         """
