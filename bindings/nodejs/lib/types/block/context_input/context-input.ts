@@ -41,7 +41,7 @@ class CommitmentContextInput extends ContextInput {
 }
 
 /**
- * A Block Issuance Credit (BIC) Input provides the VM with context for the value of
+ * A Block Issuance Credit (BIC) Context Input provides the VM with context for the value of
  * the BIC vector of a specific slot.
  */
 class BlockIssuanceCreditContextInput extends ContextInput {
