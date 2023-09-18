@@ -45,7 +45,7 @@ class CommitmentContextInput extends ContextInput {
  * the BIC vector of a specific slot.
  */
 class BlockIssuanceCreditContextInput extends ContextInput {
-    accountId: AccountId;
+    readonly accountId: AccountId;
 
     constructor(accountId: AccountId) {
         super(ContextInputType.BLOCK_ISSUANCE_CREDIT);
@@ -57,7 +57,7 @@ class BlockIssuanceCreditContextInput extends ContextInput {
  * A Reward Context Input indicates which transaction Input is claiming Mana rewards.
  */
 class RewardContextInput extends ContextInput {
-    index: u16;
+    readonly index: u16;
 
     constructor(index: u16) {
         super(ContextInputType.REWARD);
