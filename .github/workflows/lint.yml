@@ -11,7 +11,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
   pull_request:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/lint.yml"
@@ -165,23 +165,3 @@ jobs:
 
       - name: Check
         run: cargo ci-check-types
-
-  common-sets:
-    name: Check common feature sets
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout the Source Code
-        uses: actions/checkout@v3
-
-      - name: Set up Rust
-        uses: ./.github/actions/setup-rust
-
-      - name: Check wallet + storage
-        run: cargo check --no-default-features -p iota-sdk -F wallet,storage
-
-      - name: Check wallet + stronghold
-        run: cargo check --no-default-features -p iota-sdk -F wallet,stronghold
-
-      - name: Check client + private key manager
-        run: cargo check --no-default-features -p iota-sdk -F client,private_key_secret_manager

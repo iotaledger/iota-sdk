@@ -1,11 +1,10 @@
-name: Build and Run Tests
-
+name: Common Feature Sets
 on:
   push:
     branches: [develop, production, "1.1"]
     paths:
       - ".cargo/config.toml"
-      - ".github/workflows/build-and-test.yml"
+      - ".github/workflows/common-features.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -15,7 +14,7 @@ on:
     branches: [develop, production, "1.1"]
     paths:
       - ".cargo/config.toml"
-      - ".github/workflows/build-and-test.yml"
+      - ".github/workflows/common-features.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -26,30 +25,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_INCREMENTAL: 0
+
 jobs:
-  crate:
-    runs-on: ${{ matrix.os }}
+  common-sets:
+    name: Check common feature sets
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # os: [windows-latest, macos-latest, ubuntu-latest]
-        os: [windows-latest, ubuntu-latest]
+        set:
+          - pow
+          - irc_27
+          - irc_30
+          - client,private_key_secret_manager
+          - client,mqtt
+          - client,participation
+          - wallet,storage
+          - wallet,stronghold
+          - wallet,rocksdb
+          - wallet,participation
+          - wallet,events
+          - wallet,events,ledger_nano
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
 
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
 
-      # Required for ledger-nano
-      - name: Install required packages (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Install Nextest
-        uses: taiki-e/install-action@nextest
-
-      - name: Run tests
-        run: cargo ci-test
+      - name: Check wallet + stronghold
+        run: cargo check --no-default-features -p iota-sdk -F ${{ matrix.set }}
