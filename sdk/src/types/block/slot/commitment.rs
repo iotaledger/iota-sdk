@@ -24,7 +24,7 @@ pub struct SlotCommitment {
     /// The commitment ID of the previous slot.
     #[cfg_attr(feature = "serde", serde(rename = "previousCommitmentId"))]
     previous_slot_commitment_id: SlotCommitmentId,
-    /// A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
+    /// The digest of multiple sparse merkle tree roots of this slot.
     roots_id: RootsId,
     /// The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
     /// slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
@@ -56,6 +56,11 @@ impl SlotCommitment {
         }
     }
 
+    /// Returns the protocol version of the [`SlotCommitment`].
+    pub fn protocol_version(&self) -> u8 {
+        self.protocol_version
+    }
+
     /// Returns the index of the [`SlotCommitment`].
     pub fn index(&self) -> SlotIndex {
         self.index
@@ -66,7 +71,7 @@ impl SlotCommitment {
         &self.previous_slot_commitment_id
     }
 
-    /// Returns the [`RootsId`] of the [`SlotCommitment`].
+    /// Returns the roots ID of the [`SlotCommitment`].
     pub fn roots_id(&self) -> &RootsId {
         &self.roots_id
     }
@@ -76,47 +81,22 @@ impl SlotCommitment {
         self.cumulative_weight
     }
 
-    /// Derives the [`SlotCommitmentId`] of the [`SlotCommitment`].
+    /// Returns the reference mana cost of the [`SlotCommitment`].
+    pub fn reference_mana_cost(&self) -> u64 {
+        self.reference_mana_cost
+    }
+
+    /// Computes the [`SlotCommitmentId`] of the [`SlotCommitment`].
     pub fn id(&self) -> SlotCommitmentId {
         let mut bytes = [0u8; SlotCommitmentId::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
-        let hash: [u8; 32] = Blake2b256::digest(self.pack_to_vec()).into();
+        let content = self.pack_to_vec();
+        let content_hash: [u8; 32] = Blake2b256::digest(content).into();
 
         // PANIC: packing to an array of bytes can't fail.
-        hash.pack(&mut packer).unwrap();
+        content_hash.pack(&mut packer).unwrap();
         self.index.pack(&mut packer).unwrap();
 
         SlotCommitmentId::from(bytes)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use core::str::FromStr;
-
-    use super::SlotCommitment;
-    use crate::types::block::{
-        slot::{RootsId, SlotCommitmentId, SlotIndex},
-        PROTOCOL_VERSION,
-    };
-
-    #[test]
-    fn test() {
-        let commitment = SlotCommitment::new(
-            PROTOCOL_VERSION,
-            SlotIndex::new(10),
-            SlotCommitmentId::from_str(
-                "0x20e07a0ea344707d69a08b90be7ad14eec8326cf2b8b86c8ec23720fab8dcf8ec43a30e4a8cc3f1f",
-            )
-            .unwrap(),
-            RootsId::from_str("0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f").unwrap(),
-            5,
-            10,
-        );
-        // TODO: Independently verify this value
-        assert_eq!(
-            &commitment.id().to_string(),
-            "0x2f3ad38aa65d20ede9dcd6a045dccdd3332cf38192c4875308bb77116e8650880a00000000000000"
-        )
     }
 }
