@@ -30,7 +30,7 @@ class CommitmentContextInput(ContextInput):
 
     Attributes:
         type: The type of context input.
-        commitment_id: The commitment identifier to reference to.
+        commitment_id: The commitment identifier to reference.
     """
     commitment_id: HexStr
     type: int = field(
