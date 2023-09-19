@@ -62,6 +62,17 @@ type CommonQueryParameters =
     | PageSize
     | Cursor;
 
+/** Query parameters for filtering alias/basic/NFT/foundry Outputs*/
+export type GenericQueryParameter =
+    | UnlockableByAddress
+    | HasNativeTokens
+    | MinNativeTokenCount
+    | MaxNativeTokenCount
+    | CreatedAfter
+    | CreatedBefore
+    | PageSize
+    | Cursor;
+
 /** Bech32-encoded address that should be searched for. */
 interface Address {
     address: string;
@@ -155,7 +166,11 @@ interface StateController {
 interface Governor {
     governor: string;
 }
-/** Define the page size for the results */
+/** Define the page size for the results. */
 interface PageSize {
     pageSize: number;
+}
+/** Returns outputs that are unlockable by the bech32 address. */
+interface UnlockableByAddress {
+    unlockableByAddress: string;
 }
