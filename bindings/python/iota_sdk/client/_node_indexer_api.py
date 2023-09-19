@@ -1,11 +1,11 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output_id import OutputId
 from dataclasses import dataclass
 from typing import Dict, Optional
-import humps
+
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.output_id import OutputId
 
 
 class NodeIndexerAPI():
@@ -101,11 +101,11 @@ class NodeIndexerAPI():
             items: The query results.
         """
 
-        def __init__(self, dict: Dict):
-            self.ledgerIndex = dict["ledgerIndex"]
-            self.cursor = dict["cursor"]
+        def __init__(self, output_dict: Dict):
+            self.ledgerIndex = output_dict["ledgerIndex"]
+            self.cursor = output_dict["cursor"]
             self.items = [OutputId.from_string(
-                output_id) for output_id in dict["items"]]
+                output_id) for output_id in output_dict["items"]]
 
     def basic_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
