@@ -72,8 +72,7 @@ pub async fn account_prompt(wallet: &Wallet, mut account: Account) -> Result<(),
         .edit_mode(rustyline::EditMode::Emacs)
         .build();
 
-    // Panic: should never happen since it's all in-memory
-    let mut rl = Editor::with_history(config, MemHistory::with_config(config)).unwrap();
+    let mut rl = Editor::with_history(config, MemHistory::with_config(config))?;
     rl.set_helper(Some(PromptHelper::default()));
 
     loop {
