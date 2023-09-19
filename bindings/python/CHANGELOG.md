@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.3 - 2023-09-19
+
+### Fixed
+
+- Wheel upload;
+
 ## 1.0.2 - 2023-09-12
 
 ### Added

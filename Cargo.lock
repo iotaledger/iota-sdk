@@ -1716,7 +1716,7 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk-python"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "futures",
  "iota-sdk-bindings-core",
