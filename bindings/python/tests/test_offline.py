@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata
+from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 import json
 import unittest
 
@@ -123,4 +123,26 @@ def test_irc_27():
         "attributes": metadata.attributes
     }
     metadata_deser = Irc27Metadata.from_dict(metadata_dict)
+    assert metadata == metadata_deser
+
+def test_irc_30():
+    metadata = Irc30Metadata(
+        "FooCoin",
+        "FOO",
+        3,
+        description="FooCoin is the utility and governance token of FooLand, \
+                a revolutionary protocol in the play-to-earn crypto gaming field.",
+        url="https://foocoin.io/",
+        logo_url="https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
+    )
+    metadata_dict = {
+        "standard": "IRC30",
+        "name": metadata.name,
+        "description": metadata.description,
+        "decimals": metadata.decimals,
+        "symbol": metadata.symbol,
+        "url": metadata.url,
+        "logoUrl": metadata.logo_url
+    }
+    metadata_deser = Irc30Metadata.from_dict(metadata_dict)
     assert metadata == metadata_deser

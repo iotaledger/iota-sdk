@@ -20,6 +20,7 @@ from .types.common import *
 from .types.event import *
 from .types.feature import *
 from .types.irc_27 import *
+from .types.irc_30 import *
 from .types.filter_options import *
 from .types.input import *
 from .types.native_token import *
