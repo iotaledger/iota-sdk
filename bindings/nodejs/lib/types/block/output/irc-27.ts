@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { utf8ToHex } from "../../../utils";
+
 /**
  * The IRC27 NFT standard schema.
  */
@@ -82,6 +84,10 @@ class Irc27Metadata {
     withAttributes(attributes: Array<Attribute>): Irc27Metadata {
         this.attributes = attributes;
         return this;
+    }
+
+    asHex(): string {
+        return utf8ToHex(JSON.stringify(this))
     }
 }
 
