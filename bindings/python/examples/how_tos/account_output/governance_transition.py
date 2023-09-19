@@ -45,7 +45,7 @@ account_output = account_output_data.output
 
 
 def update_state_controller(unlock_condition):
-    """Update unlock condition if its a state controlled type."""
+    """Update unlock condition if it's a state controlled type."""
     if unlock_condition.type == UnlockConditionType.StateControllerAddress:
         return StateControllerAddressUnlockCondition(new_state_controller)
     return unlock_condition
