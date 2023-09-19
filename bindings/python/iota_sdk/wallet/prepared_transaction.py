@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, Union
+from dacite import from_dict
+
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_data import PreparedTransactionData
-from dacite import from_dict
-from typing import TYPE_CHECKING, Dict
+
 # Required to prevent circular import
 if TYPE_CHECKING:
     from iota_sdk.wallet.wallet import Account
@@ -22,7 +25,7 @@ class PreparedTransaction:
     def __init__(
         self,
         account: Account,
-        prepared_transaction_data: PreparedTransactionData | Dict
+        prepared_transaction_data: Union[PreparedTransactionData, Dict]
     ):
         """Initalize `Self`.
         """
@@ -39,7 +42,8 @@ class PreparedTransaction:
         """Get the prepared transaction data.
         """
         return self.prepared_transaction_data_dto if isinstance(
-            self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(PreparedTransactionData, self.prepared_transaction_data_dto)
+            self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(
+            PreparedTransactionData, self.prepared_transaction_data_dto)
 
     """
     The send function returns a promise that resolves to a Transaction object after signing

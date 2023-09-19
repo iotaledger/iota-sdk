@@ -1,20 +1,21 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import Optional
+
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output
-from typing import Optional
 
 
 class ClientUtils():
     """Client utility functions.
     """
 
-    def hex_to_bech32(self, hex: HexStr, bech32_hrp: str) -> str:
+    def hex_to_bech32(self, hex_str: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return self._call_method('hexToBech32', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
@@ -35,11 +36,11 @@ class ClientUtils():
         })
 
     def hex_public_key_to_bech32_address(
-            self, hex: HexStr, bech32_hrp: Optional[str] = None) -> str:
+            self, hex_str: HexStr, bech32_hrp: Optional[str] = None) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return self._call_method('hexPublicKeyToBech32Address', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
