@@ -119,7 +119,7 @@ class SecretManager():
         if "payload" in json_response:
             return json_response['payload']
         return response
-
+    # pylint: disable=unused-argument
     def generate_ed25519_addresses(self,
                                    account_index: Optional[int] = None,
                                    start: Optional[int] = None,

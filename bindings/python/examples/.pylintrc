@@ -8,8 +8,4 @@ disable=missing-module-docstring,
 	consider-using-f-string,
 	fixme, # TODOS 
 	too-many-instance-attributes,
-	too-many-arguments,
-	unused-argument # dict(locals()) doesnt work with this
-	
-
-
+	too-many-arguments
