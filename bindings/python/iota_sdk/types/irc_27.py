@@ -43,7 +43,7 @@ class Irc27Metadata:
         attributes: Additional attributes which follow [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards).
     """
 
-    standard = field(default="IRC27", init=False)
+    standard: str = field(default="IRC27", init=False)
     version: str = field(default="v1.0", init=False)
     type: str
     uri: str

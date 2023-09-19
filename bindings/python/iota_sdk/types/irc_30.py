@@ -22,7 +22,7 @@ class Irc30Metadata:
         logo: The svg logo of the token encoded as a byte string.
     """
 
-    standard = field(default="IRC30", init=False)
+    standard: str = field(default="IRC30", init=False)
     name: str
     symbol: str
     decimals: int
