@@ -119,7 +119,7 @@ class NodeIndexerAPI():
         Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter".
 
         Returns:
-            The corresponding output IDs of the basic outputs.
+            The corresponding output IDs of the outputs.
         """
 
         query_parameters_camelized = query_parameters.as_dict()
