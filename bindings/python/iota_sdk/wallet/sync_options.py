@@ -1,6 +1,9 @@
 from typing import List, Optional
+from iota_sdk.types.common import json
 
 
+@json
+@dataclass
 class AccountSyncOptions():
     """Sync options for addresses from the account.
 
@@ -10,17 +13,13 @@ class AccountSyncOptions():
         account_outputs: whether to sync account outputs.
     """
 
-    def __init__(self,
-                 basic_outputs: Optional[bool] = None,
-                 nft_outputs: Optional[bool] = None,
-                 account_outputs: Optional[bool] = None):
-        """Initialize `Self`.
-        """
-        self.basicOutputs = basic_outputs
-        self.nftOutputs = nft_outputs
-        self.accountOutputs = account_outputs
+    basic_outputs: Optional[bool] = None
+    nft_outputs: Optional[bool] = None
+    account_outputs: Optional[bool] = None
 
 
+@json
+@dataclass
 class AliasSyncOptions():
     """Sync options for addresses from account outputs.
 
@@ -31,19 +30,14 @@ class AliasSyncOptions():
         foundry_outputs: Whether to sync foundry outputs.
     """
 
-    def __init__(self,
-                 basic_outputs: Optional[bool] = None,
-                 nft_outputs: Optional[bool] = None,
-                 account_outputs: Optional[bool] = None,
-                 foundry_outputs: Optional[bool] = None):
-        """Initialize `Self`.
-        """
-        self.basicOutputs = basic_outputs
-        self.nftOutputs = nft_outputs
-        self.accountOutputs = account_outputs
-        self.foundryOutputs = foundry_outputs
+    basic_outputs: Optional[bool] = None
+    nft_outputs: Optional[bool] = None
+    account_outputs: Optional[bool] = None
+    foundry_outputs: Optional[bool] = None
 
 
+@json
+@dataclass
 class NftSyncOptions():
     """Sync options for addresses from NFT outputs.
 
@@ -53,17 +47,13 @@ class NftSyncOptions():
         account_outputs: Whether to sync account outputs.
     """
 
-    def __init__(self,
-                 basic_outputs: Optional[bool] = None,
-                 nft_outputs: Optional[bool] = None,
-                 account_outputs: Optional[bool] = None):
-        """Initialize `Self`.
-        """
-        self.basicOutputs = basic_outputs
-        self.nftOutputs = nft_outputs
-        self.accountOutputs = account_outputs
+    basic_outputs: Optional[bool] = None
+    nft_outputs: Optional[bool] = None
+    account_outputs: Optional[bool] = None
 
 
+@json
+@dataclass
 class SyncOptions():
     """The synchronization options.
 
@@ -102,33 +92,16 @@ class SyncOptions():
         Sync native token foundries, so their metadata can be returned in the balance.
     """
 
-    def __init__(self,
-                 addresses: Optional[List[str]] = None,
-                 address_start_index: Optional[int] = None,
-                 address_start_index_internal: Optional[int] = None,
-                 force_syncing: Optional[bool] = None,
-                 sync_incoming_transactions: Optional[bool] = None,
-                 sync_pending_transactions: Optional[bool] = None,
-                 account: Optional[AccountSyncOptions] = None,
-                 alias: Optional[AliasSyncOptions] = None,
-                 nft: Optional[NftSyncOptions] = None,
-                 sync_only_most_basic_outputs: Optional[bool] = None,
-                 sync_native_token_foundries: Optional[bool] = None):
-        """Initialize `Self`.
-        """
-        self.addresses = addresses
-        self.addressStartIndex = address_start_index
-        self.addressStartIndexInternal = address_start_index_internal
-        self.forceSyncing = force_syncing
-        self.syncIncomingTransactions = sync_incoming_transactions
-        self.syncPendingTransactions = sync_pending_transactions
-        self.account = account
-        # TODO Rename when we are done with Account changes
-        # https://github.com/iotaledger/iota-sdk/issues/647.
-        self.alias = alias
-        self.nft = nft
-        self.syncOnlyMostBasicOutputs = sync_only_most_basic_outputs
-        self.syncNativeTokenFoundries = sync_native_token_foundries
-
-    def as_dict(self):
-        return dict(self.__dict__)
+    addresses: Optional[List[str]] = None
+    address_start_index: Optional[int] = None
+    address_start_index_internal: Optional[int] = None
+    force_syncing: Optional[bool] = None
+    sync_incoming_transactions: Optional[bool] = None
+    sync_pending_transactions: Optional[bool] = None
+    account: Optional[AccountSyncOptions] = None
+    # TODO Rename when we are done with Account changes
+    # https://github.com/iotaledger/iota-sdk/issues/647.
+    alias: Optional[AliasSyncOptions] = None
+    nft: Optional[NftSyncOptions] = None
+    sync_only_most_basic_outputs: Optional[bool] = None
+    sync_native_token_foundries: Optional[bool] = None
