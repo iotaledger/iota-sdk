@@ -108,7 +108,6 @@ impl Packable for BlockHeader {
 
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq, Getters, CopyGetters)]
-
 pub struct BlockWrapper {
     #[getset(skip)]
     header: BlockHeader,
