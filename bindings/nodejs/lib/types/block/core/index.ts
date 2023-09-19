@@ -8,7 +8,7 @@ export * from './block';
 export * from './basic';
 export * from './wrapper';
 
-// Here because in block.ts it causes a circular Dependecy
+// Here because in block.ts it causes a circular dependency
 export const BlockDiscriminator = {
     property: 'type',
     subTypes: [{ value: BasicBlock, name: BlockType.Basic as any }],
