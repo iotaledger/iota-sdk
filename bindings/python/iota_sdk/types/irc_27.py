@@ -5,6 +5,7 @@ import json
 from iota_sdk import utf8_to_hex
 from dataclasses import dataclass, field
 from typing import Optional, List, Any
+from dacite import from_dict
 
 
 @dataclass
@@ -49,10 +50,14 @@ class Irc27Metadata:
     uri: str
     name: str
     collectionName: Optional[str] = None
-    royalties: Optional[dict[str, float]] = None
+    royalties: dict[str, float] = {}
     issuerName: Optional[str] = None
     description: Optional[str] = None
-    attributes: Optional[List[Attribute]] = None
+    attributes: List[Attribute] = []
+
+    @staticmethod
+    def from_dict(metadata_dict: dict):
+        return from_dict(Irc27Metadata, metadata_dict)
 
     def as_hex(self):
         utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))

@@ -6,6 +6,7 @@ from iota_sdk.types.common import HexStr
 from iota_sdk import utf8_to_hex
 from dataclasses import dataclass, field
 from typing import Optional
+from dacite import from_dict
 
 
 @dataclass
@@ -30,6 +31,10 @@ class Irc30Metadata:
     url: Optional[str] = None
     logoUrl: Optional[str] = None
     logo: Optional[HexStr] = None
+
+    @staticmethod
+    def from_dict(metadata_dict: dict):
+        return from_dict(Irc30Metadata, metadata_dict)
 
     def as_hex(self):
         utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))
