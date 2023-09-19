@@ -10,7 +10,7 @@ from typing import Optional
 
 @dataclass
 class Irc30Metadata:
-    """The IRC30 NFT standard schema.
+    """The IRC30 native token metadata standard schema.
     Attributes:
         standard: The metadata standard (IRC30).
         name: The human-readable name of the native token.
