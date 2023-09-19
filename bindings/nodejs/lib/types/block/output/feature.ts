@@ -4,7 +4,7 @@
 import { SlotIndex } from '../slot';
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../address';
-import { Ed25519BlockIssuerKey } from './block-issuer-key';
+import { BlockIssuerKey } from './block-issuer-key';
 import { u64 } from '../../utils/type_aliases';
 
 /**
@@ -114,11 +114,11 @@ class BlockIssuerFeature extends Feature {
     /**
      * The Block Issuer Keys.
      */
-    readonly blockIssuerKeys: Set<Ed25519BlockIssuerKey>;
+    readonly blockIssuerKeys: Set<BlockIssuerKey>;
 
     constructor(
         expirySlot: SlotIndex,
-        blockIssuerKeys: Set<Ed25519BlockIssuerKey>,
+        blockIssuerKeys: Set<BlockIssuerKey>,
     ) {
         super(FeatureType.BlockIssuer);
         this.expirySlot = expirySlot;
