@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HexEncodedString } from '../../utils';
+
 /**
  * All of the block issuer key types.
  */
