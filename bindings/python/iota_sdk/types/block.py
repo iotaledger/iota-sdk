@@ -4,7 +4,7 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 from iota_sdk.utils import Utils
@@ -17,16 +17,24 @@ class Block:
 
     Attributes:
         protocol_version: The protocol version with which this block was issued.
-        parents: The parents of this block.
+        strong_parents: Blocks that are strongly directly approved.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
         burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
 
     protocol_version: int
-    parents: List[HexStr]
+    strong_parents: List[HexStr]
+    weak_parents: List[HexStr]
+    shallow_like_parents: List[HexStr]
     burned_mana: str
-    payload: Optional[TaggedDataPayload |
-                      TransactionPayload] = None
+    payload: Optional[Union[TaggedDataPayload,
+                      TransactionPayload]] = None
+
+    @classmethod
+    def from_dict(cls, block_dict: Dict) -> Block:
+        return from_dict(Block, block_dict)
 
     def id(self) -> HexStr:
         return Utils.block_id(self)
@@ -64,20 +72,37 @@ class ConflictReason(Enum):
         invalidChainState (12): The chain state is invalid.
         semanticValidationFailed (255): The semantic validation failed.
     """
-    none = 0,
-    inputUTXOAlreadySpent = 1,
-    inputUTXOAlreadySpentInThisMilestone = 2,
-    inputUTXONotFound = 3,
-    inputOutputSumMismatch = 4,
-    invalidSignature = 5,
-    invalidTimelock = 6,
-    invalidNativeTokens = 7,
-    returnAmountMismatch = 8,
-    invalidInputUnlock = 9,
-    invalidInputsCommitment = 10,
-    invalidSender = 11,
-    invalidChainState = 12,
-    semanticValidationFailed = 255,
+    none = 0
+    inputUTXOAlreadySpent = 1
+    inputUTXOAlreadySpentInThisMilestone = 2
+    inputUTXONotFound = 3
+    inputOutputSumMismatch = 4
+    invalidSignature = 5
+    invalidTimelock = 6
+    invalidNativeTokens = 7
+    returnAmountMismatch = 8
+    invalidInputUnlock = 9
+    invalidInputsCommitment = 10
+    invalidSender = 11
+    invalidChainState = 12
+    semanticValidationFailed = 255
+
+
+CONFLICT_REASON_STRINGS = {
+    ConflictReason.none: 'The block has no conflict',
+    ConflictReason.inputUTXOAlreadySpent: 'The referenced UTXO was already spent',
+    ConflictReason.inputUTXOAlreadySpentInThisMilestone: 'The referenced UTXO was already spent while confirming this milestone',
+    ConflictReason.inputUTXONotFound: 'The referenced UTXO cannot be found',
+    ConflictReason.inputOutputSumMismatch: 'The sum of the inputs and output values does not match',
+    ConflictReason.invalidSignature: 'The unlock block signature is invalid',
+    ConflictReason.invalidTimelock: 'The configured timelock is not yet expired',
+    ConflictReason.invalidNativeTokens: 'The native tokens are invalid',
+    ConflictReason.returnAmountMismatch: 'The return amount in a transaction is not fulfilled by the output side',
+    ConflictReason.invalidInputUnlock: 'The input unlock is invalid',
+    ConflictReason.invalidInputsCommitment: 'The inputs commitment is invalid',
+    ConflictReason.invalidSender: ' The output contains a Sender with an ident (address) which is not unlocked',
+    ConflictReason.invalidChainState: 'The chain state transition is invalid',
+    ConflictReason.semanticValidationFailed: 'The semantic validation failed'}
 
 
 @json
@@ -87,7 +112,9 @@ class BlockMetadata:
 
     Attributes:
         block_id: The id of the block.
-        parents: The parents of the block.
+        strong_parents: Blocks that are strongly directly approved.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
         is_solid: Whether the block is solid.
         referenced_by_milestone_index: The milestone index referencing the block.
         milestone_index: The milestone index if the block contains a milestone payload.
@@ -97,7 +124,9 @@ class BlockMetadata:
         should_reattach: Whether the block should be reattached.
     """
     block_id: HexStr
-    parents: List[HexStr]
+    strong_parents: List[HexStr]
+    weak_parents: List[HexStr]
+    shallow_like_parents: List[HexStr]
     is_solid: bool
     referenced_by_milestone_index: Optional[int] = None
     milestone_index: Optional[int] = None

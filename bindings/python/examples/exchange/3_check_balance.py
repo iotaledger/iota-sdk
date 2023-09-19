@@ -3,9 +3,11 @@
 
 # This example gets the balance of an account.
 
-from iota_sdk import Wallet, SyncOptions
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import SyncOptions, Wallet
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
@@ -19,7 +21,7 @@ wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
 account = wallet.get_account('Alice')
 
 addresses = account.addresses()
-print(f'Addresses:', addresses)
+print('Addresses:', addresses)
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/account/foundry outputs.

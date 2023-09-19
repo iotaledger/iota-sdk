@@ -43,6 +43,7 @@ import {
     Response,
     OutputId,
     ProtocolParameters,
+    u64,
 } from '../types';
 import { OutputResponse, IOutputsResponse } from '../types/models/api';
 
@@ -203,10 +204,7 @@ export class Client {
      * @param amount The amount to find inputs for.
      * @returns An array of UTXO inputs.
      */
-    async findInputs(
-        addresses: string[],
-        amount: bigint,
-    ): Promise<UTXOInput[]> {
+    async findInputs(addresses: string[], amount: u64): Promise<UTXOInput[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findInputs',
             data: {
@@ -299,7 +297,7 @@ export class Client {
     /**
      * Get the ID of the network the node is connected to.
      */
-    async getNetworkId(): Promise<number> {
+    async getNetworkId(): Promise<string> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkId',
         });

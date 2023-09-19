@@ -1,7 +1,19 @@
-from iota_sdk import *
-from dataclasses import asdict
-from dotenv import load_dotenv
 import json
+from dataclasses import asdict
+
+from dotenv import load_dotenv
+
+from iota_sdk import (
+    AddressUnlockCondition,
+    Client,
+    Ed25519Address,
+    Utils,
+    SenderFeature,
+    IssuerFeature,
+    MetadataFeature,
+    TagFeature,
+    utf8_to_hex,
+)
 
 load_dotenv()
 

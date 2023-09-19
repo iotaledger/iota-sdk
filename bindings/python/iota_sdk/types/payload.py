@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from dataclasses import dataclass, field
 
@@ -11,6 +11,7 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
+from iota_sdk.types.mana import ManaAllotment
 
 
 class PayloadType(IntEnum):
@@ -59,7 +60,7 @@ class TransactionPayload(Payload):
         unlocks: The unlocks of the transaction.
     """
     essence: RegularTransactionEssence
-    unlocks: List[SignatureUnlock | ReferenceUnlock]
+    unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
     type: int = field(
         default_factory=lambda: int(
             PayloadType.Transaction),

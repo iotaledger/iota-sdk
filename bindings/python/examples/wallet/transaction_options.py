@@ -1,6 +1,9 @@
-from iota_sdk import Wallet, TransactionOptions, TaggedDataPayload, utf8_to_hex, RemainderValueStrategy
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (RemainderValueStrategy, TaggedDataPayload,
+                      TransactionOptions, Wallet, utf8_to_hex)
 
 load_dotenv()
 
@@ -23,7 +26,13 @@ params = [{
     "amount": "1000000",
 }]
 
-transaction = account.send_with_params(params, TransactionOptions(remainder_value_strategy=RemainderValueStrategy.ReuseAddress,
-                                                                  note="my first tx", tagged_data_payload=TaggedDataPayload(utf8_to_hex("tag"), utf8_to_hex("data"))))
+transaction = account.send_with_params(
+    params,
+    TransactionOptions(
+        remainder_value_strategy=RemainderValueStrategy.ReuseAddress,
+        note="my first tx",
+        tagged_data_payload=TaggedDataPayload(
+            utf8_to_hex("tag"),
+             utf8_to_hex("data"))))
 print(transaction)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, SendNftParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import SendNftParams, Wallet
 
 load_dotenv()
 
@@ -23,5 +25,5 @@ outputs = [SendNftParams(
     nft_id=balance.nfts[0],
 )]
 
-transaction = account.prepare_send_nft(outputs).send()
+transaction = account.send_nft(outputs)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

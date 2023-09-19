@@ -1,7 +1,12 @@
-from iota_sdk import *
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (AddressUnlockCondition, Client, Ed25519Address,
+                      ExpirationUnlockCondition, MetadataFeature,
+                      SenderFeature, StorageDepositReturnUnlockCondition,
+                      TagFeature, TimelockUnlockCondition, Utils, utf8_to_hex)
 
 load_dotenv()
 

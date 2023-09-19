@@ -44,3 +44,16 @@ impl<S: SecretManage> Wallet<S> {
         )?))
     }
 }
+
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
+    pub async fn get_or_create_account(&self, alias: impl Into<String> + Send) -> crate::wallet::Result<Account<S>> {
+        let alias = alias.into();
+        match self.get_account(&alias).await {
+            Err(crate::wallet::Error::AccountNotFound(_)) => self.create_account().with_alias(alias).finish().await,
+            res => res,
+        }
+    }
+}

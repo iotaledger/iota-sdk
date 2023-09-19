@@ -1,8 +1,9 @@
-from iota_sdk import Client
-from dotenv import load_dotenv
-
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Client
 
 load_dotenv()
 

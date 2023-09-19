@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, Utils, ConsolidationParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import ConsolidationParams, Utils, Wallet
 
 # In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
 # them to the same address again.
@@ -45,8 +47,7 @@ print('Sending consolidation transaction...')
 # Consolidate unspent outputs and print the consolidation transaction ID
 # Set `force` to true to force the consolidation even though the
 # `output_threshold` isn't reached.
-transaction = account.prepare_consolidate_outputs(
-    ConsolidationParams(force=True)).send()
+transaction = account.consolidate_outputs(ConsolidationParams(force=True))
 print('Transaction sent: ', transaction.transaction_id)
 
 # Wait for the consolidation transaction to get confirmed
@@ -54,10 +55,7 @@ block_id = account.reissue_transaction_until_included(
     transaction.transaction_id)
 
 print(
-    'Transaction included: {}/block/{}'.format(
-        os.environ['EXPLORER_URL'],
-        block_id
-    )
+    f'Transaction included: {os.environ["EXPLORER_ID"]}/block/{block_id}'
 )
 
 # Sync account

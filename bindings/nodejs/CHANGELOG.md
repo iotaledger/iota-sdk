@@ -19,7 +19,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.10 - 2023-mm-dd
+## 1.1.0 - 2023-MM-DD
+
+### Added
+
+- `Account::{burn(), consolidateOutputs(), createAliasOutput(), meltNativeToken(), mintNativeToken(), createNativeToken(), mintNfts(), sendTransaction(), sendNativeTokens(), sendNft()}` methods;
+
+## 1.0.11 - 2023-09-14
+
+### Fixed
+
+- `Client::getNetworkId()` return type;
+- `RegularTransactionEssence::networkId` type;
+- `FilterOptions::outputTypes` type;
+
+## 1.0.10 - 2023-09-12
+
+### Changed
+
+- `migrateDbChrysalisToStardust()` returns an error if no chrysalis data was found;
 
 ### Fixed
 

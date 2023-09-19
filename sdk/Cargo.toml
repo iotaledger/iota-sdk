@@ -42,7 +42,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.8.1", default-features = false, features = [
+packable = { version = "0.8.2", default-features = false, features = [
     "primitive-types",
 ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
@@ -50,7 +50,7 @@ prefix-hex = { version = "0.7.1", default-features = false, features = [
 ] }
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.188", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.105", default-features = false, features = [
+serde_json = { version = "1.0.107", default-features = false, features = [
     "alloc",
 ] }
 
@@ -58,13 +58,12 @@ serde_json = { version = "1.0.105", default-features = false, features = [
 anymap = { version = "0.12.1", default-features = false, optional = true }
 async-trait = { version = "0.1.73", default-features = false, optional = true }
 bs58 = { version = "0.5.0", default-features = false, optional = true }
-derive_builder = { version = "0.12.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [
     "thread-pool",
 ], optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
-iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
+iota-ledger-nano = { version = "1.0.0-alpha.5", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
 log = { version = "0.4.20", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }
@@ -139,6 +138,8 @@ tokio = { version = "1.32.0", default-features = false, features = [
 [features]
 default = ["client", "wallet", "tls"]
 
+irc_27 = ["url", "serde"]
+irc_30 = ["url", "serde"]
 ledger_nano = ["iota-ledger-nano"]
 mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
@@ -160,7 +161,6 @@ std = [
     "bitflags/std",
     "rand?/std_rng",
     "regex?/std",
-    "derive_builder?/std",
     "iota_stronghold?/std",
     "iota-crypto/std",
     "once_cell?/std",
@@ -168,7 +168,6 @@ std = [
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
     "iota_stronghold",
-    "derive_builder",
     "iota-crypto/chacha",
     "dep:time",
     "dep:anymap",
@@ -296,14 +295,14 @@ required-features = ["wallet", "storage", "stronghold"]
 [[example]]
 name = "mint_collection_nft"
 path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
-required-features = ["wallet", "stronghold"]
+required-features = ["wallet", "stronghold", "irc_27"]
 
 # Native Tokens Examples
 
 [[example]]
 name = "create_native_token"
 path = "examples/how_tos/native_tokens/create.rs"
-required-features = ["rocksdb", "stronghold"]
+required-features = ["rocksdb", "stronghold", "irc_30"]
 
 [[example]]
 name = "destroy_foundry"
@@ -350,6 +349,16 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "destroy_account_output"
 path = "examples/how_tos/account/destroy.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "state_transition"
+path = "examples/how_tos/account/state_transition.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "governance_transition"
+path = "examples/how_tos/account/governance_transition.rs"
 required-features = ["wallet", "stronghold"]
 
 # Outputs
@@ -602,7 +611,7 @@ required-features = ["wallet", "storage"]
 [[example]]
 name = "mint_nft"
 path = "examples/how_tos/nfts/mint_nft.rs"
-required-features = ["wallet", "stronghold"]
+required-features = ["wallet", "stronghold", "irc_27"]
 
 [[example]]
 name = "send_nft"
@@ -668,11 +677,6 @@ required-features = ["wallet", "storage"]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = ["wallet", "storage"]
-
-[[example]]
-name = "update_account_output"
-path = "examples/wallet/update_account_output.rs"
-required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "wallet"
