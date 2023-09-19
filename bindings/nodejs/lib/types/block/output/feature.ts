@@ -116,7 +116,10 @@ class BlockIssuerFeature extends Feature {
      */
     readonly blockIssuerKeys: Set<Ed25519BlockIssuerKey>;
 
-    constructor(expirySlot: SlotIndex, blockIssuerKeys: Set<Ed25519BlockIssuerKey>) {
+    constructor(
+        expirySlot: SlotIndex,
+        blockIssuerKeys: Set<Ed25519BlockIssuerKey>,
+    ) {
         super(FeatureType.BlockIssuer);
         this.expirySlot = expirySlot;
         this.blockIssuerKeys = blockIssuerKeys;

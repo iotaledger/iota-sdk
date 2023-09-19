@@ -37,9 +37,4 @@ class Ed25519BlockIssuerKey extends BlockIssuerKey {
     }
 }
 
-
-export {
-    BlockIssuerKey,
-    BlockIssuerKeyType,
-    Ed25519BlockIssuerKey,
-};
+export { BlockIssuerKey, BlockIssuerKeyType, Ed25519BlockIssuerKey };
