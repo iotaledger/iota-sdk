@@ -366,7 +366,7 @@ impl fmt::Display for Error {
                 write!(f, "unallowed feature at index {index} with kind {kind}")
             }
             Self::DisallowedUnlockCondition { index, kind } => {
-                write!(f, "unallowed unlock condition at index {index} with kind {kind}")
+                write!(f, "disallowed unlock condition at index {index} with kind {kind}")
             }
             Self::TooManyUnlockConditions => write!(f, "too many unlock conditions"),
             Self::UnlockConditionsNotUniqueSorted => write!(f, "unlock conditions are not unique and/or sorted"),
