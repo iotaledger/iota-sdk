@@ -55,14 +55,19 @@ const ACCOUNT_COMMANDS: &[&str] = &[
 ];
 
 impl Completer for AccountCompleter {
-    type Candidate = String;
+    type Candidate = &'static str;
 
-    fn complete(&self, input: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
+    fn complete(
+        &self,
+        input: &str,
+        _pos: usize,
+        _ctx: &Context<'_>,
+    ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
         Ok((
             0,
             ACCOUNT_COMMANDS
                 .iter()
-                .filter_map(|cmd| cmd.starts_with(input).then_some(cmd.to_string()))
+                .filter_map(|cmd| cmd.starts_with(input).then_some(*cmd))
                 .collect(),
         ))
     }
