@@ -37,6 +37,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     Attributes:
         handle: The handle to the inner client object.
     """
+
     # pylint: disable=unused-argument
     def __init__(
         self,
