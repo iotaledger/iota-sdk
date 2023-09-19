@@ -20,14 +20,14 @@ if len(sys.argv) < 2:
 
 issuer_nft_id = sys.argv[1]
 
-wallet = Wallet(os.environ["WALLET_DB_PATH"])
+wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-if "STRONGHOLD_PASSWORD" not in os.environ:
+if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account("Alice")
+account = wallet.get_account('Alice')
 
 # Sync account with the node
 account.sync()
@@ -64,7 +64,7 @@ while nft_mint_params:
         nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:],
     )
     print(
-        f"Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})"
+        f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})'
     )
     transaction = account.mint_nfts(chunk)
 
