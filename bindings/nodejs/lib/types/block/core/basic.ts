@@ -5,6 +5,7 @@ import { Payload, PayloadDiscriminator } from '../payload';
 import { Type } from 'class-transformer';
 import { StrongParents, WeakParents, ShallowLikeParents } from '../parents';
 import { Block } from './block';
+import { u64 } from '../../utils';
 
 /**
  * Basic Block layout.
@@ -33,5 +34,5 @@ export class BasicBlock extends Block {
      * The amount of mana the Account identified by IssuerID is at most
      * willing to burn for this block.
      */
-    readonly burnedMana!: string;
+    readonly burnedMana!: u64;
 }
