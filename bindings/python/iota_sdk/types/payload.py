@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from dataclasses import dataclass, field
 
@@ -37,7 +37,7 @@ class RegularTransactionEssence(TransactionEssence):
     network_id: str
     inputs_commitment: HexStr
     inputs: List[UtxoInput]
-    outputs: List[AccountOutput | FoundryOutput | NftOutput | BasicOutput]
+    outputs: List[Union[AccountOutput, FoundryOutput, NftOutput, BasicOutput]]
     allotments: List[ManaAllotment]
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: 1, init=False)
@@ -78,7 +78,7 @@ class TransactionPayload(Payload):
         unlocks: The unlocks of the transaction.
     """
     essence: RegularTransactionEssence
-    unlocks: List[SignatureUnlock | ReferenceUnlock]
+    unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
     type: int = field(
         default_factory=lambda: int(
             PayloadType.Transaction),

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import Enum
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 from dataclasses import dataclass
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import json
@@ -33,14 +33,14 @@ class RemainderValueStrategyCustomAddress:
 
 
 class RemainderValueStrategy(Enum):
-    """Remainder value stragegy variants.
+    """Remainder value strategy variants.
 
     Attributes:
         ChangeAddress: Allows to move the remainder value to a change address.
         ReuseAddress: Allows to keep the remainder value on the source address.
     """
-    ChangeAddress = None,
-    ReuseAddress = None,
+    ChangeAddress = None
+    ReuseAddress = None
 
     def to_dict(self):
         return dict({"strategy": self.name, "value": self.value[0]})
@@ -61,11 +61,22 @@ class TransactionOptions():
         allow_micro_amount: Whether to allow sending a micro amount.
     """
 
-    remainder_value_strategy: Optional[RemainderValueStrategy |
-                                       RemainderValueStrategyCustomAddress] = None
-    tagged_data_payload: Optional[TaggedDataPayload] = None
-    custom_inputs: Optional[List[OutputId]] = None
-    mandatory_inputs: Optional[List[OutputId]] = None
-    burn: Optional[Burn] = None
-    note: Optional[str] = None
-    allow_micro_amount: Optional[bool] = None
+    def __init__(self, remainder_value_strategy: Optional[Union[RemainderValueStrategy, RemainderValueStrategyCustomAddress]] = None,
+                 tagged_data_payload: Optional[TaggedDataPayload] = None,
+                 custom_inputs: Optional[List[OutputId]] = None,
+                 mandatory_inputs: Optional[List[OutputId]] = None,
+                 burn: Optional[Burn] = None,
+                 note: Optional[str] = None,
+                 allow_micro_amount: Optional[bool] = None):
+        """Initialize transaction options.
+        """
+        self.remainder_value_strategy = remainder_value_strategy
+        self.tagged_data_payload = tagged_data_payload
+        self.custom_inputs = custom_inputs
+        self.mandatory_inputs = mandatory_inputs
+        self.burn = burn
+        self.note = note
+        self.allow_micro_amount = allow_micro_amount
+
+    def as_dict(self):
+        return dict(self.__dict__)
