@@ -80,7 +80,7 @@ pub enum Error {
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(String),
-    InvalidBlockLength(usize),
+    InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
@@ -248,7 +248,7 @@ impl fmt::Display for Error {
             Self::InvalidInputKind(k) => write!(f, "invalid input kind: {k}"),
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
-            Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
+            Self::InvalidBlockWrapperLength(length) => write!(f, "invalid block length {length}"),
             Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
