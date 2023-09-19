@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "iota-sdk"
+dependencies = ["dacite >= 1.8.1", "pyhumps >= 3.8.0"]
 
 [tool.maturin]
 python-packages = ["iota_sdk"]
