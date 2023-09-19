@@ -36,9 +36,9 @@ class Irc27Metadata:
             - Documents: `application/pdf`, `text/plain`, etc.
         uri: URL pointing to the NFT file location.
         name: The human-readable name of the native token.
-        collection_name: The human-readable collection name of the native token.
+        collectionName: The human-readable collection name of the native token.
         royalties: Royalty payment addresses mapped to the payout percentage.
-        issuer_name: The human-readable name of the native token creator.
+        issuerName: The human-readable name of the native token creator.
         description: The human-readable description of the token.
         attributes: Additional attributes which follow [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards).
     """
@@ -48,9 +48,9 @@ class Irc27Metadata:
     type: str
     uri: str
     name: str
-    collection_name: Optional[str] = None
+    collectionName: Optional[str] = None
     royalties: Optional[dict[str, float]] = None
-    issuer_name: Optional[str] = None
+    issuerName: Optional[str] = None
     description: Optional[str] = None
     attributes: Optional[List[Attribute]] = None
 

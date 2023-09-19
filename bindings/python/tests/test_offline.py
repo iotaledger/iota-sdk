@@ -103,6 +103,7 @@ def test_block():
     block = Block.from_dict(block_dict)
     assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
+
 def test_irc_27():
     metadata = Irc27Metadata(
         "video/mp4",
@@ -116,14 +117,15 @@ def test_irc_27():
         "type": metadata.type,
         "uri": metadata.uri,
         "name": metadata.name,
-        "collectionName": metadata.collection_name,
+        "collectionName": metadata.collectionName,
         "royalties": metadata.royalties,
-        "issuerName": metadata.issuer_name,
+        "issuerName": metadata.issuerName,
         "description": metadata.description,
         "attributes": metadata.attributes
     }
     metadata_deser = Irc27Metadata.from_dict(metadata_dict)
     assert metadata == metadata_deser
+
 
 def test_irc_30():
     metadata = Irc30Metadata(
@@ -133,7 +135,7 @@ def test_irc_30():
         description="FooCoin is the utility and governance token of FooLand, \
                 a revolutionary protocol in the play-to-earn crypto gaming field.",
         url="https://foocoin.io/",
-        logo_url="https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
+        logoUrl="https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
     )
     metadata_dict = {
         "standard": "IRC30",
@@ -142,7 +144,7 @@ def test_irc_30():
         "decimals": metadata.decimals,
         "symbol": metadata.symbol,
         "url": metadata.url,
-        "logoUrl": metadata.logo_url
+        "logoUrl": metadata.logoUrl
     }
     metadata_deser = Irc30Metadata.from_dict(metadata_dict)
     assert metadata == metadata_deser

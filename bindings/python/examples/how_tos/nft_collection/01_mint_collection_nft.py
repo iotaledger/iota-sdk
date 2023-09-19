@@ -43,8 +43,8 @@ def get_immutable_metadata(index: int) -> str:
         "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
         "Shimmer OG NFT #" + str(index),
         description="The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
-        issuer_name="IOTA Foundation",
-        collection_name="Shimmer OG",
+        issuerName="IOTA Foundation",
+        collectionName="Shimmer OG",
     ).as_hex()
 
 
@@ -69,7 +69,8 @@ while nft_mint_params:
     transaction = account.mint_nfts(chunk)
 
     # Wait for transaction to get included
-    block_id = account.retry_transaction_until_included(transaction.transactionId)
+    block_id = account.retry_transaction_until_included(
+        transaction.transactionId)
 
     print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
