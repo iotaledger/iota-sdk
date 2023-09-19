@@ -147,7 +147,7 @@ impl ValidationBlock {
 
     /// Returns the work score of a [`ValidationBlock`].
     pub fn workscore(&self, _workscore_structure: WorkScoreStructure) -> u32 {
-        // Validator blocks do not incur any work score as they do not burn mana
+        // The work score of a validation block is `0`.
         0
     }
 }

@@ -14,7 +14,11 @@ pub use self::{
     essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
     transaction_id::TransactionId,
 };
-use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
+use crate::types::block::{
+    protocol::{ProtocolParameters, WorkScoreStructure},
+    unlock::{Unlock, Unlocks},
+    Error,
+};
 
 /// A transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -52,6 +56,17 @@ impl TransactionPayload {
         hasher.update(self.pack_to_vec());
 
         TransactionId::new(hasher.finalize().into())
+    }
+
+    /// Returns the work score of a `TransactionPayload`.
+    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        let mut score = self.essence().workscore(workscore_structure);
+        for unlock in self.unlocks.iter() {
+            if matches!(unlock, Unlock::Signature(_)) {
+                score += workscore_structure.signature_ed25519;
+            }
+        }
+        score
     }
 }
 

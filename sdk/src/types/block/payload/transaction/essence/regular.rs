@@ -11,9 +11,9 @@ use crate::types::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        output::{Feature, InputsCommitment, NativeTokens, Output, TokenScheme, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScoreStructure},
         slot::SlotIndex,
         Error,
     },
@@ -271,6 +271,32 @@ impl RegularTransactionEssence {
     /// Returns the optional payload of a [`RegularTransactionEssence`].
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
+    }
+
+    /// Returns the work score of a `RegularTransactionEssence`.
+    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        let mut score = self.inputs().len() as u32 * workscore_structure.input;
+        score += self.context_inputs().len() as u32 * workscore_structure.context_input;
+        for output in self.outputs() {
+            score += workscore_structure.output;
+            if let Some(nts) = output.native_tokens() {
+                score += nts.len() as u32 * workscore_structure.native_token;
+            }
+            if matches!(output, Output::Foundry(foundry) if foundry.token_scheme().is_simple()) {
+                score += workscore_structure.native_token
+            }
+            if let Some(features) = output.features() {
+                for feature in features.iter() {
+                    score += match feature {
+                        Feature::BlockIssuer(_) => workscore_structure.block_issuer,
+                        Feature::Staking(_) => workscore_structure.staking,
+                        _ => 0,
+                    }
+                }
+            }
+        }
+        score += self.mana_allotments().len() as u32 * workscore_structure.allotment;
+        score
     }
 }
 

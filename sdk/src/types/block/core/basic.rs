@@ -142,19 +142,16 @@ impl BasicBlock {
 
     /// Returns the work score of a [`BasicBlock`].
     pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        // offset for block, plus missing parents, plus payload.
+        // `Block + Missing Parents Score + Payload Score`
         let mut score = workscore_structure.block;
-
         let min_strong_parents_threshold = workscore_structure.min_strong_parents_threshold as usize;
         if self.strong_parents.len() < min_strong_parents_threshold {
             let missing_parents_count = min_strong_parents_threshold - self.strong_parents.len();
             score += workscore_structure.missing_parent * missing_parents_count as u32;
         }
-
         if let Some(payload) = &*self.payload {
             score += payload.workscore(workscore_structure);
         }
-
         score
     }
 }

@@ -65,10 +65,9 @@ impl Payload {
 
     /// Returns the work score of a `Payload`.
     pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        // TODO: complete impl
         match self {
-            Self::Transaction(transaction_payload) => todo!(),
-            Self::TaggedData(tagged_data_payload) => todo!(),
+            Self::Transaction(transaction_payload) => transaction_payload.workscore(workscore_structure),
+            Self::TaggedData(tagged_data_payload) => tagged_data_payload.workscore(workscore_structure),
         }
     }
 }
