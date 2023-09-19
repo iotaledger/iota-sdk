@@ -110,9 +110,6 @@ impl Packable for BlockHeader {
 #[derive(Clone, Debug, Eq, PartialEq, Getters, CopyGetters)]
 
 pub struct BlockWrapper {
-    /// The identifier of the block.
-    #[getset(get_copy = "pub")]
-    id: BlockId,
     #[getset(skip)]
     header: BlockHeader,
     /// The inner block.
@@ -121,6 +118,9 @@ pub struct BlockWrapper {
     /// The block signature, used to validate issuance capabilities.
     #[getset(get_copy = "pub")]
     signature: Signature,
+    /// The identifier of the block.
+    #[getset(get_copy = "pub")]
+    id: BlockId,
 }
 
 impl BlockWrapper {
