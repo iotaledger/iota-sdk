@@ -1,4 +1,5 @@
 from typing import List, Optional
+from iota_sdk.types.common import json
 
 @json
 @dataclass
