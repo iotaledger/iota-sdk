@@ -1,6 +1,7 @@
 from typing import List, Optional
 from iota_sdk.types.common import json
 
+
 @json
 @dataclass
 class AccountSyncOptions():
@@ -16,6 +17,7 @@ class AccountSyncOptions():
     nft_outputs: Optional[bool] = None
     account_outputs: Optional[bool] = None
 
+
 @json
 @dataclass
 class AliasSyncOptions():
@@ -27,11 +29,12 @@ class AliasSyncOptions():
         account_outputs: Whether to sync account outputs.
         foundry_outputs: Whether to sync foundry outputs.
     """
-    
+
     basic_outputs: Optional[bool] = None
     nft_outputs: Optional[bool] = None
     account_outputs: Optional[bool] = None
     foundry_outputs: Optional[bool] = None
+
 
 @json
 @dataclass
@@ -47,6 +50,7 @@ class NftSyncOptions():
     basic_outputs: Optional[bool] = None
     nft_outputs: Optional[bool] = None
     account_outputs: Optional[bool] = None
+
 
 @json
 @dataclass
