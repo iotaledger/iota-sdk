@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { plainToInstance } from 'class-transformer';
-import { HexEncodedString } from '../utils';
-import { AliasId, NftId } from './id';
+import type { HexEncodedString } from '../utils';
+import type { AliasId, NftId } from './internal';
 
 /**
  * Address type variants.

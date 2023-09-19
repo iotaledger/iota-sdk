@@ -1,10 +1,12 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { IGenerateAddressesOptions } from '../../client/generate-addresses-options';
-import type { PreparedTransactionData } from '../../client/prepared-transaction-data';
-import { HexEncodedString } from '../../utils';
-import { Bip44 } from '../secret-manager';
+import type {
+    IGenerateAddressesOptions,
+    PreparedTransactionData,
+} from '../../client';
+import type { HexEncodedString } from '../../utils';
+import type { Bip44 } from '..';
 
 export interface __GenerateEd25519AddressesMethod__ {
     name: 'generateEd25519Addresses';

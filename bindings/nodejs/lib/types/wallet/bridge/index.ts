@@ -1,4 +1,4 @@
-import type { AccountId } from '../account';
+import type { AccountId } from '..';
 import type {
     __BuildAliasOutputMethod__,
     __BuildBasicOutputMethod__,
@@ -52,8 +52,6 @@ import type {
     __PrepareIncreaseVotingPowerMethod__,
     __PrepareDecreaseVotingPowerMethod__,
     __PrepareStopParticipatingMethod__,
-} from './account';
-import type {
     __BackupMethod__,
     __ChangeStrongholdPasswordMethod__,
     __ClearStrongholdPasswordMethod__,
@@ -78,7 +76,7 @@ import type {
     __StopBackgroundSyncMethod__,
     __StoreMnemonicMethod__,
     __UpdateNodeAuthMethod__,
-} from './wallet';
+} from './internal';
 
 export type __AccountMethod__ =
     | __BuildAliasOutputMethod__

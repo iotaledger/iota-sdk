@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { TransactionPayload } from '../block/payload/transaction';
-import { OutputResponse } from '../models/api';
+import { TransactionPayload } from '../block';
+import { OutputResponse } from '../models';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {

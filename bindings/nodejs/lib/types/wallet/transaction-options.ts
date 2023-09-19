@@ -1,11 +1,10 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AliasId } from '../block';
-import { TaggedDataPayload } from '../block/payload/tagged';
-import { Burn } from '../client';
-import { HexEncodedString } from '../utils';
-import { AccountAddress } from './address';
+import type { AliasId, TaggedDataPayload } from '../block';
+import type { Burn } from '../client';
+import type { HexEncodedString } from '../utils';
+import type { AccountAddress } from './internal';
 
 /** Options for creating a transaction. */
 export interface TransactionOptions {

@@ -1,8 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { INativeToken } from '../models';
-import { HexEncodedString } from '../utils/hex-encoding';
+import type { INativeToken } from '../models';
+import type { HexEncodedString } from '../utils';
 
 /** Options for the creation of an output. */
 export interface OutputParams {

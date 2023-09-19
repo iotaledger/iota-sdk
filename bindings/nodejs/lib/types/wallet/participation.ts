@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { INode } from '../client';
-import type { OutputId } from '../block/output';
+import type { OutputId } from '../block';
 
 /**
  * An object containing an account's entire participation overview.

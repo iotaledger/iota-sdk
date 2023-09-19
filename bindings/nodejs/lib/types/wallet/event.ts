@@ -1,11 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { OutputData } from './output';
-import { InclusionState } from './transaction';
-import { InputSigningData, Remainder } from '../client';
-import { TransactionEssence, TransactionPayload } from '../block';
-import { OutputResponse } from '../models';
+import type { OutputData, InclusionState } from './internal';
+import type { InputSigningData, Remainder } from '../client';
+import type { TransactionEssence, TransactionPayload } from '../block';
+import type { OutputResponse } from '../models';
 
 /**
  * A Transaction ID represented as hex-encoded string.

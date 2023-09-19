@@ -1,12 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    Account,
-    PreparedTransactionData,
-    SignedTransactionEssence,
-    Transaction,
-} from '../..';
+import type { SignedTransactionEssence, Transaction } from './internal';
+import type { Account, PreparedTransactionData } from '../..';
 
 /**
  * PreparedTransaction` is a class that represents prepared transaction data, which

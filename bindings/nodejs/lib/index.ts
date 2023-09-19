@@ -3,9 +3,8 @@
 
 // Needed for class-transformer json deserialisation
 import 'reflect-metadata';
-import { callUtilsMethod } from './bindings';
-import { OutputId, UTXOInput } from './types';
-import { bigIntToHex } from './utils';
+import { callUtilsMethod, UTXOInput, bigIntToHex } from './internal';
+import type { OutputId } from './internal';
 
 // Allow bigint to be serialized as hex string.
 //
@@ -33,9 +32,4 @@ Object.assign(UTXOInput, {
     },
 });
 
-export * from './client';
-export * from './secret_manager';
-export * from './types';
-export * from './utils';
-export * from './wallet';
-export * from './logger';
+export * from './internal';

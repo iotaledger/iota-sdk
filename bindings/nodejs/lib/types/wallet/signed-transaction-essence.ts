@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { TransactionPayload } from '../block/payload/transaction';
+import { TransactionPayload } from '../block';
 import { InputSigningData } from '../client';
 
 /** The signed transaction with inputs data */

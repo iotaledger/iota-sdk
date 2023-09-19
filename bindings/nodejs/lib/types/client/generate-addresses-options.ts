@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import type { CoinType } from './constants';
-import type { IRange } from './range';
+
+import type { CoinType, IRange } from './internal';
 
 /**
  * Input options for GenerateAddresses

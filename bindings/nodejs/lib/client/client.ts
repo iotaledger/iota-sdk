@@ -1,13 +1,12 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ClientMethodHandler } from './client-method-handler';
-import {
+import { ClientMethodHandler } from './internal';
+import type {
     IClientOptions,
     IGenerateAddressesOptions,
     IBuildBlockOptions,
     QueryParameter,
-    PreparedTransactionData,
     INetworkInfo,
     INode,
     IAuth,
@@ -18,42 +17,37 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
-} from '../types/client';
-import type { INodeInfoWrapper } from '../types/client/nodeInfo';
-import {
     Bip44,
     SecretManagerType,
-} from '../types/secret_manager/secret-manager';
-import {
-    AliasOutput,
-    BasicOutput,
-    FoundryOutput,
-    NftOutput,
-    Block,
     BlockId,
-    UnlockCondition,
     Payload,
-    TransactionPayload,
-    MilestonePayload,
     TreasuryOutput,
-    Output,
-} from '../types/block';
-import { HexEncodedString } from '../utils';
-import {
+    HexEncodedString,
     IBlockMetadata,
     INodeInfo,
     INodeInfoProtocol,
     IPeer,
-    UTXOInput,
     Response,
     OutputId,
+    IMilestoneUtxoChangesResponse,
+    IOutputsResponse,
+    INodeInfoWrapper,
 } from '../types';
 import {
-    IMilestoneUtxoChangesResponse,
     OutputResponse,
+    Block,
+    UTXOInput,
+    PreparedTransactionData,
+    TransactionPayload,
+    UnlockCondition,
+    MilestonePayload,
     ReceiptsResponse,
-    IOutputsResponse,
-} from '../types/models/api';
+    Output,
+    NftOutput,
+    FoundryOutput,
+    BasicOutput,
+    AliasOutput,
+} from '../types';
 
 import { plainToInstance } from 'class-transformer';
 

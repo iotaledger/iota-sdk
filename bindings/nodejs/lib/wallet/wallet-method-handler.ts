@@ -16,7 +16,7 @@ import type {
     __AccountMethod__,
     AccountId,
     Event,
-} from '../types/wallet';
+} from '../types';
 import { Client } from '../client';
 import { SecretManager } from '../secret_manager';
 

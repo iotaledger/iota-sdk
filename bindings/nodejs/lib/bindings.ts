@@ -1,12 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { WalletEventType } from './types/wallet';
-import { Event } from './types/wallet';
-import type { WalletMethodHandler } from './wallet/wallet-method-handler';
-import { __UtilsMethods__ } from './types/utils';
-import type { SecretManagerMethodHandler } from './secret_manager/secret-manager-method-handler';
-import type { ClientMethodHandler } from './client/client-method-handler';
+import type {
+    WalletEventType,
+    WalletMethodHandler,
+    SecretManagerMethodHandler,
+    ClientMethodHandler,
+} from './internal';
+import { Event, __UtilsMethods__ } from './internal';
 
 // @ts-ignore: path is set to match runtime transpiled js path
 import addon = require('../build/Release/index.node');
@@ -102,7 +103,7 @@ const callWalletMethodAsync = (
     });
 
 export {
-    initLogger,
+    initLogger as initLoggerBinding,
     createClient,
     destroyClient,
     createSecretManager,

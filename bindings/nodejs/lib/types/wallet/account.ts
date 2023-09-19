@@ -1,12 +1,15 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountAddress, AddressWithUnspentOutputs } from './address';
-import { AliasId, FoundryId, NftId } from '../block/id';
-import type { OutputData } from './output';
-import type { Transaction } from './transaction';
-import { CoinType } from '../../client';
-import { HexEncodedString } from '../utils';
+import type {
+    AccountAddress,
+    AddressWithUnspentOutputs,
+    OutputData,
+    Transaction,
+} from './internal';
+import type { AliasId, FoundryId, NftId } from '../block';
+import type { CoinType } from '../../types';
+import type { HexEncodedString } from '../utils';
 
 /**
  * Account identifier

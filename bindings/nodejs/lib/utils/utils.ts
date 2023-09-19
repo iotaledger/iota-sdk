@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { callUtilsMethod } from '../bindings';
-import {
-    Address,
+import type {
     HexEncodedString,
     Block,
     Ed25519Signature,
@@ -16,8 +15,13 @@ import {
     Output,
     IRent,
     OutputId,
+    AliasId,
+    BlockId,
+    FoundryId,
+    NftId,
+    TokenId,
 } from '../types';
-import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
+import { Address } from '../types';
 
 /** Utils class for utils. */
 export class Utils {

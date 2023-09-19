@@ -1,11 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { INodeInfoBaseToken } from './node-info-base-token';
-import type { INodeInfoMetrics } from './node-info-metrics';
-import type { INodeInfoProtocol } from './node-info-protocol';
-import type { NodeInfoProtocolParamsMilestoneOpt } from './node-info-protocol-params-milestone-opt';
-import type { INodeInfoStatus } from './node-info-status';
+import type {
+    INodeInfoBaseToken,
+    INodeInfoMetrics,
+    INodeInfoProtocol,
+    NodeInfoProtocolParamsMilestoneOpt,
+    INodeInfoStatus,
+} from './internal';
 /**
  * Response from the /info endpoint.
  */

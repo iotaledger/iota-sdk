@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Address, AddressDiscriminator } from '../block/address';
-import { Output, OutputDiscriminator, OutputId } from '../block/output';
-import { IOutputMetadataResponse } from '../models/api';
+import {
+    Address,
+    AddressDiscriminator,
+    Output,
+    OutputDiscriminator,
+} from '../block';
+import type { OutputId } from '../block';
+import { IOutputMetadataResponse } from '../models';
 
 /** Output to claim */
 export enum OutputsToClaim {

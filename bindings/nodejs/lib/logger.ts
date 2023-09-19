@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ILoggerConfig } from './types/logger-config';
-import { initLogger as initLoggerBinding } from './bindings';
+import type { ILoggerConfig } from './internal';
+import { initLoggerBinding } from './internal';
 
 const defaultLoggerConfig: ILoggerConfig = {
     colorEnabled: true,

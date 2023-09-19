@@ -1,11 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { CoinType } from '../../client';
-import type { IRange } from './range';
-import type { Burn } from './burn';
-import { UTXOInput } from '../block/input';
-import { Output } from '../block/output';
+import type { CoinType, IRange, Burn } from './internal';
+import type { UTXOInput, Output } from '../block';
 
 /**
  * Options to build a new block, possibly with payloads.

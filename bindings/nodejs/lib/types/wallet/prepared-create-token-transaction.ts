@@ -1,9 +1,11 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Account, PreparedCreateNativeTokenTransactionData } from '../..';
-
-import { PreparedTransaction } from './prepared-transaction';
+import { Account } from '../..';
+import {
+    PreparedTransaction,
+    PreparedCreateNativeTokenTransactionData,
+} from './internal';
 
 /*
  * The class PreparedCreateNativeTokenTransaction represents prepared data for issuing a transaction to create a native token.

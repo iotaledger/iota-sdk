@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import {
-    MilestoneOption,
-    MilestoneOptionDiscriminator,
-} from '../../../models/milestone_options';
-import { HexEncodedString } from '../../../utils/hex-encoding';
+import { MilestoneOption, MilestoneOptionDiscriminator } from '../../../models';
+import type { HexEncodedString } from '../../../utils';
 import { Ed25519Signature } from '../../signature';
 import { Payload, PayloadType } from '../payload';
 

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Address, AddressDiscriminator } from '../block/address';
-import type { HexEncodedString } from '../utils/hex-encoding';
+import { Address, AddressDiscriminator } from '../block';
+import type { HexEncodedString } from '../utils';
 /**
  * The migrated funds for receipts.
  */

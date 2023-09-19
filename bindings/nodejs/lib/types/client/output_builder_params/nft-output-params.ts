@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Feature, HexEncodedString } from '../..';
-import type { BasicOutputBuilderParams } from './basic-output-params';
+import type { Feature, HexEncodedString } from '../..';
+import type { BasicOutputBuilderParams } from './internal';
 
 /**
  * Options for building an Nft Output

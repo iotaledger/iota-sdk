@@ -4,14 +4,17 @@
 import {
     UnlockCondition,
     UnlockConditionDiscriminator,
-} from './unlock-condition';
-import { Feature, FeatureDiscriminator } from './feature';
+    Feature,
+    FeatureDiscriminator,
+    TokenScheme,
+    TokenSchemeDiscriminator,
+} from './internal';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt } from '../../utils';
-import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
-import { INativeToken } from '../../models';
+import type { HexEncodedString } from '../../utils';
+import { hexToBigInt } from '../../utils';
+import type { INativeToken } from '../../models';
 
 export type OutputId = string;
 

@@ -1,24 +1,20 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SecretManagerMethodHandler } from './secret-manager-method-handler';
+import { SecretManagerMethodHandler } from './internal';
 import type {
     IGenerateAddressesOptions,
     PreparedTransactionData,
     LedgerNanoStatus,
-} from '../types/client';
-import {
     Bip44,
     Secp256k1EcdsaSignature,
     SecretManagerType,
-} from '../types/secret_manager';
-import {
     Ed25519Signature,
     HexEncodedString,
-    TransactionPayload,
     Unlock,
     Response,
 } from '../types';
+import { TransactionPayload } from '../types';
 
 import { plainToInstance } from 'class-transformer';
 

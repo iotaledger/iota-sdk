@@ -1,8 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { IGossipHeartbeat } from './gossip-heartbeat';
-import type { IGossipMetrics } from './gossip-metrics';
+import type { IGossipHeartbeat, IGossipMetrics } from './internal';
 /**
  * Peer details.
  */

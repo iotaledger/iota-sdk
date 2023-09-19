@@ -1,4 +1,4 @@
-import {
+import type {
     Ed25519Signature,
     HexEncodedString,
     Block,
@@ -9,8 +9,8 @@ import {
     TokenSchemeType,
     Output,
     IRent,
-} from '../../';
-import { AliasId } from '../../block/id';
+    AliasId,
+} from '../..';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';

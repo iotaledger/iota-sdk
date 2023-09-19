@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Address, AddressDiscriminator } from '../block/address';
-import { Output, OutputDiscriminator } from '../block/output/output';
 import {
+    Address,
+    AddressDiscriminator,
+    Output,
+    OutputDiscriminator,
     TransactionEssence,
     TransactionEssenceDiscriminator,
-} from '../block/payload/transaction/essence';
-import { IOutputMetadataResponse } from '../models/api';
-import { Bip44 } from '../secret_manager';
+} from '../block';
+import type { IOutputMetadataResponse } from '../models';
+import type { Bip44 } from '../secret_manager';
 
 /**
  * Helper struct for offline signing.

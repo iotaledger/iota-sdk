@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Transaction } from './transaction';
-import { PreparedTransactionData } from '../client/prepared-transaction-data';
+import { Transaction } from './internal';
+import { PreparedTransactionData } from '../client';
 
 /** The result of preparing an operation to create a native token. */
 export class PreparedCreateNativeTokenTransactionData {

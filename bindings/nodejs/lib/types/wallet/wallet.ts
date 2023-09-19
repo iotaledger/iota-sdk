@@ -1,5 +1,5 @@
-import { IClientOptions, CoinType } from '../client';
-import { SecretManagerType } from '../secret_manager/secret-manager';
+import type { IClientOptions, CoinType } from '../client';
+import type { SecretManagerType } from '../secret_manager';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {

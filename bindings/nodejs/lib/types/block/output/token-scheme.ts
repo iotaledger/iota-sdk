@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { hexToBigInt } from '../../utils/hex-encoding';
+import { hexToBigInt } from '../../utils';
 
 /**
  * All of the token scheme types.

@@ -1,9 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ConflictReason } from './conflict-reason';
-import type { HexEncodedString } from '../utils/hex-encoding';
-import type { LedgerInclusionState } from './ledger-inclusion-state';
+import type { ConflictReason, LedgerInclusionState } from './internal';
+import type { HexEncodedString } from '../utils';
 /**
  * Response from the metadata endpoint.
  */

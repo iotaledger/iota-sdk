@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { WalletMethodHandler } from './wallet-method-handler';
-import {
+import type { WalletMethodHandler } from './internal';
+import type {
     Balance,
     AccountMetadata,
     SyncOptions,
@@ -17,10 +17,8 @@ import {
     GenerateAddressOptions,
     CreateNativeTokenParams,
     MintNftParams,
-    OutputData,
     OutputParams,
     OutputsToClaim,
-    Transaction,
     TransactionOptions,
     ParticipationOverview,
     ParticipationEventId,
@@ -33,23 +31,28 @@ import {
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-    SignedTransactionEssence,
-    PreparedTransaction,
-    PreparedCreateNativeTokenTransactionData,
     ConsolidationParams,
-} from '../types/wallet';
-import { INode, Burn, PreparedTransactionData } from '../client';
-import {
+    INode,
+    Burn,
     AliasOutput,
     NftOutput,
-    Output,
     BasicOutput,
     FoundryOutput,
     Response,
-    PreparedCreateNativeTokenTransaction,
 } from '../types';
+import {
+    SignedTransactionEssence,
+    PreparedCreateNativeTokenTransaction,
+    Output,
+    Transaction,
+    PreparedTransactionData,
+    PreparedTransaction,
+    OutputData,
+    PreparedCreateNativeTokenTransactionData,
+} from '../types';
+import { bigIntToHex, hexToBigInt } from '../utils';
+
 import { plainToInstance } from 'class-transformer';
-import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
 
 /** The Account class. */
 export class Account {

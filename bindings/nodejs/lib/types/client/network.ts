@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { INodeInfoProtocol } from '../models/info';
+import type { INodeInfoProtocol } from '../models';
 
 /**
  * Network types.

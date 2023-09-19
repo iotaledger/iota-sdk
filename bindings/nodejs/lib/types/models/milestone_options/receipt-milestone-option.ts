@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { TreasuryTransactionPayload } from '../../block/payload/treasury/treasury';
+import { TreasuryTransactionPayload } from '../../block';
 import { MigratedFunds } from '../migrated-funds';
-import { MilestoneOption, MilestoneOptionType } from './milestone-options';
+import { MilestoneOption, MilestoneOptionType } from './internal';
 
 /**
  * A Receipt milestone option.

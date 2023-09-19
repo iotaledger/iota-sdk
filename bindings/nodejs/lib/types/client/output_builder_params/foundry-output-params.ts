@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Feature, SimpleTokenScheme } from '../..';
-import type { BasicOutputBuilderParams } from './basic-output-params';
+import type { Feature, SimpleTokenScheme } from '../..';
+import type { BasicOutputBuilderParams } from './internal';
 
 /**
  * Options for building a Foundry Output.

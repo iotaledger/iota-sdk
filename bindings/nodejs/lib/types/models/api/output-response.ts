@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Output, OutputDiscriminator } from '../../block/output';
-import type { IOutputMetadataResponse } from './output-metadata-response';
+import { Output, OutputDiscriminator } from '../../block';
+import type { IOutputMetadataResponse } from './internal';
 
 import { Type } from 'class-transformer';
 
