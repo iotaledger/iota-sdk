@@ -44,9 +44,11 @@ alias_output = alias_output_data.output
 
 
 def update_state_controller(unlock_condition):
+    """
+    Replace the address in the StateControllerAddressUnlockCondition
+    """
     if unlock_condition.type == UnlockConditionType.StateControllerAddress:
         return StateControllerAddressUnlockCondition(new_state_controller)
-
     return unlock_condition
 
 
