@@ -96,7 +96,7 @@ export class Client {
     }
 
     /**
-     * Fetch alias/basic/NFT output IDs based on the given query parameters.
+     * Fetch alias/basic/NFT/foundry output IDs based on the given query parameters.
      */
     async outputIds(
         queryParameters: GenericQueryParameter[],

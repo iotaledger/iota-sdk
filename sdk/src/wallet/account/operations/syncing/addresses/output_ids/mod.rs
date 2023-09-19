@@ -44,27 +44,16 @@ where
             return Ok(output_ids);
         }
 
-        // If interested in alias, basic and NFT outputs, get them all at once
+        // If interested in alias, basic, NFT and foundry outputs, get them all at once
         if (address.is_ed25519() && sync_options.account.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
-            || (address.is_alias() && sync_options.alias.all_outputs_ignoring_foundry())
+            || (address.is_alias() && sync_options.alias.all_outputs())
         {
-            let mut output_ids = self
+            return Ok(self
                 .client()
                 .output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
                 .await?
-                .items;
-
-            if address.is_alias() && sync_options.alias.foundry_outputs {
-                output_ids.extend(
-                    self.client()
-                        .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
-                        .await?
-                        .items,
-                );
-            }
-
-            return Ok(output_ids);
+                .items);
         }
 
         #[cfg(target_family = "wasm")]
@@ -153,33 +142,6 @@ where
                             account
                                 .get_alias_and_foundry_output_ids(bech32_address, &sync_options)
                                 .await
-                        })
-                        .await
-                    }
-                    .boxed(),
-                );
-            }
-        } else if address.is_alias() && sync_options.alias.foundry_outputs {
-            // foundries
-            #[cfg(target_family = "wasm")]
-            {
-                results.push(Ok(self
-                    .client()
-                    .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
-                    .await?
-                    .items))
-            }
-
-            #[cfg(not(target_family = "wasm"))]
-            {
-                tasks.push(
-                    async move {
-                        let client = self.client().clone();
-                        tokio::spawn(async move {
-                            Ok(client
-                                .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
-                                .await?
-                                .items)
                         })
                         .await
                     }

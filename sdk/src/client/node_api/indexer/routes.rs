@@ -24,8 +24,8 @@ use crate::{
 // hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
 impl ClientInner {
-    // RouteOutputs is the route for getting basic, alias and nft outputs filtered by the given parameters.
-    // GET with query parameter returns all outputIDs that fit these filter criteria.
+    // RouteOutputs is the route for getting basic, alias, nft and foundry_outputs outputs filtered by the given
+    // parameters. GET with query parameter returns all outputIDs that fit these filter criteria.
     // Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
     // "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.

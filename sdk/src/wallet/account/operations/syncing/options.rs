@@ -148,8 +148,8 @@ impl Default for AliasSyncOptions {
 }
 
 impl AliasSyncOptions {
-    pub(crate) fn all_outputs_ignoring_foundry(&self) -> bool {
-        self.basic_outputs && self.nft_outputs && self.alias_outputs
+    pub(crate) fn all_outputs(&self) -> bool {
+        self.basic_outputs && self.nft_outputs && self.alias_outputs && self.foundry_outputs
     }
 }
 
