@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(not(target_family = "wasm"))]
 #[cfg(any(feature = "storage", feature = "stronghold"))]
 pub(crate) mod chrysalis;
 mod migrate_0;

@@ -206,6 +206,7 @@ pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
     }
 }
 
+#[cfg(not(target_family = "wasm"))]
 #[cfg(feature = "rocksdb")]
 pub(crate) mod rocksdb {
     use ::rocksdb::{IteratorMode, DB};
