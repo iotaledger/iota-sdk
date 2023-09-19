@@ -148,6 +148,33 @@ where
                     .boxed(),
                 );
             }
+        } else if address.is_alias() && sync_options.alias.foundry_outputs {
+            // foundries
+            #[cfg(target_family = "wasm")]
+            {
+                results.push(Ok(self
+                    .client()
+                    .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
+                    .await?
+                    .items))
+            }
+
+            #[cfg(not(target_family = "wasm"))]
+            {
+                tasks.push(
+                    async move {
+                        let client = self.client().clone();
+                        tokio::spawn(async move {
+                            Ok(client
+                                .foundry_output_ids([QueryParameter::AliasAddress(bech32_address)])
+                                .await?
+                                .items)
+                        })
+                        .await
+                    }
+                    .boxed(),
+                );
+            }
         }
 
         #[cfg(not(target_family = "wasm"))]
