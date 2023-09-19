@@ -12,16 +12,18 @@ use rustyline::{
 };
 
 use crate::{
-    account_completion::AccountCompleter,
-    command::account::{
-        addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
-        claimable_outputs_command, consolidate_command, create_alias_outputs_command, create_native_token_command,
-        decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
-        increase_voting_power_command, melt_native_token_command, mint_native_token, mint_nft_command,
-        new_address_command, node_info_command, output_command, outputs_command, participation_overview_command,
-        send_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
-        transaction_command, transactions_command, unspent_outputs_command, vote_command, voting_output_command,
-        voting_power_command, AccountCli, AccountCommand,
+    command::{
+        account::{
+            addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
+            claimable_outputs_command, consolidate_command, create_alias_outputs_command, create_native_token_command,
+            decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
+            increase_voting_power_command, melt_native_token_command, mint_native_token, mint_nft_command,
+            new_address_command, node_info_command, output_command, outputs_command, participation_overview_command,
+            send_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
+            transaction_command, transactions_command, unspent_outputs_command, vote_command, voting_output_command,
+            voting_power_command, AccountCli, AccountCommand,
+        },
+        account_completion::AccountCompleter,
     },
     error::Error,
     helper::bytes_from_hex_or_file,
@@ -54,7 +56,7 @@ impl Highlighter for PromptHelper {
 impl Default for PromptHelper {
     fn default() -> Self {
         Self {
-            completer: AccountCompleter {},
+            completer: AccountCompleter,
             hinter: HistoryHinter {},
             colored_prompt: String::new(),
         }
@@ -139,7 +141,7 @@ pub async fn account_prompt_internal(
                             return Ok(AccountPromptResponse::Reprompt);
                         }
                     };
-                    if let Err(err) = match account_cli.command {
+                    match account_cli.command {
                         AccountCommand::Addresses => addresses_command(account).await,
                         AccountCommand::Balance { addresses } => balance_command(account, addresses).await,
                         AccountCommand::BurnNativeToken { token_id, amount } => {
@@ -257,9 +259,10 @@ pub async fn account_prompt_internal(
                             decrease_voting_power_command(account, amount).await
                         }
                         AccountCommand::VotingOutput => voting_output_command(account).await,
-                    } {
-                        println_log_error!("{err}");
                     }
+                    .unwrap_or_else(|err| {
+                        println_log_error!("{err}");
+                    });
                 }
             }
         }
