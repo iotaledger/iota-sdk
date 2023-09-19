@@ -1,10 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 from iota_sdk.types.common import HexStr
 from iota_sdk import utf8_to_hex
 from dataclasses import dataclass, field
 from typing import Optional, List
+
 
 @dataclass
 class Irc30Metadata:
@@ -19,6 +21,7 @@ class Irc30Metadata:
         logo_url: URL pointing to an image resource of the token logo.
         logo: The svg logo of the token encoded as a byte string.
     """
+
     standard = field(default="IRC30", init=False)
     name: str
     symbol: str
@@ -29,4 +32,4 @@ class Irc30Metadata:
     logo: Optional[HexStr] = None
 
     def as_hex(self):
-        utf8_to_hex(json.dumps(self.as_dict(), , separators=(',', ':')))
+        utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))

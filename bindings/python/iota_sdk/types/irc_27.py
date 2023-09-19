@@ -1,9 +1,25 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 from iota_sdk import utf8_to_hex
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, List, Any
+
+
+@dataclass
+class Attribute:
+    """An attribute which follows [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards).
+    Attributes:
+        trait_type: The trait type.
+        value: The value of the specified Attribute.
+        display_type: The optional type used to display the Attribute.
+    """
+
+    trait_type: str
+    value: Any
+    display_type: Optional[str] = None
+
 
 @dataclass
 class Irc27Metadata:
@@ -26,6 +42,7 @@ class Irc27Metadata:
         description: The human-readable description of the token.
         attributes: Additional attributes which follow [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards).
     """
+
     standard = field(default="IRC27", init=False)
     version: str = field(default="v1.0", init=False)
     type: str
@@ -38,17 +55,4 @@ class Irc27Metadata:
     attributes: Optional[List[Attribute]] = None
 
     def as_hex(self):
-        utf8_to_hex(json.dumps(self.as_dict(), , separators=(',', ':')))
-
-
-@dataclass
-class Attribute:
-    """An attribute which follows [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards).
-    Attributes:
-        trait_type: The trait type.
-        value: The value of the specified Attribute.
-        display_type: The optional type used to display the Attribute.
-    """
-    trait_type: str
-    value
-    display_type: Optional[str] = None
+        utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))

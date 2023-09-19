@@ -4,7 +4,7 @@ import sys
 
 from dotenv import load_dotenv
 
-from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex
+from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex, Irc27Metadata
 
 load_dotenv()
 
@@ -20,14 +20,14 @@ if len(sys.argv) < 2:
 
 issuer_nft_id = sys.argv[1]
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(os.environ["WALLET_DB_PATH"])
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
+if "STRONGHOLD_PASSWORD" not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
+account = wallet.get_account("Alice")
 
 # Sync account with the node
 account.sync()
@@ -44,29 +44,34 @@ def get_immutable_metadata(index: int) -> str:
         "Shimmer OG NFT #" + str(index),
         description="The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
         issuer_name="IOTA Foundation",
-        collection_name="Shimmer OG"
+        collection_name="Shimmer OG",
     ).as_hex()
 
 
 # Create the metadata with another index for each
-nft_mint_params = list(map(lambda index: MintNftParams(
-    immutableMetadata=utf8_to_hex(
-        get_immutable_metadata(index)),
-    issuer=issuer
-), range(NFT_COLLECTION_SIZE)))
+nft_mint_params = list(
+    map(
+        lambda index: MintNftParams(
+            immutableMetadata=utf8_to_hex(get_immutable_metadata(index)), issuer=issuer
+        ),
+        range(NFT_COLLECTION_SIZE),
+    )
+)
 
 while nft_mint_params:
-    chunk, nft_mint_params = nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION], nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:]
+    chunk, nft_mint_params = (
+        nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION],
+        nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:],
+    )
     print(
-        f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})')
+        f"Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})"
+    )
     transaction = account.mint_nfts(chunk)
 
     # Wait for transaction to get included
-    block_id = account.retry_transaction_until_included(
-        transaction.transactionId)
+    block_id = account.retry_transaction_until_included(transaction.transactionId)
 
-    print(
-        f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     # Sync so the new outputs are available again for new transactions
     account.sync()
