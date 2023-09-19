@@ -87,7 +87,7 @@ class BlockWrapper {
      */
     asBasic(): BasicBlock {
         if (this.isBasic()) {
-            return this as unknown as BasicBlock;
+            return this.block as unknown as BasicBlock;
         } else {
             throw new Error('invalid downcast of non-BasicBlock');
         }
