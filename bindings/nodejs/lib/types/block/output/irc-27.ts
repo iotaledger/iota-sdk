@@ -34,7 +34,7 @@ class Irc27Metadata {
     /** The human-readable description of the token. */
     description?: string;
     /** Additional attributes which follow [OpenSea Metadata standards](https://docs.opensea.io/docs/metadata-standards). */
-    attributes: Array<Attribute> = new Array();
+    attributes: Attribute[] = [];
 
     /**
      * @param type The media type (MIME) of the asset.
