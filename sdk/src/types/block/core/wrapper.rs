@@ -40,7 +40,8 @@ pub struct BlockHeader {
 
 impl BlockHeader {
     /// The length of the block header.
-    pub const LENGTH: usize = size_of::<Self>();
+    pub const LENGTH: usize =
+        size_of::<u8>() + 2 * size_of::<u64>() + SlotCommitmentId::LENGTH + size_of::<SlotIndex>() + IssuerId::LENGTH;
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         let mut bytes = [0u8; Self::LENGTH];
