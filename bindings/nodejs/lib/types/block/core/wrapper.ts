@@ -5,10 +5,10 @@ import { IssuerId } from '../id';
 import { Signature, SignatureDiscriminator } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
-import { Type } from 'class-transformer';
-import { BlockDiscriminator } from './';
-import { BasicBlock } from './basic';
+import { plainToInstance, Type } from 'class-transformer';
 import { Block, BlockType } from './block';
+import { BasicBlock } from './basic';
+import { BlockDiscriminator } from './';
 
 /**
  * Represent the object that nodes gossip around the network.
@@ -94,4 +94,8 @@ class BlockWrapper {
     }
 }
 
-export { BlockWrapper };
+function parseBlockWrapper(data: any): BlockWrapper {
+    return plainToInstance(BlockWrapper, data) as any as BlockWrapper;
+}
+
+export { BlockWrapper, parseBlockWrapper };
