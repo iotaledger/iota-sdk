@@ -31,11 +31,11 @@ class Irc27Metadata:
     type: str
     uri: str
     name: str
-    collection_name: Optional[str]
-    royalties: Optional[dict[str, float]]
-    issuer_name: Optional[str]
-    description: Optional[str]
-    attributes: Optional[List[Attribute]]
+    collection_name: Optional[str] = None
+    royalties: Optional[dict[str, float]] = None
+    issuer_name: Optional[str] = None
+    description: Optional[str] = None
+    attributes: Optional[List[Attribute]] = None
 
     def as_hex(self):
         utf8_to_hex(json.dumps(self.as_dict(), , separators=(',', ':')))
@@ -51,4 +51,4 @@ class Attribute:
     """
     trait_type: str
     value
-    display_type: Optional[str]
+    display_type: Optional[str] = None
