@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IssuerId } from '../id';
-import { Ed25519Signature } from '../signature';
+import { Signature, SignatureDiscriminator } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
 import { Type } from 'class-transformer';
@@ -47,8 +47,10 @@ class BlockWrapper {
     /**
      * The block signature; used to validate issuance capabilities.
      */
-    @Type(() => Ed25519Signature)
-    readonly signature!: Ed25519Signature;
+    @Type(() => Signature, {
+        discriminator: SignatureDiscriminator,
+    })
+    readonly signature!: Signature;
 
     constructor(
         protocolVersion: number,
@@ -58,7 +60,7 @@ class BlockWrapper {
         latestFinalizedSlot: SlotIndex,
         issuerId: IssuerId,
         block: Block,
-        signature: Ed25519Signature,
+        signature: Signature,
     ) {
         this.protocolVersion = protocolVersion;
         this.networkId = networkId;
