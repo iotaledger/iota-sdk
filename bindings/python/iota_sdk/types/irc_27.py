@@ -50,7 +50,7 @@ class Irc27Metadata:
     uri: str
     name: str
     collectionName: Optional[str] = None
-    royalties: dict[str, float] = {}
+    royalties: dict[str, float] = field(default_factory=dict)
     issuerName: Optional[str] = None
     description: Optional[str] = None
     attributes: List[Attribute] = []
