@@ -97,16 +97,16 @@ async function run() {
 
 function getImmutableMetadata(index: number) {
     return new Irc27Metadata(
-        "video/mp4",
-        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+        'video/mp4',
+        'https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT',
         `Shimmer OG NFT ${index}`,
     )
-    .withDescription(
-        "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation \
-        to celebrate the official launch of the Shimmer Network.",
-    )
-    .withIssuerName("IOTA Foundation")
-    .withCollectionName("Shimmer OG")
+        .withDescription(
+            'The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation \
+        to celebrate the official launch of the Shimmer Network.',
+        )
+        .withIssuerName('IOTA Foundation')
+        .withCollectionName('Shimmer OG');
 }
 
 run();

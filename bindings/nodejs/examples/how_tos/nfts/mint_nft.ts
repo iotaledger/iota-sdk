@@ -55,8 +55,7 @@ async function run() {
             'video/mp4',
             'https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT',
             'Shimmer OG NFT',
-        )
-        .withDescription('The original Shimmer NFT');
+        ).withDescription('The original Shimmer NFT');
 
         const params: MintNftParams = {
             address: NFT1_OWNER_ADDRESS, // Remove or change to senderAddress to send to self

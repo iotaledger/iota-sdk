@@ -36,7 +36,11 @@ async function run() {
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        const tip27ImmutableMetadata = new Irc27Metadata('image/jpeg', 'https://mywebsite.com/my-nft-files-1.jpeg', 'My NFT #0001');
+        const tip27ImmutableMetadata = new Irc27Metadata(
+            'image/jpeg',
+            'https://mywebsite.com/my-nft-files-1.jpeg',
+            'My NFT #0001',
+        );
 
         const nftOutput = await client.buildNftOutput({
             // NftId needs to be null the first time
@@ -46,9 +50,7 @@ async function run() {
             ],
             immutableFeatures: [
                 new IssuerFeature(new Ed25519Address(hexAddress)),
-                new MetadataFeature(
-                    tip27ImmutableMetadata.asHex(),
-                ),
+                new MetadataFeature(tip27ImmutableMetadata.asHex()),
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),

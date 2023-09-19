@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { utf8ToHex } from "../../../utils";
+import { utf8ToHex } from '../../../utils';
 
 /**
  * The IRC30 native token metadata standard schema.
  */
 class Irc30Metadata {
     /** The IRC standard */
-    readonly standard: string = "IRC30";
+    readonly standard: string = 'IRC30';
     /** The human-readable name of the native token. */
     name: string;
     /** The symbol/ticker of the token. */
@@ -29,11 +29,7 @@ class Irc30Metadata {
      * @param symbol The symbol/ticker of the token.
      * @param decimals Number of decimals the token uses.
      */
-    constructor(
-        name: string,
-        symbol: string,
-        decimals: number,
-    ) {
+    constructor(name: string, symbol: string, decimals: number) {
         this.name = name;
         this.symbol = symbol;
         this.decimals = decimals;
@@ -60,10 +56,8 @@ class Irc30Metadata {
     }
 
     asHex(): string {
-        return utf8ToHex(JSON.stringify(this))
+        return utf8ToHex(JSON.stringify(this));
     }
 }
 
-export {
-    Irc30Metadata
-}
+export { Irc30Metadata };

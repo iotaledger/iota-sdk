@@ -51,7 +51,11 @@ async function run() {
 
         console.log('Preparing transaction to create native token...');
 
-        const metadata = new Irc30Metadata('My Native Token', 'MNT', 10).withDescription('A native token to test the iota-sdk.');
+        const metadata = new Irc30Metadata(
+            'My Native Token',
+            'MNT',
+            10,
+        ).withDescription('A native token to test the iota-sdk.');
 
         // If we omit the AccountAddress field the first address of the account is used by default
         const params: CreateNativeTokenParams = {
