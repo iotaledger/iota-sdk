@@ -1,10 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedString, u64 } from '../../utils';
 import { SlotIndex } from '../slot';
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../address';
+import { Ed25519BlockIssuerKey } from './block-issuer-key';
+import { u64 } from '../../utils/type_aliases';
 
 /**
  * All of the feature block types.
@@ -113,9 +114,9 @@ class BlockIssuerFeature extends Feature {
     /**
      * The Block Issuer Keys.
      */
-    readonly publicKeys: Set<HexEncodedString>;
+    readonly publicKeys: Set<Ed25519BlockIssuerKey>;
 
-    constructor(expirySlot: SlotIndex, publicKeys: Set<HexEncodedString>) {
+    constructor(expirySlot: SlotIndex, publicKeys: Set<Ed25519BlockIssuerKey>) {
         super(FeatureType.BlockIssuer);
         this.expirySlot = expirySlot;
         this.publicKeys = publicKeys;
