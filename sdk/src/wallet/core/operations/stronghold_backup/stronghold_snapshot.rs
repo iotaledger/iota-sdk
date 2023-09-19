@@ -1,31 +1,24 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::atomic::Ordering;
-#[cfg(feature = "storage")]
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap, path::Path, sync::atomic::Ordering};
 
-#[cfg(feature = "storage")]
 use crate::{
-    client::constants::IOTA_COIN_TYPE,
-    wallet::{
-        migration::{
-            chrysalis::{migrate_from_chrysalis_data, to_chrysalis_key},
-            MigrationData,
-        },
-        storage::constants::{CHRYSALIS_STORAGE_KEY, WALLET_INDEXATION_KEY},
+    client::{
+        constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter,
     },
-};
-use crate::{
-    client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
     types::TryFromDto,
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
-        migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
+        migration::{
+            chrysalis::{migrate_from_chrysalis_data, to_chrysalis_key, CHRYSALIS_STORAGE_KEY},
+            latest_backup_migration_version, migrate, MigrationData, MIGRATION_VERSION_KEY,
+        },
         ClientOptions, Error as WalletError, Wallet,
     },
 };
 
+pub(crate) const WALLET_INDEXATION_KEY: &str = "iota-wallet-account-manager";
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
@@ -105,7 +98,6 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
 }
 
-#[cfg(feature = "storage")]
 pub(crate) async fn migrate_snapshot_from_chrysalis_to_stardust(
     stronghold_adapter: &StrongholdAdapter,
 ) -> crate::wallet::Result<Option<HashMap<String, String>>> {

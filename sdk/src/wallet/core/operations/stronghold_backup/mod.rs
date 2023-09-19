@@ -11,7 +11,7 @@ use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::{
     client::storage::StorageAdapter,
-    wallet::{storage::constants::CHRYSALIS_STORAGE_KEY, WalletBuilder},
+    wallet::{migration::chrysalis::CHRYSALIS_STORAGE_KEY, WalletBuilder},
 };
 use crate::{
     client::{
@@ -105,7 +105,7 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        #[cfg(feature = "storage")]
+        #[cfg_attr(not(feature = "storage"), allow(unused))]
         let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
@@ -285,7 +285,7 @@ impl Wallet<StrongholdSecretManager> {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        #[cfg(feature = "storage")]
+        #[cfg_attr(not(feature = "storage"), allow(unused))]
         let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =

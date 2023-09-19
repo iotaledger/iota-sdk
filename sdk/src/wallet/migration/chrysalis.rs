@@ -23,6 +23,8 @@ use crate::{
     wallet::{Error, Result},
 };
 
+pub(crate) const CHRYSALIS_STORAGE_KEY: &str = "chrysalis-data";
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AccountAddress {
@@ -50,6 +52,7 @@ pub(crate) struct AccountDetailsDto {
     native_token_foundries: HashMap<String, Value>,
 }
 
+#[allow(unused)]
 pub(crate) fn migrate_from_chrysalis_data(
     chrysalis_data: &HashMap<Vec<u8>, String>,
     storage_path: &Path,
@@ -146,6 +149,7 @@ pub(crate) fn migrate_from_chrysalis_data(
     Ok((new_accounts, secret_manager_dto))
 }
 
+#[allow(unused)]
 fn storage_password_to_encryption_key(password: Password) -> Zeroizing<[u8; 32]> {
     let mut dk = [0; 64];
     // safe to unwrap (rounds > 0)
@@ -159,6 +163,7 @@ fn storage_password_to_encryption_key(password: Password) -> Zeroizing<[u8; 32]>
     Zeroizing::new(key)
 }
 
+#[allow(unused)]
 fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
     let mut record: &[u8] = &record_bytes;
 
@@ -186,6 +191,7 @@ fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wa
     String::from_utf8(pt).map_err(|e| Error::Migration(format!("{:?}", e)))
 }
 
+#[allow(unused)]
 pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
     // key only needs to be hashed for stronghold
     if stronghold {
@@ -211,8 +217,7 @@ pub(crate) mod rocksdb {
             migration::{MigrationData, MIGRATION_VERSION_KEY},
             storage::{
                 constants::{
-                    ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY,
-                    WALLET_INDEXATION_KEY,
+                    ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
                 },
                 StorageManager,
             },

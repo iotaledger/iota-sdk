@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(not(target_family = "wasm"))]
-#[cfg(any(feature = "rocksdb", all(feature = "stronghold", feature = "storage")))]
+#[cfg(any(feature = "storage", feature = "stronghold"))]
 pub(crate) mod chrysalis;
 mod migrate_0;
 mod migrate_1;

@@ -12,7 +12,8 @@ mod storage_stub {
         },
         wallet::{
             core::builder::dto::WalletBuilderDto,
-            storage::constants::{CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
+            migration::chrysalis::CHRYSALIS_STORAGE_KEY,
+            storage::constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
             Wallet, WalletBuilder,
         },
     };
