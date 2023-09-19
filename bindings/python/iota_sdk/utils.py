@@ -2,15 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+from json import dumps, loads
+from typing import TYPE_CHECKING, List
+
+from dacite import from_dict
 from iota_sdk import call_utils_method
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
-from json import dumps, loads
-from typing import TYPE_CHECKING, List
-from dacite import from_dict
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -30,11 +31,11 @@ class Utils():
         })
 
     @staticmethod
-    def hex_to_bech32(hex: HexStr, bech32_hrp: str) -> str:
+    def hex_to_bech32(hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded address to a Bech32 encoded address.
         """
         return _call_method('hexToBech32', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
@@ -57,11 +58,11 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex: HexStr, bech32_hrp: str) -> str:
+    def hex_public_key_to_bech32_address(hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded public key to a Bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
@@ -208,7 +209,6 @@ class Utils():
 
 class UtilsError(Exception):
     """A utils error."""
-    pass
 
 
 def _call_method(name: str, data=None):
@@ -232,5 +232,5 @@ def _call_method(name: str, data=None):
 
     if "payload" in json_response:
         return json_response['payload']
-    else:
-        return response
+
+    return response

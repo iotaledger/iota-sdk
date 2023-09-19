@@ -45,10 +45,10 @@ account_output = account_output_data.output
 
 
 def update_state_controller(unlock_condition):
+    """Update unlock condition if it's a state controlled type."""
     if unlock_condition.type == UnlockConditionType.StateControllerAddress:
         return StateControllerAddressUnlockCondition(new_state_controller)
-    else:
-        return unlock_condition
+    return unlock_condition
 
 
 updated_unlock_conditions = list(map(
@@ -68,6 +68,6 @@ transaction = account.send_outputs([updated_account_output])
 print(f'Transaction sent: {transaction.transactionId}')
 
 # Wait for transaction to get included
-blockId = account.retry_transaction_until_included(
+blockId = account.reissue_transaction_until_included(
     transaction.transactionId)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')

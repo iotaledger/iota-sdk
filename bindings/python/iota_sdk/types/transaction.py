@@ -3,12 +3,11 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
-from typing import Dict, List, Optional
+from typing import List, Optional
+from enum import Enum
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.payload import TransactionPayload
-from enum import Enum
 
 
 class InclusionState(str, Enum):
