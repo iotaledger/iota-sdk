@@ -4,7 +4,10 @@
 import { SlotIndex } from '../slot';
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../address';
-import { BlockIssuerKey } from './block-issuer-key';
+import {
+    BlockIssuerKey,
+    BlockIssuerKeyDiscriminator,
+} from './block-issuer-key';
 import { u64 } from '../../utils/type_aliases';
 
 /**
@@ -114,6 +117,9 @@ class BlockIssuerFeature extends Feature {
     /**
      * The Block Issuer Keys.
      */
+    @Type(() => BlockIssuerKey, {
+        discriminator: BlockIssuerKeyDiscriminator,
+    })
     readonly blockIssuerKeys: Set<BlockIssuerKey>;
 
     constructor(expirySlot: SlotIndex, blockIssuerKeys: Set<BlockIssuerKey>) {

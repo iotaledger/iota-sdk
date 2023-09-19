@@ -38,4 +38,19 @@ class Ed25519BlockIssuerKey extends BlockIssuerKey {
     }
 }
 
-export { BlockIssuerKey, BlockIssuerKeyType, Ed25519BlockIssuerKey };
+const BlockIssuerKeyDiscriminator = {
+    property: 'type',
+    subTypes: [
+        {
+            value: Ed25519BlockIssuerKey,
+            name: BlockIssuerKeyType.Ed25519 as any,
+        },
+    ],
+};
+
+export {
+    BlockIssuerKeyDiscriminator,
+    BlockIssuerKey,
+    BlockIssuerKeyType,
+    Ed25519BlockIssuerKey,
+};
