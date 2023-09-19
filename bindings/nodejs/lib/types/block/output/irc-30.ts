@@ -4,7 +4,7 @@
 import { utf8ToHex } from "../../../utils";
 
 /**
- * The IRC30 NFT standard schema.
+ * The IRC30 native token metadata standard schema.
  */
 class Irc30Metadata {
     /** The IRC standard */
