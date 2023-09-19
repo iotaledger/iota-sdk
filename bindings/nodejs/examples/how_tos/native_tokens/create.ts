@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { CreateNativeTokenParams, utf8ToHex } from '@iota/sdk';
+import { CreateNativeTokenParams, Irc30Metadata } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
@@ -51,11 +51,13 @@ async function run() {
 
         console.log('Preparing transaction to create native token...');
 
+        const metadata = new Irc30Metadata('My Native Token', 'MNT', 10).withDescription('A native token to test the iota-sdk.');
+
         // If we omit the AccountAddress field the first address of the account is used by default
         const params: CreateNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
-            foundryMetadata: utf8ToHex('Hello, World!'),
+            foundryMetadata: metadata.asHex(),
         };
 
         const prepared = await account.prepareCreateNativeToken(params);
