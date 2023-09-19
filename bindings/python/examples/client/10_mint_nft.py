@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from iota_sdk import (AddressUnlockCondition, Client, Ed25519Address,
                       MetadataFeature, MnemonicSecretManager, Utils,
-                      utf8_to_hex)
+                      utf8_to_hex, Irc27Metadata)
 
 load_dotenv()
 
@@ -18,6 +18,13 @@ if 'MNEMONIC' not in os.environ:
 
 secret_manager = MnemonicSecretManager(os.environ['MNEMONIC'])
 
+metadata = Irc27Metadata(
+    "video/mp4",
+    "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+    "Shimmer OG NFT",
+    description="The original Shimmer NFT"
+)
+
 nft_output = client.build_nft_output(
     unlock_conditions=[
         AddressUnlockCondition(
@@ -28,7 +35,7 @@ nft_output = client.build_nft_output(
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     amount=1000000,
     immutable_features=[
-        MetadataFeature(utf8_to_hex('Hello, World!'))
+        MetadataFeature(metadata.as_hex())
     ],
     features=[
         MetadataFeature(utf8_to_hex('Hello, World!'))

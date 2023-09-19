@@ -36,26 +36,22 @@ bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
 
 
-def get_immutable_metadata(index: int, collection_id: str) -> str:
+def get_immutable_metadata(index: int) -> str:
     """Returns the immutable metadata for the NFT with the given index"""
-    data = {
-        "standard": "IRC27",
-        "version": "v1.0",
-        "type": "video/mp4",
-        "uri": "ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong",
-        "name": "Shimmer OG NFT #" + str(index),
-        "description": "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
-        "issuerName": "IOTA Foundation",
-        "collectionId": collection_id,
-        "collectionName": "Shimmer OG"
-    }
-    return json.dumps(data, separators=(',', ':'))
+    Irc27Metadata(
+        "video/mp4",
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+        "Shimmer OG NFT #" + str(index),
+        description="The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
+        issuer_name="IOTA Foundation",
+        collection_name="Shimmer OG"
+    ).as_hex()
 
 
 # Create the metadata with another index for each
 nft_mint_params = list(map(lambda index: MintNftParams(
     immutableMetadata=utf8_to_hex(
-        get_immutable_metadata(index, issuer_nft_id)),
+        get_immutable_metadata(index)),
     issuer=issuer
 ), range(NFT_COLLECTION_SIZE)))
 

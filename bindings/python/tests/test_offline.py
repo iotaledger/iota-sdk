@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType
+from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata
 import json
 import unittest
 
@@ -102,3 +102,25 @@ def test_block():
                                                     "0xd76cdb7acf228ecdad590a42b91acc077c1518c1a271411229e33e050fc19b44", "0xecef38d3af7e63da78a5e70128efe371f2191088b31879f7b0e81da657fa21c6"], "payload": {"type": 5, "tag": "0x68656c6c6f", "data": "0x68656c6c6f"}, "nonce": "6917529027641139843"}
     block = Block.from_dict(block_dict)
     assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+
+def test_irc_27():
+    metadata = Irc27Metadata(
+        "video/mp4",
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+        "Shimmer OG NFT",
+        description="The original Shimmer NFT"
+    )
+    metadata_dict = {
+        "standard": "IRC27",
+        "version": metadata.version,
+        "type": metadata.type,
+        "uri": metadata.uri,
+        "name": metadata.name,
+        "collectionName": metadata.collection_name,
+        "royalties": metadata.royalties,
+        "issuerName": metadata.issuer_name,
+        "description": metadata.description,
+        "attributes": metadata.attributes
+    }
+    metadata_deser = Irc27Metadata.from_dict(metadata_dict)
+    assert metadata == metadata_deser

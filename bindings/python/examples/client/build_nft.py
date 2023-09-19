@@ -17,15 +17,11 @@ client = Client(nodes=[node_url])
 hexAddress = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
-# IOTA NFT Standard - IRC27:
-# https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
-tip_27_immutable_metadata = {
-    "standard": "IRC27",
-    "version": "v1.0",
-    "type": "image/jpeg",
-    "uri": "https://mywebsite.com/my-nft-files-1.jpeg",
-    "name": "My NFT #0001"
-}
+tip_27_immutable_metadata = Irc27Metadata(
+    "image/jpeg",
+    "https://mywebsite.com/my-nft-files-1.jpeg",
+    "My NFT #0001",
+)
 
 # Build NFT output
 nft_output = client.build_nft_output(
@@ -36,8 +32,7 @@ nft_output = client.build_nft_output(
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     immutable_features=[
         IssuerFeature(Ed25519Address(hexAddress)),
-        MetadataFeature(utf8_to_hex(json.dumps(
-            tip_27_immutable_metadata, separators=(',', ':'))))
+        MetadataFeature(tip_27_immutable_metadata.as_hex())
     ],
     features=[
         SenderFeature(Ed25519Address(hexAddress)),
