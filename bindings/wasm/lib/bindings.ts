@@ -21,7 +21,7 @@ const callUtilsMethod = (method: __UtilsMethods__): any => {
 };
 
 export {
-    initLogger,
+    initLogger as initLoggerBinding,
     createClient,
     createWallet,
     createSecretManager,
