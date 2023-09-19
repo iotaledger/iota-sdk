@@ -1,7 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use rustyline::{completion::Completer, Context};
+use std::borrow::Cow;
+
+use colored::Colorize;
+use rustyline::{
+    completion::Completer, highlight::Highlighter, hint::HistoryHinter, Completer, Context, Helper, Hinter, Validator,
+};
 
 #[derive(Default)]
 pub struct AccountCompleter;
@@ -60,5 +65,44 @@ impl Completer for AccountCompleter {
                 .filter_map(|cmd| cmd.starts_with(input).then_some(cmd.to_string()))
                 .collect(),
         ))
+    }
+}
+
+#[derive(Helper, Completer, Hinter, Validator)]
+pub struct AccountPromptHelper {
+    #[rustyline(Completer)]
+    completer: AccountCompleter,
+    #[rustyline(Hinter)]
+    hinter: HistoryHinter,
+    prompt: String,
+}
+
+impl AccountPromptHelper {
+    pub fn set_prompt(&mut self, prompt: String) {
+        self.prompt = prompt;
+    }
+}
+
+impl Highlighter for AccountPromptHelper {
+    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
+        if default {
+            Cow::Borrowed(&self.prompt)
+        } else {
+            Cow::Borrowed(prompt)
+        }
+    }
+
+    fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
+        Cow::Owned(hint.bold().to_string())
+    }
+}
+
+impl Default for AccountPromptHelper {
+    fn default() -> Self {
+        Self {
+            completer: AccountCompleter,
+            hinter: HistoryHinter {},
+            prompt: String::new(),
+        }
     }
 }

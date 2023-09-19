@@ -1,15 +1,10 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::borrow::Cow;
-
 use clap::Parser;
 use colored::Colorize;
 use iota_sdk::wallet::{Account, Wallet};
-use rustyline::{
-    error::ReadlineError, highlight::Highlighter, hint::HistoryHinter, history::MemHistory, Completer, Config, Editor,
-    Helper, Hinter, Validator,
-};
+use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use crate::{
     command::{
@@ -23,45 +18,12 @@ use crate::{
             transaction_command, transactions_command, unspent_outputs_command, vote_command, voting_output_command,
             voting_power_command, AccountCli, AccountCommand,
         },
-        account_completion::AccountCompleter,
+        account_completion::AccountPromptHelper,
     },
     error::Error,
     helper::bytes_from_hex_or_file,
     println_log_error,
 };
-
-#[derive(Helper, Completer, Hinter, Validator)]
-pub struct PromptHelper {
-    #[rustyline(Completer)]
-    completer: AccountCompleter,
-    #[rustyline(Hinter)]
-    hinter: HistoryHinter,
-    colored_prompt: String,
-}
-
-impl Highlighter for PromptHelper {
-    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
-        if default {
-            Cow::Borrowed(&self.colored_prompt)
-        } else {
-            Cow::Borrowed(prompt)
-        }
-    }
-
-    fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
-        Cow::Owned(hint.bold().to_string())
-    }
-}
-
-impl Default for PromptHelper {
-    fn default() -> Self {
-        Self {
-            completer: AccountCompleter,
-            hinter: HistoryHinter {},
-            colored_prompt: String::new(),
-        }
-    }
-}
 
 // loop on the account prompt
 pub async fn account_prompt(wallet: &Wallet, mut account: Account) -> Result<(), Error> {
@@ -73,7 +35,7 @@ pub async fn account_prompt(wallet: &Wallet, mut account: Account) -> Result<(),
         .build();
 
     let mut rl = Editor::with_history(config, MemHistory::with_config(config))?;
-    rl.set_helper(Some(PromptHelper::default()));
+    rl.set_helper(Some(AccountPromptHelper::default()));
 
     loop {
         match account_prompt_internal(wallet, &account, &mut rl).await {
@@ -103,13 +65,13 @@ pub enum AccountPromptResponse {
 pub async fn account_prompt_internal(
     wallet: &Wallet,
     account: &Account,
-    rl: &mut Editor<PromptHelper, MemHistory>,
+    rl: &mut Editor<AccountPromptHelper, MemHistory>,
 ) -> Result<AccountPromptResponse, Error> {
     let alias = account.details().await.alias().clone();
 
     let prompt = format!("Account \"{alias}\": ");
     if let Some(helper) = rl.helper_mut() {
-        helper.colored_prompt = prompt.green().to_string();
+        helper.set_prompt(prompt.green().to_string());
     }
 
     let input = rl.readline(&prompt);
