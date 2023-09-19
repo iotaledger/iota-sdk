@@ -62,7 +62,7 @@ type CommonQueryParameters =
     | PageSize
     | Cursor;
 
-/** Query parameters for filtering alias/basic/NFT Outputs*/
+/** Query parameters for filtering alias/basic/NFT/foundry Outputs*/
 export type GenericQueryParameter =
     | UnlockableByAddress
     | HasNativeTokens
