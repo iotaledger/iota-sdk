@@ -116,7 +116,7 @@ class NodeIndexerAPI():
     def output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch alias/basic/NFT output IDs from the given query parameters.
-        Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter".
+        Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter", "cursor", "pageSize".
 
         Returns:
             The corresponding output IDs of the outputs.

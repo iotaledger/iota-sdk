@@ -27,7 +27,7 @@ impl ClientInner {
     // RouteOutputs is the route for getting basic, alias and nft outputs filtered by the given parameters.
     // GET with query parameter returns all outputIDs that fit these filter criteria.
     // Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
-    // "createdBefore", "createdAfter".
+    // "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v1/outputs
     pub async fn output_ids(
