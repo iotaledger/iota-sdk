@@ -1,11 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    ProtocolParamsMilestoneOption,
-    ReceiptMilestoneOption,
-} from './internal';
-
 /**
  * All of the milestone option types.
  */
@@ -33,19 +28,5 @@ abstract class MilestoneOption {
         return this.type;
     }
 }
-
-export const MilestoneOptionDiscriminator = {
-    property: 'type',
-    subTypes: [
-        {
-            value: ReceiptMilestoneOption,
-            name: MilestoneOptionType.Receipt as any,
-        },
-        {
-            value: ProtocolParamsMilestoneOption,
-            name: MilestoneOptionType.ProtocolParams as any,
-        },
-    ],
-};
 
 export { MilestoneOptionType, MilestoneOption };
