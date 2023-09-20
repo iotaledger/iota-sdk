@@ -7,6 +7,7 @@ use packable::PackableExt;
 #[test]
 fn slot_commitment_id() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#slot-commitment-id-1
+
     let slot_commitment_json = serde_json::json!({
         "version":3,
         "index":"10",

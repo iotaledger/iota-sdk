@@ -5,8 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, BlockHash, BlockId, BlockWrapper,
-        BlockWrapperDto,
+        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, BlockHash, BlockId, BlockWrapper, BlockWrapperDto,
     },
     TryFromDto,
 };
@@ -70,6 +69,7 @@ fn memory_layout() {
 #[test]
 fn basic_block_id_tagged_data_payload() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
+
     let block_json = serde_json::json!({
         "protocolVersion":3,
         "networkId":"0",
@@ -143,11 +143,12 @@ fn basic_block_id_tagged_data_payload() {
 #[test]
 fn basic_block_id_transaction_payload() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
+
     let block_json = serde_json::json!({
         "protocolVersion":3,
         "networkId":"3650798313638353144",
         "issuingTime":"1694613463455944982",
-        "slotCommitment":"0x5893048146ba125ea69c85a08bc122afec11baf6115ce03fc1d989df6aff2cdf1500000000000000",
+        "slotCommitmentId":"0x5893048146ba125ea69c85a08bc122afec11baf6115ce03fc1d989df6aff2cdf1500000000000000",
         "latestFinalizedSlot":"21",
         "issuerId":"0x907c02e9302e0f0571f10f885594e56d8c54ff0708ab7a39bc1b74d396b93b12",
         "block":{
@@ -252,5 +253,63 @@ fn basic_block_id_transaction_payload() {
     assert_eq!(
         block_id,
         "0xddebfd0434bfe8140c938d4124ab76e9fee7e18ca7a7be1ba7331d42868724d91c00000000000000"
+    );
+}
+
+#[test]
+fn validation_block_id() {
+    // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#validation-block-id
+
+    let block_json = serde_json::json!({
+        "protocolVersion":3,
+        "networkId":"0",
+        "issuingTime":"1694671670149673852",
+        "slotCommitmentId":"0xe0a1befd84ec67c1f70e97db1b2011fb391af164c89b92ecf277add20e3bdba10700000000000000",
+        "latestFinalizedSlot":"7",
+        "issuerId":"0x375358f92cc94750669598b0aaa55a6ff73310b90710e1fad524c0f911be0fea",
+        "block":{
+            "type":1,
+            "strongParents":[
+                "0x4c0f68416d3eba7a7a8a570983ac63bbacb94f97908cde435292932af37d8a060e00000000000000"
+            ],
+            "weakParents":[],
+            "shallowLikeParents":[],
+            "highestSupportedVersion":3,
+            "protocolParametersHash":"0xf8b1cbfe835723facdcd83b2ec042346a4404df11082366e906894aa9ac7e813"
+        },
+        "signature":{
+            "type":0,
+            "publicKey":"0x05c1de274451db8de8182d64c6ee0dca3ae0c9077e0b4330c976976171d79064",
+            "signature":"0x4b7b3bd8f184334740ac04443b774ef299fe56b24e88f3d60d1df6a33b4581b0c791c98085eb9c2d48e7646b17261c43d4e7be1ecf4e015d5488395017d82906"
+        }
+    });
+
+    let block_dto = serde_json::from_value::<BlockWrapperDto>(block_json).unwrap();
+    let block = BlockWrapper::try_from_dto(block_dto).unwrap();
+    let block_bytes = block.pack_to_vec();
+
+    assert_eq!(
+        block_bytes,
+        [
+            3, 0, 0, 0, 0, 0, 0, 0, 0, 124, 115, 48, 190, 231, 174, 132, 23, 224, 161, 190, 253, 132, 236, 103, 193,
+            247, 14, 151, 219, 27, 32, 17, 251, 57, 26, 241, 100, 200, 155, 146, 236, 242, 119, 173, 210, 14, 59, 219,
+            161, 7, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 55, 83, 88, 249, 44, 201, 71, 80, 102, 149, 152, 176,
+            170, 165, 90, 111, 247, 51, 16, 185, 7, 16, 225, 250, 213, 36, 192, 249, 17, 190, 15, 234, 1, 1, 76, 15,
+            104, 65, 109, 62, 186, 122, 122, 138, 87, 9, 131, 172, 99, 187, 172, 185, 79, 151, 144, 140, 222, 67, 82,
+            146, 147, 42, 243, 125, 138, 6, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 248, 177, 203, 254, 131, 87, 35, 250,
+            205, 205, 131, 178, 236, 4, 35, 70, 164, 64, 77, 241, 16, 130, 54, 110, 144, 104, 148, 170, 154, 199, 232,
+            19, 0, 5, 193, 222, 39, 68, 81, 219, 141, 232, 24, 45, 100, 198, 238, 13, 202, 58, 224, 201, 7, 126, 11,
+            67, 48, 201, 118, 151, 97, 113, 215, 144, 100, 75, 123, 59, 216, 241, 132, 51, 71, 64, 172, 4, 68, 59, 119,
+            78, 242, 153, 254, 86, 178, 78, 136, 243, 214, 13, 29, 246, 163, 59, 69, 129, 176, 199, 145, 201, 128, 133,
+            235, 156, 45, 72, 231, 100, 107, 23, 38, 28, 67, 212, 231, 190, 30, 207, 78, 1, 93, 84, 136, 57, 80, 23,
+            216, 41, 6
+        ]
+    );
+
+    let block_id = block.id(&ProtocolParameters::default()).to_string();
+
+    assert_eq!(
+        block_id,
+        "0x37ea373f2c0c7b78ab87298e754931f775df985171ddad7e9e9fb64d8b5219a70e00000000000000"
     );
 }
