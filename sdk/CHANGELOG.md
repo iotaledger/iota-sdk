@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `migrate_db_chrysalis_to_stardust()` returns an error if no chrysalis data was found;
 
+### Fixed
+
+- Don't error if custom remainder address is provided with ledger nano;
+
 ## 1.0.3 - 2023-09-07
 
 ### Added

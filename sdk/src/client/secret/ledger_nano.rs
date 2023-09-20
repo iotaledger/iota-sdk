@@ -296,19 +296,23 @@ impl SecretManage for LedgerSecretManager {
         } else {
             // figure out the remainder address and bip32 index (if there is one)
             let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
-                match &prepared_transaction.remainder {
-                    Some(a) => {
-                        let chain = a.chain.ok_or(Error::MissingBip32Chain)?;
-                        (
-                            Some(&a.address),
-                            LedgerBIP32Index {
-                                bip32_change: chain.change.harden().into(),
-                                bip32_index: chain.address_index.harden().into(),
+                prepared_transaction.remainder.as_ref().map_or_else(
+                    || (None, LedgerBIP32Index::default()),
+                    |a| {
+                        a.chain.map_or_else(
+                            || (None, LedgerBIP32Index::default()),
+                            |chain| {
+                                (
+                                    Some(&a.address),
+                                    LedgerBIP32Index {
+                                        bip32_change: chain.change.harden().into(),
+                                        bip32_index: chain.address_index.harden().into(),
+                                    },
+                                )
                             },
                         )
-                    }
-                    None => (None, LedgerBIP32Index::default()),
-                };
+                    },
+                );
 
             let mut remainder_index = 0u16;
             if let Some(remainder_address) = remainder_address {

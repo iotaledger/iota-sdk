@@ -22,8 +22,27 @@ use crate::{
 impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
     fn get_remainder_address(&self) -> Option<(Address, Option<Bip44>)> {
-        if self.remainder_address.is_some() {
-            return self.remainder_address.map(|address| (address, None));
+        if let Some(remainder_address) = self.remainder_address {
+            // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
+            #[cfg(feature = "ledger_nano")]
+            for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
+                let alias_transition = is_alias_transition(
+                    &input.output,
+                    *input.output_id(),
+                    self.outputs.as_slice(),
+                    self.burn.as_ref(),
+                );
+                // PANIC: safe to unwrap as treasury outputs can't be used as input.
+                let required_address = input
+                    .output
+                    .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)
+                    .unwrap()
+                    .0;
+                if remainder_address == required_address {
+                    return Some((remainder_address, input.chain));
+                }
+            }
+            return Some((remainder_address, None));
         }
 
         for input in &self.selected_inputs {
