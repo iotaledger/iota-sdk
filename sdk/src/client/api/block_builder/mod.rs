@@ -51,7 +51,7 @@ impl ClientInner {
         });
 
         Ok(BlockWrapper::new(
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
             issuing_time,
             commitment.id(),
             latest_finalized_slot,
