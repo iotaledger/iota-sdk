@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-from iota_sdk import utf8_to_hex
+from iota_sdk import utf8_to_hex, MetadataFeature
 from dataclasses import dataclass, field
 from typing import Optional, List, Any
 from dacite import from_dict
@@ -61,3 +61,6 @@ class Irc27Metadata:
 
     def as_hex(self):
         utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))
+
+    def as_feature(self):
+        MetadataFeature(self.as_hex())

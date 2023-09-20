@@ -41,8 +41,7 @@ nft_output = client.build_nft_output(
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     immutable_features=[
         IssuerFeature(Ed25519Address(hexAddress)),
-        MetadataFeature(
-            tip_27_immutable_metadata.as_hex())
+        tip_27_immutable_metadata.as_feature()
     ],
     features=[
         SenderFeature(Ed25519Address(hexAddress)),
