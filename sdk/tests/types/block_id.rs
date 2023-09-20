@@ -3,9 +3,12 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{
-    protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, BlockHash, BlockId, BlockWrapper,
-    BlockWrapperDto,
+use iota_sdk::types::{
+    block::{
+        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, BlockHash, BlockId, BlockWrapper,
+        BlockWrapperDto,
+    },
+    TryFromDto,
 };
 use packable::PackableExt;
 
@@ -65,55 +68,6 @@ fn memory_layout() {
 }
 
 #[test]
-fn compute() {
-    let protocol_parameters = ProtocolParameters::default();
-    let protocol_parameters_hash = protocol_parameters.hash();
-    let slot_index = SlotIndex::new(11_u64);
-    let issuing_time = slot_index.to_timestamp(
-        protocol_parameters.genesis_unix_timestamp(),
-        protocol_parameters.slot_duration_in_seconds(),
-    );
-    let network_id = protocol_parameters.network_id();
-
-    let block_dto_json = serde_json::json!({
-        "protocolVersion": 3,
-        "networkId": network_id.to_string(),
-        "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
-        "latestFinalizedSlot": "0",
-        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "block": {
-            "type":1,
-            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
-            "weakParents": [],
-            "shallowLikeParents": [],
-            "highestSupportedVersion": 3,
-            "protocolParametersHash": protocol_parameters_hash
-        },
-        "signature": {
-            "type": 0,
-            "publicKey": "0x714f5f07067012267c21426d382a52752f0b3208443e0e3c49183e0110494148",
-            "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
-        }
-    });
-    let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block = BlockWrapper::try_from_dto(block_dto, protocol_parameters).unwrap();
-    let block_id = block.id();
-
-    // TODO: Independently verify this value
-    assert_eq!(
-        block_id.to_string(),
-        "0x38c43e391e222e6a4afd1f48948b17a6d03c5cd63fb8dce69fbb493eaf7c5d150b00000000000000"
-    );
-    assert_eq!(
-        block_id.hash().to_string(),
-        "0x38c43e391e222e6a4afd1f48948b17a6d03c5cd63fb8dce69fbb493eaf7c5d15"
-    );
-    assert_eq!(block_id.slot_index(), slot_index);
-}
-
-// TODO can't really be done at the moment, would be easier if/when we remove protocol parameters from the wrapper.
-#[test]
 fn basic_block_id_tagged_data_payload() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
     let block_json = serde_json::json!({
@@ -152,7 +106,7 @@ fn basic_block_id_tagged_data_payload() {
     });
 
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_json).unwrap();
-    let block = BlockWrapper::try_from_dto(block_dto, ProtocolParameters::default()).unwrap();
+    let block = BlockWrapper::try_from_dto(block_dto).unwrap();
     let block_bytes = block.pack_to_vec();
 
     assert_eq!(

@@ -41,8 +41,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             block,
             protocol_parameters,
         } => {
-            let block = BlockWrapper::try_from_dto(block, protocol_parameters)?;
-            Response::BlockId(block.id())
+            let block = BlockWrapper::try_from_dto_with_params(block, protocol_parameters.clone())?;
+            Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto(payload)?;

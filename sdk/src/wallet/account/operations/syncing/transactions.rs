@@ -126,7 +126,7 @@ where
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(
                                             transaction,
-                                            Some(included_block.id()),
+                                            Some(included_block.id(&self.client().get_protocol_parameters().await?)),
                                             // block metadata was Conflicting, but it's confirmed in another attachment
                                             InclusionState::Confirmed,
                                             &mut updated_transactions,

@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with tag and data sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
+        block.id(&client.get_protocol_parameters().await?)
     );
 
     Ok(())

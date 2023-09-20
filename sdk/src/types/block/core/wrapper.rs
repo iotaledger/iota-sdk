@@ -118,9 +118,6 @@ pub struct BlockWrapper {
     /// The block signature, used to validate issuance capabilities.
     #[getset(get_copy = "pub")]
     signature: Signature,
-    /// The identifier of the block.
-    #[getset(get_copy = "pub")]
-    id: BlockId,
 }
 
 impl BlockWrapper {
@@ -132,7 +129,8 @@ impl BlockWrapper {
     /// Creates a new [`BlockWrapper`].
     #[inline(always)]
     pub fn new(
-        protocol_params: &ProtocolParameters,
+        protocol_version: u8,
+        network_id: u64,
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
@@ -140,18 +138,18 @@ impl BlockWrapper {
         block: impl Into<Block>,
         signature: impl Into<Signature>,
     ) -> Self {
-        let block = block.into();
-        let signature = signature.into();
         let header = BlockHeader {
-            protocol_version: protocol_params.version(),
-            network_id: protocol_params.network_id(),
+            protocol_version,
+            network_id,
             issuing_time,
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
         };
+        let block = block.into();
+        let signature = signature.into();
+
         Self {
-            id: Self::block_id(&header, &block, &signature, protocol_params),
             header,
             block,
             signature,
@@ -195,15 +193,15 @@ impl BlockWrapper {
     }
 
     /// Computes the block identifier.
-    pub fn block_id(
-        block_header: &BlockHeader,
-        block: &Block,
-        signature: &Signature,
-        protocol_params: &ProtocolParameters,
-    ) -> BlockId {
-        let id = [&block_header.hash()[..], &block.hash()[..], &signature.pack_to_vec()].concat();
+    pub fn id(&self, protocol_params: &ProtocolParameters) -> BlockId {
+        let id = [
+            &self.header.hash()[..],
+            &self.block.hash()[..],
+            &self.signature.pack_to_vec(),
+        ]
+        .concat();
         let block_hash = BlockHash::new(Blake2b256::digest(id).into());
-        block_hash.with_slot_index(protocol_params.slot_index(block_header.issuing_time()))
+        block_hash.with_slot_index(protocol_params.slot_index(self.header.issuing_time()))
     }
 
     /// Unpacks a [`BlockWrapper`] from a sequence of bytes doing syntactical checks and verifying that
@@ -271,7 +269,6 @@ impl Packable for BlockWrapper {
         let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
         let wrapper = Self {
-            id: Self::block_id(&header, &block, &signature, protocol_params),
             header,
             block,
             signature,
@@ -299,7 +296,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{block::core::dto::BlockDto, TryFromDto},
+        types::{block::core::dto::BlockDto, TryFromDto, ValidationParams},
         utils::serde::string,
     };
 
@@ -334,29 +331,35 @@ pub(crate) mod dto {
         }
     }
 
-    impl BlockWrapper {
-        pub fn try_from_dto(dto: BlockWrapperDto, protocol_params: ProtocolParameters) -> Result<Self, Error> {
-            if dto.protocol_version != protocol_params.version() {
-                return Err(Error::ProtocolVersionMismatch {
-                    expected: protocol_params.version(),
-                    actual: dto.protocol_version,
-                });
-            }
+    impl TryFromDto for BlockWrapper {
+        type Dto = BlockWrapperDto;
+        type Error = Error;
 
-            if dto.network_id != protocol_params.network_id() {
-                return Err(Error::NetworkIdMismatch {
-                    expected: protocol_params.network_id(),
-                    actual: dto.network_id,
-                });
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params.protocol_parameters() {
+                if dto.protocol_version != protocol_params.version() {
+                    return Err(Error::ProtocolVersionMismatch {
+                        expected: protocol_params.version(),
+                        actual: dto.protocol_version,
+                    });
+                }
+
+                if dto.network_id != protocol_params.network_id() {
+                    return Err(Error::NetworkIdMismatch {
+                        expected: protocol_params.network_id(),
+                        actual: dto.network_id,
+                    });
+                }
             }
 
             Ok(BlockWrapper::new(
-                &protocol_params,
+                dto.protocol_version,
+                dto.network_id,
                 dto.issuing_time,
                 dto.slot_commitment_id,
                 dto.latest_finalized_slot,
                 dto.issuer_id,
-                Block::try_from_dto_with_params(dto.block, &protocol_params)?,
+                Block::try_from_dto_with_params_inner(dto.block, params)?,
                 dto.signature,
             ))
         }

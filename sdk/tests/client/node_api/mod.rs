@@ -38,7 +38,7 @@ async fn setup_tagged_data_block() -> BlockId {
         )
         .await
         .unwrap()
-        .id()
+        .id(&client.get_protocol_parameters().await.unwrap())
 }
 
 pub fn setup_secret_manager() -> SecretManager {
