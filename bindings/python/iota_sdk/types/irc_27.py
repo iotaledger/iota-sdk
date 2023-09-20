@@ -53,7 +53,7 @@ class Irc27Metadata:
     royalties: dict[str, float] = field(default_factory=dict)
     issuerName: Optional[str] = None
     description: Optional[str] = None
-    attributes: List[Attribute] = []
+    attributes: List[Attribute] = field(default_factory=list)
 
     @staticmethod
     def from_dict(metadata_dict: dict):
