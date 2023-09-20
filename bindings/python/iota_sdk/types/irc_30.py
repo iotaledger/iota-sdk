@@ -3,7 +3,7 @@
 
 import json
 from iota_sdk.types.common import HexStr
-from iota_sdk import utf8_to_hex
+from iota_sdk import utf8_to_hex, MetadataFeature
 from dataclasses import dataclass, field
 from typing import Optional
 from dacite import from_dict
@@ -38,3 +38,6 @@ class Irc30Metadata:
 
     def as_hex(self):
         utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))
+
+    def as_feature(self):
+        MetadataFeature(self.as_hex())
