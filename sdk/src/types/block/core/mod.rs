@@ -21,10 +21,9 @@ pub use self::{
     validation::{ValidationBlock, ValidationBlockBuilder},
     wrapper::BlockWrapper,
 };
-use super::protocol::WorkScoreStructure;
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},
-    protocol::{ProtocolParameters, ProtocolParametersHash},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScoreStructure},
     Error,
 };
 
