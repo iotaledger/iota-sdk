@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { utf8ToHex } from '../../../utils';
+import { MetadataFeature } from './feature';
 
 /**
  * The IRC30 native token metadata standard schema.
@@ -57,6 +58,10 @@ class Irc30Metadata {
 
     asHex(): string {
         return utf8ToHex(JSON.stringify(this));
+    }
+
+    asFeature(): MetadataFeature {
+        return new MetadataFeature(this.asHex());
     }
 }
 

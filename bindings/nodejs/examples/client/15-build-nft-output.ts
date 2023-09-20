@@ -50,7 +50,7 @@ async function run() {
             ],
             immutableFeatures: [
                 new IssuerFeature(new Ed25519Address(hexAddress)),
-                new MetadataFeature(tip27ImmutableMetadata.asHex()),
+                tip27ImmutableMetadata.asFeature(),
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),
