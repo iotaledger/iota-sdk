@@ -5,6 +5,7 @@ from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from dataclasses import dataclass, field
 from enum import IntEnum
+from typing import Union
 
 
 class FeatureType(IntEnum):
@@ -41,7 +42,7 @@ class SenderFeature(Feature):
     Attributes:
         address: A given sender address.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Sender),
@@ -54,7 +55,7 @@ class IssuerFeature(Feature):
     Attributes:
         address: A given issuer address.
     """
-    address: Ed25519Address | AliasAddress | NFTAddress
+    address: Union[Ed25519Address, AliasAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Issuer),
