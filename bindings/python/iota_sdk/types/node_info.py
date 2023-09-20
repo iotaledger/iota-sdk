@@ -9,21 +9,6 @@ from iota_sdk.types.common import HexStr, json
 
 @json
 @dataclass
-class NodeInfoMilestone:
-    """Milestone info.
-
-    Attributes:
-        index: The milestone index.
-        timestamp: The milestone timestamp.
-        milestone_id: The milestone ID.
-    """
-    index: int
-    timestamp: Optional[int] = None
-    milestone_id: Optional[HexStr] = None
-
-
-@json
-@dataclass
 class NodeInfoStatus:
     """Node status.
 
@@ -45,9 +30,13 @@ class NodeInfoStatus:
     confirmed_tangle_time: int
     relative_confirmed_tangle_time: int
     latest_commitment_id: HexStr
+    # TODO Replace with a proper SlotIndex type
     latest_finalized_slot: str
+    # TODO Replace with a proper SlotIndex type
     latest_accepted_block_slot: str
+    # TODO Replace with a proper SlotIndex type
     latest_confirmed_block_slot: str
+    # TODO Replace with a proper SlotIndex type
     pruning_epoch: str
 
 
@@ -85,25 +74,6 @@ class RentStructure:
     v_byte_factor_block_issuer_key: int
     v_byte_factor_staking_feature: int
     v_byte_factor_delegation: int
-
-
-@json
-@dataclass
-class NodeInfoProtocol:
-    """Protocol info.
-
-    Attributes:
-        network_name: The human friendly name of the network.
-        bech32_hrp: The HRP prefix used for Bech32 addresses in the network.
-        token_supply: TokenSupply defines the current token supply on the network.
-        version: The version of the protocol running.
-        rent_structure: The rent structure used by given node/network.
-    """
-    network_name: str
-    bech32_hrp: str
-    token_supply: str
-    version: int
-    rent_structure: RentStructure
 
 
 @json
@@ -231,6 +201,7 @@ class ProtocolParameters:
     liveness_threshold: str
     min_committable_age: str
     max_committable_age: str
+    # TODO Replace with a proper SlotIndex type
     epoch_nearing_threshold: str
     congestion_control_parameters: CongestionControlParameters
     version_signaling: VersionSignaling
@@ -238,7 +209,7 @@ class ProtocolParameters:
 
 @json
 @dataclass
-class ProtocolStartParameters:
+class ProtocolParametersResponse:
     """Protocol Parameters with start epoch.
 
     Attributes:
@@ -289,7 +260,7 @@ class NodeInfo:
     version: str
     status: NodeInfoStatus
     metrics: NodeInfoMetrics
-    protocol_parameters: List[ProtocolStartParameters]
+    protocol_parameters: List[ProtocolParametersResponse]
     base_token: NodeInfoBaseToken
     features: List[str]
 
