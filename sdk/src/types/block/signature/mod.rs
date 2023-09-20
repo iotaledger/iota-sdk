@@ -6,6 +6,7 @@ mod ed25519;
 use derive_more::From;
 
 pub use self::ed25519::Ed25519Signature;
+use super::protocol::WorkScoreStructure;
 use crate::types::block::Error;
 
 /// A `Signature` contains a signature which is used to unlock a transaction input.
@@ -49,5 +50,12 @@ impl Signature {
     pub fn as_ed25519(&self) -> &Ed25519Signature {
         let Self::Ed25519(sig) = self;
         sig
+    }
+
+    /// Returns the work score of a `Signature`.
+    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        match self {
+            Self::Ed25519(_) => workscore_structure.signature_ed25519,
+        }
     }
 }

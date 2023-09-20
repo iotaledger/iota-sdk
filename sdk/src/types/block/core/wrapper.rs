@@ -129,27 +129,14 @@ impl BlockWrapper {
     }
 
     /// Returns the work score of a [`BlockWrapper`].
-    pub fn workscore(&self) -> u32 {
-        let workscore_structure = self.protocol_parameters().work_score_structure;
-        let workscore_bytes = workscore_structure.data_kilobyte * self.packed_len() as u32;
-        let mut workscore_kilobytes = workscore_bytes / 1024;
+    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        let mut score = workscore_structure.data_kilobyte * self.packed_len() as u32 / 1024;
 
-        workscore_kilobytes += self.workscore_header(workscore_structure);
-        workscore_kilobytes += self.block.workscore(workscore_structure);
-        workscore_kilobytes += self.workscore_signature(workscore_structure);
-        workscore_kilobytes
-    }
-
-    #[inline(always)]
-    fn workscore_header(&self, _workscore_structure: WorkScoreStructure) -> u32 {
-        // Header has 0 work score.
-        0
-    }
-
-    #[inline(always)]
-    fn workscore_signature(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        // TODO: check
-        workscore_structure.signature_ed25519
+        // FIXME: when #1264 is merged
+        // score += self.header.workscore(workscore_structure);
+        score += self.block.workscore(workscore_structure);
+        score += self.signature.workscore(workscore_structure);
+        score
     }
 
     pub(crate) fn pack_header<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
