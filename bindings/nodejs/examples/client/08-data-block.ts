@@ -38,9 +38,12 @@ async function run() {
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
         console.log('Block data: ', fetchedBlock);
 
-        if (fetchedBlock.payload instanceof TaggedDataPayload) {
-            const payload = fetchedBlock.payload as TaggedDataPayload;
-            console.log('Decoded data:', hexToUtf8(payload.data));
+        if (fetchedBlock.isBasic()) {
+            const basic = fetchedBlock.asBasic();
+            if (basic.payload instanceof TaggedDataPayload) {
+                const payload = basic.payload as TaggedDataPayload;
+                console.log('Decoded data:', hexToUtf8(payload.data));
+            }
         }
     } catch (error) {
         console.error('Error: ', error);
