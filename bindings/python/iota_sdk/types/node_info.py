@@ -69,8 +69,7 @@ class NodeInfoMetrics:
 @json
 @dataclass
 class RentStructure:
-    """
-    The rent structure according to TIP-19.
+    """The rent structure according to TIP-19.
 
     Attributes:
         v_byte_cost: Defines the rent of a single virtual byte denoted in IOTA tokens.
@@ -110,8 +109,7 @@ class NodeInfoProtocol:
 @json
 @dataclass
 class WorkScoreStructure:
-    """
-    Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+    """Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
 
     Attributes:
         data_kilobyte: Data_kilobyte accounts for the network traffic per kilobyte.
@@ -144,8 +142,7 @@ class WorkScoreStructure:
 @json
 @dataclass
 class CongestionControlParameters:
-    """
-    Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
+    """Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
 
     Attributes:
         rmc_min: Rmc_min is the minimum value of the reference Mana cost.
@@ -170,8 +167,7 @@ class CongestionControlParameters:
 @json
 @dataclass
 class VersionSignaling:
-    """
-    The version signaling parameters.
+    """The version signaling parameters.
 
     Attributes:
         window_size: The size of the window in epochs to find which version of protocol parameters was most signaled, from current_epoch - window_size to current_epoch.
@@ -186,8 +182,7 @@ class VersionSignaling:
 @json
 @dataclass
 class ProtocolParameters:
-    """
-    The protocol parameters.
+    """The protocol parameters.
 
     Attributes:
         version: Protocol version used by the network.
@@ -244,8 +239,7 @@ class ProtocolParameters:
 @json
 @dataclass
 class ProtocolStartParameters:
-    """
-    Protocol Parameters with start epoch.
+    """Protocol Parameters with start epoch.
 
     Attributes:
         start_epoch: The start epoch of the set of protocol parameters.
