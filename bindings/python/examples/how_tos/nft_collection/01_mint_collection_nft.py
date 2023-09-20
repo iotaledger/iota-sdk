@@ -3,7 +3,7 @@ import sys
 
 from dotenv import load_dotenv
 
-from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex, Irc27Metadata
+from iota_sdk import MintNftParams, Utils, Wallet, Irc27Metadata
 
 load_dotenv()
 
