@@ -8,7 +8,7 @@ import {
     BlockIssuerKey,
     BlockIssuerKeyDiscriminator,
 } from './block-issuer-key';
-import { u64 } from '../../utils/type_aliases';
+import { u64 } from '../../utils/type-aliases';
 
 /**
  * All of the feature block types.

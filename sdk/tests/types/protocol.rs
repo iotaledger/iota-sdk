@@ -6,7 +6,7 @@ use packable::PackableExt;
 
 #[test]
 fn params_serde_hash() {
-    // Data from https://github.com/iotaledger/tips-draft/blob/tip49/tips/TIP-0049/tip-0049.md#protocol-parameter-example
+    // Test from https://github.com/iotaledger/tips-draft/blob/tip49/tips/TIP-0049/tip-0049.md#protocol-parameter-example
     let protocol_params_json = serde_json::json!(
       {
         "type":0,
@@ -17,7 +17,7 @@ fn params_serde_hash() {
           "vByteCost":6,
           "vByteFactorData":7,
           "vByteFactorKey":8,
-          "vByteFactorIssuerKeys":9,
+          "vByteFactorBlockIssuerKey":9,
           "vByteFactorStakingFeature":10,
           "vByteFactorDelegation":10
         },
