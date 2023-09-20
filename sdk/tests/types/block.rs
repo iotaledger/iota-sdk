@@ -89,7 +89,7 @@ use packable::PackableExt;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_block_wrapper(protocol_parameters.clone());
+    let block = rand_block_wrapper(&protocol_parameters);
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -106,7 +106,7 @@ fn getters() {
     let payload = Payload::from(rand_tagged_data_payload());
 
     let block = rand_block_wrapper_with_block(
-        protocol_parameters.clone(),
+        &protocol_parameters,
         rand_basic_block_builder_with_strong_parents(parents.clone())
             .with_payload(payload.clone())
             .finish()

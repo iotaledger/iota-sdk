@@ -21,7 +21,7 @@ pub(crate) use self::{
     tagged_data::{TagLength, TaggedDataLength},
     transaction::{ContextInputCount, InputCount, OutputCount},
 };
-use super::protocol::WorkScoreStructure;
+use super::protocol::{WorkScore, WorkScoreStructure};
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
@@ -62,9 +62,10 @@ impl Payload {
             Self::TaggedData(_) => TaggedDataPayload::KIND,
         }
     }
+}
 
-    /// Returns the work score of a `Payload`.
-    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+impl WorkScore for Payload {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         match self {
             Self::Transaction(transaction_payload) => transaction_payload.workscore(workscore_structure),
             Self::TaggedData(tagged_data_payload) => tagged_data_payload.workscore(workscore_structure),

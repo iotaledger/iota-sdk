@@ -11,7 +11,7 @@ use packable::{
 use crate::types::block::{
     core::{verify_parents, Block},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScoreStructure},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreStructure},
     Error,
 };
 
@@ -144,9 +144,10 @@ impl ValidationBlock {
     pub fn protocol_parameters_hash(&self) -> ProtocolParametersHash {
         self.protocol_parameters_hash
     }
+}
 
-    /// Returns the work score of a [`ValidationBlock`].
-    pub fn workscore(&self, _workscore_structure: WorkScoreStructure) -> u32 {
+impl WorkScore for ValidationBlock {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         // The work score of a validation block is `0`.
         0
     }

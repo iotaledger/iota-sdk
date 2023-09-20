@@ -1,7 +1,9 @@
-from iota_sdk import Wallet, Utils, SyncOptions, AccountSyncOptions
-from dotenv import load_dotenv
 import os
 import time
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet, Utils, SyncOptions, AccountSyncOptions
 
 # In this example we request funds to an account wallet.
 

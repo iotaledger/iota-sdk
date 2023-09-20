@@ -15,7 +15,7 @@ pub use self::{
     transaction_id::TransactionId,
 };
 use crate::types::block::{
-    protocol::{ProtocolParameters, WorkScoreStructure},
+    protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
     unlock::{Unlock, Unlocks},
     Error,
 };
@@ -57,9 +57,10 @@ impl TransactionPayload {
 
         TransactionId::new(hasher.finalize().into())
     }
+}
 
-    /// Returns the work score of a `TransactionPayload`.
-    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+impl WorkScore for TransactionPayload {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         let mut score = self.essence().workscore(workscore_structure);
         for unlock in self.unlocks.iter() {
             if matches!(unlock, Unlock::Signature(_)) {

@@ -13,7 +13,7 @@ use crate::types::{
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
         output::{Feature, InputsCommitment, NativeTokens, Output, TokenScheme, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
-        protocol::{ProtocolParameters, WorkScoreStructure},
+        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
         slot::SlotIndex,
         Error,
     },
@@ -272,9 +272,10 @@ impl RegularTransactionEssence {
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
     }
+}
 
-    /// Returns the work score of a `RegularTransactionEssence`.
-    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+impl WorkScore for RegularTransactionEssence {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         let mut score = self.inputs().len() as u32 * workscore_structure.input;
         score += self.context_inputs().len() as u32 * workscore_structure.context_input;
         for output in self.outputs() {

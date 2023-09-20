@@ -55,4 +55,9 @@ class Ed25519Signature extends Signature {
     }
 }
 
-export { SignatureType, Ed25519Signature, Signature };
+const SignatureDiscriminator = {
+    property: 'type',
+    subTypes: [{ value: Ed25519Signature, name: SignatureType.Ed25519 as any }],
+};
+
+export { SignatureDiscriminator, SignatureType, Ed25519Signature, Signature };

@@ -12,7 +12,7 @@ use crate::types::block::{
     core::{verify_parents, Block},
     parent::{ShallowLikeParents, StrongParents, WeakParents},
     payload::{OptionalPayload, Payload},
-    protocol::{ProtocolParameters, WorkScoreStructure},
+    protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
     Error,
 };
 
@@ -139,10 +139,10 @@ impl BasicBlock {
     pub fn burned_mana(&self) -> u64 {
         self.burned_mana
     }
+}
 
-    /// Returns the work score of a [`BasicBlock`].
-    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        // `Block + Missing Parents Score + Payload Score`
+impl WorkScore for BasicBlock {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         let mut score = workscore_structure.block;
         let min_strong_parents_threshold = workscore_structure.min_strong_parents_threshold as usize;
         if self.strong_parents.len() < min_strong_parents_threshold {

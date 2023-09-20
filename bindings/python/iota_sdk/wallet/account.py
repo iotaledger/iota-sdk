@@ -1,6 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import List, Optional, Union
+from dataclasses import dataclass
+from dacite import from_dict
+
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
@@ -19,9 +23,6 @@ from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTo
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
-from typing import List, Optional
-from dacite import from_dict
-from dataclasses import dataclass
 
 
 @dataclass
@@ -377,12 +378,12 @@ class Account:
     def get_balance(self) -> Balance:
         """Get account balance information.
         """
-        return from_dict(Balance, self._call_account_method(
+        return Balance.from_dict(self._call_account_method(
             'getBalance'
         ))
 
     def prepare_output(self, params: OutputParams,
-                       transaction_options: Optional[TransactionOptions] = None) -> BasicOutput | NftOutput:
+                       transaction_options: Optional[TransactionOptions] = None) -> Union[BasicOutput, NftOutput]:
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -481,7 +482,9 @@ class Account:
         return self.prepare_send_native_tokens(params, options).send()
 
     def prepare_send_native_tokens(
-            self, params: List[SendNativeTokensParams], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+            self,
+            params: List[SendNativeTokensParams],
+            options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Send native tokens.
         """
         prepared = self._call_account_method(
@@ -533,7 +536,7 @@ class Account:
             self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
         """Sign a transaction essence.
         """
-        return from_dict(SignedTransactionData, self._call_account_method(
+        return SignedTransactionData.from_dict(self._call_account_method(
             'signTransactionEssence', {
                 'preparedTransactionData': prepared_transaction_data
             }

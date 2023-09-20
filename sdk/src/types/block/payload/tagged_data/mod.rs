@@ -12,7 +12,10 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{protocol::WorkScoreStructure, BlockWrapper, Error};
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreStructure},
+    BlockWrapper, Error,
+};
 
 pub(crate) type TagLength =
     BoundedU8<{ *TaggedDataPayload::TAG_LENGTH_RANGE.start() }, { *TaggedDataPayload::TAG_LENGTH_RANGE.end() }>;
@@ -58,9 +61,10 @@ impl TaggedDataPayload {
     pub fn data(&self) -> &[u8] {
         &self.data
     }
+}
 
-    /// Returns the work score of a `TaggedDataPayload`.
-    pub fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+impl WorkScore for TaggedDataPayload {
+    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
         // For tagged data payloads the work score is `0`.
         0
     }
