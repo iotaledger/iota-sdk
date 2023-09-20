@@ -12,6 +12,7 @@ import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString, hexToBigInt, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
+import { AccountId, DelegationId } from '../id';
 
 export type OutputId = string;
 
@@ -27,6 +28,8 @@ enum OutputType {
     Foundry = 5,
     /** An NFT output. */
     Nft = 6,
+    /** A Delegation output. */
+    Delegation = 7,
 }
 
 /**
@@ -305,6 +308,66 @@ class FoundryOutput extends ImmutableFeaturesOutput {
         this.tokenScheme = tokenScheme;
     }
 }
+/**
+ * A Delegation output.
+ */
+class DelegationOutput extends Output {
+    /**
+     * The amount of delegated coins.
+     */
+    readonly delegatedAmount: u64;
+    /**
+     * Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.
+     */
+    readonly delegationId: DelegationId;
+    /**
+     * The Account ID of the validator to which this output is delegating.
+     */
+    readonly validatorId: AccountId;
+    /**
+     * The index of the first epoch for which this output delegates.
+     */
+    readonly startEpoch: u64;
+    /**
+     * The index of the last epoch for which this output delegates.
+     */
+    readonly endEpoch: u64;
+    /**
+     * The unlock conditions for the output.
+     */
+    @Type(() => UnlockCondition, {
+        discriminator: UnlockConditionDiscriminator,
+    })
+    readonly unlockConditions: UnlockCondition[];
+
+    /**
+     * @param amount The amount of the output.
+     * @param delegatedAmount The amount of delegated coins.
+     * @param delegationId Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * @param validatorId The Account ID of the validator to which this output is delegating.
+     * @param startEpoch The index of the first epoch for which this output delegates.
+     * @param startEpoch The unlock conditions of the output.
+     * @param endEpoch The index of the last epoch for which this output delegates.
+     * @param unlockConditions The unlock conditions of the output.
+     */
+    constructor(
+        amount: u64,
+        delegatedAmount: u64,
+        delegationId: DelegationId,
+        validatorId: AccountId,
+        startEpoch: u64,
+        endEpoch: u64,
+        unlockConditions: UnlockCondition[],
+    ) {
+        super(OutputType.Delegation, amount);
+        this.delegatedAmount = delegatedAmount;
+        this.delegationId = delegationId;
+        this.validatorId = validatorId;
+        this.startEpoch = startEpoch;
+        this.endEpoch = endEpoch;
+        this.unlockConditions = unlockConditions;
+    }
+}
 
 const OutputDiscriminator = {
     property: 'type',
@@ -313,6 +376,7 @@ const OutputDiscriminator = {
         { value: AccountOutput, name: OutputType.Account as any },
         { value: NftOutput, name: OutputType.Nft as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
+        { value: DelegationOutput, name: OutputType.Delegation as any },
     ],
 };
 
@@ -325,4 +389,5 @@ export {
     AccountOutput,
     NftOutput,
     FoundryOutput,
+    DelegationOutput,
 };
