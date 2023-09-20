@@ -16,7 +16,7 @@ fn params_serde_hash() {
               "vByteCost": 6,
               "vByteFactorData": 7,
               "vByteFactorKey": 8,
-              "vByteFactorIssuerKeys": 9,
+              "vByteFactorBlockIssuerKey": 9,
               "vByteFactorStakingFeature": 10,
               "vByteFactorDelegation": 10
             },
