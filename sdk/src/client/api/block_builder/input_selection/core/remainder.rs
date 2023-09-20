@@ -32,13 +32,12 @@ impl InputSelection {
                     self.outputs.as_slice(),
                     self.burn.as_ref(),
                 );
-                // PANIC: safe to unwrap as treasury outputs can't be used as input.
-                let required_address = input
-                    .output
-                    .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)
-                    .unwrap()
-                    .0;
-                if remainder_address == required_address {
+                let required_address =
+                    input
+                        .output
+                        .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition);
+
+                if matches!(required_address, Ok(a) if a.0 == remainder_address) {
                     return Some((remainder_address, input.chain));
                 }
             }
