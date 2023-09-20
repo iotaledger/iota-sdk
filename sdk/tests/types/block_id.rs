@@ -132,10 +132,10 @@ fn basic_block_id_tagged_data_payload() {
         ]
     );
 
-    // let slot_commitment_id = slot_commitment.id().to_string();
+    let block_id = block.id(&ProtocolParameters::default()).to_string();
 
-    // assert_eq!(
-    //     slot_commitment_id,
-    //     "0x3a73079f3dbf8c1744ae0b020b9767546e32f5bbbf4c6f0233da7b64f16581f80a00000000000000"
-    // );
+    assert_eq!(
+        block_id,
+        "0xd5b4743580e968c6418b279620fa690331b51cfff28464f8d767e43fd586f0190100000000000000"
+    );
 }
