@@ -161,16 +161,16 @@ impl BlockBuilder<ValidationBlockBuilder> {
     }
 
     pub fn finish(self, signature: Ed25519Signature) -> Result<BlockWrapper, Error> {
-        Ok(BlockWrapper {
-            protocol_parameters: self.protocol_parameters,
+        Ok(BlockWrapper::new(
+            &self.protocol_parameters,
             // TODO provide a sensible default
-            issuing_time: self.issuing_time.ok_or(Error::InvalidField("issuing time"))?,
-            slot_commitment_id: self.slot_commitment_id,
-            latest_finalized_slot: self.latest_finalized_slot,
-            issuer_id: self.issuer_id,
-            block: self.block.finish_block()?,
-            signature: signature.into(),
-        })
+            self.issuing_time.ok_or(Error::InvalidField("issuing time"))?,
+            self.slot_commitment_id,
+            self.latest_finalized_slot,
+            self.issuer_id,
+            self.block.finish_block()?,
+            signature,
+        ))
     }
 }
 
