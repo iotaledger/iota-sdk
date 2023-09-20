@@ -53,6 +53,7 @@ impl BlockHeader {
 
 impl WorkScore for BlockHeader {
     fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+        // The work score of a block header is `0`.
         0
     }
 }
