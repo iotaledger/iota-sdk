@@ -4,7 +4,7 @@
 #[cfg(feature = "serde")]
 pub mod serde;
 
-#[cfg(feature = "client")]
+#[cfg(feature = "instant")]
 pub fn unix_timestamp_now() -> core::time::Duration {
     instant::SystemTime::now()
         .duration_since(instant::SystemTime::UNIX_EPOCH)

@@ -11,8 +11,8 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
+    Url,
 };
-use url::Url;
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 

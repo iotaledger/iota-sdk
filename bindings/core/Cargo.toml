@@ -30,9 +30,6 @@ serde = { version = "1.0.188", default-features = false }
 serde_json = { version = "1.0.107", default-features = false }
 thiserror = { version = "1.0.48", default-features = false }
 tokio = { version = "1.32.0", default-features = false }
-url = { version = "2.4.1", default-features = false, features = [
-    "serde",
-] }
 zeroize = { version = "1.6.0", default-features = false }
 
 [features]
