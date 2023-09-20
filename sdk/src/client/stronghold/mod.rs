@@ -490,10 +490,12 @@ impl StrongholdAdapter {
     ///
     /// [`unload_stronghold_snapshot()`]: Self::unload_stronghold_snapshot()
     pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<(), Error> {
-        if matches!(snapshot_path, Some(p) if p.is_dir()) {
-            // TODO: Add Error in 2.0 as its breaking.
-            // Issue #1197
-            panic!("Path is not a file: {:?}", p);
+        if let Some(p) = snapshot_path {
+            if p.is_dir() {
+                // TODO: Add Error in 2.0 as its breaking.
+                // Issue #1197
+                panic!("Path is not a file: {:?}", p);
+            }
         }
 
         // The key needs to be supplied first.
