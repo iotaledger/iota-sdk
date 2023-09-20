@@ -112,7 +112,7 @@ class WorkScoreStructure:
 @json
 @dataclass
 class CongestionControlParameters:
-    """Congestion Control Parameters defines the parameters used by to calculate the Reference Mana Cost (RMC).
+    """Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
 
     Attributes:
         rmc_min: Rmc_min is the minimum value of the reference Mana cost.
