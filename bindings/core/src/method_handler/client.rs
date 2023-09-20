@@ -325,6 +325,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
         }
+        ClientMethod::OutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.output_ids(query_parameters).await?)
+        }
         ClientMethod::BasicOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.basic_output_ids(query_parameters).await?)
         }

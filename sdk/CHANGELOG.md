@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ConflictReason` display implementation with an explanation of the conflict;
 - `TokenScheme` methods `is_simple` and `as_simple`;
 - `Irc27Metadata` and `Irc30Metadata` helpers;
+- `Client::output_ids()` method;
+- `QueryParameter::UnlockableByAddress` variant;
 
 ### Changed
 
