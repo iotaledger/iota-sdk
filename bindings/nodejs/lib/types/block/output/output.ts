@@ -346,7 +346,6 @@ class DelegationOutput extends Output {
      * @param delegationId Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.
      * @param validatorId The Account ID of the validator to which this output is delegating.
      * @param startEpoch The index of the first epoch for which this output delegates.
-     * @param startEpoch The unlock conditions of the output.
      * @param endEpoch The index of the last epoch for which this output delegates.
      * @param unlockConditions The unlock conditions of the output.
      */
