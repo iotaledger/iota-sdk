@@ -58,6 +58,9 @@ pub struct ProtocolParameters {
     pub(crate) staking_unbonding_period: EpochIndex,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
+    /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) punishment_epochs: u64,
     /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
     /// and commitments in its past-cone against accepted tangle time and last committed slot respectively.
     pub(crate) liveness_threshold: SlotIndex,
@@ -100,6 +103,7 @@ impl Default for ProtocolParameters {
             mana_structure: Default::default(),
             staking_unbonding_period: 10.into(),
             validation_blocks_per_slot: 10,
+            punishment_epochs: 9,
             liveness_threshold: 5.into(),
             min_committable_age: 10.into(),
             max_committable_age: 20.into(),
@@ -180,46 +184,46 @@ impl ProtocolParameters {
 #[getset(get_copy = "pub")]
 pub struct WorkScoreStructure {
     /// Modifier for network traffic per byte.
-    data_kilobyte: u32,
+    work_score_data_kilobyte: u32,
     /// Modifier for work done to process a block.
-    block: u32,
+    work_score_block: u32,
     /// Modifier for slashing when there are insufficient strong tips.
-    missing_parent: u32,
+    work_score_missing_parent: u32,
     /// Modifier for loading UTXOs and performing mana calculations.
-    input: u32,
+    work_score_input: u32,
     /// Modifier for loading and checking the context input.
-    context_input: u32,
+    work_score_context_input: u32,
     /// Modifier for storing UTXOs.
-    output: u32,
+    work_score_output: u32,
     /// Modifier for calculations using native tokens.
-    native_token: u32,
+    work_score_native_token: u32,
     /// Modifier for storing staking features.
-    staking: u32,
+    work_score_staking: u32,
     /// Modifier for storing block issuer features.
-    block_issuer: u32,
+    work_score_block_issuer: u32,
     /// Modifier for accessing the account-based ledger to transform mana to Block Issuance Credits.
-    allotment: u32,
+    work_score_allotment: u32,
     /// Modifier for the block signature check.
-    signature_ed25519: u32,
+    work_score_signature_ed25519: u32,
     /// The minimum count of strong parents in a basic block.
-    min_strong_parents_threshold: u8,
+    work_score_min_strong_parents_threshold: u8,
 }
 
 impl Default for WorkScoreStructure {
     fn default() -> Self {
         Self {
-            data_kilobyte: 0,
-            block: 100,
-            missing_parent: 500,
-            input: 20,
-            context_input: 20,
-            output: 20,
-            native_token: 20,
-            staking: 100,
-            block_issuer: 100,
-            allotment: 100,
-            signature_ed25519: 200,
-            min_strong_parents_threshold: 4,
+            work_score_data_kilobyte: 0,
+            work_score_block: 100,
+            work_score_missing_parent: 500,
+            work_score_input: 20,
+            work_score_context_input: 20,
+            work_score_output: 20,
+            work_score_native_token: 20,
+            work_score_staking: 100,
+            work_score_block_issuer: 100,
+            work_score_allotment: 100,
+            work_score_signature_ed25519: 200,
+            work_score_min_strong_parents_threshold: 4,
         }
     }
 }
@@ -252,8 +256,10 @@ pub struct CongestionControlParameters {
     /// Minimum amount of Mana that an account must have to schedule a block.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     min_mana: u64,
-    /// Maximum size of the buffer. TODO what buffer?
+    /// Maximum size of the buffer in the scheduler.
     max_buffer_size: u32,
+    /// Maximum number of blocks in the validation buffer.
+    max_validation_buffer_size: u32,
 }
 
 impl Default for CongestionControlParameters {
@@ -267,6 +273,7 @@ impl Default for CongestionControlParameters {
             scheduler_rate: 100000,
             min_mana: 1,
             max_buffer_size: 3276800,
+            max_validation_buffer_size: 100,
         }
     }
 }
