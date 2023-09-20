@@ -11,7 +11,7 @@ const DEFAULT_BYTE_COST_FACTOR_DATA: u8 = 1;
 // TODO: fill in the real values
 const DEFAULT_BYTE_COST_FACTOR_DELEGATION: u8 = 1;
 const DEFAULT_BYTE_COST_FACTOR_STAKING_FEATURE: u8 = 1;
-const DEFAULT_BYTE_COST_FACTOR_ISSUER_KEYS: u8 = 1;
+const DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY: u8 = 1;
 
 /// Specifies the current parameters for the byte cost computation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
@@ -28,7 +28,7 @@ pub struct RentStructure {
     /// The weight factor used for key fields in the outputs.
     v_byte_factor_key: u8,
     /// The weight factor used for block issuer key fields in the outputs.
-    v_byte_factor_issuer_keys: u8,
+    v_byte_factor_block_issuer_key: u8,
     /// The weight factor used for staking fields in the outputs.
     v_byte_factor_staking_feature: u8,
     /// The weight factor used for delegation fields in the outputs.
@@ -41,7 +41,7 @@ impl Default for RentStructure {
             v_byte_cost: DEFAULT_BYTE_COST,
             v_byte_factor_data: DEFAULT_BYTE_COST_FACTOR_DATA,
             v_byte_factor_key: DEFAULT_BYTE_COST_FACTOR_KEY,
-            v_byte_factor_issuer_keys: DEFAULT_BYTE_COST_FACTOR_ISSUER_KEYS,
+            v_byte_factor_block_issuer_key: DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY,
             v_byte_factor_staking_feature: DEFAULT_BYTE_COST_FACTOR_STAKING_FEATURE,
             v_byte_factor_delegation: DEFAULT_BYTE_COST_FACTOR_DELEGATION,
         }
@@ -54,7 +54,7 @@ impl RentStructure {
         byte_cost: u32,
         byte_factor_data: u8,
         byte_factor_key: u8,
-        byte_factor_issuer_keys: u8,
+        byte_factor_block_issuer_key: u8,
         byte_factor_staking_feature: u8,
         byte_factor_delegation: u8,
     ) -> Self {
@@ -62,7 +62,7 @@ impl RentStructure {
             v_byte_cost: byte_cost,
             v_byte_factor_data: byte_factor_data,
             v_byte_factor_key: byte_factor_key,
-            v_byte_factor_issuer_keys: byte_factor_issuer_keys,
+            v_byte_factor_block_issuer_key: byte_factor_block_issuer_key,
             v_byte_factor_staking_feature: byte_factor_staking_feature,
             v_byte_factor_delegation: byte_factor_delegation,
         }
@@ -87,8 +87,8 @@ impl RentStructure {
     }
 
     /// Sets the virtual byte weight for the block issuer key fields.
-    pub fn with_byte_factor_issuer_keys(mut self, byte_factor_issuer_keys: u8) -> Self {
-        self.v_byte_factor_issuer_keys = byte_factor_issuer_keys;
+    pub fn with_byte_factor_block_issuer_key(mut self, byte_factor_block_issuer_key: u8) -> Self {
+        self.v_byte_factor_block_issuer_key = byte_factor_block_issuer_key;
         self
     }
 
@@ -120,8 +120,8 @@ impl RentStructure {
     }
 
     /// Returns the block issuer key byte factor of the [`RentStructure`].
-    pub const fn byte_factor_issuer_keys(&self) -> u8 {
-        self.v_byte_factor_issuer_keys
+    pub const fn byte_factor_block_issuer_key(&self) -> u8 {
+        self.v_byte_factor_block_issuer_key
     }
 
     /// Returns the staking byte factor of the [`RentStructure`].
