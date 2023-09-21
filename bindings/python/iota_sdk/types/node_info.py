@@ -82,7 +82,7 @@ class WorkScoreStructure:
     """Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
 
     Attributes:
-        data_kilobyte: Data_kilobyte accounts for the network traffic per kilobyte.
+        data_kibibyte: Data_kibibyte accounts for the network traffic per kibibyte.
         block: Block accounts for work done to process a block in the node software.
         missing_parent: Missing_parent is used to multiply for each missing parent if there are not enough strong ones.
         input: Input accounts for loading the UTXO from the database and performing the mana calculations.
@@ -95,7 +95,7 @@ class WorkScoreStructure:
         signature_ed25519: SignatureEd25519 accounts for an Ed25519 signature check.
         min_strong_parents_threshold: MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise, the issuer gets slashed.
     """
-    data_kilobyte: int
+    data_kibibyte: int
     block: int
     missing_parent: int
     input: int
