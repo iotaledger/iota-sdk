@@ -185,7 +185,11 @@ impl StrongholdAdapterBuilder {
         if snapshot_path.as_ref().is_dir() {
             // TODO: Add Error in 2.0 as its breaking.
             // Issue #1197
-            panic!("Path is not a file: {:?}", snapshot_path.as_ref().to_path_buf());
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Path is not a file: {:?}", snapshot_path.unwrap()),
+            )
+            .into());
         }
 
         // In any case, Stronghold - as a necessary component - needs to be present at this point.
@@ -493,7 +497,11 @@ impl StrongholdAdapter {
         if matches!(snapshot_path, Some(p) if p.is_dir()) {
             // TODO: Add Error in 2.0 as its breaking.
             // Issue #1197
-            panic!("Path is not a file: {:?}", snapshot_path.unwrap());
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Path is not a file: {:?}", snapshot_path.unwrap()),
+            )
+            .into());
         }
 
         // The key needs to be supplied first.
