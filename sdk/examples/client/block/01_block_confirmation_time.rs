@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
             None,
         )
         .await?;
-    let block_id = block.id(&client.get_protocol_parameters().await?);
+    let block_id = client.block_id(&block).await?;
 
     println!("{block:#?}");
 

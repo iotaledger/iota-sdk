@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with no payload sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id(&client.get_protocol_parameters().await?)
+        client.block_id(&block).await?
     );
 
     Ok(())
