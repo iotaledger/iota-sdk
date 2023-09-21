@@ -15,6 +15,6 @@ export const BlockDiscriminator = {
     property: 'type',
     subTypes: [
         { value: BasicBlock, name: BlockType.Basic as any },
-        { value: ValidationBlock, name: BlockType.Validation as any }
+        { value: ValidationBlock, name: BlockType.Validation as any },
     ],
 };
