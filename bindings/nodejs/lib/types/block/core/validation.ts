@@ -11,7 +11,6 @@ import { Block } from './block';
  * burning Mana within the constraints of the allowed validator throughput.
  *
  * It is allowed to reference more parent blocks than a normal Basic Block.
- * Validation Block uses the introduced Block ID as its identifier.
  */
 export class ValidationBlock extends Block {
     /**
