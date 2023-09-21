@@ -4,7 +4,7 @@
 use crate::{
     client::{secret::SecretManage, Error as ClientError},
     types::{
-        api::core::response::LedgerInclusionState,
+        api::core::response::{BlockState, TransactionState},
         block::{
             payload::{transaction::TransactionId, Payload},
             BlockId,
@@ -33,6 +33,7 @@ where
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[reissue_transaction_until_included]");
 
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
@@ -50,7 +51,7 @@ where
                 .into());
             }
 
-            let block_id = match transaction.block_id {
+            let first_block_id = match transaction.block_id {
                 Some(block_id) => block_id,
                 None => self
                     .client()
@@ -62,13 +63,13 @@ where
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                     )
                     .await?
-                    .id(),
+                    .id(&protocol_parameters),
             };
 
             // Attachments of the Block to check inclusion state
             // TODO: remove when todos in `finish_basic_block_builder()` are removed
             #[allow(unused_mut)]
-            let mut block_ids = vec![block_id];
+            let mut block_ids = vec![first_block_id];
             for _ in 0..max_attempts.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT) {
                 let duration =
                     std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL));
@@ -81,21 +82,26 @@ where
 
                 // Check inclusion state for each attachment
                 let block_ids_len = block_ids.len();
-                let mut conflicting = false;
-                for (index, block_id_) in block_ids.clone().iter().enumerate() {
-                    let block_metadata = self.client().get_block_metadata(block_id_).await?;
-                    if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
-                        match inclusion_state {
-                            LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
-                                return Ok(*block_id_);
-                            }
-                            // only set it as conflicting here and don't return, because another reissued block could
+                let mut failed = false;
+                for (index, block_id) in block_ids.clone().iter().enumerate() {
+                    let block_metadata = self.client().get_block_metadata(block_id).await?;
+                    if let Some(transaction_state) = block_metadata.tx_state {
+                        match transaction_state {
+                            // TODO: find out what to do with TransactionState::Confirmed
+                            TransactionState::Finalized => return Ok(*block_id),
+                            // only set it as failed here and don't return, because another reissued block could
                             // have the included transaction
-                            LedgerInclusionState::Conflicting => conflicting = true,
+                            // TODO: check if the comment above is still correct with IOTA 2.0
+                            TransactionState::Failed => failed = true,
+                            // TODO: what to do when confirmed?
+                            _ => {}
                         };
                     }
                     // Only reissue latest attachment of the block
-                    if index == block_ids_len - 1 && block_metadata.should_reattach.unwrap_or(false) {
+                    let should_reissue = block_metadata
+                        .block_state
+                        .map_or(false, |block_state| block_state == BlockState::Rejected);
+                    if index == block_ids_len - 1 && should_reissue {
                         let reissued_block = self
                             .client()
                             .finish_basic_block_builder(
@@ -106,24 +112,26 @@ where
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                             )
                             .await?;
-                        block_ids.push(reissued_block.id());
+                        block_ids.push(reissued_block.id(&protocol_parameters));
                     }
                 }
                 // After we checked all our reissued blocks, check if the transaction got reissued in another block
                 // and confirmed
-                if conflicting {
+                // TODO: can this still be the case? Is the TransactionState per transaction or per attachment in a
+                // block?
+                if failed {
                     let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
                         if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
                             // If no block was found with this transaction id, then it can't get included
-                            ClientError::TangleInclusion(block_id.to_string())
+                            ClientError::TangleInclusion(first_block_id.to_string())
                         } else {
                             e
                         }
                     })?;
-                    return Ok(included_block.id());
+                    return Ok(included_block.id(&protocol_parameters));
                 }
             }
-            Err(ClientError::TangleInclusion(block_id.to_string()).into())
+            Err(ClientError::TangleInclusion(first_block_id.to_string()).into())
         } else {
             Err(Error::TransactionNotFound(*transaction_id))
         }

@@ -20,15 +20,19 @@ class TransactionPayload extends Payload {
     @Type(() => TransactionEssence, {
         discriminator: TransactionEssenceDiscriminator,
     })
-    essence: TransactionEssence;
+    readonly essence: TransactionEssence;
     /**
      * The unlocks.
      */
     @Type(() => Unlock, {
         discriminator: UnlockDiscriminator,
     })
-    unlocks: Unlock[];
+    readonly unlocks: Unlock[];
 
+    /**
+     * @param essence The transaction essence.
+     * @param unlocks The unlocks of the transaction.
+     */
     constructor(essence: TransactionEssence, unlocks: Unlock[]) {
         super(PayloadType.Transaction);
         this.essence = essence;

@@ -36,12 +36,12 @@ impl NftUnlock {
     }
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
 
-    /// Points to the unlock of a consumed NFT output.
     #[derive(Serialize, Deserialize)]
     struct NftUnlockDto {
         #[serde(rename = "type")]

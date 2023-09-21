@@ -66,19 +66,20 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use alloc::borrow::Cow;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::utils::serde::cow_boxed_slice_prefix;
+    use crate::utils::serde::cow_boxed_slice_prefix_hex_bytes;
 
     #[derive(Serialize, Deserialize)]
     struct TagFeatureDto<'a> {
         #[serde(rename = "type")]
         kind: u8,
-        #[serde(with = "cow_boxed_slice_prefix")]
+        #[serde(with = "cow_boxed_slice_prefix_hex_bytes")]
         tag: Cow<'a, BoxedSlicePrefix<u8, TagFeatureLength>>,
     }
 

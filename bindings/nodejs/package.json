@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk",
-    "version": "1.0.0",
+    "version": "1.0.11",
     "description": "Node.js binding to the IOTA SDK library",
     "main": "out/index.js",
     "types": "out/index.d.ts",
@@ -20,7 +20,7 @@
         "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
         "install": "prebuild-install --runtime napi --tag-prefix='iota-sdk-nodejs-v' && tsc || npm run rebuild",
         "test": "jest",
-        "create-api-docs": "typedoc ./lib/index.ts --githubPages false --disableSources --excludePrivate --excludeInternal --plugin typedoc-plugin-markdown --theme markdown --hideBreadcrumbs --entryDocument api_ref.md --readme none --hideGenerator --sort source-order --exclude ./**/src/index.ts"
+        "create-api-docs": "typedoc ./lib/index.ts --githubPages false --disableSources --excludePrivate --excludeInternal --plugin typedoc-plugin-markdown --theme markdown --hideBreadcrumbs --entryDocument api_ref.md --readme none --hideGenerator --sort source-order"
     },
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",

@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, utf8_to_hex, MintNftParams
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import MintNftParams, Wallet, utf8_to_hex
 
 load_dotenv()
 
@@ -19,8 +21,8 @@ account = wallet.get_account('Alice')
 response = account.sync()
 
 outputs = [MintNftParams(
-    immutableMetadata=utf8_to_hex("some immutable nft metadata"),
+    immutable_metadata=utf8_to_hex("some immutable nft metadata"),
 )]
 
-transaction = account.prepare_mint_nfts(outputs).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+transaction = account.mint_nfts(outputs)
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

@@ -1,10 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{
-    collections::{BTreeMap, BTreeSet},
-    vec::Vec,
-};
+use alloc::collections::{BTreeMap, BTreeSet};
 use core::cmp::Ordering;
 
 use packable::{
@@ -15,7 +12,6 @@ use packable::{
 };
 use primitive_types::U256;
 
-use super::verify_output_amount_packable;
 use crate::types::{
     block::{
         address::{AccountAddress, Address},
@@ -24,18 +20,19 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, FoundryId,
+            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
-        semantic::{ConflictReason, ValidationContext},
+        semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
     ValidationParams,
 };
 
-///
+/// Builder for a [`FoundryOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct FoundryOutputBuilder {
@@ -237,9 +234,11 @@ impl FoundryOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Foundry(output.clone()).rent_cost(&rent_structure)
+                Output::Foundry(output.clone()).rent_cost(rent_structure)
             }
         };
+
+        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -252,7 +251,7 @@ impl FoundryOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
@@ -281,15 +280,19 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 /// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     amount: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by this output.
     native_tokens: NativeTokens,
-    // The serial number of the foundry with respect to the controlling account.
+    /// The serial number of the foundry with respect to the controlling account.
     serial_number: u32,
+    /// Define the supply control scheme of the native tokens controlled by the foundry.
     token_scheme: TokenScheme,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
+    /// Features of the output.
     features: Features,
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
@@ -395,7 +398,7 @@ impl FoundryOutput {
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
-    ) -> Result<(), ConflictReason> {
+    ) -> Result<(), TransactionFailureReason> {
         Address::from(*self.account_address()).unlock(unlock, inputs, context)
     }
 
@@ -613,7 +616,10 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -625,19 +631,15 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct FoundryOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // The serial number of the foundry with respect to the controlling account.
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -737,7 +739,6 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
-    use packable::PackableExt;
 
     use super::*;
     use crate::types::{
@@ -757,61 +758,6 @@ mod tests {
         },
         TryFromDto,
     };
-
-    #[test]
-    fn builder() {
-        let protocol_parameters = protocol_parameters();
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let account_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
-        let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
-        let metadata_1 = rand_metadata_feature();
-        let metadata_2 = rand_metadata_feature();
-
-        let mut builder = FoundryOutput::build_with_amount(0, 234, rand_token_scheme())
-            .with_serial_number(85)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .with_unlock_conditions([account_1])
-            .add_feature(metadata_1.clone())
-            .replace_feature(metadata_2.clone())
-            .with_immutable_features([metadata_2.clone()])
-            .replace_immutable_feature(metadata_1.clone());
-
-        let output = builder.clone().finish().unwrap();
-        assert_eq!(output.serial_number(), 85);
-        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_1));
-        assert_eq!(output.features().metadata(), Some(&metadata_2));
-        assert_eq!(output.immutable_features().metadata(), Some(&metadata_1));
-
-        builder = builder
-            .clear_unlock_conditions()
-            .clear_features()
-            .clear_immutable_features()
-            .replace_unlock_condition(account_2);
-        let output = builder.clone().finish().unwrap();
-        assert_eq!(output.unlock_conditions().immutable_account_address(), Some(&account_2));
-        assert!(output.features().is_empty());
-        assert!(output.immutable_features().is_empty());
-
-        let output = builder
-            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
-            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-            .finish_with_params(&protocol_parameters)
-            .unwrap();
-
-        assert_eq!(
-            output.amount(),
-            Output::Foundry(output).rent_cost(protocol_parameters.rent_structure())
-        );
-    }
-
-    #[test]
-    fn pack_unpack() {
-        let protocol_parameters = protocol_parameters();
-        let output = rand_foundry_output(protocol_parameters.token_supply());
-        let bytes = output.pack_to_vec();
-        let output_unpacked = FoundryOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
-        assert_eq!(output, output_unpacked);
-    }
 
     #[test]
     fn to_from_dto() {
@@ -851,7 +797,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder = FoundryOutput::build_with_minimum_storage_deposit(
-            *protocol_parameters.rent_structure(),
+            protocol_parameters.rent_structure(),
             123,
             rand_token_scheme(),
         )

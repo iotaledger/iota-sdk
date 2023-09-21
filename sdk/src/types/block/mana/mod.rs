@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod allotment;
+mod protocol;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
@@ -10,13 +11,10 @@ use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-pub use self::allotment::ManaAllotment;
-use super::{output::AccountId, Error};
-
-/// The number of bits that a given mana value can use, excluding the sign bit.
-pub const MANA_BITS: u64 = 63;
-/// Equivalent to `2^MANA_BITS - 1`
-pub const THEORETICAL_MANA_MAX: u64 = u64::MAX >> 1;
+#[cfg(feature = "serde")]
+pub use self::allotment::dto::ManaAllotmentDto;
+pub use self::{allotment::ManaAllotment, protocol::ManaStructure};
+use super::{output::AccountId, protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =
     BoundedU16<{ *ManaAllotments::COUNT_RANGE.start() }, { *ManaAllotments::COUNT_RANGE.end() }>;
@@ -25,12 +23,12 @@ pub(crate) type ManaAllotmentCount =
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidManaAllotmentCount(p.into())))]
 pub struct ManaAllotments(
-    #[packable(verify_with = verify_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
+    #[packable(verify_with = verify_mana_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
 );
 
 impl ManaAllotments {
     /// The minimum number of mana allotments of a transaction.
-    pub const COUNT_MIN: u16 = 1;
+    pub const COUNT_MIN: u16 = 0;
     /// The maximum number of mana allotments of a transaction.
     pub const COUNT_MAX: u16 = 128;
     /// The range of valid numbers of mana allotments of a transaction.
@@ -38,24 +36,25 @@ impl ManaAllotments {
 
     /// Creates a new [`ManaAllotments`] from a vec.
     pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
-        let allotments = BoxedSlicePrefix::<ManaAllotment, ManaAllotmentCount>::try_from(allotments.into_boxed_slice())
-            .map_err(Error::InvalidManaAllotmentCount)?;
+        verify_mana_allotments_unique_sorted(&allotments)?;
 
-        verify_allotments::<true>(&allotments, &())?;
-
-        Ok(Self(allotments))
+        Ok(Self(
+            allotments
+                .into_boxed_slice()
+                .try_into()
+                .map_err(Error::InvalidManaAllotmentCount)?,
+        ))
     }
 
     /// Creates a new [`ManaAllotments`] from an ordered set.
     pub fn from_set(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Error> {
-        let allotments = BoxedSlicePrefix::<ManaAllotment, ManaAllotmentCount>::try_from(
-            allotments.into_iter().collect::<Box<[_]>>(),
-        )
-        .map_err(Error::InvalidManaAllotmentCount)?;
-
-        verify_allotments_sum(allotments.as_ref())?;
-
-        Ok(Self(allotments))
+        Ok(Self(
+            allotments
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidManaAllotmentCount)?,
+        ))
     }
 
     /// Gets a reference to an [`ManaAllotment`], if one exists, using an [`AccountId`].
@@ -65,27 +64,45 @@ impl ManaAllotments {
     }
 }
 
-fn verify_allotments<const VERIFY: bool>(allotments: &[ManaAllotment], _visitor: &()) -> Result<(), Error> {
+fn verify_mana_allotments<const VERIFY: bool>(
+    allotments: &[ManaAllotment],
+    protocol_params: &ProtocolParameters,
+) -> Result<(), Error> {
     if VERIFY {
-        if !is_unique_sorted(allotments.iter()) {
-            return Err(Error::ManaAllotmentsNotUniqueSorted);
-        }
-        verify_allotments_sum(allotments)?;
+        verify_mana_allotments_unique_sorted(allotments)?;
+        verify_mana_allotments_sum(allotments, protocol_params)?;
     }
 
     Ok(())
 }
 
-fn verify_allotments_sum<'a>(allotments: impl IntoIterator<Item = &'a ManaAllotment>) -> Result<(), Error> {
+fn verify_mana_allotments_unique_sorted<'a>(
+    allotments: impl IntoIterator<Item = &'a ManaAllotment>,
+) -> Result<(), Error> {
+    if !is_unique_sorted(allotments.into_iter()) {
+        return Err(Error::ManaAllotmentsNotUniqueSorted);
+    }
+    Ok(())
+}
+
+pub(crate) fn verify_mana_allotments_sum<'a>(
+    allotments: impl IntoIterator<Item = &'a ManaAllotment>,
+    protocol_params: &ProtocolParameters,
+) -> Result<(), Error> {
     let mut mana_sum: u64 = 0;
+    let max_mana = protocol_params.mana_structure().max_mana();
 
     for ManaAllotment { mana, .. } in allotments {
-        mana_sum = mana_sum
-            .checked_add(*mana)
-            .ok_or(Error::InvalidManaAllotmentSum(mana_sum as u128 + *mana as u128))?;
+        mana_sum = mana_sum.checked_add(*mana).ok_or(Error::InvalidManaAllotmentSum {
+            sum: mana_sum as u128 + *mana as u128,
+            max: max_mana,
+        })?;
 
-        if mana_sum > THEORETICAL_MANA_MAX {
-            return Err(Error::InvalidManaAllotmentSum(mana_sum as u128));
+        if mana_sum > max_mana {
+            return Err(Error::InvalidManaAllotmentSum {
+                sum: mana_sum as u128,
+                max: max_mana,
+            });
         }
     }
 

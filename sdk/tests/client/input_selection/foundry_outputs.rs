@@ -322,7 +322,7 @@ fn destroy_foundry_with_account_state_transition() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
+    .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
     .select()
     .unwrap();
 
@@ -364,7 +364,7 @@ fn destroy_foundry_with_account_governance_transition() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
+    .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
     .select();
 
     assert!(matches!(
@@ -415,7 +415,7 @@ fn destroy_foundry_with_account_burn() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(
+    .with_burn(
         Burn::new()
             .add_foundry(inputs[1].output.as_foundry().id())
             .add_account(account_id_2),
@@ -750,7 +750,7 @@ fn mint_and_burn_at_the_same_time() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_native_token(token_id, 10))
+    .with_burn(Burn::new().add_native_token(token_id, 10))
     .select();
 
     assert!(matches!(
@@ -864,7 +864,7 @@ fn create_native_token_but_burn_account() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -966,7 +966,7 @@ fn burned_tokens_not_provided() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_native_token(token_id_1, 100))
+    .with_burn(Burn::new().add_native_token(token_id_1, 100))
     .select();
 
     assert!(matches!(
@@ -1020,7 +1020,7 @@ fn foundry_in_outputs_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[1].output_id()])
+    .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 

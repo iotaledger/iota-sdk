@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
+    wallet::{account::types::Bip44Address, Account, ClientOptions, Result, Wallet},
 };
 
 // The maximum number of addresses to generate
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let account = get_or_create_account(&wallet, "Alice").await?;
+    let account = wallet.get_or_create_account("Alice").await?;
 
     let addresses = generate_max_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
     let bech32_addresses = addresses
@@ -57,16 +57,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
-    Ok(if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    })
-}
-
-async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
+async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<Bip44Address>> {
     let alias = account.alias().await;
     if account.addresses().await?.len() < max {
         let num_addresses_to_generate = max - account.addresses().await?.len();

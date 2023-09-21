@@ -1,7 +1,11 @@
-from iota_sdk import *
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (AddressUnlockCondition, Client, Ed25519Address,
+                      IssuerFeature, MetadataFeature, SenderFeature,
+                      TagFeature, Utils, utf8_to_hex)
 
 load_dotenv()
 
@@ -43,4 +47,4 @@ nft_output = client.build_nft_output(
 )
 
 # Print the output
-print(json.dumps(nft_output.as_dict(), indent=4))
+print(json.dumps(nft_output.to_dict(), indent=4))

@@ -11,13 +11,13 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
-    Url,
 };
+use url::Url;
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -110,8 +110,8 @@ async fn backup_and_restore() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold and MnemonicSecretManager
+#[tokio::test]
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -192,8 +192,8 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore_different_coin_type() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -276,8 +276,8 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore_same_coin_type() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -358,8 +358,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[tokio::test]
 // Backup and restore with Stronghold
+#[tokio::test]
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
@@ -524,6 +524,47 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
     assert_eq!(
         account.generate_ed25519_addresses(1, None).await?,
         new_account.generate_ed25519_addresses(1, None).await?
+    );
+    tear_down(storage_path)
+}
+
+// Restore a Stronghold snapshot without secret manager data
+#[tokio::test]
+async fn restore_no_secret_manager_data() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
+    let storage_path = "test-storage/restore_no_secret_manager_data";
+    setup(storage_path)?;
+
+    let stronghold = StrongholdSecretManager::builder().build(storage_path.to_string() + "/wallet.stronghold")?;
+
+    let restore_wallet = Wallet::builder()
+        .with_storage_path(storage_path)
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
+        .with_coin_type(IOTA_COIN_TYPE)
+        .finish()
+        .await?;
+
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
+
+    restore_wallet
+        .restore_backup(
+            PathBuf::from("./tests/wallet/fixtures/no_secret_manager_data.stronghold"),
+            stronghold_password.clone(),
+            None,
+            None,
+        )
+        .await?;
+
+    restore_wallet.set_stronghold_password(stronghold_password).await?;
+
+    // Backup is restored also without any secret manager data inside and the seed is available
+    // Backup was created with mnemonic: "inhale gorilla deny three celery song category owner lottery rent author
+    // wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak"
+    assert_eq!(
+        restore_wallet.generate_ed25519_address(0, 0, None).await?.to_string(),
+        "0xc2ece328eb3d9bbc51d471dd17fd3665aa8c6bae63c78d64c13977efbb8b011e"
     );
     tear_down(storage_path)
 }

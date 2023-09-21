@@ -1,7 +1,5 @@
 # IOTA Stardust CLI Wallet
 
-![cli-wallet](./documentation/static/img/cli-wallet.gif)
-
 Command line interface application for the [IOTA sdk wallet](https://github.com/iotaledger/iota-sdk).
 
 ## Usage
@@ -37,7 +35,7 @@ Alternatively, you can select an existing account by its alias:
 
 ## Commands
 
-To see the full list of available commands look at the documentation [here](./documentation/docs).
+To see the full list of available commands look at the documentation [here](https://wiki.iota.org/shimmer/cli-wallet/welcome/).
 
 ## Caveats
 
@@ -48,14 +46,4 @@ By default the database path is `./wallet-cli-database` but you can change this 
 ```
 export WALLET_DATABASE_PATH=/path/to/database # or add it to your .bashrc, .zshrc
 ./wallet [COMMAND] [OPTIONS]
-```
-
-## Contributing
-
-To run the CLI from source, install Rust (usually through [Rustup](https://rustup.rs/)) and run the following commands:
-
-```
-git clone --depth 1 https://github.com/iotaledger/iota-sdk
-cd cli
-cargo run -- [COMMAND] [OPTIONS]
 ```

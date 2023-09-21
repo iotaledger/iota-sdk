@@ -1,19 +1,17 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use crate::types::block::{
     output::feature::{
-        BlockIssuerFeature, Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature, StakingFeature,
-        TagFeature,
+        BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey, Feature, FeatureFlags,
+        IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature,
     },
-    public_key::PublicKeys,
     rand::{
         address::rand_address,
         bytes::rand_bytes,
         number::{rand_number, rand_number_range},
-        public_key::rand_public_keys,
     },
 };
 
@@ -39,12 +37,36 @@ pub fn rand_tag_feature() -> TagFeature {
     TagFeature::new(bytes).unwrap()
 }
 
+/// Generates a valid random Ed25519 block issuer key.
+pub fn rand_ed25519_block_issuer_key() -> Ed25519BlockIssuerKey {
+    crypto::signatures::ed25519::SecretKey::generate()
+        .unwrap()
+        .public_key()
+        .into()
+}
+
+/// Generates a valid random block issuer key.
+pub fn rand_block_issuer_key() -> BlockIssuerKey {
+    rand_ed25519_block_issuer_key().into()
+}
+
+/// Generates a vector of random valid block issuer keys of a given length.
+pub fn rand_block_issuer_keys(len: usize) -> BTreeSet<BlockIssuerKey> {
+    let mut block_issuer_keys: BTreeSet<BlockIssuerKey> = BTreeSet::new();
+
+    while block_issuer_keys.len() < len {
+        block_issuer_keys.insert(rand_block_issuer_key());
+    }
+
+    block_issuer_keys
+}
+
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
     BlockIssuerFeature::new(
         rand_number::<u64>(),
-        rand_public_keys(rand_number_range(
-            PublicKeys::COUNT_MIN as usize..=PublicKeys::COUNT_MAX as usize,
+        rand_block_issuer_keys(rand_number_range(
+            BlockIssuerKeys::COUNT_MIN as usize..=BlockIssuerKeys::COUNT_MAX as usize,
         )),
     )
     .unwrap()
@@ -52,7 +74,7 @@ pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
 
 /// Generates a random [`StakingFeature`].
 pub fn rand_staking_feature() -> StakingFeature {
-    StakingFeature::new(rand_number(), rand_number(), rand_number(), rand_number())
+    StakingFeature::new(rand_number(), rand_number(), rand_number::<u64>(), rand_number::<u64>())
 }
 
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {

@@ -1,7 +1,12 @@
-from iota_sdk import *
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (AddressUnlockCondition, Client, Ed25519Address,
+                      ExpirationUnlockCondition, MetadataFeature,
+                      SenderFeature, StorageDepositReturnUnlockCondition,
+                      TagFeature, TimelockUnlockCondition, Utils, utf8_to_hex)
 
 load_dotenv()
 
@@ -24,7 +29,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with metadata feature block
 basic_output = client.build_basic_output(
@@ -36,7 +41,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with storage deposit return
 basic_output = client.build_basic_output(
@@ -49,7 +54,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with expiration
 basic_output = client.build_basic_output(
@@ -62,7 +67,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with timelock
 basic_output = client.build_basic_output(
@@ -72,7 +77,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with tag feature
 basic_output = client.build_basic_output(
@@ -84,7 +89,7 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))
 
 # Output with sender feature
 basic_output = client.build_basic_output(
@@ -96,4 +101,4 @@ basic_output = client.build_basic_output(
     ],
     amount=1000000,
 )
-print(json.dumps(basic_output.as_dict(), indent=4))
+print(json.dumps(basic_output.to_dict(), indent=4))

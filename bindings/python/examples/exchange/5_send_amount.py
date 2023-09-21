@@ -3,9 +3,11 @@
 
 # This example sends tokens to an address.
 
-from iota_sdk import Wallet, SyncOptions
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import SyncOptions, Wallet
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
@@ -25,7 +27,7 @@ account = wallet.get_account('Alice')
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
-# have a storage deposit return, expiration or are nft/alias/foundry outputs.
+# have a storage deposit return, expiration or are nft/account/foundry outputs.
 balance = account.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
@@ -35,4 +37,4 @@ transaction = account.send(
 )
 print(transaction)
 print(
-    f'Check your block on: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+    f'Check your block on: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

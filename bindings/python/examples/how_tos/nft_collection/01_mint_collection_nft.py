@@ -1,8 +1,10 @@
-from iota_sdk import Wallet, Utils, utf8_to_hex, MintNftParams
-from dotenv import load_dotenv
+import json
 import os
 import sys
-import json
+
+from dotenv import load_dotenv
+
+from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex
 
 load_dotenv()
 
@@ -34,7 +36,8 @@ bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
 
 
-def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
+def get_immutable_metadata(index: int, collection_id: str) -> str:
+    """Returns the immutable metadata for the NFT with the given index"""
     data = {
         "standard": "IRC27",
         "version": "v1.0",
@@ -43,7 +46,7 @@ def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
         "name": "Shimmer OG NFT #" + str(index),
         "description": "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
         "issuerName": "IOTA Foundation",
-        "collectionId": issuer_nft_id,
+        "collectionId": collection_id,
         "collectionName": "Shimmer OG"
     }
     return json.dumps(data, separators=(',', ':'))
@@ -51,7 +54,7 @@ def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
 
 # Create the metadata with another index for each
 nft_mint_params = list(map(lambda index: MintNftParams(
-    immutableMetadata=utf8_to_hex(
+    immutable_metadata=utf8_to_hex(
         get_immutable_metadata(index, issuer_nft_id)),
     issuer=issuer
 ), range(NFT_COLLECTION_SIZE)))
@@ -60,12 +63,11 @@ while nft_mint_params:
     chunk, nft_mint_params = nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION], nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:]
     print(
         f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})')
-    prepared = account.prepare_mint_nfts(chunk)
-    transaction = prepared.send()
+    transaction = account.mint_nfts(chunk)
 
     # Wait for transaction to get included
     block_id = account.reissue_transaction_until_included(
-        transaction.transactionId)
+        transaction.transaction_id)
 
     print(
         f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

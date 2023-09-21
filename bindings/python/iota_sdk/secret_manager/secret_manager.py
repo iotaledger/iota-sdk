@@ -1,15 +1,16 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from json import dumps, loads
+from typing import Optional, Union
+from dacyte import from_dict
+import humps
+
 from iota_sdk import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import TransactionPayload
-from json import dumps, loads
-import humps
-from typing import Optional
-from dacite import from_dict
 
 
 class LedgerNanoSecretManager(dict):
@@ -82,8 +83,8 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                 SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
+                 SeedSecretManager, StrongholdSecretManager]] = None, secret_manager_handle=None):
         """Initialize a secret manager.
 
         Args:
@@ -117,9 +118,9 @@ class SecretManager():
 
         if "payload" in json_response:
             return json_response['payload']
-        else:
-            return response
+        return response
 
+    # pylint: disable=unused-argument
     def generate_ed25519_addresses(self,
                                    account_index: Optional[int] = None,
                                    start: Optional[int] = None,
@@ -243,7 +244,7 @@ class SecretManager():
         Returns:
             The Ed25519 signature.
         """
-        return from_dict(Ed25519Signature, self._call_method('signEd25519', {
+        return Ed25519Signature.from_dict(self._call_method('signEd25519', {
             'message': message,
             'chain': chain.__dict__,
         }))
@@ -268,7 +269,7 @@ class SecretManager():
             prepare_transaction_data: The prepared transaction data that needs to be signed.
         """
         return from_dict(TransactionPayload, self._call_method('signTransaction', {
-            'preparedTransactionData': prepared_transaction_data.as_dict()
+            'preparedTransactionData': prepared_transaction_data.to_dict()
         }))
 
     def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):

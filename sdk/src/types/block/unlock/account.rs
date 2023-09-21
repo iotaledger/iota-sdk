@@ -41,7 +41,6 @@ mod dto {
 
     use super::*;
 
-    /// Points to the unlock of a consumed account output.
     #[derive(Serialize, Deserialize)]
     struct AccountUnlockDto {
         #[serde(rename = "type")]

@@ -5,9 +5,12 @@
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
-    types::block::{
-        output::{Output, OutputId},
-        Block,
+    types::{
+        api::core::response::TransactionState,
+        block::{
+            output::{Output, OutputId},
+            BlockWrapper,
+        },
     },
 };
 use packable::PackableExt;
@@ -184,7 +187,7 @@ async fn test_get_included_block_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
-    let block_raw = Block::unpack_verified(
+    let block_raw = BlockWrapper::unpack_verified(
         client.get_included_block_raw(&transaction_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
@@ -230,7 +233,7 @@ async fn test_get_included_block_metadata() {
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);
-    assert!(!metadata_response.parents.is_empty());
+    assert_eq!(metadata_response.tx_state, Some(TransactionState::Finalized));
 
     println!("{metadata_response:#?}");
 }

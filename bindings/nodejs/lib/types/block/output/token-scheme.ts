@@ -4,33 +4,53 @@
 import { u256 } from '../../utils';
 import { hexToBigInt } from '../../utils/hex-encoding';
 
+/**
+ * All of the token scheme types.
+ */
 enum TokenSchemeType {
+    /** A simple token scheme. */
     Simple = 0,
 }
 
+/**
+ * The base class for token schemes.
+ */
 abstract class TokenScheme {
-    private type: TokenSchemeType;
-
-    constructor(type: TokenSchemeType) {
-        this.type = type;
-    }
-
     /**
      * The type of token scheme.
      */
-    getType(): TokenSchemeType {
-        return this.type;
+    readonly type: TokenSchemeType;
+
+    /**
+     * @param type The type of token scheme.
+     */
+    constructor(type: TokenSchemeType) {
+        this.type = type;
     }
 }
 
 /**
- * Simple token scheme.
+ * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: u256;
-    private meltedTokens: u256;
-    private maximumSupply: u256;
+    /**
+     * The amount of tokens minted.
+     */
+    readonly mintedTokens: u256;
+    /**
+     * The amount of tokens melted.
+     */
+    readonly meltedTokens: u256;
+    /**
+     * The maximum supply of tokens.
+     */
+    readonly maximumSupply: u256;
 
+    /**
+     * @param mintedTokens The number of tokens that were minted.
+     * @param meltedTokens The number of tokens that were melted.
+     * @param maximumSupply The maximum supply of the token.
+     */
     constructor(mintedTokens: u256, meltedTokens: u256, maximumSupply: u256) {
         super(TokenSchemeType.Simple);
         if (typeof mintedTokens === 'bigint') {
@@ -56,27 +76,6 @@ class SimpleTokenScheme extends TokenScheme {
         } else {
             this.maximumSupply = BigInt(0);
         }
-    }
-
-    /**
-     * Amount of tokens minted.
-     */
-    getMintedTokens(): u256 {
-        return this.mintedTokens;
-    }
-
-    /**
-     * Amount of tokens melted.
-     */
-    getMeltedTokens(): u256 {
-        return this.meltedTokens;
-    }
-
-    /**
-     * Maximum supply of tokens controlled.
-     */
-    getMaximumSupply(): u256 {
-        return this.maximumSupply;
     }
 }
 

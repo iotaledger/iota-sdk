@@ -22,7 +22,6 @@ use crate::{
         block::{
             output::{dto::OutputDto, Output},
             payload::transaction::TransactionPayload,
-            semantic::ConflictReason,
         },
     },
     wallet::account::{
@@ -73,10 +72,7 @@ where
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(
-                *protocol_parameters.rent_structure(),
-                protocol_parameters.token_supply(),
-            )?;
+            output.verify_storage_deposit(protocol_parameters.rent_structure(), protocol_parameters.token_supply())?;
         }
 
         self.finish_transaction(outputs, options).await
@@ -132,15 +128,12 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let local_time = self.client().get_time_checked().await?;
-
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.transaction_payload,
-            local_time,
         )?;
 
-        if conflict != ConflictReason::None {
+        if let Some(conflict) = conflict {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.transaction_payload
@@ -181,7 +174,7 @@ where
             payload: signed_transaction_data.transaction_payload,
             block_id,
             network_id,
-            timestamp: crate::utils::unix_timestamp_now().as_millis(),
+            timestamp: crate::client::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
             note: options.and_then(|o| o.note),

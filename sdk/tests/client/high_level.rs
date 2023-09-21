@@ -23,7 +23,7 @@ async fn test_find_blocks() {
     let blocks = client.find_blocks(&[block_id]).await.unwrap();
 
     assert_eq!(blocks.len(), 1);
-    assert_eq!(blocks[0].id(), block_id);
+    assert_eq!(client.block_id(&blocks[0]).await.unwrap(), block_id);
 }
 
 #[ignore]
@@ -32,7 +32,7 @@ async fn test_find_inputs() {
     let client = setup_client_with_node_health_ignored().await;
     let (block_id, _transaction_id) = setup_transaction_block(&client).await;
     let block = client.get_block(&block_id).await.unwrap();
-    let transaction = block.payload().unwrap();
+    let transaction = block.as_basic().payload().unwrap();
 
     if let Payload::Transaction(transaction) = transaction {
         let basic_output = transaction.essence().outputs().iter().next().unwrap().as_basic();

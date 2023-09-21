@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
 
     println!("{block:#?}\n");
 
-    if let Some(Payload::TaggedData(payload)) = block.payload() {
+    if let Some(Payload::TaggedData(payload)) = block.as_basic().payload() {
         println!(
             "Tag: {}",
             String::from_utf8(payload.tag().to_vec()).expect("found invalid UTF-8")
@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with tag and data sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
+        client.block_id(&block).await?
     );
 
     Ok(())

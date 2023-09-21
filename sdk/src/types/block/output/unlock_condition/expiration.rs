@@ -3,19 +3,17 @@
 
 use derive_more::From;
 
-use crate::types::block::{address::Address, Error};
+use crate::types::block::{address::Address, slot::SlotIndex, Error};
 
-/// Defines a unix time until which only Address, defined in Address Unlock Condition, is allowed to unlock the output.
-/// After or at the unix time, only Return Address can unlock it.
+/// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
+/// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
     return_address: Address,
-    // Before this unix time, seconds since unix epoch,
-    // [`AddressUnlockCondition`](crate::types::unlock_condition::AddressUnlockCondition) is allowed to unlock the
-    // output. After that, only the return [`Address`](crate::types::address::Address) can.
-    #[packable(verify_with = verify_timestamp)]
-    timestamp: u32,
+    /// The slot index that determines when the associated output expires.
+    #[packable(verify_with = verify_slot_index)]
+    slot_index: SlotIndex,
 }
 
 impl ExpirationUnlockCondition {
@@ -24,12 +22,14 @@ impl ExpirationUnlockCondition {
 
     /// Creates a new [`ExpirationUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: impl Into<Address>, timestamp: u32) -> Result<Self, Error> {
-        verify_timestamp::<true>(&timestamp, &())?;
+    pub fn new(return_address: impl Into<Address>, slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
+        let slot_index = slot_index.into();
+
+        verify_slot_index::<true>(&slot_index, &())?;
 
         Ok(Self {
             return_address: return_address.into(),
-            timestamp,
+            slot_index,
         })
     }
 
@@ -39,15 +39,15 @@ impl ExpirationUnlockCondition {
         &self.return_address
     }
 
-    /// Returns the timestamp of a [`ExpirationUnlockCondition`].
+    /// Returns the slot index of a [`ExpirationUnlockCondition`].
     #[inline(always)]
-    pub fn timestamp(&self) -> u32 {
-        self.timestamp
+    pub fn slot_index(&self) -> SlotIndex {
+        self.slot_index
     }
 
     /// Returns the return address if the condition has expired.
-    pub fn return_address_expired(&self, timestamp: u32) -> Option<&Address> {
-        if timestamp >= self.timestamp() {
+    pub fn return_address_expired(&self, slot_index: SlotIndex) -> Option<&Address> {
+        if slot_index >= self.slot_index() {
             Some(&self.return_address)
         } else {
             None
@@ -56,15 +56,16 @@ impl ExpirationUnlockCondition {
 }
 
 #[inline]
-fn verify_timestamp<const VERIFY: bool>(timestamp: &u32, _: &()) -> Result<(), Error> {
-    if VERIFY && *timestamp == 0 {
+fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {
+    if VERIFY && *slot_index == 0 {
         Err(Error::ExpirationUnlockConditionZero)
     } else {
         Ok(())
     }
 }
 
-mod dto {
+#[cfg(feature = "serde")]
+pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -76,8 +77,7 @@ mod dto {
         #[serde(rename = "type")]
         kind: u8,
         return_address: Address,
-        #[serde(rename = "unixTime")]
-        timestamp: u32,
+        slot_index: SlotIndex,
     }
 
     impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {
@@ -85,7 +85,7 @@ mod dto {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
                 return_address: *value.return_address(),
-                timestamp: value.timestamp(),
+                slot_index: value.slot_index(),
             }
         }
     }
@@ -94,7 +94,7 @@ mod dto {
         type Error = Error;
 
         fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.return_address, value.timestamp)
+            Self::new(value.return_address, value.slot_index)
                 .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
         }
     }

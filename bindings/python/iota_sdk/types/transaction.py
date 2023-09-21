@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List, Optional
-from iota_sdk.types.common import HexStr
+from typing import List, Optional
+from enum import Enum
+from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.payload import TransactionPayload
-from enum import Enum
 
 
 class InclusionState(str, Enum):
@@ -25,35 +25,28 @@ class InclusionState(str, Enum):
     UnknownPruned = 'unknownPruned'
 
 
+@json
 @dataclass
 class Transaction:
     """A transaction with some metadata.
 
     Attributes:
         payload: The transaction payload.
-        inclusionState: The inclusion state of the transaction.
+        inclusion_state: The inclusion state of the transaction.
         timestamp: The timestamp of the transaction.
-        transactionId: The ID of the corresponding transaction.
-        networkId: The ID of the network this transaction was issued in.
+        transaction_id: The ID of the corresponding transaction.
+        network_id: The ID of the network this transaction was issued in.
         incoming: Indicates whether the transaction was created by the wallet or whether it was sent by someone else and is incoming.
         inputs: The inputs of the transaction.
         note: A note attached to the transaction.
-        blockId: The ID of the block that holds the transaction.
+        block_id: The ID of the block that holds the transaction.
     """
     payload: TransactionPayload
-    inclusionState: InclusionState
+    inclusion_state: InclusionState
     timestamp: int
-    transactionId: HexStr
-    networkId: int
+    transaction_id: HexStr
+    network_id: int
     incoming: bool
     inputs = List[OutputWithMetadata]
     note: Optional[str] = None
-    blockId: Optional[HexStr] = None
-
-    @classmethod
-    def from_dict(cls, dict: Dict) -> Transaction:
-        obj = cls.__new__(cls)
-        super(Transaction, obj).__init__()
-        for k, v in dict.items():
-            setattr(obj, k, v)
-        return obj
+    block_id: Optional[HexStr] = None

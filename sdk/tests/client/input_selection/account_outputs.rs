@@ -202,46 +202,46 @@ fn transition_account_id_zero() {
 //     ));
 // }
 
-#[test]
-fn basic_output_with_account_input() {
-    let protocol_parameters = protocol_parameters();
-    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
+// #[test]
+// fn basic_output_with_account_input() {
+//     let protocol_parameters = protocol_parameters();
+//     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let inputs = build_inputs([Account(
-        2_259_500,
-        account_id_2,
-        0,
-        BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
-        None,
-        None,
-        None,
-        None,
-    )]);
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        BECH32_ADDRESS_ED25519_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+//     let inputs = build_inputs([Account(
+//         2_259_500,
+//         account_id_2,
+//         0,
+//         BECH32_ADDRESS_ED25519_0,
+//         BECH32_ADDRESS_ED25519_0,
+//         None,
+//         None,
+//         None,
+//         None,
+//     )]);
+//     let outputs = build_outputs([Basic(
+//         2_000_000,
+//         BECH32_ADDRESS_ED25519_0,
+//         None,
+//         None,
+//         None,
+//         None,
+//         None,
+//         None,
+//     )]);
 
-    let selected = InputSelection::new(
-        inputs.clone(),
-        outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
-        protocol_parameters,
-    )
-    .select()
-    .unwrap();
+//     let selected = InputSelection::new(
+//         inputs.clone(),
+//         outputs,
+//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         protocol_parameters,
+//     )
+//     .select()
+//     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    // basic output + account remainder
-    assert_eq!(selected.outputs.len(), 2);
-}
+//     assert!(unsorted_eq(&selected.inputs, &inputs));
+//     // basic output + account remainder
+//     assert_eq!(selected.outputs.len(), 2);
+// }
 
 #[test]
 fn create_account() {
@@ -325,7 +325,7 @@ fn burn_account() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_2))
+    .with_burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
 
@@ -1160,7 +1160,7 @@ fn account_burn_should_not_validate_account_sender() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1205,7 +1205,7 @@ fn account_burn_should_not_validate_account_address() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -1536,7 +1536,7 @@ fn state_controller_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1590,7 +1590,7 @@ fn state_controller_sender_required_but_governance() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1702,7 +1702,7 @@ fn governor_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1744,7 +1744,7 @@ fn governance_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1786,7 +1786,7 @@ fn state_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1840,7 +1840,7 @@ fn governor_sender_required_but_state() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs([*inputs[0].output_id()])
+    .with_required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1992,7 +1992,7 @@ fn remainder_address_in_governor() {
         protocol_parameters,
     )
     // Add the basic output so it will be consumed
-    .required_inputs([*inputs[1].output_id()])
+    .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 
@@ -2216,7 +2216,7 @@ fn burn_account_but_governor_not_owned() {
         addresses([BECH32_ADDRESS_ED25519_2]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_1))
+    .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
     assert!(matches!(
@@ -2313,7 +2313,7 @@ fn new_state_metadata() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let account_output =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id_1)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2332,7 +2332,7 @@ fn new_state_metadata() {
 
     // New account output, with updated state index
     let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
-        .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .with_state_index(account_output.as_account().state_index() + 1)
         .finish_output(protocol_parameters.token_supply())
@@ -2359,7 +2359,7 @@ fn new_state_metadata_but_same_state_index() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let account_output =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), account_id_1)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id_1)
             .with_state_metadata([1, 2, 3])
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2378,7 +2378,7 @@ fn new_state_metadata_but_same_state_index() {
 
     // New account output, without updated state index
     let updated_account_output = AccountOutputBuilder::from(account_output.as_account())
-        .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
         .with_state_metadata([3, 4, 5])
         .finish_output(protocol_parameters.token_supply())
         .unwrap();

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -20,10 +20,12 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
+            OutputBuilderAmount, OutputId, Rent, RentStructure,
         },
         protocol::ProtocolParameters,
-        semantic::{ConflictReason, ValidationContext},
+        semantic::{TransactionFailureReason, ValidationContext},
+        slot::EpochIndex,
         unlock::Unlock,
         Error,
     },
@@ -55,8 +57,8 @@ pub struct DelegationOutputBuilder {
     delegated_amount: u64,
     delegation_id: DelegationId,
     validator_id: AccountId,
-    start_epoch: u64,
-    end_epoch: u64,
+    start_epoch: EpochIndex,
+    end_epoch: EpochIndex,
     unlock_conditions: BTreeSet<UnlockCondition>,
 }
 
@@ -103,8 +105,8 @@ impl DelegationOutputBuilder {
             delegated_amount,
             delegation_id,
             validator_id,
-            start_epoch: 0,
-            end_epoch: 0,
+            start_epoch: 0.into(),
+            end_epoch: 0.into(),
             unlock_conditions: BTreeSet::new(),
         }
     }
@@ -134,14 +136,14 @@ impl DelegationOutputBuilder {
     }
 
     /// Sets the start epoch to the provided value.
-    pub fn with_start_epoch(mut self, start_epoch: u64) -> Self {
-        self.start_epoch = start_epoch;
+    pub fn with_start_epoch(mut self, start_epoch: impl Into<EpochIndex>) -> Self {
+        self.start_epoch = start_epoch.into();
         self
     }
 
     /// Sets the end epoch to the provided value.
-    pub fn with_end_epoch(mut self, end_epoch: u64) -> Self {
-        self.end_epoch = end_epoch;
+    pub fn with_end_epoch(mut self, end_epoch: impl Into<EpochIndex>) -> Self {
+        self.end_epoch = end_epoch.into();
         self
     }
 
@@ -191,9 +193,11 @@ impl DelegationOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Delegation(output.clone()).rent_cost(&rent_structure)
+                Output::Delegation(output.clone()).rent_cost(rent_structure)
             }
         };
+
+        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -206,7 +210,7 @@ impl DelegationOutputBuilder {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount(&output.amount, &token_supply)?;
+            verify_output_amount_supply(output.amount, token_supply)?;
         }
 
         Ok(output)
@@ -244,9 +248,9 @@ pub struct DelegationOutput {
     /// The Account ID of the validator to which this output is delegating.
     validator_id: AccountId,
     /// The index of the first epoch for which this output delegates.
-    start_epoch: u64,
+    start_epoch: EpochIndex,
     /// The index of the last epoch for which this output delegates.
-    end_epoch: u64,
+    end_epoch: EpochIndex,
     unlock_conditions: UnlockConditions,
 }
 
@@ -310,12 +314,12 @@ impl DelegationOutput {
     }
 
     /// Returns the start epoch of the [`DelegationOutput`].
-    pub fn start_epoch(&self) -> u64 {
+    pub fn start_epoch(&self) -> EpochIndex {
         self.start_epoch
     }
 
     /// Returns the end epoch of the [`DelegationOutput`].
-    pub fn end_epoch(&self) -> u64 {
+    pub fn end_epoch(&self) -> EpochIndex {
         self.end_epoch
     }
 
@@ -346,9 +350,9 @@ impl DelegationOutput {
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
-    ) -> Result<(), ConflictReason> {
+    ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.milestone_timestamp)
+            .locked_address(self.address(), context.essence.creation_slot())
             .unlock(unlock, inputs, context)
     }
 }
@@ -375,15 +379,13 @@ impl Packable for DelegationOutput {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if VERIFY {
-            verify_output_amount(&amount, &visitor.token_supply()).map_err(UnpackError::Packable)?;
-        }
+        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let delegated_amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let delegation_id = DelegationId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let validator_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let start_epoch = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let end_epoch = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let end_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
 
         verify_unlock_conditions::<VERIFY>(&unlock_conditions).map_err(UnpackError::Packable)?;
@@ -412,7 +414,10 @@ fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockCondit
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -438,10 +443,8 @@ pub(crate) mod dto {
         pub delegated_amount: u64,
         pub delegation_id: DelegationId,
         pub validator_id: AccountId,
-        #[serde(with = "string")]
-        start_epoch: u64,
-        #[serde(with = "string")]
-        end_epoch: u64,
+        start_epoch: EpochIndex,
+        end_epoch: EpochIndex,
         pub unlock_conditions: Vec<UnlockConditionDto>,
     }
 
@@ -492,8 +495,8 @@ pub(crate) mod dto {
             delegated_amount: u64,
             delegation_id: &DelegationId,
             validator_id: &AccountId,
-            start_epoch: u64,
-            end_epoch: u64,
+            start_epoch: impl Into<EpochIndex>,
+            end_epoch: impl Into<EpochIndex>,
             unlock_conditions: Vec<UnlockConditionDto>,
             params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {

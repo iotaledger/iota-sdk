@@ -1,33 +1,55 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedString } from '../../utils';
-import { Address } from '../address';
 import { SlotIndex } from '../slot';
+import { Type } from 'class-transformer';
+import { Address, AddressDiscriminator } from '../address';
+import {
+    BlockIssuerKey,
+    BlockIssuerKeyDiscriminator,
+} from './block-issuer-key';
+import { u64 } from '../../utils/type-aliases';
 
 /**
  * All of the feature block types.
  */
 enum FeatureType {
+    /** A Sender feature. */
     Sender = 0,
+    /** An Issuer feature. */
     Issuer = 1,
+    /** A Metadata feature. */
     Metadata = 2,
+    /** A Tag feature. */
     Tag = 3,
     BlockIssuer = 4,
+    Staking = 5,
 }
 
+/** The base class for features. */
 abstract class Feature {
     readonly type: FeatureType;
+
+    /**
+     * @param type The type of feature.
+     */
     constructor(type: FeatureType) {
         this.type = type;
     }
 }
 
 /**
- * Sender feature.
+ * A Sender feature.
  */
 class SenderFeature extends Feature {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     readonly address: Address;
+
+    /**
+     * @param sender The Sender address stored with the feature.
+     */
     constructor(sender: Address) {
         super(FeatureType.Sender);
         this.address = sender;
@@ -35,10 +57,17 @@ class SenderFeature extends Feature {
 }
 
 /**
- * Issuer feature.
+ * An Issuer feature.
  */
 class IssuerFeature extends Feature {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     readonly address: Address;
+
+    /**
+     * @param issuer The Issuer address stored with the feature.
+     */
     constructor(issuer: Address) {
         super(FeatureType.Issuer);
         this.address = issuer;
@@ -46,13 +75,15 @@ class IssuerFeature extends Feature {
 }
 
 /**
- * Metadata feature.
+ * A Metadata feature.
  */
 class MetadataFeature extends Feature {
-    /**
-     * Metadata (arbitrary binary data) that will be stored in the output.
-     */
+    /** Defines metadata (arbitrary binary data) that will be stored in the output. */
     readonly data: string;
+
+    /**
+     * @param data The metadata stored with the feature.
+     */
     constructor(data: string) {
         super(FeatureType.Metadata);
         this.data = data;
@@ -60,10 +91,15 @@ class MetadataFeature extends Feature {
 }
 
 /**
- * Tag feature.
+ * A Tag feature.
  */
 class TagFeature extends Feature {
+    /** Defines a tag for the data. */
     readonly tag: string;
+
+    /**
+     * @param tag The tag stored with the feature.
+     */
     constructor(tag: string) {
         super(FeatureType.Tag);
         this.tag = tag;
@@ -81,12 +117,50 @@ class BlockIssuerFeature extends Feature {
     /**
      * The Block Issuer Keys.
      */
-    readonly publicKeys: Set<HexEncodedString>;
+    @Type(() => BlockIssuerKey, {
+        discriminator: BlockIssuerKeyDiscriminator,
+    })
+    readonly blockIssuerKeys: Set<BlockIssuerKey>;
 
-    constructor(expirySlot: SlotIndex, publicKeys: Set<HexEncodedString>) {
+    constructor(expirySlot: SlotIndex, blockIssuerKeys: Set<BlockIssuerKey>) {
         super(FeatureType.BlockIssuer);
         this.expirySlot = expirySlot;
-        this.publicKeys = publicKeys;
+        this.blockIssuerKeys = blockIssuerKeys;
+    }
+}
+
+/**
+ * Staking feature.
+ */
+class StakingFeature extends Feature {
+    /**
+     * The amount of coins that are locked and staked in the containing account.
+     **/
+    readonly stakedAmount: u64;
+    /**
+     * The fixed cost of the validator, which it receives as part of its Mana rewards.
+     */
+    readonly fixedCost: u64;
+    /**
+     * The epoch index in which the staking started.
+     */
+    readonly startEpoch: u64;
+    /**
+     * The epoch index in which the staking ends.
+     */
+    readonly endEpoch: u64;
+
+    constructor(
+        stakedAmount: u64,
+        fixedCost: u64,
+        startEpoch: u64,
+        endEpoch: u64,
+    ) {
+        super(FeatureType.Staking);
+        this.stakedAmount = stakedAmount;
+        this.fixedCost = fixedCost;
+        this.startEpoch = startEpoch;
+        this.endEpoch = endEpoch;
     }
 }
 
@@ -98,6 +172,7 @@ const FeatureDiscriminator = {
         { value: MetadataFeature, name: FeatureType.Metadata as any },
         { value: TagFeature, name: FeatureType.Tag as any },
         { value: BlockIssuerFeature, name: FeatureType.BlockIssuer as any },
+        { value: StakingFeature, name: FeatureType.Staking as any },
     ],
 };
 
@@ -110,4 +185,5 @@ export {
     MetadataFeature,
     TagFeature,
     BlockIssuerFeature,
+    StakingFeature,
 };

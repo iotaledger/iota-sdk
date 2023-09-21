@@ -17,7 +17,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
+    wallet::{account::types::Bip44Address, Account, ClientOptions, Result, Wallet},
 };
 
 // The base coin amount to send
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let account = create_account(&wallet, "Alice").await?;
+    let account = wallet.get_or_create_account("Alice").await?;
 
     let _ = ensure_enough_addresses(&account, ADDRESSES_TO_SPLIT_FUNDS).await?;
 
@@ -109,15 +109,6 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
-    Ok(if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    })
-}
-
 async fn sync_print_balance(account: &Account) -> Result<()> {
     let alias = account.alias().await;
     let now = tokio::time::Instant::now();
@@ -127,7 +118,7 @@ async fn sync_print_balance(account: &Account) -> Result<()> {
     Ok(())
 }
 
-async fn ensure_enough_addresses(account: &Account, limit: usize) -> Result<Vec<AccountAddress>> {
+async fn ensure_enough_addresses(account: &Account, limit: usize) -> Result<Vec<Bip44Address>> {
     let alias = account.alias().await;
     if account.addresses().await?.len() < limit {
         let num_addresses_to_generate = limit - account.addresses().await?.len();

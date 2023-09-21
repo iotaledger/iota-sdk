@@ -65,10 +65,26 @@ class RewardContextInput extends ContextInput {
     }
 }
 
+const ContextInputDiscriminator = {
+    property: 'type',
+    subTypes: [
+        {
+            value: CommitmentContextInput,
+            name: ContextInputType.COMMITMENT as any,
+        },
+        {
+            value: BlockIssuanceCreditContextInput,
+            name: ContextInputType.BLOCK_ISSUANCE_CREDIT as any,
+        },
+        { value: RewardContextInput, name: ContextInputType.REWARD as any },
+    ],
+};
+
 export {
     ContextInputType,
     ContextInput,
     CommitmentContextInput,
     RewardContextInput,
     BlockIssuanceCreditContextInput,
+    ContextInputDiscriminator,
 };

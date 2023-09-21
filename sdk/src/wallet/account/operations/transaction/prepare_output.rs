@@ -16,6 +16,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
             RentStructure, UnlockCondition,
         },
+        slot::SlotIndex,
         Error,
     },
     utils::serde::string,
@@ -85,15 +86,17 @@ where
         }
 
         if let Some(unlocks) = params.unlocks {
-            if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
+            if let Some(expiration_slot_index) = unlocks.expiration_slot_index {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder
-                    .add_unlock_condition(ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?);
+                first_output_builder = first_output_builder.add_unlock_condition(ExpirationUnlockCondition::new(
+                    remainder_address,
+                    expiration_slot_index,
+                )?);
             }
-            if let Some(timelock_unix_time) = unlocks.timelock_unix_time {
+            if let Some(timelock_slot_index) = unlocks.timelock_slot_index {
                 first_output_builder =
-                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_unix_time)?);
+                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_slot_index)?);
             }
         }
 
@@ -111,7 +114,9 @@ where
         let min_storage_deposit_basic_output =
             MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
-        if params.amount > min_storage_deposit_basic_output {
+        let min_required_storage_deposit = first_output.rent_cost(rent_structure);
+
+        if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
         }
 
@@ -122,9 +127,9 @@ where
             .return_strategy
             .unwrap_or_default();
         let remainder_address = self.get_remainder_address(transaction_options).await?;
-        if params.amount < min_storage_deposit_basic_output {
+        if params.amount < min_required_storage_deposit {
             if return_strategy == ReturnStrategy::Gift {
-                second_output_builder = second_output_builder.with_amount(min_storage_deposit_basic_output);
+                second_output_builder = second_output_builder.with_amount(min_required_storage_deposit);
             }
             if return_strategy == ReturnStrategy::Return {
                 second_output_builder =
@@ -171,7 +176,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.rent_cost(&rent_structure);
+            available_base_coin += existing_nft_output_data.output.rent_cost(rent_structure);
         }
 
         if final_amount > available_base_coin {
@@ -290,7 +295,7 @@ where
                         let remainder_address = self.generate_remainder_address().await?;
                         Some(remainder_address.address().inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.address().inner),
+                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
             }
             None => None,
@@ -344,8 +349,8 @@ pub struct Features {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Unlocks {
-    pub expiration_unix_time: Option<u32>,
-    pub timelock_unix_time: Option<u32>,
+    pub expiration_slot_index: Option<SlotIndex>,
+    pub timelock_slot_index: Option<SlotIndex>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]

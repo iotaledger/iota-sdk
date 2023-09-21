@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop, production, 2.0]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/coverage.yml"
       - ".github/actions/**"
       - "coverage.sh"
@@ -55,23 +56,14 @@ jobs:
 
       # TODO add `--run-ignored all` again
       - name: Collect coverage data
-        run: >
-          cargo llvm-cov nextest
-          --lcov
-          --output-path coverage.info
-          --tests
-          --package iota-sdk
-          --all-features
-          --test-threads "num-cpus"
-          --retries 2
+        run: cargo ci-coverage
 
       # - name: Tear down private tangle
       #   if: always()
       #   uses: "./.github/actions/private-tangle/tear-down"
 
       - name: Upload coverage data to Coveralls
-        uses: coverallsapp/github-action@v1.1.2
+        uses: coverallsapp/github-action@v2.2.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverage.info
           flag-name: Unit

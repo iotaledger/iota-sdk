@@ -7,9 +7,9 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    IRent,
+    RentStructure,
 } from '../../';
-import { AliasId } from '../../block/id';
+import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
 
 export interface __GenerateMnemonicMethod__ {
@@ -23,8 +23,8 @@ export interface __MnemonicToHexSeedMethod__ {
     };
 }
 
-export interface __ComputeAliasIdMethod__ {
-    name: 'computeAliasId';
+export interface __ComputeAccountIdMethod__ {
+    name: 'computeAccountId';
     data: {
         outputId: string;
     };
@@ -33,7 +33,7 @@ export interface __ComputeAliasIdMethod__ {
 export interface __ComputeFoundryIdMethod__ {
     name: 'computeFoundryId';
     data: {
-        aliasId: AliasId;
+        accountId: AccountId;
         serialNumber: number;
         tokenSchemeType: number;
     };
@@ -65,14 +65,14 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rent: IRent;
+        rent: RentStructure;
     };
 }
 
 export interface __ComputeTokenIdMethod__ {
     name: 'computeTokenId';
     data: {
-        aliasId: AliasId;
+        accountId: AccountId;
         serialNumber: number;
         tokenSchemeType: TokenSchemeType;
     };
@@ -114,10 +114,10 @@ export interface __HexToBech32Method__ {
     };
 }
 
-export interface __AliasIdToBech32Method__ {
-    name: 'aliasIdToBech32';
+export interface __AccountIdToBech32Method__ {
+    name: 'accountIdToBech32';
     data: {
-        aliasId: string;
+        accountId: string;
         bech32Hrp?: string;
     };
 }

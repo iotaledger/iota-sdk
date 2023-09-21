@@ -5,3 +5,4 @@ pyhumps>=3.8.0
 python-dotenv>=1.0.0
 pydoc-markdown>=4.8.0
 dacite>=1.8.1
+dataclasses-json>=0.5.14

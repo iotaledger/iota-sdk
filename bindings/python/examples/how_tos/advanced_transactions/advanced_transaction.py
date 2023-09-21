@@ -1,8 +1,18 @@
-from iota_sdk import *
-from dotenv import load_dotenv
+import datetime
 import os
 import time
-import datetime
+
+from dotenv import load_dotenv
+
+from iota_sdk import (
+    AddressUnlockCondition,
+    Client,
+    Ed25519Address,
+    Wallet,
+    Utils,
+    TimelockUnlockCondition,
+)
+
 
 load_dotenv()
 
@@ -37,10 +47,10 @@ basic_output = Client().build_basic_output(
 )
 
 transaction = account.send_outputs([basic_output])
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

@@ -30,10 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::{
-    block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -422,24 +419,28 @@ impl UnlockConditions {
 
     /// Returns the address to be unlocked.
     #[inline(always)]
-    pub fn locked_address<'a>(&'a self, address: &'a Address, milestone_timestamp: u32) -> &'a Address {
+    pub fn locked_address<'a>(&'a self, address: &'a Address, slot_index: SlotIndex) -> &'a Address {
         self.expiration()
-            .and_then(|e| e.return_address_expired(milestone_timestamp))
+            .and_then(|e| e.return_address_expired(slot_index))
             .unwrap_or(address)
     }
 
     /// Returns whether a time lock exists and is still relevant.
     #[inline(always)]
-    pub fn is_time_locked(&self, milestone_timestamp: u32) -> bool {
+    pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        let slot_index = slot_index.into();
+
         self.timelock()
-            .map_or(false, |timelock| milestone_timestamp < timelock.timestamp())
+            .map_or(false, |timelock| slot_index < timelock.slot_index())
     }
 
     /// Returns whether an expiration exists and is expired.
     #[inline(always)]
-    pub fn is_expired(&self, milestone_timestamp: u32) -> bool {
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        let slot_index = slot_index.into();
+
         self.expiration()
-            .map_or(false, |expiration| milestone_timestamp >= expiration.timestamp())
+            .map_or(false, |expiration| slot_index >= expiration.slot_index())
     }
 }
 
@@ -497,12 +498,13 @@ mod test {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use self::storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From, Serialize, Deserialize)]
     #[serde(untagged)]

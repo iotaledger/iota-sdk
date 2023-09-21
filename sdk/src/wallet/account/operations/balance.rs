@@ -88,7 +88,7 @@ where
                     }
 
                     let output = &data.output;
-                    let rent = output.rent_cost(&rent_structure);
+                    let rent = output.rent_cost(rent_structure);
 
                     // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
@@ -164,7 +164,7 @@ where
                                 // spend the balance at the moment or in the future
 
                                 let account_addresses = self.addresses().await?;
-                                let local_time = self.client().get_time_checked().await?;
+                                let slot_index = self.client().get_slot_index().await?;
                                 let is_claimable =
                                     self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
 
@@ -182,7 +182,7 @@ where
                                             // outputs can't be related to this output
                                             &account_details.addresses_with_unspent_outputs,
                                             output,
-                                            local_time,
+                                            slot_index,
                                         );
 
                                     if output_can_be_unlocked_now_and_in_future {
@@ -254,7 +254,7 @@ where
                                         .expiration()
                                     {
                                         // Not expired, could get unlockable when it's expired, so we insert it
-                                        if local_time < expiration.timestamp() {
+                                        if slot_index < expiration.slot_index() {
                                             balance.potentially_locked_outputs.insert(*output_id, false);
                                         }
                                     } else {

@@ -97,11 +97,11 @@ where
     /// Get all account aliases
     pub async fn get_account_aliases(&self) -> crate::wallet::Result<Vec<String>> {
         let accounts = self.accounts.read().await;
-        let mut aliases = Vec::with_capacity(accounts.len());
+        let mut account_aliases = Vec::with_capacity(accounts.len());
         for handle in accounts.iter() {
-            aliases.push(handle.details().await.alias().clone());
+            account_aliases.push(handle.details().await.alias().clone());
         }
-        Ok(aliases)
+        Ok(account_aliases)
     }
 
     /// Removes the latest account (account with the largest account index).
@@ -178,7 +178,7 @@ impl<S: SecretManage> WalletInner<S> {
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
         I::IntoIter: Send,
-        F: Fn(&Event) + 'static + Clone + Send + Sync,
+        F: Fn(&Event) + 'static + Send + Sync,
     {
         let mut emitter = self.event_emitter.write().await;
         emitter.on(events, handler);

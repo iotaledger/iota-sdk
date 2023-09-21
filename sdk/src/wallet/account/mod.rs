@@ -25,7 +25,7 @@ use tokio::sync::{Mutex, RwLock};
 #[cfg(feature = "participation")]
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
-    address::{AccountAddress, AddressWithUnspentOutputs},
+    address::{AddressWithUnspentOutputs, Bip44Address},
     Balance, OutputData, Transaction, TransactionDto,
 };
 pub use self::{
@@ -99,9 +99,9 @@ pub struct AccountDetails {
     /// The account alias.
     alias: String,
     /// Public addresses
-    pub(crate) public_addresses: Vec<AccountAddress>,
+    pub(crate) public_addresses: Vec<Bip44Address>,
     /// Internal addresses
-    pub(crate) internal_addresses: Vec<AccountAddress>,
+    pub(crate) internal_addresses: Vec<Bip44Address>,
     /// Addresses with unspent outputs
     // used to improve performance for syncing and get balance because it's in most cases only a subset of all
     // addresses
@@ -289,7 +289,7 @@ impl AccountInner {
     }
 
     /// Returns all addresses of the account
-    pub async fn addresses(&self) -> Result<Vec<AccountAddress>> {
+    pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
         let account_details = self.details().await;
         let mut all_addresses = account_details.public_addresses().clone();
         all_addresses.extend(account_details.internal_addresses().clone());
@@ -297,7 +297,7 @@ impl AccountInner {
     }
 
     /// Returns all public addresses of the account
-    pub(crate) async fn public_addresses(&self) -> Vec<AccountAddress> {
+    pub(crate) async fn public_addresses(&self) -> Vec<Bip44Address> {
         self.details().await.public_addresses().to_vec()
     }
 
@@ -477,9 +477,9 @@ pub struct AccountDetailsDto {
     /// The account alias.
     pub alias: String,
     /// Public addresses
-    pub public_addresses: Vec<AccountAddress>,
+    pub public_addresses: Vec<Bip44Address>,
     /// Internal addresses
-    pub internal_addresses: Vec<AccountAddress>,
+    pub internal_addresses: Vec<Bip44Address>,
     /// Addresses with unspent outputs
     pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
     /// Outputs
@@ -611,13 +611,13 @@ fn serialize() {
 
     let protocol_parameters = ProtocolParameters::new(
         2,
-        String::from("testnet"),
+        "testnet",
         "rms",
-        15,
-        crate::types::block::output::RentStructure::new(500, 10, 1),
+        crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,
+        20,
     )
     .unwrap();
 
@@ -637,7 +637,7 @@ fn serialize() {
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
             .with_inputs([input1, input2])
             .add_output(output)
-            .add_mana_allotment(rand_mana_allotment())
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
             .finish_with_params(protocol_parameters)
             .unwrap();
 
@@ -708,14 +708,13 @@ impl AccountDetails {
             index: 0,
             coin_type: 4218,
             alias: "Alice".to_string(),
-            public_addresses: vec![AccountAddress {
+            public_addresses: vec![Bip44Address {
                 address: crate::types::block::address::Bech32Address::from_str(
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
                 )
                 .unwrap(),
                 key_index: 0,
                 internal: false,
-                used: false,
             }],
             internal_addresses: Vec::new(),
             addresses_with_unspent_outputs: Vec::new(),

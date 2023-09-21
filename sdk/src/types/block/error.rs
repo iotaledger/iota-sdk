@@ -5,21 +5,22 @@ use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
 use crypto::Error as CryptoError;
-// use packable::bounded::BoundedU8;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
+use super::slot::EpochIndex;
 use crate::types::block::{
     context_input::RewardContextInputIndex,
     input::UtxoInput,
     mana::ManaAllotmentCount,
     output::{
-        feature::FeatureCount, unlock_condition::UnlockConditionCount, AccountId, ChainId, MetadataFeatureLength,
-        NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
+        feature::{BlockIssuerKeyCount, FeatureCount},
+        unlock_condition::UnlockConditionCount,
+        AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
+        TagFeatureLength,
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     protocol::ProtocolParametersHash,
-    public_key::PublicKeyCount,
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -49,6 +50,8 @@ pub enum Error {
     InvalidBlockKind(u8),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
+    /// Invalid transaction failure reason byte.
+    InvalidTransactionFailureReason(u8),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {
         amount: u64,
@@ -77,12 +80,13 @@ pub enum Error {
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(String),
-    InvalidBlockLength(usize),
+    InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
+    InvalidManaDecayFactors,
     InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidOutputAmount(u64),
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
@@ -101,11 +105,12 @@ pub enum Error {
         expected: ProtocolParametersHash,
         actual: ProtocolParametersHash,
     },
-    InvalidPublicKeyCount(<PublicKeyCount as TryFrom<usize>>::Error),
+    InvalidBlockIssuerKeyCount(<BlockIssuerKeyCount as TryFrom<usize>>::Error),
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
-    InvalidPublicKeyKind(u8),
+    InvalidBlockIssuerKeyKind(u8),
+    InvalidStartEpoch(EpochIndex),
     InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
     InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
     InvalidTagFeatureLength(<TagFeatureLength as TryFrom<usize>>::Error),
@@ -114,7 +119,10 @@ pub enum Error {
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
-    InvalidManaAllotmentSum(u128),
+    InvalidManaAllotmentSum {
+        max: u64,
+        sum: u128,
+    },
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
     InvalidUnlockKind(u8),
     InvalidUnlockReference(u16),
@@ -140,7 +148,7 @@ pub enum Error {
         expected: u8,
         actual: u8,
     },
-    PublicKeysNotUniqueSorted,
+    BlockIssuerKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
     SelfControlledAccountOutput(AccountId),
     SelfDepositNft(NftId),
@@ -208,6 +216,9 @@ impl fmt::Display for Error {
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
             }
+            Self::InvalidTransactionFailureReason(reason_byte) => {
+                write!(f, "invalid transaction failure reason byte: {reason_byte}")
+            }
             Self::InsufficientStorageDepositAmount { amount, required } => {
                 write!(
                     f,
@@ -237,7 +248,7 @@ impl fmt::Display for Error {
             Self::InvalidInputKind(k) => write!(f, "invalid input kind: {k}"),
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
-            Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
+            Self::InvalidBlockWrapperLength(length) => write!(f, "invalid block wrapper length {length}"),
             Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
@@ -245,6 +256,7 @@ impl fmt::Display for Error {
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
+            Self::InvalidManaDecayFactors => write!(f, "invalid mana decay factors"),
             Self::InvalidNftIndex(index) => write!(f, "invalid nft index: {index}"),
             Self::InvalidOutputAmount(amount) => write!(f, "invalid output amount: {amount}"),
             Self::InvalidOutputCount(count) => write!(f, "invalid output count: {count}"),
@@ -263,11 +275,12 @@ impl fmt::Display for Error {
                     "invalid protocol parameters hash: expected {expected} but got {actual}"
                 )
             }
-            Self::InvalidPublicKeyCount(count) => write!(f, "invalid public key count: {count}"),
+            Self::InvalidBlockIssuerKeyCount(count) => write!(f, "invalid block issuer key count: {count}"),
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
-            Self::InvalidPublicKeyKind(k) => write!(f, "invalid public key kind: {k}"),
+            Self::InvalidBlockIssuerKeyKind(k) => write!(f, "invalid block issuer key kind: {k}"),
+            Self::InvalidStartEpoch(index) => write!(f, "invalid start epoch: {index}"),
             Self::InvalidStringPrefix(p) => write!(f, "invalid string prefix: {p}"),
             Self::InvalidTaggedDataLength(length) => {
                 write!(f, "invalid tagged data length {length}")
@@ -284,7 +297,9 @@ impl fmt::Display for Error {
             Self::InvalidTransactionNativeTokensCount(count) => {
                 write!(f, "invalid transaction native tokens count: {count}")
             }
-            Self::InvalidManaAllotmentSum(value) => write!(f, "invalid mana allotment sum: {value}"),
+            Self::InvalidManaAllotmentSum { max, sum } => {
+                write!(f, "invalid mana allotment sum: {sum} greater than max of {max}")
+            }
             Self::InvalidUnlockCount(count) => write!(f, "invalid unlock count: {count}"),
             Self::InvalidUnlockKind(k) => write!(f, "invalid unlock kind: {k}"),
             Self::InvalidUnlockReference(index) => {
@@ -323,7 +338,7 @@ impl fmt::Display for Error {
             Self::ProtocolVersionMismatch { expected, actual } => {
                 write!(f, "protocol version mismatch: expected {expected} but got {actual}")
             }
-            Self::PublicKeysNotUniqueSorted => write!(f, "public keys are not unique and/or sorted"),
+            Self::BlockIssuerKeysNotUniqueSorted => write!(f, "block issuer keys are not unique and/or sorted"),
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }

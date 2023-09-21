@@ -1,13 +1,13 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from .iota_sdk import *
+from .iota_sdk import call_utils_method, destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, call_wallet_method, call_client_method, listen_mqtt
 from .client.client import Client, NodeIndexerAPI, ClientError
 from .client._high_level_api import GenerateAddressesOptions, GenerateAddressOptions
 from .utils import Utils
 from .wallet.wallet import Wallet, Account
 from .wallet.common import WalletError
-from .wallet.sync_options import AccountSyncOptions, AliasSyncOptions, NftSyncOptions, SyncOptions
+from .wallet.sync_options import AccountSyncOptions, AccountSyncOptions, NftSyncOptions, SyncOptions
 from .secret_manager.secret_manager import *
 from .prefix_hex import *
 from .types.address import *
@@ -17,6 +17,7 @@ from .types.block_builder_options import *
 from .types.burn import *
 from .types.client_options import *
 from .types.common import *
+from .types.context_input import *
 from .types.event import *
 from .types.feature import *
 from .types.filter_options import *

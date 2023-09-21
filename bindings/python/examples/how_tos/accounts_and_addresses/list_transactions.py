@@ -1,6 +1,8 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 # In this example we will list transactions
 
@@ -17,11 +19,11 @@ account.sync({'syncIncomingTransactions': True})
 transactions = account.transactions()
 print('Sent transactions:')
 for transaction in transactions:
-    print(transaction.transactionId)
+    print(transaction.transaction_id)
 
 
 # Incoming transactions
 incoming_transactions = account.incoming_transactions()
 print('Received transactions:')
 for transaction in incoming_transactions:
-    print(transaction.transactionId)
+    print(transaction.transaction_id)

@@ -11,43 +11,49 @@ use crate::{
         constants::FIVE_MINUTES_IN_SECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::QueryParameter,
-        Client,
+        unix_timestamp_now, Client,
     },
     types::block::{
         address::Bech32Address,
-        core::Block,
+        core::{BasicBlock, Block, BlockWrapper},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{transaction::TransactionId, Payload},
+        slot::SlotIndex,
         BlockId,
     },
-    utils::unix_timestamp_now,
 };
 
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
-        let block = self.get_included_block(transaction_id).await?;
+        let wrapper = self.get_included_block(transaction_id).await?;
 
-        let inputs = match block.payload() {
-            Some(Payload::Transaction(t)) => t.essence().inputs(),
-            _ => {
-                unreachable!()
-            }
-        };
+        if let Block::Basic(block) = wrapper.block() {
+            let inputs = if let Some(Payload::Transaction(t)) = block.payload() {
+                t.essence().inputs()
+            } else {
+                return Err(Error::MissingTransactionPayload);
+            };
 
-        let input_ids = inputs
-            .iter()
-            .map(|i| match i {
-                Input::Utxo(input) => *input.output_id(),
+            let input_ids = inputs
+                .iter()
+                .map(|i| match i {
+                    Input::Utxo(input) => *input.output_id(),
+                })
+                .collect::<Vec<_>>();
+
+            self.get_outputs_with_metadata(&input_ids).await
+        } else {
+            Err(Error::UnexpectedBlockKind {
+                expected: BasicBlock::KIND,
+                actual: wrapper.block().kind(),
             })
-            .collect::<Vec<_>>();
-
-        self.get_outputs_with_metadata(&input_ids).await
+        }
     }
 
     /// Find all blocks by provided block IDs.
-    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<Block>> {
+    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<BlockWrapper>> {
         // Use a `HashSet` to prevent duplicate block_ids.
         let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
@@ -114,25 +120,22 @@ impl Client {
         Ok(selected_inputs)
     }
 
-    /// Returns the local time checked with the timestamp of the latest milestone, if the difference is larger than 5
-    /// minutes an error is returned to prevent locking outputs by accident for a wrong time.
-    pub async fn get_time_checked(&self) -> Result<u32> {
-        let current_time = unix_timestamp_now().as_secs() as u32;
+    // Returns the slot index corresponding to the current timestamp.
+    pub async fn get_slot_index(&self) -> Result<SlotIndex> {
+        let current_time = unix_timestamp_now().as_secs();
 
         let network_info = self.get_network_info().await?;
 
-        if let Some(latest_ms_timestamp) = network_info.latest_milestone_timestamp {
+        if let Some(tangle_time) = network_info.tangle_time {
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
-            if !(latest_ms_timestamp - FIVE_MINUTES_IN_SECONDS..latest_ms_timestamp + FIVE_MINUTES_IN_SECONDS)
-                .contains(&current_time)
-            {
+            if !(tangle_time - FIVE_MINUTES_IN_SECONDS..tangle_time + FIVE_MINUTES_IN_SECONDS).contains(&current_time) {
                 return Err(Error::TimeNotSynced {
                     current_time,
-                    milestone_timestamp: latest_ms_timestamp,
+                    tangle_time,
                 });
             }
         }
 
-        Ok(current_time)
+        Ok(network_info.protocol_parameters.slot_index(current_time))
     }
 }

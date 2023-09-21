@@ -5,8 +5,8 @@ import { u256 } from '../utils';
 
 /** A DTO for [`Burn`] */
 export interface Burn {
-    /** Aliases to burn */
-    aliases?: string[];
+    /** Accounts to burn */
+    accounts?: string[];
     /** NFTs to burn */
     nfts?: string[];
     /** Foundries to burn */

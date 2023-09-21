@@ -4,32 +4,26 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 from iota_sdk.types.signature import Ed25519Signature
+from iota_sdk.types.common import json
 
 
 class UnlockType(IntEnum):
     Signature = 0
     Reference = 1
-    Alias = 2
+    Account = 2
     Nft = 3
 
 
+@json
 @dataclass
 class Unlock:
     """Unlock type.
     """
     type: int
 
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
 
-        if 'signature' in config:
-            config['signature'] = config['signature'].__dict__
-
-        return config
-
-
+@json
 @dataclass
 class SignatureUnlock(Unlock):
     """An unlock holding a signature unlocking one or more inputs.
@@ -41,6 +35,7 @@ class SignatureUnlock(Unlock):
         init=False)
 
 
+@json
 @dataclass
 class ReferenceUnlock(Unlock):
     """An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
@@ -52,17 +47,19 @@ class ReferenceUnlock(Unlock):
         init=False)
 
 
+@json
 @dataclass
-class AliasUnlock:
-    """An unlock which must reference a previous unlock which unlocks the alias that the input is locked to.
+class AccountUnlock:
+    """An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
     """
     reference: int
     type: int = field(
         default_factory=lambda: int(
-            UnlockType.Alias),
+            UnlockType.Account),
         init=False)
 
 
+@json
 @dataclass
 class NftUnlock:
     """An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.

@@ -1,45 +1,48 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { callUtilsMethod } from '../../../bindings';
 import { HexEncodedString } from '../../utils';
 import { OutputId } from '../output';
 
 /**
- * All of the input types.
+ * All of the transaction input types.
  */
 enum InputType {
+    /** A UTXO input. */
     UTXO = 0,
 }
 
+/**
+ * The base class for transaction inputs.
+ */
 abstract class Input {
-    private type: InputType;
-
-    constructor(type: InputType) {
-        this.type = type;
-    }
+    readonly type: InputType;
 
     /**
-     * The type of input.
+     * @param type The type of input.
      */
-    getType(): InputType {
-        return this.type;
+    constructor(type: InputType) {
+        this.type = type;
     }
 }
 
 /**
- * UTXO Transaction Input.
+ * A UTXO transaction input.
  */
 class UTXOInput extends Input {
     /**
-     * The transaction Id.
+     * The transaction ID.
      */
-    transactionId: HexEncodedString;
+    readonly transactionId: HexEncodedString;
     /**
      * The output index.
      */
-    transactionOutputIndex: number;
+    readonly transactionOutputIndex: number;
 
+    /**
+     * @param transactionId The ID of the transaction it is an input of.
+     * @param transactionOutputIndex The index of the input within the transaction.
+     */
     constructor(
         transactionId: HexEncodedString,
         transactionOutputIndex: number,
@@ -50,16 +53,12 @@ class UTXOInput extends Input {
     }
 
     /**
-     * Creates a `UTXOInput` from an output id.
+     * Create a `UTXOInput` from a given output ID.
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     static fromOutputId(outputId: OutputId): UTXOInput {
-        const input = callUtilsMethod({
-            name: 'outputIdToUtxoInput',
-            data: {
-                outputId,
-            },
-        });
-        return new UTXOInput(input.transactionId, input.transactionOutputIndex);
+        // Implementation injected in lib/index.ts, as it uses bindings.
+        return null as unknown as UTXOInput;
     }
 }
 

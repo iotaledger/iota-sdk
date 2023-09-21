@@ -1,6 +1,8 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 load_dotenv()
 
@@ -24,10 +26,10 @@ params = [{
 }]
 
 transaction = account.send_with_params(params, {"allowMicroAmount": True})
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 block_id = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

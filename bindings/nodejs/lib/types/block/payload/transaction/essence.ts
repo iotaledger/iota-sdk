@@ -4,29 +4,37 @@
 import { Type } from 'class-transformer';
 import { PayloadDiscriminator } from '..';
 import { HexEncodedString } from '../../../utils';
+import { ContextInput, ContextInputDiscriminator } from '../../context_input';
 import { Input, InputDiscriminator } from '../../input';
+import { ManaAllotment } from '../../mana-allotment';
 import { Output, OutputDiscriminator } from '../../output';
+import { SlotIndex } from '../../slot';
 import { Payload } from '../payload';
 
 /**
  * All of the essence types.
  */
 enum TransactionEssenceType {
+    /**
+     * A regular transaction essence.
+     */
     Regular = 1,
 }
 
+/**
+ * The base class for transaction essences.
+ */
 abstract class TransactionEssence {
-    private type: TransactionEssenceType;
-
-    constructor(type: TransactionEssenceType) {
-        this.type = type;
-    }
-
     /**
      * The type of essence.
      */
-    getType(): TransactionEssenceType {
-        return this.type;
+    readonly type: TransactionEssenceType;
+
+    /**
+     * @param type The type of transaction essence.
+     */
+    constructor(type: TransactionEssenceType) {
+        this.type = type;
     }
 }
 
@@ -34,37 +42,63 @@ abstract class TransactionEssence {
  * RegularTransactionEssence transaction essence.
  */
 class RegularTransactionEssence extends TransactionEssence {
-    /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
-    networkId: number;
-    inputsCommitment: HexEncodedString;
+    /**
+     * The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
+     */
+    readonly networkId: string;
+
+    readonly creationSlot: SlotIndex;
+
+    @Type(() => Input, {
+        discriminator: ContextInputDiscriminator,
+    })
+    readonly contextInputs: ContextInput[];
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
-    inputs: [Input];
+    readonly inputs: Input[];
+
+    readonly inputsCommitment: HexEncodedString;
 
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
-    outputs: [Output];
+    readonly outputs: Output[];
+
+    readonly allotments: ManaAllotment[];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
-    payload: Payload | undefined;
+    readonly payload?: Payload;
 
+    /**
+     * @param networkId The ID of the network the transaction was issued to.
+     * @param inputsCommitment The hash of all inputs.
+     * @param inputs The inputs of the transaction.
+     * @param outputs The outputs of the transaction.
+     * @param payload An optional Tagged Data payload.
+     *
+     */
     constructor(
-        networkId: number,
+        networkId: string,
+        creationSlot: SlotIndex,
+        contextInputs: ContextInput[],
+        inputs: Input[],
         inputsCommitment: HexEncodedString,
-        inputs: [Input],
-        outputs: [Output],
-        payload: Payload | undefined,
+        outputs: Output[],
+        allotments: ManaAllotment[],
+        payload?: Payload,
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;
-        this.inputsCommitment = inputsCommitment;
+        this.creationSlot = creationSlot;
+        this.contextInputs = contextInputs;
         this.inputs = inputs;
+        this.inputsCommitment = inputsCommitment;
         this.outputs = outputs;
+        this.allotments = allotments;
         this.payload = payload;
     }
 }

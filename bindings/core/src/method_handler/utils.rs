@@ -10,7 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            Block,
+            BlockWrapper,
         },
         TryFromDto,
     },
@@ -41,8 +41,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             block,
             protocol_parameters,
         } => {
-            let block = Block::try_from_dto(block, protocol_parameters)?;
-            Response::BlockId(block.id())
+            let block = BlockWrapper::try_from_dto_with_params(block, protocol_parameters.clone())?;
+            Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto(payload)?;
@@ -80,7 +80,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;
-            Response::MinimumRequiredStorageDeposit(out.rent_cost(&rent).to_string())
+            Response::MinimumRequiredStorageDeposit(out.rent_cost(rent).to_string())
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);

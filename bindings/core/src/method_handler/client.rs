@@ -12,7 +12,7 @@ use iota_sdk::{
                 dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
             },
             payload::Payload,
-            Block, BlockDto,
+            BlockWrapper, BlockWrapperDto,
         },
         TryFromDto,
     },
@@ -168,7 +168,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetNode => Response::Node(client.get_node().await?),
         ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
-        ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
+        ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
@@ -185,9 +185,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 )
                 .await?;
 
-            let block_id = block.id();
+            let block_id = client.block_id(&block).await?;
 
-            Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
+            Response::BlockIdWithBlock(block_id, BlockWrapperDto::from(&block))
         }
         #[cfg(not(target_family = "wasm"))]
         ClientMethod::UnhealthyNodes => Response::UnhealthyNodes(client.unhealthy_nodes().await.into_iter().collect()),
@@ -198,7 +198,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
-                .post_block_raw(&Block::unpack_strict(
+                .post_block_raw(&BlockWrapper::unpack_strict(
                     &block_bytes[..],
                     &client.get_protocol_parameters().await?,
                 )?)
@@ -206,10 +206,15 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto(block, client.get_protocol_parameters().await?)?)
+                .post_block(&BlockWrapper::try_from_dto_with_params(
+                    block,
+                    client.get_protocol_parameters().await?,
+                )?)
                 .await?,
         ),
-        ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
+        ClientMethod::GetBlock { block_id } => {
+            Response::Block(BlockWrapperDto::from(&client.get_block(&block_id).await?))
+        }
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
@@ -223,9 +228,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
-        ClientMethod::GetIncludedBlock { transaction_id } => {
-            Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
-        }
+        ClientMethod::GetIncludedBlock { transaction_id } => Response::Block(BlockWrapperDto::from(
+            &client.get_included_block(&transaction_id).await?,
+        )),
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
         }
@@ -267,7 +272,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .find_blocks(&block_ids)
                 .await?
                 .iter()
-                .map(BlockDto::from)
+                .map(BlockWrapperDto::from)
                 .collect(),
         ),
         ClientMethod::FindInputs { addresses, amount } => {
@@ -289,7 +294,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
             let rent_structure = client.get_rent_structure().await?;
 
-            let minimum_storage_deposit = output.rent_cost(&rent_structure);
+            let minimum_storage_deposit = output.rent_cost(rent_structure);
 
             Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }
@@ -308,9 +313,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?;
             Response::CustomJson(data)
         }
-        ClientMethod::BlockId { block } => {
-            Response::BlockId(Block::try_from_dto(block, client.get_protocol_parameters().await?)?.id())
-        }
+        ClientMethod::BlockId { block } => Response::BlockId(
+            client
+                .block_id(&BlockWrapper::try_from_dto_with_params(
+                    block,
+                    client.get_protocol_parameters().await?,
+                )?)
+                .await?,
+        ),
     };
     Ok(response)
 }

@@ -30,11 +30,11 @@ use iota_sdk::{
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
             unlock::Unlock,
-            BlockDto, BlockId,
+            BlockId, BlockWrapperDto,
         },
     },
     wallet::account::{
-        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
+        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionDto},
         AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
@@ -68,7 +68,7 @@ pub enum Response {
     NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
-    NetworkId(u64),
+    NetworkId(String),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
     Bech32Hrp(Hrp),
@@ -107,10 +107,10 @@ pub enum Response {
     /// Response for:
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
-    Block(BlockDto),
+    Block(BlockWrapperDto),
     /// Response for:
     /// - [`PostBlockPayload`](crate::method::ClientMethod::PostBlockPayload)
-    BlockIdWithBlock(BlockId, BlockDto),
+    BlockIdWithBlock(BlockId, BlockWrapperDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
@@ -140,7 +140,7 @@ pub enum Response {
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
-    Blocks(Vec<BlockDto>),
+    Blocks(Vec<BlockWrapperDto>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInput>),
@@ -255,7 +255,7 @@ pub enum Response {
     Accounts(Vec<AccountDetailsDto>),
     /// Response for:
     /// - [`Addresses`](crate::method::AccountMethod::Addresses)
-    Addresses(Vec<AccountAddress>),
+    Addresses(Vec<Bip44Address>),
     /// Response for:
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
@@ -304,10 +304,9 @@ pub enum Response {
     /// Response for:
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
     SignedTransactionData(SignedTransactionDataDto),
-    /// GenerateAddress response.
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
-    GeneratedAccountAddresses(Vec<AccountAddress>),
+    GeneratedAccountAddresses(Vec<Bip44Address>),
     /// Response for:
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)

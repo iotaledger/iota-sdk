@@ -2,27 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * All of the payload types.
+ * All of the block payload types.
  */
 enum PayloadType {
-    /// A tagged data payload.
+    /** A tagged data payload. */
     TaggedData = 5,
-    /// A transaction payload.
+    /** A transaction payload. */
     Transaction = 6,
 }
 
+/**
+ * The base class for block payloads.
+ */
 abstract class Payload {
-    private type: PayloadType;
-
-    constructor(type: PayloadType) {
-        this.type = type;
-    }
-
     /**
      * The type of payload.
      */
-    getType(): PayloadType {
-        return this.type;
+    readonly type: PayloadType;
+
+    /**
+     * @param type The type of payload.
+     */
+    constructor(type: PayloadType) {
+        this.type = type;
     }
 }
 

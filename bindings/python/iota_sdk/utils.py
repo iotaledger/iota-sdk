@@ -2,15 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+from json import dumps, loads
+from typing import TYPE_CHECKING, List
+
+from dacite import from_dict
 from iota_sdk import call_utils_method
 from iota_sdk.types.signature import Ed25519Signature
-from iota_sdk.types.address import Address
+from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
-from json import dumps, loads
-from typing import TYPE_CHECKING, List
-from dacite import from_dict
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -30,20 +31,20 @@ class Utils():
         })
 
     @staticmethod
-    def hex_to_bech32(hex: HexStr, bech32_hrp: str) -> str:
+    def hex_to_bech32(hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded address to a Bech32 encoded address.
         """
         return _call_method('hexToBech32', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
     @staticmethod
-    def alias_id_to_bech32(alias_id: HexStr, bech32_hrp: str) -> str:
-        """Convert an alias id to a Bech32 encoded address.
+    def account_id_to_bech32(account_id: HexStr, bech32_hrp: str) -> str:
+        """Convert an account id to a Bech32 encoded address.
         """
-        return _call_method('aliasIdToBech32', {
-            'aliasId': alias_id,
+        return _call_method('accountIdToBech32', {
+            'accountId': account_id,
             'bech32Hrp': bech32_hrp
         })
 
@@ -57,11 +58,11 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex: HexStr, bech32_hrp: str) -> str:
+    def hex_public_key_to_bech32_address(hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded public key to a Bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
@@ -69,9 +70,18 @@ class Utils():
     def parse_bech32_address(address: str) -> Address:
         """Parse a string into a valid address.
         """
-        return from_dict(Address, _call_method('parseBech32Address', {
+        response = _call_method('parseBech32Address', {
             'address': address
-        }))
+        })
+
+        address_type = AddressType(response['type'])
+
+        if address_type == AddressType.ED25519:
+            return from_dict(Ed25519Address, response)
+        if address_type == AddressType.ALIAS:
+            return from_dict(AliasAddress, response)
+        if address_type == AddressType.NFT:
+            return from_dict(NFTAddress, response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:
@@ -96,20 +106,20 @@ class Utils():
         })
 
     @staticmethod
-    def compute_alias_id(output_id: OutputId) -> HexStr:
-        """Compute the alias id for the given alias output id.
+    def compute_account_id(output_id: OutputId) -> HexStr:
+        """Compute the account id for the given account output id.
         """
-        return _call_method('computeAliasId', {
+        return _call_method('computeAccountId', {
             'outputId': repr(output_id)
         })
 
     @staticmethod
-    def compute_foundry_id(alias_id: HexStr, serial_number: int,
+    def compute_foundry_id(account_id: HexStr, serial_number: int,
                            token_scheme_type: int) -> HexStr:
         """Compute the foundry id.
         """
         return _call_method('computeFoundryId', {
-            'aliasId': alias_id,
+            'accountId': account_id,
             'serialNumber': serial_number,
             'tokenSchemeType': token_scheme_type
         })
@@ -119,7 +129,7 @@ class Utils():
         """Compute the input commitment from the output objects that are used as inputs to fund the transaction.
         """
         return _call_method('computeInputsCommitment', {
-            'inputs': [i.as_dict() for i in inputs]
+            'inputs': [i.to_dict() for i in inputs]
         })
 
     @staticmethod
@@ -149,12 +159,12 @@ class Utils():
         }))
 
     @staticmethod
-    def compute_token_id(alias_id: HexStr, serial_number: int,
+    def compute_token_id(account_id: HexStr, serial_number: int,
                          token_scheme_type: int) -> HexStr:
-        """Compute a token id from the alias id, serial number and token scheme type.
+        """Compute a token id from the account id, serial number and token scheme type.
         """
         return _call_method('computeTokenId', {
-            'aliasId': alias_id,
+            'accountId': account_id,
             'serialNumber': serial_number,
             'tokenSchemeType': token_scheme_type
         })
@@ -164,7 +174,7 @@ class Utils():
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block.as_dict()
+            'block': block.to_dict()
         })
 
     @staticmethod
@@ -199,7 +209,6 @@ class Utils():
 
 class UtilsError(Exception):
     """A utils error."""
-    pass
 
 
 def _call_method(name: str, data=None):
@@ -223,5 +232,5 @@ def _call_method(name: str, data=None):
 
     if "payload" in json_response:
         return json_response['payload']
-    else:
-        return response
+
+    return response

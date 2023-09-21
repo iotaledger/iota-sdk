@@ -41,10 +41,19 @@ pub struct ClientBuilder {
     /// Timeout for API requests
     #[serde(default = "default_api_timeout")]
     pub api_timeout: Duration,
+    /// The maximum parallel API requests
+    #[cfg(not(target_family = "wasm"))]
+    #[serde(default = "default_max_parallel_api_requests")]
+    pub max_parallel_api_requests: usize,
 }
 
 fn default_api_timeout() -> Duration {
     DEFAULT_API_TIMEOUT
+}
+
+#[cfg(not(target_family = "wasm"))]
+fn default_max_parallel_api_requests() -> usize {
+    super::constants::MAX_PARALLEL_API_REQUESTS
 }
 
 impl Default for ClientBuilder {
@@ -55,6 +64,8 @@ impl Default for ClientBuilder {
             broker_options: Default::default(),
             network_info: NetworkInfo::default(),
             api_timeout: DEFAULT_API_TIMEOUT,
+            #[cfg(not(target_family = "wasm"))]
+            max_parallel_api_requests: super::constants::MAX_PARALLEL_API_REQUESTS,
         }
     }
 }
@@ -168,6 +179,13 @@ impl ClientBuilder {
         self
     }
 
+    /// Set maximum parallel API requests.
+    #[cfg(not(target_family = "wasm"))]
+    pub fn with_max_parallel_api_requests(mut self, max_parallel_api_requests: usize) -> Self {
+        self.max_parallel_api_requests = max_parallel_api_requests;
+        self
+    }
+
     /// Build the Client instance.
     #[cfg(not(target_family = "wasm"))]
     pub async fn finish(self) -> Result<Client> {
@@ -198,6 +216,7 @@ impl ClientBuilder {
                 sender: RwLock::new(mqtt_event_tx),
                 receiver: RwLock::new(mqtt_event_rx),
             },
+            request_pool: crate::client::request_pool::RequestPool::new(self.max_parallel_api_requests),
         });
 
         client_inner.sync_nodes(&nodes, ignore_node_health).await?;
@@ -238,6 +257,7 @@ impl ClientBuilder {
                     sender: RwLock::new(mqtt_event_tx),
                     receiver: RwLock::new(mqtt_event_rx),
                 },
+                last_sync: tokio::sync::Mutex::new(None),
             }),
         };
 
@@ -251,6 +271,8 @@ impl ClientBuilder {
             broker_options: *client.mqtt.broker_options.read().await,
             network_info: client.network_info.read().await.clone(),
             api_timeout: client.get_timeout().await,
+            #[cfg(not(target_family = "wasm"))]
+            max_parallel_api_requests: client.request_pool.size().await,
         }
     }
 }
@@ -263,9 +285,9 @@ pub struct NetworkInfo {
     /// Protocol parameters.
     #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
-    /// The latest cached milestone timestamp.
+    /// The current tangle time.
     #[serde(skip)]
-    pub latest_milestone_timestamp: Option<u32>,
+    pub tangle_time: Option<u64>,
 }
 
 impl NetworkInfo {
@@ -274,8 +296,8 @@ impl NetworkInfo {
         self
     }
 
-    pub fn with_latest_milestone_timestamp(mut self, latest_milestone_timestamp: impl Into<Option<u32>>) -> Self {
-        self.latest_milestone_timestamp = latest_milestone_timestamp.into();
+    pub fn with_tangle_time(mut self, tangle_time: u64) -> Self {
+        self.tangle_time = Some(tangle_time.into());
         self
     }
 }

@@ -92,7 +92,7 @@ fn no_outputs_but_burn() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .burn(Burn::new().add_account(account_id_2))
+    .with_burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
 

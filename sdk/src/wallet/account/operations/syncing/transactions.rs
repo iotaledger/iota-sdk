@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, unix_timestamp_now},
     types::{
-        api::core::response::LedgerInclusionState,
+        api::core::response::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
     },
-    utils::unix_timestamp_now,
     wallet::account::{
         types::{InclusionState, Transaction},
         Account, AccountDetails,
@@ -100,9 +99,10 @@ where
             if let Some(block_id) = transaction.block_id {
                 match self.client().get_block_metadata(&block_id).await {
                     Ok(metadata) => {
-                        if let Some(inclusion_state) = metadata.ledger_inclusion_state {
-                            match inclusion_state {
-                                LedgerInclusionState::Included => {
+                        if let Some(tx_state) = metadata.tx_state {
+                            match tx_state {
+                                // TODO: Separate TransactionState::Finalized?
+                                TransactionState::Finalized | TransactionState::Confirmed => {
                                     log::debug!(
                                         "[SYNC] confirmed transaction {transaction_id} in block {}",
                                         metadata.block_id
@@ -116,7 +116,7 @@ where
                                         &mut spent_output_ids,
                                     );
                                 }
-                                LedgerInclusionState::Conflicting => {
+                                TransactionState::Failed => {
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
                                     if let Ok(included_block) =
@@ -125,7 +125,7 @@ where
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(
                                             transaction,
-                                            Some(included_block.id()),
+                                            Some(self.client().block_id(&included_block).await?),
                                             // block metadata was Conflicting, but it's confirmed in another attachment
                                             InclusionState::Confirmed,
                                             &mut updated_transactions,
@@ -142,11 +142,8 @@ where
                                         );
                                     }
                                 }
-                                LedgerInclusionState::NoTransaction => {
-                                    unreachable!(
-                                        "We should only get the metadata for blocks with a transaction payload"
-                                    )
-                                }
+                                // Do nothing, just need to wait a bit more
+                                TransactionState::Pending => {}
                             }
                         } else {
                             // no need to reissue if one input got spent

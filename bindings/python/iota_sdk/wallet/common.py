@@ -1,11 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import call_wallet_method
-import humps
 import json
 from json import dumps, JSONEncoder
 from enum import Enum
+import humps
+
+from iota_sdk import call_wallet_method
 
 
 def _call_method_routine(func):
@@ -14,9 +15,9 @@ def _call_method_routine(func):
     def wrapper(*args, **kwargs):
         class MyEncoder(JSONEncoder):
             def default(self, obj):
-                as_dict_method = getattr(obj, "as_dict", None)
-                if callable(as_dict_method):
-                    return obj.as_dict()
+                to_dict_method = getattr(obj, "to_dict", None)
+                if callable(to_dict_method):
+                    return obj.to_dict()
                 if isinstance(obj, str):
                     return obj
                 if isinstance(obj, Enum):
@@ -42,11 +43,11 @@ def _call_method_routine(func):
         def remove_none(obj):
             if isinstance(obj, (list, tuple, set)):
                 return type(obj)(remove_none(x) for x in obj if x is not None)
-            elif isinstance(obj, dict):
+            if isinstance(obj, dict):
                 return type(obj)((remove_none(k), remove_none(v))
                                  for k, v in obj.items() if k is not None and v is not None)
-            else:
-                return obj
+            return obj
+
         message_null_filtered = remove_none(message)
         message = dumps(humps.camelize(message_null_filtered))
         # Send message to the Rust library
@@ -60,8 +61,7 @@ def _call_method_routine(func):
 
         if "payload" in json_response:
             return json_response['payload']
-        else:
-            return response
+        return response
     return wrapper
 
 

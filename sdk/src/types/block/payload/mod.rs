@@ -172,6 +172,7 @@ impl Packable for OptionalPayload {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 

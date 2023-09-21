@@ -1,17 +1,18 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.common import HexStr
-from iota_sdk.types.output_id import OutputId
 from dataclasses import dataclass
 from typing import Dict, Optional
-import humps
+
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.output_id import OutputId
 
 
 class NodeIndexerAPI():
     """Node indexer API.
     """
 
+    @json
     @dataclass
     class QueryParameters:
         """Query parameters
@@ -19,8 +20,8 @@ class NodeIndexerAPI():
         **Attributes:**
         address :
             Bech32-encoded address that should be searched for.
-        alias_address :
-            Filter foundry outputs based on bech32-encoded address of the controlling alias.
+        account_address :
+            Filter foundry outputs based on bech32-encoded address of the controlling account.
         created_after :
             Returns outputs that were created after a certain Unix timestamp.
          created_before :
@@ -68,7 +69,7 @@ class NodeIndexerAPI():
             Returns outputs that are timelocked before a certain Unix timestamp.
         """
         address: Optional[str] = None
-        alias_address: Optional[str] = None
+        account_address: Optional[str] = None
         created_after: Optional[int] = None
         created_before: Optional[int] = None
         cursor: Optional[str] = None
@@ -91,10 +92,6 @@ class NodeIndexerAPI():
         timelocked_after: Optional[int] = None
         timelocked_before: Optional[int] = None
 
-        def as_dict(self):
-            return humps.camelize(
-                [{k: v} for k, v in self.__dict__.items() if v is not None])
-
     class OutputIdsResponse:
         """Response type for output IDs.
 
@@ -104,11 +101,11 @@ class NodeIndexerAPI():
             items: The query results.
         """
 
-        def __init__(self, dict: Dict):
-            self.ledgerIndex = dict["ledgerIndex"]
-            self.cursor = dict["cursor"]
+        def __init__(self, output_dict: Dict):
+            self.ledgerIndex = output_dict["ledgerIndex"]
+            self.cursor = output_dict["cursor"]
             self.items = [OutputId.from_string(
-                output_id) for output_id in dict["items"]]
+                output_id) for output_id in output_dict["items"]]
 
     def basic_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
@@ -118,36 +115,36 @@ class NodeIndexerAPI():
             The corresponding output IDs of the basic outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('basicOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
         return self.OutputIdsResponse(response)
 
-    def alias_output_ids(
+    def account_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
-        """Fetch alias output IDs from the given query parameters.
+        """Fetch account output IDs from the given query parameters.
 
         Returns:
-            The corresponding output IDs of the alias outputs.
+            The corresponding output IDs of the account outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
-        response = self._call_method('aliasOutputIds', {
+        response = self._call_method('accountOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
         return self.OutputIdsResponse(response)
 
-    def alias_output_id(self, alias_id: HexStr) -> OutputId:
-        """Fetch alias output ID from the given alias ID.
+    def account_output_id(self, account_id: HexStr) -> OutputId:
+        """Fetch account output ID from the given account ID.
 
         Returns:
-            The output ID of the alias output.
+            The output ID of the account output.
         """
-        return OutputId.from_string(self._call_method('aliasOutputId', {
-            'aliasId': alias_id
+        return OutputId.from_string(self._call_method('accountOutputId', {
+            'accountId': account_id
         }))
 
     def nft_output_ids(
@@ -158,7 +155,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the NFT outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('nftOutputIds', {
             'queryParameters': query_parameters_camelized,
@@ -183,7 +180,7 @@ class NodeIndexerAPI():
             The corresponding output IDs of the foundry outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('foundryOutputIds', {
             'queryParameters': query_parameters_camelized,

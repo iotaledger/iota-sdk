@@ -1,13 +1,14 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import List, Union
+from dacite import from_dict
+
 from iota_sdk.types.block import Block, BlockMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
-from typing import List
-from dacite import from_dict
 
 
 class NodeCoreAPI():
@@ -31,7 +32,7 @@ class NodeCoreAPI():
             url: The node's url.
             auth: A JWT or username/password authentication object.
         """
-        return from_dict(NodeInfo, self._call_method('getNodeInfo', {
+        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
         }))
@@ -95,7 +96,8 @@ class NodeCoreAPI():
             'blockBytes': block_bytes
         })
 
-    def get_output(self, output_id: OutputId | HexStr) -> OutputWithMetadata:
+    def get_output(
+            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
         """Get the output corresponding to the given output id.
 
         Returns:
@@ -103,12 +105,12 @@ class NodeCoreAPI():
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return from_dict(OutputWithMetadata, self._call_method('getOutput', {
+        return OutputWithMetadata.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
-    def get_output_metadata(self, output_id: OutputId |
-                            HexStr) -> OutputMetadata:
+    def get_output_metadata(
+            self, output_id: Union[OutputId, HexStr]) -> OutputMetadata:
         """Get the output metadata corresponding to the given output id.
 
         Returns:

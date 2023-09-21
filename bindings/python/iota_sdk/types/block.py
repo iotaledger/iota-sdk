@@ -2,31 +2,35 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Dict, List, Optional
-from iota_sdk.types.common import HexStr
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
-from iota_sdk.utils import Utils
 from enum import Enum
-from dacite import from_dict
+from dataclasses import dataclass
+from typing import List, Optional, Union
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
+from iota_sdk.utils import Utils
 
 
+@json
 @dataclass
 class Block:
     """Represent the object that nodes gossip around the network.
 
     Attributes:
-        protocolVersion: The protocol version with which this block was issued.
-        parents: The parents of this block.
-        nonce: The nonce of this block.
+        protocol_version: The protocol version with which this block was issued.
+        strong_parents: Blocks that are strongly directly approved.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
+        burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
 
-    protocolVersion: int
-    parents: List[HexStr]
-    nonce: str
-    payload: Optional[TaggedDataPayload |
-                      TransactionPayload | MilestonePayload] = None
+    protocol_version: int
+    strong_parents: List[HexStr]
+    weak_parents: List[HexStr]
+    shallow_like_parents: List[HexStr]
+    burned_mana: str
+    payload: Optional[Union[TaggedDataPayload,
+                      TransactionPayload]] = None
 
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:
@@ -34,14 +38,6 @@ class Block:
 
     def id(self) -> HexStr:
         return Utils.block_id(self)
-
-    def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items() if v is not None}
-
-        if 'payload' in config:
-            config['payload'] = config['payload'].as_dict()
-
-        return config
 
 
 class LedgerInclusionState(str, Enum):
@@ -76,51 +72,65 @@ class ConflictReason(Enum):
         invalidChainState (12): The chain state is invalid.
         semanticValidationFailed (255): The semantic validation failed.
     """
-    none = 0,
-    inputUTXOAlreadySpent = 1,
-    inputUTXOAlreadySpentInThisMilestone = 2,
-    inputUTXONotFound = 3,
-    inputOutputSumMismatch = 4,
-    invalidSignature = 5,
-    invalidTimelock = 6,
-    invalidNativeTokens = 7,
-    returnAmountMismatch = 8,
-    invalidInputUnlock = 9,
-    invalidInputsCommitment = 10,
-    invalidSender = 11,
-    invalidChainState = 12,
-    semanticValidationFailed = 255,
+    none = 0
+    inputUTXOAlreadySpent = 1
+    inputUTXOAlreadySpentInThisMilestone = 2
+    inputUTXONotFound = 3
+    inputOutputSumMismatch = 4
+    invalidSignature = 5
+    invalidTimelock = 6
+    invalidNativeTokens = 7
+    returnAmountMismatch = 8
+    invalidInputUnlock = 9
+    invalidInputsCommitment = 10
+    invalidSender = 11
+    invalidChainState = 12
+    semanticValidationFailed = 255
 
 
+CONFLICT_REASON_STRINGS = {
+    ConflictReason.none: 'The block has no conflict',
+    ConflictReason.inputUTXOAlreadySpent: 'The referenced UTXO was already spent',
+    ConflictReason.inputUTXOAlreadySpentInThisMilestone: 'The referenced UTXO was already spent while confirming this milestone',
+    ConflictReason.inputUTXONotFound: 'The referenced UTXO cannot be found',
+    ConflictReason.inputOutputSumMismatch: 'The sum of the inputs and output values does not match',
+    ConflictReason.invalidSignature: 'The unlock block signature is invalid',
+    ConflictReason.invalidTimelock: 'The configured timelock is not yet expired',
+    ConflictReason.invalidNativeTokens: 'The native tokens are invalid',
+    ConflictReason.returnAmountMismatch: 'The return amount in a transaction is not fulfilled by the output side',
+    ConflictReason.invalidInputUnlock: 'The input unlock is invalid',
+    ConflictReason.invalidInputsCommitment: 'The inputs commitment is invalid',
+    ConflictReason.invalidSender: ' The output contains a Sender with an ident (address) which is not unlocked',
+    ConflictReason.invalidChainState: 'The chain state transition is invalid',
+    ConflictReason.semanticValidationFailed: 'The semantic validation failed'}
+
+
+@json
 @dataclass
 class BlockMetadata:
     """Block Metadata.
 
     Attributes:
-        blockId: The id of the block.
-        parents: The parents of the block.
-        isSolid: Whether the block is solid.
-        referencedByMilestoneIndex: The milestone index referencing the block.
-        milestoneIndex: The milestone index if the block contains a milestone payload.
-        ledgerInclusionState: The ledger inclusion state of the block.
-        conflictReason: The optional conflict reason of the block.
-        shouldPromote: Whether the block should be promoted.
-        shouldReattach: Whether the block should be reattached.
+        block_id: The id of the block.
+        strong_parents: Blocks that are strongly directly approved.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
+        is_solid: Whether the block is solid.
+        referenced_by_milestone_index: The milestone index referencing the block.
+        milestone_index: The milestone index if the block contains a milestone payload.
+        ledger_inclusion_state: The ledger inclusion state of the block.
+        conflict_reason: The optional conflict reason of the block.
+        should_promote: Whether the block should be promoted.
+        should_reattach: Whether the block should be reattached.
     """
-    blockId: HexStr
-    parents: List[HexStr]
-    isSolid: bool
-    referencedByMilestoneIndex: Optional[int] = None
-    milestoneIndex: Optional[int] = None
-    ledgerInclusionState: Optional[LedgerInclusionState] = None
-    conflictReason: Optional[ConflictReason] = None
-    shouldPromote: Optional[bool] = None
-    shouldReattach: Optional[bool] = None
-
-    @classmethod
-    def from_dict(cls, block_metadata_dict: Dict) -> BlockMetadata:
-        obj = cls.__new__(cls)
-        super(BlockMetadata, obj).__init__()
-        for k, v in block_metadata_dict.items():
-            setattr(obj, k, v)
-        return obj
+    block_id: HexStr
+    strong_parents: List[HexStr]
+    weak_parents: List[HexStr]
+    shallow_like_parents: List[HexStr]
+    is_solid: bool
+    referenced_by_milestone_index: Optional[int] = None
+    milestone_index: Optional[int] = None
+    ledger_inclusion_state: Optional[LedgerInclusionState] = None
+    conflict_reason: Optional[ConflictReason] = None
+    should_promote: Optional[bool] = None
+    should_reattach: Optional[bool] = None

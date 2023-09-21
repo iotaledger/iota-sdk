@@ -67,10 +67,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
-use crate::types::{
-    block::{address::Address, semantic::ValidationContext, Error},
-    ValidationParams,
-};
+use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -160,6 +157,17 @@ impl Output {
             Self::Foundry(_) => FoundryOutput::KIND,
             Self::Nft(_) => NftOutput::KIND,
             Self::Delegation(_) => DelegationOutput::KIND,
+        }
+    }
+
+    /// Returns the output kind of an [`Output`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Basic(_) => "Basic",
+            Self::Account(_) => "Account",
+            Self::Foundry(_) => "Foundry",
+            Self::Nft(_) => "Nft",
+            Self::Delegation(_) => "Delegation",
         }
     }
 
@@ -309,15 +317,13 @@ impl Output {
     /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_and_unlocked_address(
         &self,
-        current_time: u32,
+        slot_index: SlotIndex,
         output_id: &OutputId,
         account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
             Self::Account(output) => {
@@ -333,15 +339,11 @@ impl Output {
             }
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
             Self::Delegation(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), current_time),
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
         }
@@ -385,7 +387,7 @@ impl Output {
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, rent_structure: RentStructure, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.rent_cost(&rent_structure);
+        let required_output_amount = self.rent_cost(rent_structure);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -470,17 +472,30 @@ impl Packable for Output {
 }
 
 impl Rent for Output {
-    fn weighted_bytes(&self, rent_structure: &RentStructure) -> u64 {
+    fn weighted_bytes(&self, rent_structure: RentStructure) -> u64 {
         self.packed_len() as u64 * rent_structure.byte_factor_data() as u64
     }
 }
 
-pub(crate) fn verify_output_amount(amount: &u64, token_supply: &u64) -> Result<(), Error> {
-    if *amount < Output::AMOUNT_MIN || amount > token_supply {
-        Err(Error::InvalidOutputAmount(*amount))
+pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
+    if amount < Output::AMOUNT_MIN {
+        Err(Error::InvalidOutputAmount(amount))
     } else {
         Ok(())
     }
+}
+
+pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
+    if amount > token_supply {
+        Err(Error::InvalidOutputAmount(amount))
+    } else {
+        Ok(())
+    }
+}
+
+pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
+    verify_output_amount_min(amount)?;
+    verify_output_amount_supply(amount, token_supply)
 }
 
 pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
@@ -488,7 +503,7 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
     protocol_parameters: &ProtocolParameters,
 ) -> Result<(), Error> {
     if VERIFY {
-        verify_output_amount(amount, &protocol_parameters.token_supply())?;
+        verify_output_amount(*amount, protocol_parameters.token_supply())?;
     }
     Ok(())
 }
@@ -505,6 +520,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
@@ -516,7 +532,7 @@ pub mod dto {
         account::dto::AccountOutputDto, basic::dto::BasicOutputDto, delegation::dto::DelegationOutputDto,
         foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]

@@ -1,6 +1,8 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 load_dotenv()
 
@@ -21,4 +23,4 @@ nftId = balance.nfts[0]
 
 # Send transaction.
 transaction = account.prepare_burn_nft(nftId).send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.blockId}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

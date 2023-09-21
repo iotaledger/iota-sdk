@@ -10,13 +10,15 @@ use crate::{
     types::block::{
         output::{Output, OutputId},
         payload::transaction::{RegularTransactionEssence, TransactionPayload},
-        semantic::{semantic_validation, ConflictReason, ValidationContext},
+        semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
-        Block, BlockId,
+        BlockId, BlockWrapper,
     },
 };
 
-const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize = Block::LENGTH_MAX - Block::LENGTH_MIN - (7 * BlockId::LENGTH);
+// TODO this is wrong because of https://github.com/iotaledger/iota-sdk/issues/1208
+const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize =
+    BlockWrapper::LENGTH_MAX - BlockWrapper::LENGTH_MIN - (7 * BlockId::LENGTH);
 // Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
 // signature)
 const SINGLE_UNLOCK_LENGTH: usize = 1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
@@ -27,8 +29,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
-    current_time: u32,
-) -> crate::client::Result<ConflictReason> {
+) -> crate::client::Result<Option<TransactionFailureReason>> {
     let transaction_id = transaction.id();
     let inputs = input_signing_data
         .iter()
@@ -40,7 +41,6 @@ pub fn verify_semantic(
         transaction.essence(),
         inputs.iter().map(|(id, input)| (*id, *input)),
         transaction.unlocks(),
-        current_time,
     );
 
     Ok(semantic_validation(context, inputs.as_slice(), transaction.unlocks())?)

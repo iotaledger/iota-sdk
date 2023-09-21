@@ -1,6 +1,8 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 load_dotenv()
 
@@ -17,7 +19,7 @@ balance = account.sync()
 token_id = balance.foundries[0]
 
 available_balance = int(
-    [native_balance for native_balance in balance.nativeTokens if native_balance.tokenId == token_id][0].available, 0)
+    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token_id][0].available, 0)
 print(f'Balance before minting: {available_balance}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
@@ -27,16 +29,16 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 mint_amount = 10
 
-# Prepare and send transaction.
-transaction = account.prepare_mint_native_token(token_id, mint_amount).send()
-print(f'Transaction sent: {transaction.transactionId}')
+# Send transaction.
+transaction = account.mint_native_token(token_id, mint_amount)
+print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-blockId = account.reissue_transaction_until_included(
-    transaction.transactionId)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+block_id = account.reissue_transaction_until_included(
+    transaction.transaction_id)
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = account.sync()
 available_balance = int(
-    [native_balance for native_balance in balance.nativeTokens if native_balance.tokenId == token_id][0].available, 0)
+    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token_id][0].available, 0)
 print(f'Balance after minting: {available_balance}')
