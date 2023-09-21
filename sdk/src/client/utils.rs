@@ -197,3 +197,9 @@ impl Password {
         self.0.as_bytes()
     }
 }
+
+pub fn unix_timestamp_now() -> core::time::Duration {
+    instant::SystemTime::now()
+        .duration_since(instant::SystemTime::UNIX_EPOCH)
+        .expect("time went backwards")
+}
