@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicBlock } from './basic';
+import { ValidationBlock } from './validation';
 /**
  * All of the block types.
  */
