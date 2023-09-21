@@ -187,7 +187,7 @@ impl StrongholdAdapterBuilder {
             // Issue #1197
             return Err(std::io::Error::new(
                 std::io::ErrorKind::Other,
-                format!("Path is not a file: {:?}", snapshot_path.unwrap()),
+                format!("Path is not a file: {:?}", snapshot_path.as_ref().to_path_buf()),
             )
             .into());
         }
