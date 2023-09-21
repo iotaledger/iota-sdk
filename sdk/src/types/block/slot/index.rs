@@ -63,7 +63,7 @@ impl SlotIndex {
     pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> SlotIndex {
         timestamp
             .checked_sub(genesis_unix_timestamp as u64)
-            .map(|diff| (diff / slot_duration_in_seconds as u64) + 1)
+            .map(|elapsed| (elapsed / slot_duration_in_seconds as u64) + 1)
             .unwrap_or_default()
             .into()
     }
