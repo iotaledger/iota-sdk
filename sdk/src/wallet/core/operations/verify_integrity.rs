@@ -10,7 +10,7 @@ impl<S: SecretManage> Wallet<S> {
     pub async fn verify_integrity(&self) -> crate::wallet::Result<()> {
         log::debug!("[verify_integrity]");
 
-        let accounts = self.accounts.read().await;
+        let accounts = self.data.read().await;
 
         // check that no account is missing and they're ordered
         // check that no address is missing and they're ordered

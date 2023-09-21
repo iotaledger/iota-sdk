@@ -81,9 +81,10 @@ impl Wallet {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let mut accounts = self.accounts.write().await;
+
+        let mut wallet_data = self.data.write().await;
         // We don't want to overwrite possible existing accounts
-        if !accounts.is_empty() {
+        if !wallet_data.is_empty() {
             return Err(crate::wallet::Error::Backup(
                 "can't restore backup when there are already accounts",
             ));
@@ -177,7 +178,7 @@ impl Wallet {
                             .map(|a| Account::new(a, self.inner.clone()).boxed()),
                     )
                     .await?;
-                    *accounts = restored_account;
+                    *wallet_data = restored_account;
                 }
             }
         }
@@ -201,7 +202,7 @@ impl Wallet {
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
             wallet_builder.save(&*self.storage_manager.read().await).await?;
             // also save account to db
-            for account in accounts.iter() {
+            for account in wallet_data.iter() {
                 account.save(None).await?;
             }
         }
@@ -255,7 +256,7 @@ impl Wallet<StrongholdSecretManager> {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let mut accounts = self.accounts.write().await;
+        let mut accounts = self.data.write().await;
         // We don't want to overwrite possible existing accounts
         if !accounts.is_empty() {
             return Err(crate::wallet::Error::Backup(

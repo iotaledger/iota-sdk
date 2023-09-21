@@ -16,26 +16,30 @@ impl<S: SecretManage> Wallet<S> {
         identifier: I,
     ) -> crate::wallet::Result<Account<S>> {
         let account_id = identifier.into();
-        let accounts = self.accounts.read().await;
+
+        todo!("since there's only one account in the wallet, no need to have AccountIdentifier?");
+        // let data = self.data.read().await;
 
         match &account_id {
             AccountIdentifier::Index(index) => {
-                for account in accounts.iter() {
-                    let account_details = account.details().await;
+                todo!("no need to iter anymore");
+                // for account in data.iter() {
+                //     let account_details = account.details().await;
 
-                    if account_details.index() == index {
-                        return Ok(account.clone());
-                    }
-                }
+                //     if account_details.index() == index {
+                //         return Ok(account.clone());
+                //     }
+                // }
             }
             AccountIdentifier::Alias(alias) => {
-                for account in accounts.iter() {
-                    let account_details = account.details().await;
+                todo!("no need to iter anymore");
+                // for account in data.iter() {
+                //     let account_details = account.details().await;
 
-                    if account_details.alias() == alias {
-                        return Ok(account.clone());
-                    }
-                }
+                //     if account_details.alias() == alias {
+                //         return Ok(account.clone());
+                //     }
+                // }
             }
         };
 

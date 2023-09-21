@@ -244,7 +244,7 @@ where
 
         Ok(Wallet {
             inner: wallet_inner,
-            accounts: Arc::new(RwLock::new(accounts)),
+            data: Arc::new(RwLock::new(accounts)),
         })
     }
 

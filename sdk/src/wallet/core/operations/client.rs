@@ -135,9 +135,10 @@ where
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
 
-        for account in self.accounts.write().await.iter_mut() {
-            account.update_account_bech32_hrp().await?;
-        }
+        todo!("no need to iter anymore");
+        // for account in self.data.write().await.iter_mut() {
+        //     account.update_account_bech32_hrp().await?;
+        // }
 
         Ok(())
     }

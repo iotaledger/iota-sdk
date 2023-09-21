@@ -59,7 +59,7 @@ where
     /// Also generates the first address of the account and if it's not the first account, the address for the first
     /// account will also be generated and compared, so no accounts get generated with different seeds
     pub async fn finish(&mut self) -> crate::wallet::Result<Account<S>> {
-        let mut accounts = self.wallet.accounts.write().await;
+        let mut accounts = self.wallet.data.write().await;
         let account_index = accounts.len() as u32;
         // If no alias is provided, the account index will be set as alias
         let account_alias = self.alias.clone().unwrap_or_else(|| account_index.to_string());
