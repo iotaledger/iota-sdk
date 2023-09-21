@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, unix_timestamp_now},
     types::{
         api::core::response::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
     },
-    utils::unix_timestamp_now,
     wallet::account::{
         types::{InclusionState, Transaction},
         Account, AccountDetails,
