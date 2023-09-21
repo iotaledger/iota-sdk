@@ -58,7 +58,7 @@ export abstract class Block {
      * @returns The block
      */
     asValidation(): ValidationBlock {
-        if (this.isBasic()) {
+        if (this.isValidation()) {
             return this as unknown as ValidationBlock;
         } else {
             throw new Error('invalid downcast of non-ValidationBlock');
