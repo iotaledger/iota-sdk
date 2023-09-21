@@ -7,13 +7,14 @@ use packable::PackableExt;
 #[test]
 fn slot_commitment_id() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#slot-commitment-id-1
+
     let slot_commitment_json = serde_json::json!({
-      "version":3,
-      "index":"10",
-      "previousCommitmentId":"0x4b024b3e47280d05272a7d136f0c464e4e136b734e6c427749413e286162077560652c007e37241a",
-      "rootsId":"0x75614402763f5f045c040334631b791b4d755d626d504b134a505c001c516549",
-      "cumulativeWeight":"100",
-      "referenceManaCost":"6000"
+        "version": 3,
+        "index": "10",
+        "previousCommitmentId": "0x4b024b3e47280d05272a7d136f0c464e4e136b734e6c427749413e286162077560652c007e37241a",
+        "rootsId": "0x75614402763f5f045c040334631b791b4d755d626d504b134a505c001c516549",
+        "cumulativeWeight": "100",
+        "referenceManaCost": "6000"
     });
 
     let slot_commitment = serde_json::from_value::<SlotCommitment>(slot_commitment_json).unwrap();
