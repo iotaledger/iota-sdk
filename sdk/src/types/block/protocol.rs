@@ -238,9 +238,9 @@ impl Default for WorkScoreStructure {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
-    /// Minimum value of the RMC.
+    /// Minimum value of the reference Mana cost.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    rmc_min: u64,
+    min_reference_mana_cost: u64,
     /// Increase step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     increase: u64,
@@ -265,7 +265,7 @@ pub struct CongestionControlParameters {
 impl Default for CongestionControlParameters {
     fn default() -> Self {
         Self {
-            rmc_min: 500,
+            min_reference_mana_cost: 500,
             increase: 500,
             decrease: 500,
             increase_threshold: 800000,

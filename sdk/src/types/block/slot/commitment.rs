@@ -16,7 +16,6 @@ use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
 )]
 pub struct SlotCommitment {
     // The version of the protocol running.
-    #[cfg_attr(feature = "serde", serde(rename = "version"))]
     protocol_version: u8,
     /// The slot index of this commitment.
     /// It is calculated based on genesis timestamp and the duration of a slot.

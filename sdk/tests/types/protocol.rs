@@ -40,13 +40,13 @@ fn params_serde_hash() {
         "slotDurationInSeconds":10,
         "slotsPerEpochExponent":13,
         "manaStructure": {
-          "manaBitsCount":1,
-          "manaGenerationRate":1,
-          "manaGenerationRateExponent":27,
-          "manaDecayFactors":[10,20],
-          "manaDecayFactorsExponent":32,
-          "manaDecayFactorEpochsSum":1337,
-          "manaDecayFactorEpochsSumExponent":20
+          "bitsCount":1,
+          "generationRate":1,
+          "generationRateExponent":27,
+          "decayFactors":[10,20],
+          "decayFactorsExponent":32,
+          "decayFactorEpochsSum":1337,
+          "decayFactorEpochsSumExponent":20
         },
         "stakingUnbondingPeriod":"11",
         "validationBlocksPerSlot":10,
@@ -56,7 +56,7 @@ fn params_serde_hash() {
         "maxCommittableAge":"20",
         "epochNearingThreshold":"24",
         "congestionControlParameters": {
-          "rmcMin":"500",
+          "minReferenceManaCost":"500",
           "increase":"500",
           "decrease":"500",
           "increaseThreshold":800000,
