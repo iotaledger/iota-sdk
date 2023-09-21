@@ -201,7 +201,7 @@ impl BlockWrapper {
         ]
         .concat();
         let block_hash = BlockHash::new(Blake2b256::digest(id).into());
-        block_hash.with_slot_index(protocol_params.slot_index(self.header.issuing_time()))
+        block_hash.with_slot_index(protocol_params.slot_index(self.header.issuing_time() / 1000000000))
     }
 
     /// Unpacks a [`BlockWrapper`] from a sequence of bytes doing syntactical checks and verifying that
