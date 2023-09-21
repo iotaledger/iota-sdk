@@ -76,37 +76,37 @@ fn basic_block_id_tagged_data_payload() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
 
     let block_json = serde_json::json!({
-          "protocolVersion":3,
-    "networkId":"10549460113735494767",
-    "issuingTime":"1695275834000000000",
-    "slotCommitmentId":"0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
-    "latestFinalizedSlot":"21",
-    "issuerId":"0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
-    "block":{
-      "type":0,
-      "strongParents":[
-        "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
-        "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
-      ],
-      "weakParents":[
-        "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
-      ],
-      "shallowLikeParents":[
-        "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
-      ],
-      "payload":{
-        "type":5,
-        "tag":"0x68656c6c6f20776f726c64",
-        "data":"0x01020304"
+      "protocolVersion": 3,
+      "networkId": "10549460113735494767",
+      "issuingTime": "1695275834000000000",
+      "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
+      "latestFinalizedSlot": "21",
+      "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+      "block": {
+        "type": 0,
+        "strongParents": [
+          "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
+          "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
+        ],
+        "weakParents": [
+          "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
+        ],
+        "shallowLikeParents": [
+          "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
+        ],
+        "payload": {
+          "type": 5,
+          "tag": "0x68656c6c6f20776f726c64",
+          "data": "0x01020304"
+        },
+        "burnedMana": "180500"
       },
-      "burnedMana":"180500"
-    },
-    "signature":{
-      "type":0,
-      "publicKey":"0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
-      "signature":"0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
-    }
-      });
+      "signature": {
+        "type": 0,
+        "publicKey": "0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
+        "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
+      }
+    });
 
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_json).unwrap();
     let block = BlockWrapper::try_from_dto(block_dto).unwrap();
@@ -147,78 +147,80 @@ fn basic_block_id_transaction_payload() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
 
     let block_json = serde_json::json!({
-      "protocolVersion":3,
-      "networkId":"10549460113735494767","issuingTime":"1695275834000000000","slotCommitmentId":"0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
-      "latestFinalizedSlot":"21",
-      "issuerId":"0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
-      "block":{
-      "type":0,
-      "strongParents":[
-      "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
-      "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
-      ],
-      "weakParents":[
-      "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
-      ],
-      "shallowLikeParents":[
-      "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
-      ],
-      "payload":{
-      "type":6,
-      "essence":{
-      "type":2,
-      "networkId":"3650798313638353144",
-        "creationSlot":"28",
-        "contextInputs":[],
-        "inputs":[
-          {
-            "type":0,
-            "transactionId":"0x24ff9b3038506fb1b406306a496001c3e24e2be07c838317922bf21d686a078f",
-            "transactionOutputIndex":10
-            }
-          ],
-          "inputsCommitment":"0xb70c6f86a1ea03a59a71d73dcd07e2082bbdf0ce971faa21748348bca22fb023",
-          "outputs":[
-            {
-              "type":3,
-              "amount":"10000",
-              "mana":"0",
-              "unlockConditions":[
-                {
-                  "type":0,
-                  "address":{
-                    "type":0,
-                    "pubKeyHash":"0xd9f84458286dc41cd34789dec566cd096cf47de991aa36a97aebfaea14128f6d"
+      "protocolVersion": 3,
+      "networkId": "10549460113735494767",
+      "issuingTime": "1695275834000000000",
+      "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
+      "latestFinalizedSlot": "21",
+      "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+      "block": {
+        "type": 0,
+        "strongParents": [
+          "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
+          "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
+        ],
+        "weakParents": [
+          "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
+        ],
+        "shallowLikeParents": [
+          "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
+        ],
+        "payload": {
+          "type": 6,
+          "essence": {
+            "type": 2,
+            "networkId": "3650798313638353144",
+            "creationSlot": "28",
+            "contextInputs": [],
+            "inputs": [
+              {
+                "type": 0,
+                "transactionId": "0x24ff9b3038506fb1b406306a496001c3e24e2be07c838317922bf21d686a078f",
+                "transactionOutputIndex": 10
+              }
+            ],
+            "inputsCommitment": "0xb70c6f86a1ea03a59a71d73dcd07e2082bbdf0ce971faa21748348bca22fb023",
+            "outputs": [
+              {
+                "type": 3,
+                "amount": "10000",
+                "mana": "0",
+                "unlockConditions": [
+                  {
+                    "type": 0,
+                    "address": {
+                      "type": 0,
+                      "pubKeyHash": "0xd9f84458286dc41cd34789dec566cd096cf47de991aa36a97aebfaea14128f6d"
+                    }
                   }
-                }
-              ]
+                ]
+              }
+            ],
+            "allotments": [],
+            "payload": {
+              "type": 5,
+              "tag": "0x1d7b3e11697264111e130b0e",
+              "data": "0x1d7b3e11697264111e130b0e"
             }
-          ],
-          "allotments":[],
-          "payload":{
-            "type":5,
-            "tag":"0x1d7b3e11697264111e130b0e",
-            "data":"0x1d7b3e11697264111e130b0e"
-          }
+          },
+          "unlocks": [
+            {
+              "type": 0,
+              "signature": {
+                "type": 0,
+                "publicKey": "0x803361fe1effc899dca7f931d8ad07c01ba23aaa93f986adb04d4c17cf6368d8",
+                "signature": "0xccddbac3aaac413e0193e16da3449f30c183d0e7eaa7f303dc12ae0dbc9fb890e449a52f9056e7d952ea796fd3e5645f60d9eb98ed91cb3261720fb528d2a105"
+              }
+            }
+          ]
         },
-        "unlocks":[
-          {
-            "type":0,
-            "signature":{
-              "type":0,
-              "publicKey":"0x803361fe1effc899dca7f931d8ad07c01ba23aaa93f986adb04d4c17cf6368d8",
-              "signature":"0xccddbac3aaac413e0193e16da3449f30c183d0e7eaa7f303dc12ae0dbc9fb890e449a52f9056e7d952ea796fd3e5645f60d9eb98ed91cb3261720fb528d2a105"
-            }
-          }
-        ]
+        "burnedMana": "180500"
       },
-      "burnedMana":"180500"
-    },
-    "signature":{
-      "type":0,
-      "publicKey":"0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
-      "signature":"0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
-    }
+      "signature": {
+        "type": 0,
+        "publicKey": "0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
+        "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
+      }
     });
 
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_json).unwrap();
@@ -270,32 +272,32 @@ fn validation_block_id() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#validation-block-id
 
     let block_json = serde_json::json!({
-        "protocolVersion":3,
-        "networkId":"10549460113735494767",
-        "issuingTime":"1695275834000000000",
-        "slotCommitmentId":"0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
-        "latestFinalizedSlot":"0",
-        "issuerId":"0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
-        "block":{
-            "type":1,
-            "strongParents":[
-                "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
-                "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
-            ],
-            "weakParents":[
-                "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
-            ],
-            "shallowLikeParents":[
-                "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
-            ],
-            "highestSupportedVersion":3,
-            "protocolParametersHash":"0xf6021fae654975db2e82c17444dc8d43573cb4222f506fb46ba46a097cf8c873"
-        },
-        "signature":{
-            "type":0,
-            "publicKey":"0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
-            "signature":"0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
-        }
+      "protocolVersion": 3,
+      "networkId": "10549460113735494767",
+      "issuingTime": "1695275834000000000",
+      "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
+      "latestFinalizedSlot": "0",
+      "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+      "block": {
+        "type": 1,
+        "strongParents": [
+          "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
+          "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
+        ],
+        "weakParents": [
+          "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
+        ],
+        "shallowLikeParents": [
+          "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
+        ],
+        "highestSupportedVersion": 3,
+        "protocolParametersHash": "0xf6021fae654975db2e82c17444dc8d43573cb4222f506fb46ba46a097cf8c873"
+      },
+      "signature": {
+        "type": 0,
+        "publicKey": "0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
+        "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
+      }
     });
 
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_json).unwrap();
