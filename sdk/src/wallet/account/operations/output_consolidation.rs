@@ -15,6 +15,7 @@ use crate::{
         },
         slot::SlotIndex,
     },
+    wallet::Wallet,
 };
 
 // Constants for the calculation of the amount of inputs we can use with a ledger nano
@@ -33,7 +34,7 @@ use crate::wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
         types::{OutputData, Transaction},
-        Account, AddressWithUnspentOutputs, TransactionOptions,
+        AddressWithUnspentOutputs, TransactionOptions,
     },
     Result,
 };
@@ -70,7 +71,7 @@ impl ConsolidationParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -129,10 +130,10 @@ where
         let slot_index = self.client().get_slot_index().await?;
         let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
-        let account_details = self.details().await;
-        let account_addresses = &account_details.addresses_with_unspent_outputs[..];
+        let wallet_data = self.data().await;
+        let wallet_addresses = &wallet_data.addresses_with_unspent_outputs[..];
 
-        for (output_id, output_data) in account_details.unspent_outputs() {
+        for (output_id, output_data) in &wallet_data.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
                 // Remove voting output from inputs, because we want to keep its features and not consolidate it.
@@ -140,15 +141,15 @@ where
                     continue;
                 }
             }
-            let is_locked_output = account_details.locked_outputs.contains(output_id);
+            let is_locked_output = wallet_data.locked_outputs.contains(output_id);
             let should_consolidate_output =
-                self.should_consolidate_output(output_data, slot_index, account_addresses)?;
+                self.should_consolidate_output(output_data, slot_index, wallet_addresses)?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
             }
         }
 
-        drop(account_details);
+        drop(wallet_data);
 
         let output_threshold = match params.output_threshold {
             Some(t) => t,
@@ -156,7 +157,7 @@ where
                 #[cfg(feature = "ledger_nano")]
                 {
                     use crate::wallet::account::SecretManager;
-                    let secret_manager = self.wallet.secret_manager.read().await;
+                    let secret_manager = self.inner.secret_manager.read().await;
                     if secret_manager
                         .downcast::<LedgerSecretManager>()
                         .or_else(|| {
@@ -196,7 +197,7 @@ where
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
             use crate::wallet::account::SecretManager;
-            let secret_manager = self.wallet.secret_manager.read().await;
+            let secret_manager = self.inner.secret_manager.read().await;
             if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
                 secret_manager.downcast::<SecretManager>().and_then(|s| {
                     if let SecretManager::LedgerNano(n) = s {

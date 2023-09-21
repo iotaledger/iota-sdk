@@ -9,12 +9,12 @@ use crate::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
-        Error,
+        account::{types::Transaction, TransactionOptions},
+        Error, Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -59,9 +59,9 @@ where
         log::debug!("[TRANSACTION] mint_native_token");
 
         let mint_amount = mint_amount.into();
-        let account_details = self.details().await;
+        let wallet_data = self.data().await;
         let token_supply = self.client().get_token_supply().await?;
-        let existing_foundry_output = account_details.unspent_outputs().values().find(|output_data| {
+        let existing_foundry_output = wallet_data.unspent_outputs.values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {
                 TokenId::new(*output.id()) == token_id
             } else {
@@ -84,7 +84,7 @@ where
             }
 
             // Get the account output that controls the foundry output
-            let existing_account_output = account_details.unspent_outputs().values().find(|output_data| {
+            let existing_account_output = wallet_data.unspent_outputs.values().find(|output_data| {
                 if let Output::Account(output) = &output_data.output {
                     output.account_id_non_null(&output_data.output_id) == **foundry_output.account_address()
                 } else {
@@ -98,7 +98,7 @@ where
             return Err(Error::MintingFailed("account output is not available".to_string()));
         };
 
-        drop(account_details);
+        drop(wallet_data);
 
         let account_output = if let Output::Account(account_output) = existing_account_output.output {
             account_output

@@ -35,7 +35,7 @@ use iota_sdk::{
     },
     wallet::account::{
         types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionDto},
-        AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
+        PreparedCreateNativeTokenTransactionDto, WalletDataDto,
     },
 };
 use serde::Serialize;
@@ -246,13 +246,13 @@ pub enum Response {
     /// Response for:
     /// - [`CreateAccount`](crate::method::WalletMethod::CreateAccount),
     /// - [`GetAccount`](crate::method::WalletMethod::GetAccount)
-    Account(AccountDetailsDto),
+    Account(WalletDataDto),
     /// Response for:
     /// - [`GetAccountIndexes`](crate::method::WalletMethod::GetAccountIndexes)
     AccountIndexes(Vec<u32>),
     /// Response for:
     /// - [`GetAccounts`](crate::method::WalletMethod::GetAccounts)
-    Accounts(Vec<AccountDetailsDto>),
+    Accounts(Vec<WalletDataDto>),
     /// Response for:
     /// - [`Addresses`](crate::method::AccountMethod::Addresses)
     Addresses(Vec<Bip44Address>),

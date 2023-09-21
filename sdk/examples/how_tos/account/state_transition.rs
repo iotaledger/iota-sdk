@@ -22,10 +22,10 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Set the stronghold password
     wallet
@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
 
     // Get the first account
     let account_id = balance
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         .first()
         .expect("No account output available in the account.");
 
-    let account_output_data = account
+    let account_output_data = wallet
         .unspent_account_output(account_id)
         .await?
         .expect("account not found in unspent outputs");
@@ -50,8 +50,8 @@ async fn main() -> Result<()> {
         account_output_data.output_id
     );
 
-    let token_supply = account.client().get_token_supply().await?;
-    let rent_structure = account.client().get_rent_structure().await?;
+    let token_supply = wallet.client().get_token_supply().await?;
+    let rent_structure = wallet.client().get_rent_structure().await?;
 
     let account_output = account_output_data.output.as_account();
     let updated_account_output = AccountOutputBuilder::from(account_output)
@@ -63,10 +63,10 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?;
 
     println!("Sending transaction...",);
-    let transaction = account.send_outputs(vec![updated_account_output], None).await?;
+    let transaction = wallet.send_outputs(vec![updated_account_output], None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(

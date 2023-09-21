@@ -16,14 +16,17 @@ use crate::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         output::{FoundryId, Output, OutputId, OutputMetadata},
     },
-    wallet::account::{
-        constants::MIN_SYNC_INTERVAL,
-        types::{AddressWithUnspentOutputs, OutputData},
-        Account, Balance,
+    wallet::{
+        account::{
+            constants::MIN_SYNC_INTERVAL,
+            types::{AddressWithUnspentOutputs, OutputData},
+            Balance,
+        },
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -32,9 +35,8 @@ where
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
         #[cfg(feature = "storage")]
         {
-            let index = *self.details().await.index();
-            let storage_manager = self.wallet.storage_manager.read().await;
-            storage_manager.set_default_sync_options(index, &options).await?;
+            let storage_manager = self.storage_manager.read().await;
+            storage_manager.set_default_sync_options(todo!("index"), &options).await?;
         }
 
         *self.default_sync_options.lock().await = options;
@@ -46,51 +48,53 @@ where
         self.default_sync_options.lock().await.clone()
     }
 
-    /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
-    /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
-        let options = match options {
-            Some(opt) => opt,
-            None => self.default_sync_options().await,
-        };
+    // TODO: needs to be merged with wallet::sync
 
-        log::debug!("[SYNC] start syncing with {:?}", options);
-        let syc_start_time = instant::Instant::now();
+    // /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
+    // /// if necessary. A custom default can be set using set_default_sync_options.
+    // pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
+    //     let options = match options {
+    //         Some(opt) => opt,
+    //         None => self.default_sync_options().await,
+    //     };
 
-        // Prevent syncing the account multiple times simultaneously
-        let time_now = crate::utils::unix_timestamp_now().as_millis();
-        let mut last_synced = self.last_synced.lock().await;
-        log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
-        if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
-            log::debug!(
-                "[SYNC] synced within the latest {} ms, only calculating balance",
-                MIN_SYNC_INTERVAL
-            );
-            // Calculate the balance because if we created a transaction in the meantime, the amount for the inputs is
-            // not available anymore
-            return self.balance().await;
-        }
+    //     log::debug!("[SYNC] start syncing with {:?}", options);
+    //     let syc_start_time = instant::Instant::now();
 
-        self.sync_internal(&options).await?;
+    //     // Prevent syncing the account multiple times simultaneously
+    //     let time_now = crate::utils::unix_timestamp_now().as_millis();
+    //     let mut last_synced = self.last_synced.lock().await;
+    //     log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
+    //     if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
+    //         log::debug!(
+    //             "[SYNC] synced within the latest {} ms, only calculating balance",
+    //             MIN_SYNC_INTERVAL
+    //         );
+    //         // Calculate the balance because if we created a transaction in the meantime, the amount for the inputs
+    // is         // not available anymore
+    //         return self.balance().await;
+    //     }
 
-        // Sync transactions after updating account with outputs, so we can use them to check the transaction
-        // status
-        if options.sync_pending_transactions {
-            let confirmed_tx_with_unknown_output = self.sync_pending_transactions().await?;
-            // Sync again if we don't know the output yet, to prevent having no unspent outputs after syncing
-            if confirmed_tx_with_unknown_output {
-                log::debug!("[SYNC] a transaction for which no output is known got confirmed, syncing outputs again");
-                self.sync_internal(&options).await?;
-            }
-        };
+    //     self.sync_internal(&options).await?;
 
-        let balance = self.balance().await?;
-        // Update last_synced mutex
-        let time_now = crate::utils::unix_timestamp_now().as_millis();
-        *last_synced = time_now;
-        log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
-        Ok(balance)
-    }
+    //     // Sync transactions after updating account with outputs, so we can use them to check the transaction
+    //     // status
+    //     if options.sync_pending_transactions {
+    //         let confirmed_tx_with_unknown_output = self.sync_pending_transactions().await?;
+    //         // Sync again if we don't know the output yet, to prevent having no unspent outputs after syncing
+    //         if confirmed_tx_with_unknown_output {
+    //             log::debug!("[SYNC] a transaction for which no output is known got confirmed, syncing outputs
+    // again");             self.sync_internal(&options).await?;
+    //         }
+    //     };
+
+    //     let balance = self.balance().await?;
+    //     // Update last_synced mutex
+    //     let time_now = crate::utils::unix_timestamp_now().as_millis();
+    //     *last_synced = time_now;
+    //     log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
+    //     Ok(balance)
+    // }
 
     async fn sync_internal(&self, options: &SyncOptions) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] sync_internal");

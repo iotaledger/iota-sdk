@@ -14,8 +14,13 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{address::{Bech32Address, Address}, output::BasicOutput, payload::transaction::TransactionId},
-    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet}, crypto::keys::bip44::Bip44,
+    crypto::keys::bip44::Bip44,
+    types::block::{
+        address::{Address, Bech32Address},
+        output::BasicOutput,
+        payload::transaction::TransactionId,
+    },
+    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
 };
 
 // The account alias used in this example.

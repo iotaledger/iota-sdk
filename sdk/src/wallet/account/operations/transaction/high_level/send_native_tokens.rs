@@ -19,10 +19,8 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        account::{
-            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
-        },
-        Error, Result,
+        account::{constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, TransactionOptions},
+        Error, Result, Wallet,
     },
 };
 
@@ -79,7 +77,7 @@ impl SendNativeTokensParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

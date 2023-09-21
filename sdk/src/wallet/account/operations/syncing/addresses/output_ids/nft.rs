@@ -12,10 +12,10 @@ use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
     client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
-    wallet::Account,
+    wallet::Wallet,
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

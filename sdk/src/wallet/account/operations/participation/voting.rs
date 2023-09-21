@@ -14,12 +14,12 @@ use crate::{
         },
     },
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
-        Result,
+        account::{types::Transaction, TransactionOptions},
+        Result, Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

@@ -14,7 +14,10 @@ use crate::{
         },
     },
     utils::serde::option_prefix_hex_bytes,
-    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
+    wallet::{
+        account::{types::Transaction, OutputData, TransactionOptions},
+        Wallet,
+    },
 };
 
 /// Params `create_account_output()`
@@ -35,7 +38,7 @@ pub struct CreateAccountParams {
     pub state_metadata: Option<Vec<u8>>,
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -125,9 +128,9 @@ where
     /// Gets an existing account output.
     pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
-        self.details()
+        self.data()
             .await
-            .unspent_outputs()
+            .unspent_outputs
             .values()
             .find_map(|output_data| match &output_data.output {
                 Output::Account(account_output) => {

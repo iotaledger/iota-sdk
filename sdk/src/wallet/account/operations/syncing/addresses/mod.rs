@@ -8,10 +8,13 @@ use std::collections::HashSet;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs, Account},
+    wallet::{
+        account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs},
+        Wallet,
+    },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

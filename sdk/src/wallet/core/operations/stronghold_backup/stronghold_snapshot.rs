@@ -7,7 +7,7 @@ use crate::{
     client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
     types::TryFromDto,
     wallet::{
-        account::{AccountDetails, AccountDetailsDto},
+        core::{WalletData, WalletDataDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
         ClientOptions, Wallet,
     },
@@ -55,7 +55,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     Option<ClientOptions>,
     Option<u32>,
     Option<S::Config>,
-    Option<Vec<AccountDetails>>,
+    Option<Vec<WalletData>>,
 )> {
     migrate(stronghold).await?;
 
@@ -81,11 +81,11 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
 
     // Get accounts
     let restored_accounts = stronghold
-        .get::<Vec<AccountDetailsDto>>(ACCOUNTS_KEY)
+        .get::<Vec<WalletDataDto>>(ACCOUNTS_KEY)
         .await?
         .map(|v| {
             v.into_iter()
-                .map(AccountDetails::try_from_dto)
+                .map(WalletData::try_from_dto)
                 .collect::<Result<Vec<_>, _>>()
         })
         .transpose()?;

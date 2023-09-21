@@ -10,16 +10,13 @@ use crate::{
             BlockId,
         },
     },
-    wallet::{
-        account::{types::InclusionState, Account},
-        Error,
-    },
+    wallet::{account::types::InclusionState, Error, Wallet},
 };
 
 const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     Error: From<S::Error>,
 {
@@ -33,7 +30,7 @@ where
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[reissue_transaction_until_included]");
 
-        let transaction = self.details().await.transactions.get(transaction_id).cloned();
+        let transaction = self.data().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
             if transaction.inclusion_state == InclusionState::Confirmed {

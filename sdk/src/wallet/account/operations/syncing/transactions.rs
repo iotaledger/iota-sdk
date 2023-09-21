@@ -8,9 +8,10 @@ use crate::{
         block::{input::Input, output::OutputId, BlockId},
     },
     utils::unix_timestamp_now,
-    wallet::account::{
-        types::{InclusionState, Transaction},
-        Account, AccountDetails,
+    wallet::{
+        account::types::{InclusionState, Transaction},
+        core::WalletData,
+        Wallet,
     },
 };
 
@@ -19,7 +20,7 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -29,7 +30,7 @@ where
     /// be synced again
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
-        let account_details = self.details().await;
+        let account_details = self.data().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
         // (transaction_output.is_none())
@@ -233,7 +234,7 @@ fn updated_transaction_and_outputs(
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
-    account: &AccountDetails,
+    account: &WalletData,
     mut transaction: Transaction,
     updated_transactions: &mut Vec<Transaction>,
     output_ids_to_unlock: &mut Vec<OutputId>,

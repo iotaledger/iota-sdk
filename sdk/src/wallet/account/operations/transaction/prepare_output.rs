@@ -20,12 +20,13 @@ use crate::{
         Error,
     },
     utils::serde::string,
-    wallet::account::{
-        operations::transaction::RemainderValueStrategy, types::OutputData, Account, TransactionOptions,
+    wallet::{
+        account::{operations::transaction::RemainderValueStrategy, types::OutputData, TransactionOptions},
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

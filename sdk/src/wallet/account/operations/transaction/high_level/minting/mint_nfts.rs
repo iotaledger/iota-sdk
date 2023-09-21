@@ -16,8 +16,8 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        account::{operations::transaction::Transaction, Account, TransactionOptions},
-        Error as WalletError,
+        account::{operations::transaction::Transaction, TransactionOptions},
+        Error as WalletError, Wallet,
     },
 };
 
@@ -109,7 +109,7 @@ impl MintNftParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

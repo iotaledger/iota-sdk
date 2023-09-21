@@ -8,13 +8,16 @@ use crate::{
     types::api::plugins::participation::types::{
         ParticipationEventId, ParticipationEventStatus, ParticipationEventType,
     },
-    wallet::account::{
-        operations::participation::ParticipationEventWithNodes,
-        types::participation::ParticipationEventRegistrationOptions, Account,
+    wallet::{
+        account::{
+            operations::participation::ParticipationEventWithNodes,
+            types::participation::ParticipationEventRegistrationOptions,
+        },
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -60,12 +63,11 @@ where
                 data: event_data,
                 nodes: vec![options.node.clone()],
             };
-            let account_index = self.details().await.index;
-            self.wallet
+            self.inner
                 .storage_manager
                 .read()
                 .await
-                .insert_participation_event(account_index, event_with_node.clone())
+                .insert_participation_event(todo!("account_index"), event_with_node.clone())
                 .await?;
             registered_participation_events.insert(event_id, event_with_node.clone());
         }
@@ -75,12 +77,10 @@ where
 
     /// Removes a previously registered participation event from local storage.
     pub async fn deregister_participation_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<()> {
-        let account_index = self.details().await.index;
-        self.wallet
-            .storage_manager
+        self.storage_manager
             .read()
             .await
-            .remove_participation_event(account_index, id)
+            .remove_participation_event(todo!("account_index"), id)
             .await?;
         Ok(())
     }
@@ -90,13 +90,11 @@ where
         &self,
         id: ParticipationEventId,
     ) -> crate::wallet::Result<Option<ParticipationEventWithNodes>> {
-        let account_index = self.details().await.index;
         Ok(self
-            .wallet
             .storage_manager
             .read()
             .await
-            .get_participation_events(account_index)
+            .get_participation_events(todo!("account_index"))
             .await?
             .get(&id)
             .cloned())
@@ -106,12 +104,10 @@ where
     pub async fn get_participation_events(
         &self,
     ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
-        let account_index = self.details().await.index;
-        self.wallet
-            .storage_manager
+        self.storage_manager
             .read()
             .await
-            .get_participation_events(account_index)
+            .get_participation_events(todo!("account_index"))
             .await
     }
 

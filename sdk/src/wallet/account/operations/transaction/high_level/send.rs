@@ -19,10 +19,8 @@ use crate::{
     },
     utils::serde::string,
     wallet::{
-        account::{
-            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
-        },
-        Error,
+        account::{constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, TransactionOptions},
+        Error, Wallet,
     },
 };
 
@@ -77,7 +75,7 @@ impl SendParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

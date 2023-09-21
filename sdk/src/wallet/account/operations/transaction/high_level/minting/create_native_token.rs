@@ -16,9 +16,12 @@ use crate::{
             AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
-    wallet::account::{
-        types::{Transaction, TransactionDto},
-        Account, TransactionOptions,
+    wallet::{
+        account::{
+            types::{Transaction, TransactionDto},
+            TransactionOptions,
+        },
+        Wallet,
     },
 };
 
@@ -85,7 +88,7 @@ impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTr
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

@@ -25,10 +25,7 @@ use crate::{
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
-    wallet::{
-        account::{Account, OutputData},
-        task, Result,
-    },
+    wallet::{account::OutputData, task, Result, Wallet},
 };
 
 /// An object containing an account's entire participation overview.
@@ -49,7 +46,7 @@ pub struct ParticipationEventWithNodes {
     pub nodes: Vec<Node>,
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -63,11 +60,10 @@ where
         // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
         let mut spent_cached_outputs = self
-            .wallet
             .storage_manager
             .read()
             .await
-            .get_cached_participation_output_status(self.details().await.index)
+            .get_cached_participation_output_status(todo!("self.data().await.index"))
             .await?;
         let restored_spent_cached_outputs_len = spent_cached_outputs.len();
         log::debug!(
@@ -216,11 +212,10 @@ where
         );
         // Only store updated data if new outputs got added
         if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
-            self.wallet
-                .storage_manager
+            self.storage_manager
                 .read()
                 .await
-                .set_cached_participation_output_status(self.details().await.index, &spent_cached_outputs)
+                .set_cached_participation_output_status(todo!("self.data().await.index"), &spent_cached_outputs)
                 .await?;
         }
 
@@ -245,13 +240,11 @@ where
     /// If event isn't found, the client from the account will be returned.
     pub(crate) async fn get_client_for_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<Client> {
         log::debug!("[get_client_for_event]");
-        let account_index = self.details().await.index;
         let events = self
-            .wallet
             .storage_manager
             .read()
             .await
-            .get_participation_events(account_index)
+            .get_participation_events(todo!("account_index"))
             .await?;
 
         let event_with_nodes = match events.get(id) {
@@ -277,13 +270,11 @@ where
         let latest_milestone_index = 0;
         // let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
 
-        let account_index = self.details().await.index;
         let events = self
-            .wallet
             .storage_manager
             .read()
             .await
-            .get_participation_events(account_index)
+            .get_participation_events(todo!("account_index"))
             .await?;
 
         for participation in participations.participations.clone().iter() {

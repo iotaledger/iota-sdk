@@ -24,13 +24,13 @@ use crate::{
             payload::transaction::TransactionPayload,
         },
     },
-    wallet::account::{
-        types::{InclusionState, Transaction},
-        Account,
+    wallet::{
+        account::types::{InclusionState, Transaction},
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -181,14 +181,14 @@ where
             inputs,
         };
 
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
 
-        account_details.transactions.insert(transaction_id, transaction.clone());
-        account_details.pending_transactions.insert(transaction_id);
+        wallet_data.transactions.insert(transaction_id, transaction.clone());
+        wallet_data.pending_transactions.insert(transaction_id);
         #[cfg(feature = "storage")]
         {
-            log::debug!("[TRANSACTION] storing account {}", account_details.index());
-            self.save(Some(&account_details)).await?;
+            log::debug!("[TRANSACTION] storing account {}", todo!("wallet_data.index()"));
+            self.save(Some(&wallet_data)).await?;
         }
 
         Ok(transaction)
@@ -196,10 +196,10 @@ where
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
-            account_details.locked_outputs.remove(output_id);
+            wallet_data.locked_outputs.remove(output_id);
             log::debug!(
                 "[TRANSACTION] Unlocked output {} because of transaction error",
                 output_id

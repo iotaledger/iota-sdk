@@ -19,16 +19,17 @@ use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
-use crate::wallet::{
-    account::AccountDetails,
-    storage::{StorageManager, StorageOptions},
-};
+use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::secret::{SecretManage, SecretManager},
+    types::block::{
+        address::{AccountAddress, Address},
+        output::AccountId,
+    },
     wallet::{
         core::{WalletData, WalletInner},
-        Account, ClientOptions, Wallet,
-    }, types::block::{address::{Address, AccountAddress}, output::AccountId},
+        ClientOptions, Wallet, account::SyncOptions,
+    },
 };
 
 /// Builder for the wallet inner.
@@ -271,11 +272,17 @@ where
         }
 
         todo!("remove unwraps");
-        let wallet_data = Arc::new(RwLock::new(WalletData::new(self.alias.unwrap(), self.bip_path.unwrap(), self.address.unwrap())));
+        let wallet_data = Arc::new(RwLock::new(WalletData::new(
+            self.alias.unwrap(),
+            self.bip_path.unwrap(),
+            self.address.unwrap(),
+        )));
 
         Ok(Wallet {
             inner: wallet_inner,
             data: wallet_data,
+            default_sync_options: todo!("SyncOptions::default()"),
+            last_synced: todo!("Mutex::new(0)"),
         })
     }
 
@@ -295,12 +302,12 @@ where
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
 // transactions
 #[cfg(feature = "storage")]
-fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Result<()> {
+fn unlock_unused_inputs(accounts: &mut [WalletData]) -> crate::wallet::Result<()> {
     log::debug!("[unlock_unused_inputs]");
     for account in accounts.iter_mut() {
         let mut used_inputs = HashSet::new();
-        for transaction_id in account.pending_transactions() {
-            if let Some(tx) = account.transactions().get(transaction_id) {
+        for transaction_id in &account.pending_transactions {
+            if let Some(tx) = account.transactions.get(transaction_id) {
                 for input in &tx.inputs {
                     used_inputs.insert(*input.metadata.output_id());
                 }

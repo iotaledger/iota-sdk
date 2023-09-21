@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use iota_sdk::{
     types::block::address::ToBech32Ext,
-    wallet::{account::AccountDetailsDto, Wallet},
+    wallet::{account::WalletDataDto, Wallet},
 };
 
 use super::account::call_account_method_internal;
@@ -36,7 +36,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             match builder.finish().await {
                 Ok(account) => {
                     let account = account.details().await;
-                    Response::Account(AccountDetailsDto::from(&*account))
+                    Response::Account(WalletDataDto::from(&*account))
                 }
                 Err(e) => return Err(e.into()),
             }
@@ -44,7 +44,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::GetAccount { account_id } => {
             let account = wallet.get_account(account_id.clone()).await?;
             let account = account.details().await;
-            Response::Account(AccountDetailsDto::from(&*account))
+            Response::Account(WalletDataDto::from(&*account))
         }
         WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
@@ -59,7 +59,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let mut account_dtos = Vec::with_capacity(accounts.len());
             for account in accounts {
                 let account = account.details().await;
-                account_dtos.push(AccountDetailsDto::from(&*account));
+                account_dtos.push(WalletDataDto::from(&*account));
             }
             Response::Accounts(account_dtos)
         }
@@ -104,7 +104,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let mut account_dtos = Vec::with_capacity(accounts.len());
             for account in accounts {
                 let account = account.details().await;
-                account_dtos.push(AccountDetailsDto::from(&*account));
+                account_dtos.push(WalletDataDto::from(&*account));
             }
             Response::Accounts(account_dtos)
         }

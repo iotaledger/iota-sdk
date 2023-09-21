@@ -6,10 +6,13 @@ use std::collections::HashMap;
 use crate::{
     client::secret::SecretManage,
     types::block::output::{OutputId, OutputMetadata},
-    wallet::account::{
-        operations::syncing::options::SyncOptions,
-        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
-        Account, Bip44Address,
+    wallet::{
+        account::{
+            operations::syncing::options::SyncOptions,
+            types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
+            Bip44Address,
+        },
+        Wallet,
     },
 };
 #[cfg(feature = "events")]
@@ -21,16 +24,16 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
     /// Set the alias for the account
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
-        let mut account_details = self.details_mut().await;
-        account_details.alias = alias.to_string();
+        let mut wallet_data = self.data_mut().await;
+        wallet_data.alias = alias.to_string();
         #[cfg(feature = "storage")]
-        self.save(Some(&account_details)).await?;
+        self.save(Some(&wallet_data)).await?;
         Ok(())
     }
 
@@ -45,13 +48,11 @@ where
         log::debug!("[SYNC] Update account with new synced transactions");
 
         let network_id = self.client().get_network_id().await?;
-        let mut account_details = self.details_mut().await;
-        #[cfg(feature = "events")]
-        let account_index = account_details.index;
+        let mut wallet_data = self.data_mut().await;
 
         // Update addresses_with_unspent_outputs
         // only keep addresses below the address start index, because we synced the addresses above and will update them
-        account_details.addresses_with_unspent_outputs.retain(|a| {
+        wallet_data.addresses_with_unspent_outputs.retain(|a| {
             if a.internal {
                 a.key_index < options.address_start_index_internal
             } else {
@@ -61,7 +62,7 @@ where
 
         // then add all synced addresses with balance, all other addresses that had balance before will then be removed
         // from this list
-        account_details
+        wallet_data
             .addresses_with_unspent_outputs
             .extend(addresses_with_unspent_outputs);
 
@@ -70,8 +71,8 @@ where
             // If we got the output response and it's still unspent, skip it
             if let Some(output_metadata_response) = output_metadata_response_opt {
                 if output_metadata_response.is_spent() {
-                    account_details.unspent_outputs.remove(&output_id);
-                    if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
+                    wallet_data.unspent_outputs.remove(&output_id);
+                    if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
                         output_data.metadata = output_metadata_response;
                     }
                 } else {
@@ -80,20 +81,20 @@ where
                 }
             }
 
-            if let Some(output) = account_details.outputs.get(&output_id) {
+            if let Some(output) = wallet_data.outputs.get(&output_id) {
                 // Could also be outputs from other networks after we switched the node, so we check that first
                 if output.network_id == network_id {
                     log::debug!("[SYNC] Spent output {}", output_id);
-                    account_details.locked_outputs.remove(&output_id);
-                    account_details.unspent_outputs.remove(&output_id);
+                    wallet_data.locked_outputs.remove(&output_id);
+                    wallet_data.unspent_outputs.remove(&output_id);
                     // Update spent data fields
-                    if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
+                    if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
                         output_data.metadata.set_spent(true);
                         output_data.is_spent = true;
                         #[cfg(feature = "events")]
                         {
                             self.emit(
-                                account_index,
+                                todo!("account_index"),
                                 WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
                                     output: OutputDataDto::from(&*output_data),
                                 })),
@@ -108,18 +109,18 @@ where
         // Add new synced outputs
         for output_data in unspent_outputs {
             // Insert output, if it's unknown emit the NewOutputEvent
-            if account_details
+            if wallet_data
                 .outputs
                 .insert(output_data.output_id, output_data.clone())
                 .is_none()
             {
                 #[cfg(feature = "events")]
                 {
-                    let transaction = account_details
+                    let transaction = wallet_data
                         .incoming_transactions
                         .get(output_data.output_id.transaction_id());
                     self.emit(
-                        account_index,
+                        todo!("account_index"),
                         WalletEvent::NewOutput(Box::new(NewOutputEvent {
                             output: OutputDataDto::from(&output_data),
                             transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
@@ -136,7 +137,7 @@ where
                 }
             };
             if !output_data.is_spent {
-                account_details
+                wallet_data
                     .unspent_outputs
                     .insert(output_data.output_id, output_data);
             }
@@ -146,9 +147,9 @@ where
         {
             log::debug!(
                 "[SYNC] storing account {} with new synced data",
-                account_details.alias()
+                wallet_data.alias
             );
-            self.save(Some(&account_details)).await?;
+            self.save(Some(&wallet_data)).await?;
         }
         Ok(())
     }
@@ -162,13 +163,13 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update account with new synced transactions");
 
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
 
         for transaction in updated_transactions {
             match transaction.inclusion_state {
                 InclusionState::Confirmed | InclusionState::Conflicting | InclusionState::UnknownPruned => {
                     let transaction_id = transaction.payload.id();
-                    account_details.pending_transactions.remove(&transaction_id);
+                    wallet_data.pending_transactions.remove(&transaction_id);
                     log::debug!(
                         "[SYNC] inclusion_state of {transaction_id} changed to {:?}",
                         transaction.inclusion_state
@@ -176,7 +177,7 @@ where
                     #[cfg(feature = "events")]
                     {
                         self.emit(
-                            account_details.index,
+                            todo!("wallet_data.index"),
                             WalletEvent::TransactionInclusion(TransactionInclusionEvent {
                                 transaction_id,
                                 inclusion_state: transaction.inclusion_state,
@@ -187,22 +188,22 @@ where
                 }
                 _ => {}
             }
-            account_details
+            wallet_data
                 .transactions
                 .insert(transaction.payload.id(), transaction.clone());
         }
 
         for output_to_unlock in &spent_output_ids {
-            if let Some(output) = account_details.outputs.get_mut(output_to_unlock) {
+            if let Some(output) = wallet_data.outputs.get_mut(output_to_unlock) {
                 output.is_spent = true;
             }
-            account_details.locked_outputs.remove(output_to_unlock);
-            account_details.unspent_outputs.remove(output_to_unlock);
+            wallet_data.locked_outputs.remove(output_to_unlock);
+            wallet_data.unspent_outputs.remove(output_to_unlock);
             log::debug!("[SYNC] Unlocked spent output {}", output_to_unlock);
         }
 
         for output_to_unlock in &output_ids_to_unlock {
-            account_details.locked_outputs.remove(output_to_unlock);
+            wallet_data.locked_outputs.remove(output_to_unlock);
             log::debug!(
                 "[SYNC] Unlocked unspent output {} because of a conflicting transaction",
                 output_to_unlock
@@ -213,9 +214,9 @@ where
         {
             log::debug!(
                 "[SYNC] storing account {} with new synced transactions",
-                account_details.alias()
+                wallet_data.alias
             );
-            self.save(Some(&account_details)).await?;
+            self.save(Some(&wallet_data)).await?;
         }
         Ok(())
     }
@@ -228,19 +229,19 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[update_account_addresses]");
 
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
 
         // add addresses to the account
         if internal {
-            account_details.internal_addresses.extend(new_addresses);
+            wallet_data.internal_addresses.extend(new_addresses);
         } else {
-            account_details.public_addresses.extend(new_addresses);
+            wallet_data.public_addresses.extend(new_addresses);
         };
 
         #[cfg(feature = "storage")]
         {
-            log::debug!("[update_account_addresses] storing account {}", account_details.index());
-            self.save(Some(&account_details)).await?;
+            log::debug!("[update_account_addresses] storing account: {}", wallet_data.alias);
+            self.save(Some(&wallet_data)).await?;
         }
         Ok(())
     }
@@ -250,26 +251,26 @@ where
     pub(crate) async fn update_account_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         log::debug!("[UPDATE ACCOUNT WITH BECH32 HRP] new bech32_hrp: {}", bech32_hrp);
-        let mut account_details = self.details_mut().await;
-        for address in &mut account_details.addresses_with_unspent_outputs {
+        let mut wallet_data = self.data_mut().await;
+        for address in &mut wallet_data.addresses_with_unspent_outputs {
             address.address.hrp = bech32_hrp;
         }
-        for address in &mut account_details.public_addresses {
+        for address in &mut wallet_data.public_addresses {
             address.address.hrp = bech32_hrp;
         }
-        for address in &mut account_details.internal_addresses {
+        for address in &mut wallet_data.internal_addresses {
             address.address.hrp = bech32_hrp;
         }
 
-        account_details.inaccessible_incoming_transactions.clear();
+        wallet_data.inaccessible_incoming_transactions.clear();
 
         #[cfg(feature = "storage")]
         {
             log::debug!(
                 "[SYNC] storing account {} after updating it with new bech32 hrp",
-                account_details.alias()
+                wallet_data.alias
             );
-            self.save(Some(&account_details)).await?;
+            self.save(Some(&wallet_data)).await?;
         }
 
         Ok(())

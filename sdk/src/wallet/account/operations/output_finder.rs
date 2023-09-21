@@ -5,10 +5,13 @@ use std::cmp;
 
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
-    wallet::account::{operations::syncing::SyncOptions, types::AddressWithUnspentOutputs, Account},
+    wallet::{
+        account::{operations::syncing::SyncOptions, types::AddressWithUnspentOutputs},
+        Wallet,
+    },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -30,7 +33,7 @@ where
         // store the current index, so we can remove new addresses with higher indexes later again, if they don't have
         // outputs
         let (highest_public_address_index, highest_internal_address_index) = {
-            let account_details = self.details().await;
+            let account_details = self.data().await;
             (
                 account_details
                     .public_addresses
@@ -78,7 +81,7 @@ where
             // Also needs to be in the loop so it gets updated every round for internal use without modifying the values
             // outside
             let (highest_public_address_index, highest_internal_address_index) = {
-                let account_details = self.details().await;
+                let account_details = self.data().await;
                 (
                     account_details
                         .public_addresses
@@ -118,7 +121,7 @@ where
             sync_options.address_start_index_internal = address_start_index_internal;
             self.sync(Some(sync_options.clone())).await?;
 
-            let output_count = self.details().await.unspent_outputs.len();
+            let output_count = self.data().await.unspent_outputs.len();
 
             // break if we didn't find more outputs with the new addresses
             if output_count <= latest_outputs_count {
@@ -130,7 +133,7 @@ where
             // Update address_gap_limit to only generate the amount of addresses we need to have `address_gap_limit`
             // amount of empty addresses after the latest one with outputs
 
-            let account_details = self.details().await;
+            let account_details = self.data().await;
 
             let highest_address_index = account_details
                 .public_addresses
@@ -232,13 +235,13 @@ where
         old_highest_public_address_index: u32,
         old_highest_internal_address_index: Option<u32>,
     ) {
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
 
         let (internal_addresses_with_unspent_outputs, public_addresses_with_spent_outputs): (
             Vec<&AddressWithUnspentOutputs>,
             Vec<&AddressWithUnspentOutputs>,
-        ) = account_details
-            .addresses_with_unspent_outputs()
+        ) = wallet_data
+            .addresses_with_unspent_outputs
             .iter()
             .partition(|address| address.internal);
 
@@ -257,14 +260,14 @@ where
         // The new highest index should be either the old one before we searched for funds or if we found addresses with
         // funds the highest index from an address with outputs
         let new_latest_public_index = cmp::max(highest_public_index_with_outputs, old_highest_public_address_index);
-        account_details.public_addresses = account_details
+        wallet_data.public_addresses = wallet_data
             .public_addresses
             .clone()
             .into_iter()
             .filter(|a| a.key_index <= new_latest_public_index)
             .collect();
 
-        account_details.internal_addresses =
+        wallet_data.internal_addresses =
             if old_highest_internal_address_index.is_none() && highest_internal_index_with_outputs.is_none() {
                 // For internal addresses we don't leave an empty address, that's only required for the public address
                 Vec::new()
@@ -273,7 +276,7 @@ where
                     highest_internal_index_with_outputs.unwrap_or(0),
                     old_highest_internal_address_index.unwrap_or(0),
                 );
-                account_details
+                wallet_data
                     .internal_addresses
                     .clone()
                     .into_iter()

@@ -17,10 +17,10 @@ use crate::{
         api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
         secret::SecretManage,
     },
-    wallet::account::{operations::transaction::TransactionPayload, Account},
+    wallet::{account::operations::transaction::TransactionPayload, Wallet},
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -33,7 +33,7 @@ where
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
         self.emit(
-            self.details().await.index,
+            todo!("self.data().await.index"),
             WalletEvent::TransactionProgress(TransactionProgressEvent::SigningTransaction),
         )
         .await;
@@ -41,7 +41,7 @@ where
         #[cfg(all(feature = "events", feature = "ledger_nano"))]
         {
             use crate::wallet::account::SecretManager;
-            let secret_manager = self.wallet.secret_manager.read().await;
+            let secret_manager = self.secret_manager.read().await;
             if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
                 secret_manager.downcast::<SecretManager>().and_then(|s| {
                     if let SecretManager::LedgerNano(n) = s {
@@ -55,7 +55,7 @@ where
                 if let Some(buffer_size) = ledger_nano_status.buffer_size() {
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {
                         self.emit(
-                            self.details().await.index,
+                            todo!("self.data().await.index"),
                             WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionEssenceHash(
                                 prefix_hex::encode(prepared_transaction_data.essence.hash()),
                             )),
@@ -63,7 +63,7 @@ where
                         .await;
                     } else {
                         self.emit(
-                            self.details().await.index,
+                            todo!("self.data().await.index"),
                             WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransaction(Box::new(
                                 PreparedTransactionDataDto::from(prepared_transaction_data),
                             ))),
@@ -75,7 +75,6 @@ where
         }
 
         let unlocks = match self
-            .wallet
             .secret_manager
             .read()
             .await

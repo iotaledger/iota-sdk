@@ -16,23 +16,23 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Sync account
-    account.sync(None).await?;
+    wallet.sync(None).await?;
 
     // Print output ids
     println!("Output ids:");
-    for output in account.outputs(None).await? {
+    for output in wallet.outputs(None).await? {
         println!("{}", output.output_id);
     }
 
     // Print unspent output ids
     println!("Unspent output ids:");
-    for output in account.unspent_outputs(None).await? {
+    for output in wallet.unspent_outputs(None).await? {
         println!("{}", output.output_id);
     }
 

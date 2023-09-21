@@ -16,13 +16,10 @@ use crate::{
             ConvertTo,
         },
     },
-    wallet::{
-        account::{Account, SyncOptions},
-        task,
-    },
+    wallet::{account::SyncOptions, task, Wallet},
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

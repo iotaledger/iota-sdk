@@ -14,37 +14,40 @@ use crate::{
         account::{
             operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
             types::{AddressWithUnspentOutputs, Balance, NativeTokensBalance},
-            Account, AccountDetails, OutputsToClaim,
+            OutputsToClaim,
         },
-        Error, Result,
+        core::WalletData,
+        Error, Result, Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     Error: From<S::Error>,
 {
-    /// Get the balance of the account.
-    pub async fn balance(&self) -> Result<Balance> {
-        log::debug!("[BALANCE] balance");
+    // TODO: Needs to be merged with Wallet::balance
 
-        let account_details = self.details().await;
+    // /// Get the balance of the account.
+    // pub async fn balance(&self) -> Result<Balance> {
+    //     log::debug!("[BALANCE] balance");
 
-        self.balance_inner(account_details.addresses_with_unspent_outputs.iter(), &account_details)
-            .await
-    }
+    //     let wallet_data = self.data().await;
+
+    //     self.balance_inner(account_details.addresses_with_unspent_outputs.iter(), &account_details)
+    //         .await
+    // }
 
     /// Get the balance of the given addresses.
     pub async fn addresses_balance(&self, addresses: Vec<impl ConvertTo<Bech32Address>>) -> Result<Balance> {
         log::debug!("[BALANCE] addresses_balance");
 
-        let account_details = self.details().await;
+        let wallet_data = self.data.read().await;
 
         let addresses_with_unspent_outputs = addresses
             .into_iter()
             .map(|address| {
                 let address = address.convert()?;
-                account_details
+                wallet_data
                     .addresses_with_unspent_outputs
                     .iter()
                     .find(|&a| a.address == address)
@@ -52,14 +55,14 @@ where
             })
             .collect::<Result<Vec<&_>>>()?;
 
-        self.balance_inner(addresses_with_unspent_outputs.into_iter(), &account_details)
+        self.balance_inner(addresses_with_unspent_outputs.into_iter(), &wallet_data)
             .await
     }
 
     async fn balance_inner(
         &self,
         addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
-        account_details: &AccountDetails,
+        wallet_data: &WalletData,
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
         let rent_structure = self.client().get_rent_structure().await?;
@@ -81,7 +84,7 @@ where
             }
 
             for output_id in &address_with_unspent_outputs.output_ids {
-                if let Some(data) = account_details.unspent_outputs.get(output_id) {
+                if let Some(data) = wallet_data.unspent_outputs.get(output_id) {
                     // Check if output is from the network we're currently connected to
                     if data.network_id != network_id {
                         continue;
@@ -98,7 +101,7 @@ where
                             balance.base_coin.total += output.amount();
                             // Add storage deposit
                             balance.required_storage_deposit.account += rent;
-                            if !account_details.locked_outputs.contains(output_id) {
+                            if !wallet_data.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
                             // Add native tokens
@@ -112,7 +115,7 @@ where
                             balance.base_coin.total += output.amount();
                             // Add storage deposit
                             balance.required_storage_deposit.foundry += rent;
-                            if !account_details.locked_outputs.contains(output_id) {
+                            if !wallet_data.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
                             // Add native tokens
@@ -144,13 +147,13 @@ where
                                         .native_tokens()
                                         .map(|native_tokens| !native_tokens.is_empty())
                                         .unwrap_or(false)
-                                        && !account_details.locked_outputs.contains(output_id)
+                                        && !wallet_data.locked_outputs.contains(output_id)
                                     {
                                         total_rent_amount += rent;
                                     }
                                 } else if output.is_nft() {
                                     balance.required_storage_deposit.nft += rent;
-                                    if !account_details.locked_outputs.contains(output_id) {
+                                    if !wallet_data.locked_outputs.contains(output_id) {
                                         total_rent_amount += rent;
                                     }
                                 }
@@ -180,7 +183,7 @@ where
                                             // We use the addresses with unspent outputs, because other addresses of
                                             // the account without unspent
                                             // outputs can't be related to this output
-                                            &account_details.addresses_with_unspent_outputs,
+                                            &wallet_data.addresses_with_unspent_outputs,
                                             output,
                                             slot_index,
                                         );
@@ -227,13 +230,13 @@ where
                                                 .native_tokens()
                                                 .map(|native_tokens| !native_tokens.is_empty())
                                                 .unwrap_or(false)
-                                                && !account_details.locked_outputs.contains(output_id)
+                                                && !wallet_data.locked_outputs.contains(output_id)
                                             {
                                                 total_rent_amount += rent;
                                             }
                                         } else if output.is_nft() {
                                             balance.required_storage_deposit.nft += rent;
-                                            if !account_details.locked_outputs.contains(output_id) {
+                                            if !wallet_data.locked_outputs.contains(output_id) {
                                                 total_rent_amount += rent;
                                             }
                                         }
@@ -268,19 +271,13 @@ where
             }
         }
 
-        self.finish(
-            balance,
-            account_details,
-            network_id,
-            total_rent_amount,
-            total_native_tokens,
-        )
+        self.finish(balance, wallet_data, network_id, total_rent_amount, total_native_tokens)
     }
 
     fn finish(
         &self,
         mut balance: Balance,
-        account_details: &AccountDetails,
+        account_details: &WalletData,
         network_id: u64,
         total_rent_amount: u64,
         total_native_tokens: NativeTokensBuilder,

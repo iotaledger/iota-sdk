@@ -17,13 +17,16 @@ use crate::{
         address::{Address, Bech32Address},
         output::OutputId,
     },
-    wallet::account::{
-        constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
-        types::address::AddressWithUnspentOutputs, Account,
+    wallet::{
+        account::{
+            constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
+            types::address::AddressWithUnspentOutputs,
+        },
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -151,6 +154,8 @@ where
         Ok(output_ids.into_iter().collect())
     }
 
+    // TODO: `Send` issue down below
+
     /// Get the current output ids for provided addresses and only returns addresses that have unspent outputs and
     /// return spent outputs separated
     pub(crate) async fn get_output_ids_for_addresses(
@@ -164,62 +169,65 @@ where
         let mut addresses_with_outputs = Vec::new();
         // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
         let mut spent_or_not_anymore_synced_outputs = Vec::new();
-        // We split the addresses into chunks so we don't get timeouts if we have thousands
-        for addresses_chunk in &mut addresses_with_unspent_outputs
-            .chunks(PARALLEL_REQUESTS_AMOUNT)
-            .map(|x: &[AddressWithUnspentOutputs]| x.to_vec())
-        {
-            let results;
-            #[cfg(target_family = "wasm")]
-            {
-                let mut tasks = Vec::new();
-                for address in addresses_chunk {
-                    let output_ids = self.get_output_ids_for_address(address.address.inner, &options).await?;
-                    tasks.push(crate::wallet::Result::Ok((address, output_ids)));
-                }
-                results = tasks;
-            }
+        
+        // TODO: fix `Send` issue!
 
-            #[cfg(not(target_family = "wasm"))]
-            {
-                let mut tasks = Vec::new();
-                for address in addresses_chunk {
-                    let account = self.clone();
-                    let sync_options = options.clone();
-                    tasks.push(async move {
-                        tokio::spawn(async move {
-                            let output_ids = account
-                                .get_output_ids_for_address(address.address.inner, &sync_options)
-                                .await?;
-                            crate::wallet::Result::Ok((address, output_ids))
-                        })
-                        .await
-                    });
-                }
+        // // We split the addresses into chunks so we don't get timeouts if we have thousands
+        // for addresses_chunk in &mut addresses_with_unspent_outputs
+        //     .chunks(PARALLEL_REQUESTS_AMOUNT)
+        //     .map(|x: &[AddressWithUnspentOutputs]| x.to_vec())
+        // {
+        //     let results;
+        //     #[cfg(target_family = "wasm")]
+        //     {
+        //         let mut tasks = Vec::new();
+        //         for address in addresses_chunk {
+        //             let output_ids = self.get_output_ids_for_address(address.address.inner, &options).await?;
+        //             tasks.push(crate::wallet::Result::Ok((address, output_ids)));
+        //         }
+        //         results = tasks;
+        //     }
 
-                results = futures::future::try_join_all(tasks).await?;
-            }
+        //     #[cfg(not(target_family = "wasm"))]
+        //     {
+        //         let mut tasks = Vec::new();
+        //         for address in addresses_chunk {
+        //             let wallet = self.clone();
+        //             let sync_options = options.clone();
+        //             tasks.push(async move {
+        //                 tokio::spawn(async move {
+        //                     let output_ids = wallet
+        //                         .get_output_ids_for_address(address.address.inner, &sync_options)
+        //                         .await?;
+        //                     crate::wallet::Result::Ok((address, output_ids))
+        //                 })
+        //                 .await
+        //             });
+        //         }
 
-            for res in results {
-                let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
-                // only return addresses with outputs
-                if !output_ids.is_empty() {
-                    // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
-                    // synced anymore because of other sync options
-                    for output_id in address.output_ids {
-                        if !output_ids.contains(&output_id) {
-                            spent_or_not_anymore_synced_outputs.push(output_id);
-                        }
-                    }
-                    address.output_ids = output_ids;
-                    addresses_with_outputs.push(address);
-                } else {
-                    // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
-                    // synced anymore because of other sync options
-                    spent_or_not_anymore_synced_outputs.extend(address.output_ids);
-                }
-            }
-        }
+        //         results = futures::future::try_join_all(tasks).await?;
+        //     }
+
+        //     for res in results {
+        //         let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
+        //         // only return addresses with outputs
+        //         if !output_ids.is_empty() {
+        //             // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
+        //             // synced anymore because of other sync options
+        //             for output_id in address.output_ids {
+        //                 if !output_ids.contains(&output_id) {
+        //                     spent_or_not_anymore_synced_outputs.push(output_id);
+        //                 }
+        //             }
+        //             address.output_ids = output_ids;
+        //             addresses_with_outputs.push(address);
+        //         } else {
+        //             // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
+        //             // synced anymore because of other sync options
+        //             spent_or_not_anymore_synced_outputs.extend(address.output_ids);
+        //         }
+        //     }
+        // }
 
         log::debug!(
             "[SYNC] spent or not anymore synced account/nft/foundries outputs: {:?}",

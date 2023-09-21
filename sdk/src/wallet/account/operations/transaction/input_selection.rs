@@ -15,12 +15,14 @@ use crate::{
         output::{Output, OutputId},
         slot::SlotIndex,
     },
-    wallet::account::{
-        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account, AccountDetails, OutputData,
+    wallet::{
+        account::{operations::helpers::time::can_output_be_unlocked_forever_from_now_on, OutputData},
+        core::WalletData,
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -38,24 +40,24 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         // lock so the same inputs can't be selected in multiple transactions
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
         self.emit(
-            account_details.index,
+            todo!("wallet_data.index"),
             WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
         )
         .await;
 
         let slot_index = self.client().get_slot_index().await?;
         #[allow(unused_mut)]
-        let mut forbidden_inputs = account_details.locked_outputs.clone();
+        let mut forbidden_inputs = wallet_data.locked_outputs.clone();
 
-        let addresses = account_details
-            .public_addresses()
+        let addresses = wallet_data
+            .public_addresses
             .iter()
-            .chain(account_details.internal_addresses().iter())
+            .chain(wallet_data.internal_addresses.iter())
             .map(|address| *address.address.as_ref())
             .collect::<Vec<_>>();
 
@@ -73,8 +75,8 @@ where
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_outputs_signing_data = filter_inputs(
-            &account_details,
-            account_details.unspent_outputs.values(),
+            &wallet_data,
+            wallet_data.unspent_outputs.values(),
             slot_index,
             &outputs,
             burn,
@@ -87,7 +89,7 @@ where
         if let Some(custom_inputs) = custom_inputs {
             // Check that no input got already locked
             for input in custom_inputs.iter() {
-                if account_details.locked_outputs.contains(input) {
+                if wallet_data.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -115,14 +117,14 @@ where
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account_details.locked_outputs.insert(*output.output_id());
+                wallet_data.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
             // Check that no input got already locked
             for input in mandatory_inputs.iter() {
-                if account_details.locked_outputs.contains(input) {
+                if wallet_data.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -150,12 +152,12 @@ where
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account_details.locked_outputs.insert(*output.output_id());
+                wallet_data.locked_outputs.insert(*output.output_id());
             }
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account_details.locked_outputs.insert(*output.output_id());
+                wallet_data.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
@@ -197,7 +199,7 @@ where
         // lock outputs so they don't get used by another transaction
         for output in &selected_transaction_data.inputs {
             log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            account_details.locked_outputs.insert(*output.output_id());
+            wallet_data.locked_outputs.insert(*output.output_id());
         }
 
         Ok(selected_transaction_data)
@@ -224,7 +226,7 @@ where
 /// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
-    account: &AccountDetails,
+    account: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
     outputs: &[Output],

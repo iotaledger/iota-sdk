@@ -11,7 +11,10 @@ use crate::{
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
         ConvertTo,
     },
-    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
+    wallet::{
+        account::{operations::transaction::Transaction, TransactionOptions},
+        Wallet,
+    },
 };
 
 /// Params for `send_nft()`
@@ -39,7 +42,7 @@ impl SendNftParams {
     }
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

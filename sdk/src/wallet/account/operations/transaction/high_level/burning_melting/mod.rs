@@ -5,13 +5,13 @@ use crate::{
     client::api::{input_selection::Burn, PreparedTransactionData},
     wallet::{
         account::{types::Transaction, TransactionOptions},
-        Account,
+        Wallet,
     },
 };
 
 pub(crate) mod melt_native_token;
 
-impl Account {
+impl Wallet {
     /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase

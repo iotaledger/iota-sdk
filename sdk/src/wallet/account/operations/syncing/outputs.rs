@@ -16,12 +16,12 @@ use crate::{
         },
     },
     wallet::{
-        account::{build_transaction_from_payload_and_inputs, types::OutputData, Account, AddressWithUnspentOutputs},
-        task,
+        account::{build_transaction_from_payload_and_inputs, types::OutputData, AddressWithUnspentOutputs},
+        task, Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -34,21 +34,21 @@ where
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
-        let account_details = self.details().await;
+        let wallet_data = self.data().await;
 
         Ok(outputs_with_meta
             .into_iter()
             .map(|output_with_meta| {
                 // check if we know the transaction that created this output and if we created it (if we store incoming
                 // transactions separated, then this check wouldn't be required)
-                let remainder = account_details
+                let remainder = wallet_data
                     .transactions
                     .get(output_with_meta.metadata().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
 
                 // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                let chain = Bip44::new(account_details.coin_type)
-                    .with_account(account_details.index)
+                let chain = Bip44::new(wallet_data.coin_type())
+                    .with_account(todo!("wallet_data.index"))
                     .with_change(associated_address.internal as _)
                     .with_address_index(associated_address.key_index);
 
@@ -77,10 +77,10 @@ where
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
 
         for output_id in output_ids {
-            match account_details.outputs.get_mut(&output_id) {
+            match wallet_data.outputs.get_mut(&output_id) {
                 // set unspent
                 Some(output_data) => {
                     output_data.is_spent = false;
@@ -96,10 +96,10 @@ where
         // known output is unspent, so insert it to the unspent outputs again, because if it was an
         // account/nft/foundry output it could have been removed when syncing without them
         for (output_id, output_data) in unspent_outputs {
-            account_details.unspent_outputs.insert(output_id, output_data);
+            wallet_data.unspent_outputs.insert(output_id, output_data);
         }
 
-        drop(account_details);
+        drop(wallet_data);
 
         if !unknown_outputs.is_empty() {
             outputs.extend(self.client().get_outputs_with_metadata(&unknown_outputs).await?);
@@ -122,7 +122,7 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_incoming_transaction_data");
 
-        let account_details = self.details().await;
+        let account_details = self.data().await;
         transaction_ids.retain(|transaction_id| {
             !(account_details.transactions.contains_key(transaction_id)
                 || account_details.incoming_transactions.contains_key(transaction_id)
@@ -184,17 +184,17 @@ where
             .await?;
 
         // Update account with new transactions
-        let mut account_details = self.details_mut().await;
+        let mut wallet_data = self.data_mut().await;
         for (transaction_id, txn) in results.into_iter().flatten() {
             if let Some(transaction) = txn {
-                account_details
+                wallet_data
                     .incoming_transactions
                     .insert(transaction_id, transaction);
             } else {
                 log::debug!("[SYNC] adding {transaction_id} to inaccessible_incoming_transactions");
                 // Save transactions that weren't found by the node to avoid requesting them endlessly.
                 // Will be cleared when new client options are provided.
-                account_details
+                wallet_data
                     .inaccessible_incoming_transactions
                     .insert(transaction_id);
             }

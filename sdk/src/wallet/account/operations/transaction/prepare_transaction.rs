@@ -14,13 +14,13 @@ use crate::{
         input::INPUT_COUNT_RANGE,
         output::{Output, OUTPUT_COUNT_RANGE},
     },
-    wallet::account::{
-        operations::transaction::{RemainderValueStrategy, TransactionOptions},
-        Account,
+    wallet::{
+        account::operations::transaction::{RemainderValueStrategy, TransactionOptions},
+        Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -81,9 +81,8 @@ where
                         let remainder_address = self.generate_remainder_address().await?;
                         #[cfg(feature = "events")]
                         {
-                            let account_index = self.details().await.index;
                             self.emit(
-                                account_index,
+                                todo!("account_index"),
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
                                         address: remainder_address.address,

@@ -19,13 +19,13 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Sync account
-    account
+    wallet
         .sync(Some(SyncOptions {
             sync_incoming_transactions: true,
             ..Default::default()
@@ -34,13 +34,13 @@ async fn main() -> Result<()> {
 
     // Print transaction ids
     println!("Sent transactions:");
-    for transaction in account.transactions().await {
+    for transaction in wallet.transactions().await {
         println!("{}", transaction.transaction_id);
     }
 
     // Print received transaction ids
     println!("Received transactions:");
-    for transaction in account.incoming_transactions().await {
+    for transaction in wallet.incoming_transactions().await {
         println!("{}", transaction.transaction_id);
     }
 

@@ -6,7 +6,7 @@ use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretMana
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
-    wallet::account::{types::address::Bip44Address, Account},
+    wallet::{account::types::address::Bip44Address, Wallet},
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::{
@@ -14,7 +14,7 @@ use crate::{
     wallet::events::types::{AddressData, WalletEvent},
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -46,18 +46,18 @@ where
             return Ok(Vec::new());
         }
 
-        let account_details = self.details().await;
+        let wallet_data = self.data().await;
 
         // get the highest index for the public or internal addresses
         let highest_current_index_plus_one = if options.internal {
-            account_details.internal_addresses.len() as u32
+            wallet_data.internal_addresses.len() as u32
         } else {
-            account_details.public_addresses.len() as u32
+            wallet_data.public_addresses.len() as u32
         };
 
         // get bech32_hrp
         let bech32_hrp = {
-            match account_details.public_addresses.first() {
+            match wallet_data.public_addresses.first() {
                 Some(address) => address.address.hrp,
                 None => self.client().get_bech32_hrp().await?,
             }
@@ -71,7 +71,7 @@ where
         #[cfg(feature = "ledger_nano")]
         let addresses = {
             use crate::wallet::account::SecretManager;
-            let secret_manager = self.wallet.secret_manager.read().await;
+            let secret_manager = self.inner.secret_manager.read().await;
             if secret_manager
                 .downcast::<LedgerSecretManager>()
                 .or_else(|| {
@@ -99,19 +99,19 @@ where
                     {
                         // Generate without prompt to be able to display it
                         let address = self
-                            .wallet
+                            .inner
                             .secret_manager
                             .read()
                             .await
                             .generate_ed25519_addresses(
-                                account_details.coin_type,
-                                account_details.index,
+                                wallet_data.coin_type(),
+                                todo!("wallet_data.index"),
                                 address_index..address_index + 1,
                                 Some(changed_options),
                             )
                             .await?;
                         self.emit(
-                            account_details.index,
+                            todo!("wallet_data.index"),
                             WalletEvent::LedgerAddressGeneration(AddressData {
                                 address: address[0].to_bech32(bech32_hrp),
                             }),
@@ -120,13 +120,13 @@ where
                     }
                     // Generate with prompt so the user can verify
                     let address = self
-                        .wallet
+                        .inner
                         .secret_manager
                         .read()
                         .await
                         .generate_ed25519_addresses(
-                            account_details.coin_type,
-                            account_details.index,
+                            wallet_data.coin_type(),
+                            todo!("wallet_data.index"),
                             address_index..address_index + 1,
                             Some(options),
                         )
@@ -135,13 +135,13 @@ where
                 }
                 addresses
             } else {
-                self.wallet
+                self.inner
                     .secret_manager
                     .read()
                     .await
                     .generate_ed25519_addresses(
-                        account_details.coin_type,
-                        account_details.index,
+                        wallet_data.coin_type(),
+                        todo!("wallet_data.index"),
                         address_range,
                         Some(options),
                     )
@@ -163,7 +163,7 @@ where
             )
             .await?;
 
-        drop(account_details);
+        drop(wallet_data);
 
         let generate_addresses: Vec<Bip44Address> = addresses
             .into_iter()

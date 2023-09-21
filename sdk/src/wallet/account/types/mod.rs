@@ -30,7 +30,7 @@ use crate::{
         TryFromDto,
     },
     utils::serde::bip44::option_bip44,
-    wallet::account::AccountDetails,
+    wallet::core::WalletData,
 };
 
 /// An output with metadata
@@ -55,7 +55,7 @@ pub struct OutputData {
 impl OutputData {
     pub fn input_signing_data(
         &self,
-        account: &AccountDetails,
+        wallet_data: &WalletData,
         slot_index: SlotIndex,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
@@ -66,14 +66,14 @@ impl OutputData {
         let chain = if unlock_address == self.address {
             self.chain
         } else if let Address::Ed25519(_) = unlock_address {
-            if let Some(address) = account
+            if let Some(address) = wallet_data
                 .addresses_with_unspent_outputs
                 .iter()
                 .find(|a| a.address.inner == unlock_address)
             {
                 Some(
-                    Bip44::new(account.coin_type)
-                        .with_account(account.index)
+                    Bip44::new(wallet_data.coin_type())
+                        .with_account(todo!("wallet_data.index"))
                         .with_change(address.internal as _)
                         .with_address_index(address.key_index),
                 )

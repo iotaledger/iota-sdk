@@ -16,10 +16,10 @@ use crate::{
         output::{InputsCommitment, Output},
         payload::transaction::{RegularTransactionEssence, TransactionEssence},
     },
-    wallet::account::{operations::transaction::TransactionOptions, Account},
+    wallet::{account::operations::transaction::TransactionOptions, Wallet},
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {

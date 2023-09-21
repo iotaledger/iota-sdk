@@ -16,9 +16,11 @@ use crate::{
         },
         slot::SlotIndex,
     },
-    wallet::account::{
-        operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
-        TransactionOptions,
+    wallet::{
+        account::{
+            operations::helpers::time::can_output_be_unlocked_now, types::Transaction, OutputData, TransactionOptions,
+        },
+        Wallet,
     },
 };
 
@@ -33,7 +35,7 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -45,19 +47,19 @@ where
     /// additional inputs
     pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
-        let account_details = self.details().await;
+        let wallet_data = self.data().await;
 
         let slot_index = self.client().get_slot_index().await?;
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in account_details
+        for (output_id, output_data) in wallet_data
             .unspent_outputs
             .iter()
             .filter(|(_, o)| o.output.is_basic() || o.output.is_nft())
         {
             // Don't use outputs that are locked for other transactions
-            if !account_details.locked_outputs.contains(output_id) && account_details.outputs.contains_key(output_id) {
+            if !wallet_data.locked_outputs.contains(output_id) && wallet_data.outputs.contains_key(output_id) {
                 if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
                     // If there is a single [UnlockCondition], then it's an
                     // [AddressUnlockCondition] and we own it already without
@@ -66,7 +68,7 @@ where
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            &account_details.addresses_with_unspent_outputs,
+                            &wallet_data.addresses_with_unspent_outputs,
                             // outputs controlled by an account or nft are currently not considered
                             &[],
                             output_data,
@@ -131,11 +133,11 @@ where
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let account_details = self.details().await;
+        let wallet_data = self.data().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
         let mut basic_outputs: Vec<OutputData> = Vec::new();
-        for (output_id, output_data) in &account_details.unspent_outputs {
+        for (output_id, output_data) in &wallet_data.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
                 // Remove voting output from inputs, because we don't want to spent it to claim something else.
@@ -144,8 +146,8 @@ where
                 }
             }
             // Don't use outputs that are locked for other transactions
-            if !account_details.locked_outputs.contains(output_id) {
-                if let Some(output) = account_details.outputs.get(output_id) {
+            if !wallet_data.locked_outputs.contains(output_id) {
+                if let Some(output) = wallet_data.outputs.get(output_id) {
                     if let Output::Basic(basic_output) = &output.output {
                         if basic_output.unlock_conditions().len() == 1 {
                             // Store outputs with [`AddressUnlockCondition`] alone, because they could be used as
@@ -206,12 +208,12 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let account_details = self.details().await;
+        let wallet_data = self.data().await;
 
         let mut outputs_to_claim = Vec::new();
         for output_id in output_ids_to_claim {
-            if let Some(output_data) = account_details.unspent_outputs.get(&output_id) {
-                if !account_details.locked_outputs.contains(&output_id) {
+            if let Some(output_data) = wallet_data.unspent_outputs.get(&output_id) {
+                if !wallet_data.locked_outputs.contains(&output_id) {
                     outputs_to_claim.push(output_data.clone());
                 }
             }
@@ -223,12 +225,12 @@ where
             ));
         }
 
-        let first_account_address = account_details
+        let first_account_address = wallet_data
             .public_addresses
             .first()
             .ok_or(crate::wallet::Error::FailedToGetRemainder)?
             .clone();
-        drop(account_details);
+        drop(wallet_data);
 
         let mut additional_inputs_used = HashSet::new();
 

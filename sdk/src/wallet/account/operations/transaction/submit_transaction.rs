@@ -6,10 +6,10 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
     types::block::{payload::Payload, BlockId},
-    wallet::account::{operations::transaction::TransactionPayload, Account},
+    wallet::{account::operations::transaction::TransactionPayload, Wallet},
 };
 
-impl<S: 'static + SecretManage> Account<S>
+impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
@@ -19,8 +19,6 @@ where
         transaction_payload: TransactionPayload,
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] send_payload");
-        #[cfg(feature = "events")]
-        let account_index = self.details().await.index;
 
         let block = self
             .client()
@@ -35,7 +33,7 @@ where
 
         #[cfg(feature = "events")]
         self.emit(
-            account_index,
+            todo!("account_index"),
             WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting),
         )
         .await;
