@@ -185,7 +185,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 )
                 .await?;
 
-            let block_id = block.id();
+            let block_id = client.block_id(&block).await?;
 
             Response::BlockIdWithBlock(block_id, BlockWrapperDto::from(&block))
         }
@@ -206,7 +206,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&BlockWrapper::try_from_dto(
+                .post_block(&BlockWrapper::try_from_dto_with_params(
                     block,
                     client.get_protocol_parameters().await?,
                 )?)
@@ -313,9 +313,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?;
             Response::CustomJson(data)
         }
-        ClientMethod::BlockId { block } => {
-            Response::BlockId(BlockWrapper::try_from_dto(block, client.get_protocol_parameters().await?)?.id())
-        }
+        ClientMethod::BlockId { block } => Response::BlockId(
+            client
+                .block_id(&BlockWrapper::try_from_dto_with_params(
+                    block,
+                    client.get_protocol_parameters().await?,
+                )?)
+                .await?,
+        ),
     };
     Ok(response)
 }

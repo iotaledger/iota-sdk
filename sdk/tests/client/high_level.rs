@@ -23,7 +23,7 @@ async fn test_find_blocks() {
     let blocks = client.find_blocks(&[block_id]).await.unwrap();
 
     assert_eq!(blocks.len(), 1);
-    assert_eq!(blocks[0].id(), block_id);
+    assert_eq!(client.block_id(&blocks[0]).await.unwrap(), block_id);
 }
 
 #[ignore]
