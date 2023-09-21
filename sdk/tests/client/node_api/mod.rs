@@ -25,8 +25,7 @@ const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750
 // Sends a tagged data block to the node to test against it.
 async fn setup_tagged_data_block() -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
-
-    client
+    let block = client
         .finish_basic_block_builder(
             todo!("issuer id"),
             todo!("block signature"),
@@ -37,8 +36,9 @@ async fn setup_tagged_data_block() -> BlockId {
             ))),
         )
         .await
-        .unwrap()
-        .id(&client.get_protocol_parameters().await.unwrap())
+        .unwrap();
+
+    client.block_id(&block).await.unwrap()
 }
 
 pub fn setup_secret_manager() -> SecretManager {
