@@ -13,5 +13,3 @@ pub(crate) mod storage;
 pub(crate) mod stronghold;
 #[cfg(feature = "stronghold")]
 pub(crate) mod stronghold_backup;
-#[cfg(debug_assertions)]
-pub(crate) mod verify_integrity;

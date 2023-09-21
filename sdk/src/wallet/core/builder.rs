@@ -8,6 +8,7 @@ use std::sync::{
 #[cfg(feature = "storage")]
 use std::{collections::HashSet, sync::atomic::Ordering};
 
+use crypto::keys::bip44::Bip44;
 use futures::{future::try_join_all, FutureExt};
 use serde::Serialize;
 use tokio::sync::RwLock;
@@ -24,15 +25,20 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    wallet::{core::WalletInner, Account, ClientOptions, Wallet},
+    wallet::{
+        core::{WalletData, WalletInner},
+        Account, ClientOptions, Wallet,
+    }, types::block::{address::{Address, AccountAddress}, output::AccountId},
 };
 
-/// Builder for the wallet.
+/// Builder for the wallet inner.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
+    pub(crate) alias: Option<String>,
+    pub(crate) address: Option<Address>,
+    pub(crate) bip_path: Option<Bip44>,
     pub(crate) client_options: Option<ClientOptions>,
-    pub(crate) coin_type: Option<u32>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: Option<StorageOptions>,
     #[serde(skip)]
@@ -42,8 +48,10 @@ pub struct WalletBuilder<S: SecretManage = SecretManager> {
 impl<S: SecretManage> Default for WalletBuilder<S> {
     fn default() -> Self {
         Self {
+            alias: Default::default(),
+            address: Default::default(),
+            bip_path: Default::default(),
             client_options: Default::default(),
-            coin_type: Default::default(),
             #[cfg(feature = "storage")]
             storage_options: Default::default(),
             secret_manager: Default::default(),
@@ -63,15 +71,27 @@ where
         }
     }
 
-    /// Set the client options for the core nodes.
-    pub fn with_client_options(mut self, client_options: impl Into<Option<ClientOptions>>) -> Self {
-        self.client_options = client_options.into();
+    /// Set the alias of the wallet.
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
-    /// Set the coin type for the wallet. Registered coin types can be found at <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    pub fn with_coin_type(mut self, coin_type: impl Into<Option<u32>>) -> Self {
-        self.coin_type = coin_type.into();
+    /// Set the address of the wallet.
+    pub fn with_address(mut self, address: impl Into<Option<Address>>) -> Self {
+        self.address = address.into();
+        self
+    }
+
+    /// Set the BIP44 path of the wallet.
+    pub fn with_bip44(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
+        self.bip_path = bip_path.into();
+        self
+    }
+
+    /// Set the client options for the core nodes.
+    pub fn with_client_options(mut self, client_options: impl Into<Option<ClientOptions>>) -> Self {
+        self.client_options = client_options.into();
         self
     }
 
@@ -113,7 +133,7 @@ where
     crate::wallet::Error: From<S::Error>,
     Self: SaveLoadWallet,
 {
-    /// Builds the wallet
+    /// Builds the wallet.
     pub async fn finish(mut self) -> crate::wallet::Result<Wallet<S>> {
         log::debug!("[WalletBuilder]");
 
@@ -126,9 +146,10 @@ where
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
             }
-            if self.coin_type.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("coin_type"));
-            }
+            todo!("move this to wallet builder");
+            // if self.coin_type.is_none() {
+            //     return Err(crate::wallet::Error::MissingParameter("coin_type"));
+            // }
             if self.secret_manager.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("secret_manager"));
             }
@@ -172,26 +193,28 @@ where
             self.secret_manager.replace(secret_manager);
         }
 
-        if self.coin_type.is_none() {
-            self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
-        }
-        let coin_type = self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
-            "coin_type (IOTA: 4218, Shimmer: 4219)",
-        ))?;
+        todo!("access bip44 path");
+        // if self.coin_type.is_none() {
+        //     self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
+        // }
+        // let coin_type = self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
+        //     "coin_type (IOTA: 4218, Shimmer: 4219)",
+        // ))?;
 
-        #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.get_accounts().await?;
+        todo!("get account from storage");
+        // #[cfg(feature = "storage")]
+        // let mut accounts = storage_manager.get_accounts().await?;
 
-        // Check against potential account coin type before saving the wallet data
-        #[cfg(feature = "storage")]
-        if let Some(account) = accounts.first() {
-            if *account.coin_type() != coin_type {
-                return Err(crate::wallet::Error::InvalidCoinType {
-                    new_coin_type: coin_type,
-                    existing_coin_type: *account.coin_type(),
-                });
-            }
-        }
+        // // Check against potential account coin type before saving the wallet data
+        // #[cfg(feature = "storage")]
+        // if let Some(account) = accounts.first() {
+        //     if *account.coin_type() != coin_type {
+        //         return Err(crate::wallet::Error::InvalidCoinType {
+        //             new_coin_type: coin_type,
+        //             existing_coin_type: *account.coin_type(),
+        //         });
+        //     }
+        // }
 
         // Store wallet data in storage
         #[cfg(feature = "storage")]
@@ -202,10 +225,14 @@ where
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
-        #[cfg(feature = "storage")]
-        unlock_unused_inputs(&mut accounts)?;
-        #[cfg(not(feature = "storage"))]
-        let accounts = Vec::new();
+        todo!("single account");
+        // #[cfg(feature = "storage")]
+        // unlock_unused_inputs(&mut accounts)?;
+
+        todo!("single account");
+        // #[cfg(not(feature = "storage"))]
+        // let accounts = Vec::new();
+
         let wallet_inner = Arc::new(WalletInner {
             background_syncing_status: AtomicUsize::new(0),
             client: self
@@ -214,7 +241,6 @@ where
                 .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
                 .finish()
                 .await?,
-            coin_type: AtomicU32::new(coin_type),
             secret_manager: self
                 .secret_manager
                 .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
@@ -226,33 +252,40 @@ where
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         });
 
-        let mut accounts: Vec<Account<S>> = try_join_all(
-            accounts
-                .into_iter()
-                .map(|a| Account::new(a, wallet_inner.clone()).boxed()),
-        )
-        .await?;
+        todo!("single account");
+        // let mut accounts: Vec<Account<S>> = try_join_all(
+        //     accounts
+        //         .into_iter()
+        //         .map(|a| Account::new(a, wallet_inner.clone()).boxed()),
+        // )
+        // .await?;
 
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if new_provided_client_options {
-            for account in accounts.iter_mut() {
-                // Safe to unwrap because we create the client if accounts aren't empty
-                account.update_account_bech32_hrp().await?;
-            }
+            todo!("single account");
+            // for account in accounts.iter_mut() {
+            //     // Safe to unwrap because we create the client if accounts aren't empty
+            //     account.update_account_bech32_hrp().await?;
+            // }
         }
+
+        todo!("remove unwraps");
+        let wallet_data = Arc::new(RwLock::new(WalletData::new(self.alias.unwrap(), self.bip_path.unwrap(), self.address.unwrap())));
 
         Ok(Wallet {
             inner: wallet_inner,
-            data: Arc::new(RwLock::new(accounts)),
+            data: wallet_data,
         })
     }
 
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
+            alias: Some(wallet.data.read().await.alias.clone()),
+            bip_path: Some(wallet.data.read().await.bip_path.clone()),
+            address: Some(wallet.data.read().await.address.clone()),
             client_options: Some(wallet.client_options().await),
-            coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),
         }
@@ -295,10 +328,12 @@ pub(crate) mod dto {
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub(crate) alias: Option<String>,
+        pub(crate) bip_path: String,
+        pub(crate) address: String,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) client_options: Option<ClientOptions>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub(crate) coin_type: Option<u32>,
         #[cfg(feature = "storage")]
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) storage_options: Option<StorageOptions>,
@@ -306,13 +341,16 @@ pub(crate) mod dto {
 
     impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
         fn from(value: WalletBuilderDto) -> Self {
-            Self {
-                client_options: value.client_options,
-                coin_type: value.coin_type,
-                #[cfg(feature = "storage")]
-                storage_options: value.storage_options,
-                secret_manager: None,
-            }
+            todo!("make this TryFrom");
+            // Self {
+            //     alias: value.alias.unwrap_or_else("0".to_string()),
+            //     bip_path: value.bip_path,
+            //     address: value.address,
+            //     client_options: value.client_options,
+            //     #[cfg(feature = "storage")]
+            //     storage_options: value.storage_options,
+            //     secret_manager: None,
+            // }
         }
     }
 

@@ -4,12 +4,12 @@
 pub(crate) mod builder;
 pub(crate) mod operations;
 
-use std::sync::{
+use std::{sync::{
     atomic::{AtomicU32, AtomicUsize},
     Arc,
-};
+}, collections::{HashMap, HashSet}};
 
-use crypto::keys::bip39::{Mnemonic, MnemonicRef};
+use crypto::keys::{bip39::{Mnemonic, MnemonicRef}, bip44::Bip44};
 use tokio::sync::RwLock;
 
 pub use self::builder::WalletBuilder;
@@ -25,8 +25,10 @@ use crate::{
         secret::{SecretManage, SecretManager},
         verify_mnemonic, Client,
     },
-    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance, Account},
+    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance, Account}, types::block::{address::Address, output::{OutputId, FoundryOutput, FoundryId}, payload::transaction::TransactionId},
 };
+
+use super::account::types::{OutputData, Transaction};
 
 /// The wallet, used to ... TODO
 #[derive(Debug)]
@@ -39,7 +41,7 @@ impl<S: SecretManage> Clone for Wallet<S> {
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
-            // data: self.data.clone(),
+            data: self.data.clone(),
         }
     }
 }
@@ -61,11 +63,11 @@ where
         WalletBuilder::<S>::new()
     }
 
-    /// Create a new account
-    pub fn create_account(&self) -> AccountBuilder<S> {
-        log::debug!("creating account");
-        AccountBuilder::<S>::new(self.clone())
-    }
+    // TODO: remove
+    // pub fn create_account(&self) -> AccountBuilder<S> {
+    //     log::debug!("creating account");
+    //     AccountBuilder::<S>::new(self.clone())
+    // }
 }
 
 #[derive(Debug)]
@@ -73,8 +75,6 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client: Client,
-    // TODO: remove in favor of WalletData::bip_path
-    pub(crate) coin_type: AtomicU32,
     pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
@@ -88,65 +88,10 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Get all accounts
-    pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account<S>>> {
-        // Ok(self.data.read().await.clone())
-        todo!("get_data")
-    }
-
-    /// Get all account aliases
-    pub async fn get_account_aliases(&self) -> crate::wallet::Result<Vec<String>> {
-        // let accounts = self.data.read().await;
-        // let mut account_aliases = Vec::with_capacity(accounts.len());
-        // for handle in accounts.iter() {
-        //     account_aliases.push(handle.details().await.alias().clone());
-        // }
-        // Ok(account_aliases)
-        todo!("get_alias")
-    }
-
-    /// Removes the latest account (account with the largest account index).
-    pub async fn remove_latest_account(&self) -> crate::wallet::Result<()> {
-        // let mut largest_account_index_opt = None;
-        // let mut accounts = self.data.write().await;
-
-        // for account in accounts.iter() {
-        //     let account_index = *account.details().await.index();
-        //     if let Some(largest_account_index) = largest_account_index_opt {
-        //         if account_index > largest_account_index {
-        //             largest_account_index_opt = Some(account_index);
-        //         }
-        //     } else {
-        //         largest_account_index_opt = Some(account_index)
-        //     }
-        // }
-
-        // if let Some(largest_account_index) = largest_account_index_opt {
-        //     for i in 0..accounts.len() {
-        //         if let Some(account) = accounts.get(i) {
-        //             if *account.details().await.index() == largest_account_index {
-        //                 let _ = accounts.remove(i);
-
-        //                 #[cfg(feature = "storage")]
-        //                 self.storage_manager
-        //                     .write()
-        //                     .await
-        //                     .remove_account(largest_account_index)
-        //                     .await?;
-
-        //                 return Ok(());
-        //             }
-        //         }
-        //     }
-        // }
-
-        // Ok(())
-        todo!("refactor to remove account");
-    }
-
     /// Get the balance of all accounts added together
     pub async fn balance(&self) -> crate::wallet::Result<Balance> {
         let mut balance = Balance::default();
+
         todo!("just return the balance of the single account");
         // let accounts = self.data.read().await;
 
@@ -167,28 +112,27 @@ where
         // }
 
         Ok(balance)
-
-        fn address() -> Ed25519Address {
-            ...
-        }
-        
-        fn implicit_account_address() -> ImplicitAccountAddress {
-            // Based on Self::address()
-            ...
-        }
-        
-        fn implicit_accounts() -> Vec<ImplicitAccount> {
-            let output = self.unspent_outputs.find(ImplcitType);
-            ImplicitAccount {
-                output,
-                wallet: self
-            }
-        }
-        
-        fn issuer_accounts() -> Vec<Account> {
-            
-        }
     }
+
+    // fn address() -> Ed25519Address {
+    // }
+
+    // fn implicit_account_address() -> ImplicitAccountAddress {
+    //     // Based on Self::address()
+    //     ...
+    // }
+
+    // fn implicit_accounts() -> Vec<ImplicitAccount> {
+    //     let output = self.unspent_outputs.find(ImplcitType);
+    //     ImplicitAccount {
+    //         output,
+    //         wallet: self
+    //     }
+    // }
+
+    // fn issuer_accounts() -> Vec<Account> {
+
+    // }
 }
 
 impl<S: SecretManage> WalletInner<S> {
@@ -250,16 +194,39 @@ impl<S: SecretManage> Drop for Wallet<S> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct WalletData {
-    pub(crate) bip_path: BIP44,
     pub(crate) alias: String,
+    pub(crate) bip_path: Bip44,
     pub(crate) address: Address,
     pub(crate) outputs: HashMap<OutputId, OutputData>,
     pub(crate) locked_outputs: HashSet<OutputId>,
     pub(crate) unspent_outputs: HashMap<OutputId, OutputData>,
-    transactions: HashMap<TransactionId, Transaction>,
-    pending_transactions: HashSet<TransactionId>,
-    incoming_transactions: HashMap<TransactionId, Transaction>,
-    inaccessible_incoming_transactions: HashSet<TransactionId>,
-    native_token_foundries: HashMap<FoundryId, FoundryOutput>,
+    pub(crate) transactions: HashMap<TransactionId, Transaction>,
+    pub(crate) pending_transactions: HashSet<TransactionId>,
+    pub(crate) incoming_transactions: HashMap<TransactionId, Transaction>,
+    pub(crate) inaccessible_incoming_transactions: HashSet<TransactionId>,
+    pub(crate) native_token_foundries: HashMap<FoundryId, FoundryOutput>,
+}
+
+impl WalletData {
+    pub(crate) fn new(alias: String, bip_path: Bip44, address: Address) -> Self {
+        Self {
+            alias,
+            bip_path,
+            address,
+            outputs: HashMap::new(),
+            locked_outputs: HashSet::new(),
+            unspent_outputs: HashMap::new(),
+            transactions: HashMap::new(),
+            pending_transactions: HashSet::new(),
+            incoming_transactions: HashMap::new(),
+            inaccessible_incoming_transactions: HashSet::new(),
+            native_token_foundries: HashMap::new(),
+        }
+    }
+
+    pub(crate) fn coin_type(&self) -> u32 {
+        self.bip_path.coin_type
+    }
 }

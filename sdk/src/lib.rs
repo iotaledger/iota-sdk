@@ -4,7 +4,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // TODO missing_docs
-#![deny(clippy::nursery, rust_2018_idioms, /* warnings, */ unreachable_pub)]
+#![deny(clippy::nursery, rust_2018_idioms, /* warnings, unreachable_pub */)]
 #![allow(
     clippy::redundant_pub_crate,
     clippy::missing_const_for_fn,

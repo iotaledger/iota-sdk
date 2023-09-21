@@ -50,7 +50,7 @@ impl Wallet {
                         // Generate without prompt to be able to display it
                         let address = ledger_nano
                             .generate_ed25519_addresses(
-                                self.coin_type.load(Ordering::Relaxed),
+                                self.data.read().await.coin_type(),
                                 account_index,
                                 address_index..address_index + 1,
                                 changed_options,
@@ -71,7 +71,7 @@ impl Wallet {
                     // Generate with prompt so the user can verify
                     ledger_nano
                         .generate_ed25519_addresses(
-                            self.coin_type.load(Ordering::Relaxed),
+                            self.data.read().await.coin_type(),
                             account_index,
                             address_index..address_index + 1,
                             options,
@@ -80,7 +80,7 @@ impl Wallet {
                 } else {
                     ledger_nano
                         .generate_ed25519_addresses(
-                            self.coin_type.load(Ordering::Relaxed),
+                            self.data.read().await.coin_type(),
                             account_index,
                             address_index..address_index + 1,
                             options,
@@ -92,7 +92,7 @@ impl Wallet {
             SecretManager::Stronghold(stronghold) => {
                 stronghold
                     .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
+                        self.data.read().await.coin_type(),
                         account_index,
                         address_index..address_index + 1,
                         options,
@@ -102,7 +102,7 @@ impl Wallet {
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
                     .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
+                        self.data.read().await.coin_type(),
                         account_index,
                         address_index..address_index + 1,
                         options,
@@ -113,7 +113,7 @@ impl Wallet {
             SecretManager::PrivateKey(private_key) => {
                 private_key
                     .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
+                        self.data.read().await.coin_type(),
                         account_index,
                         address_index..address_index + 1,
                         options,
@@ -135,17 +135,18 @@ where
 {
     /// Get the bech32 hrp from the first account address or if not existent, from the client
     pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<Hrp> {
-        Ok(match self.get_accounts().await?.first() {
-            Some(account) => {
-                account
-                    .public_addresses()
-                    .await
-                    .first()
-                    .expect("missing first public address")
-                    .address
-                    .hrp
-            }
-            None => self.client().get_bech32_hrp().await?,
-        })
+        todo!("single account");
+        // Ok(match self.get_accounts().await?.first() {
+        //     Some(account) => {
+        //         account
+        //             .public_addresses()
+        //             .await
+        //             .first()
+        //             .expect("missing first public address")
+        //             .address
+        //             .hrp
+        //     }
+        //     None => self.client().get_bech32_hrp().await?,
+        // })
     }
 }

@@ -350,7 +350,7 @@ pub(crate) mod dto {
                 });
             }
 
-            Ok(BlockWrapper::new(
+            Ok(Self::new(
                 &protocol_params,
                 dto.issuing_time,
                 dto.slot_commitment_id,

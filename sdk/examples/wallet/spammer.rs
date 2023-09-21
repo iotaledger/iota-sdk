@@ -14,8 +14,8 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
-    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
+    types::block::{address::{Bech32Address, Address}, output::BasicOutput, payload::transaction::TransactionId},
+    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet}, crypto::keys::bip44::Bip44,
 };
 
 // The account alias used in this example.
@@ -39,12 +39,19 @@ async fn main() -> Result<()> {
     // Restore wallet from a mnemonic phrase.
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
+    todo!("generate and set address");
+
     let wallet = Wallet::builder()
+        .with_alias(ACCOUNT_ALIAS)
+        // .with_address(Address::Ed25519(...))
+        .with_bip44(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
+
+    todo!("remove this");
     let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
 
     let recv_address = *account.addresses().await?[0].address();

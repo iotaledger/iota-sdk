@@ -60,7 +60,7 @@ impl SlotIndex {
 
     /// Gets the slot index of a unix timestamp.
     /// Slots are counted starting from `1` with `0` being reserved for times before the genesis.
-    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> SlotIndex {
+    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> Self {
         timestamp
             .checked_sub(genesis_unix_timestamp as u64)
             .map(|diff| (diff / slot_duration_in_seconds as u64) + 1)
