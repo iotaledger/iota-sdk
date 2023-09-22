@@ -60,9 +60,9 @@ impl SlotIndex {
 
     /// Gets the slot index of a unix timestamp.
     /// Slots are counted starting from `1` with `0` being reserved for times before the genesis.
-    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> SlotIndex {
+    pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> Self {
         timestamp
-            .checked_sub(genesis_unix_timestamp as u64)
+            .checked_sub(genesis_unix_timestamp)
             .map(|elapsed| (elapsed / slot_duration_in_seconds as u64) + 1)
             .unwrap_or_default()
             .into()
@@ -73,7 +73,7 @@ impl SlotIndex {
     pub fn to_timestamp(self, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> u64 {
         self.0
             .checked_sub(1)
-            .map(|adjusted_slot| (adjusted_slot * slot_duration_in_seconds as u64) + genesis_unix_timestamp as u64)
+            .map(|adjusted_slot| (adjusted_slot * slot_duration_in_seconds as u64) + genesis_unix_timestamp)
             .unwrap_or_default()
     }
 }
@@ -130,7 +130,7 @@ mod test {
         let protocol_params = ProtocolParameters::default();
 
         // Timestamp before the genesis
-        let timestamp = protocol_params.genesis_unix_timestamp() as u64 - 100;
+        let timestamp = protocol_params.genesis_unix_timestamp() - 100;
         let slot_index = protocol_params.slot_index(timestamp);
         assert_eq!(*slot_index, 0);
         assert_eq!(
@@ -142,7 +142,7 @@ mod test {
         );
 
         // Genesis timestamp
-        let timestamp = protocol_params.genesis_unix_timestamp() as u64;
+        let timestamp = protocol_params.genesis_unix_timestamp();
         let slot_index = protocol_params.slot_index(timestamp);
         assert_eq!(*slot_index, 1);
         assert_eq!(
@@ -154,7 +154,7 @@ mod test {
         );
 
         // Timestamp 5 seconds after slot 100 starts
-        let timestamp = protocol_params.genesis_unix_timestamp() as u64
+        let timestamp = protocol_params.genesis_unix_timestamp()
             + (99 * protocol_params.slot_duration_in_seconds() as u64) // Add 99 because the slots are 1-indexed
             + 5;
         let slot_index = protocol_params.slot_index(timestamp);
