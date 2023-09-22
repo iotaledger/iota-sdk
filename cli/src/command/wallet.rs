@@ -95,6 +95,15 @@ pub enum WalletCommand {
         /// Node URL to use for all future operations.
         url: String,
     },
+    /// Set the PoW options.
+    SetPow {
+        /// Whether the PoW should be done locally or remotely.
+        #[arg(short, long, action = clap::ArgAction::Set)]
+        local_pow: bool,
+        /// The amount of workers that should be used for PoW, default is num_cpus::get().
+        #[arg(short, long)]
+        worker_count: Option<usize>,
+    },
     /// Synchronize all accounts.
     Sync,
 }
@@ -268,6 +277,25 @@ pub async fn set_node_url_command(storage_path: &Path, snapshot_path: &Path, url
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
+
+    Ok(wallet)
+}
+
+pub async fn set_pow_command(
+    storage_path: &Path,
+    snapshot_path: &Path,
+    local_pow: bool,
+    worker_count: Option<usize>,
+) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    // Need to get the current node, so it's not removed
+    let node = wallet.client().get_node().await?;
+    let client_options = ClientOptions::new()
+        .with_node(node.url.as_ref())?
+        .with_local_pow(local_pow)
+        .with_pow_worker_count(worker_count);
+    wallet.set_client_options(client_options).await?;
 
     Ok(wallet)
 }
