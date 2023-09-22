@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, unix_timestamp_now},
     types::{
         api::core::response::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
     },
-    utils::unix_timestamp_now,
     wallet::account::{
         types::{InclusionState, Transaction},
         Account, AccountDetails,
@@ -126,7 +125,7 @@ where
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(
                                             transaction,
-                                            Some(included_block.id()),
+                                            Some(self.client().block_id(&included_block).await?),
                                             // block metadata was Conflicting, but it's confirmed in another attachment
                                             InclusionState::Confirmed,
                                             &mut updated_transactions,
