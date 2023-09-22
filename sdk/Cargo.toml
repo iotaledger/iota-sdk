@@ -144,11 +144,11 @@ events = []
 irc_27 = ["url", "serde"]
 irc_30 = ["url", "serde"]
 ledger_nano = ["iota-ledger-nano"]
-mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
+mqtt = ["std", "tls", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
 pow = ["std", "num_cpus", "iota-crypto/curl-p"]
 rand = ["dep:rand"]
-rocksdb = ["dep:rocksdb", "storage"]
+rocksdb = ["storage", "dep:rocksdb"]
 serde = [
     "serde_repr",
     "hashbrown/serde",
