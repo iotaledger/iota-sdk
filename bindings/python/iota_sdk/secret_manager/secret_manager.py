@@ -3,7 +3,7 @@
 
 from json import dumps, loads
 from typing import Optional, Union
-from dacyte import from_dict
+from dacite import from_dict
 import humps
 
 from iota_sdk import create_secret_manager, call_secret_manager_method
@@ -79,7 +79,6 @@ class StrongholdSecretManager(dict):
 class SecretManagerError(Exception):
     """Secret manager error.
     """
-    pass
 
 
 class SecretManager():

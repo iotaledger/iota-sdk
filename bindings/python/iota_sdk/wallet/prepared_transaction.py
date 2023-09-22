@@ -37,7 +37,6 @@ class PreparedTransaction:
 
     :returns: The method prepared_transaction_data() is returning an object of type PreparedTransaction
     """
-
     def prepared_transaction_data(self) -> PreparedTransactionData:
         """Get the prepared transaction data.
         """
@@ -51,7 +50,6 @@ class PreparedTransaction:
 
     :returns: The send() method is returning a Transaction object after it has been signed and submitted.
     """
-
     def send(self) -> Transaction:
         """Send a transaction. Internally just calls `sign_and_submit_transaction`.
 

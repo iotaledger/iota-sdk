@@ -28,7 +28,6 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 
 class ClientError(Exception):
     """Represents a client error."""
-    pass
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):

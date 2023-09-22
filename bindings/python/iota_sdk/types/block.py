@@ -4,7 +4,8 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from dacite import from_dict
+from typing import List, Optional, Union, Dict
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 from iota_sdk.utils import Utils

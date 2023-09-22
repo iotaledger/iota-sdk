@@ -3,7 +3,7 @@
 
 from typing import List, Optional
 from dataclasses import dataclass
-from dacite import from_dict
+from abc import ABCMeta, abstractmethod
 from iota_sdk.types.block import Block
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import OutputWithMetadata
@@ -59,6 +59,11 @@ class GenerateAddressesOptions():
 class HighLevelAPI():
     """High level API.
     """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def _call_method(self, name, data=None):
+        return {}
 
     def get_outputs(
             self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:

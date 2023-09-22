@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import Optional
+from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output
@@ -10,6 +11,11 @@ from iota_sdk.types.output import Output
 class ClientUtils():
     """Client utility functions.
     """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def _call_method(self, name, data=None):
+        return {}
 
     def hex_to_bech32(self, hex_str: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
