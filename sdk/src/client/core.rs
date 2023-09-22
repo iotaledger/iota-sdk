@@ -177,4 +177,10 @@ impl ClientInner {
         };
         Ok(())
     }
+
+    /// Resize the client's request pool
+    #[cfg(not(target_family = "wasm"))]
+    pub async fn resize_request_pool(&self, new_size: usize) {
+        self.request_pool.resize(new_size).await;
+    }
 }
