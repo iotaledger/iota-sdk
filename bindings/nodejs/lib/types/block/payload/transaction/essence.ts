@@ -7,7 +7,6 @@ import { HexEncodedString } from '../../../utils';
 import { Input, InputDiscriminator } from '../../input';
 import { Output, OutputDiscriminator } from '../../output';
 import { MilestonePayload } from '../milestone/milestone';
-import { Payload } from '../payload';
 import { TaggedDataPayload } from '../tagged/tagged';
 import { TreasuryTransactionPayload } from '../treasury';
 import { TransactionPayload } from './transaction';
