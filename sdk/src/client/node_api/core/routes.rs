@@ -10,7 +10,7 @@ use url::Url;
 use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
-        node_api::query_string,
+        node_api::query_tuples_to_query_string,
         node_manager::node::{Node, NodeAuth},
         Client, ClientInner, Result,
     },
@@ -116,7 +116,7 @@ impl ClientInner {
     pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>> + Send) -> Result<CommitteeResponse> {
         const PATH: &str = "api/core/v3/committee";
 
-        let query = query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
+        let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
 
         self.get_request(PATH, query.as_deref(), false, false).await
     }
@@ -132,7 +132,7 @@ impl ClientInner {
     ) -> Result<ValidatorsResponse> {
         const PATH: &str = "api/core/v3/validators";
 
-        let query = query_string([
+        let query = query_tuples_to_query_string([
             page_size.into().map(|i| ("pageSize", i.to_string())),
             cursor.into().map(|i| ("cursor", i)),
         ]);

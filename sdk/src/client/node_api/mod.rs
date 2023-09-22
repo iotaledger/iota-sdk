@@ -14,7 +14,9 @@ pub mod mqtt;
 pub mod participation;
 pub mod plugin;
 
-pub(crate) fn query_string(query: impl IntoIterator<Item = Option<(&'static str, String)>>) -> Option<String> {
+pub(crate) fn query_tuples_to_query_string(
+    query: impl IntoIterator<Item = Option<(&'static str, String)>>,
+) -> Option<String> {
     let query = query
         .into_iter()
         .filter_map(|q| q.map(|q| format!("{}={}", q.0, q.1)))

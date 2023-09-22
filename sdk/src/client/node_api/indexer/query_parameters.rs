@@ -8,7 +8,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{node_api::query_string, Error, Result},
+    client::{node_api::query_tuples_to_query_string, Error, Result},
     types::block::{address::Bech32Address, slot::SlotIndex},
 };
 
@@ -58,7 +58,7 @@ impl QueryParameters {
 
     /// Converts parameters to a single String.
     pub fn to_query_string(&self) -> Option<String> {
-        query_string(self.0.iter().map(|q| Some(q.to_query_tuple())))
+        query_tuples_to_query_string(self.0.iter().map(|q| Some(q.to_query_tuple())))
     }
 }
 
