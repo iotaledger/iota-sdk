@@ -32,7 +32,7 @@ use crate::types::block::Error;
 /// | 2  | 16  | 24  |
 // ...
 #[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
+    Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
 )]
 #[repr(transparent)]
 pub struct EpochIndex(u64);
