@@ -21,7 +21,7 @@ use crate::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AccountId, NftId},
         payload::TaggedDataPayload,
-        ConvertTo,
+        BlockId, BlockWrapper, ConvertTo,
     },
 };
 
@@ -186,6 +186,10 @@ impl Client {
     pub fn tagged_data_to_utf8(payload: &TaggedDataPayload) -> Result<(String, String)> {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
     }
+
+    pub async fn block_id(&self, block: &BlockWrapper) -> Result<BlockId> {
+        Ok(block.id(&self.get_protocol_parameters().await?))
+    }
 }
 
 /// A password wrapper that takes care of zeroing the memory when being dropped.
@@ -196,4 +200,10 @@ impl Password {
     pub fn as_bytes(&self) -> &[u8] {
         self.0.as_bytes()
     }
+}
+
+pub fn unix_timestamp_now() -> core::time::Duration {
+    instant::SystemTime::now()
+        .duration_since(instant::SystemTime::UNIX_EPOCH)
+        .expect("time went backwards")
 }

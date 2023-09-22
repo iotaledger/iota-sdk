@@ -181,7 +181,10 @@ impl ClientInner {
 
         let dto = self.get_request::<BlockWrapperDto>(path, None, false, true).await?;
 
-        Ok(BlockWrapper::try_from_dto(dto, self.get_protocol_parameters().await?)?)
+        Ok(BlockWrapper::try_from_dto_with_params(
+            dto,
+            self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Finds a block by its ID and returns it as raw bytes.
@@ -236,7 +239,10 @@ impl ClientInner {
 
         let dto = self.get_request::<BlockWrapperDto>(path, None, true, true).await?;
 
-        Ok(BlockWrapper::try_from_dto(dto, self.get_protocol_parameters().await?)?)
+        Ok(BlockWrapper::try_from_dto_with_params(
+            dto,
+            self.get_protocol_parameters().await?,
+        )?)
     }
 
     /// Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.

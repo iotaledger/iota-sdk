@@ -58,7 +58,7 @@ where
         let syc_start_time = instant::Instant::now();
 
         // Prevent syncing the account multiple times simultaneously
-        let time_now = crate::utils::unix_timestamp_now().as_millis();
+        let time_now = crate::client::unix_timestamp_now().as_millis();
         let mut last_synced = self.last_synced.lock().await;
         log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
         if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
@@ -86,7 +86,7 @@ where
 
         let balance = self.balance().await?;
         // Update last_synced mutex
-        let time_now = crate::utils::unix_timestamp_now().as_millis();
+        let time_now = crate::client::unix_timestamp_now().as_millis();
         *last_synced = time_now;
         log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
         Ok(balance)
