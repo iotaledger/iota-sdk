@@ -1,7 +1,7 @@
 name: Common Feature Sets
 on:
   push:
-    branches: [develop, production, "1.1"]
+    branches: [develop, production, "2.0"]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/common-features.yml"
@@ -11,7 +11,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
   pull_request:
-    branches: [develop, production, "1.1"]
+    branches: [develop, production, "2.0"]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/common-features.yml"
