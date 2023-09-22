@@ -18,6 +18,30 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 # Mandatory dependencies
+bech32 = { version = "0.9.1", default-features = false }
+bitflags = { version = "2.4.0", default-features = false }
+derive_more = { version = "0.99.17", default-features = false, features = [
+    "from",
+    "from_str",
+    "as_ref",
+    "deref",
+    "deref_mut",
+    "display",
+    "add",
+    "add_assign",
+] }
+getset = { version = "0.1.2", default-features = false }
+hashbrown = { version = "0.14.0", default-features = false, features = [
+    "ahash",
+    "inline-more",
+] }
+hex = { version = "0.4.3", default-features = false }
+iota-crypto = { version = "0.23.0", default-features = false, features = [
+    "blake2b",
+    "ed25519",
+    "secp256k1",
+] }
+iterator-sorted = { version = "0.1.0", default-features = false }
 packable = { version = "0.8.3", default-features = false, features = [
     "primitive-types",
 ] }
@@ -78,30 +102,6 @@ tokio = { version = "1.32.0", default-features = false, features = [
     "time",
     "sync",
 ], optional = true }
-bech32 = { version = "0.9.1", default-features = false }
-bitflags = { version = "2.4.0", default-features = false }
-derive_more = { version = "0.99.17", default-features = false, features = [
-    "from",
-    "from_str",
-    "as_ref",
-    "deref",
-    "deref_mut",
-    "display",
-    "add",
-    "add_assign",
-] }
-getset = { version = "0.1.2", default-features = false }
-hashbrown = { version = "0.14.0", default-features = false, features = [
-    "ahash",
-    "inline-more",
-] }
-hex = { version = "0.4.3", default-features = false }
-iota-crypto = { version = "0.23.0", default-features = false, features = [
-    "blake2b",
-    "ed25519",
-    "secp256k1",
-] }
-iterator-sorted = { version = "0.1.0", default-features = false }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-storage = { version = "0.3.0", default-features = false, optional = true }
@@ -137,14 +137,12 @@ tokio = { version = "1.32.0", default-features = false, features = [
 
 [features]
 default = ["client", "wallet", "tls"]
-rocksdb = ["storage", "dep:rocksdb"]
 irc_27 = ["serde", "dep:url"]
 irc_30 = ["serde", "dep:url"]
 ledger_nano = ["dep:iota-ledger-nano"]
 mqtt = ["std", "tls", "dep:regex", "dep:rumqttc", "dep:once_cell"]
 participation = ["storage"]
-rand = ["dep:rand"]
-events = []
+rocksdb = ["storage", "dep:rocksdb"]
 serde = [
     "hashbrown/serde",
     "packable/serde",
@@ -174,6 +172,7 @@ stronghold = [
     "dep:once_cell",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
+events = []
 private_key_secret_manager = ["dep:bs58"]
 
 client = [
