@@ -323,7 +323,7 @@ export class Client {
     /**
      * Get the token supply.
      */
-    async getTokenSupply(): Promise<string> {
+    async getTokenSupply(): Promise<u64> {
         return (await this.getProtocolParameters()).tokenSupply;
     }
 
