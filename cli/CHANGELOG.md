@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::switch` command to allow changing accounts quickly;
 - UX improvements (Ctrl+l, TAB completion/suggestions and more) during interactive account management;
 - `WalletCommand::SetPow` command;
+- Check for existing stronghold on `restore`;
 
 ### Changed
 
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `print_wallet_help` changed to `WalletCli::print_help`;
 - `print_account_help` changed to `AccountCli::print_help`;
 - `AccountCommand::Addresses` now prints an overview that includes NTs, NFTs, Aliases and Foundries;
+- Restrict permissions of mnemonic file on Windows;
 
 ## 1.0.1 - 2023-MM-DD
 
