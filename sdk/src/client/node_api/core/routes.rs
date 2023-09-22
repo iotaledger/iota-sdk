@@ -124,6 +124,7 @@ impl ClientInner {
                 if !self.get_fallback_to_local_pow().await {
                     return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
+                log::debug!("[post_block] falling back to local PoW");
 
                 self.network_info.write().await.local_pow = true;
 
