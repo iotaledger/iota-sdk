@@ -5,7 +5,7 @@ use std::{
     collections::{HashMap, HashSet},
     convert::TryInto,
     io::Read,
-    path::{Path, PathBuf},
+    path::Path,
     str::FromStr,
 };
 
@@ -13,26 +13,17 @@ use crypto::{
     ciphers::{chacha::XChaCha20Poly1305, traits::Aead},
     macs::hmac::HMAC_SHA512,
 };
-use rocksdb::{IteratorMode, DB};
 use serde::Serialize;
 use serde_json::Value;
 use zeroize::Zeroizing;
 
 use crate::{
-    client::{constants::IOTA_COIN_TYPE, storage::StorageAdapter, Password},
+    client::{constants::IOTA_COIN_TYPE, Password},
     types::block::address::Bech32Address,
-    wallet::{
-        migration::{MigrationData, MIGRATION_VERSION_KEY},
-        storage::{
-            constants::{
-                ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY,
-                WALLET_INDEXATION_KEY,
-            },
-            StorageManager,
-        },
-        Error, Result,
-    },
+    wallet::{Error, Result},
 };
+
+pub(crate) const CHRYSALIS_STORAGE_KEY: &str = "chrysalis-data";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -61,86 +52,7 @@ pub(crate) struct AccountDetailsDto {
     native_token_foundries: HashMap<String, Value>,
 }
 
-#[cfg(feature = "rocksdb")]
-pub async fn migrate_db_chrysalis_to_stardust(
-    storage_path: impl Into<PathBuf> + Send,
-    password: Option<Password>,
-    new_db_encryption_key: impl Into<Option<Zeroizing<[u8; 32]>>> + Send,
-) -> Result<()> {
-    let storage_path_string = storage_path.into();
-    // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
-    let chrysalis_storage_path = &(*storage_path_string).join("db");
-
-    if !chrysalis_storage_path.is_dir() {
-        return Err(crate::wallet::Error::Migration(
-            "no chrysalis data to migrate".to_string(),
-        ));
-    }
-    let chrysalis_data = get_chrysalis_data(chrysalis_storage_path, password)?;
-
-    // create new accounts base on previous data
-    let (new_accounts, secret_manager_dto) = migrate_from_chrysalis_data(&chrysalis_data, &storage_path_string, false)?;
-
-    // convert to string keys
-    let chrysalis_data_with_string_keys = chrysalis_data
-        .into_iter()
-        .map(|(k, v)| {
-            Ok((
-                String::from_utf8(k).map_err(|_| Error::Migration("invalid utf8".into()))?,
-                v,
-            ))
-        })
-        .collect::<Result<HashMap<String, String>>>()?;
-
-    log::debug!(
-        "Chrysalis data: {}",
-        serde_json::to_string_pretty(&chrysalis_data_with_string_keys)?
-    );
-
-    let stardust_db = crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_path_string)?;
-
-    let stardust_storage = StorageManager::new(stardust_db, new_db_encryption_key).await?;
-
-    // store chrysalis data in a new key
-    stardust_storage
-        .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data_with_string_keys)
-        .await?;
-    // write new accounts to db (with account indexation)
-    let accounts_indexation_data: Vec<u32> = new_accounts.iter().map(|account| account.index).collect();
-    stardust_storage
-        .set(ACCOUNTS_INDEXATION_KEY, &accounts_indexation_data)
-        .await?;
-    for new_account in new_accounts {
-        stardust_storage
-            .set(&format!("{ACCOUNT_INDEXATION_KEY}{}", new_account.index), &new_account)
-            .await?;
-    }
-
-    if let Some(secret_manager_dto) = secret_manager_dto {
-        // This is required for the secret manager to be loaded
-        stardust_storage
-            .set(
-                WALLET_INDEXATION_KEY,
-                &serde_json::from_str::<Value>(&format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}"))?,
-            )
-            .await?;
-        stardust_storage
-            .set(SECRET_MANAGER_KEY, &serde_json::from_str::<Value>(&secret_manager_dto)?)
-            .await?;
-    }
-
-    // set db migration version
-    let migration_version = crate::wallet::migration::migrate_4::Migrate::version();
-    stardust_storage.set(MIGRATION_VERSION_KEY, &migration_version).await?;
-
-    drop(stardust_storage);
-
-    // remove old db
-    std::fs::remove_dir_all(chrysalis_storage_path)?;
-
-    Ok(())
-}
-
+#[allow(unused)]
 pub(crate) fn migrate_from_chrysalis_data(
     chrysalis_data: &HashMap<Vec<u8>, String>,
     storage_path: &Path,
@@ -237,39 +149,7 @@ pub(crate) fn migrate_from_chrysalis_data(
     Ok((new_accounts, secret_manager_dto))
 }
 
-fn get_chrysalis_data(chrysalis_storage_path: &Path, password: Option<Password>) -> Result<HashMap<Vec<u8>, String>> {
-    let encryption_key = password.map(storage_password_to_encryption_key);
-    let chrysalis_db = DB::open_default(chrysalis_storage_path)?;
-    let mut chrysalis_data = HashMap::new();
-    // iterate over all rocksdb keys
-    for item in chrysalis_db.iterator(IteratorMode::Start) {
-        let (key, value) = item?;
-
-        let key_utf8 = String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
-        let value = if let Some(encryption_key) = &encryption_key {
-            let value_utf8 = String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
-            // "iota-wallet-key-checksum_value" is never an encrypted value
-            if key_utf8 == "iota-wallet-key-checksum_value" {
-                value_utf8
-            } else if let Ok(value) = serde_json::from_str::<Vec<u8>>(&value_utf8) {
-                decrypt_record(value, encryption_key)?
-            } else {
-                value_utf8
-            }
-        } else {
-            String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
-        };
-
-        chrysalis_data.insert(key.to_vec(), value);
-    }
-    if !chrysalis_data.contains_key(&b"iota-wallet-account-indexation".to_vec()) {
-        return Err(crate::wallet::Error::Migration(
-            "no chrysalis data to migrate".to_string(),
-        ));
-    }
-    Ok(chrysalis_data)
-}
-
+#[allow(unused)]
 fn storage_password_to_encryption_key(password: Password) -> Zeroizing<[u8; 32]> {
     let mut dk = [0; 64];
     // safe to unwrap (rounds > 0)
@@ -283,6 +163,7 @@ fn storage_password_to_encryption_key(password: Password) -> Zeroizing<[u8; 32]>
     Zeroizing::new(key)
 }
 
+#[allow(unused)]
 fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wallet::Result<String> {
     let mut record: &[u8] = &record_bytes;
 
@@ -310,6 +191,7 @@ fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wa
     String::from_utf8(pt).map_err(|e| Error::Migration(format!("{:?}", e)))
 }
 
+#[allow(unused)]
 pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
     // key only needs to be hashed for stronghold
     if stronghold {
@@ -321,5 +203,142 @@ pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
         id.try_into().unwrap()
     } else {
         key.into()
+    }
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "rocksdb")]
+pub(crate) mod rocksdb {
+    use ::rocksdb::{IteratorMode, DB};
+
+    use super::*;
+    use crate::{
+        client::storage::StorageAdapter,
+        wallet::{
+            migration::{MigrationData, MIGRATION_VERSION_KEY},
+            storage::{
+                constants::{
+                    ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
+                },
+                StorageManager,
+            },
+        },
+    };
+
+    pub async fn migrate_db_chrysalis_to_stardust(
+        storage_path: impl Into<std::path::PathBuf> + Send,
+        password: Option<Password>,
+        new_db_encryption_key: impl Into<Option<Zeroizing<[u8; 32]>>> + Send,
+    ) -> Result<()> {
+        let storage_path_string = storage_path.into();
+        // `/db` will be appended to the chrysalis storage path, because that's how it was done in the chrysalis wallet
+        let chrysalis_storage_path = &(*storage_path_string).join("db");
+
+        if !chrysalis_storage_path.is_dir() {
+            return Err(crate::wallet::Error::Migration(
+                "no chrysalis data to migrate".to_string(),
+            ));
+        }
+        let chrysalis_data = get_chrysalis_data(chrysalis_storage_path, password)?;
+
+        // create new accounts base on previous data
+        let (new_accounts, secret_manager_dto) =
+            migrate_from_chrysalis_data(&chrysalis_data, &storage_path_string, false)?;
+
+        // convert to string keys
+        let chrysalis_data_with_string_keys = chrysalis_data
+            .into_iter()
+            .map(|(k, v)| {
+                Ok((
+                    String::from_utf8(k).map_err(|_| Error::Migration("invalid utf8".into()))?,
+                    v,
+                ))
+            })
+            .collect::<Result<HashMap<String, String>>>()?;
+
+        log::debug!(
+            "Chrysalis data: {}",
+            serde_json::to_string_pretty(&chrysalis_data_with_string_keys)?
+        );
+
+        let stardust_db = crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_path_string)?;
+
+        let stardust_storage = StorageManager::new(stardust_db, new_db_encryption_key).await?;
+
+        // store chrysalis data in a new key
+        stardust_storage
+            .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data_with_string_keys)
+            .await?;
+        // write new accounts to db (with account indexation)
+        let accounts_indexation_data: Vec<u32> = new_accounts.iter().map(|account| account.index).collect();
+        stardust_storage
+            .set(ACCOUNTS_INDEXATION_KEY, &accounts_indexation_data)
+            .await?;
+        for new_account in new_accounts {
+            stardust_storage
+                .set(&format!("{ACCOUNT_INDEXATION_KEY}{}", new_account.index), &new_account)
+                .await?;
+        }
+
+        if let Some(secret_manager_dto) = secret_manager_dto {
+            // This is required for the secret manager to be loaded
+            stardust_storage
+                .set(
+                    WALLET_INDEXATION_KEY,
+                    &serde_json::from_str::<Value>(&format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}"))?,
+                )
+                .await?;
+            stardust_storage
+                .set(SECRET_MANAGER_KEY, &serde_json::from_str::<Value>(&secret_manager_dto)?)
+                .await?;
+        }
+
+        // set db migration version
+        let migration_version = crate::wallet::migration::migrate_4::Migrate::version();
+        stardust_storage.set(MIGRATION_VERSION_KEY, &migration_version).await?;
+
+        drop(stardust_storage);
+
+        // remove old db
+        std::fs::remove_dir_all(chrysalis_storage_path)?;
+
+        Ok(())
+    }
+
+    fn get_chrysalis_data(
+        chrysalis_storage_path: &Path,
+        password: Option<Password>,
+    ) -> Result<HashMap<Vec<u8>, String>> {
+        let encryption_key = password.map(storage_password_to_encryption_key);
+        let chrysalis_db = DB::open_default(chrysalis_storage_path)?;
+        let mut chrysalis_data = HashMap::new();
+        // iterate over all rocksdb keys
+        for item in chrysalis_db.iterator(IteratorMode::Start) {
+            let (key, value) = item?;
+
+            let key_utf8 = String::from_utf8(key.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
+            let value = if let Some(encryption_key) = &encryption_key {
+                let value_utf8 =
+                    String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
+                // "iota-wallet-key-checksum_value" is never an encrypted value
+                if key_utf8 == "iota-wallet-key-checksum_value" {
+                    value_utf8
+                } else if let Ok(value) = serde_json::from_str::<Vec<u8>>(&value_utf8) {
+                    decrypt_record(value, encryption_key)?
+                } else {
+                    value_utf8
+                }
+            } else {
+                String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?
+            };
+
+            chrysalis_data.insert(key.to_vec(), value);
+        }
+        if !chrysalis_data.contains_key(&b"iota-wallet-account-indexation".to_vec()) {
+            return Err(crate::wallet::Error::Migration(
+                "no chrysalis data to migrate".to_string(),
+            ));
+        }
+        Ok(chrysalis_data)
     }
 }
