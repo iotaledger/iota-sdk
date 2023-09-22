@@ -18,6 +18,7 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
+    GenericQueryParameter,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import {
@@ -89,6 +90,22 @@ export class Client {
     async getNetworkInfo(): Promise<INetworkInfo> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkInfo',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Fetch alias/basic/NFT/foundry output IDs based on the given query parameters.
+     */
+    async outputIds(
+        queryParameters: GenericQueryParameter[],
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'outputIds',
+            data: {
+                queryParameters,
+            },
         });
 
         return JSON.parse(response).payload;
@@ -370,7 +387,7 @@ export class Client {
     /**
      * Get the ID of the network the node is connected to.
      */
-    async getNetworkId(): Promise<number> {
+    async getNetworkId(): Promise<string> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkId',
         });

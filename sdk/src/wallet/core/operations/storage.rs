@@ -3,7 +3,6 @@
 
 #[cfg(feature = "storage")]
 mod storage_stub {
-
     use async_trait::async_trait;
 
     use crate::{
@@ -13,7 +12,8 @@ mod storage_stub {
         },
         wallet::{
             core::builder::dto::WalletBuilderDto,
-            storage::constants::{CHRYSALIS_STORAGE_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
+            migration::chrysalis::CHRYSALIS_STORAGE_KEY,
+            storage::constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
             Wallet, WalletBuilder,
         },
     };

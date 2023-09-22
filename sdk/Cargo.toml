@@ -43,7 +43,7 @@ iterator-sorted = { version = "0.1.0", default-features = false }
 itertools = { version = "0.11.0", default-features = false, features = [
     "use_alloc",
 ] }
-packable = { version = "0.8.1", default-features = false, features = [
+packable = { version = "0.8.3", default-features = false, features = [
     "primitive-types",
 ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
@@ -51,7 +51,7 @@ prefix-hex = { version = "0.7.1", default-features = false, features = [
 ] }
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.188", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.105", default-features = false, features = [
+serde_json = { version = "1.0.107", default-features = false, features = [
     "alloc",
 ] }
 
@@ -65,7 +65,7 @@ futures = { version = "0.3.28", default-features = false, features = [
 ], optional = true }
 heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
-iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
+iota-ledger-nano = { version = "1.0.0-alpha.5", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
 log = { version = "0.4.20", default-features = false, optional = true }
 num_cpus = { version = "1.16.0", default-features = false, optional = true }
@@ -144,11 +144,11 @@ events = []
 irc_27 = ["url", "serde"]
 irc_30 = ["url", "serde"]
 ledger_nano = ["iota-ledger-nano"]
-mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
+mqtt = ["std", "tls", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
 pow = ["std", "num_cpus", "iota-crypto/curl-p"]
 rand = ["dep:rand"]
-rocksdb = ["dep:rocksdb", "storage"]
+rocksdb = ["storage", "dep:rocksdb"]
 serde = [
     "serde_repr",
     "hashbrown/serde",
@@ -359,6 +359,16 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "destroy_alias"
 path = "examples/how_tos/alias/destroy.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "state_transition"
+path = "examples/how_tos/alias/state_transition.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "governance_transition"
+path = "examples/how_tos/alias/governance_transition.rs"
 required-features = ["wallet", "stronghold"]
 
 # Outputs
@@ -854,11 +864,6 @@ required-features = ["wallet", "storage"]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = ["wallet", "storage"]
-
-[[example]]
-name = "update_alias_output"
-path = "examples/wallet/update_alias_output.rs"
-required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "wallet"

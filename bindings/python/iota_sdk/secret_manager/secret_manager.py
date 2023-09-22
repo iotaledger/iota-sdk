@@ -8,7 +8,7 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import TransactionPayload
 from json import dumps, loads
 import humps
-from typing import Optional
+from typing import Optional, Union
 from dacite import from_dict
 
 
@@ -82,8 +82,8 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                 SeedSecretManager | StrongholdSecretManager] = None, secret_manager_handle=None):
+    def __init__(self, secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
+                 SeedSecretManager, StrongholdSecretManager]] = None, secret_manager_handle=None):
         """Initialize a secret manager.
 
         Args:

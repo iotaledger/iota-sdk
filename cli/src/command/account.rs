@@ -11,8 +11,8 @@ use iota_sdk::{
         block::{
             address::Bech32Address,
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
-                Output, OutputId, TokenId,
+                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken,
+                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
             ConvertTo,
@@ -926,39 +926,62 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let addresses = account.addresses_with_unspent_outputs().await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
-    if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
-        (a.key_index(), a.internal())
-    }) {
-        let mut address_amount = 0;
-        for output_id in addresses[index].output_ids() {
+    let mut output_ids: &[OutputId] = &[];
+    let mut amount = 0;
+    let mut native_tokens = NativeTokensBuilder::new();
+    let mut nfts = Vec::new();
+    let mut aliases = Vec::new();
+    let mut foundries = Vec::new();
+
+    if let Some(address) = addresses
+        .iter()
+        .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
+    {
+        output_ids = address.output_ids().as_slice();
+
+        for output_id in output_ids {
             if let Some(output_data) = account.get_output(output_id).await {
-                // Output might be associated with the address, but can't unlocked by it, so we check that here
-                let (required_address, _) =
-                    output_data
-                        .output
-                        .required_and_unlocked_address(current_time, output_id, None)?;
-                if *address.address().as_ref() == required_address {
+                // Output might be associated with the address, but can't be unlocked by it, so we check that here.
+                // Panic: cannot fail for outputs belonging to an account.
+                let (required_address, _) = output_data
+                    .output
+                    .required_and_unlocked_address(current_time, output_id, None)
+                    .unwrap();
+
+                if address.address().as_ref() == &required_address {
+                    if let Some(nts) = output_data.output.native_tokens() {
+                        native_tokens.add_native_tokens(nts.clone())?;
+                    }
+                    match &output_data.output {
+                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Alias(alias) => aliases.push(alias.alias_id_non_null(output_id)),
+                        Output::Foundry(foundry) => foundries.push(foundry.id()),
+                        Output::Basic(_) | Output::Treasury(_) => {}
+                    }
                     let unlock_conditions = output_data
                         .output
                         .unlock_conditions()
                         .expect("output must have unlock conditions");
+                    let sdr_amount = unlock_conditions
+                        .storage_deposit_return()
+                        .map(|sdr| sdr.amount())
+                        .unwrap_or(0);
 
-                    if let Some(sdr) = unlock_conditions.storage_deposit_return() {
-                        address_amount += output_data.output.amount() - sdr.amount();
-                    } else {
-                        address_amount += output_data.output.amount();
-                    }
+                    amount += output_data.output.amount() - sdr_amount;
                 }
             }
         }
-        log = format!(
-            "{log}\nOutputs: {:#?}\nBase coin amount: {}\n",
-            addresses[index].output_ids(),
-            address_amount
-        );
-    } else {
-        log = format!("{log}\nOutputs: []\nBase coin amount: 0\n");
     }
+
+    log = format!(
+        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
+        output_ids,
+        amount,
+        native_tokens.finish_vec()?,
+        nfts,
+        aliases,
+        foundries,
+    );
 
     println_log_info!("{log}");
 
