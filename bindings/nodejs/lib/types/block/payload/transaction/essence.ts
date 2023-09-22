@@ -86,8 +86,13 @@ class RegularTransactionEssence extends TransactionEssence {
         this.payload = payload;
     }
 
-    getParsedPayload(): TransactionPayload | MilestonePayload | TaggedDataPayload | TreasuryTransactionPayload | undefined {
-        return this.payload ? parsePayload(this.payload) as any : undefined
+    getParsedPayload():
+        | TransactionPayload
+        | MilestonePayload
+        | TaggedDataPayload
+        | TreasuryTransactionPayload
+        | undefined {
+        return this.payload ? (parsePayload(this.payload) as any) : undefined;
     }
 }
 
