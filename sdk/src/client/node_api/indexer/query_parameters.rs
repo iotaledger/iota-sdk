@@ -8,7 +8,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{Error, Result},
+    client::{node_api::query_string, Error, Result},
     types::block::{address::Bech32Address, slot::SlotIndex},
 };
 
@@ -58,17 +58,7 @@ impl QueryParameters {
 
     /// Converts parameters to a single String.
     pub fn to_query_string(&self) -> Option<String> {
-        if self.0.is_empty() {
-            None
-        } else {
-            Some(
-                self.0
-                    .iter()
-                    .map(QueryParameter::to_query_string)
-                    .collect::<Vec<String>>()
-                    .join("&"),
-            )
-        }
+        query_string(self.0.iter().map(|q| Some(q.to_query_tuple())))
     }
 }
 
@@ -131,32 +121,32 @@ pub enum QueryParameter {
 }
 
 impl QueryParameter {
-    fn to_query_string(&self) -> String {
+    fn to_query_tuple(&self) -> (&'static str, String) {
         match self {
-            Self::Address(v) => format!("address={v}"),
-            Self::AccountAddress(v) => format!("accountAddress={v}"),
-            Self::CreatedAfter(v) => format!("createdAfter={v}"),
-            Self::CreatedBefore(v) => format!("createdBefore={v}"),
-            Self::Cursor(v) => format!("cursor={v}"),
-            Self::ExpirationReturnAddress(v) => format!("expirationReturnAddress={v}"),
-            Self::ExpiresAfter(v) => format!("expiresAfter={v}"),
-            Self::ExpiresBefore(v) => format!("expiresBefore={v}"),
-            Self::Governor(v) => format!("governor={v}"),
-            Self::HasExpiration(v) => format!("hasExpiration={v}"),
-            Self::HasNativeTokens(v) => format!("hasNativeTokens={v}"),
-            Self::HasStorageDepositReturn(v) => format!("hasStorageDepositReturn={v}"),
-            Self::HasTimelock(v) => format!("hasTimelock={v}"),
-            Self::Issuer(v) => format!("issuer={v}"),
-            Self::MaxNativeTokenCount(v) => format!("maxNativeTokenCount={v}"),
-            Self::MinNativeTokenCount(v) => format!("minNativeTokenCount={v}"),
-            Self::PageSize(v) => format!("pageSize={v}"),
-            Self::Sender(v) => format!("sender={v}"),
-            Self::StateController(v) => format!("stateController={v}"),
-            Self::StorageDepositReturnAddress(v) => format!("storageDepositReturnAddress={v}"),
-            Self::Tag(v) => format!("tag={v}"),
-            Self::TimelockedAfter(v) => format!("timelockedAfter={v}"),
-            Self::TimelockedBefore(v) => format!("timelockedBefore={v}"),
-            Self::UnlockableByAddress(v) => format!("unlockableByAddress={v}"),
+            Self::Address(v) => ("address", v.to_string()),
+            Self::AccountAddress(v) => ("accountAddress", v.to_string()),
+            Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
+            Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
+            Self::Cursor(v) => ("cursor", v.to_string()),
+            Self::ExpirationReturnAddress(v) => ("expirationReturnAddress", v.to_string()),
+            Self::ExpiresAfter(v) => ("expiresAfter", v.to_string()),
+            Self::ExpiresBefore(v) => ("expiresBefore", v.to_string()),
+            Self::Governor(v) => ("governor", v.to_string()),
+            Self::HasExpiration(v) => ("hasExpiration", v.to_string()),
+            Self::HasNativeTokens(v) => ("hasNativeTokens", v.to_string()),
+            Self::HasStorageDepositReturn(v) => ("hasStorageDepositReturn", v.to_string()),
+            Self::HasTimelock(v) => ("hasTimelock", v.to_string()),
+            Self::Issuer(v) => ("issuer", v.to_string()),
+            Self::MaxNativeTokenCount(v) => ("maxNativeTokenCount", v.to_string()),
+            Self::MinNativeTokenCount(v) => ("minNativeTokenCount", v.to_string()),
+            Self::PageSize(v) => ("pageSize", v.to_string()),
+            Self::Sender(v) => ("sender", v.to_string()),
+            Self::StateController(v) => ("stateController", v.to_string()),
+            Self::StorageDepositReturnAddress(v) => ("storageDepositReturnAddress", v.to_string()),
+            Self::Tag(v) => ("tag", v.to_string()),
+            Self::TimelockedAfter(v) => ("timelockedAfter", v.to_string()),
+            Self::TimelockedBefore(v) => ("timelockedBefore", v.to_string()),
+            Self::UnlockableByAddress(v) => ("unlockableByAddress", v.to_string()),
         }
     }
 
@@ -192,7 +182,8 @@ impl QueryParameter {
 
 impl fmt::Display for QueryParameter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_query_string())
+        let query_tuple = self.to_query_tuple();
+        write!(f, "{}={}", query_tuple.0, query_tuple.1)
     }
 }
 
