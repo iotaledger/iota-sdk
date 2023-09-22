@@ -112,6 +112,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
+      - name: Run linter for iota_sdk
+        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
+        working-directory: bindings/python
+        run: tox -e lint-sdk
+
       - name: Run linter for examples
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
         working-directory: bindings/python
