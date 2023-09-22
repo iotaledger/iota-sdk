@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::switch` command to allow changing accounts quickly;
 - UX improvements (Ctrl+l, TAB completion/suggestions and more) during interactive account management;
 - `WalletCommand::SetPow` command;
+- Check for existing stronghold on `restore`;
 
 ### Changed
 
