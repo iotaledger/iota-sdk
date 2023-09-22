@@ -8,7 +8,7 @@ use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretMana
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Bech32Address,
+        address::{Address, Bech32Address},
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
@@ -79,7 +79,7 @@ where
         &self,
         output_data: &OutputData,
         slot_index: SlotIndex,
-        account_addresses: &[AddressWithUnspentOutputs],
+        wallet_address: &Address,
     ) -> Result<bool> {
         Ok(if let Output::Basic(basic_output) = &output_data.output {
             let unlock_conditions = basic_output.unlock_conditions();
@@ -98,7 +98,7 @@ where
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(account_addresses, &[], output_data, slot_index, None)?
+            can_output_be_unlocked_now(wallet_address, &[], output_data, slot_index, None)?
         } else {
             false
         })
@@ -131,7 +131,10 @@ where
         let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
         let wallet_data = self.data().await;
-        let wallet_addresses = &wallet_data.addresses_with_unspent_outputs[..];
+
+        // TODO: remove
+        // let wallet_addresses = &wallet_data.addresses_with_unspent_outputs[..];
+        let wallet_address = &wallet_data.address;
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             #[cfg(feature = "participation")]
@@ -141,9 +144,10 @@ where
                     continue;
                 }
             }
+
+            // TODO: remove
             let is_locked_output = wallet_data.locked_outputs.contains(output_id);
-            let should_consolidate_output =
-                self.should_consolidate_output(output_data, slot_index, wallet_addresses)?;
+            let should_consolidate_output = self.should_consolidate_output(output_data, slot_index, wallet_address)?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
             }
@@ -181,6 +185,7 @@ where
             }
         };
 
+        // TODO: remove
         // only consolidate if the unlocked outputs are >= output_threshold
         if outputs_to_consolidate.is_empty() || (!params.force && outputs_to_consolidate.len() < output_threshold) {
             log::debug!(

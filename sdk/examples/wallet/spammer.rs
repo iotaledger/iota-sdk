@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_alias(ACCOUNT_ALIAS)
         // .with_address(Address::Ed25519(...))
-        .with_bip44(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .finish()

@@ -187,16 +187,12 @@ where
         let mut wallet_data = self.data_mut().await;
         for (transaction_id, txn) in results.into_iter().flatten() {
             if let Some(transaction) = txn {
-                wallet_data
-                    .incoming_transactions
-                    .insert(transaction_id, transaction);
+                wallet_data.incoming_transactions.insert(transaction_id, transaction);
             } else {
                 log::debug!("[SYNC] adding {transaction_id} to inaccessible_incoming_transactions");
                 // Save transactions that weren't found by the node to avoid requesting them endlessly.
                 // Will be cleared when new client options are provided.
-                wallet_data
-                    .inaccessible_incoming_transactions
-                    .insert(transaction_id);
+                wallet_data.inaccessible_incoming_transactions.insert(transaction_id);
             }
         }
 

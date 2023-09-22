@@ -4,7 +4,7 @@
 use clap::Parser;
 use colored::Colorize;
 use dialoguer::Input;
-use iota_sdk::wallet::{Account, Wallet};
+use iota_sdk::wallet::Wallet;
 
 use crate::{
     account_completion::AccountCompletion,

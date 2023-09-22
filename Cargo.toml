@@ -1,11 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-	"bindings/core",
-	"bindings/nodejs",
-	"bindings/python",
-	"bindings/wasm",
-	"cli",
+	# TODO: uncomment and fix step by step
+	#"bindings/core",
+	#"bindings/nodejs",
+	#"bindings/python",
+	#"bindings/wasm",
+	#"cli",
 	"sdk",
 ]
 

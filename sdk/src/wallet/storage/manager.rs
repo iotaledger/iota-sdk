@@ -45,9 +45,7 @@ impl StorageManager {
                 .await?;
         };
 
-        let storage_manager = Self {
-            storage,
-        };
+        let storage_manager = Self { storage };
 
         Ok(storage_manager)
     }
@@ -61,11 +59,8 @@ impl StorageManager {
     }
 
     pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
-        self.set(
-            &format!("{WALLET_INDEXATION_KEY}"),
-            &WalletDataDto::from(wallet_data),
-        )
-        .await
+        self.set(&format!("{WALLET_INDEXATION_KEY}"), &WalletDataDto::from(wallet_data))
+            .await
     }
 
     // TODO: remove fn?

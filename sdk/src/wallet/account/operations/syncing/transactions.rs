@@ -206,7 +206,7 @@ where
         }
 
         // updates account with balances, output ids, outputs
-        self.update_account_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)
+        self.update_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)
             .await?;
 
         Ok(confirmed_unknown_output)

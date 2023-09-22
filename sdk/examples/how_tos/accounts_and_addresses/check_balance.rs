@@ -19,19 +19,19 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     println!("{balance:#?}");
 
     println!("ADDRESSES:");
     let explorer_url = std::env::var("EXPLORER_URL").ok();
     let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
-    for address in account.addresses().await? {
+    for address in wallet.addresses().await? {
         println!(" - {prepended}{}", address.address());
     }
 

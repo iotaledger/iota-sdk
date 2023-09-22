@@ -23,7 +23,7 @@ fn new_valid_max_index() {
 fn new_invalid_more_than_max_index() {
     assert!(matches!(
         AccountUnlock::new(128),
-        Err(Error::InvalidAccountIndex(InvalidBoundedU16(128)))
+        Err(Error::InvalidWalletIndex(InvalidBoundedU16(128)))
     ));
 }
 
@@ -36,7 +36,7 @@ fn try_from_valid() {
 fn try_from_invalid() {
     assert!(matches!(
         AccountUnlock::try_from(128),
-        Err(Error::InvalidAccountIndex(InvalidBoundedU16(128)))
+        Err(Error::InvalidWalletIndex(InvalidBoundedU16(128)))
     ));
 }
 

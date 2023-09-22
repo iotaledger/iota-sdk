@@ -20,14 +20,15 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
-    println!("Accounts BEFORE:\n{:#?}", balance.accounts());
+    let balance = wallet.sync(None).await?;
+    todo!("account outputs");
+    // println!("Accounts BEFORE:\n{:#?}", balance.accounts());
 
     // Set the stronghold password
     wallet
@@ -37,10 +38,10 @@ async fn main() -> Result<()> {
     println!("Sending the create-account transaction...");
 
     // Create an account output
-    let transaction = account.create_account_output(None, None).await?;
+    let transaction = wallet.create_account_output(None, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -49,8 +50,9 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
-    println!("Accounts AFTER:\n{:#?}", balance.accounts());
+    let balance = wallet.sync(None).await?;
+    todo!("account outputs");
+    // println!("Accounts AFTER:\n{:#?}", balance.accounts());
 
     Ok(())
 }

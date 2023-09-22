@@ -68,7 +68,7 @@ where
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            &wallet_data.addresses_with_unspent_outputs,
+                            todo!("&wallet_data.addresses_with_unspent_outputs"),
                             // outputs controlled by an account or nft are currently not considered
                             &[],
                             output_data,
@@ -225,11 +225,15 @@ where
             ));
         }
 
-        let first_account_address = wallet_data
-            .public_addresses
-            .first()
-            .ok_or(crate::wallet::Error::FailedToGetRemainder)?
-            .clone();
+        let wallet_address = wallet_data.address.clone();
+
+        // TODO: remove
+        // let first_account_address = wallet_data
+        //     .public_addresses
+        //     .first()
+        //     .ok_or(crate::wallet::Error::FailedToGetRemainder)?
+        //     .clone();
+
         drop(wallet_data);
 
         let mut additional_inputs_used = HashSet::new();
@@ -274,13 +278,13 @@ where
                     // deposit for the remaining amount and possible NTs
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address)])
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_storage_deposit(rent_structure)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address)])
                         // Set native tokens empty, we will collect them from all inputs later
                         .with_native_tokens([])
                         .finish_output(token_supply)?
@@ -372,7 +376,7 @@ where
         if available_amount - required_amount_for_nfts > 0 {
             outputs_to_send.push(
                 BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
-                    .add_unlock_condition(AddressUnlockCondition::new(first_account_address.address.inner))
+                    .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
                     .with_native_tokens(new_native_tokens.finish()?)
                     .finish_output(token_supply)?,
             );

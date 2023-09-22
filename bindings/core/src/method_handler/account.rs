@@ -9,44 +9,44 @@ use iota_sdk::{
         block::output::{dto::OutputDto, Output},
         TryFromDto,
     },
-    wallet::account::{types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto},
+    wallet::account::{types::TransactionDto, OutputDataDto, PreparedCreateNativeTokenTransactionDto},
 };
 
-use crate::{method::AccountMethod, Response, Result};
+use crate::{method::WalletMethod, Response, Result};
 
-pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
+pub(crate) async fn call_account_method_internal(account: &Account, method: WalletMethod) -> Result<Response> {
     let response = match method {
-        AccountMethod::Addresses => {
+        WalletMethod::Addresses => {
             let addresses = account.addresses().await?;
             Response::Addresses(addresses)
         }
-        AccountMethod::AddressesWithUnspentOutputs => {
+        WalletMethod::AddressesWithUnspentOutputs => {
             let addresses = account.addresses_with_unspent_outputs().await?;
             Response::AddressesWithUnspentOutputs(addresses)
         }
-        AccountMethod::ClaimableOutputs { outputs_to_claim } => {
+        WalletMethod::ClaimableOutputs { outputs_to_claim } => {
             let output_ids = account.claimable_outputs(outputs_to_claim).await?;
             Response::OutputIds(output_ids)
         }
-        AccountMethod::ClaimOutputs { output_ids_to_claim } => {
+        WalletMethod::ClaimOutputs { output_ids_to_claim } => {
             let transaction = account.claim_outputs(output_ids_to_claim.to_vec()).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::DeregisterParticipationEvent { event_id } => {
+        WalletMethod::DeregisterParticipationEvent { event_id } => {
             account.deregister_participation_event(&event_id).await?;
             Response::Ok
         }
-        AccountMethod::GenerateEd25519Addresses { amount, options } => {
+        WalletMethod::GenerateEd25519Addresses { amount, options } => {
             let address = account.generate_ed25519_addresses(amount, options).await?;
             Response::GeneratedAccountAddresses(address)
         }
-        AccountMethod::GetBalance => Response::Balance(account.balance().await?),
-        AccountMethod::GetFoundryOutput { token_id } => {
+        WalletMethod::GetBalance => Response::Balance(account.balance().await?),
+        WalletMethod::GetFoundryOutput { token_id } => {
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
         }
-        AccountMethod::GetIncomingTransaction { transaction_id } => {
+        WalletMethod::GetIncomingTransaction { transaction_id } => {
             let transaction = account.get_incoming_transaction(&transaction_id).await;
 
             transaction.map_or_else(
@@ -54,69 +54,69 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 |transaction| Response::Transaction(Some(Box::new(TransactionDto::from(&transaction)))),
             )
         }
-        AccountMethod::GetOutput { output_id } => {
+        WalletMethod::GetOutput { output_id } => {
             let output_data = account.get_output(&output_id).await;
             Response::OutputData(output_data.as_ref().map(OutputDataDto::from).map(Box::new))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::GetParticipationEvent { event_id } => {
+        WalletMethod::GetParticipationEvent { event_id } => {
             let event_and_nodes = account.get_participation_event(event_id).await?;
             Response::ParticipationEvent(event_and_nodes)
         }
         #[cfg(feature = "participation")]
-        AccountMethod::GetParticipationEventIds { node, event_type } => {
+        WalletMethod::GetParticipationEventIds { node, event_type } => {
             let event_ids = account.get_participation_event_ids(&node, event_type).await?;
             Response::ParticipationEventIds(event_ids)
         }
         #[cfg(feature = "participation")]
-        AccountMethod::GetParticipationEventStatus { event_id } => {
+        WalletMethod::GetParticipationEventStatus { event_id } => {
             let event_status = account.get_participation_event_status(&event_id).await?;
             Response::ParticipationEventStatus(event_status)
         }
         #[cfg(feature = "participation")]
-        AccountMethod::GetParticipationEvents => {
+        WalletMethod::GetParticipationEvents => {
             let events = account.get_participation_events().await?;
             Response::ParticipationEvents(events)
         }
         #[cfg(feature = "participation")]
-        AccountMethod::GetParticipationOverview { event_ids } => {
+        WalletMethod::GetParticipationOverview { event_ids } => {
             let overview = account.get_participation_overview(event_ids).await?;
             Response::AccountParticipationOverview(overview)
         }
-        AccountMethod::GetTransaction { transaction_id } => {
+        WalletMethod::GetTransaction { transaction_id } => {
             let transaction = account.get_transaction(&transaction_id).await;
             Response::Transaction(transaction.as_ref().map(TransactionDto::from).map(Box::new))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::GetVotingPower => {
+        WalletMethod::GetVotingPower => {
             let voting_power = account.get_voting_power().await?;
             Response::VotingPower(voting_power.to_string())
         }
-        AccountMethod::IncomingTransactions => {
+        WalletMethod::IncomingTransactions => {
             let transactions = account.incoming_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
-        AccountMethod::Outputs { filter_options } => {
+        WalletMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
-        AccountMethod::PendingTransactions => {
+        WalletMethod::PendingTransactions => {
             let transactions = account.pending_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
-        AccountMethod::PrepareBurn { burn, options } => {
+        WalletMethod::PrepareBurn { burn, options } => {
             let data = account.prepare_burn(burn, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareConsolidateOutputs { params } => {
+        WalletMethod::PrepareConsolidateOutputs { params } => {
             let data = account.prepare_consolidate_outputs(params).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareCreateAccountOutput { params, options } => {
+        WalletMethod::PrepareCreateAccountOutput { params, options } => {
             let data = account.prepare_create_account_output(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareMeltNativeToken {
+        WalletMethod::PrepareMeltNativeToken {
             token_id,
             melt_amount,
             options,
@@ -127,11 +127,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::PrepareDecreaseVotingPower { amount } => {
+        WalletMethod::PrepareDecreaseVotingPower { amount } => {
             let data = account.prepare_decrease_voting_power(amount).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareMintNativeToken {
+        WalletMethod::PrepareMintNativeToken {
             token_id,
             mint_amount,
             options,
@@ -142,43 +142,43 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::PrepareIncreaseVotingPower { amount } => {
+        WalletMethod::PrepareIncreaseVotingPower { amount } => {
             let data = account.prepare_increase_voting_power(amount).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareMintNfts { params, options } => {
+        WalletMethod::PrepareMintNfts { params, options } => {
             let data = account.prepare_mint_nfts(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareCreateNativeToken { params, options } => {
+        WalletMethod::PrepareCreateNativeToken { params, options } => {
             let data = account.prepare_create_native_token(params, options).await?;
             Response::PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto::from(&data))
         }
-        AccountMethod::PrepareOutput {
+        WalletMethod::PrepareOutput {
             params,
             transaction_options,
         } => {
             let output = account.prepare_output(*params, transaction_options).await?;
             Response::Output(OutputDto::from(&output))
         }
-        AccountMethod::PrepareSend { params, options } => {
+        WalletMethod::PrepareSend { params, options } => {
             let data = account.prepare_send(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareSendNativeTokens { params, options } => {
+        WalletMethod::PrepareSendNativeTokens { params, options } => {
             let data = account.prepare_send_native_tokens(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareSendNft { params, options } => {
+        WalletMethod::PrepareSendNft { params, options } => {
             let data = account.prepare_send_nft(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::PrepareStopParticipating { event_id } => {
+        WalletMethod::PrepareStopParticipating { event_id } => {
             let data = account.prepare_stop_participating(event_id).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareTransaction { outputs, options } => {
+        WalletMethod::PrepareTransaction { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
             let data = account
                 .prepare_transaction(
@@ -192,16 +192,16 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::PrepareVote { event_id, answers } => {
+        WalletMethod::PrepareVote { event_id, answers } => {
             let data = account.prepare_vote(event_id, answers).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::RegisterParticipationEvents { options } => {
+        WalletMethod::RegisterParticipationEvents { options } => {
             let events = account.register_participation_events(&options).await?;
             Response::ParticipationEvents(events)
         }
-        AccountMethod::ReissueTransactionUntilIncluded {
+        WalletMethod::ReissueTransactionUntilIncluded {
             transaction_id,
             interval,
             max_attempts,
@@ -211,7 +211,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::BlockId(block_id)
         }
-        AccountMethod::Send {
+        WalletMethod::Send {
             amount,
             address,
             options,
@@ -219,11 +219,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.send(amount, address, options).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SendWithParams { params, options } => {
+        WalletMethod::SendWithParams { params, options } => {
             let transaction = account.send_with_params(params, options).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SendOutputs { outputs, options } => {
+        WalletMethod::SendOutputs { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
             let transaction = account
                 .send_outputs(
@@ -236,15 +236,15 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SetAlias { alias } => {
+        WalletMethod::SetAlias { alias } => {
             account.set_alias(&alias).await?;
             Response::Ok
         }
-        AccountMethod::SetDefaultSyncOptions { options } => {
+        WalletMethod::SetDefaultSyncOptions { options } => {
             account.set_default_sync_options(options).await?;
             Response::Ok
         }
-        AccountMethod::SignAndSubmitTransaction {
+        WalletMethod::SignAndSubmitTransaction {
             prepared_transaction_data,
         } => {
             let transaction = account
@@ -258,7 +258,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SignTransactionEssence {
+        WalletMethod::SignTransactionEssence {
             prepared_transaction_data,
         } => {
             let signed_transaction_data = account
@@ -266,7 +266,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
         }
-        AccountMethod::SubmitAndStoreTransaction {
+        WalletMethod::SubmitAndStoreTransaction {
             signed_transaction_data,
         } => {
             let signed_transaction_data = SignedTransactionData::try_from_dto_with_params(
@@ -278,12 +278,12 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::Sync { options } => Response::Balance(account.sync(options).await?),
-        AccountMethod::Transactions => {
+        WalletMethod::Sync { options } => Response::Balance(account.sync(options).await?),
+        WalletMethod::Transactions => {
             let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
-        AccountMethod::UnspentOutputs { filter_options } => {
+        WalletMethod::UnspentOutputs { filter_options } => {
             let outputs = account.unspent_outputs(filter_options).await?;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }

@@ -23,9 +23,9 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Provide the stronghold password
     wallet
@@ -36,16 +36,16 @@ async fn main() -> Result<()> {
     let address_url = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
 
     println!("Current addresses:");
-    for address in account.addresses().await? {
+    for address in wallet.addresses().await? {
         println!(" - {address_url}{}", address.address());
     }
 
     // Generate some addresses
-    let new_addresses = account
+    let new_addresses = wallet
         .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
         .await?;
     println!("Generated {} new addresses:", new_addresses.len());
-    let account_addresses = account.addresses().await?;
+    let account_addresses = wallet.addresses().await?;
     for new_address in new_addresses.iter() {
         assert!(account_addresses.contains(new_address));
         println!(" - {address_url}{}", new_address.address());

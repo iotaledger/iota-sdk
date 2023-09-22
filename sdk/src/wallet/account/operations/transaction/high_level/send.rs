@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, ToBech32Ext},
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -140,8 +140,11 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let account_addresses = self.addresses().await?;
-        let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
+        let wallet_address = self.address().await;
+
+        // TODO: remove
+        // let default_return_address = wallet_address.first().ok_or(Error::FailedToGetRemainder)?;
+        let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
 
         let slot_index = self.client().get_slot_index().await?;
 
@@ -165,7 +168,7 @@ where
                     Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address);
+                .unwrap_or(default_return_address);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)

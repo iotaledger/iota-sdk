@@ -78,20 +78,21 @@ where
                         None
                     }
                     RemainderValueStrategy::ChangeAddress => {
-                        let remainder_address = self.generate_remainder_address().await?;
-                        #[cfg(feature = "events")]
-                        {
-                            self.emit(
-                                todo!("account_index"),
-                                WalletEvent::TransactionProgress(
-                                    TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address,
-                                    }),
-                                ),
-                            )
-                            .await;
-                        }
-                        Some(remainder_address.address().inner)
+                        todo!("How is this handled now?")
+                        // let remainder_address = self.generate_remainder_address().await?;
+                        // #[cfg(feature = "events")]
+                        // {
+                        //     self.emit(
+                        //         todo!("account_index"),
+                        //         WalletEvent::TransactionProgress(
+                        //             TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
+                        //                 address: remainder_address.address,
+                        //             }),
+                        //         ),
+                        //     )
+                        //     .await;
+                        // }
+                        // Some(remainder_address.address().inner)
                     }
                     RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }

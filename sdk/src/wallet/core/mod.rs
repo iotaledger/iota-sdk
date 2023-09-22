@@ -39,7 +39,7 @@ use crate::{
     },
     types::{
         block::{
-            address::Address,
+            address::{Address, ToBech32Ext, Hrp},
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::transaction::TransactionId,
         },
@@ -56,11 +56,6 @@ use crate::{
 pub struct Wallet<S: SecretManage = SecretManager> {
     pub(crate) inner: Arc<WalletInner<S>>,
     pub(crate) data: Arc<RwLock<WalletData>>,
-    // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
-    // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
-    // again, because sending transactions can change that
-    pub(crate) last_synced: Arc<Mutex<u128>>,
-    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
 }
 
 impl<S: SecretManage> Clone for Wallet<S> {
@@ -68,8 +63,6 @@ impl<S: SecretManage> Clone for Wallet<S> {
         Self {
             inner: self.inner.clone(),
             data: self.data.clone(),
-            last_synced: self.last_synced.clone(),
-            default_sync_options: self.default_sync_options.clone(),
         }
     }
 }
@@ -101,6 +94,11 @@ where
 /// Wallet inner.
 #[derive(Debug)]
 pub struct WalletInner<S: SecretManage = SecretManager> {
+    // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
+    // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
+    // again, because sending transactions can change that
+    pub(crate) last_synced: Mutex<u128>,
+    pub(crate) default_sync_options: Mutex<SyncOptions>,
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client: Client,
@@ -114,20 +112,16 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 }
 
 /// Wallet data.
-#[derive(Clone, Debug /*, Eq, PartialEq */)]
+#[derive(Clone, Debug /* , Eq, PartialEq */)]
 pub struct WalletData {
-    /// The wallet alias.
-    pub(crate) alias: String,
     /// The wallet BIP44 path.
     pub(crate) bip_path: Bip44,
     /// The wallet address.
     pub(crate) address: Address,
-
-    // TODO: remove
-    pub(crate) public_addresses: Vec<Bip44Address>,
-    pub(crate) internal_addresses: Vec<Bip44Address>,
-    pub(crate) addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-
+    /// The wallet alias.
+    pub(crate) alias: String,
+    /// The Bech32 hrp.
+    pub(crate) bech32_hrp: Hrp,
     /// Outputs
     // stored separated from the wallet for performance?
     pub(crate) outputs: HashMap<OutputId, OutputData>,
@@ -157,14 +151,12 @@ pub struct WalletData {
 }
 
 impl WalletData {
-    pub(crate) fn new(alias: String, bip_path: Bip44, address: Address) -> Self {
+    pub(crate) fn new(bip_path: Bip44, address: Address, bech32_hrp: Hrp, alias: String) -> Self {
         Self {
-            alias,
             bip_path,
             address,
-            public_addresses: Vec::new(),
-            internal_addresses: Vec::new(),
-            addresses_with_unspent_outputs: Vec::new(),
+            bech32_hrp,
+            alias,
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
             unspent_outputs: HashMap::new(),
@@ -179,57 +171,10 @@ impl WalletData {
     pub(crate) fn coin_type(&self) -> u32 {
         self.bip_path.coin_type
     }
-}
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
-    /// Get the balance of all accounts added together
-    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
-        let mut balance = Balance::default();
-
-        todo!("just return the balance of the single account");
-        // let accounts = self.data.read().await;
-
-        // for account in accounts.iter() {
-        //     balance += account.balance().await?;
-        // }
-
-        Ok(balance)
+    pub(crate) fn account(&self) -> u32 {
+        self.bip_path.account
     }
-
-    /// Sync all accounts
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
-        let mut balance = Balance::default();
-
-        todo!("just sync the one account and return its balance");
-        // for account in self.data.read().await.iter() {
-        //     balance += account.sync(options.clone()).await?;
-        // }
-
-        Ok(balance)
-    }
-
-    // fn address() -> Ed25519Address {
-    // }
-
-    // fn implicit_account_address() -> ImplicitAccountAddress {
-    //     // Based on Self::address()
-    //     ...
-    // }
-
-    // fn implicit_accounts() -> Vec<ImplicitAccount> {
-    //     let output = self.unspent_outputs.find(ImplcitType);
-    //     ImplicitAccount {
-    //         output,
-    //         wallet: self
-    //     }
-    // }
-
-    // fn issuer_accounts() -> Vec<Account> {
-
-    // }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -237,9 +182,9 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(wallet_data: WalletData, wallet_inner: Arc<WalletInner<S>>) -> Result<Self> {
+    pub(crate) async fn new(inner: Arc<WalletInner<S>>, data: WalletData) -> Result<Self> {
         #[cfg(feature = "storage")]
-        let default_sync_options = wallet_inner
+        let default_sync_options = inner
             .storage_manager
             .read()
             .await
@@ -249,11 +194,17 @@ where
         #[cfg(not(feature = "storage"))]
         let default_sync_options = Default::default();
 
+        // TODO: maybe move this into a `reset` fn or smth to avoid this kinda-weird block.
+        {
+            let mut last_synced = inner.last_synced.lock().await;
+            *last_synced = Default::default();
+            let mut sync_options = inner.default_sync_options.lock().await;
+            *sync_options = default_sync_options;
+        }
+
         Ok(Self {
-            inner: wallet_inner,
-            data: Arc::new(RwLock::new(wallet_data)),
-            last_synced: Default::default(),
-            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
+            inner,
+            data: Arc::new(RwLock::new(data)),
         })
     }
 
@@ -304,10 +255,11 @@ where
         self.inner.emit(account_index, wallet_event).await
     }
 
-    // TODO: why no access?
+    // TODO: why no access to those methods?
     // }
 
     // impl Wallet {
+
     pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
         self.data.read().await
     }
@@ -316,8 +268,19 @@ where
         self.data.write().await
     }
 
+    /// Get the index of the wallet.
+    pub async fn index(&self) -> u32 {
+        self.data().await.bip_path.account
+    }
+
+    /// Get the alias of the wallet.
     pub async fn alias(&self) -> String {
         self.data().await.alias.clone()
+    }
+
+    /// GEt the address of the wallet.
+    pub async fn address(&self) -> Address {
+        self.data().await.address
     }
 
     /// Get the [`OutputData`] of an output stored in the account
@@ -336,23 +299,25 @@ where
         self.data().await.incoming_transactions.get(transaction_id).cloned()
     }
 
-    /// Returns all addresses of the account
-    pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
-        let wallet_data = self.data().await;
-        let mut all_addresses = wallet_data.public_addresses.clone();
-        all_addresses.extend(wallet_data.internal_addresses.clone());
-        Ok(all_addresses.to_vec())
-    }
+    // TODO: remove
 
-    /// Returns all public addresses of the account
-    pub(crate) async fn public_addresses(&self) -> Vec<Bip44Address> {
-        self.data().await.public_addresses.to_vec()
-    }
+    // /// Returns all addresses of the account
+    // pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
+    //     let wallet_data = self.data().await;
+    //     let mut all_addresses = wallet_data.public_addresses.clone();
+    //     all_addresses.extend(wallet_data.internal_addresses.clone());
+    //     Ok(all_addresses.to_vec())
+    // }
 
-    /// Returns only addresses of the account with balance
-    pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
-        Ok(self.data().await.addresses_with_unspent_outputs.to_vec())
-    }
+    // /// Returns all public addresses of the account
+    // pub(crate) async fn public_addresses(&self) -> Vec<Bip44Address> {
+    //     self.data().await.public_addresses.to_vec()
+    // }
+
+    // /// Returns only addresses of the account with balance
+    // pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
+    //     Ok(self.data().await.addresses_with_unspent_outputs.to_vec())
+    // }
 
     fn filter_outputs<'a>(
         &self,
@@ -704,38 +669,16 @@ impl<S: SecretManage> Drop for Wallet<S> {
 //     }
 // }
 
-// /// Generate the first public address of an account
-// pub(crate) async fn get_first_public_address<S: SecretManage>(
-//     secret_manager: &RwLock<S>,
-//     coin_type: u32,
-//     account_index: u32,
-// ) -> crate::wallet::Result<Ed25519Address>
-// where
-//     crate::wallet::Error: From<S::Error>,
-// {
-//     Ok(secret_manager
-//         .read()
-//         .await
-//         .generate_ed25519_addresses(coin_type, account_index, 0..1, None)
-//         .await?[0])
-// }
-
 /// Dto for an Account.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletDataDto {
-    /// The wallet alias.
-    pub alias: String,
     /// The BIP44 path of the wallet.
     pub bip_path: String,
     /// The wallet address.
     pub address: String,
-    /// Public addresses
-    pub public_addresses: Vec<Bip44Address>,
-    /// Internal addresses
-    pub internal_addresses: Vec<Bip44Address>,
-    /// Addresses with unspent outputs
-    pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
+    /// The wallet alias.
+    pub alias: String,
     /// Outputs
     pub outputs: HashMap<OutputId, OutputDataDto>,
     /// Unspent outputs that are currently used as input for transactions
@@ -762,14 +705,10 @@ impl TryFromDto for WalletData {
         params: crate::types::ValidationParams<'_>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
-            alias: todo!("dto.alias"),
             bip_path: todo!("dto.bip_path"),
             address: todo!("dto.address"),
-
-            public_addresses: dto.public_addresses,
-            internal_addresses: dto.internal_addresses,
-            addresses_with_unspent_outputs: dto.addresses_with_unspent_outputs,
-
+            bech32_hrp: todo!("dto.bech_hrp"),
+            alias: todo!("dto.alias"),
             outputs: dto
                 .outputs
                 .into_iter()
@@ -805,14 +744,9 @@ impl TryFromDto for WalletData {
 impl From<&WalletData> for WalletDataDto {
     fn from(value: &WalletData) -> Self {
         Self {
-            alias: value.alias.clone(),
             bip_path: todo!("value.bip_path.clone()"),
             address: todo!("value.address.clone()"),
-
-            public_addresses: value.public_addresses.clone(),
-            internal_addresses: value.internal_addresses.clone(),
-            addresses_with_unspent_outputs: value.addresses_with_unspent_outputs.clone(),
-
+            alias: value.alias.clone(),
             outputs: value
                 .outputs
                 .iter()

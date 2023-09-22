@@ -54,12 +54,16 @@ where
         #[allow(unused_mut)]
         let mut forbidden_inputs = wallet_data.locked_outputs.clone();
 
-        let addresses = wallet_data
-            .public_addresses
-            .iter()
-            .chain(wallet_data.internal_addresses.iter())
-            .map(|address| *address.address.as_ref())
-            .collect::<Vec<_>>();
+        todo!("no need for a vec anymore");
+        let addresses = vec![wallet_data.address.clone()];
+
+        // TODO: remove
+        // let addresses = wallet_data
+        //     .public_addresses
+        //     .iter()
+        //     .chain(wallet_data.internal_addresses.iter())
+        //     .map(|address| *address.address.as_ref())
+        //     .collect::<Vec<_>>();
 
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
@@ -247,7 +251,7 @@ fn filter_inputs(
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
-                &account.addresses_with_unspent_outputs,
+                todo!("&account.addresses_with_unspent_outputs"),
                 &output_data.output,
                 slot_index,
             );

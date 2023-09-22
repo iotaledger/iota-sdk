@@ -27,13 +27,13 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
+    wallet.sync(None).await?;
 
     // Set the stronghold password
     wallet
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let transaction = account
+    let transaction = wallet
         .send(
             SEND_MICRO_AMOUNT,
             RECV_ADDRESS,
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 

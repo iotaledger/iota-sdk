@@ -12,8 +12,8 @@ use crate::{
     utils::serde::string,
 };
 
-/// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
-/// [`crate::wallet::account::Account::balance()`].
+/// The balance of the wallet, returned from [`crate::wallet::core::Wallet::sync()`] and
+/// [`crate::wallet::core::Wallet::balance()`].
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]

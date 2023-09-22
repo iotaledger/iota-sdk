@@ -7,7 +7,7 @@ use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
-use iota_sdk_bindings_core::{AccountMethod, CallMethod, Response, Result, WalletMethod, WalletOptions};
+use iota_sdk_bindings_core::{WalletMethod, CallMethod, Response, Result, WalletMethod, WalletOptions};
 
 #[tokio::test]
 async fn create_account() -> Result<()> {
@@ -35,7 +35,7 @@ async fn create_account() -> Result<()> {
 
     // create an account
     let response = wallet
-        .call_method(WalletMethod::CreateAccount {
+        .call_method(WalletMethod::Create {
             alias: None,
             bech32_hrp: None,
             addresses: None,
@@ -52,9 +52,9 @@ async fn create_account() -> Result<()> {
     }
 
     let response = wallet
-        .call_method(WalletMethod::CallAccountMethod {
+        .call_method(WalletMethod::CallMethod {
             account_id: AccountIdentifier::Index(0),
-            method: AccountMethod::UnspentOutputs { filter_options: None },
+            method: WalletMethod::UnspentOutputs { filter_options: None },
         })
         .await;
 
@@ -103,7 +103,7 @@ async fn verify_accounts() -> Result<()> {
     for alias in ["Alice", "Bob", "Roger", "Denise", "Farquad", "Pikachu"] {
         handle_response(
             wallet
-                .call_method(WalletMethod::CreateAccount {
+                .call_method(WalletMethod::Create {
                     alias: Some(alias.to_owned()),
                     bech32_hrp: None,
                     addresses: None,
@@ -201,7 +201,7 @@ async fn client_from_wallet() -> Result<()> {
 
     // create an account
     let response = wallet
-        .call_method(WalletMethod::CreateAccount {
+        .call_method(WalletMethod::Create {
             alias: None,
             bech32_hrp: None,
             addresses: None,

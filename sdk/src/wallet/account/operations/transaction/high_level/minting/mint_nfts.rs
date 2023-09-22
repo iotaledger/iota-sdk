@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, ToBech32Ext},
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
@@ -162,7 +162,7 @@ where
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
-        let account_addresses = self.addresses().await?;
+        let wallet_address = self.address().await;
         let mut outputs = Vec::new();
 
         for MintNftParams {
@@ -177,15 +177,9 @@ where
             let address = match address {
                 Some(address) => {
                     self.client().bech32_hrp_matches(address.hrp()).await?;
-                    address
+                    address.inner().clone()
                 }
-                // todo other error message
-                None => {
-                    account_addresses
-                        .first()
-                        .ok_or(WalletError::FailedToGetRemainder)?
-                        .address
-                }
+                None => wallet_address,
             };
 
             // NftId needs to be set to 0 for the creation

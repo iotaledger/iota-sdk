@@ -13,8 +13,6 @@ pub(crate) mod helpers;
 pub(crate) mod output_claiming;
 /// The module for the output consolidation
 pub(crate) mod output_consolidation;
-/// The module to find additional addresses with unspent outputs
-pub(crate) mod output_finder;
 /// The module for participation
 #[cfg(feature = "participation")]
 pub(crate) mod participation;

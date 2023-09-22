@@ -33,11 +33,11 @@ where
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
     /// (account/nft address in AddressUnlockCondition and the account/nft output is controlled with the Ed25519
     /// address) connected to
-    pub(crate) async fn get_output_ids_for_address(
+    pub(crate) async fn get_output_ids_for_wallet_address(
         &self,
-        address: Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
+        let address = self.address().await;
         let bech32_address = Bech32Address::new(self.client().get_bech32_hrp().await?, address);
 
         if sync_options.sync_only_most_basic_outputs {
@@ -154,23 +154,23 @@ where
         Ok(output_ids.into_iter().collect())
     }
 
-    // TODO: `Send` issue down below
-
-    /// Get the current output ids for provided addresses and only returns addresses that have unspent outputs and
+    /// Get the current output ids and only returns addresses that have unspent outputs and
     /// return spent outputs separated
-    pub(crate) async fn get_output_ids_for_addresses(
+    pub(crate) async fn get_unspent_and_spent_output_ids_for_wallet_address(
         &self,
         options: &SyncOptions,
-        addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
-        log::debug!("[SYNC] start get_output_ids_for_addresses");
+        // TODO: remove
+        // addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
+    // ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
+    ) -> crate::wallet::Result<(Vec<OutputId>, Vec<OutputId>)> {
+        log::debug!("[SYNC] start get_unspent_and_spent_output_ids_for_wallet_address");
         let address_output_ids_start_time = Instant::now();
 
         let mut addresses_with_outputs = Vec::new();
         // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
         let mut spent_or_not_anymore_synced_outputs = Vec::new();
-        
-        // TODO: fix `Send` issue!
+
+        // TODO: re-enable this
 
         // // We split the addresses into chunks so we don't get timeouts if we have thousands
         // for addresses_chunk in &mut addresses_with_unspent_outputs
@@ -197,7 +197,7 @@ where
         //             tasks.push(async move {
         //                 tokio::spawn(async move {
         //                     let output_ids = wallet
-        //                         .get_output_ids_for_address(address.address.inner, &sync_options)
+        //                         .get_output_ids_for_wallet_address(address.address.inner, &sync_options)
         //                         .await?;
         //                     crate::wallet::Result::Ok((address, output_ids))
         //                 })
@@ -212,8 +212,8 @@ where
         //         let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
         //         // only return addresses with outputs
         //         if !output_ids.is_empty() {
-        //             // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
-        //             // synced anymore because of other sync options
+        //             // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't
+        //             // get synced anymore because of other sync options
         //             for output_id in address.output_ids {
         //                 if !output_ids.contains(&output_id) {
         //                     spent_or_not_anymore_synced_outputs.push(output_id);
@@ -222,8 +222,8 @@ where
         //             address.output_ids = output_ids;
         //             addresses_with_outputs.push(address);
         //         } else {
-        //             // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't get
-        //             // synced anymore because of other sync options
+        //             // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't
+        //             // get synced anymore because of other sync options
         //             spent_or_not_anymore_synced_outputs.extend(address.output_ids);
         //         }
         //     }

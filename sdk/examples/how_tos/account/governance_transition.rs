@@ -25,18 +25,18 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
+        .with_alias("Alice")
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Set the stronghold password
     wallet
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(None).await?;
 
     // Get the first account
     let account_id = balance
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         .first()
         .expect("No account output available in the account.");
 
-    let account_output_data = account
+    let account_output_data = wallet
         .unspent_account_output(account_id)
         .await?
         .expect("account not found in unspent outputs");
@@ -54,9 +54,9 @@ async fn main() -> Result<()> {
     );
 
     // Generate a new address, which will be the new state controller
-    let new_state_controller = &account.generate_ed25519_addresses(1, None).await?[0];
+    let new_state_controller = &wallet.generate_ed25519_addresses(1, None).await?[0];
 
-    let token_supply = account.client().get_token_supply().await?;
+    let token_supply = wallet.client().get_token_supply().await?;
 
     let account_output = account_output_data.output.as_account();
     let updated_account_output = AccountOutputBuilder::from(account_output)
@@ -66,10 +66,10 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?;
 
     println!("Sending transaction...",);
-    let transaction = account.send_outputs(vec![updated_account_output], None).await?;
+    let transaction = wallet.send_outputs(vec![updated_account_output], None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(

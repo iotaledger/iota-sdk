@@ -32,7 +32,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
-pub enum AccountMethod {
+pub enum WalletMethod {
     /// List addresses.
     /// Expected response: [`Addresses`](crate::Response::Addresses)
     Addresses,

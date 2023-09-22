@@ -49,12 +49,13 @@ pub enum Error {
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },
-    /// Invalid coin type, all accounts need to have the same coin type
-    #[error("invalid coin type for new account: {new_coin_type}, existing coin type is: {existing_coin_type}")]
-    InvalidCoinType {
-        new_coin_type: u32,
-        existing_coin_type: u32,
-    },
+    // TODO: remove?
+    // /// Invalid coin type, all accounts need to have the same coin type
+    // #[error("invalid coin type for new account: {new_coin_type}, existing coin type is: {existing_coin_type}")]
+    // InvalidCoinType {
+    //     new_coin_type: u32,
+    //     existing_coin_type: u32,
+    // },
     /// Invalid mnemonic error
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),

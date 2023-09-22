@@ -21,7 +21,7 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::method::account::AccountMethod;
+use crate::method::account::WalletMethod;
 #[cfg(feature = "stronghold")]
 use crate::OmittedDebug;
 
@@ -34,7 +34,9 @@ pub enum WalletMethod {
     /// Creates an account.
     /// Expected response: [`Account`](crate::Response::Account)
     #[serde(rename_all = "camelCase")]
-    CreateAccount {
+    Create {
+        /// The wallet index.
+        index: Option<u32>
         /// The account alias.
         alias: Option<String>,
         /// The bech32 HRP.
@@ -42,24 +44,33 @@ pub enum WalletMethod {
         /// BIP44 addresses.
         addresses: Option<Vec<Bip44Address>>,
     },
-    /// Read account.
-    /// Expected response: [`Account`](crate::Response::Account)
-    #[serde(rename_all = "camelCase")]
-    GetAccount { account_id: AccountIdentifier },
-    /// Return the account indexes.
-    /// Expected response: [`AccountIndexes`](crate::Response::AccountIndexes)
-    GetAccountIndexes,
-    /// Read accounts.
-    /// Expected response: [`Accounts`](crate::Response::Accounts)
-    GetAccounts,
+    
+    // TODO: remove
+    // /// Read account.
+    // /// Expected response: [`Account`](crate::Response::Account)
+    // #[serde(rename_all = "camelCase")]
+    // GetAccount { account_id: AccountIdentifier },
+
+    // TODO: change to `GetAccountIndex`
+    // /// Return the account indexes.
+    // /// Expected response: [`AccountIndexes`](crate::Response::AccountIndexes)
+    // GetAccountIndexes,
+
+
+    // TODO: remove
+    // /// Read accounts.
+    // /// Expected response: [`Accounts`](crate::Response::Accounts)
+    // GetAccounts,
+
+
     /// Consume an account method.
     /// Returns [`Response`](crate::Response)
     #[serde(rename_all = "camelCase")]
-    CallAccountMethod {
+    CallMethod {
         /// The account identifier.
         account_id: AccountIdentifier,
         /// The account method to call.
-        method: AccountMethod,
+        method: WalletMethod,
     },
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
     /// Expected response: [`Ok`](crate::Response::Ok)

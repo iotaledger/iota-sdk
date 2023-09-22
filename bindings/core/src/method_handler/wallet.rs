@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use iota_sdk::{
     types::block::address::ToBech32Ext,
-    wallet::{account::WalletDataDto, Wallet},
+    wallet::{core::WalletDataDto, Wallet},
 };
 
 use super::account::call_account_method_internal;
@@ -14,7 +14,7 @@ use crate::{method::WalletMethod, response::Response, Result};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
     let response = match method {
-        WalletMethod::CreateAccount {
+        WalletMethod::Create {
             alias,
             bech32_hrp,
             addresses,
@@ -42,28 +42,39 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             }
         }
         WalletMethod::GetAccount { account_id } => {
-            let account = wallet.get_account(account_id.clone()).await?;
-            let account = account.details().await;
-            Response::Account(WalletDataDto::from(&*account))
+            todo!("remove")
+
+            // let account = wallet.get_account(account_id.clone()).await?;
+            // let account = account.details().await;
+            // Response::Account(WalletDataDto::from(&*account))
         }
+
+
+        // TODO: remove
         WalletMethod::GetAccountIndexes => {
-            let accounts = wallet.get_accounts().await?;
-            let mut account_indexes = Vec::with_capacity(accounts.len());
-            for account in accounts.iter() {
-                account_indexes.push(*account.details().await.index());
-            }
-            Response::AccountIndexes(account_indexes)
+            todo!("remove")
+
+            // let accounts = wallet.get_accounts().await?;
+            // let mut account_indexes = Vec::with_capacity(accounts.len());
+            // for account in accounts.iter() {
+            //     account_indexes.push(*account.details().await.index());
+            // }
+            // Response::AccountIndexes(account_indexes)
         }
+
         WalletMethod::GetAccounts => {
-            let accounts = wallet.get_accounts().await?;
-            let mut account_dtos = Vec::with_capacity(accounts.len());
-            for account in accounts {
-                let account = account.details().await;
-                account_dtos.push(WalletDataDto::from(&*account));
-            }
-            Response::Accounts(account_dtos)
+            todo!("remove")
+            // let accounts = wallet.get_accounts().await?;
+            // let mut account_dtos = Vec::with_capacity(accounts.len());
+            // for account in accounts {
+            //     let account = account.details().await;
+            //     account_dtos.push(WalletDataDto::from(&*account));
+            // }
+            // Response::Accounts(account_dtos)
         }
-        WalletMethod::CallAccountMethod { account_id, method } => {
+
+
+        WalletMethod::CallMethod { account_id, method } => {
             let account = wallet.get_account(account_id).await?;
             call_account_method_internal(&account, method).await?
         }

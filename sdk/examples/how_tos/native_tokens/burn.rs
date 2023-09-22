@@ -32,15 +32,15 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    let alias = "Alice";
     let wallet = Wallet::builder()
+        .with_alias(alias)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let alias = "Alice";
-    let account = wallet.get_account(alias.to_string()).await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
 
     // Take the given token id, or use a default.
     let token_id = std::env::args()
@@ -59,10 +59,10 @@ async fn main() -> Result<()> {
             .await?;
 
         // Burn a native token
-        let transaction = account.burn(NativeToken::new(token_id, BURN_AMOUNT)?, None).await?;
+        let transaction = wallet.burn(NativeToken::new(token_id, BURN_AMOUNT)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(None).await?;
 
         print!("Balance after burning: ");
         if let Some(native_token_balance) = balance

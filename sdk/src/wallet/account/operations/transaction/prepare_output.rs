@@ -293,8 +293,9 @@ where
                         None
                     }
                     RemainderValueStrategy::ChangeAddress => {
-                        let remainder_address = self.generate_remainder_address().await?;
-                        Some(remainder_address.address().inner)
+                        todo!("how is this handled now?")
+                        // let remainder_address = self.generate_remainder_address().await?;
+                        // Some(remainder_address.address().inner)
                     }
                     RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
@@ -303,14 +304,7 @@ where
         };
         let remainder_address = match remainder_address {
             Some(address) => address,
-            None => {
-                self.addresses()
-                    .await?
-                    .first()
-                    .ok_or(crate::wallet::Error::FailedToGetRemainder)?
-                    .address()
-                    .inner
-            }
+            None => self.address().await,
         };
         Ok(remainder_address)
     }

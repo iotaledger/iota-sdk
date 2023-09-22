@@ -17,7 +17,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         utils::request_funds_from_faucet,
     },
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet}, crypto::keys::bip44::Bip44,
 };
 
 // The number of addresses to generate
@@ -36,7 +36,8 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_alias("Alice")
         .finish()
         .await?;
 
