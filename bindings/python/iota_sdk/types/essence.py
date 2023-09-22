@@ -48,10 +48,14 @@ class RegularTransactionEssence(TransactionEssence):
     network_id: str
     # TODO: Replace with a proper SlotIndex type
     creation_slot: HexStr
-    context_inputs: Optional[List[Union[CommitmentInput, BlockIssuanceCreditInput, RewardInput]]] = None
+    context_inputs: Optional[List[Union[CommitmentInput,
+                                        BlockIssuanceCreditInput, RewardInput]]] = None
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
-    outputs: List[Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]
+    outputs: List[Union[BasicOutput, AccountOutput,
+                        FoundryOutput, NftOutput, DelegationOutput]]
     allotments: Optional[List[Allotment]] = None
     payload: Optional[TaggedDataPayload] = None
-    type: int = field(default_factory=lambda: EssenceType.RegularTransactionEssence, init=False)
+    type: int = field(
+        default_factory=lambda: EssenceType.RegularTransactionEssence,
+        init=False)

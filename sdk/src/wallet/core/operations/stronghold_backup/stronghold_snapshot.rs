@@ -9,7 +9,7 @@ use crate::{
     wallet::{
         account::{AccountDetails, AccountDetailsDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
-        ClientOptions, Wallet,
+        ClientOptions, Error as WalletError, Wallet,
     },
 };
 
@@ -67,7 +67,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
         let coin_type = u32::from_le_bytes(
             coin_type_bytes
                 .try_into()
-                .map_err(|_| crate::wallet::Error::Backup("invalid coin_type"))?,
+                .map_err(|_| WalletError::Backup("invalid coin_type"))?,
         );
         log::debug!("[restore_backup] restored coin_type: {coin_type}");
         Some(coin_type)

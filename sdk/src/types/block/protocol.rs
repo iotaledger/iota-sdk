@@ -58,6 +58,9 @@ pub struct ProtocolParameters {
     pub(crate) staking_unbonding_period: EpochIndex,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
+    /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) punishment_epochs: u64,
     /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
     /// and commitments in its past-cone against accepted tangle time and last committed slot respectively.
     pub(crate) liveness_threshold: SlotIndex,
@@ -100,6 +103,7 @@ impl Default for ProtocolParameters {
             mana_structure: Default::default(),
             staking_unbonding_period: 10.into(),
             validation_blocks_per_slot: 10,
+            punishment_epochs: 9,
             liveness_threshold: 5.into(),
             min_committable_age: 10.into(),
             max_committable_age: 20.into(),
@@ -180,7 +184,7 @@ impl ProtocolParameters {
 #[getset(get_copy = "pub")]
 pub struct WorkScoreStructure {
     /// Modifier for network traffic per byte.
-    data_kilobyte: u32,
+    data_byte: u32,
     /// Modifier for work done to process a block.
     block: u32,
     /// Modifier for slashing when there are insufficient strong tips.
@@ -208,7 +212,7 @@ pub struct WorkScoreStructure {
 impl Default for WorkScoreStructure {
     fn default() -> Self {
         Self {
-            data_kilobyte: 0,
+            data_byte: 0,
             block: 100,
             missing_parent: 500,
             input: 20,
@@ -234,9 +238,9 @@ impl Default for WorkScoreStructure {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
-    /// Minimum value of the RMC.
+    /// Minimum value of the reference Mana cost.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    rmc_min: u64,
+    min_reference_mana_cost: u64,
     /// Increase step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     increase: u64,
@@ -252,14 +256,16 @@ pub struct CongestionControlParameters {
     /// Minimum amount of Mana that an account must have to schedule a block.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     min_mana: u64,
-    /// Maximum size of the buffer. TODO what buffer?
+    /// Maximum size of the buffer in the scheduler.
     max_buffer_size: u32,
+    /// Maximum number of blocks in the validation buffer.
+    max_validation_buffer_size: u32,
 }
 
 impl Default for CongestionControlParameters {
     fn default() -> Self {
         Self {
-            rmc_min: 500,
+            min_reference_mana_cost: 500,
             increase: 500,
             decrease: 500,
             increase_threshold: 800000,
@@ -267,6 +273,7 @@ impl Default for CongestionControlParameters {
             scheduler_rate: 100000,
             min_mana: 1,
             max_buffer_size: 3276800,
+            max_validation_buffer_size: 100,
         }
     }
 }
