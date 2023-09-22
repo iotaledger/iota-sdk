@@ -76,7 +76,7 @@ class RegularTransactionEssence extends TransactionEssence {
         inputsCommitment: HexEncodedString,
         inputs: Input[],
         outputs: Output[],
-        payload: Payload | undefined,
+        payload: unknown | undefined,
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;
