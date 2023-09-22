@@ -58,7 +58,8 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex_str: HexStr, bech32_hrp: str) -> str:
+    def hex_public_key_to_bech32_address(
+            hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded public key to a Bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
