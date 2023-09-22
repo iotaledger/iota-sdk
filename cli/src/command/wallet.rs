@@ -262,7 +262,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         builder = builder.with_secret_manager(secret_manager);
     }
 
-    let wallet: Wallet = builder
+    let wallet = builder
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
