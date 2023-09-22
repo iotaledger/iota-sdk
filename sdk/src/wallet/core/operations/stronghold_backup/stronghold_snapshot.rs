@@ -6,6 +6,7 @@ use std::{collections::HashMap, path::Path, sync::atomic::Ordering};
 use crate::{
     client::{
         constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter,
+        Error as ClientError,
     },
     types::TryFromDto,
     wallet::{
@@ -101,8 +102,8 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
 pub(crate) async fn migrate_snapshot_from_chrysalis_to_stardust(
     stronghold_adapter: &StrongholdAdapter,
 ) -> crate::wallet::Result<Option<HashMap<String, String>>> {
-    use crate::client::Error as ClientError;
     log::debug!("migrate_snapshot_from_chrysalis_to_stardust");
+
     let stronghold = stronghold_adapter.inner().await;
     let stronghold_client = match stronghold.load_client(b"iota-wallet-records") {
         Ok(client) => client,
