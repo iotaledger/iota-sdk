@@ -36,7 +36,6 @@ jobs:
       fail-fast: false
       matrix:
         set:
-          - pow
           - irc_27
           - irc_30
           - client,private_key_secret_manager
