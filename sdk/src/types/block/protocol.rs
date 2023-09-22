@@ -184,46 +184,46 @@ impl ProtocolParameters {
 #[getset(get_copy = "pub")]
 pub struct WorkScoreStructure {
     /// Modifier for network traffic per byte.
-    work_score_data_kilobyte: u32,
+    data_byte: u32,
     /// Modifier for work done to process a block.
-    work_score_block: u32,
+    block: u32,
     /// Modifier for slashing when there are insufficient strong tips.
-    work_score_missing_parent: u32,
+    missing_parent: u32,
     /// Modifier for loading UTXOs and performing mana calculations.
-    work_score_input: u32,
+    input: u32,
     /// Modifier for loading and checking the context input.
-    work_score_context_input: u32,
+    context_input: u32,
     /// Modifier for storing UTXOs.
-    work_score_output: u32,
+    output: u32,
     /// Modifier for calculations using native tokens.
-    work_score_native_token: u32,
+    native_token: u32,
     /// Modifier for storing staking features.
-    work_score_staking: u32,
+    staking: u32,
     /// Modifier for storing block issuer features.
-    work_score_block_issuer: u32,
+    block_issuer: u32,
     /// Modifier for accessing the account-based ledger to transform mana to Block Issuance Credits.
-    work_score_allotment: u32,
+    allotment: u32,
     /// Modifier for the block signature check.
-    work_score_signature_ed25519: u32,
+    signature_ed25519: u32,
     /// The minimum count of strong parents in a basic block.
-    work_score_min_strong_parents_threshold: u8,
+    min_strong_parents_threshold: u8,
 }
 
 impl Default for WorkScoreStructure {
     fn default() -> Self {
         Self {
-            work_score_data_kilobyte: 0,
-            work_score_block: 100,
-            work_score_missing_parent: 500,
-            work_score_input: 20,
-            work_score_context_input: 20,
-            work_score_output: 20,
-            work_score_native_token: 20,
-            work_score_staking: 100,
-            work_score_block_issuer: 100,
-            work_score_allotment: 100,
-            work_score_signature_ed25519: 200,
-            work_score_min_strong_parents_threshold: 4,
+            data_byte: 0,
+            block: 100,
+            missing_parent: 500,
+            input: 20,
+            context_input: 20,
+            output: 20,
+            native_token: 20,
+            staking: 100,
+            block_issuer: 100,
+            allotment: 100,
+            signature_ed25519: 200,
+            min_strong_parents_threshold: 4,
         }
     }
 }
