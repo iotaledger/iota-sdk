@@ -6,7 +6,7 @@ use core::cmp::Ordering;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
+    packer::{Packer, SlicePacker},
     unpacker::Unpacker,
     Packable,
 };
@@ -16,13 +16,14 @@ use crate::types::{
     block::{
         address::{AccountAddress, Address},
         output::{
+            account::AccountId,
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, FoundryId,
-            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
-            StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
+            StateTransitionVerifier, TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -31,6 +32,54 @@ use crate::types::{
     },
     ValidationParams,
 };
+
+impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
+
+#[cfg(feature = "serde")]
+string_serde_impl!(FoundryId);
+
+impl From<TokenId> for FoundryId {
+    fn from(token_id: TokenId) -> Self {
+        Self::new(*token_id)
+    }
+}
+
+impl FoundryId {
+    /// Builds a new [`FoundryId`] from its components.
+    pub fn build(account_address: &AccountAddress, serial_number: u32, token_scheme_kind: u8) -> Self {
+        let mut bytes = [0u8; Self::LENGTH];
+        let mut packer = SlicePacker::new(&mut bytes);
+
+        // PANIC: packing to an array of the correct length can't fail.
+        Address::Account(*account_address).pack(&mut packer).unwrap();
+        serial_number.pack(&mut packer).unwrap();
+        token_scheme_kind.pack(&mut packer).unwrap();
+
+        Self::new(bytes)
+    }
+
+    /// Returns the [`AccountAddress`] of the [`FoundryId`].
+    pub fn account_address(&self) -> AccountAddress {
+        // PANIC: the lengths are known.
+        AccountAddress::from(AccountId::new(self.0[1..AccountId::LENGTH + 1].try_into().unwrap()))
+    }
+
+    /// Returns the serial number of the [`FoundryId`].
+    pub fn serial_number(&self) -> u32 {
+        // PANIC: the lengths are known.
+        u32::from_le_bytes(
+            self.0[AccountId::LENGTH + 1..AccountId::LENGTH + 1 + core::mem::size_of::<u32>()]
+                .try_into()
+                .unwrap(),
+        )
+    }
+
+    /// Returns the [`TokenScheme`](crate::types::block::output::TokenScheme) kind of the [`FoundryId`].
+    pub fn token_scheme_kind(&self) -> u8 {
+        // PANIC: the lengths are known.
+        *self.0.last().unwrap()
+    }
+}
 
 /// Builder for a [`FoundryOutput`].
 #[derive(Clone)]
