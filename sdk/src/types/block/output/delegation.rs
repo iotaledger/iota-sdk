@@ -44,11 +44,7 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -177,8 +173,12 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Finishes the builder into a [`DelegationOutput`] without amount verification.
+    /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
+        if self.validator_id.is_null() {
+            return Err(Error::NullDelegationValidatorId);
+        }
+
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
@@ -205,7 +205,7 @@ impl DelegationOutputBuilder {
         Ok(output)
     }
 
-    /// Finishes the builder into a [`DelegationOutput`] with amount verification.
+    /// Finishes the builder into a [`DelegationOutput`] with parameters verification.
     pub fn finish_with_params<'a>(
         self,
         params: impl Into<ValidationParams<'a>> + Send,
@@ -386,6 +386,11 @@ impl Packable for DelegationOutput {
         let delegated_amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let delegation_id = DelegationId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let validator_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        if validator_id.is_null() {
+            return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
+        }
+
         let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let end_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
