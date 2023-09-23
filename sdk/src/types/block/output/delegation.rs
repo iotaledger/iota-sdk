@@ -16,7 +16,6 @@ use crate::types::{
         output::{
             account_id::AccountId,
             chain_id::ChainId,
-            feature::FeatureFlags,
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
@@ -45,7 +44,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -260,8 +263,6 @@ impl DelegationOutput {
     pub const KIND: u8 = 7;
     /// The set of allowed [`UnlockCondition`]s for a [`DelegationOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
-    /// The set of allowed immutable [`Feature`]s for a [`DelegationOutput`].
-    pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER;
 
     /// Creates a new [`DelegationOutputBuilder`] with a provided amount.
     pub fn build_with_amount(
