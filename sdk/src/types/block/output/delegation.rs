@@ -236,21 +236,22 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
     }
 }
 
-/// Describes a Delegation output, which delegates its contained IOTA tokens as voting power to a validator.
+/// An output which delegates its contained IOTA tokens as voting power to a validator.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct DelegationOutput {
-    // Amount of IOTA tokens held by the output.
+    /// Amount of IOTA tokens to deposit with this output.
     amount: u64,
-    /// The amount of delegated coins.
+    /// Amount of delegated IOTA tokens.
     delegated_amount: u64,
-    /// Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.
+    /// Unique identifier of the delegation output.
     delegation_id: DelegationId,
-    /// The Account ID of the validator to which this output is delegating.
+    /// Account ID of the validator to which this output is delegating.
     validator_id: AccountId,
-    /// The index of the first epoch for which this output delegates.
+    /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
-    /// The index of the last epoch for which this output delegates.
+    /// Index of the last epoch for which this output delegates.
     end_epoch: EpochIndex,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
 }
 
