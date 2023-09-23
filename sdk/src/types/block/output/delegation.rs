@@ -20,7 +20,7 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure,
+            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -356,6 +356,29 @@ impl DelegationOutput {
         self.unlock_conditions()
             .locked_address(self.address(), context.essence.creation_slot())
             .unlock(unlock, inputs, context)
+    }
+
+    // Transition, just without full ValidationContext.
+    pub(crate) fn transition_inner(_current_state: &Self, _next_state: &Self) -> Result<(), StateTransitionError> {
+        Ok(())
+    }
+}
+
+impl StateTransitionVerifier for DelegationOutput {
+    fn creation(_next_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        Ok(())
+    }
+
+    fn transition(
+        current_state: &Self,
+        next_state: &Self,
+        _context: &ValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
+        Self::transition_inner(current_state, next_state)
+    }
+
+    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        Ok(())
     }
 }
 

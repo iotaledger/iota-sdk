@@ -360,6 +360,7 @@ impl Output {
             (None, Some(Self::Account(next_state))) => AccountOutput::creation(next_state, context),
             (None, Some(Self::Foundry(next_state))) => FoundryOutput::creation(next_state, context),
             (None, Some(Self::Nft(next_state))) => NftOutput::creation(next_state, context),
+            (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
 
             // Transitions.
             (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
@@ -371,11 +372,15 @@ impl Output {
             (Some(Self::Nft(current_state)), Some(Self::Nft(next_state))) => {
                 NftOutput::transition(current_state, next_state, context)
             }
+            (Some(Self::Delegation(current_state)), Some(Self::Delegation(next_state))) => {
+                DelegationOutput::transition(current_state, next_state, context)
+            }
 
             // Destructions.
             (Some(Self::Account(current_state)), None) => AccountOutput::destruction(current_state, context),
             (Some(Self::Foundry(current_state)), None) => FoundryOutput::destruction(current_state, context),
             (Some(Self::Nft(current_state)), None) => NftOutput::destruction(current_state, context),
+            (Some(Self::Delegation(current_state)), None) => DelegationOutput::destruction(current_state, context),
 
             // Unsupported.
             _ => Err(StateTransitionError::UnsupportedStateTransition),
