@@ -44,7 +44,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -359,13 +363,32 @@ impl DelegationOutput {
     }
 
     // Transition, just without full ValidationContext.
-    pub(crate) fn transition_inner(_current_state: &Self, _next_state: &Self) -> Result<(), StateTransitionError> {
+    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+        if current_state.delegated_amount != next_state.delegated_amount
+            || current_state.start_epoch != next_state.start_epoch
+            || current_state.validator_id != next_state.validator_id
+        {
+            return Err(StateTransitionError::MutatedImmutableField);
+        }
+
         Ok(())
     }
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(_next_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if !next_state.delegation_id.is_null() {
+            return Err(StateTransitionError::NonZeroCreatedId);
+        }
+
+        if next_state.amount != next_state.delegated_amount {
+            return Err(StateTransitionError::InvalidDelegatedAmount);
+        }
+
+        if next_state.end_epoch != 0 {
+            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
+        }
+
         Ok(())
     }
 
