@@ -7,7 +7,7 @@ use crypto::signatures::ed25519::PublicKey;
 use derive_more::{AsRef, Deref, From};
 use packable::Packable;
 
-use super::Restricted;
+use super::RestrictedAddress;
 use crate::types::block::Error;
 
 /// An Ed25519 address.
@@ -28,7 +28,7 @@ impl Ed25519Address {
     }
 }
 
-impl Restricted<Ed25519Address> {
+impl RestrictedAddress<Ed25519Address> {
     /// The [`Address`](crate::types::block::address::Address) kind of a
     /// [`RestrictedEd25519Address`](Restricted<Ed25519Address>).
     pub const KIND: u8 = 1;
@@ -59,7 +59,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{types::block::address::restricted::dto::RestrictedDto, utils::serde::prefix_hex_bytes};
+    use crate::{types::block::address::restricted::dto::RestrictedAddressDto, utils::serde::prefix_hex_bytes};
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -87,11 +87,11 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(Ed25519Address, Ed25519AddressDto, "ed25519 address");
 
-    impl From<&Restricted<Ed25519Address>> for RestrictedDto<Ed25519AddressDto> {
-        fn from(value: &Restricted<Ed25519Address>) -> Self {
+    impl From<&RestrictedAddress<Ed25519Address>> for RestrictedAddressDto<Ed25519AddressDto> {
+        fn from(value: &RestrictedAddress<Ed25519Address>) -> Self {
             Self {
                 address: Ed25519AddressDto {
-                    kind: Restricted::<Ed25519Address>::KIND,
+                    kind: RestrictedAddress::<Ed25519Address>::KIND,
                     pub_key_hash: **value.address(),
                 },
                 allowed_capabilities: value.allowed_capabilities().into_iter().map(|c| **c).collect(),
@@ -99,8 +99,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl From<RestrictedDto<Ed25519AddressDto>> for Restricted<Ed25519Address> {
-        fn from(value: RestrictedDto<Ed25519AddressDto>) -> Self {
+    impl From<RestrictedAddressDto<Ed25519AddressDto>> for RestrictedAddress<Ed25519Address> {
+        fn from(value: RestrictedAddressDto<Ed25519AddressDto>) -> Self {
             let mut res = Self::new(Ed25519Address::from(value.address));
             if let Some(allowed_capabilities) = value.allowed_capabilities.first() {
                 res = res.with_allowed_capabilities(*allowed_capabilities);
@@ -110,8 +110,8 @@ pub(crate) mod dto {
     }
 
     impl_serde_typed_dto!(
-        Restricted<Ed25519Address>,
-        RestrictedDto<Ed25519AddressDto>,
+        RestrictedAddress<Ed25519Address>,
+        RestrictedAddressDto<Ed25519AddressDto>,
         "restricted ed25519 address"
     );
 }

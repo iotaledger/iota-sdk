@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use super::Restricted;
+use super::RestrictedAddress;
 use crate::types::block::{output::NftId, Error};
 
 /// An NFT address.
@@ -38,7 +38,7 @@ impl NftAddress {
     }
 }
 
-impl Restricted<NftAddress> {
+impl RestrictedAddress<NftAddress> {
     /// The [`Address`](crate::types::block::address::Address) kind of a
     /// [`RestrictedNftAddress`](Restricted<NftAddress>).
     pub const KIND: u8 = 17;
@@ -69,7 +69,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::address::restricted::dto::RestrictedDto;
+    use crate::types::block::address::restricted::dto::RestrictedAddressDto;
 
     /// Describes an NFT address.
     #[derive(Serialize, Deserialize)]
@@ -97,11 +97,11 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(NftAddress, NftAddressDto, "nft address");
 
-    impl From<&Restricted<NftAddress>> for RestrictedDto<NftAddressDto> {
-        fn from(value: &Restricted<NftAddress>) -> Self {
+    impl From<&RestrictedAddress<NftAddress>> for RestrictedAddressDto<NftAddressDto> {
+        fn from(value: &RestrictedAddress<NftAddress>) -> Self {
             Self {
                 address: NftAddressDto {
-                    kind: Restricted::<NftAddress>::KIND,
+                    kind: RestrictedAddress::<NftAddress>::KIND,
                     nft_id: **value.address(),
                 },
                 allowed_capabilities: value.allowed_capabilities().into_iter().map(|c| **c).collect(),
@@ -109,8 +109,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl From<RestrictedDto<NftAddressDto>> for Restricted<NftAddress> {
-        fn from(value: RestrictedDto<NftAddressDto>) -> Self {
+    impl From<RestrictedAddressDto<NftAddressDto>> for RestrictedAddress<NftAddress> {
+        fn from(value: RestrictedAddressDto<NftAddressDto>) -> Self {
             let mut res = Self::new(NftAddress::from(value.address));
             if let Some(allowed_capabilities) = value.allowed_capabilities.first() {
                 res = res.with_allowed_capabilities(*allowed_capabilities);
@@ -120,8 +120,8 @@ pub(crate) mod dto {
     }
 
     impl_serde_typed_dto!(
-        Restricted<NftAddress>,
-        RestrictedDto<NftAddressDto>,
+        RestrictedAddress<NftAddress>,
+        RestrictedAddressDto<NftAddressDto>,
         "restricted nft address"
     );
 }

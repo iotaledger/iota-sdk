@@ -17,7 +17,7 @@ pub use self::{
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
     nft::NftAddress,
-    restricted::{CapabilityFlag, Restricted},
+    restricted::{CapabilityFlag, RestrictedAddress},
 };
 use crate::types::block::{
     output::{Output, OutputId},
@@ -37,20 +37,20 @@ pub enum Address {
     #[packable(tag = Ed25519Address::KIND)]
     Ed25519(Ed25519Address),
     /// A restricted Ed25519 address.
-    #[packable(tag = Restricted::<Ed25519Address>::KIND)]
-    RestrictedEd25519(Restricted<Ed25519Address>),
+    #[packable(tag = RestrictedAddress::<Ed25519Address>::KIND)]
+    RestrictedEd25519(RestrictedAddress<Ed25519Address>),
     /// An account address.
     #[packable(tag = AccountAddress::KIND)]
     Account(AccountAddress),
     /// A restricted account address.
-    #[packable(tag = Restricted::<AccountAddress>::KIND)]
-    RestrictedAccount(Restricted<AccountAddress>),
+    #[packable(tag = RestrictedAddress::<AccountAddress>::KIND)]
+    RestrictedAccount(RestrictedAddress<AccountAddress>),
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
     /// A restricted NFT address.
-    #[packable(tag = Restricted::<NftAddress>::KIND)]
-    RestrictedNft(Restricted<NftAddress>),
+    #[packable(tag = RestrictedAddress::<NftAddress>::KIND)]
+    RestrictedNft(RestrictedAddress<NftAddress>),
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
@@ -75,11 +75,11 @@ impl Address {
     pub fn kind(&self) -> u8 {
         match self {
             Self::Ed25519(_) => Ed25519Address::KIND,
-            Self::RestrictedEd25519(_) => Restricted::<Ed25519Address>::KIND,
+            Self::RestrictedEd25519(_) => RestrictedAddress::<Ed25519Address>::KIND,
             Self::Account(_) => AccountAddress::KIND,
-            Self::RestrictedAccount(_) => Restricted::<AccountAddress>::KIND,
+            Self::RestrictedAccount(_) => RestrictedAddress::<AccountAddress>::KIND,
             Self::Nft(_) => NftAddress::KIND,
-            Self::RestrictedNft(_) => Restricted::<NftAddress>::KIND,
+            Self::RestrictedNft(_) => RestrictedAddress::<NftAddress>::KIND,
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
         }
     }
@@ -248,7 +248,7 @@ mod test {
 
     #[test]
     fn capabilities() {
-        let address = Restricted::new(rand_ed25519_address()).with_allowed_capabilities(0);
+        let address = RestrictedAddress::new(rand_ed25519_address()).with_allowed_capabilities(0);
         let mut capabilities = address.allowed_capabilities().unwrap();
         assert!(!capabilities.has_capabilities(CapabilityFlag::NATIVE_TOKENS));
         capabilities.add_capabilities(CapabilityFlag::NATIVE_TOKENS);
@@ -286,7 +286,7 @@ mod test {
             address.to_bech32_unchecked("iota").to_string(),
             "iota1qrhacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xqgyzyx"
         );
-        let mut address = Restricted::new(address);
+        let mut address = RestrictedAddress::new(address);
         assert_eq!(
             address.to_bech32_unchecked("iota").to_string(),
             "iota1q8hacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xqq7ar5ue"

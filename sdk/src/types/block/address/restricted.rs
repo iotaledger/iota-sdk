@@ -8,13 +8,13 @@ use crate::types::block::Error;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, getset::Getters)]
 #[getset(get = "pub")]
-pub struct Restricted<A> {
+pub struct RestrictedAddress<A> {
     address: A,
     allowed_capabilities: Option<Capabilities>,
 }
 
-impl<A> Restricted<A> {
-    /// Creates a new [`Restricted`] address from the underlying type.
+impl<A> RestrictedAddress<A> {
+    /// Creates a new [`RestrictedAddress`] address from the underlying type.
     #[inline(always)]
     pub fn new(address: A) -> Self {
         Self {
@@ -38,13 +38,13 @@ impl<A> Restricted<A> {
     }
 }
 
-impl<A> From<A> for Restricted<A> {
+impl<A> From<A> for RestrictedAddress<A> {
     fn from(value: A) -> Self {
         Self::new(value)
     }
 }
 
-impl<A: 'static + Packable> Packable for Restricted<A>
+impl<A: 'static + Packable> Packable for RestrictedAddress<A>
 where
     Error: From<A::UnpackError>,
 {
@@ -129,10 +129,9 @@ pub(crate) mod dto {
 
     use crate::utils::serde::prefix_hex_bytes;
 
-    /// Describes a restricted Ed25519 address.
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct RestrictedDto<A> {
+    pub struct RestrictedAddressDto<A> {
         #[serde(flatten)]
         pub address: A,
         // TODO: is this format right?
@@ -140,7 +139,7 @@ pub(crate) mod dto {
         pub allowed_capabilities: Vec<u8>,
     }
 
-    impl<A> core::ops::Deref for RestrictedDto<A> {
+    impl<A> core::ops::Deref for RestrictedAddressDto<A> {
         type Target = A;
 
         fn deref(&self) -> &Self::Target {
