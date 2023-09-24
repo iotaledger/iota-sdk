@@ -120,6 +120,12 @@ impl Default for AccountSyncOptions {
     }
 }
 
+impl AccountSyncOptions {
+    pub(crate) fn all_outputs(&self) -> bool {
+        self.basic_outputs && self.nft_outputs && self.account_outputs
+    }
+}
+
 /// Sync options for addresses from account outputs
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -142,6 +148,12 @@ impl Default for AliasSyncOptions {
     }
 }
 
+impl AliasSyncOptions {
+    pub(crate) fn all_outputs(&self) -> bool {
+        self.basic_outputs && self.nft_outputs && self.account_outputs && self.foundry_outputs
+    }
+}
+
 /// Sync options for addresses from NFT outputs
 #[derive(Debug, Default, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -149,4 +161,10 @@ pub struct NftSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
     pub account_outputs: bool,
+}
+
+impl NftSyncOptions {
+    pub(crate) fn all_outputs(&self) -> bool {
+        self.basic_outputs && self.nft_outputs && self.account_outputs
+    }
 }

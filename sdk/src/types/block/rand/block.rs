@@ -37,9 +37,10 @@ pub fn rand_basic_block_builder_with_strong_parents(strong_parents: StrongParent
 }
 
 /// Generates a random block wrapper.
-pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block: impl Into<Block>) -> BlockWrapper {
+pub fn rand_block_wrapper_with_block(protocol_params: &ProtocolParameters, block: impl Into<Block>) -> BlockWrapper {
     BlockWrapper::new(
-        protocol_params,
+        protocol_params.version(),
+        protocol_params.network_id(),
         rand_number(),
         rand_slot_commitment_id(),
         rand_slot_index(),
@@ -50,7 +51,7 @@ pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block:
 }
 
 /// Generates a random block wrapper.
-pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
+pub fn rand_block_wrapper(protocol_params: &ProtocolParameters) -> BlockWrapper {
     rand_block_wrapper_with_block(
         protocol_params,
         rand_basic_block_builder_with_strong_parents(rand_strong_parents())

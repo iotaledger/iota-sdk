@@ -4,8 +4,7 @@
 use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
-
-use crate::Url;
+use url::Url;
 
 /// Node authentication object.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

@@ -69,7 +69,7 @@ impl SecretManage for PrivateKeySecretManager {
         let public_key = self.0.public_key();
         let signature = self.0.sign(msg);
 
-        Ok(Ed25519Signature::new(public_key.into(), signature))
+        Ok(Ed25519Signature::new(public_key, signature))
     }
 
     async fn sign_secp256k1_ecdsa(

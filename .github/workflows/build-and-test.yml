@@ -2,7 +2,7 @@ name: Build and Run Tests
 
 on:
   push:
-    branches: [develop, production, 2.0]
+    branches: [develop, production, "2.0"]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/build-and-test.yml"
@@ -12,7 +12,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
   pull_request:
-    branches: [develop, production, 2.0]
+    branches: [develop, production, "2.0"]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/build-and-test.yml"

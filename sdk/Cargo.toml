@@ -42,7 +42,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.8.2", default-features = false, features = [
+packable = { version = "0.8.3", default-features = false, features = [
     "primitive-types",
 ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
@@ -137,21 +137,19 @@ tokio = { version = "1.32.0", default-features = false, features = [
 
 [features]
 default = ["client", "wallet", "tls"]
-
-irc_27 = ["url", "serde"]
-irc_30 = ["url", "serde"]
-ledger_nano = ["iota-ledger-nano"]
-mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
+irc_27 = ["serde", "dep:url"]
+irc_30 = ["serde", "dep:url"]
+ledger_nano = ["dep:iota-ledger-nano"]
+mqtt = ["std", "tls", "dep:regex", "dep:rumqttc", "dep:once_cell"]
 participation = ["storage"]
-rand = ["dep:rand"]
-rocksdb = ["dep:rocksdb", "storage"]
+rocksdb = ["storage", "dep:rocksdb"]
 serde = [
-    "serde_repr",
     "hashbrown/serde",
     "packable/serde",
     "primitive-types/serde_no_std",
     "iota-crypto/serde",
     "zeroize?/serde",
+    "dep:serde_repr",
 ]
 std = [
     "packable/std",
@@ -167,34 +165,34 @@ std = [
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
-    "iota_stronghold",
     "iota-crypto/chacha",
+    "dep:iota_stronghold",
     "dep:time",
     "dep:anymap",
     "dep:once_cell",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
 events = []
-private_key_secret_manager = ["bs58"]
+private_key_secret_manager = ["dep:bs58"]
 
 client = [
-    "async-trait",
-    "futures",
-    "instant",
+    "std",
+    "serde",
     "iota-crypto/bip39",
     "iota-crypto/bip39-en",
     "iota-crypto/bip44",
     "iota-crypto/keccak",
     "iota-crypto/random",
     "iota-crypto/slip10",
-    "log",
-    "reqwest",
-    "serde",
-    "std",
-    "thiserror",
-    "tokio",
-    "url",
-    "zeroize",
+    "dep:async-trait",
+    "dep:futures",
+    "dep:instant",
+    "dep:log",
+    "dep:reqwest",
+    "dep:thiserror",
+    "dep:tokio",
+    "dep:url",
+    "dep:zeroize",
 ]
 wallet = ["client"]
 

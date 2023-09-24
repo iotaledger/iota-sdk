@@ -50,8 +50,11 @@ impl ClientInner {
             issuing_time
         });
 
+        let protocol_parameters = self.get_protocol_parameters().await?;
+
         Ok(BlockWrapper::new(
-            self.get_protocol_parameters().await?,
+            protocol_parameters.version(),
+            protocol_parameters.network_id(),
             issuing_time,
             commitment.id(),
             latest_finalized_slot,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountId } from '../..';
-import { u16 } from '../../utils/type_aliases';
+import { u16 } from '../../utils/type-aliases';
 import { SlotCommitmentId } from '../slot';
 
 enum ContextInputType {
