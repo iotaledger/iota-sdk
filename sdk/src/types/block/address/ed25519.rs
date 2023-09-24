@@ -59,7 +59,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{types::block::address::dto::RestrictedDto, utils::serde::prefix_hex_bytes};
+    use crate::{types::block::address::restricted::dto::RestrictedDto, utils::serde::prefix_hex_bytes};
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -92,9 +92,9 @@ pub(crate) mod dto {
             Self {
                 address: Ed25519AddressDto {
                     kind: Restricted::<Ed25519Address>::KIND,
-                    pub_key_hash: value.address.0,
+                    pub_key_hash: **value.address(),
                 },
-                allowed_capabilities: value.allowed_capabilities.into_iter().map(|c| c.0).collect(),
+                allowed_capabilities: value.allowed_capabilities().into_iter().map(|c| **c).collect(),
             }
         }
     }

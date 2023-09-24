@@ -69,7 +69,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::address::dto::RestrictedDto;
+    use crate::types::block::address::restricted::dto::RestrictedDto;
 
     /// Describes an NFT address.
     #[derive(Serialize, Deserialize)]
@@ -102,9 +102,9 @@ pub(crate) mod dto {
             Self {
                 address: NftAddressDto {
                     kind: Restricted::<NftAddress>::KIND,
-                    nft_id: value.address.0,
+                    nft_id: **value.address(),
                 },
-                allowed_capabilities: value.allowed_capabilities.into_iter().map(|c| c.0).collect(),
+                allowed_capabilities: value.allowed_capabilities().into_iter().map(|c| **c).collect(),
             }
         }
     }

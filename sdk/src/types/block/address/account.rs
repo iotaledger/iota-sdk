@@ -69,7 +69,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::address::dto::RestrictedDto;
+    use crate::types::block::address::restricted::dto::RestrictedDto;
 
     /// Describes an account address.
     #[derive(Serialize, Deserialize)]
@@ -102,9 +102,9 @@ mod dto {
             Self {
                 address: AccountAddressDto {
                     kind: Restricted::<AccountAddress>::KIND,
-                    account_id: value.address.0,
+                    account_id: **value.address(),
                 },
-                allowed_capabilities: value.allowed_capabilities.into_iter().map(|c| c.0).collect(),
+                allowed_capabilities: value.allowed_capabilities().into_iter().map(|c| **c).collect(),
             }
         }
     }
