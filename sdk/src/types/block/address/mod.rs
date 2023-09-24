@@ -4,16 +4,17 @@
 mod account;
 mod bech32;
 mod ed25519;
+mod implicit_account_creation;
 mod nft;
 
 use derive_more::{Deref, From};
 use packable::{error::UnpackErrorExt, Packable};
 
-use self::ed25519::ImplicitAccountCreationAddress;
 pub use self::{
     account::AccountAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
+    implicit_account_creation::ImplicitAccountCreationAddress,
     nft::NftAddress,
 };
 use crate::types::block::{

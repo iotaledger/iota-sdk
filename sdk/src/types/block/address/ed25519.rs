@@ -4,7 +4,7 @@
 use core::str::FromStr;
 
 use crypto::signatures::ed25519::PublicKey;
-use derive_more::{AsRef, Deref, Display, From, FromStr};
+use derive_more::{AsRef, Deref, From};
 use packable::Packable;
 
 use super::Restricted;
@@ -34,24 +34,6 @@ impl Restricted<Ed25519Address> {
     pub const KIND: u8 = 1;
 }
 
-/// An implicit account creation address that can be used to transition an account.
-#[derive(Copy, Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
-#[as_ref(forward)]
-pub struct ImplicitAccountCreationAddress(Ed25519Address);
-
-impl ImplicitAccountCreationAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of an [`ImplicitAccountCreationAddress`].
-    pub const KIND: u8 = 24;
-    /// The length of an [`ImplicitAccountCreationAddress`].
-    pub const LENGTH: usize = Ed25519Address::LENGTH;
-
-    /// Creates a new [`ImplicitAccountCreationAddress`].
-    #[inline(always)]
-    pub fn new(address: [u8; Self::LENGTH]) -> Self {
-        Self(Ed25519Address::new(address))
-    }
-}
-
 impl FromStr for Ed25519Address {
     type Err = Error;
 
@@ -79,7 +61,6 @@ pub(crate) mod dto {
     use super::*;
     use crate::{types::block::address::dto::RestrictedDto, utils::serde::prefix_hex_bytes};
 
-    /// Describes an Ed25519 address.
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct Ed25519AddressDto {
@@ -132,36 +113,5 @@ pub(crate) mod dto {
         Restricted<Ed25519Address>,
         RestrictedDto<Ed25519AddressDto>,
         "restricted ed25519 address"
-    );
-
-    /// Describes an Implicit Account Creation address.
-    #[derive(Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    struct ImplicitAccountCreationAddressDto {
-        #[serde(rename = "type")]
-        kind: u8,
-        #[serde(with = "prefix_hex_bytes")]
-        pub_key_hash: [u8; Ed25519Address::LENGTH],
-    }
-
-    impl From<&ImplicitAccountCreationAddress> for ImplicitAccountCreationAddressDto {
-        fn from(value: &ImplicitAccountCreationAddress) -> Self {
-            Self {
-                kind: ImplicitAccountCreationAddress::KIND,
-                pub_key_hash: value.0.0,
-            }
-        }
-    }
-
-    impl From<ImplicitAccountCreationAddressDto> for ImplicitAccountCreationAddress {
-        fn from(value: ImplicitAccountCreationAddressDto) -> Self {
-            Self::new(value.pub_key_hash)
-        }
-    }
-
-    impl_serde_typed_dto!(
-        ImplicitAccountCreationAddress,
-        ImplicitAccountCreationAddressDto,
-        "implicit account creation address"
     );
 }
