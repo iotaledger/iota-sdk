@@ -364,6 +364,10 @@ impl DelegationOutput {
 
     // Transition, just without full ValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+        if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
+            return Err(StateTransitionError::NonDelayedClaimingTransition);
+        }
+
         if current_state.delegated_amount != next_state.delegated_amount
             || current_state.start_epoch != next_state.start_epoch
             || current_state.validator_id != next_state.validator_id
