@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    types::block::output::{
-        feature::SenderFeature,
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, UnlockCondition,
+    types::block::{
+        address::Bech32Address,
+        output::{
+            feature::SenderFeature,
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+            BasicOutputBuilder, UnlockCondition,
+        },
     },
     wallet::{account::types::Balance, Result},
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[test]
 fn balance_add_assign() {
@@ -89,34 +92,36 @@ fn balance_add_assign() {
 #[ignore]
 #[tokio::test]
 async fn balance_expiration() -> Result<()> {
-    let storage_path = "test-storage/balance_expiration";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/balance_expiration_0";
+    let storage_path_1 = "test-storage/balance_expiration_1";
+    let storage_path_2 = "test-storage/balance_expiration_2";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
+    setup(storage_path_2)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_2 = make_wallet(storage_path_2, None, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    let account_1 = wallet.create_account().finish().await?;
-    let account_2 = wallet.create_account().finish().await?;
+    request_funds(&wallet_0).await?;
 
     let slots_until_expired = 20;
-    let token_supply = account_0.client().get_token_supply().await?;
+    let token_supply = wallet_0.client().get_token_supply().await?;
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
-            UnlockCondition::Address(AddressUnlockCondition::new(
-                *account_1.addresses().await?[0].address().as_ref(),
-            )),
+            UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                *account_2.addresses().await?[0].address().as_ref(),
-                account_0.client().get_slot_index().await? + slots_until_expired,
+                wallet_2.address().await,
+                wallet_0.client().get_slot_index().await? + slots_until_expired,
             )?),
         ])
-        .with_features([SenderFeature::new(*account_0.addresses().await?[0].address().as_ref())])
+        .with_features([SenderFeature::new(wallet_0.address().await)])
         .finish_output(token_supply)?];
 
-    let balance_before_tx = account_0.balance().await?;
-    let tx = account_0.send_outputs(outputs, None).await?;
-    let balance_after_tx = account_0.balance().await?;
+    let balance_before_tx = wallet_0.balance().await?;
+    let tx = wallet_0.send_outputs(outputs, None).await?;
+    let balance_after_tx = wallet_0.balance().await?;
     // Total doesn't change before syncing after tx got confirmed
     assert_eq!(
         balance_before_tx.base_coin().total(),
@@ -124,18 +129,18 @@ async fn balance_expiration() -> Result<()> {
     );
     assert_eq!(balance_after_tx.base_coin().available(), 0);
 
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    // Account 1 balance before expiration
-    let balance = account_1.sync(None).await?;
+    // Wallet 1 balance before expiration
+    let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
     assert_eq!(balance.base_coin().total(), 0);
     assert_eq!(balance.base_coin().available(), 0);
 
-    // Account 2 balance before expiration
-    let balance = account_2.sync(None).await?;
+    // Wallet 2 balance before expiration
+    let balance = wallet_2.sync(None).await?;
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
     assert_eq!(balance.base_coin().total(), 0);
     assert_eq!(balance.base_coin().available(), 0);
@@ -144,47 +149,46 @@ async fn balance_expiration() -> Result<()> {
     // TODO wait for slots, not seconds
     tokio::time::sleep(std::time::Duration::from_secs(slots_until_expired)).await;
 
-    // Account 1 balance after expiration
-    let balance = account_1.sync(None).await?;
+    // Wallet 1 balance after expiration
+    let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.base_coin().total(), 0);
     assert_eq!(balance.base_coin().available(), 0);
 
-    // Account 2 balance after expiration
-    let balance = account_2.sync(None).await?;
+    // Wallet 2 balance after expiration
+    let balance = wallet_2.sync(None).await?;
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.base_coin().total(), 1_000_000);
     assert_eq!(balance.base_coin().available(), 1_000_000);
 
     // It's possible to send the expired output
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
-        // Send to account 1 with expiration to account 2, both have no amount yet
-        .with_unlock_conditions([AddressUnlockCondition::new(
-            *account_1.addresses().await?[0].address().as_ref(),
-        )])
+        // Send to wallet 1 with expiration to wallet 2, both have no amount yet
+        .with_unlock_conditions([AddressUnlockCondition::new(wallet_1.address().await)])
         .finish_output(token_supply)?];
-    let _tx = account_2.send_outputs(outputs, None).await?;
+    let _tx = wallet_2.send_outputs(outputs, None).await?;
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+    tear_down(storage_path_2)?;
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
-async fn addresses_balance() -> Result<()> {
-    let storage_path = "test-storage/addresses_balance";
-    setup(storage_path)?;
+async fn balance_transfer() -> Result<()> {
+    let storage_path_0 = "test-storage/addresses_balance_0";
+    let storage_path_1 = "test-storage/addresses_balance_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    let account_1 = wallet.create_account().finish().await?;
-    let addresses_0 = account_0.addresses_with_unspent_outputs().await?;
-    let acc_1_addr = &account_1.generate_ed25519_addresses(1, None).await?[0];
+    request_funds(&wallet_0).await?;
 
-    let balance_0 = account_0
-        .addresses_balance(addresses_0.iter().map(|a| a.address()).collect())
-        .await?;
-    let balance_0_sync = account_0.balance().await?;
+    let balance_0 = wallet_0.balance().await?;
+    let balance_0_sync = wallet_0.sync(None).await?;
     let to_send = balance_0.base_coin().available();
 
     // Check if 0 has balance and sync() and address_balance() match
@@ -192,50 +196,30 @@ async fn addresses_balance() -> Result<()> {
     assert_eq!(balance_0, balance_0_sync);
 
     // Make sure 1 is empty
-    let balance_1 = account_1.sync(None).await?;
+    let balance_1 = wallet_1.sync(None).await?;
     assert_eq!(balance_1.base_coin().available(), 0);
 
     // Send to 1
-    let tx = account_0.send(to_send, acc_1_addr.address(), None).await?;
+    let tx = wallet_0.send(to_send, wallet_1.address_as_bech32().await, None).await?;
+
     // Balance should update without sync
-    let balance_0 = account_0
-        .addresses_balance(addresses_0.iter().map(|a| a.address()).collect())
-        .await?;
-    let balance_0_sync = account_0.balance().await?;
+    let balance_0 = wallet_0.balance().await?;
+    let balance_0_sync = wallet_0.sync(None).await?;
     assert_eq!(balance_0.base_coin().available(), 0);
     assert_eq!(balance_0, balance_0_sync);
 
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
-    account_1.sync(None).await?;
+    wallet_1.sync(None).await?;
 
     // Balance should have transferred entirely
-    let balance_1 = account_1.addresses_balance(vec![acc_1_addr.address()]).await?;
-    let balance_1_sync = account_1.balance().await?;
+    let balance_1_sync = wallet_1.balance().await?;
     assert!(balance_1.base_coin().available() > 0);
-    assert_eq!(balance_1, balance_1_sync);
 
-    // Internal transfer on account 1
-    let acc_1_addr_2 = &account_1.generate_ed25519_addresses(1, None).await?[0];
-
-    let tx = account_1.send(to_send / 2, acc_1_addr_2.address(), None).await?;
-    account_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
-        .await?;
-    let balance_1_sync = account_1.sync(None).await?;
-
-    // Check the new address
-    let balance_1 = account_1.addresses_balance(vec![acc_1_addr_2.address()]).await?;
-    assert_eq!(to_send / 2, balance_1.base_coin().available());
-
-    // Check old and new together
-    let balance_1_total = account_1
-        .addresses_balance(vec![acc_1_addr.address(), acc_1_addr_2.address()])
-        .await?;
-    assert_eq!(balance_1_total, balance_1_sync);
-
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+    Ok(())
 }
 
 #[ignore]
@@ -245,38 +229,39 @@ async fn balance_voting_power() -> Result<()> {
     let storage_path = "test-storage/balance_voting_power";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None, None).await?;
 
-    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
+    request_funds(&wallet).await?;
 
     let faucet_amount = 100_000_000_000;
 
-    let balance = account.balance().await?;
+    let balance = wallet.balance().await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
     assert_eq!(balance.base_coin().available(), faucet_amount);
 
     let voting_power = 1_000_000;
     // Only use a part as voting power
-    let tx = account.increase_voting_power(voting_power).await?;
-    account
+    let tx = wallet.increase_voting_power(voting_power).await?;
+    wallet
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
     assert_eq!(balance.base_coin().available(), faucet_amount - voting_power);
-    let account_voting_power = account.get_voting_power().await?;
+    let account_voting_power = wallet.get_voting_power().await?;
     assert_eq!(account_voting_power, voting_power);
 
     // Increase voting power to total amount
-    let tx = account.increase_voting_power(faucet_amount - voting_power).await?;
-    account
+    let tx = wallet.increase_voting_power(faucet_amount - voting_power).await?;
+    wallet
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
     assert_eq!(balance.base_coin().available(), 0);
-    let account_voting_power = account.get_voting_power().await?;
+    let account_voting_power = wallet.get_voting_power().await?;
     assert_eq!(account_voting_power, faucet_amount);
 
-    tear_down(storage_path)
+    tear_down(storage_path)?;
+    Ok(())
 }

@@ -3,7 +3,7 @@
 
 mod constants;
 
-use crypto::keys::bip39::Mnemonic;
+use crypto::keys::{bip39::Mnemonic, bip44::Bip44};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -11,7 +11,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Client,
     },
-    wallet::{Account, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 pub use self::constants::*;
@@ -29,7 +29,12 @@ pub use self::constants::*;
 ///
 /// An Wallet
 #[allow(dead_code, unused_variables)]
-pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, node: Option<&str>) -> Result<Wallet> {
+pub(crate) async fn make_wallet(
+    storage_path: &str,
+    mnemonic: Option<Mnemonic>,
+    node: Option<&str>,
+    alias: impl Into<Option<&'static str>>,
+) -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic().unwrap()))?;
@@ -38,7 +43,12 @@ pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, 
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE);
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE));
+
+    if let Some(alias) = alias.into() {
+        wallet_builder = wallet_builder.with_alias(alias);
+    }
+
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
@@ -58,7 +68,7 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE);
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
@@ -67,28 +77,20 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
     wallet_builder.finish().await
 }
 
-/// Create `amount` new accounts, request funds from the faucet and sync the accounts afterwards until the faucet output
-/// is available. Returns the new accounts.
+/// Request funds from the faucet and sync the wallet.
 #[allow(dead_code)]
-pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -> Result<Vec<Account>> {
-    let mut new_accounts = Vec::new();
-    'accounts: for _ in 0..amount {
-        let account = wallet.create_account().finish().await?;
-        request_funds_from_faucet(FAUCET_URL, account.addresses().await?[0].address()).await?;
+pub(crate) async fn request_funds(wallet: &Wallet) -> Result<()> {
+    request_funds_from_faucet(FAUCET_URL, &wallet.address_as_bech32().await).await?;
 
-        // Continue only after funds are received
-        for _ in 0..30 {
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-            let balance = account.sync(None).await?;
-            if balance.base_coin().available() > 0 {
-                new_accounts.push(account);
-                continue 'accounts;
-            }
+    // Continue only after funds are received
+    for _ in 0..30 {
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        let balance = wallet.sync(None).await?;
+        if balance.base_coin().available() > 0 {
+            return Ok(());
         }
-        panic!("Faucet no longer wants to hand over coins");
     }
-
-    Ok(new_accounts)
+    panic!("Faucet no longer wants to hand over coins");
 }
 
 #[allow(dead_code)]

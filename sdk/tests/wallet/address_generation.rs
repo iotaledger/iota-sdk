@@ -3,6 +3,7 @@
 
 #[cfg(feature = "stronghold")]
 use crypto::keys::bip39::Mnemonic;
+use crypto::keys::bip44::Bip44;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 #[cfg(feature = "ledger_nano")]
@@ -33,7 +34,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(IOTA_COIN_TYPE);
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -41,7 +42,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = wallet.generate_ed25519_address(None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -55,6 +56,8 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn wallet_address_generation_stronghold() -> Result<()> {
+    use iota_sdk::crypto::keys::bip44::Bip44;
+
     let storage_path = "test-storage/wallet_address_generation_stronghold";
     setup(storage_path)?;
 
@@ -72,14 +75,14 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(IOTA_COIN_TYPE);
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = wallet.generate_ed25519_address(None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -94,6 +97,8 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
 #[cfg(all(feature = "ledger_nano", feature = "events"))]
 #[ignore = "requires ledger nano instance"]
 async fn wallet_address_generation_ledger() -> Result<()> {
+    use iota_sdk::crypto::keys::bip44::Bip44;
+
     let storage_path = "test-storage/wallet_address_generation_ledger";
     setup(storage_path)?;
 
@@ -105,7 +110,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(IOTA_COIN_TYPE);
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -113,7 +118,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = wallet.generate_ed25519_address(None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -139,14 +144,10 @@ async fn wallet_address_generation_ledger() -> Result<()> {
         .await;
 
     let address = wallet
-        .generate_ed25519_address(
-            0,
-            0,
-            Some(GenerateAddressOptions {
-                ledger_nano_prompt: true,
-                ..Default::default()
-            }),
-        )
+        .generate_ed25519_address(Some(GenerateAddressOptions {
+            ledger_nano_prompt: true,
+            ..Default::default()
+        }))
         .await?;
 
     assert_eq!(
@@ -186,7 +187,7 @@ async fn wallet_address_generation_placeholder() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Placeholder)
         .with_client_options(client_options)
-        .with_coin_type(IOTA_COIN_TYPE);
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -194,7 +195,7 @@ async fn wallet_address_generation_placeholder() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    if let Err(Error::Client(error)) = wallet.generate_ed25519_address(0, 0, None).await {
+    if let Err(Error::Client(error)) = wallet.generate_ed25519_address(None).await {
         assert!(matches!(*error, ClientError::PlaceholderSecretManager))
     } else {
         panic!("expected PlaceholderSecretManager")

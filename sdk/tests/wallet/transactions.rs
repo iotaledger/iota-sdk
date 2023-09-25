@@ -3,7 +3,7 @@
 
 use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendNftParams, SendParams};
 
-use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -13,7 +13,7 @@ async fn send_amount() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     let amount = 1_000_000;
@@ -42,7 +42,7 @@ async fn send_amount_127_outputs() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     let amount = 1_000_000;
@@ -78,7 +78,7 @@ async fn send_amount_custom_input() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     // Send 10 outputs to account_1
@@ -122,7 +122,7 @@ async fn send_nft() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let accounts = &create_accounts_with_funds(&wallet, 2).await?;
+    let accounts = &request_funds(&wallet, 2).await?;
 
     let nft_options = [MintNftParams::new()
         .with_address(*accounts[0].addresses().await?[0].address())
@@ -165,7 +165,7 @@ async fn send_with_note() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     let amount = 1_000_000;
@@ -195,7 +195,7 @@ async fn conflicting_transaction() -> Result<()> {
     let mnemonic = iota_sdk::client::utils::generate_mnemonic()?;
     // Create two wallets with the same mnemonic
     let wallet_0 = make_wallet(storage_path_0, Some(mnemonic.clone()), None).await?;
-    let wallet_0_account = &create_accounts_with_funds(&wallet_0, 1).await?[0];
+    let wallet_0_account = &request_funds(&wallet_0, 1).await?[0];
     let wallet_1 = make_wallet(storage_path_1, Some(mnemonic), None).await?;
     let wallet_1_account = wallet_1.create_account().finish().await?;
 
@@ -267,7 +267,7 @@ async fn prepare_transaction_ledger() -> Result<()> {
 
     let wallet = crate::wallet::common::make_ledger_nano_wallet(storage_path, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     let amount = 1_000_000;

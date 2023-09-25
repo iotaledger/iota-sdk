@@ -12,6 +12,7 @@ use iota_sdk::{
         stronghold::{Error as StrongholdError, StrongholdAdapter},
         Error as ClientError,
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 
@@ -87,7 +88,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
         .with_secret_manager(stronghold_secret_manager)
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
         // Build with a different coin type, to check if it gets replaced by the one from the backup
-        .with_coin_type(IOTA_COIN_TYPE)
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
         .finish()
         .await
         .unwrap();

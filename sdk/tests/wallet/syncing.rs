@@ -12,7 +12,7 @@ use iota_sdk::{
     wallet::{account::SyncOptions, Result},
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[tokio::test]
 #[cfg(feature = "rocksdb")]
@@ -22,7 +22,7 @@ async fn updated_default_sync_options() -> Result<()> {
 
     let default_sync = SyncOptions::default();
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None, None).await?;
     let account = wallet.create_account().finish().await?;
 
     assert_eq!(default_sync, account.default_sync_options().await);
@@ -37,7 +37,7 @@ async fn updated_default_sync_options() -> Result<()> {
     drop(account);
     drop(wallet);
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None, None).await?;
     let account = wallet.get_account(0).await?;
 
     assert_eq!(custom_options, account.default_sync_options().await);
@@ -51,9 +51,9 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let storage_path = "test-storage/sync_only_most_basic_outputs";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     let account_1_address = *account_1.addresses().await?[0].address().as_ref();
@@ -155,9 +155,9 @@ async fn sync_incoming_transactions() -> Result<()> {
     let storage_path = "test-storage/sync_incoming_transactions";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
     let account_1_address = *account_1.addresses().await?[0].address().as_ref();
