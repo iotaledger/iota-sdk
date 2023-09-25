@@ -21,7 +21,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, AccountIdentifier},
-            Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
+            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -768,7 +768,12 @@ pub async fn send_nft_command(
 
 // `sync` command
 pub async fn sync_command(account: &Account) -> Result<(), Error> {
-    let balance = account.sync(None).await?;
+    let balance = account
+        .sync(Some(SyncOptions {
+            sync_native_token_foundries: true,
+            ..Default::default()
+        }))
+        .await?;
     println_log_info!("Synced.");
     println_log_info!("{balance:#?}");
 
