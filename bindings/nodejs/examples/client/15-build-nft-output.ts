@@ -12,6 +12,7 @@ import {
     SenderFeature,
     Ed25519Address,
     IssuerFeature,
+    Irc27Metadata,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -35,14 +36,11 @@ async function run() {
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        // IOTA NFT Standard - IRC27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
-        const tip27ImmutableMetadata = {
-            standard: 'IRC27',
-            version: 'v1.0',
-            type: 'image/jpeg',
-            uri: 'https://mywebsite.com/my-nft-files-1.jpeg',
-            name: 'My NFT #0001',
-        };
+        const tip27ImmutableMetadata = new Irc27Metadata(
+            'image/jpeg',
+            'https://mywebsite.com/my-nft-files-1.jpeg',
+            'My NFT #0001',
+        );
 
         const nftOutput = await client.buildNftOutput({
             // NftId needs to be null the first time
@@ -52,9 +50,7 @@ async function run() {
             ],
             immutableFeatures: [
                 new IssuerFeature(new Ed25519Address(hexAddress)),
-                new MetadataFeature(
-                    utf8ToHex(JSON.stringify(tip27ImmutableMetadata)),
-                ),
+                tip27ImmutableMetadata.asFeature(),
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),
