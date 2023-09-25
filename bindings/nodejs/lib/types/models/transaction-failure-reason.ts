@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Reason for transaction failure..
+ * Reason for transaction failure.
  */
 export enum TransactionFailureReason {
     /**
