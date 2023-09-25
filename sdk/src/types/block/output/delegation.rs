@@ -405,6 +405,7 @@ impl StateTransitionVerifier for DelegationOutput {
     }
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        // TODO handle mana rewards
         Ok(())
     }
 }
