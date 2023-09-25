@@ -5,10 +5,8 @@ import { Type } from 'class-transformer';
 import { HexEncodedString } from '../../../utils';
 import { Input, InputDiscriminator } from '../../input';
 import { Output, OutputDiscriminator } from '../../output';
-import { MilestonePayload } from '../milestone/milestone';
 import { Payload, PayloadType } from '../payload';
 import { TaggedDataPayload } from '../tagged/tagged';
-import { TreasuryTransactionPayload } from '../treasury';
 
 /**
  * All of the essence types.
@@ -41,15 +39,13 @@ abstract class TransactionEssence {
     }
 }
 
+/**
+ * PayloadDiscriminator for payloads inside of a TransactionEssence.
+ */
 const PayloadDiscriminator = {
     property: 'type',
     subTypes: [
-        { value: MilestonePayload, name: PayloadType.Milestone as any },
         { value: TaggedDataPayload, name: PayloadType.TaggedData as any },
-        {
-            value: TreasuryTransactionPayload,
-            name: PayloadType.TreasuryTransaction as any,
-        },
     ],
 };
 
