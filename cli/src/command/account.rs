@@ -916,7 +916,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
     let mut log = format!(
-        "Address {}:\n {:<10}{}\n {:<10}{:?}",
+        "Address: {}\n{:<9}{}\n{:<9}{:?}",
         address.key_index(),
         "Bech32:",
         address.address(),
@@ -979,7 +979,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     }
 
     log = format!(
-        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
+        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAliases: {:#?}\nFoundries: {:#?}\n",
         output_ids,
         amount,
         native_tokens.finish_vec()?,
