@@ -21,9 +21,26 @@ use crate::{
 
 impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
-    fn get_remainder_address(&self) -> Option<(Address, Option<Bip44>)> {
-        if self.remainder_address.is_some() {
-            return self.remainder_address.map(|address| (address, None));
+    fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
+        if let Some(remainder_address) = self.remainder_address {
+            // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
+            for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
+                let alias_transition = is_alias_transition(
+                    &input.output,
+                    *input.output_id(),
+                    self.outputs.as_slice(),
+                    self.burn.as_ref(),
+                );
+                let (required_address, _) =
+                    input
+                        .output
+                        .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?;
+
+                if required_address == remainder_address {
+                    return Ok(Some((remainder_address, input.chain)));
+                }
+            }
+            return Ok(Some((remainder_address, None)));
         }
 
         for input in &self.selected_inputs {
@@ -33,19 +50,17 @@ impl InputSelection {
                 self.outputs.as_slice(),
                 self.burn.as_ref(),
             );
-            // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             let required_address = input
                 .output
-                .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)
-                .unwrap()
+                .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?
                 .0;
 
             if required_address.is_ed25519() {
-                return Some((required_address, input.chain));
+                return Ok(Some((required_address, input.chain)));
             }
         }
 
-        None
+        Ok(None)
     }
 
     pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
@@ -125,7 +140,7 @@ impl InputSelection {
             return Ok((None, storage_deposit_returns));
         }
 
-        let Some((remainder_address, chain)) = self.get_remainder_address() else {
+        let Some((remainder_address, chain)) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
