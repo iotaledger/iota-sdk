@@ -21,13 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.12 - 2023-mm-dd
 
-### Added
+### Fixed
 
-- `RegularTransactionEssence.getParsedPayload()` method;
-
-### Changed
-
-- `RegularTransactionEssence.payload` type to `unknown`;
+- Parsing of `RegularTransactionEssence.payload`;
 
 ## 1.0.11 - 2023-09-14
 

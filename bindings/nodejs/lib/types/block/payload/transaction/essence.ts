@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { parsePayload } from '../../../..';
 import { HexEncodedString } from '../../../utils';
 import { Input, InputDiscriminator } from '../../input';
 import { Output, OutputDiscriminator } from '../../output';
 import { MilestonePayload } from '../milestone/milestone';
+import { Payload, PayloadType } from '../payload';
 import { TaggedDataPayload } from '../tagged/tagged';
 import { TreasuryTransactionPayload } from '../treasury';
-import { TransactionPayload } from './transaction';
 
 /**
  * All of the essence types.
@@ -42,6 +41,18 @@ abstract class TransactionEssence {
     }
 }
 
+const PayloadDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: MilestonePayload, name: PayloadType.Milestone as any },
+        { value: TaggedDataPayload, name: PayloadType.TaggedData as any },
+        {
+            value: TreasuryTransactionPayload,
+            name: PayloadType.TreasuryTransaction as any,
+        },
+    ],
+};
+
 /**
  * RegularTransactionEssence transaction essence.
  */
@@ -60,7 +71,10 @@ class RegularTransactionEssence extends TransactionEssence {
     })
     outputs: Output[];
 
-    payload?: unknown;
+    @Type(() => Payload, {
+        discriminator: PayloadDiscriminator,
+    })
+    payload: Payload | undefined;
 
     /**
      * @param networkId The ID of the network the transaction was issued to.
@@ -75,7 +89,7 @@ class RegularTransactionEssence extends TransactionEssence {
         inputsCommitment: HexEncodedString,
         inputs: Input[],
         outputs: Output[],
-        payload: unknown | undefined,
+        payload: MilestonePayload | TaggedDataPayload | undefined,
     ) {
         super(TransactionEssenceType.Regular);
         this.networkId = networkId;
@@ -83,15 +97,6 @@ class RegularTransactionEssence extends TransactionEssence {
         this.inputs = inputs;
         this.outputs = outputs;
         this.payload = payload;
-    }
-
-    getParsedPayload():
-        | TransactionPayload
-        | MilestonePayload
-        | TaggedDataPayload
-        | TreasuryTransactionPayload
-        | undefined {
-        return this.payload ? (parsePayload(this.payload) as any) : undefined;
     }
 }
 
