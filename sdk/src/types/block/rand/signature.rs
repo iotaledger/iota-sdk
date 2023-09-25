@@ -22,7 +22,7 @@ pub fn rand_ed25519_signature() -> Ed25519Signature {
     let public_key = private_key.public_key();
     let signature = private_key.sign(&rand_bytes(64));
 
-    Ed25519Signature::new(public_key.into(), signature)
+    Ed25519Signature::new(public_key, signature)
 }
 
 pub fn rand_signature() -> Signature {

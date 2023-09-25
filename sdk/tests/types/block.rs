@@ -126,7 +126,7 @@ fn dto_mismatch_version() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+    let issuing_time = protocol_parameters.genesis_unix_timestamp()
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = protocol_parameters.network_id();
     let protocol_version = 4;
@@ -168,7 +168,7 @@ fn dto_mismatch_network_id() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+    let issuing_time = protocol_parameters.genesis_unix_timestamp()
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = network_name_to_id("invalid-network");
     let block_dto_json = serde_json::json!({

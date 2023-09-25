@@ -5,6 +5,7 @@ use fern_logger::Error as LoggerError;
 use iota_sdk::{
     client::error::Error as ClientError, types::block::Error as BlockError, wallet::error::Error as WalletError,
 };
+use rustyline::error::ReadlineError;
 use serde_json::Error as SerdeJsonError;
 
 #[derive(Debug, thiserror::Error)]
@@ -21,6 +22,8 @@ pub enum Error {
     Miscellaneous(String),
     #[error("generate at least one address before using the faucet")]
     NoAddressForFaucet,
+    #[error("prompt error: {0}")]
+    Prompt(#[from] ReadlineError),
     #[error("serde_json error: {0}")]
     SerdeJson(#[from] SerdeJsonError),
     #[error("wallet error: {0}")]

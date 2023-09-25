@@ -10,6 +10,7 @@ import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AccountQueryParameter,
     FoundryQueryParameter,
+    GenericQueryParameter,
     NftQueryParameter,
     QueryParameter,
 } from '../query-parameters';
@@ -28,6 +29,13 @@ export interface __GetOutputMethod__ {
     name: 'getOutput';
     data: {
         outputId: string;
+    };
+}
+
+export interface __GetOutputIdsMethod__ {
+    name: 'outputIds';
+    data: {
+        queryParameters: GenericQueryParameter[];
     };
 }
 
