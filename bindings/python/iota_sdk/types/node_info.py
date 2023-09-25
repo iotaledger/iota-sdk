@@ -186,7 +186,7 @@ class ProtocolParameters:
         bech32_hrp: Tells whether the node supports mainnet or testnet addresses.
                     Value `iota` indicates that the node supports mainnet addresses.
                     Value `atoi` indicates that the node supports testnet addresses.
-        rent_structure: The rent structure according to TIP-19.
+        rent_structure: The rent structure used by a given node/network.
         work_score_structure: Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
