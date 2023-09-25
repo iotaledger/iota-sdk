@@ -26,12 +26,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_or_create_account` convenience method;
 - `Output::kind_str()` method;
 - `ConflictReason` display implementation with an explanation of the conflict;
+- `TokenScheme` methods `is_simple` and `as_simple`;
+- `Irc27Metadata` and `Irc30Metadata` helpers;
+- `Client::output_ids()` method;
+- `QueryParameter::UnlockableByAddress` variant;
 
 ### Changed
 
 - `StrongholdAdapterBuilder` updated to be slightly more ergonomic;
 - `Wallet::{set_stronghold_password, change_stronghold_password, set_stronghold_password_clear_interval, store_mnemonic}` return an `Err` instead of `Ok` in case of a non-stronghold secret manager; 
 - Balance computation internal refactoring;
+
+## 1.0.4 - 2023-MM-DD
+
+### Changed
+
+- `migrate_db_chrysalis_to_stardust()` returns an error if no chrysalis data was found;
+
+## 1.0.3 - 2023-09-07
+
+### Added
+
+- `migrate_db_chrysalis_to_stardust()` function;
+- `Wallet::get_chrysalis_data()` method;
+- `PrivateKeySecretManager` and `SecretManager::PrivateKey`;
+- `SecretManager::from` impl for variants;
+- `Client` requests now obey a maximum concurrency using a request pool (set via `ClientBuilder::with_max_parallel_api_requests`);
+
+### Fixed
+
+- `Clients` returning the default protocol parameters when multiple `Client` instances are used;
+- Ledger Nano events properly created when preparing transactions using a `SecretManager`;
+- `Account::prepare_output()` when `ReturnStrategy::Gift` is used with an existing NFT output;
+- `Wallet::restore_backup()` when no secret manager data is stored inside;
+- Migration mismatch from `iota-rs` version;
+
+## 1.0.2 - 2023-07-28
+
+### Changed
+
+- Bump `iota_stronghold` dependency to `2.0.0`;
 
 ## 1.0.1 - 2023-07-25
 

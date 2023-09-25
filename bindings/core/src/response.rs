@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashMap;
 #[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
@@ -46,7 +47,6 @@ use serde::Serialize;
 use {
     iota_sdk::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
     iota_sdk::wallet::account::{AccountParticipationOverview, ParticipationEventWithNodes},
-    std::collections::HashMap,
 };
 
 use crate::{error::Error, OmittedDebug};
@@ -71,7 +71,7 @@ pub enum Response {
     NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
-    NetworkId(u64),
+    NetworkId(String),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
     Bech32Hrp(Hrp),
@@ -168,6 +168,7 @@ pub enum Response {
     /// - [`BasicOutputIds`](crate::method::ClientMethod::BasicOutputIds)
     /// - [`FoundryOutputIds`](crate::method::ClientMethod::FoundryOutputIds)
     /// - [`NftOutputIds`](crate::method::ClientMethod::NftOutputIds)
+    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
@@ -227,6 +228,8 @@ pub enum Response {
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
+    /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)
+    HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
 
@@ -307,6 +310,9 @@ pub enum Response {
     /// Response for:
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
+    /// Response for:
+    /// - [`GetChrysalisData`](crate::method::WalletMethod::GetChrysalisData)
+    ChrysalisData(Option<HashMap<String, String>>),
     /// Response for:
     /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
     /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)

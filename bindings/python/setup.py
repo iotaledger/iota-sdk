@@ -9,7 +9,7 @@ from setuptools_rust import RustExtension
 def get_py_version_cfgs():
     # For now each Cfg Py_3_X flag is interpreted as "at least 3.X"
     version = sys.version_info[0:3]
-    py3_min = 8
+    py3_min = 9
     out_cfg = []
     for minor in range(py3_min, version[1] + 1):
         out_cfg.append("--cfg=Py_3_%d" % minor)
@@ -22,7 +22,7 @@ def get_py_version_cfgs():
 
 setup(
     name="iota_sdk",
-    version="1.0.0",
+    version="1.0.3",
     classifiers=[
         "License :: SPDX-License-Identifier ::  Apache-2.0",
         "Intended Audience :: Developers",

@@ -66,6 +66,7 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::boxed::Box;
 

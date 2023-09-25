@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
 from iota_sdk.utils import Utils
@@ -25,8 +25,8 @@ class Block:
     protocolVersion: int
     parents: List[HexStr]
     nonce: str
-    payload: Optional[TaggedDataPayload |
-                      TransactionPayload | MilestonePayload] = None
+    payload: Optional[Union[TaggedDataPayload,
+                      TransactionPayload, MilestonePayload]] = None
 
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:

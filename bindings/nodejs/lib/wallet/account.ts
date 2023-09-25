@@ -57,6 +57,10 @@ export class Account {
     private meta: AccountMeta;
     private methodHandler: WalletMethodHandler;
 
+    /**
+     * @param accountMeta An instance of `AccountMeta`.
+     * @param methodHandler A instance of `WalletMethodHandler`.
+     */
     constructor(accountMeta: AccountMeta, methodHandler: WalletMethodHandler) {
         this.meta = accountMeta;
         this.methodHandler = methodHandler;
@@ -113,16 +117,29 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
-     * @param burn The outputs to burn
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * A generic function that can be used to burn native tokens, nfts, foundries and aliases.
+     * @param burn The outputs or native tokens to burn
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The resulting transaction.
+     * @returns The transaction.
+     */
+    async burn(
+        burn: Burn,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareBurn(burn, transactionOptions)).send();
+    }
+
+    /**
+     * A generic function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
+     * @param burn The outputs or native tokens to burn
+     * @param transactionOptions Additional transaction options
+     * @returns The prepared transaction.
      */
     async prepareBurn(
         burn: Burn,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -133,8 +150,13 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**
@@ -143,9 +165,9 @@ export class Account {
      * recommended to use melting, if the foundry output is available.
      * @param tokenId The native token id.
      * @param burnAmount The to be burned amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareBurnNativeToken(
         tokenId: string,
@@ -172,12 +194,13 @@ export class Account {
             this,
         );
     }
+
     /**
      * Burn an nft output.
      * @param nftId The NftId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareBurnNft(
         nftId: string,
@@ -228,9 +251,21 @@ export class Account {
      * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
-     * @param force Force consolidation on addresses where the threshold isn't met.
-     * @param outputConsolidationThreshold A default threshold is used if this is omitted.
+     * @param params Consolidation options.
      * @returns The consolidation transaction.
+     */
+    async consolidateOutputs(
+        params: ConsolidationParams,
+    ): Promise<Transaction> {
+        return (await this.prepareConsolidateOutputs(params)).send();
+    }
+
+    /**
+     * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
+     * by sending them to an own address again if the output amount is greater or
+     * equal to the output consolidation threshold.
+     * @param params Consolidation options.
+     * @returns The prepared consolidation transaction.
      */
     async prepareConsolidateOutputs(
         params: ConsolidationParams,
@@ -254,11 +289,27 @@ export class Account {
     }
 
     /**
+     * Creates an alias output.
+     * @param params The alias output options.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async createAliasOutput(
+        params?: AliasOutputParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareCreateAliasOutput(params, transactionOptions)
+        ).send();
+    }
+
+    /**
      * `createAliasOutput` creates an alias output
      * @param params The alias output options.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns A transaction object.
+     * @returns The prepared transaction.
      */
     async prepareCreateAliasOutput(
         params?: AliasOutputParams,
@@ -288,9 +339,32 @@ export class Account {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
+     */
+    async meltNativeToken(
+        tokenId: string,
+        meltAmount: bigint,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareMeltNativeToken(
+                tokenId,
+                meltAmount,
+                transactionOptions,
+            )
+        ).send();
+    }
+
+    /**
+     * Melt native tokens. This happens with the foundry output which minted them, by increasing its
+     * `melted_tokens` field.
+     * @param tokenId The native token id.
+     * @param meltAmount To be melted amount.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The prepared transaction.
      */
     async prepareMeltNativeToken(
         tokenId: string,
@@ -317,6 +391,11 @@ export class Account {
         );
     }
 
+    /**
+     * Deregister a participation event.
+     *
+     * @param eventId The id of the participation event to deregister.
+     */
     async deregisterParticipationEvent(
         eventId: ParticipationEventId,
     ): Promise<void> {
@@ -334,10 +413,11 @@ export class Account {
 
     /**
      * Destroy an alias output.
+     *
      * @param aliasId The AliasId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareDestroyAlias(
         aliasId: string,
@@ -367,10 +447,11 @@ export class Account {
     /**
      * Function to destroy a foundry output with a circulating supply of 0.
      * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias.
+     *
      * @param foundryId The FoundryId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The transaction.
+     * @returns The prepared transaction.
      */
     async prepareDestroyFoundry(
         foundryId: string,
@@ -398,7 +479,8 @@ export class Account {
     }
 
     /**
-     * Generate new unused ed25519 addresses.
+     * Generate new unused Ed25519 addresses.
+     *
      * @param amount The amount of addresses to generate.
      * @param options Options for address generation.
      * @returns The addresses.
@@ -422,6 +504,7 @@ export class Account {
 
     /**
      * Get the account balance.
+     *
      * @returns The account balance.
      */
     async getBalance(): Promise<Balance> {
@@ -448,19 +531,19 @@ export class Account {
                 payload.nativeTokens[i].available,
             );
         }
-        payload.baseCoin.total = hexToBigInt(payload.baseCoin.total);
-        payload.baseCoin.available = hexToBigInt(payload.baseCoin.available);
+        payload.baseCoin.total = BigInt(payload.baseCoin.total);
+        payload.baseCoin.available = BigInt(payload.baseCoin.available);
 
-        payload.requiredStorageDeposit.alias = hexToBigInt(
+        payload.requiredStorageDeposit.alias = BigInt(
             payload.requiredStorageDeposit.alias,
         );
-        payload.requiredStorageDeposit.basic = hexToBigInt(
+        payload.requiredStorageDeposit.basic = BigInt(
             payload.requiredStorageDeposit.basic,
         );
-        payload.requiredStorageDeposit.foundry = hexToBigInt(
+        payload.requiredStorageDeposit.foundry = BigInt(
             payload.requiredStorageDeposit.foundry,
         );
-        payload.requiredStorageDeposit.nft = hexToBigInt(
+        payload.requiredStorageDeposit.nft = BigInt(
             payload.requiredStorageDeposit.nft,
         );
 
@@ -486,6 +569,11 @@ export class Account {
         return plainToInstance(OutputData, parsed.payload);
     }
 
+    /**
+     * Get a participation event.
+     *
+     * @param eventId The ID of the event to get.
+     */
     async getParticipationEvent(
         eventId: ParticipationEventId,
     ): Promise<ParticipationEventWithNodes> {
@@ -501,6 +589,12 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * Get IDs of participation events of a certain type.
+     *
+     * @param node The node to get events from.
+     * @param eventType The type of events to get.
+     */
     async getParticipationEventIds(
         node: INode,
         eventType?: ParticipationEventType,
@@ -518,6 +612,9 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * Get all participation events.
+     */
     async getParticipationEvents(): Promise<ParticipationEventMap> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -528,6 +625,11 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /**
+     * Get the participation event status by its ID.
+     *
+     * @param eventId The ID of the event status to get.
+     */
     async getParticipationEventStatus(
         eventId: ParticipationEventId,
     ): Promise<ParticipationEventStatus> {
@@ -546,6 +648,7 @@ export class Account {
     /**
      * Get a `FoundryOutput` by native token ID. It will try to get the foundry from
      * the account, if it isn't in the account it will try to get it from the node.
+     *
      * @param tokenId The native token ID to get the foundry for.
      * @returns The `FoundryOutput` that minted the token.
      */
@@ -564,6 +667,7 @@ export class Account {
 
     /**
      * Get outputs with additional unlock conditions.
+     *
      * @param outputs The type of outputs to claim.
      * @returns The output IDs of the unlockable outputs.
      */
@@ -582,6 +686,7 @@ export class Account {
 
     /**
      * Get a transaction stored in the account.
+     *
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
@@ -602,6 +707,7 @@ export class Account {
     /**
      * Get the transaction with inputs of an incoming transaction stored in the account
      * List might not be complete, if the node pruned the data already
+     *
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
@@ -621,6 +727,7 @@ export class Account {
 
     /**
      * List all the addresses of the account.
+     *
      * @returns The addresses.
      */
     async addresses(): Promise<AccountAddress[]> {
@@ -636,6 +743,7 @@ export class Account {
 
     /**
      * List the addresses of the account with unspent outputs.
+     *
      * @returns The addresses.
      */
     async addressesWithUnspentOutputs(): Promise<AddressWithUnspentOutputs[]> {
@@ -651,6 +759,7 @@ export class Account {
 
     /**
      * List all outputs of the account.
+     *
      * @param filterOptions Options to filter the to be returned outputs.
      * @returns The outputs with metadata.
      */
@@ -669,6 +778,7 @@ export class Account {
 
     /**
      * List all the pending transactions of the account.
+     *
      * @returns The transactions.
      */
     async pendingTransactions(): Promise<Transaction[]> {
@@ -684,6 +794,7 @@ export class Account {
 
     /**
      * List all incoming transactions of the account.
+     *
      * @returns The incoming transactions with their inputs.
      */
     async incomingTransactions(): Promise<Transaction[]> {
@@ -699,6 +810,7 @@ export class Account {
 
     /**
      * List all the transactions of the account.
+     *
      * @returns The transactions.
      */
     async transactions(): Promise<Transaction[]> {
@@ -714,6 +826,7 @@ export class Account {
 
     /**
      * List all the unspent outputs of the account.
+     *
      * @param filterOptions Options to filter the to be returned outputs.
      * @returns The outputs with metadata.
      */
@@ -731,6 +844,7 @@ export class Account {
 
     /**
      * Get the accounts metadata.
+     *
      * @returns The accounts metadata.
      */
     getMetadata(): AccountMetadata {
@@ -743,11 +857,35 @@ export class Account {
 
     /**
      * Mint additional native tokens.
+     *
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The minting transaction.
+     */
+    async mintNativeToken(
+        tokenId: string,
+        mintAmount: bigint,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareMintNativeToken(
+                tokenId,
+                mintAmount,
+                transactionOptions,
+            )
+        ).send();
+    }
+
+    /**
+     * Mint additional native tokens.
+     *
+     * @param tokenId The native token id.
+     * @param mintAmount To be minted amount.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The prepared minting transaction.
      */
     async prepareMintNativeToken(
         tokenId: string,
@@ -777,10 +915,28 @@ export class Account {
 
     /**
      * Create a native token.
+     *
      * @param params The options for creating a native token.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The creating transaction and the token ID.
+     * @returns The created transaction.
+     */
+    async createNativeToken(
+        params: CreateNativeTokenParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareCreateNativeToken(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Create a native token.
+     *
+     * @param params The options for creating a native token.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The created transaction and the token ID.
      */
     async prepareCreateNativeToken(
         params: CreateNativeTokenParams,
@@ -816,11 +972,27 @@ export class Account {
     }
 
     /**
-     * Mint nfts.
+     * Mint NFTs.
+     *
      * @param params The options for minting nfts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The minting transaction.
+     */
+    async mintNfts(
+        params: MintNftParams[],
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareMintNfts(params, transactionOptions)).send();
+    }
+
+    /**
+     * Mint NFTs.
+     *
+     * @param params The options for minting nfts.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The prepared minting transaction.
      */
     async prepareMintNfts(
         params: MintNftParams[],
@@ -848,6 +1020,7 @@ export class Account {
 
     /**
      * Prepare an output for sending, useful for offline signing.
+     *
      * @param options The options for preparing an output. If the amount is
      * below the minimum required storage deposit, by default the remaining
      * amount will automatically be added with a `StorageDepositReturn` `UnlockCondition`,
@@ -855,7 +1028,7 @@ export class Account {
      * storage deposit will be sent to the recipient. When the assets contain
      * an nft id, the data from the existing `NftOutput` will be used, just with
      * the address unlock conditions replaced.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared output.
      */
@@ -883,8 +1056,9 @@ export class Account {
 
     /**
      * Prepare to send base coins, useful for offline signing.
+     *
      * @param params Address with amounts to send.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -917,9 +1091,25 @@ export class Account {
     }
 
     /**
-     * Prepare a transaction, useful for offline signing.
+     * Send a transaction.
+     *
      * @param outputs Outputs to use in the transaction.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options
+     * or custom inputs.
+     * @returns The transaction data.
+     */
+    async sendTransaction(
+        outputs: Output[],
+        options?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareTransaction(outputs, options)).send();
+    }
+
+    /**
+     * Prepare a transaction, useful for offline signing.
+     *
+     * @param outputs Outputs to use in the transaction.
+     * @param options Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -946,6 +1136,12 @@ export class Account {
         );
     }
 
+    /**
+     * Register participation events.
+     *
+     * @param options Options to register participation events.
+     * @returns A mapping between event IDs and their corresponding event data.
+     */
     async registerParticipationEvents(
         options: ParticipationEventRegistrationOptions,
     ): Promise<ParticipationEventMap> {
@@ -986,9 +1182,10 @@ export class Account {
 
     /**
      * Send base coins to an address.
+     *
      * @param amount Amount of coins.
      * @param address Receiving address.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1017,8 +1214,9 @@ export class Account {
 
     /**
      * Send base coins with amounts from input addresses.
+     *
      * @param params Addresses with amounts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1047,10 +1245,28 @@ export class Account {
 
     /**
      * Send native tokens.
+     *
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The sent transaction.
+     * @returns The transaction.
+     */
+    async sendNativeTokens(
+        params: SendNativeTokensParams[],
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (
+            await this.prepareSendNativeTokens(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Send native tokens.
+     *
+     * @param params Addresses amounts and native tokens.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
         params: SendNativeTokensParams[],
@@ -1076,11 +1292,27 @@ export class Account {
     }
 
     /**
-     * Send nft.
+     * Send NFT.
+     *
      * @param params Addresses and nft ids.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
-     * @returns The sent transaction.
+     * @returns The transaction.
+     */
+    async sendNft(
+        params: SendNftParams[],
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        return (await this.prepareSendNft(params, transactionOptions)).send();
+    }
+
+    /**
+     * Send NFT.
+     *
+     * @param params Addresses and nft ids.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The prepared transaction.
      */
     async prepareSendNft(
         params: SendNftParams[],
@@ -1107,8 +1339,9 @@ export class Account {
 
     /**
      * Send outputs in a transaction.
+     *
      * @param outputs The outputs to send.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1133,6 +1366,7 @@ export class Account {
 
     /**
      * Set the alias for the account
+     *
      * @param alias The account alias to set.
      */
     async setAlias(alias: string): Promise<void> {
@@ -1147,6 +1381,7 @@ export class Account {
     /**
      * Set the fallback SyncOptions for account syncing.
      * If storage is enabled, will persist during restarts.
+     *
      * @param options The sync options to set.
      */
     async setDefaultSyncOptions(options: SyncOptions): Promise<void> {
@@ -1160,6 +1395,7 @@ export class Account {
 
     /**
      * Sign a prepared transaction, useful for offline signing.
+     *
      * @param preparedTransactionData The prepared transaction data to sign.
      * @returns The signed transaction essence.
      */
@@ -1183,6 +1419,7 @@ export class Account {
 
     /**
      * Sign a prepared transaction, and send it.
+     *
      * @param preparedTransactionData The prepared transaction data to sign and submit.
      * @returns The transaction.
      */
@@ -1204,6 +1441,7 @@ export class Account {
 
     /**
      * Validate the transaction, submit it to a node and store it in the account.
+     *
      * @param signedTransactionData A signed transaction to submit and store.
      * @returns The sent transaction.
      */
@@ -1245,6 +1483,13 @@ export class Account {
         return this.adjustBalancePayload(payload);
     }
 
+    /**
+     * Prepare a vote.
+     *
+     * @param eventId The participation event ID.
+     * @param answers Answers for a voting event, can be empty.
+     * @returns An instance of `PreparedTransaction`.
+     */
     async prepareVote(
         eventId?: ParticipationEventId,
         answers?: number[],
@@ -1268,6 +1513,12 @@ export class Account {
         );
     }
 
+    /**
+     * Prepare stop participating in an event.
+     *
+     * @param eventId The event ID to stop participating in.
+     * @returns An instance of `PreparedTransaction`.
+     */
     async prepareStopParticipating(
         eventId: ParticipationEventId,
     ): Promise<PreparedTransaction> {
@@ -1291,8 +1542,9 @@ export class Account {
 
     /**
      * Calculates the voting overview of an account.
+     *
      * @param eventIds Optional, filters participations only for provided events.
-     * @returns ParticipationOverview
+     * @returns An instance of `ParticipationOverview`
      */
     async getParticipationOverview(
         eventIds?: ParticipationEventId[],
@@ -1309,7 +1561,20 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /** @deprecated use prepareIncreaseVotingPower() instead. */
     async prepareVotingPower(amount: string): Promise<PreparedTransaction> {
+        return this.prepareIncreaseVotingPower(amount);
+    }
+
+    /**
+     * Prepare to increase the voting power.
+     *
+     * @param amount The amount to increase the voting power by.
+     * @returns An instance of `PreparedTransaction`.
+     */
+    async prepareIncreaseVotingPower(
+        amount: string,
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1328,6 +1593,12 @@ export class Account {
         );
     }
 
+    /**
+     * Prepare to decrease the voting power.
+     *
+     * @param amount The amount to decrease the voting power by.
+     * @returns An instance of `PreparedTransaction`.
+     */
     async prepareDecreaseVotingPower(
         amount: string,
     ): Promise<PreparedTransaction> {

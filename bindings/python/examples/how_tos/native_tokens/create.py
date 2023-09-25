@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import CreateNativeTokenParams, Wallet, utf8_to_hex
+from iota_sdk import CreateNativeTokenParams, Wallet, Irc30Metadata
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ balance = account.sync()
 # existing one.
 if not balance.aliases:
     # If we don't have an alias, we need to create one
-    transaction = account.prepare_create_alias_output(None, None).send()
+    transaction = account.create_alias_output(None, None)
     print(f'Transaction sent: {transaction.transactionId}')
 
     # Wait for transaction to get included
@@ -38,10 +38,14 @@ if not balance.aliases:
 
 print('Preparing transaction to create native token...')
 
+metadata = Irc30Metadata(
+    "My Native Token", "MNT", 10, description="A native token to test the iota-sdk."
+)
+
 params = CreateNativeTokenParams(
     100,
     100,
-    utf8_to_hex('Hello, World!'),
+    metadata.as_hex(),
 )
 
 prepared_transaction = account.prepare_create_native_token(params, None)

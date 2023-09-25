@@ -72,8 +72,7 @@ async function run() {
                     i + chunk.length
                 }/${NFT_COLLECTION_SIZE})`,
             );
-            const prepared = await account.prepareMintNfts(chunk);
-            const transaction = await prepared.send();
+            const transaction = await account.mintNfts(chunk);
 
             // Wait for transaction to get included
             const blockId = await account.retryTransactionUntilIncluded(

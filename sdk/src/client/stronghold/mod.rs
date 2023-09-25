@@ -67,7 +67,7 @@ use tokio::{
 };
 use zeroize::Zeroizing;
 
-use self::common::PRIVATE_DATA_CLIENT_PATH;
+pub(crate) use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
 use super::{storage::StorageAdapter, utils::Password};
 
@@ -182,6 +182,16 @@ impl StrongholdAdapterBuilder {
     /// [`password()`]: Self::password()
     /// [`timeout()`]: Self::timeout()
     pub fn build<P: AsRef<Path>>(self, snapshot_path: P) -> Result<StrongholdAdapter, Error> {
+        if snapshot_path.as_ref().is_dir() {
+            // TODO: Add Error in 2.0 as its breaking.
+            // Issue #1197
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Path is not a file: {:?}", snapshot_path.as_ref().to_path_buf()),
+            )
+            .into());
+        }
+
         // In any case, Stronghold - as a necessary component - needs to be present at this point.
         let stronghold = self.stronghold.unwrap_or_default();
 
@@ -484,6 +494,16 @@ impl StrongholdAdapter {
     ///
     /// [`unload_stronghold_snapshot()`]: Self::unload_stronghold_snapshot()
     pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<(), Error> {
+        if let Some(p) = snapshot_path {
+            if p.is_dir() {
+                // TODO: Add Error in 2.0 as its breaking.
+                // Issue #1197
+                return Err(
+                    std::io::Error::new(std::io::ErrorKind::Other, format!("Path is not a file: {:?}", p)).into(),
+                );
+            }
+        }
+
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
         let key_provider = if let Some(key_provider) = &*locked_key_provider {

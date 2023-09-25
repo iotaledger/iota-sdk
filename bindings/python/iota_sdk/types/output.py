@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
@@ -89,10 +89,10 @@ class BasicOutput(Output):
             The type of output.
     """
     amount: str
-    unlockConditions: List[AddressUnlockCondition | ExpirationUnlockCondition | StorageDepositReturnUnlockCondition |
-                           TimelockUnlockCondition]
-    features: Optional[List[SenderFeature |
-                            MetadataFeature | TagFeature]] = None
+    unlockConditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
+                           TimelockUnlockCondition]]
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature, TagFeature]]] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
@@ -129,12 +129,12 @@ class AliasOutput(Output):
     aliasId: HexStr
     stateIndex: int
     foundryCounter: int
-    unlockConditions: List[StateControllerAddressUnlockCondition |
-                           GovernorAddressUnlockCondition]
-    features: Optional[List[SenderFeature |
-                            MetadataFeature]] = None
-    immutableFeatures: Optional[List[IssuerFeature |
-                                     MetadataFeature]] = None
+    unlockConditions: List[Union[StateControllerAddressUnlockCondition,
+                           GovernorAddressUnlockCondition]]
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature]]] = None
+    immutableFeatures: Optional[List[Union[IssuerFeature,
+                                     MetadataFeature]]] = None
     stateMetadata: Optional[HexStr] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -198,12 +198,12 @@ class NftOutput(Output):
     """
     amount: str
     nftId: HexStr
-    unlockConditions: List[AddressUnlockCondition | ExpirationUnlockCondition |
-                           StorageDepositReturnUnlockCondition | TimelockUnlockCondition]
-    features: Optional[List[SenderFeature |
-                            MetadataFeature | TagFeature]] = None
-    immutableFeatures: Optional[List[
-        IssuerFeature | MetadataFeature]] = None
+    unlockConditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
+                           StorageDepositReturnUnlockCondition, TimelockUnlockCondition]]
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature, TagFeature]]] = None
+    immutableFeatures: Optional[List[Union[
+        IssuerFeature, MetadataFeature]]] = None
     nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
 
@@ -257,7 +257,7 @@ class OutputWithMetadata:
     """
 
     metadata: OutputMetadata
-    output: AliasOutput | FoundryOutput | NftOutput | BasicOutput
+    output: Union[AliasOutput, FoundryOutput, NftOutput, BasicOutput]
 
     @classmethod
     def from_dict(cls, dict: Dict) -> OutputWithMetadata:
@@ -277,7 +277,7 @@ class OutputWithMetadata:
 
 
 def output_from_dict(
-        output: Dict[str, any]) -> TreasuryOutput | BasicOutput | AliasOutput | FoundryOutput | NftOutput | Output:
+        output: Dict[str, any]) -> Union[TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput, Output]:
     output_type = OutputType(output['type'])
 
     if output_type == OutputType.Treasury:

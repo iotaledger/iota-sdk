@@ -8,7 +8,9 @@ export interface IClientOptions {
     primaryNode?: string | INode;
     /** Node which will be tried first when using remote PoW, even before the primary_node */
     primaryPowNode?: string | INode;
+    /** A list of nodes. */
     nodes?: Array<string | INode>;
+    /** A list of permanodes. */
     permanodes?: Array<string | INode>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;
@@ -34,10 +36,14 @@ export interface IClientOptions {
     powWorkerCount?: number;
     /** Whether the PoW should be done locally or remotely. */
     localPow?: boolean;
+    /** The maximum parallel API requests. */
+    maxParallelApiRequests?: number;
 }
 
 /** Time duration */
 export interface IDuration {
+    /** Seconds. */
     secs: number;
+    /** Nanoseconds. */
     nanos: number;
 }

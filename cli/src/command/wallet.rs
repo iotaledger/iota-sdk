@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use clap::{builder::BoolishValueParser, Args, Parser, Subcommand};
+use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -42,6 +42,13 @@ pub struct WalletCli {
     pub log_level: LevelFilter,
     #[command(subcommand)]
     pub command: Option<WalletCommand>,
+}
+
+impl WalletCli {
+    pub fn print_help() -> Result<(), Error> {
+        Self::command().bin_name("wallet").print_help()?;
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -87,6 +94,15 @@ pub enum WalletCommand {
     SetNodeUrl {
         /// Node URL to use for all future operations.
         url: String,
+    },
+    /// Set the PoW options.
+    SetPow {
+        /// Whether the PoW should be done locally or remotely.
+        #[arg(short, long, action = clap::ArgAction::Set)]
+        local_pow: bool,
+        /// The amount of workers that should be used for PoW, default is num_cpus::get().
+        #[arg(short, long)]
+        worker_count: Option<usize>,
     },
     /// Synchronize all accounts.
     Sync,
@@ -231,14 +247,22 @@ pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
-    let password = get_password("Stronghold password", false)?;
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password.clone())
-            .build(snapshot_path)?,
-    );
-    let wallet = Wallet::builder()
-        .with_secret_manager(secret_manager)
+    let mut builder = Wallet::builder();
+    if check_file_exists(snapshot_path).await.is_ok() {
+        println!(
+            "Detected a stronghold file at {}. Enter password to unlock:",
+            snapshot_path.to_str().unwrap()
+        );
+        let password = get_password("Stronghold password", false)?;
+        let secret_manager = SecretManager::Stronghold(
+            StrongholdSecretManager::builder()
+                .password(password.clone())
+                .build(snapshot_path)?,
+        );
+        builder = builder.with_secret_manager(secret_manager);
+    }
+
+    let wallet = builder
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
@@ -247,6 +271,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .finish()
         .await?;
 
+    let password = get_password("Stronghold backup password", false)?;
     wallet.restore_backup(backup_path.into(), password, None, None).await?;
 
     println_log_info!(
@@ -261,6 +286,25 @@ pub async fn set_node_url_command(storage_path: &Path, snapshot_path: &Path, url
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
+
+    Ok(wallet)
+}
+
+pub async fn set_pow_command(
+    storage_path: &Path,
+    snapshot_path: &Path,
+    local_pow: bool,
+    worker_count: Option<usize>,
+) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    // Need to get the current node, so it's not removed
+    let node = wallet.client().get_node().await?;
+    let client_options = ClientOptions::new()
+        .with_node(node.url.as_ref())?
+        .with_local_pow(local_pow)
+        .with_pow_worker_count(worker_count);
+    wallet.set_client_options(client_options).await?;
 
     Ok(wallet)
 }

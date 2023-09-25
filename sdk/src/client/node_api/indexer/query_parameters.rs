@@ -126,6 +126,8 @@ pub enum QueryParameter {
     TimelockedAfter(u32),
     /// Returns outputs that are timelocked before a certain Unix timestamp.
     TimelockedBefore(u32),
+    /// Returns outputs that are unlockable by the bech32 address.
+    UnlockableByAddress(Bech32Address),
 }
 
 impl QueryParameter {
@@ -154,6 +156,7 @@ impl QueryParameter {
             Self::Tag(v) => format!("tag={v}"),
             Self::TimelockedAfter(v) => format!("timelockedAfter={v}"),
             Self::TimelockedBefore(v) => format!("timelockedBefore={v}"),
+            Self::UnlockableByAddress(v) => format!("unlockableByAddress={v}"),
         }
     }
 
@@ -182,6 +185,7 @@ impl QueryParameter {
             Self::Tag(_) => 20,
             Self::TimelockedAfter(_) => 21,
             Self::TimelockedBefore(_) => 22,
+            Self::UnlockableByAddress(_) => 23,
         }
     }
 }
@@ -202,6 +206,22 @@ macro_rules! verify_query_parameters {
             Ok(())
         }
     };
+}
+
+pub(crate) fn verify_query_parameters_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {
+    verify_query_parameters!(
+        query_parameters,
+        QueryParameter::HasNativeTokens,
+        QueryParameter::MinNativeTokenCount,
+        QueryParameter::MaxNativeTokenCount,
+        QueryParameter::CreatedBefore,
+        QueryParameter::CreatedAfter,
+        QueryParameter::PageSize,
+        QueryParameter::Cursor,
+        QueryParameter::UnlockableByAddress
+    )?;
+
+    Ok(QueryParameters::new(query_parameters))
 }
 
 pub(crate) fn verify_query_parameters_basic_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {

@@ -47,17 +47,25 @@ export interface BaseCoinBalance {
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
+    /** The required amount for Alias outputs. */
     alias: bigint;
+    /** The required amount for Basic outputs. */
     basic: bigint;
+    /** The required amount for Foundry outputs. */
     foundry: bigint;
+    /** The required amount for NFT outputs. */
     nft: bigint;
 }
 
 /** The balance of a native token */
 export interface NativeTokenBalance {
+    /** The native token id. */
     tokenId: HexEncodedString;
+    /** Some metadata of the native token. */
     metadata?: string;
+    /** The total native token balance. */
     total: bigint;
+    /** The available amount of the total native token balance. */
     available: bigint;
 }
 
@@ -103,48 +111,67 @@ export interface SyncOptions {
 
 /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
 export interface AccountSyncOptions {
+    /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
+    /** Whether to sync Alias outputs. */
     aliasOutputs?: boolean;
+    /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an alias output. */
 export interface AliasSyncOptions {
+    /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
+    /** Whether to sync Alias outputs. */
     aliasOutputs?: boolean;
+    /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
+    /** Whether to sync foundry outputs. */
     foundryOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an nft output. */
 export interface NftSyncOptions {
+    /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
+    /** Whether to sync Alias outputs. */
     aliasOutputs?: boolean;
+    /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
 }
 
-/** The account object */
+/** The account object. */
 export interface AccountMeta {
+    /** The account index. */
     index: number;
+    /** The type of coin managed with the account. */
     coinType: CoinType;
+    /** The alias name of the account. */
     alias: string;
+    /** All public addresses. */
     publicAddresses: AccountAddress[];
+    /** All internal addresses. */
     internalAddresses: AccountAddress[];
+    /** All addresses with unspent outputs. */
     addressesWithUnspentOutputs: AddressWithUnspentOutputs[];
+    /** All outputs of the account. */
     outputs: { [outputId: string]: OutputData };
-    /** Output IDs of unspent outputs that are currently used as input for transactions */
+    /** All IDs of unspent outputs that are currently used as inputs for transactions. */
     lockedOutputs: Set<string>;
+    /** All unspent outputs of the account. */
     unspentOutputs: { [outputId: string]: OutputData };
+    /** All transactions of the account. */
     transactions: { [transactionId: string]: Transaction };
-    /** Transaction IDs of pending transactions */
+    /** All pending transactions of the account. */
     pendingTransactions: Set<string>;
-    /** Incoming transactions with their inputs if available and not already pruned */
+    /** All incoming transactions of the account (with their inputs if available and not already pruned). */
     incomingTransactions: {
         [transactionId: string]: [Transaction];
     };
 }
 
-/** The account metadata */
+/** The account metadata. */
 export interface AccountMetadata {
     /** The account alias */
     alias: string;
@@ -154,10 +181,13 @@ export interface AccountMetadata {
     index: number;
 }
 
-/** Options for account creation */
+/** Options for account creation. */
 export interface CreateAccountPayload {
+    /** An account alias name. */
     alias?: string;
+    /** The Bech32 HRP (human readable part) to use. */
     bech32Hrp?: string;
+    /** Account addresses to use. */
     addresses?: AccountAddress[];
 }
 
@@ -168,7 +198,7 @@ export interface FilterOptions {
     /** Filter all outputs where the booked milestone index is above the specified timestamp */
     upperBoundBookedTimestamp?: number;
     /** Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6) */
-    outputTypes?: Uint8Array;
+    outputTypes?: number[];
     /** Return all alias outputs matching these IDs. */
     aliasIds?: AliasId[];
     /** Return all foundry outputs matching these IDs. */

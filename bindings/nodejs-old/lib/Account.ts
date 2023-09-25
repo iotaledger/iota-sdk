@@ -138,7 +138,7 @@ export class Account {
      * recommended to use melting, if the foundry output is available.
      * @param tokenId The native token id.
      * @param burnAmount The to be burned amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The transaction.
      */
@@ -164,7 +164,7 @@ export class Account {
     /**
      * Burn an nft output
      * @param nftId The NftId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The transaction.
      */
@@ -229,7 +229,7 @@ export class Account {
     /**
      * `createAliasOutput` creates an alias output
      * @param params The alias output options.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns A transaction object.
      */
@@ -255,7 +255,7 @@ export class Account {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The transaction.
      */
@@ -296,7 +296,7 @@ export class Account {
     /**
      * Destroy an alias output.
      * @param aliasId The AliasId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The transaction.
      */
@@ -321,7 +321,7 @@ export class Account {
      * Function to destroy a foundry output with a circulating supply of 0.
      * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
      * @param foundryId The FoundryId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The transaction.
      */
@@ -761,7 +761,7 @@ export class Account {
      * Mint additional native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The minting transaction.
      */
@@ -788,7 +788,7 @@ export class Account {
     /**
      * Create a native token.
      * @param params The options for creating the token.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The creating transaction and the token ID.
      */
@@ -813,7 +813,7 @@ export class Account {
     /**
      * Mint nfts.
      * @param params The options for minting nfts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The minting transaction.
      */
@@ -844,7 +844,7 @@ export class Account {
      * storage deposit will be sent to the recipient. When the assets contain
      * an nft id, the data from the existing `NftOutput` will be used, just with
      * the address unlock conditions replaced.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The prepared output.
      */
@@ -868,7 +868,7 @@ export class Account {
     /**
      * Prepare a send transaction, useful for offline signing.
      * @param params Address with amounts to send.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options 
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -892,7 +892,7 @@ export class Account {
     /**
      * Prepare a transaction, useful for offline signing.
      * @param outputs Outputs to use in the transaction.
-     * @param options The options to define a `RemainderValueStrategy`
+     * @param options Additional transaction options 
      * or custom inputs.
      * @returns The prepared transaction data.
      */
@@ -971,7 +971,7 @@ export class Account {
     /**
      * Send a transaction with amounts from input addresses.
      * @param params Addresses with amounts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -996,7 +996,7 @@ export class Account {
     /**
      * Send native tokens.
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1021,7 +1021,7 @@ export class Account {
     /**
      * Send nft.
      * @param params Addresses and nft ids.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The sent transaction.
      */
@@ -1046,7 +1046,7 @@ export class Account {
     /**
      * Send outputs in a transaction.
      * @param outputs The outputs to send.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * @param transactionOptions Additional transaction options 
      * or custom inputs.
      * @returns The sent transaction.
      */

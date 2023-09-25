@@ -2,7 +2,7 @@ name: Nodejs bindings checks (wallet)
 
 on:
   push:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -16,7 +16,7 @@ on:
       - ".github/workflows/bindings-wallet-nodejs.yml"
       - ".patches/*"
   pull_request:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -70,7 +70,7 @@ jobs:
           cache-root: bindings/nodejs-old
 
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
           cache: npm

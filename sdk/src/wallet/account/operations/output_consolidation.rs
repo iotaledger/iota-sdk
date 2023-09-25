@@ -149,21 +149,31 @@ where
 
         drop(account_details);
 
+        #[allow(clippy::option_if_let_else)]
         let output_threshold = match params.output_threshold {
             Some(t) => t,
             None => {
                 #[cfg(feature = "ledger_nano")]
-                if self
-                    .wallet
-                    .secret_manager
-                    .read()
-                    .await
-                    .downcast::<LedgerSecretManager>()
-                    .is_some()
                 {
-                    DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
-                } else {
-                    DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
+                    use crate::wallet::account::SecretManager;
+                    let secret_manager = self.wallet.secret_manager.read().await;
+                    if secret_manager
+                        .downcast::<LedgerSecretManager>()
+                        .or_else(|| {
+                            secret_manager.downcast::<SecretManager>().and_then(|s| {
+                                if let SecretManager::LedgerNano(n) = s {
+                                    Some(n)
+                                } else {
+                                    None
+                                }
+                            })
+                        })
+                        .is_some()
+                    {
+                        DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
+                    } else {
+                        DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
+                    }
                 }
                 #[cfg(not(feature = "ledger_nano"))]
                 DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
@@ -184,31 +194,37 @@ where
         }
 
         #[cfg(feature = "ledger_nano")]
-        let max_inputs = if let Some(ledger) = self
-            .wallet
-            .secret_manager
-            .read()
-            .await
-            .downcast::<LedgerSecretManager>()
-        {
-            let ledger_nano_status = ledger.get_ledger_nano_status().await;
-            // With blind signing we are only limited by the protocol
-            if ledger_nano_status.blind_signing_enabled() {
-                INPUT_COUNT_MAX
+        let max_inputs = {
+            use crate::wallet::account::SecretManager;
+            let secret_manager = self.wallet.secret_manager.read().await;
+            if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
+                secret_manager.downcast::<SecretManager>().and_then(|s| {
+                    if let SecretManager::LedgerNano(n) = s {
+                        Some(n)
+                    } else {
+                        None
+                    }
+                })
+            }) {
+                let ledger_nano_status = ledger.get_ledger_nano_status().await;
+                // With blind signing we are only limited by the protocol
+                if ledger_nano_status.blind_signing_enabled() {
+                    INPUT_COUNT_MAX
+                } else {
+                    ledger_nano_status
+                        .buffer_size()
+                        .map(|buffer_size| {
+                            // Calculate how many inputs we can have with this ledger, buffer size is different for
+                            // different ledger types
+                            let available_buffer_size_for_inputs =
+                                buffer_size - ESSENCE_SIZE_WITHOUT_IN_AND_OUTPUTS - MIN_OUTPUT_SIZE_IN_ESSENCE;
+                            (available_buffer_size_for_inputs / INPUT_SIZE) as u16
+                        })
+                        .unwrap_or(INPUT_COUNT_MAX)
+                }
             } else {
-                ledger_nano_status
-                    .buffer_size()
-                    .map(|buffer_size| {
-                        // Calculate how many inputs we can have with this ledger, buffer size is different for
-                        // different ledger types
-                        let available_buffer_size_for_inputs =
-                            buffer_size - ESSENCE_SIZE_WITHOUT_IN_AND_OUTPUTS - MIN_OUTPUT_SIZE_IN_ESSENCE;
-                        (available_buffer_size_for_inputs / INPUT_SIZE) as u16
-                    })
-                    .unwrap_or(INPUT_COUNT_MAX)
+                INPUT_COUNT_MAX
             }
-        } else {
-            INPUT_COUNT_MAX
         };
         #[cfg(not(feature = "ledger_nano"))]
         let max_inputs = INPUT_COUNT_MAX;

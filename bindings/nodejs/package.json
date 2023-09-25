@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk",
-    "version": "1.0.1",
+    "version": "1.0.11",
     "description": "Node.js binding to the IOTA SDK library",
     "main": "out/index.js",
     "types": "out/index.d.ts",
@@ -18,9 +18,9 @@
         "prebuild-windows-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run neon-build-windows-arm64' --strip --arch arm64",
         "neon-build-windows-arm64": "cargo-cp-artifact -ac iota-sdk-nodejs ./index.node -- cargo build --profile=production --message-format=json-render-diagnostics --target aarch64-pc-windows-msvc && node -e \"require('./scripts/move-artifact.js')()\"",
         "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
-        "install": "prebuild-install --runtime napi --tag-prefix='iota-sdk-nodejs-v' && tsc || npm run rebuild",
+        "install": "prebuild-install --runtime napi --tag-prefix=iota-sdk-nodejs-v && tsc || npm run rebuild",
         "test": "jest",
-        "create-api-docs": "typedoc ./lib/index.ts --githubPages false --disableSources --excludePrivate --excludeInternal --plugin typedoc-plugin-markdown --theme markdown --hideBreadcrumbs --entryDocument api_ref.md --readme none --hideGenerator --sort source-order --exclude ./**/src/index.ts"
+        "create-api-docs": "typedoc ./lib/index.ts --githubPages false --disableSources --excludePrivate --excludeInternal --plugin typedoc-plugin-markdown --theme markdown --hideBreadcrumbs --entryDocument api_ref.md --readme none --hideGenerator --sort source-order"
     },
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",

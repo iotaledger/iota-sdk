@@ -1,27 +1,45 @@
 [package]
 name = "iota-sdk-nodejs"
 version = "0.1.0"
-authors = [ "IOTA Stiftung" ]
+authors = ["IOTA Stiftung"]
 edition = "2021"
 description = "Node.js bindings for the IOTA SDK library"
 documentation = "https://wiki.iota.org/sdk/welcome"
 homepage = "https://www.iota.org/"
 repository = "https://github.com/iotaledger/iota-sdk"
 license = "Apache-2.0"
-keywords = [ "iota", "client", "wallet", "transaction", "nodejs" ]
-categories = [ "cryptography::cryptocurrencies" ]
-exclude = [ "index.node" ]
+keywords = ["iota", "client", "wallet", "transaction", "nodejs"]
+categories = ["cryptography::cryptocurrencies"]
+exclude = ["index.node"]
 publish = false
 
 [lib]
-crate-type = [ "cdylib" ]
+crate-type = ["cdylib"]
 doc = false
 
 [dependencies]
-iota-sdk-bindings-core = { path = "../core", default-features = false, features = [ "events", "ledger_nano", "storage", "stronghold", "participation", "rocksdb", "mqtt" ] }
+iota-sdk-bindings-core = { path = "../core", default-features = false, features = [
+    "events",
+    "ledger_nano",
+    "storage",
+    "stronghold",
+    "participation",
+    "rocksdb",
+    "mqtt",
+] }
 
-log = { version = "0.4.19", default-features = false }
-neon = { version = "0.10.1", default-features = false, features = [ "napi-6", "event-queue-api", "promise-api" ] }
+log = { version = "0.4.20", default-features = false }
+neon = { version = "0.10.1", default-features = false, features = [
+    "napi-6",
+    "event-queue-api",
+    "promise-api",
+] }
 once_cell = { version = "1.18.0", default-features = false }
-serde_json = { version = "1.0.103", default-features = false }
-tokio = { version = "1.29.1", default-features = false }
+serde_json = { version = "1.0.107", default-features = false }
+tokio = { version = "1.32.0", default-features = false }
+
+[profile.production]
+codegen-units = 1
+inherits = "release"
+lto = true
+strip = "symbols"

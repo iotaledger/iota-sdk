@@ -1,58 +1,80 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { AliasId } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
+import { HexEncodedString } from '../utils';
+import { AccountAddress } from './address';
 
-/** Options for the transaction creation */
+/** Options for creating a transaction. */
 export interface TransactionOptions {
+    /** The strategy applied for base coin remainders. */
     remainderValueStrategy?: RemainderValueStrategy;
+    /** An optional tagged data payload. */
     taggedDataPayload?: TaggedDataPayload;
-    /** Custom inputs that should be used for the transaction */
+    /**
+     * Custom inputs that should be used for the transaction.
+     * If custom inputs are provided, only those are used.
+     * If also other additional inputs should be used, `mandatoryInputs` should be used instead.
+     */
     customInputs?: string[];
+    /** Inputs that must be used for the transaction. */
     mandatoryInputs?: string[];
+    /** Specifies what needs to be burned during input selection. */
     burn?: Burn;
-    /** Optional note, that is only stored locally */
+    /** Optional note, that is only stored locally. */
     note?: string;
+    /** Whether to allow sending a micro amount. */
     allowMicroAmount: boolean;
 }
 
-/** The RemainderValueStrategy */
+/** The possible remainder value strategies. */
 export type RemainderValueStrategy =
     | ChangeAddress
     | ReuseAddress
     | CustomAddress;
 
-/** ChangeAddress variant of RemainderValueStrategy */
+/**
+ * Allows to move the remainder value to a change address.
+ */
 export type ChangeAddress = {
+    /** The name of the strategy. */
     strategy: 'ChangeAddress';
+    /** Only required for `CustomAddress`. */
     value: null;
 };
 
-/** ReuseAddress variant of RemainderValueStrategy */
+/**
+ * Allows to keep the remainder value on the source address.
+ */
 export type ReuseAddress = {
+    /** The name of the strategy. */
     strategy: 'ReuseAddress';
+    /** Only required for `CustomAddress`. */
     value: null;
 };
 
 /** CustomAddress variant of RemainderValueStrategy */
 export type CustomAddress = {
+    /** The name of the strategy. */
     strategy: 'CustomAddress';
-    value: string;
+    value: AccountAddress;
 };
 
-/** Native token options for creating */
+/** Options for creating Native Tokens. */
 export interface CreateNativeTokenParams {
-    aliasId?: string;
+    /** The Alias ID of the corresponding Foundry. */
+    aliasId?: AliasId;
     /** Hex encoded number */
     circulatingSupply: bigint;
     /** Hex encoded number */
     maximumSupply: bigint;
     /** Hex encoded bytes */
-    foundryMetadata?: string;
+    foundryMetadata?: HexEncodedString;
 }
 
-/** Nft options for minting */
+/** Options for minting NFTs. */
 export interface MintNftParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
@@ -61,13 +83,13 @@ export interface MintNftParams {
     /** Bech32 encoded sender address **/
     sender?: string;
     /** Hex encoded bytes */
-    metadata?: string;
+    metadata?: HexEncodedString;
     /** Hex encoded bytes */
-    tag?: string;
+    tag?: HexEncodedString;
     /** Bech32 encoded issuer address **/
     issuer?: string;
     /** Hex encoded bytes */
-    immutableMetadata?: string;
+    immutableMetadata?: HexEncodedString;
 }
 
 /** Options for the alias output creation */
@@ -77,9 +99,9 @@ export interface AliasOutputParams {
      */
     address?: string;
     /** Hex encoded bytes */
-    immutableMetadata?: string;
+    immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */
-    metadata?: string;
+    metadata?: HexEncodedString;
     /** Hex encoded bytes */
-    stateMetadata?: string;
+    stateMetadata?: HexEncodedString;
 }

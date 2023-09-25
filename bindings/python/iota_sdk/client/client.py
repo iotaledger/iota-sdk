@@ -21,7 +21,7 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 from json import dumps, loads
 import humps
 from datetime import timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from dacite import from_dict
 
 
@@ -39,7 +39,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def __init__(
         self,
-        nodes: Optional[str | List[str]] = None,
+        nodes: Optional[Union[str, List[str]]] = None,
         primary_node: Optional[str] = None,
         primary_pow_node: Optional[str] = None,
         permanode: Optional[str] = None,
@@ -359,8 +359,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         }))
 
     def build_and_post_block(self,
-                             secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                                                      SeedSecretManager | StrongholdSecretManager] = None,
+                             secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
+                                                      SeedSecretManager, StrongholdSecretManager]] = None,
                              account_index: Optional[int] = None,
                              coin_type: Optional[int] = None,
                              custom_remainder_address: Optional[str] = None,
@@ -371,7 +371,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              inputs: Optional[List[Dict[str, Any]]] = None,
                              output: Optional[AddressAndAmount] = None,
                              outputs: Optional[List[Any]] = None,
-                             tag: Optional[HexStr] = None) -> List[HexStr | Block]:
+                             tag: Optional[HexStr] = None) -> List[Union[HexStr, Block]]:
         """Build and post a block.
 
         **Arguments**
@@ -471,8 +471,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         return self._call_method('unhealthyNodes')
 
     def prepare_transaction(self,
-                            secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager |
-                                                     SeedSecretManager | StrongholdSecretManager] = None,
+                            secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
+                                                     SeedSecretManager, StrongholdSecretManager]] = None,
                             options=None):
         """Prepare a transaction for signing.
 
@@ -485,8 +485,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'options': options
         }))
 
-    def sign_transaction(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
-                         StrongholdSecretManager, prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
+    def sign_transaction(self, secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager,
+                                                     SeedSecretManager, StrongholdSecretManager], prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
         Args:
@@ -498,7 +498,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(self, payload: Payload) -> List[HexStr | Block]:
+    def submit_payload(self, payload: Payload) -> List[Union[HexStr, Block]]:
         """Submit a payload in a block.
 
         Args:

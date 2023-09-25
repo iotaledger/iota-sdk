@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "1.0.1"
+version = "1.0.3"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -19,8 +19,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 # Mandatory dependencies
 bech32 = { version = "0.9.1", default-features = false }
-bitflags = { version = "2.3.3", default-features = false }
-bytemuck = { version = "1.13.1", default-features = false }
+bitflags = { version = "2.4.0", default-features = false }
+bytemuck = { version = "1.14.0", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [
     "from",
     "as_ref",
@@ -43,39 +43,40 @@ iterator-sorted = { version = "0.1.0", default-features = false }
 itertools = { version = "0.11.0", default-features = false, features = [
     "use_alloc",
 ] }
-packable = { version = "0.8.1", default-features = false, features = [
+packable = { version = "0.8.3", default-features = false, features = [
     "primitive-types",
 ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
     "primitive-types",
 ] }
 primitive-types = { version = "0.12.1", default-features = false }
-serde = { version = "1.0.175", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.103", default-features = false, features = [
+serde = { version = "1.0.188", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.107", default-features = false, features = [
     "alloc",
 ] }
 
 # Optional dependencies
 anymap = { version = "0.12.1", default-features = false, optional = true }
-async-trait = { version = "0.1.72", default-features = false, optional = true }
+async-trait = { version = "0.1.73", default-features = false, optional = true }
+bs58 = { version = "0.5.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [
     "thread-pool",
 ], optional = true }
 heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
-iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-iota_stronghold = { version = "2.0.0-rc.2", default-features = false, optional = true }
-log = { version = "0.4.19", default-features = false, optional = true }
+iota-ledger-nano = { version = "1.0.0-alpha.5", default-features = false, optional = true }
+iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
+log = { version = "0.4.20", default-features = false, optional = true }
 num_cpus = { version = "1.16.0", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [
     "min_const_gen",
 ], optional = true }
-regex = { version = "1.9.1", default-features = false, features = [
+regex = { version = "1.9.5", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
-reqwest = { version = "0.11.18", default-features = false, features = [
+reqwest = { version = "0.11.20", default-features = false, features = [
     "json",
 ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [
@@ -84,13 +85,13 @@ rocksdb = { version = "0.21.0", default-features = false, features = [
 rumqttc = { version = "0.22.0", default-features = false, features = [
     "websocket",
 ], optional = true }
-serde_repr = { version = "0.1.15", default-features = false, optional = true }
-thiserror = { version = "1.0.44", default-features = false, optional = true }
-time = { version = "0.3.23", default-features = false, features = [
+serde_repr = { version = "0.1.16", default-features = false, optional = true }
+thiserror = { version = "1.0.48", default-features = false, optional = true }
+time = { version = "0.3.28", default-features = false, features = [
     "serde",
     "macros",
 ], optional = true }
-url = { version = "2.4.0", default-features = false, features = [
+url = { version = "2.4.1", default-features = false, features = [
     "serde",
 ], optional = true }
 zeroize = { version = "1.6.0", default-features = false, features = [
@@ -98,7 +99,7 @@ zeroize = { version = "1.6.0", default-features = false, features = [
 ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-tokio = { version = "1.29.1", default-features = false, features = [
+tokio = { version = "1.32.0", default-features = false, features = [
     "macros",
     "rt-multi-thread",
     "time",
@@ -106,15 +107,15 @@ tokio = { version = "1.29.1", default-features = false, features = [
 ], optional = true }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-gloo-storage = { version = "0.2.2", default-features = false, optional = true }
-gloo-timers = { version = "0.2.6", default-features = false, features = [
+gloo-storage = { version = "0.3.0", default-features = false, optional = true }
+gloo-timers = { version = "0.3.0", default-features = false, features = [
     "futures",
 ] }
 instant = { version = "0.1.12", default-features = false, features = [
     "wasm-bindgen",
 ], optional = true }
 lazy_static = { version = "1.4.0", default-features = false }
-tokio = { version = "1.29.1", default-features = false, features = [
+tokio = { version = "1.32.0", default-features = false, features = [
     "macros",
     "rt",
     "time",
@@ -127,7 +128,7 @@ iota-sdk = { path = ".", default-features = false, features = ["rand"] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-tokio = { version = "1.29.1", default-features = false, features = [
+tokio = { version = "1.32.0", default-features = false, features = [
     "macros",
     "rt",
     "rt-multi-thread",
@@ -140,12 +141,14 @@ tokio = { version = "1.29.1", default-features = false, features = [
 default = ["client", "wallet", "tls"]
 
 events = []
+irc_27 = ["url", "serde"]
+irc_30 = ["url", "serde"]
 ledger_nano = ["iota-ledger-nano"]
-mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
+mqtt = ["std", "tls", "regex", "rumqttc", "dep:once_cell"]
 participation = ["storage"]
 pow = ["std", "num_cpus", "iota-crypto/curl-p"]
 rand = ["dep:rand"]
-rocksdb = ["dep:rocksdb", "storage"]
+rocksdb = ["storage", "dep:rocksdb"]
 serde = [
     "serde_repr",
     "hashbrown/serde",
@@ -182,6 +185,7 @@ stronghold = [
     "dep:heck",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
+private_key_secret_manager = ["bs58"]
 
 client = [
     "pow",
@@ -301,14 +305,14 @@ required-features = ["wallet", "storage", "stronghold"]
 [[example]]
 name = "mint_collection_nft"
 path = "examples/how_tos/nft_collection/01_mint_collection_nft.rs"
-required-features = ["wallet", "stronghold"]
+required-features = ["wallet", "stronghold", "irc_27"]
 
 # Native Tokens Examples
 
 [[example]]
 name = "create_native_token"
 path = "examples/how_tos/native_tokens/create.rs"
-required-features = ["rocksdb", "stronghold"]
+required-features = ["rocksdb", "stronghold", "irc_30"]
 
 [[example]]
 name = "destroy_foundry"
@@ -355,6 +359,16 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "destroy_alias"
 path = "examples/how_tos/alias/destroy.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "state_transition"
+path = "examples/how_tos/alias/state_transition.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "governance_transition"
+path = "examples/how_tos/alias/governance_transition.rs"
 required-features = ["wallet", "stronghold"]
 
 # Outputs
@@ -620,6 +634,11 @@ path = "examples/client/get_block.rs"
 required-features = ["client"]
 
 [[example]]
+name = "client_getting_started"
+path = "examples/client/getting_started.rs"
+required-features = ["client"]
+
+[[example]]
 name = "ledger_nano"
 path = "examples/client/ledger_nano.rs"
 required-features = ["client", "ledger_nano"]
@@ -779,7 +798,7 @@ required-features = ["wallet", "storage"]
 [[example]]
 name = "mint_nft"
 path = "examples/how_tos/nfts/mint_nft.rs"
-required-features = ["wallet", "stronghold"]
+required-features = ["wallet", "stronghold", "irc_27"]
 
 [[example]]
 name = "send_nft"
@@ -845,11 +864,6 @@ required-features = ["wallet", "storage"]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = ["wallet", "storage"]
-
-[[example]]
-name = "update_alias_output"
-path = "examples/wallet/update_alias_output.rs"
-required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "wallet"

@@ -2,8 +2,9 @@ name: Build and Run Tests
 
 on:
   push:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -11,8 +12,9 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
   pull_request:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
+      - ".cargo/config.toml"
       - ".github/workflows/build-and-test.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -50,7 +52,4 @@ jobs:
         uses: taiki-e/install-action@nextest
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: nextest
-          args: run --all-features --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core
+        run: cargo ci-test

@@ -12,7 +12,7 @@ import { IOutputMetadataResponse } from '../models/api';
 import { Bip44 } from '../secret_manager';
 
 /**
- * Helper struct for offline signing
+ * Helper struct for offline signing.
  */
 export class PreparedTransactionData {
     /**
@@ -33,7 +33,7 @@ export class PreparedTransactionData {
 }
 
 /**
- * Data for transaction inputs for signing and ordering of unlock blocks
+ * Data for transaction inputs for signing and ordering of unlock blocks.
  */
 export class InputSigningData {
     /**
@@ -53,20 +53,23 @@ export class InputSigningData {
     chain?: Bip44;
 }
 
+/**
+ * Data for a remainder output, used for Ledger Nano.
+ */
 export class Remainder {
     /**
-     * The remainder output
+     * The remainder output.
      */
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
     output!: Output;
     /**
-     * The chain derived from seed, for the remainder addresses
+     * The chain derived from seed, for the remainder addresses.
      */
     chain?: Bip44;
     /**
-     * The remainder address
+     * The remainder address.
      */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,

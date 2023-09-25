@@ -4,7 +4,6 @@
 use std::path::Path;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
@@ -17,11 +16,7 @@ use tokio::{
 };
 use zeroize::Zeroize;
 
-use crate::{
-    command::{account::AccountCli, wallet::WalletCli},
-    error::Error,
-    println_log_error, println_log_info,
-};
+use crate::{error::Error, println_log_error, println_log_info};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
@@ -87,18 +82,6 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
 
             Ok(Some(accounts.swap_remove(index)))
         }
-    }
-}
-
-pub fn print_wallet_help() {
-    if let Err(err) = WalletCli::try_parse_from(["Wallet:", "help"]) {
-        println!("{err}");
-    }
-}
-
-pub fn print_account_help() {
-    if let Err(err) = AccountCli::try_parse_from(["Account:", "help"]) {
-        println!("{err}");
     }
 }
 
@@ -228,6 +211,83 @@ async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error>
     let mut file = open_options.open(path).await?;
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
 
+    #[cfg(windows)]
+    restrict_file_permissions(path)?;
+
+    Ok(())
+}
+
+// Slightly modified from https://github.com/sile/sloggers/blob/master/src/permissions.rs
+#[cfg(windows)]
+pub fn restrict_file_permissions<P: AsRef<Path>>(path: P) -> std::io::Result<()> {
+    use std::io;
+
+    use winapi::um::winnt::{FILE_GENERIC_READ, FILE_GENERIC_WRITE, PSID, STANDARD_RIGHTS_ALL};
+    use windows_acl::{
+        acl::{AceType, ACL},
+        helper::sid_to_string,
+    };
+
+    /// This is the security identifier in Windows for the owner of a file. See:
+    /// - https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/security-identifiers-in-windows#well-known-sids-all-versions-of-windows
+    const OWNER_SID_STR: &str = "S-1-3-4";
+    /// We don't need any of the `AceFlags` listed here:
+    /// - https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header
+    const OWNER_ACL_ENTRY_FLAGS: u8 = 0;
+    /// Generic Rights:
+    ///  - https://docs.microsoft.com/en-us/windows/win32/fileio/file-security-and-access-rights
+    /// Individual Read/Write/Execute Permissions (referenced in generic rights link):
+    ///  - https://docs.microsoft.com/en-us/windows/win32/wmisdk/file-and-directory-access-rights-constants
+    /// STANDARD_RIGHTS_ALL
+    ///  - https://docs.microsoft.com/en-us/windows/win32/secauthz/access-mask
+    const OWNER_ACL_ENTRY_MASK: u32 = FILE_GENERIC_READ | FILE_GENERIC_WRITE | STANDARD_RIGHTS_ALL;
+
+    let path_str = path
+        .as_ref()
+        .to_str()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Unable to open file path.".to_string()))?;
+
+    let mut acl = ACL::from_file_path(path_str, false)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("Unable to retrieve ACL: {:?}", e)))?;
+
+    let owner_sid = windows_acl::helper::string_to_sid(OWNER_SID_STR)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("Unable to convert SID: {:?}", e)))?;
+
+    let entries = acl.all().map_err(|e| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("Unable to enumerate ACL entries: {:?}", e),
+        )
+    })?;
+
+    // Add single entry for file owner.
+    acl.add_entry(
+        owner_sid.as_ptr() as PSID,
+        AceType::AccessAllow,
+        OWNER_ACL_ENTRY_FLAGS,
+        OWNER_ACL_ENTRY_MASK,
+    )
+    .map_err(|e| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("Failed to add ACL entry for SID {} error={}", OWNER_SID_STR, e),
+        )
+    })?;
+    // Remove all AccessAllow entries from the file that aren't the owner_sid.
+    for entry in &entries {
+        if let Some(ref entry_sid) = entry.sid {
+            let entry_sid_str = sid_to_string(entry_sid.as_ptr() as PSID).unwrap_or_else(|_| "BadFormat".to_string());
+            if entry_sid_str != OWNER_SID_STR {
+                acl.remove(entry_sid.as_ptr() as PSID, Some(AceType::AccessAllow), None)
+                    .map_err(|_| {
+                        io::Error::new(
+                            io::ErrorKind::Other,
+                            format!("Failed to remove ACL entry for SID {}", entry_sid_str),
+                        )
+                    })?;
+            }
+        }
+    }
     Ok(())
 }
 
@@ -267,7 +327,7 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
         "Failed to convert timestamp to NaiveDateTime".to_string(),
     ))?;
 
-    Ok(DateTime::from_utc(naive_time, Utc))
+    Ok(naive_time.and_utc())
 }
 
 pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
