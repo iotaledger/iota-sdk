@@ -28,7 +28,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         let client_options = self.client_options().await;
         stronghold.set(CLIENT_OPTIONS_KEY, &client_options).await?;
 
-        let coin_type = self.data.read().await.coin_type();
+        let coin_type = self.data.read().await.bip_path.coin_type;
         stronghold.set_bytes(COIN_TYPE_KEY, &coin_type.to_le_bytes()).await?;
 
         if let Some(secret_manager_dto) = self.secret_manager.read().await.to_config() {

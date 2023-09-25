@@ -23,7 +23,7 @@ use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::secret::{SecretManage, SecretManager},
     types::block::{
-        address::{AccountAddress, Address, ToBech32Ext, Hrp},
+        address::{AccountAddress, Address, Hrp, ToBech32Ext},
         output::AccountId,
     },
     wallet::{
@@ -90,6 +90,12 @@ where
     /// Set the BIP44 path of the wallet.
     pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
         self.bip_path = bip_path.into();
+        self
+    }
+
+    /// Set the wallet address.
+    pub fn with_address(mut self, address: impl Into<Option<Address>>) -> Self {
+        self.address = address.into();
         self
     }
 
@@ -203,6 +209,8 @@ where
         let bip_path = self
             .bip_path
             .ok_or(crate::wallet::Error::MissingParameter("bip_path"))?;
+
+        // TODO: if none was provided then try to generate it with the provided secret manager first?
         let address = self.address.ok_or(crate::wallet::Error::MissingParameter("address"))?;
 
         #[cfg(feature = "storage")]
@@ -255,7 +263,8 @@ where
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         });
 
-        let address = create_wallet_address(&*wallet_inner.secret_manager, bip_path.coin_type, bip_path.account).await?;
+        let address =
+            create_wallet_address(&*wallet_inner.secret_manager, bip_path.coin_type, bip_path.account).await?;
 
         let bech32_hrp = wallet_inner.client.get_bech32_hrp().await?;
         // TODO: just take the last 10 chars or so
@@ -302,11 +311,13 @@ pub(crate) async fn create_wallet_address<S: SecretManage>(
 where
     crate::wallet::Error: From<S::Error>,
 {
-    Ok(Address::Ed25519(secret_manager
-        .read()
-        .await
-        .generate_ed25519_addresses(coin_type, account_index, 0..1, None)
-        .await?[0]))
+    Ok(Address::Ed25519(
+        secret_manager
+            .read()
+            .await
+            .generate_ed25519_addresses(coin_type, account_index, 0..1, None)
+            .await?[0],
+    ))
 }
 
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new

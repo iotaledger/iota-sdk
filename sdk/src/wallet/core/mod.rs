@@ -39,14 +39,17 @@ use crate::{
     },
     types::{
         block::{
-            address::{Address, ToBech32Ext, Hrp},
+            address::{Address, Bech32Address, Hrp, ToBech32Ext},
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::transaction::TransactionId,
         },
         TryFromDto,
     },
     wallet::{
-        account::{operations::syncing::SyncOptions, types::Balance},
+        account::{
+            operations::syncing::SyncOptions,
+            types::{Balance, InclusionState},
+        },
         Result,
     },
 };
@@ -83,12 +86,6 @@ where
     pub fn builder() -> WalletBuilder<S> {
         WalletBuilder::<S>::new()
     }
-
-    // TODO: remove
-    // pub fn create_account(&self) -> AccountBuilder<S> {
-    //     log::debug!("creating account");
-    //     AccountBuilder::<S>::new(self.clone())
-    // }
 }
 
 /// Wallet inner.
@@ -112,7 +109,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 }
 
 /// Wallet data.
-#[derive(Clone, Debug /* , Eq, PartialEq */)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct WalletData {
     /// The wallet BIP44 path.
     pub(crate) bip_path: Bip44,
@@ -168,13 +165,23 @@ impl WalletData {
         }
     }
 
-    pub(crate) fn coin_type(&self) -> u32 {
-        self.bip_path.coin_type
-    }
+    // TODO: remove?
 
-    pub(crate) fn account(&self) -> u32 {
-        self.bip_path.account
-    }
+    // pub(crate) fn coin_type(&self) -> u32 {
+    //     self.bip_path.coin_type
+    // }
+
+    // pub(crate) fn account_index(&self) -> u32 {
+    //     self.bip_path.account
+    // }
+
+    // pub(crate) fn address_index(&self) -> u32 {
+    //     self.bip_path.address_index
+    // }
+
+    // pub(crate) fn bip_path(&self) -> Bip44 {
+    //     self.bip_path
+    // }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -278,9 +285,19 @@ where
         self.data().await.alias.clone()
     }
 
-    /// GEt the address of the wallet.
+    /// Get the wallet address.
     pub async fn address(&self) -> Address {
         self.data().await.address
+    }
+
+    /// Get the wallet address as Bech32 using the wallet's configured HRP.
+    pub async fn address_as_bech32(&self) -> Bech32Address {
+        self.address().await.to_bech32(self.bech32_hrp().await)
+    }
+
+    /// Get the wallet's configured Bech32 HRP.
+    pub async fn bech32_hrp(&self) -> Hrp {
+        self.data().await.bech32_hrp
     }
 
     /// Get the [`OutputData`] of an output stored in the account
@@ -862,12 +879,10 @@ fn serialize() {
     );
 
     let account = WalletData {
-        index: 0,
-        coin_type: 4218,
+        bip_path: Bip44::new(4218),
+        address: todo!("address"),
+        bech32_hrp: todo!("hrp"),
         alias: "0".to_string(),
-        public_addresses: Vec::new(),
-        internal_addresses: Vec::new(),
-        addresses_with_unspent_outputs: Vec::new(),
         outputs: HashMap::new(),
         locked_outputs: HashSet::new(),
         unspent_outputs: HashMap::new(),
@@ -895,20 +910,15 @@ impl WalletData {
     #[cfg(feature = "storage")]
     pub(crate) fn mock() -> Self {
         use core::str::FromStr;
+
+        use crate::types::block::address::Ed25519Address;
         Self {
-            index: 0,
-            coin_type: 4218,
             alias: "Alice".to_string(),
-            public_addresses: vec![Bip44Address {
-                address: crate::types::block::address::Bech32Address::from_str(
+            bip_path: Bip44::new(4218),
+            address: crate::types::block::address::Bech32Address::from_str(
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-                )
-                .unwrap(),
-                key_index: 0,
-                internal: false,
-            }],
-            internal_addresses: Vec::new(),
-            addresses_with_unspent_outputs: Vec::new(),
+                ).unwrap().into_inner(),
+            bech32_hrp: Hrp::from_str_unchecked("rms"),
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
             unspent_outputs: HashMap::new(),

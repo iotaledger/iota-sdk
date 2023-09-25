@@ -187,7 +187,8 @@ where
         wallet_data.pending_transactions.insert(transaction_id);
         #[cfg(feature = "storage")]
         {
-            log::debug!("[TRANSACTION] storing account {}", todo!("wallet_data.index()"));
+            // TODO: maybe better to use the wallt address as identifier now?
+            log::debug!("[TRANSACTION] storing wallet {}", (*wallet_data).alias);
             self.save(Some(&wallet_data)).await?;
         }
 

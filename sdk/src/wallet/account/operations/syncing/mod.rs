@@ -50,7 +50,7 @@ where
         self.default_sync_options.lock().await.clone()
     }
 
-    /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
+    /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
         let options = match options {
@@ -84,7 +84,7 @@ where
             // Sync again if we don't know the output yet, to prevent having no unspent outputs after syncing
             if confirmed_tx_with_unknown_output {
                 log::debug!("[SYNC] a transaction for which no output is known got confirmed, syncing outputs again");
-                 self.sync_internal(&options).await?;
+                self.sync_internal(&options).await?;
             }
         };
 
@@ -248,7 +248,7 @@ where
         // synced afterwards, so we filter these unspent outputs here. Maybe the spent_or_not_synced_output_ids can be
         // calculated more efficient in the future, by comparing the new and old outputs only at this point. Then this
         // retain isn't needed anymore.
-        
+
         // TODO: change
 
         // let unspent_output_ids: HashSet<OutputId> = HashSet::from_iter(outputs_data.iter().map(|o| o.output_id));

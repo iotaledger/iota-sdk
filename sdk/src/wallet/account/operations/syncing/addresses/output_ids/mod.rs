@@ -161,7 +161,7 @@ where
         options: &SyncOptions,
         // TODO: remove
         // addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-    // ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
+        // ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<OutputId>)> {
         log::debug!("[SYNC] start get_unspent_and_spent_output_ids_for_wallet_address");
         let address_output_ids_start_time = Instant::now();

@@ -134,17 +134,16 @@ mod tests {
     #[tokio::test]
     async fn save_remove_account() {
         let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager.load_wallet_data().await.unwrap().is_empty());
+        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
 
         let account_details = WalletData::mock();
 
         storage_manager.save_wallet_data(&account_details).await.unwrap();
-        let accounts = storage_manager.load_wallet_data().await.unwrap();
-        assert_eq!(accounts.len(), 1);
-        assert_eq!(accounts[0].alias(), "Alice");
+        let wallet = storage_manager.load_wallet_data().await.unwrap();
+        assert!(matches!(wallet, Some(data) if data.alias == "Alice"));
 
-        storage_manager.remove_wallet_data(0).await.unwrap();
-        assert!(storage_manager.load_wallet_data().await.unwrap().is_empty());
+        storage_manager.remove_wallet_data().await.unwrap();
+        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
     }
 
     #[tokio::test]
