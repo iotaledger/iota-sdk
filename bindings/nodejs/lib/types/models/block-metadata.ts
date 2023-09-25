@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ConflictReason } from './conflict-reason';
+import type { TransactionFailureReason } from './transaction-failure-reason';
 import type { HexEncodedString } from '../utils/hex-encoding';
 import type { LedgerInclusionState } from './ledger-inclusion-state';
 /**
@@ -33,9 +33,9 @@ export interface IBlockMetadata {
      */
     ledgerInclusionState?: LedgerInclusionState;
     /**
-     * The conflict reason.
+     * The transaction failure reason.
      */
-    conflictReason?: ConflictReason;
+    transactionFailureReason?: TransactionFailureReason;
     /**
      * Should the block be promoted.
      */
