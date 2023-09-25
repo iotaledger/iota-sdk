@@ -156,4 +156,7 @@ pub enum UtilsMethod {
     /// Creates a UTXOInput from outputId.
     #[serde(rename_all = "camelCase")]
     OutputIdToUtxoInput { output_id: OutputId },
+    /// Returns the hex representation of the serialized output bytes.
+    #[serde(rename_all = "camelCase")]
+    OutputHexBytes { output: OutputDto },
 }

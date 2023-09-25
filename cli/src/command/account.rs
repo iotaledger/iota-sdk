@@ -933,10 +933,11 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let mut aliases = Vec::new();
     let mut foundries = Vec::new();
 
-    if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
-        (a.key_index(), a.internal())
-    }) {
-        output_ids = addresses[index].output_ids().as_slice();
+    if let Some(address) = addresses
+        .iter()
+        .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
+    {
+        output_ids = address.output_ids().as_slice();
 
         for output_id in output_ids {
             if let Some(output_data) = account.get_output(output_id).await {

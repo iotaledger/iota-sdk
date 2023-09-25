@@ -31,5 +31,3 @@ pub(crate) const DATABASE_SCHEMA_VERSION_KEY: &str = "database-schema-version";
 pub(crate) const PARTICIPATION_EVENTS: &str = "participation-events";
 #[cfg(feature = "participation")]
 pub(crate) const PARTICIPATION_CACHED_OUTPUTS: &str = "participation-cached-outputs";
-
-pub(crate) const CHRYSALIS_STORAGE_KEY: &str = "chrysalis-data";
