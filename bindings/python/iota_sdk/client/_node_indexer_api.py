@@ -131,7 +131,7 @@ class NodeIndexerAPI():
         response = self._call_method('outputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response)
+        return OutputIdsResponse(response)
 
     def basic_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:

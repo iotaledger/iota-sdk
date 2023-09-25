@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 import humps
 from dacite import from_dict
 
-import iota_sdk
-from iota_sdk import call_client_method, listen_mqtt
+from iota_sdk.external import create_client, call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
@@ -115,7 +114,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         # Create the message handler
         if client_handle is None:
-            self.handle = iota_sdk.create_client(client_config_str)
+            self.handle = create_client(client_config_str)
         else:
             self.handle = client_handle
 

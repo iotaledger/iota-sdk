@@ -11,13 +11,11 @@ from iota_sdk.types.address import Address, AddressType, Ed25519Address, Account
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
-from iota_sdk.types.block import Block
+from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk import call_utils_method
-else:
-    call_utils_method = object
+    from iota_sdk.types.block import Block
 
 
 class Utils():

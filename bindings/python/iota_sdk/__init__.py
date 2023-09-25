@@ -1,10 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# pylint: disable=import-error
-from .iota_sdk import call_utils_method, destroy_wallet, create_client, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, call_wallet_method, call_client_method, listen_mqtt
 from .client.client import Client, NodeIndexerAPI, ClientError
 from .client._high_level_api import GenerateAddressesOptions, GenerateAddressOptions
+from .external import *
 from .utils import Utils
 from .wallet.wallet import Wallet, Account
 from .wallet.common import WalletError

@@ -26,6 +26,7 @@ class OutputType(IntEnum):
     Account = 4
     Foundry = 5
     Nft = 6
+    Delegation = 7
 
 
 @json
@@ -182,6 +183,18 @@ class NftOutput(Output):
         IssuerFeature, MetadataFeature]]] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
+
+
+@json
+@dataclass
+class DelegationOutput(Output):
+    """Describes a delegation output.
+    Attributes:
+        type :
+            The type of output.
+    """
+    # TODO fields done in #1174
+    type: int = field(default_factory=lambda: int(OutputType.Delegation), init=False)
 
 
 @json
