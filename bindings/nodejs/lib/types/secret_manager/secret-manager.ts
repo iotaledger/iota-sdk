@@ -24,6 +24,7 @@ export interface SeedSecretManager {
 /** Placeholder secret manager that can't do anything. */
 export type PlaceholderSecretManager = 'placeholder';
 
+
 /** Secret manager that uses Stronghold. */
 export interface StrongholdSecretManager {
     /** The underlying Stronghold snapshot. */
@@ -33,11 +34,18 @@ export interface StrongholdSecretManager {
     };
 }
 
+/** Secret manager based on a single ED25519 private key. */
+export interface PrivateKeySecretManager {
+    privateKey: string
+
+}
+
 /** Supported secret managers */
 export type SecretManagerType =
     | LedgerNanoSecretManager
     | MnemonicSecretManager
     | StrongholdSecretManager
+    | PrivateKeySecretManager
     | PlaceholderSecretManager;
 
 export interface Secp256k1EcdsaSignature {
