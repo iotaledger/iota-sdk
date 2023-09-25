@@ -24,7 +24,6 @@ impl InputSelection {
     fn get_remainder_address(&self) -> Option<(Address, Option<Bip44>)> {
         if let Some(remainder_address) = self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
-            #[cfg(feature = "ledger_nano")]
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
                 let alias_transition = is_alias_transition(
                     &input.output,
