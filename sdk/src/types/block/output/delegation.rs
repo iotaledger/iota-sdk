@@ -370,7 +370,7 @@ impl DelegationOutput {
         {
             return Err(StateTransitionError::MutatedImmutableField);
         }
-
+// TODO add end_epoch validation rules
         Ok(())
     }
 }
