@@ -55,10 +55,9 @@ class GenerateAddressesOptions():
     options: Optional[GenerateAddressOptions] = None
 
 
-class HighLevelAPI():
+class HighLevelAPI(metaclass=ABCMeta):
     """High level API.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def _call_method(self, name, data=None):

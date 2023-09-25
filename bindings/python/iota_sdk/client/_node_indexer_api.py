@@ -25,10 +25,9 @@ class OutputIdsResponse:
             output_id) for output_id in output_dict["items"]]
 
 
-class NodeIndexerAPI():
+class NodeIndexerAPI(metaclass=ABCMeta):
     """Node indexer API.
     """
-    __metaclass__ = ABCMeta
 
     @json
     @dataclass

@@ -12,10 +12,9 @@ from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 
 
-class NodeCoreAPI():
+class NodeCoreAPI(metaclass=ABCMeta):
     """Node core API.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def _call_method(self, name, data=None):

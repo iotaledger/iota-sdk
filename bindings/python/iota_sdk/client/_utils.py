@@ -8,10 +8,9 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output
 
 
-class ClientUtils():
+class ClientUtils(metaclass=ABCMeta):
     """Client utility functions.
     """
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def _call_method(self, name, data=None):
