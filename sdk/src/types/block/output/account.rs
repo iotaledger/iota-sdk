@@ -21,9 +21,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, AccountId, ChainId,
-            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
-            StateTransitionError, StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
+            StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -32,6 +32,30 @@ use crate::types::{
     },
     ValidationParams,
 };
+
+impl_id!(pub AccountId, 32, "Unique identifier of an account, which is the BLAKE2b-256 hash of the Output ID that created it.");
+
+#[cfg(feature = "serde")]
+string_serde_impl!(AccountId);
+
+impl From<&OutputId> for AccountId {
+    fn from(output_id: &OutputId) -> Self {
+        Self::from(output_id.hash())
+    }
+}
+
+impl AccountId {
+    ///
+    pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
+        if self.is_null() { Self::from(output_id) } else { self }
+    }
+}
+
+impl From<AccountId> for Address {
+    fn from(value: AccountId) -> Self {
+        Self::Account(AccountAddress::new(value))
+    }
+}
 
 /// Types of account transition.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
