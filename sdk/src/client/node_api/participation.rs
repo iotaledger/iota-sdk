@@ -50,7 +50,7 @@ impl ClientInner {
         self.get_request(
             &route,
             milestone_index
-                .map(|index| format!("milestoneIndex={}", index.to_string()))
+                .map(|index| format!("milestoneIndex={index}"))
                 .as_deref(),
             false,
             false,
