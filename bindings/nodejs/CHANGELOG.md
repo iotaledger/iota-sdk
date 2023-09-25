@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GenericQueryParameter, UnlockableByAddress` types;
 - `Irc27Metadata` and `Irc30Metadata` helpers;
 - `Utils::outputHexBytes`;
-- `PrivateKeySecretManager`.
+- `PrivateKeySecretManager`;
 
 ## 1.0.11 - 2023-09-14
 
