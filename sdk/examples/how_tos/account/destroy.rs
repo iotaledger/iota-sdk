@@ -57,9 +57,8 @@ async fn main() -> Result<()> {
 
         let balance = wallet.sync(None).await?;
 
-        todo!("account outputs");
-        // let accounts_after = balance.accounts();
-        // println!("Accounts AFTER destroying:\n{accounts_after:#?}",);
+        let accounts_after = balance.accounts();
+        println!("Accounts AFTER destroying:\n{accounts_after:#?}",);
     } else {
         println!("No Account available in account '{alias}'");
     }

@@ -20,7 +20,7 @@ use iota_sdk::{
         output::{feature::Irc27Metadata, NftId},
         payload::transaction::TransactionId,
     },
-    wallet::{Account, MintNftParams, Result},
+    wallet::{MintNftParams, Result},
     Wallet,
 };
 
@@ -41,11 +41,11 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    account.sync(None).await?;
+    wallet.sync(None).await?;
     println!("Account synced!");
 
     // Set the stronghold password
@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let bech32_hrp = account.client().get_bech32_hrp().await?;
+    let bech32_hrp = wallet.client().get_bech32_hrp().await?;
     let issuer = Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id));
 
     // Create the metadata with another index for each
@@ -73,11 +73,11 @@ async fn main() -> Result<()> {
             index * NUM_NFTS_MINTED_PER_TRANSACTION + nft_mint_params.len(),
             NFT_COLLECTION_SIZE
         );
-        let transaction = account.mint_nfts(nft_mint_params.to_vec(), None).await?;
-        wait_for_inclusion(&transaction.transaction_id, &account).await?;
+        let transaction = wallet.mint_nfts(nft_mint_params.to_vec(), None).await?;
+        wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 
         // Sync so the new outputs are available again for new transactions
-        account.sync(None).await?;
+        wallet.sync(None).await?;
     }
 
     // After the NFTs are minted, the issuer nft can be sent to the so called "null address"
@@ -105,14 +105,14 @@ fn get_immutable_metadata(index: usize) -> Irc27Metadata {
     .with_collection_name("Shimmer OG")
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(

@@ -19,13 +19,12 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
 
 // The account alias used in this example
-const ACCOUNT_ALIAS: &str = "ledger";
-// The number of addresses to generate
-const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
+const ALIAS: &str = "ledger";
 // The address to send coins to
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount of base coins we'll send
@@ -42,35 +41,31 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_alias(ALIAS)
         .finish()
         .await?;
 
     println!("{:?}", wallet.get_ledger_nano_status().await?);
 
-    // Get or create a new account
-    let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
-
-    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
+    println!("Generating address...");
     let now = tokio::time::Instant::now();
-    let addresses = account
-        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
-        .await?;
+    let address = wallet.generate_ed25519_address(None).await?;
     println!("took: {:.2?}", now.elapsed());
 
-    println!("ADDRESSES:\n{addresses:#?}");
+    println!("ADDRESS:\n{address:#?}");
 
     let now = tokio::time::Instant::now();
-    let balance = account.sync(None).await?;
-    println!("Account synced in: {:.2?}", now.elapsed());
+    let balance = wallet.sync(None).await?;
+    println!("Wallet synced in: {:.2?}", now.elapsed());
 
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
     println!("Sending the coin-transfer transaction...");
-    let transaction = account.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
+    let transaction = wallet.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -80,8 +75,8 @@ async fn main() -> Result<()> {
     );
 
     let now = tokio::time::Instant::now();
-    let balance = account.sync(None).await?;
-    println!("Account synced in: {:.2?}", now.elapsed());
+    let balance = wallet.sync(None).await?;
+    println!("Wallet synced in: {:.2?}", now.elapsed());
 
     println!("Balance AFTER:\n{:?}", balance.base_coin());
 

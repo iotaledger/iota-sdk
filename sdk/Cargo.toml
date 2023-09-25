@@ -217,23 +217,13 @@ path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
 required-features = ["client"]
 
 [[example]]
-name = "create_account"
-path = "examples/how_tos/accounts_and_addresses/create_account.rs"
+name = "create_wallet"
+path = "examples/how_tos/accounts_and_addresses/create_wallet.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "check_balance"
 path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
-required-features = ["rocksdb", "stronghold"]
-
-[[example]]
-name = "list_addresses"
-path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
-required-features = ["rocksdb", "stronghold"]
-
-[[example]]
-name = "create_address"
-path = "examples/how_tos/accounts_and_addresses/create_address.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
@@ -624,11 +614,6 @@ path = "examples/wallet/17_check_unlock_conditions.rs"
 required-features = ["wallet", "storage"]
 
 [[example]]
-name = "accounts"
-path = "examples/wallet/accounts.rs"
-required-features = ["wallet", "storage"]
-
-[[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
 required-features = ["wallet", "storage"]
@@ -662,11 +647,6 @@ required-features = ["wallet", "storage"]
 name = "spammer"
 path = "examples/wallet/spammer.rs"
 required-features = ["wallet"]
-
-[[example]]
-name = "split_funds"
-path = "examples/wallet/split_funds.rs"
-required-features = ["wallet", "storage"]
 
 [[example]]
 name = "storage"

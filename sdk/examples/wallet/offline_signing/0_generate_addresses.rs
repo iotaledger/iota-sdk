@@ -13,13 +13,13 @@ use iota_sdk::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    crypto::keys::bip39::Mnemonic,
-    wallet::{Account, ClientOptions, Result, Wallet},
+    crypto::keys::{bip39::Mnemonic, bip44::Bip44},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 const OFFLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-offline-walletdb";
 const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
-const ADDRESSES_FILE_PATH: &str = "./examples/wallet/offline_signing/example.addresses.json";
+const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -43,30 +43,24 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_storage_path(OFFLINE_WALLET_DB_PATH)
         .with_client_options(offline_client)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Create a new account
-    let account = wallet
-        .create_account()
-        .with_alias("Alice")
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_bech32_hrp(SHIMMER_BECH32_HRP)
+        .with_alias("Alice")
         .finish()
         .await?;
 
-    println!("Generated a new account '{}'", account.alias().await);
+    println!("Generated a new account '{}'", wallet.alias().await);
 
-    write_addresses_to_file(&account).await
+    write_addresses_to_file(&wallet).await
 }
 
-async fn write_addresses_to_file(account: &Account) -> Result<()> {
+async fn write_addresses_to_file(wallet: &Wallet) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
-    let addresses = account.addresses().await?;
-    let json = serde_json::to_string_pretty(&addresses)?;
-    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(ADDRESSES_FILE_PATH).await?);
-    println!("example.addresses.json:\n{json}");
+    let wallet_address = wallet.address().await;
+    let json = serde_json::to_string_pretty(&wallet_address)?;
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(ADDRESS_FILE_PATH).await?);
+    println!("example.address.json:\n{json}");
     file.write_all(json.as_bytes()).await?;
     file.flush().await?;
     Ok(())

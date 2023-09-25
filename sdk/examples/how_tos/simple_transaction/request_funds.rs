@@ -20,21 +20,20 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    let balance = account.sync(None).await?;
-    println!("Account synced");
+    let balance = wallet.sync(None).await?;
+    println!("Wallet synced");
 
-    let addresses = account.addresses().await?;
+    let bech32_address = wallet.address_as_bech32().await;
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");
 
     println!("Requesting funds from faucet...");
-    let faucet_response =
-        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), addresses[0].address()).await?;
+    let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &bech32_address).await?;
 
     println!("Response from faucet: {}", faucet_response.trim_end());
 
@@ -46,7 +45,7 @@ async fn main() -> Result<()> {
             println!("Timeout: waiting for funds took too long");
             return Ok(());
         };
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(None).await?;
         let funds_after = balance.base_coin().available();
         if funds_after > funds_before {
             break funds_after;

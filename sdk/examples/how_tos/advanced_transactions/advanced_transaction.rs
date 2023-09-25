@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send a transaction.
+//!
 //! Rename `.env.example` to `.env` first.
 //!
 //! `cargo run --release --all-features --example advanced_transaction`
@@ -24,11 +25,13 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // Get the wallet we generated with `create_wallet`.
+    let wallet = Wallet::builder()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
+        .finish()
+        .await?;
 
-    // Get the account we generated with `create_account`
-    let account = wallet.get_account("Alice").await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = wallet.sync(None).await?;
 
@@ -46,13 +49,13 @@ async fn main() -> Result<()> {
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             )?))
             .add_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
-            .finish_output(account.client().get_token_supply().await?)?;
+            .finish_output(wallet.client().get_token_supply().await?)?;
 
-        let transaction = account.send_outputs(vec![basic_output], None).await?;
+        let transaction = wallet.send_outputs(vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(

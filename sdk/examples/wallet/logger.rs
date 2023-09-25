@@ -13,11 +13,9 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
-
-// The number of addresses to generate
-const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -41,20 +39,16 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_alias("Alice")
         .finish()
         .await?;
 
-    // Get or create a new account
-    let account = wallet.get_or_create_account("Alice").await?;
-
-    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
-    let _ = account
-        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
-        .await?;
+    println!("Generating address...");
+    let _ = wallet.generate_ed25519_address(None).await?;
 
     println!("Syncing account");
-    account.sync(None).await?;
+    wallet.sync(None).await?;
 
     println!("Example finished successfully");
     Ok(())

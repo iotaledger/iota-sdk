@@ -28,12 +28,12 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
 
     // Find first foundry and corresponding token id
     let token_id = std::env::args()
@@ -60,10 +60,10 @@ async fn main() -> Result<()> {
 
     // Melt some of the circulating supply
 
-    let transaction = account.melt_native_token(token_id, MELT_AMOUNT, None).await?;
+    let transaction = wallet.melt_native_token(token_id, MELT_AMOUNT, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
@@ -73,7 +73,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     let available_balance = balance
         .native_tokens()
         .iter()

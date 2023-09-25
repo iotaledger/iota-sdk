@@ -14,11 +14,12 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::SecretManager,
     },
+    crypto::keys::bip44::Bip44,
     wallet::{account::types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
-const ADDRESSES_FILE_PATH: &str = "./examples/wallet/offline_signing/example.addresses.json";
+const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
 const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
 // Address to which we want to send the amount.
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
@@ -33,7 +34,7 @@ async fn main() -> Result<()> {
     let params = [SendParams::new(SEND_AMOUNT, RECV_ADDRESS)?];
 
     // Recovers addresses from example `0_address_generation`.
-    let addresses = read_addresses_from_file().await?;
+    let address = read_address_from_file().await?.into_bech32();
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
@@ -42,22 +43,16 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Create a new account
-    let account = wallet
-        .create_account()
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address(*address)
         .with_alias("Alice")
-        .with_addresses(addresses)
         .finish()
         .await?;
 
     // Sync the account to get the outputs for the addresses
-    account.sync(None).await?;
+    wallet.sync(None).await?;
 
-    let prepared_transaction = account.prepare_send(params.clone(), None).await?;
+    let prepared_transaction = wallet.prepare_send(params.clone(), None).await?;
 
     println!("Prepared transaction sending {params:?}");
 
@@ -66,10 +61,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_addresses_from_file() -> Result<Vec<Bip44Address>> {
+async fn read_address_from_file() -> Result<Bip44Address> {
     use tokio::io::AsyncReadExt;
 
-    let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESSES_FILE_PATH).await?);
+    let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESS_FILE_PATH).await?);
     let mut json = String::new();
     file.read_to_string(&mut json).await?;
 

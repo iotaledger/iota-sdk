@@ -29,32 +29,25 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    let account_addresses = account
-        .addresses()
-        .await?
-        .into_iter()
-        .map(|a| *a.address())
-        .collect::<Vec<Bech32Address>>();
+    let wallet_address = wallet.address().await;
 
-    println!("ADDRESSES:\n{:#?}", account_addresses);
+    println!("Wallet address:\n{:#?}", wallet_address);
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
-        .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
-        .finish_output(account.client().get_token_supply().await?)?;
+        .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
+        .finish_output(wallet.client().get_token_supply().await?)?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output
         .unlock_conditions()
         .expect("output needs to have unlock conditions")
         .as_ref()
     {
-        // Check that address in the unlock condition belongs to the account
-        account_addresses
-            .iter()
-            .any(|address| address.as_ref() == address_unlock_condition.address())
+        // Check that the address in the unlock condition belongs to the wallet
+        &wallet_address == address_unlock_condition.address()
     } else {
         false
     };

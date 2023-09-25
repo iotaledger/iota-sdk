@@ -29,10 +29,11 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
-    let balance = account.sync(None).await?;
+
+    let balance = wallet.sync(None).await?;
 
     // Set the stronghold password
     wallet
@@ -43,11 +44,11 @@ async fn main() -> Result<()> {
     // outputs and therefore we can reuse an existing one
     if balance.accounts().is_empty() {
         // If we don't have an account, we need to create one
-        let transaction = account.create_account_output(None, None).await?;
+        let transaction = wallet.create_account_output(None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
@@ -56,7 +57,7 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        account.sync(None).await?;
+        wallet.sync(None).await?;
         println!("Account synced");
     }
 
@@ -72,11 +73,11 @@ async fn main() -> Result<()> {
         foundry_metadata: Some(metadata.to_bytes()),
     };
 
-    let transaction = account.create_native_token(params, None).await?;
+    let transaction = wallet.create_native_token(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -87,7 +88,7 @@ async fn main() -> Result<()> {
     println!("Created token: {}", transaction.token_id);
 
     // Ensure the account is synced after creating the native token.
-    account.sync(None).await?;
+    wallet.sync(None).await?;
     println!("Account synced");
 
     Ok(())

@@ -43,9 +43,9 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // Provide the stronghold password
     wallet
@@ -58,7 +58,7 @@ async fn main() -> Result<()> {
         auth: None,
         disabled: false,
     };
-    let _ = account
+    let _ = wallet
         .register_participation_events(&ParticipationEventRegistrationOptions {
             node,
             // We ignore this particular event
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!("Registered events:");
-    let registered_participation_events = account.get_participation_events().await?;
+    let registered_participation_events = wallet.get_participation_events().await?;
     for (i, (id, event)) in registered_participation_events.iter().enumerate() {
         println!("EVENT #{i}");
         println!(
@@ -85,11 +85,11 @@ async fn main() -> Result<()> {
     }
 
     println!("Checking for participation event '{PARTICIPATION_EVENT_ID_1}'");
-    if let Ok(Some(event)) = account.get_participation_event(event_id).await {
+    if let Ok(Some(event)) = wallet.get_participation_event(event_id).await {
         println!("{event:#?}");
 
         println!("Getting event status for '{PARTICIPATION_EVENT_ID_1}'");
-        let event_status = account.get_participation_event_status(&event_id).await?;
+        let event_status = wallet.get_participation_event_status(&event_id).await?;
         println!("{event_status:#?}");
     } else {
         println!("Event not found");
@@ -99,12 +99,12 @@ async fn main() -> Result<()> {
     // deregister an event
     ////////////////////////////////////////////////
     if !DEREGISTERED_PARTICIPATION_EVENT.is_empty() {
-        account
+        wallet
             .deregister_participation_event(&DEREGISTERED_PARTICIPATION_EVENT.parse()?)
             .await?;
 
         println!("Registered events (updated):");
-        let registered_participation_events = account.get_participation_events().await?;
+        let registered_participation_events = wallet.get_participation_events().await?;
         for (i, (id, event)) in registered_participation_events.iter().enumerate() {
             println!("EVENT #{i}");
             println!(
@@ -118,7 +118,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     println!("Account synced");
 
     ////////////////////////////////////////////////
@@ -128,11 +128,11 @@ async fn main() -> Result<()> {
     println!("Current voting power: {}", balance.base_coin().voting_power());
 
     println!("Sending transaction to increase voting power...");
-    let transaction = account.increase_voting_power(INCREASE_VOTING_POWER_AMOUNT).await?;
+    let transaction = wallet.increase_voting_power(INCREASE_VOTING_POWER_AMOUNT).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `increase voting power` transaction to be included...");
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -141,11 +141,11 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     println!("Account synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
-    let voting_output = account.get_voting_output().await?.unwrap();
+    let voting_output = wallet.get_voting_output().await?.unwrap();
     println!("Voting output:\n{:#?}", voting_output.output);
 
     ////////////////////////////////////////////////
@@ -153,11 +153,11 @@ async fn main() -> Result<()> {
     ////////////////////////////////////////////////
 
     println!("Sending transaction to decrease voting power...");
-    let transaction = account.decrease_voting_power(DECREASE_VOTING_POWER_AMOUNT).await?;
+    let transaction = wallet.decrease_voting_power(DECREASE_VOTING_POWER_AMOUNT).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `decrease voting power` transaction to be included...");
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -166,7 +166,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     println!("Account synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
@@ -175,14 +175,14 @@ async fn main() -> Result<()> {
     ////////////////////////////////////////////////
 
     println!("Sending transaction to vote...");
-    let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
+    let transaction = wallet.vote(Some(event_id), Some(vec![0])).await?;
     // NOTE!!!
     // from here on out, the example will only proceed if you've set up your own participation event and
     // changed the constants above with a valid (i.e. ongoing) event id for
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `vote` transaction to be included...");
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -191,25 +191,25 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    account.sync(None).await?;
+    wallet.sync(None).await?;
     println!("Account synced");
 
     ////////////////////////////////////////////////
     // get voting overview
     ////////////////////////////////////////////////
 
-    let overview = account.get_participation_overview(None).await?;
+    let overview = wallet.get_participation_overview(None).await?;
     println!("Particpation overview:\n{overview:?}");
 
     ////////////////////////////////////////////////
     // stop vote
     ////////////////////////////////////////////////
 
-    let transaction = account.stop_participating(event_id).await?;
+    let transaction = wallet.stop_participating(event_id).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `stop participating` transaction to be included...");
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -218,22 +218,22 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    account.sync(None).await?;
+    wallet.sync(None).await?;
     println!("Account synced");
 
     ////////////////////////////////////////////////
     // destroy voting output
     ////////////////////////////////////////////////
 
-    let voting_output = account.get_voting_output().await?.unwrap();
+    let voting_output = wallet.get_voting_output().await?.unwrap();
     println!("Voting output: {:?}", voting_output.output);
 
     // Decrease full amount, there should be no voting output afterwards
-    let transaction = account.decrease_voting_power(voting_output.output.amount()).await?;
+    let transaction = wallet.decrease_voting_power(voting_output.output.amount()).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `decrease voting power` transaction to be included...");
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -242,10 +242,10 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    account.sync(None).await?;
+    wallet.sync(None).await?;
     println!("Account synced");
 
-    assert!(account.get_voting_output().await.is_err());
+    assert!(wallet.get_voting_output().await.is_err());
 
     Ok(())
 }

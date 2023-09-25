@@ -19,15 +19,15 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Create the wallet
+    let alias = "Alice";
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias(alias)
         .finish()
         .await?;
-    let alias = "Alice";
-    let account = wallet.get_account(alias).await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
 
     // Get the first nft
     if let Some(nft_id) = balance.nfts().first() {
@@ -39,10 +39,10 @@ async fn main() -> Result<()> {
             .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let transaction = account.burn(*nft_id, None).await?;
+        let transaction = wallet.burn(*nft_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
 
@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
 
         println!("Burned NFT '{}'", nft_id);
 
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(None).await?;
         let nfts_after = balance.nfts();
         println!("Balance after burning:\n{nfts_after:#?}",);
     } else {

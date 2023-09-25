@@ -15,6 +15,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -31,20 +32,19 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
-    let accounts = wallet.recover_accounts(0, 2, 2, None).await?;
+    todo!("recover wallet");
+    // wallet.recover(0, 2, 2, None).await?;
 
-    println!("Recovered {} accounts", accounts.len());
-    for account in accounts.iter() {
-        println!("ACCOUNT #{}:", account.details().await.index());
-        let now = tokio::time::Instant::now();
-        let balance = account.sync(None).await?;
-        println!("Account synced in: {:.2?}", now.elapsed());
-        println!("Balance: {balance:#?}");
-    }
+    println!("Recovered wallet");
+
+    let now = tokio::time::Instant::now();
+    let balance = wallet.sync(None).await?;
+    println!("Wallet synced in: {:.2?}", now.elapsed());
+    println!("Balance: {balance:#?}");
 
     Ok(())
 }

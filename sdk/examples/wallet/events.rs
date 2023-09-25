@@ -14,6 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    crypto::keys::bip44::Bip44,
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
@@ -39,7 +40,8 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_alias("Alice")
         .finish()
         .await?;
 
@@ -49,21 +51,18 @@ async fn main() -> Result<()> {
         })
         .await;
 
-    // Get or create an account
-    let account = wallet.get_or_create_account("Alice").await?;
-
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     println!("Balance BEFORE:\n{:#?}", balance.base_coin());
 
     // send transaction
     let outputs = [BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
-        .finish_output(account.client().get_token_supply().await?)?];
+        .finish_output(wallet.client().get_token_supply().await?)?];
 
-    let transaction = account.send_outputs(outputs, None).await?;
+    let transaction = wallet.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
@@ -73,7 +72,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     println!("Balance AFTER:\n{:#?}", balance.base_coin());
 
     Ok(())

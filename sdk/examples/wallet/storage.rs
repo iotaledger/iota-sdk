@@ -13,11 +13,9 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account::types::Bip44Address, Account, ClientOptions, Result, Wallet},
+    crypto::keys::bip44::Bip44,
+    wallet::{account::types::Bip44Address, ClientOptions, Result, Wallet},
 };
-
-// The maximum number of addresses to generate
-const MAX_ADDRESSES_TO_GENERATE: usize = 3;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -32,48 +30,31 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_alias("Alice")
         .finish()
         .await?;
 
-    // Get account or create a new one
-    let account = wallet.get_or_create_account("Alice").await?;
+    let bech32_address = wallet.address_as_bech32().await;
 
-    let addresses = generate_max_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
-    let bech32_addresses = addresses
-        .into_iter()
-        .map(|address| address.into_bech32())
-        .collect::<Vec<_>>();
+    println!("ADDRESS:\n{bech32_address}");
 
-    println!("Total address count:\n{:?}", account.addresses().await?.len());
-    println!("ADDRESSES:\n{bech32_addresses:#?}");
+    sync_print_balance(&wallet).await?;
 
-    sync_print_balance(&account).await?;
+    // TODO: remove?
 
-    #[cfg(debug_assertions)]
-    wallet.verify_integrity().await?;
+    // #[cfg(debug_assertions)]
+    // wallet.verify_integrity().await?;
 
     println!("Example finished successfully");
     Ok(())
 }
 
-async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<Bip44Address>> {
-    let alias = account.alias().await;
-    if account.addresses().await?.len() < max {
-        let num_addresses_to_generate = max - account.addresses().await?.len();
-        println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
-        account
-            .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
-            .await?;
-    }
-    account.addresses().await
-}
-
-async fn sync_print_balance(account: &Account) -> Result<()> {
-    let alias = account.alias().await;
+async fn sync_print_balance(wallet: &Wallet) -> Result<()> {
+    let alias = wallet.alias().await;
     let now = tokio::time::Instant::now();
-    let balance = account.sync(None).await?;
-    println!("{alias}'s account synced in: {:.2?}", now.elapsed());
+    let balance = wallet.sync(None).await?;
+    println!("{alias}'s wallet synced in: {:.2?}", now.elapsed());
     println!("{alias}'s balance:\n{:#?}", balance.base_coin());
     Ok(())
 }

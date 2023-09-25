@@ -54,14 +54,14 @@ async fn main() -> Result<()> {
     );
 
     // Generate a new address, which will be the new state controller
-    let new_state_controller = &wallet.generate_ed25519_addresses(1, None).await?[0];
+    let new_state_controller = wallet.generate_ed25519_address(None).await?;
 
     let token_supply = wallet.client().get_token_supply().await?;
 
     let account_output = account_output_data.output.as_account();
     let updated_account_output = AccountOutputBuilder::from(account_output)
         .replace_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(new_state_controller.address()),
+            StateControllerAddressUnlockCondition::new(new_state_controller),
         ))
         .finish_output(token_supply)?;
 

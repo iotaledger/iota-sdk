@@ -14,6 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -31,8 +32,9 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
         .with_storage_path("getting-started-db")
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_alias("Alice")
         .finish()
         .await?;
 
@@ -42,15 +44,8 @@ async fn main() -> Result<()> {
     println!("Mnemonic: {}", mnemonic.as_ref());
     wallet.store_mnemonic(mnemonic).await?;
 
-    // Create an account.
-    let account = wallet
-        .create_account()
-        .with_alias("Alice") // A name to associate with the created account.
-        .finish()
-        .await?;
-
-    let first_address = &account.addresses().await?[0];
-    println!("{}", first_address.address());
+    let wallet_address = wallet.address_as_bech32().await;
+    println!("{}", wallet_address);
 
     Ok(())
 }

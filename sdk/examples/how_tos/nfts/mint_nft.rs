@@ -35,20 +35,18 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
+    // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
 
-    // Get the account we generated with `create_account`
-    let account = wallet.get_account("Alice").await?;
-
     // Ensure the account is synced after minting.
-    account.sync(None).await?;
+    wallet.sync(None).await?;
 
-    // We send from the first address in the account.
-    let sender_address = *account.addresses().await?[0].address();
+    // We send from the wallet address.
+    let sender_address = wallet.address_as_bech32().await;
 
     // Set the stronghold password
     wallet
@@ -72,11 +70,11 @@ async fn main() -> Result<()> {
         .try_with_issuer(sender_address)?
         .with_immutable_metadata(metadata.to_bytes())];
 
-    let transaction = account.mint_nfts(nft_params, None).await?;
+    let transaction = wallet.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -87,7 +85,7 @@ async fn main() -> Result<()> {
     println!("Minted NFT 1");
 
     // Build an NFT manually by using the `NftOutputBuilder`
-    let token_supply = account.client().get_token_supply().await?;
+    let token_supply = wallet.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(NFT2_AMOUNT, NftId::null())
@@ -97,11 +95,11 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    let transaction = account.send_outputs(outputs, None).await?;
+    let transaction = wallet.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -112,7 +110,7 @@ async fn main() -> Result<()> {
     println!("Minted NFT 2");
 
     // Ensure the account is synced after minting.
-    account.sync(None).await?;
+    wallet.sync(None).await?;
 
     Ok(())
 }

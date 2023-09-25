@@ -15,7 +15,7 @@ use iota_sdk::{
         Client,
     },
     types::{block::payload::transaction::TransactionId, TryFromDto},
-    wallet::{Account, Result},
+    wallet::Result,
     Wallet,
 };
 
@@ -31,19 +31,17 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_secret_manager(SecretManager::Placeholder)
+        .with_alias("Alice")
         .finish()
         .await?;
 
-    // Create a new account
-    let account = wallet.get_account("Alice").await?;
-
-    let signed_transaction_data = read_signed_transaction_from_file(account.client()).await?;
+    let signed_transaction_data = read_signed_transaction_from_file(wallet.client()).await?;
 
     // Sends offline signed transaction online.
-    let transaction = account
+    let transaction = wallet
         .submit_and_store_transaction(signed_transaction_data, None)
         .await?;
-    wait_for_inclusion(&transaction.transaction_id, &account).await?;
+    wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 
     Ok(())
 }
@@ -63,14 +61,14 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
     )?)
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(

@@ -30,12 +30,12 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias("Alice")
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
 
     // Get a token with sufficient balance
     if let Some(token_id) = balance
@@ -64,11 +64,11 @@ async fn main() -> Result<()> {
             [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
         )?];
 
-        let transaction = account.send_native_tokens(outputs, None).await?;
+        let transaction = wallet.send_native_tokens(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
@@ -77,7 +77,7 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(None).await?;
 
         let available_balance = balance
             .native_tokens()

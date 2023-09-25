@@ -19,15 +19,15 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    let alias = "Alice";
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_alias(alias)
         .finish()
         .await?;
-    let alias = "Alice";
-    let account = wallet.get_account(alias).await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
 
     let foundry_count = balance.foundries().len();
     println!("Foundries before destroying: {foundry_count}");
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
             .iter()
             .find(|native_token| *native_token.token_id() == token_id);
         if let Some(native_token) = native_tokens {
-            let output = account.get_foundry_output(token_id).await?;
+            let output = wallet.get_foundry_output(token_id).await?;
             // Check if all tokens are melted.
             if native_token.available() != output.as_foundry().token_scheme().as_simple().circulating_supply() {
                 // We are not able to melt all tokens, because we don't own them or they are not unlocked.
@@ -57,12 +57,12 @@ async fn main() -> Result<()> {
 
             println!("Melting remaining tokens..");
             // Melt all tokens so we can destroy the foundry.
-            let transaction = account
+            let transaction = wallet
                 .melt_native_token(token_id, native_token.available(), None)
                 .await?;
             println!("Transaction sent: {}", transaction.transaction_id);
 
-            let block_id = account
+            let block_id = wallet
                 .reissue_transaction_until_included(&transaction.transaction_id, None, None)
                 .await?;
             println!(
@@ -72,15 +72,15 @@ async fn main() -> Result<()> {
             );
 
             // Sync to make the foundry output available again, because it was used in the melting transaction.
-            account.sync(None).await?;
+            wallet.sync(None).await?;
         }
         println!("Destroying foundry..");
 
-        let transaction = account.burn(*foundry_id, None).await?;
+        let transaction = wallet.burn(*foundry_id, None).await?;
 
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
         );
 
         // Resync to update the foundries list.
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(None).await?;
 
         let foundry_count = balance.foundries().len();
         println!("Foundries after destroying: {foundry_count}");

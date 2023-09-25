@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example check_balance
 //! ```
 
-use iota_sdk::{wallet::Result, Wallet};
+use iota_sdk::{types::block::address::ToBech32Ext, wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,12 +28,9 @@ async fn main() -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("{balance:#?}");
 
-    println!("ADDRESSES:");
     let explorer_url = std::env::var("EXPLORER_URL").ok();
-    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
-    for address in wallet.addresses().await? {
-        println!(" - {prepended}{}", address.address());
-    }
+    let addr_base_url = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+    println!("{addr_base_url}{}", wallet.address_as_bech32().await);
 
     Ok(())
 }
