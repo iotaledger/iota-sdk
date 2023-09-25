@@ -282,73 +282,75 @@ impl FromStr for OutputKind {
     }
 }
 
-/// The account identifier.
-#[derive(Debug, Clone, Serialize, Eq, PartialEq, Hash)]
-#[serde(untagged)]
-#[non_exhaustive]
-pub enum AccountIdentifier {
-    /// Account alias as identifier.
-    Alias(String),
-    /// An index identifier.
-    Index(u32),
-}
+// TODO: remove
 
-// Custom deserialize because the index could also be encoded as String
-impl<'de> Deserialize<'de> for AccountIdentifier {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        use serde::de::Error;
-        use serde_json::Value;
-        let v = Value::deserialize(deserializer)?;
-        Ok(match v.as_u64() {
-            Some(number) => {
-                let index: u32 =
-                    u32::try_from(number).map_err(|_| D::Error::custom("account index is greater than u32::MAX"))?;
-                Self::Index(index)
-            }
-            None => {
-                let alias_or_index_str = v
-                    .as_str()
-                    .ok_or_else(|| D::Error::custom("account identifier is not a number or string"))?;
-                Self::from(alias_or_index_str)
-            }
-        })
-    }
-}
+// /// The account identifier.
+// #[derive(Debug, Clone, Serialize, Eq, PartialEq, Hash)]
+// #[serde(untagged)]
+// #[non_exhaustive]
+// pub enum AccountIdentifier {
+//     /// Account alias as identifier.
+//     Alias(String),
+//     /// An index identifier.
+//     Index(u32),
+// }
 
-// When the identifier is a string.
-impl From<&str> for AccountIdentifier {
-    fn from(value: &str) -> Self {
-        u32::from_str(value).map_or_else(|_| Self::Alias(value.to_string()), Self::Index)
-    }
-}
+// // Custom deserialize because the index could also be encoded as String
+// impl<'de> Deserialize<'de> for AccountIdentifier {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: Deserializer<'de>,
+//     {
+//         use serde::de::Error;
+//         use serde_json::Value;
+//         let v = Value::deserialize(deserializer)?;
+//         Ok(match v.as_u64() {
+//             Some(number) => {
+//                 let index: u32 =
+//                     u32::try_from(number).map_err(|_| D::Error::custom("account index is greater than u32::MAX"))?;
+//                 Self::Index(index)
+//             }
+//             None => {
+//                 let alias_or_index_str = v
+//                     .as_str()
+//                     .ok_or_else(|| D::Error::custom("account identifier is not a number or string"))?;
+//                 Self::from(alias_or_index_str)
+//             }
+//         })
+//     }
+// }
 
-impl From<String> for AccountIdentifier {
-    fn from(value: String) -> Self {
-        Self::from(value.as_str())
-    }
-}
+// // When the identifier is a string.
+// impl From<&str> for AccountIdentifier {
+//     fn from(value: &str) -> Self {
+//         u32::from_str(value).map_or_else(|_| Self::Alias(value.to_string()), Self::Index)
+//     }
+// }
 
-impl From<&String> for AccountIdentifier {
-    fn from(value: &String) -> Self {
-        Self::from(value.as_str())
-    }
-}
+// impl From<String> for AccountIdentifier {
+//     fn from(value: String) -> Self {
+//         Self::from(value.as_str())
+//     }
+// }
 
-// When the identifier is an index.
-impl From<u32> for AccountIdentifier {
-    fn from(value: u32) -> Self {
-        Self::Index(value)
-    }
-}
+// impl From<&String> for AccountIdentifier {
+//     fn from(value: &String) -> Self {
+//         Self::from(value.as_str())
+//     }
+// }
 
-impl core::fmt::Display for AccountIdentifier {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::Alias(alias) => alias.fmt(f),
-            Self::Index(index) => index.fmt(f),
-        }
-    }
-}
+// // When the identifier is an index.
+// impl From<u32> for AccountIdentifier {
+//     fn from(value: u32) -> Self {
+//         Self::Index(value)
+//     }
+// }
+
+// impl core::fmt::Display for AccountIdentifier {
+//     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+//         match self {
+//             Self::Alias(alias) => alias.fmt(f),
+//             Self::Index(index) => index.fmt(f),
+//         }
+//     }
+// }

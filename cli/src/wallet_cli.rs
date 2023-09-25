@@ -11,13 +11,17 @@ use iota_sdk::{
         stronghold::StrongholdAdapter,
         utils::Password,
     },
-    wallet::{account::types::AccountIdentifier, ClientOptions, Wallet},
+    crypto::keys::bip44::Bip44,
+    wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
+    helper::{
+        check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_alias, get_decision, get_password,
+        import_mnemonic,
+    },
     println_log_error, println_log_info,
 };
 
@@ -35,8 +39,6 @@ pub struct WalletCli {
     /// Set the path to the stronghold snapshot file.
     #[arg(long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
     pub stronghold_snapshot_path: String,
-    /// Set the account to enter.
-    pub account: Option<AccountIdentifier>,
     /// Set the log level.
     #[arg(short, long, default_value = DEFAULT_LOG_LEVEL)]
     pub log_level: LevelFilter,
@@ -49,54 +51,6 @@ impl WalletCli {
         Self::command().bin_name("wallet").print_help()?;
         Ok(())
     }
-}
-
-#[derive(Debug, Clone, Subcommand)]
-pub enum WalletCommand {
-    /// List all accounts.
-    Accounts,
-    /// Create a stronghold backup file.
-    Backup {
-        /// Path of the created stronghold backup file.
-        backup_path: String,
-    },
-    /// Change the stronghold password.
-    ChangePassword,
-    /// Initialize the wallet.
-    Init(InitParameters),
-    /// Migrate a stronghold snapshot v2 to v3.
-    MigrateStrongholdSnapshotV2ToV3 {
-        /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.
-        path: Option<String>,
-    },
-    /// Generate a random mnemonic.
-    Mnemonic {
-        // Output the mnemonic to the specified file.
-        #[arg(long)]
-        output_file_name: Option<String>,
-        // Output the mnemonic to the stdout.
-        #[arg(long, num_args = 0..=1, default_missing_value = Some("true"), value_parser = BoolishValueParser::new())]
-        output_stdout: Option<bool>,
-    },
-    /// Create a new account.
-    NewAccount {
-        /// Account alias, next available account index if not provided.
-        alias: Option<String>,
-    },
-    /// Get information about currently set node.
-    NodeInfo,
-    /// Restore a stronghold backup file.
-    Restore {
-        /// Path of the to be restored stronghold backup file.
-        backup_path: String,
-    },
-    /// Set the URL of the node to use.
-    SetNodeUrl {
-        /// Node URL to use for all future operations.
-        url: String,
-    },
-    /// Synchronize all accounts.
-    Sync,
 }
 
 #[derive(Debug, Clone, Args)]
@@ -123,19 +77,136 @@ impl Default for InitParameters {
     }
 }
 
-pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
-    let password = get_password("Stronghold password", false)?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
-    let accounts = wallet.get_accounts().await?;
-
-    println!("INDEX\tALIAS");
-    for account in accounts {
-        let details = &*account.details().await;
-        println!("{}\t{}", details.index(), details.alias());
-    }
-
-    Ok(())
+#[derive(Debug, Clone, Subcommand)]
+pub enum WalletCommand {
+    /// Create a stronghold backup file.
+    Backup {
+        /// Path of the created stronghold backup file.
+        backup_path: String,
+    },
+    /// Change the stronghold password.
+    ChangePassword,
+    /// Initialize the wallet.
+    Init(InitParameters),
+    /// Migrate a stronghold snapshot v2 to v3.
+    MigrateStrongholdSnapshotV2ToV3 {
+        /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.
+        path: Option<String>,
+    },
+    /// Generate a random mnemonic.
+    Mnemonic {
+        // Output the mnemonic to the specified file.
+        #[arg(long)]
+        output_file_name: Option<String>,
+        // Output the mnemonic to the stdout.
+        #[arg(long, num_args = 0..=1, default_missing_value = Some("true"), value_parser = BoolishValueParser::new())]
+        output_stdout: Option<bool>,
+    },
+    /// Get information about currently set node.
+    NodeInfo,
+    /// Restore a stronghold backup file.
+    Restore {
+        /// Path of the to be restored stronghold backup file.
+        backup_path: String,
+    },
+    /// Set the URL of the node to use.
+    SetNodeUrl {
+        /// Node URL to use for all future operations.
+        url: String,
+    },
+    /// Synchronize all accounts.
+    Sync,
 }
+
+pub async fn new_wallet(cli: WalletCli) -> Result<Option<Wallet>, Error> {
+    let storage_path = Path::new(&cli.wallet_db_path);
+    let snapshot_path = Path::new(&cli.stronghold_snapshot_path);
+
+    Ok(if let Some(command) = cli.command {
+        match command {
+            WalletCommand::Backup { backup_path } => {
+                backup_command(storage_path, snapshot_path, std::path::Path::new(&backup_path)).await?;
+                None
+            }
+            WalletCommand::ChangePassword => {
+                let wallet = change_password_command(storage_path, snapshot_path).await?;
+                Some(wallet)
+            }
+            WalletCommand::Init(init_parameters) => {
+                let wallet = init_command(storage_path, snapshot_path, init_parameters).await?;
+                Some(wallet)
+            }
+            WalletCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
+                migrate_stronghold_snapshot_v2_to_v3_command(path).await?;
+                None
+            }
+            WalletCommand::Mnemonic {
+                output_file_name,
+                output_stdout,
+            } => {
+                mnemonic_command(output_file_name, output_stdout).await?;
+                None
+            }
+            WalletCommand::NodeInfo => {
+                node_info_command(storage_path).await?;
+                None
+            }
+            WalletCommand::Restore { backup_path } => {
+                let wallet = restore_command(storage_path, snapshot_path, std::path::Path::new(&backup_path)).await?;
+                Some(wallet)
+            }
+            WalletCommand::SetNodeUrl { url } => {
+                let wallet = set_node_url_command(storage_path, snapshot_path, url).await?;
+                Some(wallet)
+            }
+            WalletCommand::Sync => {
+                let wallet = sync_command(storage_path, snapshot_path).await?;
+                Some(wallet)
+            }
+        }
+    } else {
+        // no command provided, i.e. `> ./wallet`
+        match (storage_path.exists(), snapshot_path.exists()) {
+            (true, true) => {
+                let password = get_password("Stronghold password", false)?;
+                let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+                Some(wallet)
+            }
+            (false, false) => {
+                if get_decision("Create a new wallet with default parameters?")? {
+                    let wallet = init_command(storage_path, snapshot_path, InitParameters::default()).await?;
+                    println_log_info!("Created new wallet.");
+                    Some(wallet)
+                } else {
+                    WalletCli::print_help()?;
+                    None
+                }
+            }
+            (true, false) => {
+                println_log_error!("Stronghold snapshot not found at '{}'.", snapshot_path.display());
+                None
+            }
+            (false, true) => {
+                println_log_error!("Wallet database not found at '{}'.", storage_path.display());
+                None
+            }
+        }
+    })
+}
+
+// TODO: remove
+
+// async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
+//     // Ask the user whether an initial account should be created.
+//     if get_decision("Create initial account?")? {
+//         let alias = get_alias("New account alias", &wallet).await?;
+//         let account_id = add_account(&wallet, Some(alias)).await?;
+//         println_log_info!("Created initial account.\nType `help` to see all available account commands.");
+//         Ok((Some(wallet), Some(account_id)))
+//     } else {
+//         Ok((Some(wallet), None))
+//     }
+// }
 
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
@@ -187,11 +258,14 @@ pub async fn init_command(
     secret_manager.store_mnemonic(mnemonic).await?;
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
+    let alias = get_alias("New wallet alias").await?;
+
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_coin_type(parameters.coin_type)
+        .with_bip_path(Bip44::new(parameters.coin_type))
+        .with_alias(alias)
         .finish()
         .await?)
 }
@@ -211,19 +285,6 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
 pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: Option<bool>) -> Result<(), Error> {
     generate_mnemonic(output_file_name, output_stdout).await?;
     Ok(())
-}
-
-pub async fn new_account_command(
-    storage_path: &Path,
-    snapshot_path: &Path,
-    alias: Option<String>,
-) -> Result<(Wallet, AccountIdentifier), Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
-
-    let alias = add_account(&wallet, alias).await?;
-
-    Ok((wallet, alias))
 }
 
 pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
@@ -250,7 +311,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         // Will be overwritten by the backup's value.
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
@@ -309,19 +370,4 @@ pub async fn unlock_wallet(
     }
 
     Ok(maybe_wallet?)
-}
-
-pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<AccountIdentifier, Error> {
-    let mut account_builder = wallet.create_account();
-
-    if let Some(alias) = alias {
-        account_builder = account_builder.with_alias(alias);
-    }
-
-    let account = account_builder.finish().await?;
-    let alias = AccountIdentifier::Alias(account.details().await.alias().clone());
-
-    println_log_info!("Created account \"{alias}\"");
-
-    Ok(alias)
 }

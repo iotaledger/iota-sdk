@@ -4,6 +4,8 @@
 use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
+use colored::Colorize;
+use dialoguer::Input;
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::{
@@ -20,41 +22,39 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{
-            types::{AccountIdentifier, Bip44Address},
-            Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
-        },
-        CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
+        account::{types::Bip44Address, ConsolidationParams, OutputsToClaim, TransactionOptions},
+        CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams, Wallet,
     },
     U256,
 };
 
-use crate::{error::Error, helper::to_utc_date_time, println_log_info};
+use crate::{
+    error::Error,
+    helper::{bytes_from_hex_or_file, to_utc_date_time},
+    println_log_error, println_log_info,
+    protocol_cli_completion::ProtocolCliCompletion,
+    protocol_cli_history::ProtocolCliHistory,
+};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
-pub struct AccountCli {
+pub struct ProtocolCli {
     #[command(subcommand)]
-    pub command: AccountCommand,
+    pub command: ProtocolCommand,
 }
 
-impl AccountCli {
+impl ProtocolCli {
     pub fn print_help() -> Result<(), Error> {
-        Self::command().bin_name("Account:").print_help()?;
+        Self::command().bin_name("Wallet:").print_help()?;
         Ok(())
     }
 }
 
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
-pub enum AccountCommand {
-    /// List the account addresses.
-    Addresses,
-    /// Print the account balance.
-    Balance {
-        /// Addresses to compute the balance for.
-        addresses: Option<Vec<Bech32Address>>,
-    },
+pub enum ProtocolCommand {
+    /// Print the wallet balance.
+    Balance,
     /// Burn an amount of native token.
     BurnNativeToken {
         /// Token ID to be burnt, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -152,8 +152,6 @@ pub enum AccountCommand {
         /// Amount to be melted, e.g. 100.
         amount: String,
     },
-    /// Generate a new address.
-    NewAddress,
     /// Get information about currently set node.
     NodeInfo,
     /// Display an output.
@@ -203,11 +201,6 @@ pub enum AccountCommand {
         address: Bech32Address,
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
-    },
-    /// Switch to a different account.
-    Switch {
-        /// The identifier (alias or index) of the account you want to switch to.
-        account_id: AccountIdentifier,
     },
     /// Synchronize the account.
     Sync,
@@ -282,38 +275,35 @@ impl FromStr for TransactionSelector {
     }
 }
 
-/// `addresses` command
-pub async fn addresses_command(account: &Account) -> Result<(), Error> {
-    let addresses = account.addresses().await?;
+// TODO: remove
 
-    if addresses.is_empty() {
-        println_log_info!("No addresses found");
-    } else {
-        for address in addresses {
-            print_address(account, &address).await?;
-        }
-    }
+// pub async fn addresses_command(account: &Account) -> Result<(), Error> {
+//     let addresses = account.addresses().await?;
 
-    Ok(())
-}
+//     if addresses.is_empty() {
+//         println_log_info!("No addresses found");
+//     } else {
+//         for address in addresses {
+//             print_address(account, &address).await?;
+//         }
+//     }
+
+//     Ok(())
+// }
 
 // `balance` command
-pub async fn balance_command(account: &Account, addresses: Option<Vec<Bech32Address>>) -> Result<(), Error> {
-    let balance = if let Some(addresses) = addresses {
-        account.addresses_balance(addresses).await?
-    } else {
-        account.balance().await?
-    };
+pub async fn balance_command(wallet: &Wallet) -> Result<(), Error> {
+    let balance = wallet.balance().await?;
     println_log_info!("{balance:#?}");
 
     Ok(())
 }
 
 // `burn-native-token` command
-pub async fn burn_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
+pub async fn burn_native_token_command(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
     println_log_info!("Burning native token {token_id} {amount}.");
 
-    let transaction = account
+    let transaction = wallet
         .burn(
             NativeToken::new(
                 TokenId::from_str(&token_id)?,
@@ -333,10 +323,10 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 }
 
 // `burn-nft` command
-pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
+pub async fn burn_nft_command(wallet: &Wallet, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account.burn(NftId::from_str(&nft_id)?, None).await?;
+    let transaction = wallet.burn(NftId::from_str(&nft_id)?, None).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
@@ -348,11 +338,11 @@ pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), E
 }
 
 // `claim` command
-pub async fn claim_command(account: &Account, output_id: Option<String>) -> Result<(), Error> {
+pub async fn claim_command(wallet: &Wallet, output_id: Option<String>) -> Result<(), Error> {
     if let Some(output_id) = output_id {
         println_log_info!("Claiming output {output_id}");
 
-        let transaction = account.claim_outputs([OutputId::from_str(&output_id)?]).await?;
+        let transaction = wallet.claim_outputs([OutputId::from_str(&output_id)?]).await?;
 
         println_log_info!(
             "Claiming transaction sent:\n{:?}\n{:?}",
@@ -362,7 +352,7 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
     } else {
         println_log_info!("Claiming outputs.");
 
-        let output_ids = account.claimable_outputs(OutputsToClaim::All).await?;
+        let output_ids = wallet.claimable_outputs(OutputsToClaim::All).await?;
 
         if output_ids.is_empty() {
             println_log_info!("No outputs available to claim.");
@@ -371,7 +361,7 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
         // Doing chunks of only 60, because we might need to create the double amount of outputs, because of potential
         // storage deposit return unlock conditions and also consider the remainder output.
         for output_ids_chunk in output_ids.chunks(60) {
-            let transaction = account.claim_outputs(output_ids_chunk.to_vec()).await?;
+            let transaction = wallet.claim_outputs(output_ids_chunk.to_vec()).await?;
             println_log_info!(
                 "Claiming transaction sent:\n{:?}\n{:?}",
                 transaction.transaction_id,
@@ -384,15 +374,15 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
 }
 
 /// `claimable-outputs` command
-pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
-    let balance = account.balance().await?;
+pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
+    let balance = wallet.balance().await?;
     for output_id in balance
         .potentially_locked_outputs()
         .iter()
         .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output_data = account.get_output(output_id).await.unwrap();
+        let output_data = wallet.get_output(output_id).await.unwrap();
         let output = output_data.output;
         let kind = match output {
             Output::Nft(_) => "Nft",
@@ -419,7 +409,7 @@ pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
             println_log_info!("  - base coin amount: {}", amount);
 
             if let Some(expiration) = unlock_conditions.expiration() {
-                let slot_index = account.client().get_slot_index().await?;
+                let slot_index = wallet.client().get_slot_index().await?;
 
                 if *expiration.slot_index() > *slot_index {
                     println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
@@ -437,10 +427,10 @@ pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
 }
 
 // `consolidate` command
-pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
+pub async fn consolidate_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("Consolidating outputs.");
 
-    let transaction = account
+    let transaction = wallet
         .consolidate_outputs(ConsolidationParams::new().with_force(true))
         .await?;
 
@@ -454,10 +444,10 @@ pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
 }
 
 // `create-account-output` command
-pub async fn create_account_output_command(account: &Account) -> Result<(), Error> {
+pub async fn create_account_output_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("Creating account output.");
 
-    let transaction = account.create_account_output(None, None).await?;
+    let transaction = wallet.create_account_output(None, None).await?;
 
     println_log_info!(
         "Account output creation transaction sent:\n{:?}\n{:?}",
@@ -470,24 +460,24 @@ pub async fn create_account_output_command(account: &Account) -> Result<(), Erro
 
 // `create-native-token` command
 pub async fn create_native_token_command(
-    account: &Account,
+    wallet: &Wallet,
     circulating_supply: String,
     maximum_supply: String,
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no account output exists, create one first
-    if account.balance().await?.accounts().is_empty() {
-        let transaction = account.create_account_output(None, None).await?;
+    if wallet.balance().await?.accounts().is_empty() {
+        let transaction = wallet.create_account_output(None, None).await?;
         println_log_info!(
             "Account output minting transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,
             transaction.block_id
         );
-        account
+        wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         // Sync account after the transaction got confirmed, so the account output is available
-        account.sync(None).await?;
+        wallet.sync(None).await?;
     }
 
     let params = CreateNativeTokenParams {
@@ -497,7 +487,7 @@ pub async fn create_native_token_command(
         foundry_metadata,
     };
 
-    let create_transaction = account.create_native_token(params, None).await?;
+    let create_transaction = wallet.create_native_token(params, None).await?;
 
     println_log_info!(
         "Transaction to create native token sent:\n{:?}\n{:?}",
@@ -509,10 +499,10 @@ pub async fn create_native_token_command(
 }
 
 // `destroy-account` command
-pub async fn destroy_account_command(account: &Account, account_id: String) -> Result<(), Error> {
+pub async fn destroy_account_command(wallet: &Wallet, account_id: String) -> Result<(), Error> {
     println_log_info!("Destroying account {account_id}.");
 
-    let transaction = account.burn(AccountId::from_str(&account_id)?, None).await?;
+    let transaction = wallet.burn(AccountId::from_str(&account_id)?, None).await?;
 
     println_log_info!(
         "Destroying account transaction sent:\n{:?}\n{:?}",
@@ -524,10 +514,10 @@ pub async fn destroy_account_command(account: &Account, account_id: String) -> R
 }
 
 // `destroy-foundry` command
-pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> Result<(), Error> {
+pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: String) -> Result<(), Error> {
     println_log_info!("Destroying foundry {foundry_id}.");
 
-    let transaction = account.burn(FoundryId::from_str(&foundry_id)?, None).await?;
+    let transaction = wallet.burn(FoundryId::from_str(&foundry_id)?, None).await?;
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
@@ -539,19 +529,8 @@ pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> R
 }
 
 // `faucet` command
-pub async fn faucet_command(
-    account: &Account,
-    address: Option<Bech32Address>,
-    url: Option<String>,
-) -> Result<(), Error> {
-    let address = if let Some(address) = address {
-        address
-    } else {
-        match account.addresses().await?.last() {
-            Some(address) => *address.address(),
-            None => return Err(Error::NoAddressForFaucet),
-        }
-    };
+pub async fn faucet_command(wallet: &Wallet, url: Option<String>) -> Result<(), Error> {
+    let address = wallet.address_as_bech32().await;
     let faucet_url = url
         .as_deref()
         .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
@@ -562,8 +541,8 @@ pub async fn faucet_command(
 }
 
 // `melt-native-token` command
-pub async fn melt_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
-    let transaction = account
+pub async fn melt_native_token_command(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
+    let transaction = wallet
         .melt_native_token(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
@@ -581,8 +560,8 @@ pub async fn melt_native_token_command(account: &Account, token_id: String, amou
 }
 
 // `mint-native-token` command
-pub async fn mint_native_token(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
-    let mint_transaction = account
+pub async fn mint_native_token(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
+    let mint_transaction = wallet
         .mint_native_token(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
@@ -601,7 +580,7 @@ pub async fn mint_native_token(account: &Account, token_id: String, amount: Stri
 
 // `mint-nft` command
 pub async fn mint_nft_command(
-    account: &Account,
+    wallet: &Wallet,
     address: Option<Bech32Address>,
     immutable_metadata: Option<Vec<u8>>,
     metadata: Option<Vec<u8>>,
@@ -622,7 +601,7 @@ pub async fn mint_nft_command(
         .with_tag(tag)
         .with_sender(sender)
         .with_issuer(issuer);
-    let transaction = account.mint_nfts([nft_options], None).await?;
+    let transaction = wallet.mint_nfts([nft_options], None).await?;
 
     println_log_info!(
         "NFT minting transaction sent:\n{:?}\n{:?}",
@@ -633,18 +612,9 @@ pub async fn mint_nft_command(
     Ok(())
 }
 
-// `new-address` command
-pub async fn new_address_command(account: &Account) -> Result<(), Error> {
-    let address = account.generate_ed25519_addresses(1, None).await?;
-
-    print_address(account, &address[0]).await?;
-
-    Ok(())
-}
-
 // `node-info` command
-pub async fn node_info_command(account: &Account) -> Result<(), Error> {
-    let node_info = account.client().get_info().await?;
+pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
+    let node_info = wallet.client().get_info().await?;
 
     println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
 
@@ -652,8 +622,8 @@ pub async fn node_info_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(account: &Account, output_id: String) -> Result<(), Error> {
-    let output = account.get_output(&OutputId::from_str(&output_id)?).await;
+pub async fn output_command(wallet: &Wallet, output_id: String) -> Result<(), Error> {
+    let output = wallet.get_output(&OutputId::from_str(&output_id)?).await;
 
     if let Some(output) = output {
         println_log_info!("{output:#?}");
@@ -665,8 +635,8 @@ pub async fn output_command(account: &Account, output_id: String) -> Result<(), 
 }
 
 /// `outputs` command
-pub async fn outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.outputs(None).await?;
+pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
+    let outputs = wallet.outputs(None).await?;
 
     if outputs.is_empty() {
         println_log_info!("No outputs found");
@@ -681,7 +651,7 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
 
 // `send` command
 pub async fn send_command(
-    account: &Account,
+    wallet: &Wallet,
     address: impl ConvertTo<Bech32Address>,
     amount: u64,
     return_address: Option<impl ConvertTo<Bech32Address>>,
@@ -691,7 +661,7 @@ pub async fn send_command(
     let params = [SendParams::new(amount, address)?
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
         .with_expiration(expiration)];
-    let transaction = account
+    let transaction = wallet
         .send_with_params(
             params,
             TransactionOptions {
@@ -712,7 +682,7 @@ pub async fn send_command(
 
 // `send-native-token` command
 pub async fn send_native_token_command(
-    account: &Account,
+    wallet: &Wallet,
     address: impl ConvertTo<Bech32Address>,
     token_id: String,
     amount: String,
@@ -721,10 +691,10 @@ pub async fn send_native_token_command(
     let address = address.convert()?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
-        let rent_structure = account.client().get_rent_structure().await?;
-        let token_supply = account.client().get_token_supply().await?;
+        let rent_structure = wallet.client().get_rent_structure().await?;
+        let token_supply = wallet.client().get_token_supply().await?;
 
-        account.client().bech32_hrp_matches(address.hrp()).await?;
+        wallet.client().bech32_hrp_matches(address.hrp()).await?;
 
         let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
             .add_unlock_condition(AddressUnlockCondition::new(address))
@@ -734,7 +704,7 @@ pub async fn send_native_token_command(
             )?])
             .finish_output(token_supply)?];
 
-        account.send_outputs(outputs, None).await?
+        wallet.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
         let outputs = [SendNativeTokensParams::new(
@@ -744,7 +714,7 @@ pub async fn send_native_token_command(
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )],
         )?];
-        account.send_native_tokens(outputs, None).await?
+        wallet.send_native_tokens(outputs, None).await?
     };
 
     println_log_info!(
@@ -758,12 +728,12 @@ pub async fn send_native_token_command(
 
 // `send-nft` command
 pub async fn send_nft_command(
-    account: &Account,
+    wallet: &Wallet,
     address: impl ConvertTo<Bech32Address>,
     nft_id: String,
 ) -> Result<(), Error> {
     let outputs = [SendNftParams::new(address.convert()?, &nft_id)?];
-    let transaction = account.send_nft(outputs, None).await?;
+    let transaction = wallet.send_nft(outputs, None).await?;
 
     println_log_info!(
         "Nft transaction sent:\n{:?}\n{:?}",
@@ -775,8 +745,8 @@ pub async fn send_nft_command(
 }
 
 // `sync` command
-pub async fn sync_command(account: &Account) -> Result<(), Error> {
-    let balance = account.sync(None).await?;
+pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
+    let balance = wallet.sync(None).await?;
     println_log_info!("Synced.");
     println_log_info!("{balance:#?}");
 
@@ -784,8 +754,8 @@ pub async fn sync_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `transaction` command
-pub async fn transaction_command(account: &Account, selector: TransactionSelector) -> Result<(), Error> {
-    let mut transactions = account.transactions().await;
+pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector) -> Result<(), Error> {
+    let mut transactions = wallet.transactions().await;
     let transaction = match selector {
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
@@ -804,8 +774,8 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
 }
 
 /// `transactions` command
-pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
-    let mut transactions = account.transactions().await;
+pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
+    let mut transactions = wallet.transactions().await;
     transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {
@@ -827,8 +797,8 @@ pub async fn transactions_command(account: &Account, show_details: bool) -> Resu
 }
 
 /// `unspent-outputs` command
-pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.unspent_outputs(None).await?;
+pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
+    let outputs = wallet.unspent_outputs(None).await?;
 
     if outputs.is_empty() {
         println_log_info!("No outputs found");
@@ -842,8 +812,8 @@ pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn vote_command(account: &Account, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
-    let transaction = account.vote(Some(event_id), Some(answers)).await?;
+pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
+    let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
 
     println_log_info!(
         "Voting transaction sent:\n{:?}\n{:?}",
@@ -854,8 +824,8 @@ pub async fn vote_command(account: &Account, event_id: ParticipationEventId, ans
     Ok(())
 }
 
-pub async fn stop_participating_command(account: &Account, event_id: ParticipationEventId) -> Result<(), Error> {
-    let transaction = account.stop_participating(event_id).await?;
+pub async fn stop_participating_command(wallet: &Wallet, event_id: ParticipationEventId) -> Result<(), Error> {
+    let transaction = wallet.stop_participating(event_id).await?;
 
     println_log_info!(
         "Stop participating transaction sent:\n{:?}\n{:?}",
@@ -867,26 +837,26 @@ pub async fn stop_participating_command(account: &Account, event_id: Participati
 }
 
 pub async fn participation_overview_command(
-    account: &Account,
+    wallet: &Wallet,
     event_ids: Option<Vec<ParticipationEventId>>,
 ) -> Result<(), Error> {
-    let participation_overview = account.get_participation_overview(event_ids).await?;
+    let participation_overview = wallet.get_participation_overview(event_ids).await?;
 
     println_log_info!("Participation overview: {participation_overview:?}");
 
     Ok(())
 }
 
-pub async fn voting_power_command(account: &Account) -> Result<(), Error> {
-    let voting_power = account.get_voting_power().await?;
+pub async fn voting_power_command(wallet: &Wallet) -> Result<(), Error> {
+    let voting_power = wallet.get_voting_power().await?;
 
     println_log_info!("Voting power: {voting_power}");
 
     Ok(())
 }
 
-pub async fn increase_voting_power_command(account: &Account, amount: u64) -> Result<(), Error> {
-    let transaction = account.increase_voting_power(amount).await?;
+pub async fn increase_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
+    let transaction = wallet.increase_voting_power(amount).await?;
 
     println_log_info!(
         "Increase voting power transaction sent:\n{:?}\n{:?}",
@@ -897,8 +867,8 @@ pub async fn increase_voting_power_command(account: &Account, amount: u64) -> Re
     Ok(())
 }
 
-pub async fn decrease_voting_power_command(account: &Account, amount: u64) -> Result<(), Error> {
-    let transaction = account.decrease_voting_power(amount).await?;
+pub async fn decrease_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
+    let transaction = wallet.decrease_voting_power(amount).await?;
 
     println_log_info!(
         "Decrease voting power transaction sent:\n{:?}\n{:?}",
@@ -909,15 +879,15 @@ pub async fn decrease_voting_power_command(account: &Account, amount: u64) -> Re
     Ok(())
 }
 
-pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
-    let output = account.get_voting_output().await?;
+pub async fn voting_output_command(wallet: &Wallet) -> Result<(), Error> {
+    let output = wallet.get_voting_output().await?;
 
     println_log_info!("Voting output: {output:?}");
 
     Ok(())
 }
 
-async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), Error> {
+async fn print_address(wallet: &Wallet, address: &Bip44Address) -> Result<(), Error> {
     let mut log = format!(
         "Address {}:\n {:<10}{}\n {:<10}{:?}",
         address.key_index(),
@@ -931,67 +901,220 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
         log = format!("{log}\nChange address");
     }
 
-    let addresses = account.addresses_with_unspent_outputs().await?;
-    let slot_index = account.client().get_slot_index().await?;
+    // TODO: include it again
+    // let addresses = wallet.addresses_with_unspent_outputs().await?;
+    // let slot_index = wallet.client().get_slot_index().await?;
 
-    let mut output_ids: &[OutputId] = &[];
-    let mut amount = 0;
-    let mut native_tokens = NativeTokensBuilder::new();
-    let mut nfts = Vec::new();
-    let mut accounts = Vec::new();
-    let mut foundries = Vec::new();
+    // let mut output_ids: &[OutputId] = &[];
+    // let mut amount = 0;
+    // let mut native_tokens = NativeTokensBuilder::new();
+    // let mut nfts = Vec::new();
+    // let mut accounts = Vec::new();
+    // let mut foundries = Vec::new();
 
-    if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
-        (a.key_index(), a.internal())
-    }) {
-        output_ids = addresses[index].output_ids().as_slice();
+    // if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
+    //     (a.key_index(), a.internal())
+    // }) {
+    //     output_ids = addresses[index].output_ids().as_slice();
 
-        for output_id in output_ids {
-            if let Some(output_data) = account.get_output(output_id).await {
-                // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-                let (required_address, _) = output_data
-                    .output
-                    .required_and_unlocked_address(slot_index, output_id, None)?;
+    //     for output_id in output_ids {
+    //         if let Some(output_data) = wallet.get_output(output_id).await {
+    //             // Output might be associated with the address, but can't be unlocked by it, so we check that here.
+    //             let (required_address, _) = output_data
+    //                 .output
+    //                 .required_and_unlocked_address(slot_index, output_id, None)?;
 
-                if address.address().as_ref() == &required_address {
-                    if let Some(nts) = output_data.output.native_tokens() {
-                        native_tokens.add_native_tokens(nts.clone())?;
-                    }
-                    match &output_data.output {
-                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
-                        Output::Account(account) => accounts.push(account.account_id_non_null(output_id)),
-                        Output::Foundry(foundry) => foundries.push(foundry.id()),
-                        Output::Basic(_) => {}
-                        Output::Delegation(_) => {
-                            // TODO do we want to log them?
-                        }
-                    }
-                    let unlock_conditions = output_data
-                        .output
-                        .unlock_conditions()
-                        .expect("output must have unlock conditions");
-                    let sdr_amount = unlock_conditions
-                        .storage_deposit_return()
-                        .map(|sdr| sdr.amount())
-                        .unwrap_or(0);
+    //             if address.address().as_ref() == &required_address {
+    //                 if let Some(nts) = output_data.output.native_tokens() {
+    //                     native_tokens.add_native_tokens(nts.clone())?;
+    //                 }
+    //                 match &output_data.output {
+    //                     Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+    //                     Output::Account(account) => accounts.push(account.account_id_non_null(output_id)),
+    //                     Output::Foundry(foundry) => foundries.push(foundry.id()),
+    //                     Output::Basic(_) => {}
+    //                     Output::Delegation(_) => {
+    //                         // TODO do we want to log them?
+    //                     }
+    //                 }
+    //                 let unlock_conditions = output_data
+    //                     .output
+    //                     .unlock_conditions()
+    //                     .expect("output must have unlock conditions");
+    //                 let sdr_amount = unlock_conditions
+    //                     .storage_deposit_return()
+    //                     .map(|sdr| sdr.amount())
+    //                     .unwrap_or(0);
 
-                    amount += output_data.output.amount() - sdr_amount;
-                }
-            }
-        }
-    }
+    //                 amount += output_data.output.amount() - sdr_amount;
+    //             }
+    //         }
+    //     }
+    // }
 
-    log = format!(
-        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Accounts: {:?}\n Foundries: {:?}\n",
-        output_ids,
-        amount,
-        native_tokens.finish_vec()?,
-        nfts,
-        accounts,
-        foundries,
-    );
+    // log = format!(
+    //     "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Accounts: {:?}\n
+    // Foundries: {:?}\n",     output_ids,
+    //     amount,
+    //     native_tokens.finish_vec()?,
+    //     nfts,
+    //     accounts,
+    //     foundries,
+    // );
 
     println_log_info!("{log}");
 
     Ok(())
+}
+
+// loop on the wallet prompt
+pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
+    let mut history = ProtocolCliHistory::default();
+    loop {
+        match prompt_internal(wallet, &mut history).await {
+            Ok(res) => match res {
+                PromptResponse::Reprompt => (),
+                PromptResponse::Done => {
+                    return Ok(());
+                }
+            },
+            Err(e) => {
+                println_log_error!("{e}");
+            }
+        }
+    }
+}
+
+pub enum PromptResponse {
+    Reprompt,
+    Done,
+}
+
+// loop on the wallet prompt
+pub async fn prompt_internal(wallet: &Wallet, history: &mut ProtocolCliHistory) -> Result<PromptResponse, Error> {
+    let alias = wallet.alias().await;
+
+    let command: String = Input::new()
+        .with_prompt(format!("Account \"{}\"", alias).green().to_string())
+        .history_with(history)
+        .completion_with(&ProtocolCliCompletion)
+        .interact_text()?;
+    match command.as_str() {
+        "h" | "help" => ProtocolCli::print_help()?,
+        "c" | "clear" => {
+            // Clear console
+            let _ = std::process::Command::new("clear").status();
+        }
+        _ => {
+            // Prepend `Account: ` so the parsing will be correct
+            let command = format!("Wallet: {}", command.trim());
+            let account_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
+                Ok(account_cli) => account_cli,
+                Err(err) => {
+                    println!("{err}");
+                    return Ok(PromptResponse::Reprompt);
+                }
+            };
+            if let Err(err) = match account_cli.command {
+                ProtocolCommand::Balance => balance_command(wallet).await,
+                ProtocolCommand::BurnNativeToken { token_id, amount } => {
+                    burn_native_token_command(wallet, token_id, amount).await
+                }
+                ProtocolCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
+                ProtocolCommand::Claim { output_id } => claim_command(wallet, output_id).await,
+                ProtocolCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                ProtocolCommand::Consolidate => consolidate_command(wallet).await,
+                ProtocolCommand::CreateAccountOutput => create_account_output_command(wallet).await,
+                ProtocolCommand::CreateNativeToken {
+                    circulating_supply,
+                    maximum_supply,
+                    foundry_metadata_hex,
+                    foundry_metadata_file,
+                } => {
+                    create_native_token_command(
+                        wallet,
+                        circulating_supply,
+                        maximum_supply,
+                        bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
+                    )
+                    .await
+                }
+                ProtocolCommand::DestroyAccount { account_id } => destroy_account_command(wallet, account_id).await,
+                ProtocolCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(wallet, foundry_id).await,
+                ProtocolCommand::Exit => {
+                    return Ok(PromptResponse::Done);
+                }
+                ProtocolCommand::Faucet { address, url } => faucet_command(wallet, url).await,
+                ProtocolCommand::MeltNativeToken { token_id, amount } => {
+                    melt_native_token_command(wallet, token_id, amount).await
+                }
+                ProtocolCommand::MintNativeToken { token_id, amount } => {
+                    mint_native_token(wallet, token_id, amount).await
+                }
+                ProtocolCommand::MintNft {
+                    address,
+                    immutable_metadata_hex,
+                    immutable_metadata_file,
+                    metadata_hex,
+                    metadata_file,
+                    tag,
+                    sender,
+                    issuer,
+                } => {
+                    mint_nft_command(
+                        wallet,
+                        address,
+                        bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
+                        bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
+                        tag,
+                        sender,
+                        issuer,
+                    )
+                    .await
+                }
+                ProtocolCommand::NodeInfo => node_info_command(wallet).await,
+                ProtocolCommand::Output { output_id } => output_command(wallet, output_id).await,
+                ProtocolCommand::Outputs => outputs_command(wallet).await,
+                ProtocolCommand::Send {
+                    address,
+                    amount,
+                    return_address,
+                    expiration,
+                    allow_micro_amount,
+                } => {
+                    let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
+                        true
+                    } else {
+                        allow_micro_amount
+                    };
+                    send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
+                }
+                ProtocolCommand::SendNativeToken {
+                    address,
+                    token_id,
+                    amount,
+                    gift_storage_deposit,
+                } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
+                ProtocolCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
+                ProtocolCommand::Sync => sync_command(wallet).await,
+                ProtocolCommand::Transaction { selector } => transaction_command(wallet, selector).await,
+                ProtocolCommand::Transactions { show_details } => transactions_command(wallet, show_details).await,
+                ProtocolCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
+                ProtocolCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
+                ProtocolCommand::StopParticipating { event_id } => stop_participating_command(wallet, event_id).await,
+                ProtocolCommand::ParticipationOverview { event_ids } => {
+                    let event_ids = (!event_ids.is_empty()).then_some(event_ids);
+                    participation_overview_command(wallet, event_ids).await
+                }
+                ProtocolCommand::VotingPower => voting_power_command(wallet).await,
+                ProtocolCommand::IncreaseVotingPower { amount } => increase_voting_power_command(wallet, amount).await,
+                ProtocolCommand::DecreaseVotingPower { amount } => decrease_voting_power_command(wallet, amount).await,
+                ProtocolCommand::VotingOutput => voting_output_command(wallet).await,
+            } {
+                println_log_error!("{err}");
+            }
+        }
+    }
+
+    Ok(PromptResponse::Reprompt)
 }

@@ -916,8 +916,10 @@ impl WalletData {
             alias: "Alice".to_string(),
             bip_path: Bip44::new(4218),
             address: crate::types::block::address::Bech32Address::from_str(
-                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-                ).unwrap().into_inner(),
+                "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+            )
+            .unwrap()
+            .into_inner(),
             bech32_hrp: Hrp::from_str_unchecked("rms"),
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),

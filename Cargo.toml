@@ -6,7 +6,7 @@ members = [
 	#"bindings/nodejs",
 	#"bindings/python",
 	#"bindings/wasm",
-	#"cli",
+	"cli",
 	"sdk",
 ]
 

@@ -8,7 +8,7 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
     crypto::keys::bip39::Mnemonic,
-    wallet::{Account, Wallet},
+    wallet::Wallet,
 };
 use tokio::{
     fs::{self, OpenOptions},
@@ -50,37 +50,13 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn get_account_alias(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
-    let account_aliases = wallet.get_account_aliases().await?;
+pub async fn get_alias(prompt: &str) -> Result<String, Error> {
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
             println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
-        } else if account_aliases.iter().any(|alias| alias == &input) {
-            println_log_error!("Account '{input}' already exists, please choose another alias.");
         } else {
             return Ok(input);
-        }
-    }
-}
-
-pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
-    let mut accounts = wallet.get_accounts().await?;
-
-    match accounts.len() {
-        0 => Ok(None),
-        1 => Ok(Some(accounts.swap_remove(0))),
-        _ => {
-            // fetch all available account aliases to display to the user
-            let account_aliases = wallet.get_account_aliases().await?;
-
-            let index = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Select an account:")
-                .items(&account_aliases)
-                .default(0)
-                .interact_on(&Term::stderr())?;
-
-            Ok(Some(accounts.swap_remove(index)))
         }
     }
 }

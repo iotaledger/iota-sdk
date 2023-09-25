@@ -3,16 +3,16 @@
 
 use dialoguer::Completion;
 
-pub(crate) struct AccountCompletion;
+pub(crate) struct ProtocolCliCompletion;
 
-pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
-    "accounts",
-    "addresses",
+pub(crate) const PROTOCOL_COMMANDS: &[&str] = &[
+    "address",
     "balance",
     "burn-native-token",
     "burn-nft",
     "claim",
     "claimable-outputs",
+    "clear",
     "consolidate",
     "create-account-output",
     "create-native-token",
@@ -23,14 +23,12 @@ pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
     "melt-native-token",
     "mint-native-token",
     "mint-nft",
-    "new-address",
     "node-info",
     "output",
     "outputs",
     "send",
     "send-native-token",
     "send-nft",
-    "switch",
     "sync",
     "transaction",
     "transactions",
@@ -47,9 +45,9 @@ pub(crate) const ACCOUNT_COMPLETION: &[&str] = &[
     "help",
 ];
 
-impl Completion for AccountCompletion {
+impl Completion for ProtocolCliCompletion {
     fn get(&self, input: &str) -> Option<String> {
-        let matches = ACCOUNT_COMPLETION
+        let matches = PROTOCOL_COMMANDS
             .iter()
             .filter(|option| option.starts_with(input))
             .collect::<Vec<_>>();

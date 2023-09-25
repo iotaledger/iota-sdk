@@ -1,18 +1,20 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod account;
-mod account_completion;
-mod account_history;
-mod command;
 mod error;
 mod helper;
-mod wallet;
+mod protocol_cli;
+mod protocol_cli_completion;
+mod protocol_cli_history;
+mod wallet_cli;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
 
-use self::{command::wallet::WalletCli, error::Error, wallet::new_wallet};
+use self::{
+    error::Error,
+    wallet_cli::{new_wallet, WalletCli},
+};
 
 #[macro_export]
 macro_rules! println_log_info {
@@ -48,9 +50,8 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
 }
 
 async fn run(cli: WalletCli) -> Result<(), Error> {
-    if let (Some(wallet), Some(account)) = new_wallet(cli).await? {
-        let account = wallet.get_account(account).await?;
-        account::account_prompt(&wallet, account).await?;
+    if let Some(wallet) = new_wallet(cli).await? {
+        protocol_cli::prompt(&wallet).await?;
     }
 
     Ok(())

@@ -5,21 +5,21 @@ use std::collections::VecDeque;
 
 use dialoguer::History;
 
-pub struct AccountHistory {
+pub struct ProtocolCliHistory {
     max: usize,
     history: VecDeque<String>,
 }
 
-impl Default for AccountHistory {
+impl Default for ProtocolCliHistory {
     fn default() -> Self {
-        AccountHistory {
+        ProtocolCliHistory {
             max: 25,
             history: VecDeque::new(),
         }
     }
 }
 
-impl<T: ToString> History<T> for AccountHistory {
+impl<T: ToString> History<T> for ProtocolCliHistory {
     fn read(&self, pos: usize) -> Option<String> {
         self.history.get(pos).cloned()
     }
