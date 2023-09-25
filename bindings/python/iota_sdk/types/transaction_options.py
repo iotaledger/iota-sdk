@@ -45,9 +45,9 @@ class RemainderValueStrategy(Enum):
     def to_dict(self):
         """
         The function `to_dict` returns a dictionary with the strategy name and its corresponding value.
-        
+
         Returns:
-        
+
         a dictionary with two key-value pairs. The "strategy" key is assigned the value of self.name,
         and the "value" key is assigned the first element of self.value.
         """

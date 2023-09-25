@@ -14,7 +14,7 @@ def _call_method_routine(func):
     """
     def wrapper(*args, **kwargs):
         class MyEncoder(JSONEncoder):
-            """Custom encoder 
+            """Custom encoder
             """
 
             # pylint: disable=too-many-return-statements

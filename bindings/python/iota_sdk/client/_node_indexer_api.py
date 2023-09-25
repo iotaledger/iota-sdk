@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output_id import OutputId
 
+
 class OutputIdsResponse:
     """Response type for output IDs.
 
@@ -22,6 +23,7 @@ class OutputIdsResponse:
         self.cursor = output_dict["cursor"]
         self.items = [OutputId.from_string(
             output_id) for output_id in output_dict["items"]]
+
 
 class NodeIndexerAPI():
     """Node indexer API.

@@ -74,6 +74,7 @@ class StrongholdSecretManager(dict):
     class Inner(dict):
         """Inner storage for stronghold configuration information.
         """
+
         def __init__(self, snapshot_path, password):
             dict.__init__(self, password=password, snapshotPath=snapshot_path)
 
@@ -86,6 +87,7 @@ class SecretManagerError(Exception):
 class SecretManager():
     """Secret manager wrapper.
     """
+
     def __init__(self, secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
                  SeedSecretManager, StrongholdSecretManager]] = None, secret_manager_handle=None):
         """Initialize a secret manager.

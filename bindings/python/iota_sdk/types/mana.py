@@ -4,6 +4,7 @@
 from dataclasses import dataclass
 from iota_sdk.types.common import HexStr, json
 
+
 @json
 @dataclass
 class ManaAllotment:

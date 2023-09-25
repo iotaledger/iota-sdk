@@ -38,9 +38,9 @@ class Block:
         """
         The function `from_dict` takes a dictionary that contains the data needed to
         create an instance of the `Block` class.
-        
+
         Returns:
-        
+
         An instance of the `Block` class.
         """
         return from_dict(Block, block_dict)

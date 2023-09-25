@@ -252,9 +252,9 @@ def output_from_dict(
     """
     The function `output_from_dict` takes a dictionary as input and returns an instance of a specific
     output class based on the value of the 'type' key in the dictionary.
-    
+
     Arguments:
-    
+
     * `output`: The `output` parameter is a dictionary that contains information about the output. It is
     expected to have a key called 'type' which specifies the type of the output. The value of 'type'
     should be one of the values defined in the `OutputType` enum.

@@ -11,6 +11,8 @@ from iota_sdk.wallet.account import Account, _call_method_routine
 from iota_sdk.wallet.sync_options import SyncOptions
 
 # pylint: disable=too-many-public-methods
+
+
 class Wallet():
     """An IOTA Wallet.
 
