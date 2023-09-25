@@ -78,7 +78,7 @@ class Irc27Metadata {
         return this;
     }
 
-    withAttributes(attributes: Array<Attribute>): Irc27Metadata {
+    withAttributes(attributes: Attribute[]): Irc27Metadata {
         this.attributes = attributes;
         return this;
     }
