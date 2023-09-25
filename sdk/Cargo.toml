@@ -42,7 +42,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.8.2", default-features = false, features = [
+packable = { version = "0.8.3", default-features = false, features = [
     "primitive-types",
 ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
@@ -137,7 +137,6 @@ tokio = { version = "1.32.0", default-features = false, features = [
 
 [features]
 default = ["client", "wallet", "tls"]
-
 irc_27 = ["serde", "dep:url"]
 irc_30 = ["serde", "dep:url"]
 ledger_nano = ["dep:iota-ledger-nano"]

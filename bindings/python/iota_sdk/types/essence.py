@@ -59,4 +59,6 @@ class RegularTransactionEssence(TransactionEssence):
     outputs: List[Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]
     allotments: Optional[List[ManaAllotment]] = None
     payload: Optional[TaggedDataPayload] = None
-    type: int = field(default_factory=lambda: EssenceType.RegularTransactionEssence, init=False)
+    type: int = field(
+        default_factory=lambda: EssenceType.RegularTransactionEssence,
+        init=False)

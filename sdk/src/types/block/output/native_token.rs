@@ -12,7 +12,18 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::TokenId, Error};
+use crate::types::block::{output::foundry::FoundryId, Error};
+
+impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
+
+#[cfg(feature = "serde")]
+string_serde_impl!(TokenId);
+
+impl From<FoundryId> for TokenId {
+    fn from(foundry_id: FoundryId) -> Self {
+        Self::new(*foundry_id)
+    }
+}
 
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]

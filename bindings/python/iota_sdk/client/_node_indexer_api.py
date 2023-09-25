@@ -83,6 +83,8 @@ class NodeIndexerAPI():
             Returns outputs that are timelocked after a certain Unix timestamp.
             timelocked_before :
             Returns outputs that are timelocked before a certain Unix timestamp.
+         unlockable_by_address :
+            Returns outputs that are unlockable by the bech32 address.
         """
         address: Optional[str] = None
         account_address: Optional[str] = None
@@ -107,10 +109,27 @@ class NodeIndexerAPI():
         tag: Optional[str] = None
         timelocked_after: Optional[int] = None
         timelocked_before: Optional[int] = None
+        unlockable_by_address: Optional[str] = None
 
     @abstractmethod
     def _call_method(self, name, data=None):
         return {}
+
+    def output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+        """Fetch alias/basic/NFT/foundry output IDs from the given query parameters.
+        Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter", "cursor", "pageSize".
+
+        Returns:
+            The corresponding output IDs of the outputs.
+        """
+
+        query_parameters_camelized = query_parameters.as_dict()
+
+        response = self._call_method('outputIds', {
+            'queryParameters': query_parameters_camelized,
+        })
+        return self.OutputIdsResponse(response)
 
     def basic_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
