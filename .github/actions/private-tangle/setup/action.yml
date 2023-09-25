@@ -30,7 +30,7 @@ runs:
 
     - name: Wait for tangle to start
       shell: bash
-      run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 180 http://localhost:8080/health -- echo "Tangle is up"
+      run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 240 http://localhost:8080/health -- echo "Tangle is up"
 
     # TODO enable, maybe need another URL
     # - name: Wait for faucet to start
