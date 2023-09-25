@@ -195,3 +195,10 @@ export interface __OutputIdToUtxoInput__ {
         outputId: string;
     };
 }
+
+export interface __OutputHexBytes__ {
+    name: 'outputHexBytes';
+    data: {
+        output: Output;
+    };
+}
