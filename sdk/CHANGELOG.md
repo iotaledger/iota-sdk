@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Format of `milestoneIndex` query parameter of `ClientInner::event_status`;
 - Don't error if custom remainder address is provided with ledger nano;
 
 ## 1.0.3 - 2023-09-07
