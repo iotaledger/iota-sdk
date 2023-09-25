@@ -8,86 +8,6 @@ from abc import ABCMeta, abstractmethod
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output_id import OutputId
 
-@json
-@dataclass
-class QueryParameters:
-    """Query parameters
-
-    **Attributes:**
-    address :
-        Bech32-encoded address that should be searched for.
-    account_address :
-        Filter foundry outputs based on bech32-encoded address of the controlling account.
-    created_after :
-        Returns outputs that were created after a certain Unix timestamp.
-        created_before :
-        Returns outputs that were created before a certain Unix timestamp.
-        cursor :
-        Starts the search from the cursor (confirmationMS+outputId.pageSize).
-        expiration_return_address :
-        Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
-        condition.
-        expires_after :
-        Returns outputs that expire after a certain Unix timestamp.
-        expires_before :
-        Returns outputs that expire before a certain Unix timestamp.
-        governor :
-        Filters outputs based on bech32-encoded governor (governance controller) address.
-        has_expiration :
-        Filters outputs based on the presence of expiration unlock condition.
-        has_native_tokens :
-        Filters outputs based on the presence of native tokens.
-        has_storage_deposit_return :
-        Filters outputs based on the presence of storage deposit return unlock condition.
-        has_timelock :
-        Filters outputs based on the presence of timelock unlock condition.
-        issuer:
-        Filters outputs based on bech32-encoded issuer address.
-        max_native_token_count :
-        Filters outputs that have at most a certain number of distinct native tokens.
-        min_native_token_count :
-        Filters outputs that have at least a certain number of distinct native tokens.
-        page_size :
-        The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
-        returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
-        sender :
-        Filters outputs based on the presence of validated Sender (bech32 encoded).
-        state_controller :
-        Filters outputs based on bech32-encoded state controller address.
-        storage_deposit_return_address :
-        Filters outputs based on the presence of a specific return address in the storage deposit return unlock
-        condition.
-        tag :
-        Filters outputs based on matching Tag Block.
-        timelocked_after :
-        Returns outputs that are timelocked after a certain Unix timestamp.
-        timelocked_before :
-        Returns outputs that are timelocked before a certain Unix timestamp.
-    """
-    address: Optional[str] = None
-    account_address: Optional[str] = None
-    created_after: Optional[int] = None
-    created_before: Optional[int] = None
-    cursor: Optional[str] = None
-    expiration_return_address: Optional[str] = None
-    expires_after: Optional[int] = None
-    expires_before: Optional[int] = None
-    governor: Optional[str] = None
-    has_expiration: Optional[bool] = None
-    has_native_tokens: Optional[bool] = None
-    has_storage_deposit_return: Optional[bool] = None
-    has_timelock: Optional[bool] = None
-    issuer: Optional[str] = None
-    max_native_token_count: Optional[int] = None
-    min_native_token_count: Optional[int] = None
-    page_size: Optional[int] = None
-    sender: Optional[str] = None
-    state_controller: Optional[str] = None
-    storage_deposit_return_address: Optional[str] = None
-    tag: Optional[str] = None
-    timelocked_after: Optional[int] = None
-    timelocked_before: Optional[int] = None
-
 class OutputIdsResponse:
     """Response type for output IDs.
 
@@ -107,6 +27,86 @@ class NodeIndexerAPI():
     """Node indexer API.
     """
     __metaclass__ = ABCMeta
+
+    @json
+    @dataclass
+    class QueryParameters:
+        """Query parameters
+
+        **Attributes:**
+        address :
+            Bech32-encoded address that should be searched for.
+        account_address :
+            Filter foundry outputs based on bech32-encoded address of the controlling account.
+        created_after :
+            Returns outputs that were created after a certain Unix timestamp.
+            created_before :
+            Returns outputs that were created before a certain Unix timestamp.
+            cursor :
+            Starts the search from the cursor (confirmationMS+outputId.pageSize).
+            expiration_return_address :
+            Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
+            condition.
+            expires_after :
+            Returns outputs that expire after a certain Unix timestamp.
+            expires_before :
+            Returns outputs that expire before a certain Unix timestamp.
+            governor :
+            Filters outputs based on bech32-encoded governor (governance controller) address.
+            has_expiration :
+            Filters outputs based on the presence of expiration unlock condition.
+            has_native_tokens :
+            Filters outputs based on the presence of native tokens.
+            has_storage_deposit_return :
+            Filters outputs based on the presence of storage deposit return unlock condition.
+            has_timelock :
+            Filters outputs based on the presence of timelock unlock condition.
+            issuer:
+            Filters outputs based on bech32-encoded issuer address.
+            max_native_token_count :
+            Filters outputs that have at most a certain number of distinct native tokens.
+            min_native_token_count :
+            Filters outputs that have at least a certain number of distinct native tokens.
+            page_size :
+            The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+            returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+            sender :
+            Filters outputs based on the presence of validated Sender (bech32 encoded).
+            state_controller :
+            Filters outputs based on bech32-encoded state controller address.
+            storage_deposit_return_address :
+            Filters outputs based on the presence of a specific return address in the storage deposit return unlock
+            condition.
+            tag :
+            Filters outputs based on matching Tag Block.
+            timelocked_after :
+            Returns outputs that are timelocked after a certain Unix timestamp.
+            timelocked_before :
+            Returns outputs that are timelocked before a certain Unix timestamp.
+        """
+        address: Optional[str] = None
+        account_address: Optional[str] = None
+        created_after: Optional[int] = None
+        created_before: Optional[int] = None
+        cursor: Optional[str] = None
+        expiration_return_address: Optional[str] = None
+        expires_after: Optional[int] = None
+        expires_before: Optional[int] = None
+        governor: Optional[str] = None
+        has_expiration: Optional[bool] = None
+        has_native_tokens: Optional[bool] = None
+        has_storage_deposit_return: Optional[bool] = None
+        has_timelock: Optional[bool] = None
+        issuer: Optional[str] = None
+        max_native_token_count: Optional[int] = None
+        min_native_token_count: Optional[int] = None
+        page_size: Optional[int] = None
+        sender: Optional[str] = None
+        state_controller: Optional[str] = None
+        storage_deposit_return_address: Optional[str] = None
+        tag: Optional[str] = None
+        timelocked_after: Optional[int] = None
+        timelocked_before: Optional[int] = None
 
     @abstractmethod
     def _call_method(self, name, data=None):

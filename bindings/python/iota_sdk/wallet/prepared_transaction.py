@@ -32,24 +32,16 @@ class PreparedTransaction:
         self.account = account
         self.prepared_transaction_data_dto = prepared_transaction_data
 
-    """
-    The function returns the prepared transaction data.
-
-    :returns: The method prepared_transaction_data() is returning an object of type PreparedTransaction
-    """
     def prepared_transaction_data(self) -> PreparedTransactionData:
-        """Get the prepared transaction data.
+        """The function returns the prepared transaction data.
+
+        Returns:
+            The method prepared_transaction_data() is returning an object of type PreparedTransaction
         """
         return self.prepared_transaction_data_dto if isinstance(
             self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(
             PreparedTransactionData, self.prepared_transaction_data_dto)
 
-    """
-    The send function returns a promise that resolves to a Transaction object after signing
-    and submitting the transaction. Internally just calls sign_and_submit_transaction.
-
-    :returns: The send() method is returning a Transaction object after it has been signed and submitted.
-    """
     def send(self) -> Transaction:
         """Send a transaction. Internally just calls `sign_and_submit_transaction`.
 

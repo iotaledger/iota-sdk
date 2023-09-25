@@ -4,8 +4,8 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from dacite import from_dict
 from typing import List, Optional, Union, Dict
+from dacite import from_dict
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 from iota_sdk.utils import Utils
@@ -35,9 +35,19 @@ class Block:
 
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:
+        """
+        The function `from_dict` takes a dictionary that contains the data needed to
+        create an instance of the `Block` class.
+        
+        Returns:
+        
+        An instance of the `Block` class.
+        """
         return from_dict(Block, block_dict)
 
     def id(self) -> HexStr:
+        """Rreturns the block ID as a hexadecimal string.
+        """
         return Utils.block_id(self)
 
 

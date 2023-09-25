@@ -227,15 +227,19 @@ class OutputWithMetadata:
     output: Union[AccountOutput, FoundryOutput, NftOutput, BasicOutput]
 
     @classmethod
-    def from_dict(cls, dict: Dict) -> OutputWithMetadata:
+    def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
+        """Creates an output with metadata instance from the dict object.
+        """
         obj = cls.__new__(cls)
         super(OutputWithMetadata, obj).__init__()
-        for k, v in dict.items():
+        for k, v in data_dict.items():
             setattr(obj, k, v)
         return obj
 
     def as_dict(self):
-        config = dict()
+        """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
+        """
+        config = {}
 
         config['metadata'] = self.metadata.__dict__
         config['output'] = self.output.as_dict()
@@ -245,6 +249,16 @@ class OutputWithMetadata:
 
 def output_from_dict(
         output: Dict[str, any]) -> Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, Output]:
+    """
+    The function `output_from_dict` takes a dictionary as input and returns an instance of a specific
+    output class based on the value of the 'type' key in the dictionary.
+    
+    Arguments:
+    
+    * `output`: The `output` parameter is a dictionary that contains information about the output. It is
+    expected to have a key called 'type' which specifies the type of the output. The value of 'type'
+    should be one of the values defined in the `OutputType` enum.
+    """
     output_type = OutputType(output['type'])
 
     if output_type == OutputType.Basic:

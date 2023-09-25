@@ -8,10 +8,10 @@ from typing import Optional, List, Union
 from dataclasses import dataclass, field
 
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput
-from iota_sdk.types.input import UtxoInput
+from iota_sdk.types.mana import ManaAllotment
+from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput
+from iota_sdk.types.input import UtxoInput, CommitmentInput, BlockIssuanceCreditInput, RewardInput
 from iota_sdk.types.payload import TaggedDataPayload
-from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 
 
 class EssenceType(IntEnum):
@@ -20,12 +20,14 @@ class EssenceType(IntEnum):
     Attributes:
         RegularTransactionEssence (2): A Regular Transaction Essence.
     """
-    RegularTransactionEssence = 5
+    RegularTransactionEssence = 2
 
 
 @json
 @dataclass
 class TransactionEssence:
+    """Base class of Transaction essence
+    """
     type: int
 
 
@@ -52,6 +54,6 @@ class RegularTransactionEssence(TransactionEssence):
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
     outputs: List[Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]
-    allotments: Optional[List[Allotment]] = None
+    allotments: Optional[List[ManaAllotment]] = None
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: EssenceType.RegularTransactionEssence, init=False)
