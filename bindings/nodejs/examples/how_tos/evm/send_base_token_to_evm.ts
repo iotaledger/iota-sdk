@@ -12,6 +12,7 @@ import {
     MetadataFeature,
     Wallet,
     TransactionOptions,
+    StorageDeposit,
 } from '@iota/sdk';
 import {
     prepareMetadata
@@ -21,6 +22,10 @@ require('dotenv').config({ path: '.env' });
 
 // Run with command:
 // yarn run-example ./how_tos/outputs/unlock-conditions.ts
+
+const amount = 100000;
+const gas = 10000;
+const toEVMAddress = '0x48e28C1681BBb92a2E5874113bc740cC11A0FD7a';
 
 // Build ouputs with all unlock conditions
 async function run() {
@@ -48,16 +53,15 @@ async function run() {
     const balance = await account.getBalance();
     console.log('Balance::', balance.baseCoin);
 
-    const amount = 100000;
-    const gas = 10000;
-
     const bigAmount: bigint = BigInt(amount);
     const bigGas: bigint = BigInt(gas);
     // console.log('amounts:', bigAmount, bigGas);
 
     try {
+        const addresses = await account.addresses();
+        console.log('address selected:', addresses[0].address);
         const hexAddress = Utils.bech32ToHex(
-            'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
+            addresses[0].address,
         );
 
         const addressUnlockCondition: UnlockCondition = new AddressUnlockCondition(new Ed25519Address(hexAddress));
@@ -66,7 +70,7 @@ async function run() {
         // console.log('addressFeature:', addressFeature);
 
         const metadata = await prepareMetadata(
-            '0x48e28C1681BBb92a2E5874113bc740cC11A0FD7a',
+            toEVMAddress,
             bigAmount,
             bigGas
         );
@@ -81,7 +85,7 @@ async function run() {
             features: [
                 addressFeature,
                 metadataFeature,
-              ],
+            ],
         });
         console.log('basicOutput:', JSON.stringify(basicOutput, null, 2));
 
