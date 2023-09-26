@@ -239,12 +239,12 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
     }
 }
 
-/// An output which delegates its contained IOTA tokens as voting power to a validator.
+/// An output which delegates its contained IOTA coins as voting power to a validator.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct DelegationOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     amount: u64,
-    /// Amount of delegated IOTA tokens.
+    /// Amount of delegated IOTA coins.
     delegated_amount: u64,
     /// Unique identifier of the delegation output.
     delegation_id: DelegationId,
@@ -370,7 +370,7 @@ impl DelegationOutput {
         {
             return Err(StateTransitionError::MutatedImmutableField);
         }
-// TODO add end_epoch validation rules
+        // TODO add end_epoch validation rules
         Ok(())
     }
 }

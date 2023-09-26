@@ -215,7 +215,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of stored Mana held by this output.
