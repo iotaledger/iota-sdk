@@ -19,7 +19,7 @@ pub struct RewardsParameters {
     validator_blocks_per_slot: u8,
     /// Used for shift operation for calculation of profit margin.
     profit_margin_exponent: u8,
-    /// The length in epochs of the bootstrapping phase.
+    /// The length of the bootstrapping phase in epochs.
     bootstrapping_duration: EpochIndex,
     /// The coefficient used for calculation of initial rewards.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
