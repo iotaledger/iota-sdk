@@ -3,6 +3,7 @@
 
 use std::fmt::Debug;
 
+use crypto::keys::bip44::Bip44;
 use serde::{
     ser::{SerializeMap, Serializer},
     Serialize,
@@ -13,15 +14,6 @@ use crate::types::block::{address::Bech32Address, payload::transaction::Transact
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Account alias must be unique.
-    #[error("can't create account: account alias {0} already exists")]
-    AccountAliasAlreadyExists(String),
-    /// Account not found
-    #[error("account {0} not found")]
-    AccountNotFound(String),
-    /// Address not found in account
-    #[error("address {0} not found in account")]
-    AddressNotFoundInAccount(Bech32Address),
     /// Errors during backup creation or restoring
     #[error("backup failed {0}")]
     Backup(&'static str),
@@ -34,6 +26,9 @@ pub enum Error {
     /// Client error.
     #[error("`{0}`")]
     Client(Box<crate::client::Error>),
+    /// BIP44 coin type mismatch
+    #[error("BIP44 coin type mismatch: {new_coin_type}, existing coin type is: {old_coin_type}")]
+    CoinTypeMismatch { new_coin_type: u32, old_coin_type: u32 },
     /// Funds are spread over too many outputs
     #[error("funds are spread over too many outputs {output_count}/{output_count_max}, consolidation required")]
     ConsolidationRequired { output_count: usize, output_count_max: u16 },
@@ -49,13 +44,6 @@ pub enum Error {
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },
-    // TODO: remove?
-    // /// Invalid coin type, all accounts need to have the same coin type
-    // #[error("invalid coin type for new account: {new_coin_type}, existing coin type is: {existing_coin_type}")]
-    // InvalidCoinType {
-    //     new_coin_type: u32,
-    //     existing_coin_type: u32,
-    // },
     /// Invalid mnemonic error
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),

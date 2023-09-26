@@ -1,7 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::path::Path;
+use std::{path::Path, str::FromStr};
 
 use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
 use iota_sdk::{
@@ -12,6 +12,7 @@ use iota_sdk::{
         utils::Password,
     },
     crypto::keys::bip44::Bip44,
+    types::block::address::{Bech32Address, Hrp},
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
@@ -65,6 +66,9 @@ pub struct InitParameters {
     /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
     #[arg(short, long, default_value_t = SHIMMER_COIN_TYPE)]
     pub coin_type: u32,
+    /// Bech32 wallet address
+    #[arg(short, long)]
+    pub address: Option<String>,
 }
 
 impl Default for InitParameters {
@@ -73,6 +77,7 @@ impl Default for InitParameters {
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),
             coin_type: SHIMMER_COIN_TYPE,
+            address: None,
         }
     }
 }
@@ -194,20 +199,6 @@ pub async fn new_wallet(cli: WalletCli) -> Result<Option<Wallet>, Error> {
     })
 }
 
-// TODO: remove
-
-// async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
-//     // Ask the user whether an initial account should be created.
-//     if get_decision("Create initial account?")? {
-//         let alias = get_alias("New account alias", &wallet).await?;
-//         let account_id = add_account(&wallet, Some(alias)).await?;
-//         println_log_info!("Created initial account.\nType `help` to see all available account commands.");
-//         Ok((Some(wallet), Some(account_id)))
-//     } else {
-//         Ok((Some(wallet), None))
-//     }
-// }
-
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password.clone()).await?;
@@ -232,7 +223,7 @@ pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) 
 pub async fn init_command(
     storage_path: &Path,
     snapshot_path: &Path,
-    parameters: InitParameters,
+    init_params: InitParameters,
 ) -> Result<Wallet, Error> {
     if storage_path.exists() {
         return Err(Error::Miscellaneous(format!(
@@ -247,7 +238,7 @@ pub async fn init_command(
         )));
     }
     let password = get_password("Stronghold password", true)?;
-    let mnemonic = match parameters.mnemonic_file_path {
+    let mnemonic = match init_params.mnemonic_file_path {
         Some(path) => import_mnemonic(&path).await?,
         None => enter_or_generate_mnemonic().await?,
     };
@@ -259,12 +250,17 @@ pub async fn init_command(
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
     let alias = get_alias("New wallet alias").await?;
+    let address = init_params
+        .address
+        .map(|addr| Bech32Address::from_str(&addr))
+        .transpose()?;
 
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
-        .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
+        .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_bip_path(Bip44::new(parameters.coin_type))
+        .with_bip_path(Bip44::new(init_params.coin_type))
+        .with_address(address)
         .with_alias(alias)
         .finish()
         .await?)

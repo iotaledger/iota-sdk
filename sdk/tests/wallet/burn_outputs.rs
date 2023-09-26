@@ -23,7 +23,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     request_funds(&wallet).await?;
 
     let nft_options = [MintNftParams::new()
-        .with_address(wallet.address_as_bech32().await)
+        .with_address(wallet.address().await)
         .with_metadata(b"some nft metadata".to_vec())
         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 

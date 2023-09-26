@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("Wallet synced");
 
-    let bech32_address = wallet.address_as_bech32().await;
+    let bech32_address = wallet.address().await;
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");

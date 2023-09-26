@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let bech32_address = wallet.address_as_bech32().await;
+    let bech32_address = wallet.address().await;
 
     println!("ADDRESS:\n{bech32_address}");
 

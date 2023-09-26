@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     println!("Mnemonic: {}", mnemonic.as_ref());
     wallet.store_mnemonic(mnemonic).await?;
 
-    let wallet_address = wallet.address_as_bech32().await;
+    let wallet_address = wallet.address().await;
     println!("{}", wallet_address);
 
     Ok(())

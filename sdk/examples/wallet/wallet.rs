@@ -63,11 +63,7 @@ async fn create_wallet() -> Result<Wallet> {
 }
 
 async fn print_address(wallet: &Wallet) -> Result<()> {
-    println!(
-        "{}'s wallet address: {}",
-        wallet.alias().await,
-        wallet.address_as_bech32().await
-    );
+    println!("{}'s wallet address: {}", wallet.alias().await, wallet.address().await);
     Ok(())
 }
 

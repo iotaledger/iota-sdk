@@ -51,7 +51,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn load_wallet_data(&mut self) -> crate::wallet::Result<Option<WalletData>> {
-        if let Some(dto) = self.get::<WalletDataDto>(WALLET_INDEXATION_KEY).await? {
+        if let Some(dto) = self.get::<WalletDataDto>(WALLET_DATA_KEY).await? {
             Ok(Some(WalletData::try_from_dto(dto)?))
         } else {
             Ok(None)
@@ -59,13 +59,13 @@ impl StorageManager {
     }
 
     pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
-        self.set(&format!("{WALLET_INDEXATION_KEY}"), &WalletDataDto::from(wallet_data))
+        self.set(&format!("{WALLET_DATA_KEY}"), &WalletDataDto::from(wallet_data))
             .await
     }
 
     // TODO: remove fn?
     pub(crate) async fn remove_wallet_data(&mut self) -> crate::wallet::Result<()> {
-        self.delete(&format!("{WALLET_INDEXATION_KEY}")).await
+        self.delete(&format!("{WALLET_DATA_KEY}")).await
     }
 
     pub(crate) async fn set_default_sync_options(
@@ -73,12 +73,12 @@ impl StorageManager {
         account_index: u32,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
-        let key = format!("{WALLET_INDEXATION_KEY}-{WALLET_SYNC_OPTIONS}");
+        let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
     }
 
     pub(crate) async fn get_default_sync_options(&self) -> crate::wallet::Result<Option<SyncOptions>> {
-        let key = format!("{WALLET_INDEXATION_KEY}-{WALLET_SYNC_OPTIONS}");
+        let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
         self.get(&key).await
     }
 }

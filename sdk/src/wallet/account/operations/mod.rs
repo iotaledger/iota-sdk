@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// The module for the address generation
-pub(crate) mod address_generation;
 /// The module to get the accounts balance
 pub(crate) mod balance;
 /// Helper functions

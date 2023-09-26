@@ -80,7 +80,7 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
 /// Request funds from the faucet and sync the wallet.
 #[allow(dead_code)]
 pub(crate) async fn request_funds(wallet: &Wallet) -> Result<()> {
-    request_funds_from_faucet(FAUCET_URL, &wallet.address_as_bech32().await).await?;
+    request_funds_from_faucet(FAUCET_URL, &wallet.address().await).await?;
 
     // Continue only after funds are received
     for _ in 0..30 {

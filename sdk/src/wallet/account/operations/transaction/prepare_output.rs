@@ -304,7 +304,7 @@ where
         };
         let remainder_address = match remainder_address {
             Some(address) => address,
-            None => self.address().await,
+            None => self.address().await.into_inner(),
         };
         Ok(remainder_address)
     }

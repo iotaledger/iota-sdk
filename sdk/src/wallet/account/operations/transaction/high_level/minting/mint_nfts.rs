@@ -162,7 +162,7 @@ where
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
-        let wallet_address = self.address().await;
+        let wallet_address = self.address().await.into_inner();
         let mut outputs = Vec::new();
 
         for MintNftParams {

@@ -200,7 +200,7 @@ async fn balance_transfer() -> Result<()> {
     assert_eq!(balance_1.base_coin().available(), 0);
 
     // Send to 1
-    let tx = wallet_0.send(to_send, wallet_1.address_as_bech32().await, None).await?;
+    let tx = wallet_0.send(to_send, wallet_1.address().await, None).await?;
 
     // Balance should update without sync
     let balance_0 = wallet_0.balance().await?;

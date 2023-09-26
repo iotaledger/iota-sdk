@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
-        .with_address(*address)
+        .with_address(address)
         .with_alias("Alice")
         .finish()
         .await?;

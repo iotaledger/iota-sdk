@@ -99,6 +99,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client: Client,
+    // TODO: make this optional?
     pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
@@ -114,11 +115,13 @@ pub struct WalletData {
     /// The wallet BIP44 path.
     pub(crate) bip_path: Bip44,
     /// The wallet address.
-    pub(crate) address: Address,
+    pub(crate) address: Bech32Address,
+
+    // TODO: remove
+    // /// The bech32 hrp.
+    // pub(crate) bech32_hrp: Hrp,
     /// The wallet alias.
     pub(crate) alias: String,
-    /// The Bech32 hrp.
-    pub(crate) bech32_hrp: Hrp,
     /// Outputs
     // stored separated from the wallet for performance?
     pub(crate) outputs: HashMap<OutputId, OutputData>,
@@ -148,11 +151,10 @@ pub struct WalletData {
 }
 
 impl WalletData {
-    pub(crate) fn new(bip_path: Bip44, address: Address, bech32_hrp: Hrp, alias: String) -> Self {
+    pub(crate) fn new(bip_path: Bip44, address: Bech32Address, alias: String) -> Self {
         Self {
             bip_path,
             address,
-            bech32_hrp,
             alias,
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
@@ -164,24 +166,6 @@ impl WalletData {
             native_token_foundries: HashMap::new(),
         }
     }
-
-    // TODO: remove?
-
-    // pub(crate) fn coin_type(&self) -> u32 {
-    //     self.bip_path.coin_type
-    // }
-
-    // pub(crate) fn account_index(&self) -> u32 {
-    //     self.bip_path.account
-    // }
-
-    // pub(crate) fn address_index(&self) -> u32 {
-    //     self.bip_path.address_index
-    // }
-
-    // pub(crate) fn bip_path(&self) -> Bip44 {
-    //     self.bip_path
-    // }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -239,7 +223,7 @@ where
     /// saving
     #[cfg(feature = "storage")]
     pub(crate) async fn save(&self, updated_wallet: Option<&WalletData>) -> Result<()> {
-        log::debug!("[save] saving account to database");
+        log::debug!("[save] wallet data");
         match updated_wallet {
             Some(wallet) => {
                 let mut storage_manager = self.inner.storage_manager.write().await;
@@ -247,11 +231,11 @@ where
                 drop(storage_manager);
             }
             None => {
-                let account_details = self.data.read().await;
+                let wallet_data = self.data.read().await;
                 let mut storage_manager = self.inner.storage_manager.write().await;
-                storage_manager.save_wallet_data(&account_details).await?;
+                storage_manager.save_wallet_data(&wallet_data).await?;
                 drop(storage_manager);
-                drop(account_details);
+                drop(wallet_data);
             }
         }
         Ok(())
@@ -286,18 +270,13 @@ where
     }
 
     /// Get the wallet address.
-    pub async fn address(&self) -> Address {
+    pub async fn address(&self) -> Bech32Address {
         self.data().await.address
-    }
-
-    /// Get the wallet address as Bech32 using the wallet's configured HRP.
-    pub async fn address_as_bech32(&self) -> Bech32Address {
-        self.address().await.to_bech32(self.bech32_hrp().await)
     }
 
     /// Get the wallet's configured Bech32 HRP.
     pub async fn bech32_hrp(&self) -> Hrp {
-        self.data().await.bech32_hrp
+        self.data().await.address.hrp
     }
 
     /// Get the [`OutputData`] of an output stored in the account
@@ -691,9 +670,9 @@ impl<S: SecretManage> Drop for Wallet<S> {
 #[serde(rename_all = "camelCase")]
 pub struct WalletDataDto {
     /// The BIP44 path of the wallet.
-    pub bip_path: String,
+    pub bip_path: Bip44,
     /// The wallet address.
-    pub address: String,
+    pub address: Bech32Address,
     /// The wallet alias.
     pub alias: String,
     /// Outputs
@@ -722,10 +701,9 @@ impl TryFromDto for WalletData {
         params: crate::types::ValidationParams<'_>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
-            bip_path: todo!("dto.bip_path"),
-            address: todo!("dto.address"),
-            bech32_hrp: todo!("dto.bech_hrp"),
-            alias: todo!("dto.alias"),
+            bip_path: dto.bip_path,
+            address: dto.address,
+            alias: dto.alias,
             outputs: dto
                 .outputs
                 .into_iter()
@@ -761,8 +739,8 @@ impl TryFromDto for WalletData {
 impl From<&WalletData> for WalletDataDto {
     fn from(value: &WalletData) -> Self {
         Self {
-            bip_path: todo!("value.bip_path.clone()"),
-            address: todo!("value.address.clone()"),
+            bip_path: value.bip_path,
+            address: value.address,
             alias: value.alias.clone(),
             outputs: value
                 .outputs
@@ -878,11 +856,13 @@ fn serialize() {
         incoming_transaction,
     );
 
-    let account = WalletData {
+    let wallet_data = WalletData {
         bip_path: Bip44::new(4218),
-        address: todo!("address"),
-        bech32_hrp: todo!("hrp"),
-        alias: "0".to_string(),
+        address: crate::types::block::address::Bech32Address::from_str(
+            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+        )
+        .unwrap(),
+        alias: "Alice".to_string(),
         outputs: HashMap::new(),
         locked_outputs: HashSet::new(),
         unspent_outputs: HashMap::new(),
@@ -893,12 +873,13 @@ fn serialize() {
         native_token_foundries: HashMap::new(),
     };
 
-    let deser_account = WalletData::try_from_dto(
-        serde_json::from_str::<WalletDataDto>(&serde_json::to_string(&WalletDataDto::from(&account)).unwrap()).unwrap(),
+    let deser_wallet_data = WalletData::try_from_dto(
+        serde_json::from_str::<WalletDataDto>(&serde_json::to_string(&WalletDataDto::from(&wallet_data)).unwrap())
+            .unwrap(),
     )
     .unwrap();
 
-    assert_eq!(account, deser_account);
+    assert_eq!(wallet_data, deser_wallet_data);
 }
 
 #[cfg(test)]
@@ -913,14 +894,12 @@ impl WalletData {
 
         use crate::types::block::address::Ed25519Address;
         Self {
-            alias: "Alice".to_string(),
             bip_path: Bip44::new(4218),
             address: crate::types::block::address::Bech32Address::from_str(
                 "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
             )
-            .unwrap()
-            .into_inner(),
-            bech32_hrp: Hrp::from_str_unchecked("rms"),
+            .unwrap(),
+            alias: "Alice".to_string(),
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
             unspent_outputs: HashMap::new(),

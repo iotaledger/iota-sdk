@@ -49,8 +49,8 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
     Ok(())
 }
 
-async fn run(cli: WalletCli) -> Result<(), Error> {
-    if let Some(wallet) = new_wallet(cli).await? {
+async fn run(wallet_cli: WalletCli) -> Result<(), Error> {
+    if let Some(wallet) = new_wallet(wallet_cli).await? {
         protocol_cli::prompt(&wallet).await?;
     }
 

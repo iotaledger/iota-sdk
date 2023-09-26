@@ -16,7 +16,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::{
-        address::{Address, Bech32Address},
+        address::{Address, Bech32Address, Hrp},
         output::BasicOutput,
         payload::transaction::TransactionId,
     },
@@ -47,10 +47,13 @@ async fn main() -> Result<()> {
 
     // TODO: in this case we can just let the builder generate the wallet address ... so remove?
     let bip_path = Bip44::new(SHIMMER_COIN_TYPE);
-    let address = Address::from(
-        secret_manager
-            .generate_ed25519_addresses(bip_path.coin_type, bip_path.account, 0..1, None)
-            .await?[0],
+    let address = Bech32Address::new(
+        Hrp::from_str_unchecked("smr"),
+        Address::from(
+            secret_manager
+                .generate_ed25519_addresses(bip_path.coin_type, bip_path.account, 0..1, None)
+                .await?[0],
+        ),
     );
 
     let wallet = Wallet::builder()
@@ -62,7 +65,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let recv_address = wallet.address_as_bech32().await;
+    let recv_address = wallet.address().await;
     println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.

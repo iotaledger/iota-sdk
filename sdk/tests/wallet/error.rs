@@ -5,12 +5,6 @@ use iota_sdk::wallet::Error;
 
 #[test]
 fn stringified_error() {
-    let error = Error::AccountNotFound("0".into());
-    assert_eq!(
-        &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"accountNotFound\",\"error\":\"account 0 not found\"}"
-    );
-
     let error = Error::NoOutputsToConsolidate {
         available_outputs: 0,
         consolidation_threshold: 0,

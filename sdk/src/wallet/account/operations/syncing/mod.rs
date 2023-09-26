@@ -109,7 +109,9 @@ where
             Vec<OutputId>,
             Vec<AddressWithUnspentOutputs>,
             Vec<OutputData>,
-        ) = self.request_outputs_recursively(address_to_sync, options).await?;
+        ) = self
+            .request_outputs_recursively(address_to_sync.into_inner(), options)
+            .await?;
 
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");

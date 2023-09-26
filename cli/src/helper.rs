@@ -8,7 +8,6 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
     crypto::keys::bip39::Mnemonic,
-    wallet::Wallet,
 };
 use tokio::{
     fs::{self, OpenOptions},

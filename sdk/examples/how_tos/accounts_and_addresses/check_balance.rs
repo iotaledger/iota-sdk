@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     let explorer_url = std::env::var("EXPLORER_URL").ok();
     let addr_base_url = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
-    println!("{addr_base_url}{}", wallet.address_as_bech32().await);
+    println!("{addr_base_url}{}", wallet.address().await);
 
     Ok(())
 }

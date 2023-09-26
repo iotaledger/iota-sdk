@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .as_ref()
     {
         // Check that the address in the unlock condition belongs to the wallet
-        &wallet_address == address_unlock_condition.address()
+        wallet_address.inner() == address_unlock_condition.address()
     } else {
         false
     };

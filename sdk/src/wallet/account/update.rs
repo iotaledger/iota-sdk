@@ -218,61 +218,18 @@ where
         Ok(())
     }
 
-    // TODO: remove
-
-    // /// Update wallet with newly generated addresses.
-    // pub(crate) async fn update_wallet_addresses(
-    //     &self,
-    //     internal: bool,
-    //     new_addresses: Vec<Bip44Address>,
-    // ) -> crate::wallet::Result<()> { log::debug!("[update_account_addresses]");
-
-    //     let mut wallet_data = self.data_mut().await;
-
-    //     // add addresses to the account
-    //     if internal {
-    //         wallet_data.internal_addresses.extend(new_addresses);
-    //     } else {
-    //         wallet_data.public_addresses.extend(new_addresses);
-    //     };
-
-    //     #[cfg(feature = "storage")]
-    //     {
-    //         log::debug!("[update_wallet_addresses] storing account: {}", wallet_data.alias);
-    //         self.save(Some(&wallet_data)).await?;
-    //     }
-    //     Ok(())
-    // }
-
-    // TODO: remove?
-
     /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible_incoming_transactions.
     pub(crate) async fn update_bech32_hrp(&self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
-        log::debug!("[UPDATE WALLET WITH BECH32 HRP] new bech32_hrp: {}", bech32_hrp);
+        log::debug!("updating wallet data with new bech32_hrp: {}", bech32_hrp);
         let mut wallet_data = self.data_mut().await;
-        wallet_data.bech32_hrp = bech32_hrp;
-
-        // TODO: remove
-
-        // for address in &mut wallet_data.addresses_with_unspent_outputs {
-        //     address.address.hrp = bech32_hrp;
-        // }
-        // for address in &mut wallet_data.public_addresses {
-        //     address.address.hrp = bech32_hrp;
-        // }
-        // for address in &mut wallet_data.internal_addresses {
-        //     address.address.hrp = bech32_hrp;
-        // }
+        wallet_data.address.hrp = bech32_hrp;
 
         wallet_data.inaccessible_incoming_transactions.clear();
 
         #[cfg(feature = "storage")]
         {
-            log::debug!(
-                "[SYNC] storing wallet {} after updating it with new bech32 hrp",
-                wallet_data.alias
-            );
+            log::debug!("[save] wallet data with updated bech32 hrp",);
             self.save(Some(&wallet_data)).await?;
         }
 

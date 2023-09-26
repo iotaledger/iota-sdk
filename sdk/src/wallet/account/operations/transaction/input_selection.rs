@@ -55,7 +55,7 @@ where
         let mut forbidden_inputs = wallet_data.locked_outputs.clone();
 
         todo!("no need for a vec anymore");
-        let addresses = vec![wallet_data.address.clone()];
+        let addresses = vec![wallet_data.address.into_inner()];
 
         // TODO: remove
         // let addresses = wallet_data

@@ -33,8 +33,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = wallet_1
         .send_with_params(
             [
-                SendParams::new(micro_amount, wallet_0.address_as_bech32().await)?,
-                SendParams::new(micro_amount, wallet_0.address_as_bech32().await)?,
+                SendParams::new(micro_amount, wallet_0.address().await)?,
+                SendParams::new(micro_amount, wallet_0.address().await)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -90,8 +90,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = wallet_1
         .send_with_params(
             [
-                SendParams::new(amount, wallet_0.address_as_bech32().await)?,
-                SendParams::new(0, wallet_0.address_as_bech32().await)?,
+                SendParams::new(amount, wallet_0.address().await)?,
+                SendParams::new(0, wallet_0.address().await)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -148,9 +148,9 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
 
     let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address_as_bech32().await))
+        .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
         .add_unlock_condition(ExpirationUnlockCondition::new(
-            wallet_0.address_as_bech32().await,
+            wallet_0.address().await,
             expiration_slot,
         )?)
         .finish_output(token_supply)?;
@@ -243,14 +243,8 @@ async fn claim_2_native_tokens() -> Result<()> {
     let tx = wallet_1
         .send_native_tokens(
             [
-                SendNativeTokensParams::new(
-                    wallet_0.address_as_bech32().await,
-                    [(create_tx_0.token_id, native_token_amount)],
-                )?,
-                SendNativeTokensParams::new(
-                    wallet_0.address_as_bech32().await,
-                    [(create_tx_1.token_id, native_token_amount)],
-                )?,
+                SendNativeTokensParams::new(wallet_0.address().await, [(create_tx_0.token_id, native_token_amount)])?,
+                SendNativeTokensParams::new(wallet_0.address().await, [(create_tx_1.token_id, native_token_amount)])?,
             ],
             None,
         )
@@ -549,7 +543,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     let micro_amount = 1;
     let tx = wallet_0
         .send_with_params(
-            [SendParams::new(micro_amount, wallet_1.address_as_bech32().await)?],
+            [SendParams::new(micro_amount, wallet_1.address().await)?],
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()

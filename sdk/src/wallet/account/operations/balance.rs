@@ -74,12 +74,16 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
 
+        // TODO: remove
         // for address_with_unspent_outputs in addresses_with_unspent_outputs {
+
         #[cfg(feature = "participation")]
         {
             if let Some(voting_output) = &voting_output {
+                // TODO: remove
                 // if voting_output.output.as_basic().address() == address_with_unspent_outputs.address.inner() {
-                if voting_output.output.as_basic().address() == &wallet_data.address {
+
+                if voting_output.output.as_basic().address() == wallet_data.address.inner() {
                     balance.base_coin.voting_power = voting_output.output.amount();
                 }
             }
@@ -171,7 +175,7 @@ where
                         // if we have multiple unlock conditions for basic or nft outputs, then we can't
                         // spend the balance at the moment or in the future
 
-                        let wallet_address = self.address().await;
+                        let wallet_address = self.address().await.into_inner();
                         let slot_index = self.client().get_slot_index().await?;
                         let is_claimable = self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
 
