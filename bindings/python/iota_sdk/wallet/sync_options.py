@@ -1,4 +1,8 @@
+# Copyright 2023 IOTA Stiftung
+# SPDX-License-Identifier: Apache-2.0
+
 from typing import List, Optional
+from dataclasses import dataclass
 from iota_sdk.types.common import json
 
 
