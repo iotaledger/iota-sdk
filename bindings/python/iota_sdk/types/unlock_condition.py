@@ -62,7 +62,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         return_address: The address to return the amount to.
     """
     amount: str
-    returnAddress: Union[Ed25519Address, AccountAddress, NFTAddress]
+    return_address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StorageDepositReturn), init=False)
 
@@ -89,8 +89,8 @@ class ExpirationUnlockCondition(UnlockCondition):
         unix_time: Unix timestamp marking the expiration of the claim.
         return_address: The return address if the output was not claimed in time.
     """
-    unixTime: int
-    returnAddress: Union[Ed25519Address, AccountAddress, NFTAddress]
+    unix_time: int
+    return_address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Expiration),
