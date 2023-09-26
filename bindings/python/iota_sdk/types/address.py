@@ -71,6 +71,8 @@ class NFTAddress(Address):
 
 @json
 @dataclass
+# pylint: disable=function-redefined
+# TODO: Change name
 class AccountAddress():
     """An Address of the Account.
     """

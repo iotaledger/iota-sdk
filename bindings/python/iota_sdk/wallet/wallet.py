@@ -10,6 +10,8 @@ from iota_sdk.types.address import AccountAddress
 from iota_sdk.wallet.account import Account, _call_method_routine
 from iota_sdk.wallet.sync_options import SyncOptions
 
+# pylint: disable=too-many-public-methods
+
 
 class Wallet():
     """An IOTA Wallet.
@@ -22,7 +24,7 @@ class Wallet():
                  storage_path: Optional[str] = None,
                  client_options: Optional[Dict[str, Any]] = None,
                  coin_type: Optional[int] = None,
-                 secret_manager: Optional[Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager]] = None):
+                 secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None):
         """Initialize `self`.
         """
 
