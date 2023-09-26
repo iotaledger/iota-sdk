@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod allotment;
-mod protocol;
+mod rewards;
+mod structure;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
@@ -13,7 +14,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 #[cfg(feature = "serde")]
 pub use self::allotment::dto::ManaAllotmentDto;
-pub use self::{allotment::ManaAllotment, protocol::ManaStructure};
+pub use self::{allotment::ManaAllotment, rewards::RewardsParameters, structure::ManaStructure};
 use super::{output::AccountId, protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =
