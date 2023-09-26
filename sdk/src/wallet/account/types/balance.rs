@@ -21,12 +21,12 @@ pub struct Balance {
     pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
     pub(crate) native_tokens: Vec<NativeTokensBalance>,
-    /// Nfts
-    pub(crate) nfts: Vec<NftId>,
     /// Aliases
     pub(crate) aliases: Vec<AliasId>,
     /// Foundries
     pub(crate) foundries: Vec<FoundryId>,
+    /// Nfts
+    pub(crate) nfts: Vec<NftId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
@@ -51,9 +51,9 @@ impl std::ops::AddAssign for Balance {
             }
         }
 
-        self.nfts.extend(rhs.nfts);
         self.aliases.extend(rhs.aliases);
         self.foundries.extend(rhs.foundries);
+        self.nfts.extend(rhs.nfts);
     }
 }
 
@@ -89,9 +89,9 @@ impl std::ops::AddAssign for BaseCoinBalance {
 #[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
     #[serde(with = "crate::utils::serde::string")]
-    pub(crate) alias: u64,
-    #[serde(with = "crate::utils::serde::string")]
     pub(crate) basic: u64,
+    #[serde(with = "crate::utils::serde::string")]
+    pub(crate) alias: u64,
     #[serde(with = "crate::utils::serde::string")]
     pub(crate) foundry: u64,
     #[serde(with = "crate::utils::serde::string")]
@@ -100,8 +100,8 @@ pub struct RequiredStorageDeposit {
 
 impl std::ops::AddAssign for RequiredStorageDeposit {
     fn add_assign(&mut self, rhs: Self) {
-        self.alias += rhs.alias;
         self.basic += rhs.basic;
+        self.alias += rhs.alias;
         self.foundry += rhs.foundry;
         self.nft += rhs.nft;
     }
@@ -205,8 +205,8 @@ impl Balance {
                 voting_power: total / 4,
             },
             required_storage_deposit: RequiredStorageDeposit {
-                alias: total / 16,
                 basic: total / 8,
+                alias: total / 16,
                 foundry: total / 4,
                 nft: total / 2,
             },

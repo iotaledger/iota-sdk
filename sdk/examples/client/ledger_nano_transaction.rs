@@ -4,7 +4,7 @@
 //! In this example we will create a testnet transaction with a simulated ledger nano hardware wallet.
 //!
 //! To use the ledger nano simulator, run the following commands:
-//! 1. `clone https://github.com/iotaledger/ledger-shimmer-app`
+//! 1. `clone https://github.com/iotaledger/ledger-iota-app`
 //! 2. `cd ledger-shimmer-app`
 //! 3. `git submodule init && git submodule update --recursive`
 //! 4. `./build.sh -m nanos|nanox|nanosplus -s`

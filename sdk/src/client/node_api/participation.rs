@@ -3,7 +3,7 @@
 
 //! IOTA node public participation routes.
 //! <https://github.com/iota-community/treasury/blob/main/specifications/hornet-participation-plugin.md#public-node-endpoints>
-//! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
+//! <https://github.com/iotaledger/inx-participation/blob/develop/components/participation/routes.go>
 
 use crate::{
     client::{ClientInner, Result},
@@ -49,7 +49,9 @@ impl ClientInner {
 
         self.get_request(
             &route,
-            milestone_index.map(|index| index.to_string()).as_deref(),
+            milestone_index
+                .map(|index| format!("milestoneIndex={index}"))
+                .as_deref(),
             false,
             false,
         )

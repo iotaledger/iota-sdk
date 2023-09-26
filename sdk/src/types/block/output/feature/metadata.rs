@@ -312,7 +312,7 @@ pub(crate) mod irc_30 {
 
     use super::*;
 
-    /// The IRC30 NFT standard schema.
+    /// The IRC30 native token metadata standard schema.
     #[derive(Clone, Debug, Serialize, Deserialize, Getters, PartialEq, Eq)]
     #[serde(rename_all = "camelCase")]
     #[serde(tag = "standard", rename = "IRC30")]
@@ -322,7 +322,8 @@ pub(crate) mod irc_30 {
         name: String,
         /// The symbol/ticker of the token.
         symbol: String,
-        /// Number of decimals the token uses (divide the token amount by 10^decimals to get its user representation).
+        /// Number of decimals the token uses (divide the token amount by `10^decimals` to get its user
+        /// representation).
         decimals: u32,
         /// The human-readable description of the token.
         #[serde(default, skip_serializing_if = "Option::is_none")]
