@@ -1744,19 +1744,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iota-wallet-nodejs"
-version = "0.2.0"
-dependencies = [
- "iota-sdk-bindings-core",
- "log",
- "neon",
- "once_cell",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "iota_stronghold"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
