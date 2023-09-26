@@ -10,6 +10,8 @@ import {
     Ed25519Address,
     SenderFeature,
     MetadataFeature,
+    Wallet,
+    TransactionOptions,
 } from '@iota/sdk';
 import { SimpleBufferCursor } from './simple-buffer-cursor';
 
@@ -25,7 +27,7 @@ async function prepareMetadata(evmAddress: string, amount: bigint, gas: bigint) 
     const metadata = new SimpleBufferCursor();
 
     /* Write contract meta data */
-    metadata.writeUInt32LE(0x0); // nil sender contract
+    metadata.writeUInt8(0); // nil sender contract
     metadata.writeUInt32LE(0x3c4b5e02); // "accounts"
     metadata.writeUInt32LE(0x23f4e3a1); // "transferAllowanceTo"
     metadata.writeUInt64SpecialEncoding(gas); // gas
@@ -48,8 +50,8 @@ async function prepareMetadata(evmAddress: string, amount: bigint, gas: bigint) 
     // see https://github.com/iotaledger/wasp/blob/12845adea4fc097813a30a061853af4a43407d3c/packages/isc/assets.go#L348-L356 
     metadata.writeUInt8(128); // 0x80 flag meaning there are native tokens in the allowance
     metadata.writeUInt64SpecialEncoding(amount - gas); // IOTA amount to send
-    console.log(metadata.buffer.toString('hex'))
-    return metadata.buffer.toString('hex');
+    // console.log(metadata.buffer.toString('hex'))
+    return '0x' + metadata.buffer.toString('hex');
 }
 
 // Run with command:
@@ -61,14 +63,32 @@ async function run() {
 
     const client = new Client({});
 
-    const amount = 100;
+    if (!process.env.STRONGHOLD_PASSWORD) {
+        throw new Error(
+            '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+        );
+    }
+
+    const wallet = new Wallet({
+        storagePath: process.env.WALLET_DB_PATH,
+    });
+
+    const account = await wallet.getAccount('Alice');
+
+    // Sync new outputs from the node.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _syncBalance = await account.sync();
+
+    // After syncing the balance can also be computed with the local data
+    const balance = await account.getBalance();
+    console.log('Balance::', balance.baseCoin);
+
+    const amount = 51000;
     const gas = 10;
 
     const bigAmount: bigint = BigInt(amount);
-    const bigGas: bigint = BigInt(gas)
-
-    console.log('amounts:', bigAmount, bigGas);
-    
+    const bigGas: bigint = BigInt(gas);
+    // console.log('amounts:', bigAmount, bigGas);
 
     try {
         const hexAddress = Utils.bech32ToHex(
@@ -78,18 +98,18 @@ async function run() {
         const addressUnlockCondition: UnlockCondition = new AddressUnlockCondition(new Ed25519Address(hexAddress));
 
         const addressFeature = new SenderFeature(new Ed25519Address(hexAddress));
-        console.log('addressFeature:', addressFeature);
+        // console.log('addressFeature:', addressFeature);
 
         const metadata = await prepareMetadata(
             '0x48e28C1681BBb92a2E5874113bc740cC11A0FD7a',
             bigAmount,
             bigGas
         );
-        console.log('metadata:', metadata);
+        // console.log('metadata:', metadata);
         const metadataFeature = new MetadataFeature(metadata);
-        console.log('metadataFeature:', metadataFeature);
+        // console.log('metadataFeature:', metadataFeature);
 
-        // // Most simple output
+        // Basic Output with Metadata
         const basicOutput = await client.buildBasicOutput({
             amount: amount.toString(),
             unlockConditions: [addressUnlockCondition],
@@ -99,6 +119,22 @@ async function run() {
               ],
         });
         console.log('basicOutput:', JSON.stringify(basicOutput, null, 2));
+
+        // let transactionOptions: TransactionOptions;
+
+        // Allowance
+
+        // Send Output
+        console.log('Sending Transaction...');
+        const transaction = await account.sendOutputs([basicOutput]);
+        console.log(`Transaction sent: ${transaction.transactionId}`);
+
+        console.log('Waiting until included in block...');
+        const blockId = await account.retryTransactionUntilIncluded(
+            transaction.transactionId,
+        );
+        console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
+
     } catch (error) {
         console.error('Error: ', error);
     }
