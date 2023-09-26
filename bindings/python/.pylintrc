@@ -5,6 +5,10 @@ disable=missing-module-docstring,
 	invalid-name, # files that starts with number
 	duplicate-code,
 	consider-using-with,
-	consider-using-f-string
+	fixme, # TODOS 
+	too-many-instance-attributes,
+	too-many-arguments,
+	too-few-public-methods
 
-
+[TYPECHECK]
+generated-members=from_dict,to_dict,to_json # Made from @json

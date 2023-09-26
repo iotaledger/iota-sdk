@@ -2,15 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from iota_sdk.types.common import HexStr
+from enum import IntEnum
+from typing import List, Union
+
+from dataclasses import dataclass, field
+
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.essence import RegularTransactionEssence
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
-from dacite import from_dict
-from dataclasses import dataclass, field
-from enum import IntEnum
-from typing import Any, Optional, List, Union
 
 
 class PayloadType(IntEnum):

@@ -37,6 +37,8 @@ class AccountMetadata:
     coinType: int
     index: int
 
+# pylint: disable=too-many-public-methods
+
 
 class Account:
     """A wallet account.

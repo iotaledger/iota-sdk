@@ -13,18 +13,22 @@ def _call_method_routine(func):
     """
     def wrapper(*args, **kwargs):
         class MyEncoder(JSONEncoder):
-            def default(self, obj):
-                as_dict_method = getattr(obj, "as_dict", None)
-                if callable(as_dict_method):
-                    return obj.as_dict()
-                if isinstance(obj, str):
-                    return obj
-                if isinstance(obj, Enum):
-                    return obj.__dict__
-                if isinstance(obj, dict):
-                    return obj
-                if hasattr(obj, "__dict__"):
-                    obj_dict = obj.__dict__
+            """Custom encoder
+            """
+
+            # pylint: disable=too-many-return-statements
+            def default(self, o):
+                to_dict_method = getattr(o, "to_dict", None)
+                if callable(to_dict_method):
+                    return o.to_dict()
+                if isinstance(o, str):
+                    return o
+                if isinstance(o, Enum):
+                    return o.__dict__
+                if isinstance(o, dict):
+                    return o
+                if hasattr(o, "__dict__"):
+                    obj_dict = o.__dict__
 
                     items_method = getattr(self, "items", None)
                     if callable(items_method):
@@ -32,7 +36,7 @@ def _call_method_routine(func):
                             obj_dict[k] = dumps(v, cls=MyEncoder)
                             return obj_dict
                     return obj_dict
-                return obj
+                return o
         message = func(*args, **kwargs)
 
         for k, v in message.items():
@@ -67,4 +71,3 @@ def _call_method_routine(func):
 
 class WalletError(Exception):
     """A wallet error."""
-    pass

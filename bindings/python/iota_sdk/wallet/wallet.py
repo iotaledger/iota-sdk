@@ -10,6 +10,8 @@ from iota_sdk.wallet.sync_options import SyncOptions
 from json import dumps
 from typing import Any, Dict, List, Optional, Union
 
+# pylint: disable=too-many-public-methods
+
 
 class Wallet():
     """An IOTA Wallet.
@@ -18,7 +20,10 @@ class Wallet():
         handle: The wallet handle.
     """
 
-    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None,
+    def __init__(self,
+                 storage_path: Optional[str] = None,
+                 client_options: Optional[Dict[str, Any]] = None,
+                 coin_type: Optional[int] = None,
                  secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None):
         """Initialize `self`.
         """

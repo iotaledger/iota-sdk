@@ -1,11 +1,11 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
-from iota_sdk.types.common import HexStr
-from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Union
+from dataclasses import dataclass, field
+from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
+from iota_sdk.types.common import HexStr
 
 
 class FeatureType(IntEnum):

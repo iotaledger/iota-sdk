@@ -28,7 +28,9 @@ class SimpleTokenScheme(TokenScheme):
     type: int = field(default_factory=lambda: 0, init=False)
 
     def as_dict(self):
-        config = dict(self.__dict__)
+        """
+        The function converts integer values in the config to hexadecimal strings.
+        """
 
         if isinstance(config['mintedTokens'], int):
             config['mintedTokens'] = str(hex(config['mintedTokens']))
