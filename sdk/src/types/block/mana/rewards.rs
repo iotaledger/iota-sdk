@@ -17,7 +17,7 @@ use crate::types::block::{slot::EpochIndex, Error};
 pub struct RewardsParameters {
     /// The number of validation blocks that should be issued by a selected validator per slot during its epoch duties.
     validator_blocks_per_slot: u8,
-    /// Used for shift operation for calculation of profit margin.
+    /// Used for shift operation during calculation of profit margin.
     profit_margin_exponent: u8,
     /// The length of the bootstrapping phase in epochs.
     bootstrapping_duration: EpochIndex,
