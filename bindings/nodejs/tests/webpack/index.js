@@ -1,0 +1,1 @@
+import { Irc27Metadata } from '../../out/types';
