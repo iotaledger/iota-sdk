@@ -29,7 +29,7 @@ pub struct RewardsParameters {
     /// Needs to be an integer approximation calculated based on chosen DecayBalancingConstantExponent.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     decay_balancing_constant: u64,
-    /// The exponent used for shifting operation in the pool rewards calculations.
+    /// The exponent used for shifting operation during the pool rewards calculations.
     pool_coefficient_exponent: u8,
 }
 
