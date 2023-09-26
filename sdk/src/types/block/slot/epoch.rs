@@ -87,6 +87,12 @@ impl From<EpochIndex> for u64 {
     }
 }
 
+impl PartialEq<u64> for EpochIndex {
+    fn eq(&self, other: &u64) -> bool {
+        self.0 == *other
+    }
+}
+
 #[cfg(feature = "serde")]
 string_serde_impl!(EpochIndex);
 

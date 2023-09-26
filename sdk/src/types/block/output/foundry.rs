@@ -329,7 +329,7 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 /// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     amount: u64,
     /// Native tokens held by this output.
     native_tokens: NativeTokens,
