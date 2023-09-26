@@ -4,7 +4,6 @@
 //! Core library for iota-sdk bindings
 
 mod error;
-pub mod message_interface_old;
 mod method;
 mod method_handler;
 mod panic;
