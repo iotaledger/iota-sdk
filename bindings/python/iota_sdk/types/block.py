@@ -64,56 +64,81 @@ class LedgerInclusionState(str, Enum):
     conflicting = 'conflicting'
 
 
-class ConflictReason(Enum):
+class TransactionFailureReason(Enum):
     """Represents the possible reasons for a conflicting transaction.
 
     Attributes:
-        none (0): The transaction does not conflict with the ledger.
-        inputUTXOAlreadySpent (1): The input UTXO is already spent.
-        inputUTXOAlreadySpentInThisMilestone (2): The input UTXO is already spent in this milestone.
-        inputUTXONotFound (3): The input UTXO was not found.
-        inputOutputSumMismatch (4): The sum of input and output amounts is not equal.
-        invalidSignature (5): The signature is invalid.
-        invalidTimelock (6): The timelock is invalid.
-        invalidNativeTokens (7): The native tokens are invalid.
-        returnAmountMismatch (8): The return amount is invalid.
-        invalidInputUnlock (9): Not all inputs can be unlocked.
-        invalidInputsCommitment (10): The inputs commitment hash is invalid.
-        invalidSender (11): The sender is invalid.
-        invalidChainState (12): The chain state is invalid.
-        semanticValidationFailed (255): The semantic validation failed.
+        InputUtxoAlreadySpent: The referenced UTXO was already spent.
+        ConflictingWithAnotherTx: The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason.
+        InvalidReferencedUtxo: The referenced UTXO is invalid.
+        InvalidTransaction: The transaction is invalid.
+        SumInputsOutputsAmountMismatch: The sum of the inputs and output base token amount does not match.
+        InvalidUnlockBlockSignature: The unlock block signature is invalid.
+        TimelockNotExpired: The configured timelock is not yet expired.
+        InvalidNativeTokens: The given native tokens are invalid.
+        StorageDepositReturnUnfulfilled: The return amount in a transaction is not fulfilled by the output side.
+        InvalidInputUnlock: An input unlock was invalid.
+        InvalidInputsCommitment: The inputs commitment is invalid.
+        SenderNotUnlocked: The output contains a Sender with an ident (address) which is not unlocked.
+        InvalidChainStateTransition: The chain state transition is invalid.
+        InvalidTransactionIssuingTime: The referenced input is created after the transaction issuing time.
+        InvalidManaAmount: The mana amount is invalid.
+        InvalidBlockIssuanceCreditsAmount: The Block Issuance Credits amount is invalid.
+        InvalidRewardContextInput: Reward Context Input is invalid.
+        InvalidCommitmentContextInput: Commitment Context Input is invalid.
+        MissingStakingFeature: Staking Feature is not provided in account output when claiming rewards.
+        FailedToClaimStakingReward: Failed to claim staking reward.
+        FailedToClaimDelegationReward: Failed to claim delegation reward.
+        SemanticValidationFailed: The semantic validation failed for a reason not covered by the previous variants.
     """
-    none = 0
-    inputUTXOAlreadySpent = 1
-    inputUTXOAlreadySpentInThisMilestone = 2
-    inputUTXONotFound = 3
-    inputOutputSumMismatch = 4
-    invalidSignature = 5
-    invalidTimelock = 6
-    invalidNativeTokens = 7
-    returnAmountMismatch = 8
-    invalidInputUnlock = 9
-    invalidInputsCommitment = 10
-    invalidSender = 11
-    invalidChainState = 12
-    semanticValidationFailed = 255
+    InputUtxoAlreadySpent = 1
+    ConflictingWithAnotherTx = 2
+    InvalidReferencedUtxo = 3
+    InvalidTransaction = 4
+    SumInputsOutputsAmountMismatch = 5
+    InvalidUnlockBlockSignature = 6
+    TimelockNotExpired = 7
+    InvalidNativeTokens = 8
+    StorageDepositReturnUnfulfilled = 9
+    InvalidInputUnlock = 10
+    InvalidInputsCommitment = 11
+    SenderNotUnlocked = 12
+    InvalidChainStateTransition = 13
+    InvalidTransactionIssuingTime = 14
+    InvalidManaAmount = 15
+    InvalidBlockIssuanceCreditsAmount = 16
+    InvalidRewardContextInput = 17
+    InvalidCommitmentContextInput = 18
+    MissingStakingFeature = 19
+    FailedToClaimStakingReward = 20
+    FailedToClaimDelegationReward = 21
+    SemanticValidationFailed = 255
 
-
-CONFLICT_REASON_STRINGS = {
-    ConflictReason.none: 'The block has no conflict',
-    ConflictReason.inputUTXOAlreadySpent: 'The referenced UTXO was already spent',
-    ConflictReason.inputUTXOAlreadySpentInThisMilestone: 'The referenced UTXO was already spent while confirming this milestone',
-    ConflictReason.inputUTXONotFound: 'The referenced UTXO cannot be found',
-    ConflictReason.inputOutputSumMismatch: 'The sum of the inputs and output values does not match',
-    ConflictReason.invalidSignature: 'The unlock block signature is invalid',
-    ConflictReason.invalidTimelock: 'The configured timelock is not yet expired',
-    ConflictReason.invalidNativeTokens: 'The native tokens are invalid',
-    ConflictReason.returnAmountMismatch: 'The return amount in a transaction is not fulfilled by the output side',
-    ConflictReason.invalidInputUnlock: 'The input unlock is invalid',
-    ConflictReason.invalidInputsCommitment: 'The inputs commitment is invalid',
-    ConflictReason.invalidSender: ' The output contains a Sender with an ident (address) which is not unlocked',
-    ConflictReason.invalidChainState: 'The chain state transition is invalid',
-    ConflictReason.semanticValidationFailed: 'The semantic validation failed'}
+    def __str__(self):
+        return {
+            1: "The referenced UTXO was already spent.",
+            2: "The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason.",
+            3: "The referenced UTXO is invalid.",
+            4: "The transaction is invalid.",
+            5: "The sum of the inputs and output base token amount does not match.",
+            6: "The unlock block signature is invalid.",
+            7: "The configured timelock is not yet expired.",
+            8: "The given native tokens are invalid.",
+            9: "The return amount in a transaction is not fulfilled by the output side.",
+            10: "An input unlock was invalid.",
+            11: "The inputs commitment is invalid.",
+            12: "The output contains a Sender with an ident (address) which is not unlocked.",
+            13: "The chain state transition is invalid.",
+            14: "The referenced input is created after the transaction issuing time.",
+            15: "The mana amount is invalid.",
+            16: "The Block Issuance Credits amount is invalid.",
+            17: "Reward Context Input is invalid.",
+            18: "Commitment Context Input is invalid.",
+            19: "Staking Feature is not provided in account output when claiming rewards.",
+            20: "Failed to claim staking reward.",
+            21: "Failed to claim delegation reward.",
+            255: "The semantic validation failed for a reason not covered by the previous variants."
+        }[self.value]
 
 
 @json
@@ -142,6 +167,6 @@ class BlockMetadata:
     referenced_by_milestone_index: Optional[int] = None
     milestone_index: Optional[int] = None
     ledger_inclusion_state: Optional[LedgerInclusionState] = None
-    conflict_reason: Optional[ConflictReason] = None
+    conflict_reason: Optional[TransactionFailureReason] = None
     should_promote: Optional[bool] = None
     should_reattach: Optional[bool] = None

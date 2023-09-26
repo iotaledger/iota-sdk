@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeMap;
+use core::fmt;
 
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
@@ -31,21 +32,21 @@ pub enum TransactionFailureReason {
     InvalidReferencedUtxo = 3,
     /// The transaction is invalid.
     InvalidTransaction = 4,
-    /// The created amount does not match the consumed amount.
-    CreatedConsumedAmountMismatch = 5,
-    /// The unlock signature is invalid.
-    InvalidSignature = 6,
+    /// The sum of the inputs and output base token amount does not match.
+    SumInputsOutputsAmountMismatch = 5,
+    /// The unlock block signature is invalid.
+    InvalidUnlockBlockSignature = 6,
     /// The configured timelock is not yet expired.
     TimelockNotExpired = 7,
     /// The given native tokens are invalid.
     InvalidNativeTokens = 8,
     /// The return amount in a transaction is not fulfilled by the output side.
     StorageDepositReturnUnfulfilled = 9,
-    /// An invalid unlock was used.
-    InvalidUnlock = 10,
+    /// An input unlock was invalid.
+    InvalidInputUnlock = 10,
     /// The inputs commitment is invalid.
     InvalidInputsCommitment = 11,
-    /// The sender was not verified.
+    /// The output contains a Sender with an ident (address) which is not unlocked.
     SenderNotUnlocked = 12,
     /// The chain state transition is invalid.
     InvalidChainStateTransition = 13,
@@ -69,38 +70,53 @@ pub enum TransactionFailureReason {
     SemanticValidationFailed = 255,
 }
 
-// TODO bring back
-// impl fmt::Display for TransactionFailureReason {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         match self {
-//             Self::None => write!(f, "The block has no conflict"),
-//             Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent"),
-//             Self::InputUtxoAlreadySpentInThisMilestone => write!(
-//                 f,
-//                 "The referenced UTXO was already spent while confirming this milestone"
-//             ),
-//             Self::InputUtxoNotFound => write!(f, "The referenced UTXO cannot be found"),
-//             Self::CreatedConsumedAmountMismatch => {
-//                 write!(f, "The sum of the inputs and output values does not match")
-//             }
-//             Self::InvalidSignature => write!(f, "The unlock block signature is invalid"),
-//             Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired"),
-//             Self::InvalidNativeTokens => write!(f, "The native tokens are invalid"),
-//             Self::StorageDepositReturnUnfulfilled => write!(
-//                 f,
-//                 "The return amount in a transaction is not fulfilled by the output side"
-//             ),
-//             Self::InvalidUnlock => write!(f, "The input unlock is invalid"),
-//             Self::InputsCommitmentsMismatch => write!(f, "The inputs commitment is invalid"),
-//             Self::UnverifiedSender => write!(
-//                 f,
-//                 " The output contains a Sender with an ident (address) which is not unlocked"
-//             ),
-//             Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid"),
-//             Self::SemanticValidationFailed => write!(f, "The semantic validation failed"),
-//         }
-//     }
-// }
+impl fmt::Display for TransactionFailureReason {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent."),
+            Self::ConflictingWithAnotherTx => write!(
+                f,
+                "The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason."
+            ),
+            Self::InvalidReferencedUtxo => write!(f, "The referenced UTXO is invalid."),
+            Self::InvalidTransaction => write!(f, "The transaction is invalid."),
+            Self::SumInputsOutputsAmountMismatch => {
+                write!(f, "The sum of the inputs and output base token amount does not match.")
+            }
+            Self::InvalidUnlockBlockSignature => write!(f, "The unlock block signature is invalid."),
+            Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired."),
+            Self::InvalidNativeTokens => write!(f, "The given native tokens are invalid."),
+            Self::StorageDepositReturnUnfulfilled => write!(
+                f,
+                "The return amount in a transaction is not fulfilled by the output side."
+            ),
+            Self::InvalidInputUnlock => write!(f, "An input unlock was invalid."),
+            Self::InvalidInputsCommitment => write!(f, "The inputs commitment is invalid."),
+            Self::SenderNotUnlocked => write!(
+                f,
+                "The output contains a Sender with an ident (address) which is not unlocked."
+            ),
+            Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid."),
+            Self::InvalidTransactionIssuingTime => {
+                write!(f, "The referenced input is created after transaction issuing time.")
+            }
+            Self::InvalidManaAmount => write!(f, "The mana amount is invalid."),
+            Self::InvalidBlockIssuanceCreditsAmount => write!(f, "The Block Issuance Credits amount is invalid."),
+            Self::InvalidRewardContextInput => write!(f, "Reward Context Input is invalid."),
+            Self::InvalidCommitmentContextInput => write!(f, "Commitment Context Input is invalid."),
+            Self::MissingStakingFeature => write!(
+                f,
+                "Staking Feature is not provided in account output when claiming rewards."
+            ),
+            Self::FailedToClaimStakingReward => write!(f, "Failed to claim staking reward."),
+            Self::FailedToClaimDelegationReward => write!(f, "Failed to claim delegation reward."),
+            Self::SemanticValidationFailed => write!(
+                f,
+                "The semantic validation failed for a reason not covered by the previous variants."
+            ),
+        }
+    }
+}
 
 impl TryFrom<u8> for TransactionFailureReason {
     type Error = Error;
@@ -111,12 +127,12 @@ impl TryFrom<u8> for TransactionFailureReason {
             2 => Self::ConflictingWithAnotherTx,
             3 => Self::InvalidReferencedUtxo,
             4 => Self::InvalidTransaction,
-            5 => Self::CreatedConsumedAmountMismatch,
-            6 => Self::InvalidSignature,
+            5 => Self::SumInputsOutputsAmountMismatch,
+            6 => Self::InvalidUnlockBlockSignature,
             7 => Self::TimelockNotExpired,
             8 => Self::InvalidNativeTokens,
             9 => Self::StorageDepositReturnUnfulfilled,
-            10 => Self::InvalidUnlock,
+            10 => Self::InvalidInputUnlock,
             11 => Self::InvalidInputsCommitment,
             12 => Self::SenderNotUnlocked,
             13 => Self::InvalidChainStateTransition,
@@ -349,7 +365,7 @@ pub fn semantic_validation(
 
     // Validation of amounts.
     if context.input_amount != context.output_amount {
-        return Ok(Some(TransactionFailureReason::CreatedConsumedAmountMismatch));
+        return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
     }
 
     let mut native_token_ids = HashSet::new();
