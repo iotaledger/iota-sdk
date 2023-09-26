@@ -1,1 +1,1 @@
-import { Irc27Metadata } from '../../out/types';
+import * as types from '../../out/types';
