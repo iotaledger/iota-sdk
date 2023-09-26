@@ -815,7 +815,7 @@ mod tests {
         let dto = OutputDto::Foundry((&output).into());
         let output_unver = Output::try_from_dto(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from_dto_with_params(dto, protocol_parameters.clone()).unwrap();
+        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
