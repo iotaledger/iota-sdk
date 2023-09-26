@@ -6,12 +6,12 @@ from json import dumps, loads
 from typing import TYPE_CHECKING, List
 
 from dacite import from_dict
-from iota_sdk import call_utils_method
 from iota_sdk.types.signature import Ed25519Signature
-from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAddress, NFTAddress
+from iota_sdk.types.address import Address, AddressType, Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
+from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -58,7 +58,8 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex_str: HexStr, bech32_hrp: str) -> str:
+    def hex_public_key_to_bech32_address(
+            hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded public key to a Bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
@@ -78,10 +79,11 @@ class Utils():
 
         if address_type == AddressType.ED25519:
             return from_dict(Ed25519Address, response)
-        if address_type == AddressType.ALIAS:
-            return from_dict(AliasAddress, response)
+        if address_type == AddressType.ACCOUNT:
+            return from_dict(AccountAddress, response)
         if address_type == AddressType.NFT:
             return from_dict(NFTAddress, response)
+        return from_dict(Address, response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:

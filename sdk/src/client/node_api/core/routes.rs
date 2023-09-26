@@ -10,6 +10,7 @@ use url::Url;
 use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
+        node_api::query_tuples_to_query_string,
         node_manager::node::{Node, NodeAuth},
         Client, ClientInner, Result,
     },
@@ -112,22 +113,31 @@ impl ClientInner {
     /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
     /// current committee members are returned.
     /// GET /api/core/v3/committee/?epochIndex
-    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>>) -> Result<CommitteeResponse> {
+    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>> + Send) -> Result<CommitteeResponse> {
         const PATH: &str = "api/core/v3/committee";
 
-        let epoch_index = epoch_index.into().map(|i| format!("epochIndex={i}"));
-        self.get_request(PATH, epoch_index.as_deref(), false, false).await
+        let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
+
+        self.get_request(PATH, query.as_deref(), false, false).await
     }
 
     // Validators routes.
 
     /// Returns information of all registered validators and if they are active.
     /// GET JSON to /api/core/v3/validators
-    pub async fn get_validators(&self, page_size: Option<u32>) -> Result<ValidatorsResponse> {
+    pub async fn get_validators(
+        &self,
+        page_size: impl Into<Option<u32>> + Send,
+        cursor: impl Into<Option<String>> + Send,
+    ) -> Result<ValidatorsResponse> {
         const PATH: &str = "api/core/v3/validators";
 
-        let page_size = page_size.map(|i| format!("pageSize={i}"));
-        self.get_request(PATH, page_size.as_deref(), false, false).await
+        let query = query_tuples_to_query_string([
+            page_size.into().map(|i| ("pageSize", i.to_string())),
+            cursor.into().map(|i| ("cursor", i)),
+        ]);
+
+        self.get_request(PATH, query.as_deref(), false, false).await
     }
 
     /// Return information about a validator.

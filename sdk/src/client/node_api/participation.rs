@@ -6,7 +6,7 @@
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
 use crate::{
-    client::{ClientInner, Result},
+    client::{node_api::query_tuples_to_query_string, ClientInner, Result},
     types::{
         api::plugins::participation::{
             responses::{AddressOutputsResponse, EventsResponse, OutputStatusResponse},
@@ -24,12 +24,9 @@ impl ClientInner {
     pub async fn events(&self, event_type: Option<ParticipationEventType>) -> Result<EventsResponse> {
         let route = "api/participation/v1/events";
 
-        let query = event_type.map(|event_type| match event_type {
-            ParticipationEventType::Voting => "type=0",
-            ParticipationEventType::Staking => "type=1",
-        });
+        let query = query_tuples_to_query_string([event_type.map(|t| ("type", (t as u8).to_string()))]);
 
-        self.get_request(route, query, false, false).await
+        self.get_request(route, query.as_deref(), false, false).await
     }
 
     /// RouteParticipationEvent is the route to access a single participation by its ID.
@@ -47,13 +44,9 @@ impl ClientInner {
     ) -> Result<ParticipationEventStatus> {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
-        self.get_request(
-            &route,
-            milestone_index.map(|index| index.to_string()).as_deref(),
-            false,
-            false,
-        )
-        .await
+        let query = query_tuples_to_query_string([milestone_index.map(|i| ("milestoneIndex", i.to_string()))]);
+
+        self.get_request(&route, query.as_deref(), false, false).await
     }
 
     /// RouteOutputStatus is the route to get the vote status for a given output ID.

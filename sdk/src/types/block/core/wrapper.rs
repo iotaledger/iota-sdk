@@ -352,7 +352,7 @@ pub(crate) mod dto {
                 }
             }
 
-            Ok(BlockWrapper::new(
+            Ok(Self::new(
                 dto.protocol_version,
                 dto.network_id,
                 dto.issuing_time,

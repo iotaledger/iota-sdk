@@ -3,15 +3,13 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Optional, List, Union
+from typing import List, Union
 
 from dataclasses import dataclass, field
 
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput
-from iota_sdk.types.input import UtxoInput
+from iota_sdk.types.essence import RegularTransactionEssence
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
-from iota_sdk.types.mana import ManaAllotment
 
 
 class PayloadType(IntEnum):

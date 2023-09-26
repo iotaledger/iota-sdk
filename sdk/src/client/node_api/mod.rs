@@ -13,3 +13,14 @@ pub mod mqtt;
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
 pub mod participation;
 pub mod plugin;
+
+pub(crate) fn query_tuples_to_query_string(
+    tuples: impl IntoIterator<Item = Option<(&'static str, String)>>,
+) -> Option<String> {
+    let query = tuples
+        .into_iter()
+        .filter_map(|tuple| tuple.map(|(key, value)| format!("{}={}", key, value)))
+        .collect::<Vec<_>>();
+
+    if query.is_empty() { None } else { Some(query.join("&")) }
+}
