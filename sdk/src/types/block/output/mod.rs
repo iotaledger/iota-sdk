@@ -1,18 +1,14 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod account_id;
 mod chain_id;
 mod delegation;
-mod foundry_id;
 mod inputs_commitment;
 mod metadata;
 mod native_token;
-mod nft_id;
 mod output_id;
 mod rent;
 mod state_transition;
-mod token_id;
 mod token_scheme;
 
 ///
@@ -46,23 +42,19 @@ pub(crate) use self::{
     unlock_condition::AddressUnlockCondition,
 };
 pub use self::{
-    account::{AccountOutput, AccountOutputBuilder, AccountTransition},
-    account_id::AccountId,
+    account::{AccountId, AccountOutput, AccountOutputBuilder, AccountTransition},
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
-    foundry::{FoundryOutput, FoundryOutputBuilder},
-    foundry_id::FoundryId,
+    foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
     inputs_commitment::InputsCommitment,
     metadata::OutputMetadata,
-    native_token::{NativeToken, NativeTokens, NativeTokensBuilder},
-    nft::{NftOutput, NftOutputBuilder},
-    nft_id::NftId,
+    native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
+    nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     rent::{MinimumStorageDepositBasicOutput, Rent, RentStructure},
     state_transition::{StateTransitionError, StateTransitionVerifier},
-    token_id::TokenId,
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };

@@ -14,7 +14,7 @@ use crate::types::{
     block::{
         address::Address,
         output::{
-            account_id::AccountId,
+            account::AccountId,
             chain_id::ChainId,
             feature::FeatureFlags,
             unlock_condition::{
