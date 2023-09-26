@@ -8,3 +8,4 @@ out/
 **/dist
 offline_signing*.json
 docs
+.venv-nodejs
