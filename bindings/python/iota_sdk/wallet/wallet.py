@@ -24,7 +24,7 @@ class Wallet():
                  storage_path: Optional[str] = None,
                  client_options: Optional[Dict[str, Any]] = None,
                  coin_type: Optional[int] = None,
-                 secret_manager: Optional[Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager]] = None):
+                 secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None):
         """Initialize `self`.
         """
 

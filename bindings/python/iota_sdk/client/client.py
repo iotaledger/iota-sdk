@@ -381,7 +381,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def sign_transaction(
             self,
-            secret_manager: Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager],
+            secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager],
             prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
