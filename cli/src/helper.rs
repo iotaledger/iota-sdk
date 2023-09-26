@@ -21,13 +21,12 @@ use crate::{error::Error, println_log_error, println_log_info};
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
 pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
-    let mut password = dialoguer::Password::new();
-
-    password.with_prompt(prompt);
+    let mut password = dialoguer::Password::new().with_prompt(prompt);
 
     if confirmation {
-        password.with_prompt("Provide a new Stronghold password");
-        password.with_confirmation("Confirm password", "Password mismatch");
+        password = password
+            .with_prompt("Provide a new Stronghold password")
+            .with_confirmation("Confirm password", "Password mismatch");
     }
 
     Ok(password.interact()?.into())
@@ -103,13 +102,13 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
         .default(0)
         .interact_on(&Term::stderr())?;
 
-    let mnemnonic = match selected_choice {
+    let mnemonic = match selected_choice {
         0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
         _ => unreachable!(),
     };
 
-    Ok(mnemnonic)
+    Ok(mnemonic)
 }
 
 pub async fn generate_mnemonic(
