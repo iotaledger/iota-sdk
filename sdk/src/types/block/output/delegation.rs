@@ -12,9 +12,8 @@ use packable::{
 
 use crate::types::{
     block::{
-        address::Address,
+        address::{AccountAddress, Address},
         output::{
-            account::AccountId,
             chain_id::ChainId,
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
@@ -55,7 +54,7 @@ pub struct DelegationOutputBuilder {
     amount: OutputBuilderAmount,
     delegated_amount: u64,
     delegation_id: DelegationId,
-    validator_id: AccountId,
+    validator_address: AccountAddress,
     start_epoch: EpochIndex,
     end_epoch: EpochIndex,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -67,13 +66,13 @@ impl DelegationOutputBuilder {
         amount: u64,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_id: AccountId,
+        validator_address: AccountAddress,
     ) -> Self {
         Self::new(
             OutputBuilderAmount::Amount(amount),
             delegated_amount,
             delegation_id,
-            validator_id,
+            validator_address,
         )
     }
 
@@ -83,13 +82,13 @@ impl DelegationOutputBuilder {
         rent_structure: RentStructure,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_id: AccountId,
+        validator_address: AccountAddress,
     ) -> Self {
         Self::new(
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
             delegated_amount,
             delegation_id,
-            validator_id,
+            validator_address,
         )
     }
 
@@ -97,13 +96,13 @@ impl DelegationOutputBuilder {
         amount: OutputBuilderAmount,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_id: AccountId,
+        validator_address: AccountAddress,
     ) -> Self {
         Self {
             amount,
             delegated_amount,
             delegation_id,
-            validator_id,
+            validator_address,
             start_epoch: 0.into(),
             end_epoch: 0.into(),
             unlock_conditions: BTreeSet::new(),
@@ -128,9 +127,9 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Sets the validator ID to the provided value.
-    pub fn with_validator_id(mut self, validator_id: AccountId) -> Self {
-        self.validator_id = validator_id;
+    /// Sets the validator address to the provided value.
+    pub fn with_validator_address(mut self, validator_address: AccountAddress) -> Self {
+        self.validator_address = validator_address;
         self
     }
 
@@ -175,7 +174,7 @@ impl DelegationOutputBuilder {
 
     /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
-        if self.validator_id.is_null() {
+        if self.validator_address.is_null() {
             return Err(Error::NullDelegationValidatorId);
         }
 
@@ -187,7 +186,7 @@ impl DelegationOutputBuilder {
             amount: 1u64,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
-            validator_id: self.validator_id,
+            validator_address: self.validator_address,
             start_epoch: self.start_epoch,
             end_epoch: self.end_epoch,
             unlock_conditions,
@@ -231,7 +230,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
             amount: OutputBuilderAmount::Amount(output.amount),
             delegated_amount: output.delegated_amount,
             delegation_id: output.delegation_id,
-            validator_id: output.validator_id,
+            validator_address: output.validator_address,
             start_epoch: output.start_epoch,
             end_epoch: output.end_epoch,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -248,8 +247,8 @@ pub struct DelegationOutput {
     delegated_amount: u64,
     /// Unique identifier of the delegation output.
     delegation_id: DelegationId,
-    /// Account ID of the validator to which this output is delegating.
-    validator_id: AccountId,
+    /// Account address of the validator to which this output is delegating.
+    validator_address: AccountAddress,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
     /// Index of the last epoch for which this output delegates.
@@ -269,9 +268,9 @@ impl DelegationOutput {
         amount: u64,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_id: AccountId,
+        validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_id)
+        DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_address)
     }
 
     /// Creates a new [`DelegationOutputBuilder`] with a provided rent structure.
@@ -280,13 +279,13 @@ impl DelegationOutput {
         rent_structure: RentStructure,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_id: AccountId,
+        validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
         DelegationOutputBuilder::new_with_minimum_storage_deposit(
             rent_structure,
             delegated_amount,
             delegation_id,
-            validator_id,
+            validator_address,
         )
     }
 
@@ -310,9 +309,9 @@ impl DelegationOutput {
         self.delegation_id.or_from_output_id(output_id)
     }
 
-    /// Returns the validator ID of the [`DelegationOutput`].
-    pub fn validator_id(&self) -> &AccountId {
-        &self.validator_id
+    /// Returns the validator address of the [`DelegationOutput`].
+    pub fn validator_address(&self) -> &AccountAddress {
+        &self.validator_address
     }
 
     /// Returns the start epoch of the [`DelegationOutput`].
@@ -366,7 +365,7 @@ impl DelegationOutput {
 
         if current_state.delegated_amount != next_state.delegated_amount
             || current_state.start_epoch != next_state.start_epoch
-            || current_state.validator_id != next_state.validator_id
+            || current_state.validator_address != next_state.validator_address
         {
             return Err(StateTransitionError::MutatedImmutableField);
         }
@@ -414,7 +413,7 @@ impl Packable for DelegationOutput {
         self.amount.pack(packer)?;
         self.delegated_amount.pack(packer)?;
         self.delegation_id.pack(packer)?;
-        self.validator_id.pack(packer)?;
+        self.validator_address.pack(packer)?;
         self.start_epoch.pack(packer)?;
         self.end_epoch.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
@@ -432,9 +431,9 @@ impl Packable for DelegationOutput {
 
         let delegated_amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let delegation_id = DelegationId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let validator_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let validator_address = AccountAddress::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        if validator_id.is_null() {
+        if validator_address.is_null() {
             return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
         }
 
@@ -448,7 +447,7 @@ impl Packable for DelegationOutput {
             amount,
             delegated_amount,
             delegation_id,
-            validator_id,
+            validator_address,
             start_epoch,
             end_epoch,
             unlock_conditions,
@@ -496,7 +495,7 @@ pub(crate) mod dto {
         #[serde(with = "string")]
         pub delegated_amount: u64,
         pub delegation_id: DelegationId,
-        pub validator_id: AccountId,
+        pub validator_address: AccountAddress,
         start_epoch: EpochIndex,
         end_epoch: EpochIndex,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -509,7 +508,7 @@ pub(crate) mod dto {
                 amount: value.amount(),
                 delegated_amount: value.delegated_amount(),
                 delegation_id: *value.delegation_id(),
-                validator_id: *value.validator_id(),
+                validator_address: *value.validator_address(),
                 start_epoch: value.start_epoch(),
                 end_epoch: value.end_epoch(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -529,7 +528,7 @@ pub(crate) mod dto {
                 dto.amount,
                 dto.delegated_amount,
                 dto.delegation_id,
-                dto.validator_id,
+                dto.validator_address,
             )
             .with_start_epoch(dto.start_epoch)
             .with_end_epoch(dto.end_epoch);
@@ -548,7 +547,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmount,
             delegated_amount: u64,
             delegation_id: &DelegationId,
-            validator_id: &AccountId,
+            validator_address: &AccountAddress,
             start_epoch: impl Into<EpochIndex>,
             end_epoch: impl Into<EpochIndex>,
             unlock_conditions: Vec<UnlockConditionDto>,
@@ -556,15 +555,18 @@ pub(crate) mod dto {
         ) -> Result<Self, Error> {
             let params = params.into();
             let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => {
-                    DelegationOutputBuilder::new_with_amount(amount, delegated_amount, *delegation_id, *validator_id)
-                }
+                OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
+                    amount,
+                    delegated_amount,
+                    *delegation_id,
+                    *validator_address,
+                ),
                 OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
                     DelegationOutputBuilder::new_with_minimum_storage_deposit(
                         rent_structure,
                         delegated_amount,
                         *delegation_id,
-                        *validator_id,
+                        *validator_address,
                     )
                 }
             }
