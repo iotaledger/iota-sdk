@@ -6,13 +6,12 @@ import {
     initLogger,
     Utils,
     UnlockCondition,
-    AddressUnlockCondition,
     Ed25519Address,
     SenderFeature,
     MetadataFeature,
     Wallet,
-    TransactionOptions,
-    StorageDeposit,
+    AddressUnlockCondition,
+    AliasAddress,
 } from '@iota/sdk';
 import {
     prepareMetadata
@@ -23,9 +22,10 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/outputs/unlock-conditions.ts
 
-const amount = 100000;
+const amount = 1000000;
 const gas = 10000;
 const toEVMAddress = '0x48e28C1681BBb92a2E5874113bc740cC11A0FD7a';
+const chainAddress = 'rms1pr75wa5xuepg2hew44vnr28wz5h6n6x99zptk2g68sp2wuu2karywgrztx3';
 
 // Build ouputs with all unlock conditions
 async function run() {
@@ -59,12 +59,15 @@ async function run() {
 
     try {
         const addresses = await account.addresses();
-        console.log('address selected:', addresses[0].address);
+        // console.log('address selected:', addresses[0].address);
         const hexAddress = Utils.bech32ToHex(
             addresses[0].address,
         );
 
-        const addressUnlockCondition: UnlockCondition = new AddressUnlockCondition(new Ed25519Address(hexAddress));
+        const aliasHexAddress = Utils.bech32ToHex(
+            chainAddress,
+        );
+        const addressUnlockCondition: UnlockCondition = new AddressUnlockCondition(new AliasAddress(aliasHexAddress))
 
         const addressFeature = new SenderFeature(new Ed25519Address(hexAddress));
         // console.log('addressFeature:', addressFeature);
@@ -81,17 +84,15 @@ async function run() {
         // Basic Output with Metadata
         const basicOutput = await client.buildBasicOutput({
             amount: amount.toString(),
-            unlockConditions: [addressUnlockCondition],
+            unlockConditions: [
+                addressUnlockCondition
+            ],
             features: [
                 addressFeature,
                 metadataFeature,
             ],
         });
         console.log('basicOutput:', JSON.stringify(basicOutput, null, 2));
-
-        // let transactionOptions: TransactionOptions;
-
-        // Allowance
 
         // Send Output
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
