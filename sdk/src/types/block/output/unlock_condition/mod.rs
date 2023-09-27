@@ -277,6 +277,7 @@ impl UnlockConditions {
     }
 
     /// Returns the address to be unlocked.
+    /// TODO take expiration deadzone into account
     #[inline(always)]
     pub fn locked_address<'a>(&'a self, address: &'a Address, slot_index: SlotIndex) -> &'a Address {
         self.expiration()
@@ -285,7 +286,6 @@ impl UnlockConditions {
     }
 
     /// Returns whether a time lock exists and is still relevant.
-    /// TODO take expiration deadzone into account
     #[inline(always)]
     pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
         let slot_index = slot_index.into();
