@@ -26,9 +26,9 @@ class NodeInfoStatus:
     """
     is_healthy: bool
     accepted_tangle_time: str
-    relative_accepted_tangle_time: int
-    confirmed_tangle_time: int
-    relative_confirmed_tangle_time: int
+    relative_accepted_tangle_time: str
+    confirmed_tangle_time: str
+    relative_confirmed_tangle_time: str
     latest_commitment_id: HexStr
     # TODO Replace with a proper SlotIndex type
     latest_finalized_slot: str
@@ -210,7 +210,7 @@ class ProtocolParameters:
     rent_structure: RentStructure
     work_score_structure: WorkScoreStructure
     token_supply: str
-    genesis_unix_timestamp: int
+    genesis_unix_timestamp: str
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
     mana_structure: ManaStructure
