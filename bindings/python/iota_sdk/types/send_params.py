@@ -16,7 +16,9 @@ class SendParams():
         address: The address to send to.
         amount: The amount to send.
         returnAddress: The address to return the funds to if not claimed.
-        expiration: The expiration timestamp until funds can be claimed.
+        expiration: Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+        receiver already. The expiration will only be used if one is necessary given the provided amount. If an
+        expiration is needed but not provided, it will default to one day.
     """
     address: str
     amount: str

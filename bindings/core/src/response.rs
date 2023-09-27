@@ -71,7 +71,7 @@ pub enum Response {
     NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
-    NetworkId(u64),
+    NetworkId(String),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
     Bech32Hrp(Hrp),

@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.4 - 2023-MM-DD
+
+### Changed
+
+- `migrate_db_chrysalis_to_stardust()` returns an error if no chrysalis data was found;
+
+### Fixed
+
+- Format of `milestoneIndex` query parameter of `ClientInner::event_status`;
+- Don't error if custom remainder address is provided with ledger nano;
+
 ## 1.0.3 - 2023-09-07
 
 ### Added

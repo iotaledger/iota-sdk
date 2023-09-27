@@ -878,11 +878,12 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let addresses = account.addresses_with_unspent_outputs().await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
-    if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
-        (a.key_index(), a.internal())
-    }) {
+    if let Some(address) = addresses
+        .iter()
+        .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
+    {
         let mut address_amount = 0;
-        for output_id in addresses[index].output_ids() {
+        for output_id in address.output_ids() {
             if let Some(output_data) = account.get_output(output_id).await {
                 // Output might be associated with the address, but can't unlocked by it, so we check that here
                 let (required_address, _) =
@@ -905,7 +906,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
         }
         log = format!(
             "{log}\nOutputs: {:#?}\nBase coin amount: {}\n",
-            addresses[index].output_ids(),
+            address.output_ids(),
             address_amount
         );
     } else {

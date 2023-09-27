@@ -10,7 +10,7 @@ from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 from dacite import from_dict
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Union
 
 
 class PayloadType(IntEnum):
@@ -38,7 +38,7 @@ class RegularTransactionEssence(TransactionEssence):
     networkId: str
     inputsCommitment: HexStr
     inputs: List[UtxoInput]
-    outputs: List[AliasOutput | FoundryOutput | NftOutput | BasicOutput]
+    outputs: List[Union[AliasOutput, FoundryOutput, NftOutput, BasicOutput]]
     payload: Optional[TaggedDataPayload] = None
     type: int = field(default_factory=lambda: 1, init=False)
 
@@ -143,7 +143,7 @@ class TransactionPayload(Payload):
         unlocks: The unlocks of the transaction.
     """
     essence: RegularTransactionEssence
-    unlocks: List[SignatureUnlock | ReferenceUnlock]
+    unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
     type: int = field(
         default_factory=lambda: int(
             PayloadType.Transaction),

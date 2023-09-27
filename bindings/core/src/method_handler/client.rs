@@ -198,7 +198,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetNode => Response::Node(client.get_node().await?),
         ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
-        ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
+        ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetMinPowScore => Response::MinPowScore(client.get_min_pow_score().await?),
         ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval().await),

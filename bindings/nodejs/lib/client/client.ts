@@ -370,7 +370,7 @@ export class Client {
     /**
      * Get the ID of the network the node is connected to.
      */
-    async getNetworkId(): Promise<number> {
+    async getNetworkId(): Promise<string> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkId',
         });

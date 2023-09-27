@@ -19,7 +19,7 @@ from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeToke
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
-from typing import List, Optional
+from typing import List, Optional, Union
 from dacite import from_dict
 from dataclasses import dataclass
 
@@ -334,7 +334,7 @@ class Account:
         ))
 
     def prepare_output(self, params: OutputParams,
-                       transaction_options: Optional[TransactionOptions] = None) -> BasicOutput | NftOutput:
+                       transaction_options: Optional[TransactionOptions] = None) -> Union[BasicOutput, NftOutput]:
         """Prepare an output for sending.
            If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
            be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
