@@ -8,7 +8,6 @@ use std::sync::{
 #[cfg(feature = "storage")]
 use std::{collections::HashSet, sync::atomic::Ordering};
 
-use crypto::keys::bip44::Bip44;
 use futures::{future::try_join_all, FutureExt};
 use serde::Serialize;
 use tokio::sync::{Mutex, RwLock};
@@ -28,7 +27,7 @@ use crate::{
     },
     wallet::{
         account::SyncOptions,
-        core::{WalletData, WalletInner},
+        core::{Bip44, WalletData, WalletInner},
         ClientOptions, Wallet,
     },
 };
@@ -242,8 +241,9 @@ where
             if self.secret_manager.is_some() {
                 let secret_manager = &**self.secret_manager.as_ref().unwrap();
                 let bip_path = *self.bip_path.as_ref().unwrap();
-                let coin_type = bip_path.coin_type;
-                let account_index = bip_path.account;
+                // TODO: remove
+                // let coin_type = bip_path.coin_type;
+                // let account_index = bip_path.account;
                 let address = self.create_default_wallet_address(bech32_hrp, bip_path).await?;
 
                 self.address = Some(address);
@@ -401,9 +401,12 @@ pub(crate) mod dto {
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
-        pub(crate) bip_path: Bip44,
-        pub(crate) address: Bech32Address,
-        pub(crate) alias: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub(crate) bip_path: Option<Bip44>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub(crate) address: Option<Bech32Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub(crate) alias: Option<String>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) client_options: Option<ClientOptions>,
         #[cfg(feature = "storage")]
@@ -414,9 +417,9 @@ pub(crate) mod dto {
     impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
         fn from(value: WalletBuilderDto) -> Self {
             Self {
-                bip_path: Some(value.bip_path),
-                address: Some(value.address),
-                alias: Some(value.alias),
+                bip_path: value.bip_path,
+                address: value.address,
+                alias: value.alias,
                 client_options: value.client_options,
                 #[cfg(feature = "storage")]
                 storage_options: value.storage_options,
