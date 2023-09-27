@@ -217,9 +217,7 @@ pub(crate) mod rocksdb {
         wallet::{
             migration::{MigrationData, MIGRATION_VERSION_KEY},
             storage::{
-                constants::{
-                    ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
-                },
+                constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY},
                 StorageManager,
             },
         },
@@ -281,13 +279,6 @@ pub(crate) mod rocksdb {
         }
 
         if let Some(secret_manager_dto) = secret_manager_dto {
-            // This is required for the secret manager to be loaded
-            stardust_storage
-                .set(
-                    WALLET_INDEXATION_KEY,
-                    &serde_json::from_str::<Value>(&format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}"))?,
-                )
-                .await?;
             stardust_storage
                 .set(SECRET_MANAGER_KEY, &serde_json::from_str::<Value>(&secret_manager_dto)?)
                 .await?;

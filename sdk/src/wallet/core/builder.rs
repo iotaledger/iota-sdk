@@ -292,7 +292,7 @@ pub(crate) mod dto {
     #[cfg(feature = "storage")]
     use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Default, Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
         #[serde(default, skip_serializing_if = "Option::is_none")]

@@ -5,8 +5,7 @@ use std::{collections::HashMap, path::Path, sync::atomic::Ordering};
 
 use crate::{
     client::{
-        constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter,
-        Error as ClientError,
+        secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter, Error as ClientError,
     },
     types::TryFromDto,
     wallet::{
@@ -19,7 +18,6 @@ use crate::{
     },
 };
 
-pub(crate) const WALLET_INDEXATION_KEY: &str = "iota-wallet-account-manager";
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
@@ -176,13 +174,6 @@ pub(crate) async fn migrate_snapshot_from_chrysalis_to_stardust(
         .await?;
 
     if let Some(secret_manager_dto) = secret_manager_dto {
-        // This is required for the secret manager to be loaded
-        stronghold_adapter
-            .set(
-                WALLET_INDEXATION_KEY,
-                format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}").as_bytes(),
-            )
-            .await?;
         stronghold_adapter
             .set_bytes(SECRET_MANAGER_KEY, secret_manager_dto.as_bytes())
             .await?;

@@ -52,18 +52,19 @@ mod storage_stub {
             storage: &impl StorageAdapter<Error = crate::wallet::Error>,
         ) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
-            if let Some(data) = storage.get::<WalletBuilderDto>(WALLET_INDEXATION_KEY).await? {
-                log::debug!("get_wallet_data {data:?}");
+            let data = storage.get::<WalletBuilderDto>(WALLET_INDEXATION_KEY).await?;
+            log::debug!("get_wallet_data {data:?}");
 
-                let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
-                log::debug!("get_secret_manager {secret_manager_dto:?}");
+            let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
+            log::debug!("get_secret_manager {secret_manager_dto:?}");
 
-                Ok(Some(Self::from(data).with_secret_manager(
-                    secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
-                )))
-            } else {
-                Ok(None)
+            if data.is_none() && secret_manager_dto.is_none() {
+                return Ok(None);
             }
+
+            Ok(Some(Self::from(data.unwrap_or_default()).with_secret_manager(
+                secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
+            )))
         }
     }
 
