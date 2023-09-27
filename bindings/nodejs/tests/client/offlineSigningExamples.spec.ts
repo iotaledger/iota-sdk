@@ -16,7 +16,7 @@ import {
     Utils
 } from '../../';
 import '../customMatchers';
-import { addresses } from '../fixtures/addresses';
+import { addresses } from '../fixtures/offlineSigningAddresses';
 import * as signedTransactionJson from '../fixtures/signedTransaction.json';
 import * as sigUnlockPreparedTx from '../fixtures/sigUnlockPreparedTx.json';
 
