@@ -107,7 +107,7 @@ impl ClientInner {
         // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
-            let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
+            let current_time = crate::client::unix_timestamp_now().as_secs() as u32;
             if let Some(last_sync) = *self.last_sync.lock().await {
                 if current_time < last_sync {
                     return Ok(self.network_info.read().await.clone());
@@ -176,5 +176,11 @@ impl ClientInner {
             });
         };
         Ok(())
+    }
+
+    /// Resize the client's request pool
+    #[cfg(not(target_family = "wasm"))]
+    pub async fn resize_request_pool(&self, new_size: usize) {
+        self.request_pool.resize(new_size).await;
     }
 }

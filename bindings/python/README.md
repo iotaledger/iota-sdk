@@ -82,7 +82,7 @@ python3 example/[example file]
 - Where `[example file]` is the file name from the example folder. For example:
 
 ```bash
-python3 examples/client/00_get_info.py
+python3 examples/how_tos/client/get_info.py
 ```
 
 ## API Reference

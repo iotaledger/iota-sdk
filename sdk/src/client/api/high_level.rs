@@ -11,7 +11,7 @@ use crate::{
         constants::FIVE_MINUTES_IN_SECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::QueryParameter,
-        Client,
+        unix_timestamp_now, Client,
     },
     types::block::{
         address::Bech32Address,
@@ -22,7 +22,6 @@ use crate::{
         slot::SlotIndex,
         BlockId,
     },
-    utils::unix_timestamp_now,
 };
 
 impl Client {

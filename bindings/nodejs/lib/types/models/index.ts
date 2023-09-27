@@ -4,7 +4,7 @@
 export * from './api';
 export * from './info';
 
-export * from './conflict-reason';
+export * from './transaction-failure-reason';
 export * from './block-metadata';
 export * from './gossip-metrics';
 export * from './gossip-heartbeat';

@@ -27,8 +27,6 @@ pub mod utils;
 pub use crypto;
 pub use packable;
 pub use primitive_types::U256;
-#[cfg(feature = "url")]
-pub use url::Url;
 
 #[cfg(feature = "wallet")]
 pub type Wallet = self::wallet::Wallet<client::secret::SecretManager>;
