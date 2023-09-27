@@ -426,6 +426,7 @@ impl UnlockConditions {
     }
 
     /// Returns whether a time lock exists and is still relevant.
+    /// TODO take expiration deadzone into account
     #[inline(always)]
     pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
         let slot_index = slot_index.into();
