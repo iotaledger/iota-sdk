@@ -53,6 +53,7 @@ import {
     Response,
     OutputId,
     TransactionId,
+    Bech32,
 } from '../types';
 import {
     IMilestoneUtxoChangesResponse,
@@ -708,9 +709,9 @@ export class Client {
      * @returns The corresponding Bech32 address.
      */
     async hexToBech32(
-        hex: string,
+        hex: HexEncodedString,
         bech32Hrp?: string,
-    ): Promise<HexEncodedString> {
+    ): Promise<Bech32> {
         const response = await this.methodHandler.callMethod({
             name: 'hexToBech32',
             data: {
@@ -732,7 +733,7 @@ export class Client {
     async aliasIdToBech32(
         aliasId: AliasId,
         bech32Hrp?: string,
-    ): Promise<string> {
+    ): Promise<Bech32> {
         const response = await this.methodHandler.callMethod({
             name: 'aliasIdToBech32',
             data: {
@@ -754,7 +755,7 @@ export class Client {
     async nftIdToBech32(
         nftId: NftId,
         bech32Hrp?: string,
-    ): Promise<HexEncodedString> {
+    ): Promise<Bech32> {
         const response = await this.methodHandler.callMethod({
             name: 'nftIdToBech32',
             data: {
@@ -774,9 +775,9 @@ export class Client {
      * @returns The corresponding Bech32 address.
      */
     async hexPublicKeyToBech32Address(
-        hex: string,
+        hex: HexEncodedString,
         bech32Hrp?: string,
-    ): Promise<HexEncodedString> {
+    ): Promise<Bech32> {
         const response = await this.methodHandler.callMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {
@@ -1224,7 +1225,7 @@ export class Client {
      */
     async requestFundsFromFaucet(
         url: string,
-        address: HexEncodedString,
+        address: Bech32,
     ): Promise<string> {
         const response = await this.methodHandler.callMethod({
             name: 'requestFundsFromFaucet',

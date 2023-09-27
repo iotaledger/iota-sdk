@@ -16,6 +16,7 @@ import {
     Output,
     IRent,
     OutputId,
+    Bech32,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
@@ -177,7 +178,7 @@ export class Utils {
      * @param address A Bech32 address as string.
      * @returns A Bech32 address.
      */
-    static parseBech32Address(address: string): Address {
+    static parseBech32Address(address: Bech32): Address {
         const addr = callUtilsMethod({
             name: 'parseBech32Address',
             data: {
@@ -238,7 +239,7 @@ export class Utils {
      * @param bech32 A Bech32 address.
      * @returns The hex-encoded string.
      */
-    static bech32ToHex(bech32: string): HexEncodedString {
+    static bech32ToHex(bech32: Bech32): HexEncodedString {
         return callUtilsMethod({
             name: 'bech32ToHex',
             data: {
@@ -254,7 +255,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static hexToBech32(hex: HexEncodedString, bech32Hrp: string): string {
+    static hexToBech32(hex: HexEncodedString, bech32Hrp: string): Bech32 {
         return callUtilsMethod({
             name: 'hexToBech32',
             data: {
@@ -271,7 +272,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static aliasIdToBech32(aliasId: AliasId, bech32Hrp: string): string {
+    static aliasIdToBech32(aliasId: AliasId, bech32Hrp: string): Bech32 {
         return callUtilsMethod({
             name: 'aliasIdToBech32',
             data: {
@@ -288,7 +289,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static nftIdToBech32(nftId: string, bech32Hrp: string): string {
+    static nftIdToBech32(nftId: string, bech32Hrp: string): Bech32 {
         return callUtilsMethod({
             name: 'nftIdToBech32',
             data: {
@@ -308,7 +309,7 @@ export class Utils {
     static hexPublicKeyToBech32Address(
         hex: HexEncodedString,
         bech32Hrp: string,
-    ): string {
+    ): Bech32 {
         return callUtilsMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {

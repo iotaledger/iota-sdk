@@ -11,6 +11,7 @@ import {
     IRent,
     OutputId,
     NftId,
+    Bech32,
 } from '../../';
 import { AliasId } from '../../block/id';
 
@@ -83,7 +84,7 @@ export interface __ComputeTokenIdMethod__ {
 export interface __ParseBech32AddressMethod__ {
     name: 'parseBech32Address';
     data: {
-        address: string;
+        address: Bech32;
     };
 }
 
@@ -111,7 +112,7 @@ export interface __TransactionIdMethod__ {
 export interface __Bech32ToHexMethod__ {
     name: 'bech32ToHex';
     data: {
-        bech32: string;
+        bech32: Bech32;
     };
 }
 

@@ -6,6 +6,11 @@ import { HexEncodedString } from '../utils';
 import { AliasId, NftId } from './id';
 
 /**
+ * A hex encoded address prepended by its network type.
+ */
+type Bech32 = string;
+
+/**
  * Address type variants.
  */
 enum AddressType {
@@ -138,6 +143,7 @@ const AddressDiscriminator = {
 
 export {
     AddressDiscriminator,
+    Bech32,
     Address,
     AddressType,
     Ed25519Address,
