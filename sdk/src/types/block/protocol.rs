@@ -158,8 +158,8 @@ impl ProtocolParameters {
     }
 
     /// Returns the slots per epoch of the [`ProtocolParameters`].
-    pub fn slots_per_epoch(&self) -> u64 {
-        2_u64.pow(self.slots_per_epoch_exponent() as u32)
+    pub fn slots_per_epoch(&self) -> u32 {
+        2_u32.pow(self.slots_per_epoch_exponent() as u32)
     }
 
     /// Gets a [`SlotIndex`] from a unix timestamp.
