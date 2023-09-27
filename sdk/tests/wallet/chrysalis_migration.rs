@@ -36,6 +36,7 @@ async fn migrate_chrysalis_db() -> Result<()> {
     let wallet = Wallet::builder()
         .with_storage_path("migrate_chrysalis_db")
         .with_client_options(client_options)
+        .with_coin_type(IOTA_COIN_TYPE)
         .finish()
         .await?;
 
@@ -126,6 +127,7 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     let wallet = Wallet::builder()
         .with_storage_path("migrate_chrysalis_db_encrypted")
         .with_client_options(client_options)
+        .with_coin_type(IOTA_COIN_TYPE)
         .finish()
         .await?;
 
@@ -212,6 +214,7 @@ async fn migrate_chrysalis_db_encrypted_encrypt_new() -> Result<()> {
             .with_encryption_key([0u8; 32]),
         )
         .with_client_options(client_options)
+        .with_coin_type(IOTA_COIN_TYPE)
         .finish()
         .await?;
 
