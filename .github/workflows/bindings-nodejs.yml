@@ -94,6 +94,11 @@ jobs:
           yarn
           yarn build
 
+      - name: Test types module webpack compatibility
+        working-directory: bindings/nodejs/
+        run: |
+          yarn run test-webpack
+
   lint:
     name: Lint
     if: ${{ ! github.event.schedule }}
