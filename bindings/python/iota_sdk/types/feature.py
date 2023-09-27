@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-from typing import List, Union
+from typing import Dict, List, Union, Any
 from dataclasses import dataclass, field
-
-from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
+from dataclasses_json import config
+from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress, address_from_dict
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -43,7 +43,10 @@ class SenderFeature(Feature):
     Attributes:
         address: A given sender address.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+        metadata=config(
+            decoder=address_from_dict
+        ))
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Sender),
@@ -57,7 +60,10 @@ class IssuerFeature(Feature):
     Attributes:
         address: A given issuer address.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+        metadata=config(
+            decoder=address_from_dict
+        ))
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Issuer),
@@ -91,7 +97,7 @@ class TagFeature(Feature):
 
 @json
 @dataclass
-class BlockIssuer(Feature):
+class BlockIssuerFeature(Feature):
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
@@ -124,3 +130,38 @@ class StakingFeature(Feature):
         default_factory=lambda: int(
             FeatureType.Staking),
         init=False)
+
+
+def feature_from_dict(dict: Dict[str, Any]) -> Union[SenderFeature, IssuerFeature,
+                                                     MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    type = dict['type']
+    if type == FeatureType.Sender:
+        return SenderFeature.from_dict(dict)
+    if type == FeatureType.Issuer:
+        return IssuerFeature.from_dict(dict)
+    if type == FeatureType.Metadata:
+        return MetadataFeature.from_dict(dict)
+    if type == FeatureType.Tag:
+        return TagFeature.from_dict(dict)
+    if type == FeatureType.BlockIssuer:
+        return BlockIssuerFeature.from_dict(dict)
+    if type == FeatureType.Staking:
+        return StakingFeature.from_dict(dict)
+    raise Exception(f'invalid feature type: {type}')
+
+
+def features_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[SenderFeature,
+                                                                   IssuerFeature, MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(feature_from_dict, dicts))

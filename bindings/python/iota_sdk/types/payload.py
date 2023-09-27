@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from dataclasses import dataclass, field
 
@@ -63,3 +63,29 @@ class TransactionPayload(Payload):
         default_factory=lambda: int(
             PayloadType.Transaction),
         init=False)
+
+
+def payload_from_dict(dict: Dict[str, Any]) -> Union[TaggedDataPayload, TransactionPayload]:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    type = dict['type']
+    if type == PayloadType.TaggedData:
+        return TaggedDataPayload.from_dict(dict)
+    if type == PayloadType.Transaction:
+        return TransactionPayload.from_dict(dict)
+    raise Exception(f'invalid payload type: {type}')
+
+
+def payloads_from_dicts(
+        dicts: List[Dict[str, Any]]) -> List[Union[TaggedDataPayload, TransactionPayload]]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(payload_from_dict, dicts))

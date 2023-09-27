@@ -3,14 +3,14 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
+from dataclasses_json import config
 from enum import IntEnum
-from typing import Dict, Optional, List, Union
-
+from typing import Dict, Optional, List, Union, Any
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
+from iota_sdk.types.feature import features_from_dicts, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
+from iota_sdk.types.unlock_condition import unlock_conditions_from_dicts, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -57,11 +57,16 @@ class BasicOutput(Output):
     """
     amount: str
     mana: str
-    unlockConditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                           TimelockUnlockCondition]]
+    unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
+                                  TimelockUnlockCondition]] = field(metadata=config(
+                                                                    decoder=unlock_conditions_from_dicts
+                                                                    ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature, TagFeature]]] = None
-    nativeTokens: Optional[List[NativeToken]] = None
+                            MetadataFeature, TagFeature]]] = field(default=None,
+                                                                   metadata=config(
+                                                                       decoder=features_from_dicts
+                                                                   ))
+    native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
             OutputType.Basic),
@@ -99,14 +104,23 @@ class AccountOutput(Output):
     amount: str
     mana: str
     account_id: HexStr
-    stateIndex: int
+    state_index: int
     foundry_counter: int
     unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
-                                  GovernorAddressUnlockCondition]]
+                                  GovernorAddressUnlockCondition]] = field(
+        metadata=config(
+            decoder=unlock_conditions_from_dicts
+        ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature]]] = None
+                            MetadataFeature]]] = field(default=None,
+                                                       metadata=config(
+                                                           decoder=features_from_dicts
+                                                       ))
     immutable_features: Optional[List[Union[IssuerFeature,
-                                            MetadataFeature]]] = None
+                                            MetadataFeature]]] = field(default=None,
+                                                                       metadata=config(
+                                                                           decoder=features_from_dicts
+                                                                       ))
     state_metadata: Optional[HexStr] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -141,8 +155,14 @@ class FoundryOutput(Output):
     serial_number: int
     token_scheme: SimpleTokenScheme
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
-    features: Optional[List[MetadataFeature]] = None
-    immutable_features: Optional[List[MetadataFeature]] = None
+    features: Optional[List[MetadataFeature]] = field(default=None,
+                                                      metadata=config(
+                                                          decoder=features_from_dicts
+                                                      ))
+    immutable_features: Optional[List[MetadataFeature]] = field(default=None,
+                                                                metadata=config(
+                                                                    decoder=features_from_dicts
+                                                                ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
@@ -176,11 +196,20 @@ class NftOutput(Output):
     mana: str
     nft_id: HexStr
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
-                                  StorageDepositReturnUnlockCondition, TimelockUnlockCondition]]
+                                  StorageDepositReturnUnlockCondition, TimelockUnlockCondition]] = field(
+        metadata=config(
+            decoder=unlock_conditions_from_dicts
+        ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature, TagFeature]]] = None
+                            MetadataFeature, TagFeature]]] = field(default=None,
+                                                                   metadata=config(
+                                                                       decoder=features_from_dicts
+                                                                   ))
     immutable_features: Optional[List[Union[
-        IssuerFeature, MetadataFeature]]] = None
+        IssuerFeature, MetadataFeature]]] = field(default=None,
+                                                  metadata=config(
+                                                      decoder=features_from_dicts
+                                                  ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
 
@@ -194,93 +223,38 @@ class DelegationOutput(Output):
             The type of output.
     """
     # TODO fields done in #1174
-    type: int = field(default_factory=lambda: int(OutputType.Delegation), init=False)
+    type: int = field(default_factory=lambda: int(
+        OutputType.Delegation), init=False)
 
 
-@json
-@dataclass
-class OutputMetadata:
-    """Metadata about an output.
-
-    Attributes:
-        block_id: The ID of the block in which the output appeared in.
-        transaction_id: The ID of the transaction in which the output was created.
-        output_index: The index of the output within the corresponding transaction.
-        is_spent: Whether the output is already spent.
-        milestone_index_booked: The index of the milestone which booked/created the output.
-        milestone_timestamp_booked: The timestamp of the milestone which booked/created the output.
-        ledger_index: The current ledger index.
-        milestone_index_spent: The index of the milestone which spent the output.
-        milestone_timestamp_spent: The timestamp of the milestone which spent the output.
-        transaction_id_spent: The ID of the transaction that spent the output.
+def output_from_dict(dict: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
+                                                    FoundryOutput, NftOutput, DelegationOutput]:
     """
-    block_id: HexStr
-    transaction_id: HexStr
-    output_index: int
-    is_spent: bool
-    milestone_index_booked: int
-    milestone_timestamp_booked: int
-    ledger_index: int
-    milestone_index_spent: Optional[int] = None
-    milestone_timestamp_spent: Optional[int] = None
-    transaction_id_spent: Optional[HexStr] = None
-
-
-@json
-@dataclass
-class OutputWithMetadata:
-    """An output with its metadata.
-
-    Attributes:
-        metadata: The `OutputMetadata` object that belongs to `output`.
-        output: An `Output` object.
-    """
-
-    metadata: OutputMetadata
-    output: Union[AccountOutput, FoundryOutput, NftOutput, BasicOutput]
-
-    @classmethod
-    def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
-        """Creates an output with metadata instance from the dict object.
-        """
-        obj = cls.__new__(cls)
-        super(OutputWithMetadata, obj).__init__()
-        for k, v in data_dict.items():
-            setattr(obj, k, v)
-        return obj
-
-    def as_dict(self):
-        """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
-        """
-        config = {}
-
-        config['metadata'] = self.metadata.__dict__
-        config['output'] = self.output.as_dict()
-
-        return config
-
-
-def output_from_dict(
-        output: Dict[str, any]) -> Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, Output]:
-    """
-    The function `output_from_dict` takes a dictionary as input and returns an instance of a specific
-    output class based on the value of the 'type' key in the dictionary.
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-
-    * `output`: The `output` parameter is a dictionary that contains information about the output. It is
-    expected to have a key called 'type' which specifies the type of the output. The value of 'type'
-    should be one of the values defined in the `OutputType` enum.
+    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    output_type = OutputType(output['type'])
+    type = dict['type']
+    if type == OutputType.Basic:
+        return BasicOutput.from_dict(dict)
+    if type == OutputType.Account:
+        return AccountOutput.from_dict(dict)
+    if type == OutputType.Foundry:
+        return FoundryOutput.from_dict(dict)
+    if type == OutputType.Nft:
+        return NftOutput.from_dict(dict)
+    if type == OutputType.Delegation:
+        return DelegationOutput.from_dict(dict)
+    raise Exception(f'invalid output type: {type}')
 
-    if output_type == OutputType.Basic:
-        return BasicOutput.from_dict(output)
-    if output_type == OutputType.Account:
-        return AccountOutput.from_dict(output)
-    if output_type == OutputType.Foundry:
-        return FoundryOutput.from_dict(output)
-    if output_type == OutputType.Nft:
-        return NftOutput.from_dict(output)
 
-    return Output.from_dict(output)
+def outputs_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[BasicOutput,
+                                                                  AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(output_from_dict, dicts))

@@ -4,6 +4,7 @@
 from enum import IntEnum
 
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Union
 
 
 from iota_sdk.types.common import HexStr, json
@@ -71,19 +72,6 @@ class NFTAddress(Address):
 
 @json
 @dataclass
-# pylint: disable=function-redefined
-# TODO: Change name
-class AccountAddress():
-    """An Address of the Account.
-    """
-    address: str
-    key_index: int
-    internal: bool
-    used: bool
-
-
-@json
-@dataclass
 class AddressWithUnspentOutputs():
     """An Address with unspent outputs.
     """
@@ -91,3 +79,31 @@ class AddressWithUnspentOutputs():
     key_index: int
     internal: bool
     output_ids: bool
+
+
+def address_from_dict(dict: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress, NFTAddress]:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    type = dict['type']
+    if type == AddressType.ED25519:
+        return Ed25519Address.from_dict(dict)
+    if type == AddressType.ACCOUNT:
+        return AccountAddress.from_dict(dict)
+    if type == AddressType.NFT:
+        return NFTAddress.from_dict(dict)
+    raise Exception(f'invalid address type: {type}')
+
+
+def addresses_from_dicts(
+        dicts: List[Dict[str, Any]]) -> List[Union[Ed25519Address, AccountAddress, NFTAddress]]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(address_from_dict, dicts))
