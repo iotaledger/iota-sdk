@@ -155,7 +155,7 @@ interface CreatedAfter {
 }
 /** Pass the cursor(confirmationMS+outputId.pageSize) to start the results from */
 interface Cursor {
-    cursor: NumericString;
+    cursor: string;
 }
 /** Filter for a certain issuer */
 interface Issuer {

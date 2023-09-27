@@ -18,7 +18,7 @@ export interface IOutputsResponse {
     /**
      * The cursor to use for getting the next results.
      */
-    cursor?: NumericString;
+    cursor?: string;
     /**
      * The output IDs (transaction hash + output index) of the outputs on this address.
      */
