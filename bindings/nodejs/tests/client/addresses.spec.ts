@@ -5,7 +5,7 @@ import { describe, it } from '@jest/globals';
 import { SecretManager } from '../../out';
 import '../customMatchers';
 
-import * as mnemonicAddressTestCases from '../fixtures/addressTestVectors.json';
+import * as mnemonicAddressTestCases from '../../../../sdk/tests/client/fixtures/test_vectors.json';
 
 const secretManager = {
     mnemonic:
