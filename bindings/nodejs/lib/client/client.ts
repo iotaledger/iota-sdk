@@ -752,10 +752,7 @@ export class Client {
      * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
      * @returns The corresponding Bech32 address.
      */
-    async nftIdToBech32(
-        nftId: NftId,
-        bech32Hrp?: string,
-    ): Promise<Bech32> {
+    async nftIdToBech32(nftId: NftId, bech32Hrp?: string): Promise<Bech32> {
         const response = await this.methodHandler.callMethod({
             name: 'nftIdToBech32',
             data: {
