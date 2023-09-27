@@ -119,7 +119,7 @@ pub enum WalletCommand {
         /// Node URL to use for all future operations.
         url: String,
     },
-    /// Synchronize all accounts.
+    /// Synchronize wallet.
     Sync,
 }
 
@@ -334,7 +334,7 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<W
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
     let total_balance = wallet.sync(None).await?;
 
-    println_log_info!("Synchronized all accounts: {:?}", total_balance);
+    println_log_info!("Synchronized wallet: {:?}", total_balance);
 
     Ok(wallet)
 }

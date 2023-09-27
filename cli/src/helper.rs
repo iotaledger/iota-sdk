@@ -128,10 +128,10 @@ pub async fn generate_mnemonic(
         println_log_info!("Mnemonic has been written to '{file_path}'.");
     }
 
-    println_log_info!("IMPORTANT:");
-    println_log_info!("Store this mnemonic in a secure location!");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
+    println!("IMPORTANT:");
+    println!("Store this mnemonic in a secure location!");
+    println!(
+        "It is the only way to recover your wallet if you ever forget your password and/or lose the stronghold file."
     );
 
     Ok(mnemonic)

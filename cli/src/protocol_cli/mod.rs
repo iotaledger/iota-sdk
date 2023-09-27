@@ -1,6 +1,8 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod completer;
+
 use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
@@ -28,11 +30,11 @@ use iota_sdk::{
 };
 use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
+use self::completer::{ProtocolCommandCompleter, ProtocolPromptHelper};
 use crate::{
     error::Error,
     helper::{bytes_from_hex_or_file, to_utc_date_time},
     println_log_error, println_log_info,
-    protocol_cli_completion::{ProtocolCommandCompleter, ProtocolPromptHelper},
 };
 
 #[derive(Debug, Parser)]
@@ -168,7 +170,7 @@ pub enum ProtocolCommand {
         amount: u64,
         /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
         /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
-        /// default to the first address of the account.
+        /// default to the wallet address.
         #[arg(long)]
         return_address: Option<Bech32Address>,
         /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by
@@ -201,7 +203,7 @@ pub enum ProtocolCommand {
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
     },
-    /// Synchronize the account.
+    /// Synchronize the wallet.
     Sync,
     /// Show the details of a transaction.
     #[clap(visible_alias = "tx")]
@@ -210,14 +212,14 @@ pub enum ProtocolCommand {
         /// Either by ID (e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b) or index.
         selector: TransactionSelector,
     },
-    /// List the account transactions.
+    /// List the wallet transactions.
     #[clap(visible_alias = "txs")]
     Transactions {
-        /// List account transactions with all details.
+        /// List wallet transactions with all details.
         #[arg(long, default_value_t = false)]
         show_details: bool,
     },
-    /// List the account unspent outputs.
+    /// List the unspent outputs.
     UnspentOutputs,
     /// Cast votes for an event.
     Vote {
@@ -232,26 +234,26 @@ pub enum ProtocolCommand {
         /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
         event_id: ParticipationEventId,
     },
-    /// Get the participation overview of the account.
+    /// Get the participation overview of the wallet.
     ParticipationOverview {
         /// Event IDs for which to get the participation overview, e.g.
         /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
         #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
         event_ids: Vec<ParticipationEventId>,
     },
-    /// Get the voting power of the account.
+    /// Get the voting power of the wallet.
     VotingPower,
-    /// Increase the voting power of the account.
+    /// Increase the voting power of the wallet.
     IncreaseVotingPower {
         /// Amount to increase the voting power by, e.g. 100.
         amount: u64,
     },
-    /// Decrease the voting power of the account.
+    /// Decrease the voting power of the wallet.
     DecreaseVotingPower {
         /// Amount to decrease the voting power by, e.g. 100.
         amount: u64,
     },
-    /// Get the voting output of the account.
+    /// Get the voting output of the wallet.
     VotingOutput,
 }
 
@@ -466,7 +468,7 @@ pub async fn create_native_token_command(
         wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-        // Sync account after the transaction got confirmed, so the account output is available
+        // Sync wallet after the transaction got confirmed, so the account output is available
         wallet.sync(None).await?;
     }
 
@@ -948,7 +950,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
-// loop on the account prompt
+// loop on the protocol prompt
 pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
     let config = Config::builder()
         .auto_add_history(true)
@@ -980,7 +982,6 @@ pub enum PromptResponse {
     Done,
 }
 
-// loop on the account prompt
 pub async fn prompt_internal(
     wallet: &Wallet,
     rl: &mut Editor<ProtocolPromptHelper, MemHistory>,
@@ -1004,14 +1005,14 @@ pub async fn prompt_internal(
                 _ => {
                     // Prepend `Wallet: ` so the parsing will be correct
                     let command = format!("Wallet: {}", command.trim());
-                    let account_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
-                        Ok(account_cli) => account_cli,
+                    let protocol_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
+                        Ok(protocol_cli) => protocol_cli,
                         Err(err) => {
                             println!("{err}");
                             return Ok(PromptResponse::Reprompt);
                         }
                     };
-                    match account_cli.command {
+                    match protocol_cli.command {
                         ProtocolCommand::Address => address_command(wallet).await,
                         ProtocolCommand::Balance => balance_command(wallet).await,
                         ProtocolCommand::BurnNativeToken { token_id, amount } => {
@@ -1136,156 +1137,3 @@ pub async fn prompt_internal(
 
     Ok(PromptResponse::Reprompt)
 }
-
-// // loop on the wallet prompt
-// pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
-//     let mut history = ProtocolCliHistory::default();
-//     loop {
-//         match prompt_internal(wallet, &mut history).await {
-//             Ok(res) => match res {
-//                 PromptResponse::Reprompt => (),
-//                 PromptResponse::Done => {
-//                     return Ok(());
-//                 }
-//             },
-//             Err(e) => {
-//                 println_log_error!("{e}");
-//             }
-//         }
-//     }
-// }
-
-// pub enum PromptResponse {
-//     Reprompt,
-//     Done,
-// }
-
-// // loop on the wallet prompt
-// pub async fn prompt_internal(wallet: &Wallet, history: &mut ProtocolCliHistory) -> Result<PromptResponse, Error> {
-//     let alias = wallet.alias().await;
-
-//     let command: String = Input::new()
-//         .with_prompt(format!("Wallet \"{}\"", alias).green().to_string())
-//         .history_with(history)
-//         .completion_with(&ProtocolCliCompletion)
-//         .interact_text()?;
-//     match command.as_str() {
-//         "h" | "help" => ProtocolCli::print_help()?,
-//         "c" | "clear" => {
-//             // Clear console
-//             let _ = std::process::Command::new("clear").status();
-//         }
-//         _ => {
-//             // Prepend `Account: ` so the parsing will be correct
-//             let command = format!("Wallet: {}", command.trim());
-//             let account_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
-//                 Ok(account_cli) => account_cli,
-//                 Err(err) => {
-//                     println!("{err}");
-//                     return Ok(PromptResponse::Reprompt);
-//                 }
-//             };
-//             if let Err(err) = match account_cli.command {
-//                 ProtocolCommand::Address => address_command(wallet).await,
-//                 ProtocolCommand::Balance => balance_command(wallet).await,
-//                 ProtocolCommand::BurnNativeToken { token_id, amount } => {
-//                     burn_native_token_command(wallet, token_id, amount).await
-//                 }
-//                 ProtocolCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
-//                 ProtocolCommand::Claim { output_id } => claim_command(wallet, output_id).await,
-//                 ProtocolCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
-//                 ProtocolCommand::Consolidate => consolidate_command(wallet).await,
-//                 ProtocolCommand::CreateAccountOutput => create_account_output_command(wallet).await,
-//                 ProtocolCommand::CreateNativeToken {
-//                     circulating_supply,
-//                     maximum_supply,
-//                     foundry_metadata_hex,
-//                     foundry_metadata_file,
-//                 } => {
-//                     create_native_token_command(
-//                         wallet,
-//                         circulating_supply,
-//                         maximum_supply,
-//                         bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
-//                     )
-//                     .await
-//                 }
-//                 ProtocolCommand::DestroyAccount { account_id } => destroy_account_command(wallet, account_id).await,
-//                 ProtocolCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(wallet, foundry_id).await,
-//                 ProtocolCommand::Exit => {
-//                     return Ok(PromptResponse::Done);
-//                 }
-//                 ProtocolCommand::Faucet { url } => faucet_command(wallet, url).await,
-//                 ProtocolCommand::MeltNativeToken { token_id, amount } => {
-//                     melt_native_token_command(wallet, token_id, amount).await
-//                 }
-//                 ProtocolCommand::MintNativeToken { token_id, amount } => {
-//                     mint_native_token(wallet, token_id, amount).await
-//                 }
-//                 ProtocolCommand::MintNft {
-//                     address,
-//                     immutable_metadata_hex,
-//                     immutable_metadata_file,
-//                     metadata_hex,
-//                     metadata_file,
-//                     tag,
-//                     sender,
-//                     issuer,
-//                 } => {
-//                     mint_nft_command(
-//                         wallet,
-//                         address,
-//                         bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
-//                         bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
-//                         tag,
-//                         sender,
-//                         issuer,
-//                     )
-//                     .await
-//                 }
-//                 ProtocolCommand::NodeInfo => node_info_command(wallet).await,
-//                 ProtocolCommand::Output { output_id } => output_command(wallet, output_id).await,
-//                 ProtocolCommand::Outputs => outputs_command(wallet).await,
-//                 ProtocolCommand::Send {
-//                     address,
-//                     amount,
-//                     return_address,
-//                     expiration,
-//                     allow_micro_amount,
-//                 } => {
-//                     let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
-//                         true
-//                     } else {
-//                         allow_micro_amount
-//                     };
-//                     send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
-//                 }
-//                 ProtocolCommand::SendNativeToken {
-//                     address,
-//                     token_id,
-//                     amount,
-//                     gift_storage_deposit,
-//                 } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
-//                 ProtocolCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
-//                 ProtocolCommand::Sync => sync_command(wallet).await,
-//                 ProtocolCommand::Transaction { selector } => transaction_command(wallet, selector).await,
-//                 ProtocolCommand::Transactions { show_details } => transactions_command(wallet, show_details).await,
-//                 ProtocolCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
-//                 ProtocolCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
-//                 ProtocolCommand::StopParticipating { event_id } => stop_participating_command(wallet,
-// event_id).await,                 ProtocolCommand::ParticipationOverview { event_ids } => {
-//                     let event_ids = (!event_ids.is_empty()).then_some(event_ids);
-//                     participation_overview_command(wallet, event_ids).await
-//                 }
-//                 ProtocolCommand::VotingPower => voting_power_command(wallet).await,
-//                 ProtocolCommand::IncreaseVotingPower { amount } => increase_voting_power_command(wallet,
-// amount).await,                 ProtocolCommand::DecreaseVotingPower { amount } =>
-// decrease_voting_power_command(wallet, amount).await,                 ProtocolCommand::VotingOutput =>
-// voting_output_command(wallet).await,             } {
-//                 println_log_error!("{err}");
-//             }
-//         }
-//     }
-
-//     Ok(PromptResponse::Reprompt)
-// }
