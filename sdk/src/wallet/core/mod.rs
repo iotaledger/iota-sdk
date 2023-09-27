@@ -172,7 +172,7 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Create a new Account with an AccountDetails
+    /// Create a new wallet.
     pub(crate) async fn new(inner: Arc<WalletInner<S>>, data: WalletData) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = inner
@@ -200,7 +200,7 @@ where
     }
 
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
-    /// from the account, if it isn't in the account try to get it from the node
+    /// from the wallet, if it isn't in the wallet try to get it from the node
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output> {
         let foundry_id = FoundryId::from(native_token_id);
 
@@ -212,14 +212,14 @@ where
             }
         }
 
-        // Foundry was not found in the account, try to get it from the node
+        // Foundry was not found in the wallet, try to get it from the node
         let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
         let output = self.client().get_output(&foundry_output_id).await?;
 
         Ok(output)
     }
 
-    /// Save the account to the database, accepts the updated_account as option so we don't need to drop it before
+    /// Save the wallet to the database, accepts the updated wallet data as option so we don't need to drop it before
     /// saving
     #[cfg(feature = "storage")]
     pub(crate) async fn save(&self, updated_wallet: Option<&WalletData>) -> Result<()> {
@@ -259,11 +259,6 @@ where
         self.data.write().await
     }
 
-    /// Get the index of the wallet.
-    pub async fn index(&self) -> u32 {
-        self.data().await.bip_path.account
-    }
-
     /// Get the alias of the wallet.
     pub async fn alias(&self) -> String {
         self.data().await.alias.clone()
@@ -279,17 +274,17 @@ where
         self.data().await.address.hrp
     }
 
-    /// Get the [`OutputData`] of an output stored in the account
+    /// Get the [`OutputData`] of an output stored in the wallet.
     pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
         self.data().await.outputs.get(output_id).cloned()
     }
 
-    /// Get the [`Transaction`] of a transaction stored in the account
+    /// Get the [`Transaction`] of a transaction stored in the wallet.
     pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
         self.data().await.transactions.get(transaction_id).cloned()
     }
 
-    /// Get the transaction with inputs of an incoming transaction stored in the account
+    /// Get the transaction with inputs of an incoming transaction stored in the wallet.
     /// List might not be complete, if the node pruned the data already
     pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
         self.data().await.incoming_transactions.get(transaction_id).cloned()
@@ -297,7 +292,7 @@ where
 
     // TODO: remove
 
-    // /// Returns all addresses of the account
+    // /// Returns all addresses of the wallet.
     // pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
     //     let wallet_data = self.data().await;
     //     let mut all_addresses = wallet_data.public_addresses.clone();
@@ -305,12 +300,12 @@ where
     //     Ok(all_addresses.to_vec())
     // }
 
-    // /// Returns all public addresses of the account
+    // /// Returns all public addresses of the wallet.
     // pub(crate) async fn public_addresses(&self) -> Vec<Bip44Address> {
     //     self.data().await.public_addresses.to_vec()
     // }
 
-    // /// Returns only addresses of the account with balance
+    // /// Returns only addresses of the wallet with balance
     // pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
     //     Ok(self.data().await.addresses_with_unspent_outputs.to_vec())
     // }
@@ -387,12 +382,12 @@ where
         }
     }
 
-    /// Returns outputs of the account
+    /// Returns outputs of the wallet.
     pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.data().await.outputs.values(), filter)
     }
 
-    /// Returns unspent outputs of the account
+    /// Returns unspent outputs of the wallet.
     pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.data().await.unspent_outputs.values(), filter)
     }
@@ -427,23 +422,23 @@ where
         .map(|res| res.get(0).cloned())
     }
 
-    /// Returns all incoming transactions of the account
+    /// Returns all incoming transactions of the wallet
     pub async fn incoming_transactions(&self) -> Vec<Transaction> {
         self.data().await.incoming_transactions.values().cloned().collect()
     }
 
-    /// Returns all transactions of the account
+    /// Returns all transactions of the wallet
     pub async fn transactions(&self) -> Vec<Transaction> {
         self.data().await.transactions.values().cloned().collect()
     }
 
-    /// Returns all pending transactions of the account
+    /// Returns all pending transactions of the wallet
     pub async fn pending_transactions(&self) -> Vec<Transaction> {
         let mut transactions = Vec::new();
-        let account_details = self.data().await;
+        let wallet_data = self.data().await;
 
-        for transaction_id in &account_details.pending_transactions {
-            if let Some(transaction) = account_details.transactions.get(transaction_id) {
+        for transaction_id in &wallet_data.pending_transactions {
+            if let Some(transaction) = wallet_data.transactions.get(transaction_id) {
                 transactions.push(transaction.clone());
             }
         }
@@ -496,7 +491,7 @@ impl<S: SecretManage> WalletInner<S> {
         self.event_emitter.read().await.emit(event);
     }
 
-    /// Helper function to test events. Emits a provided event with account index 0.
+    /// Helper function to test events.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent) {
@@ -730,8 +725,8 @@ fn serialize() {
 #[cfg(test)]
 impl WalletData {
     /// Returns a mock of this type with the following values:
-    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
-    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+    /// index: 0, coin_type: 4218, alias: "Alice", address:
+    /// rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy, all other fields are set to their Rust
     /// defaults.
     #[cfg(feature = "storage")]
     pub(crate) fn mock() -> Self {

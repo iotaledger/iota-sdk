@@ -50,6 +50,11 @@ pub enum Error {
     /// Invalid output kind.
     #[error("invalid output kind: {0}")]
     InvalidOutputKind(String),
+    /// Invalid Voting Power
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    #[error("invalid voting power")]
+    InvalidVotingPower,
     /// IO error. (storage, backup, restore)
     #[error("`{0}`")]
     Io(#[from] std::io::Error),
@@ -104,10 +109,9 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("voting error {0}")]
     Voting(String),
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[error("invalid voting power")]
-    InvalidVotingPower,
+    /// Address not the wallet address
+    #[error("address {0} is not the wallet address")]
+    WalletAddressMismatch(Bech32Address),
 }
 
 // Serialize type with Display error
