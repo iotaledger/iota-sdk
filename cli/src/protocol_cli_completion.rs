@@ -1,11 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use dialoguer::Completion;
+use std::borrow::Cow;
 
-pub(crate) struct ProtocolCliCompletion;
+use colored::Colorize;
+use rustyline::{
+    completion::Completer, highlight::Highlighter, hint::HistoryHinter, Completer, Context, Helper, Hinter, Validator,
+};
 
-pub(crate) const PROTOCOL_COMMANDS: &[&str] = &[
+#[derive(Default)]
+pub struct ProtocolCommandCompleter;
+
+const PROTOCOL_COMMANDS: &[&str] = &[
     "address",
     "balance",
     "burn-native-token",
@@ -14,9 +20,9 @@ pub(crate) const PROTOCOL_COMMANDS: &[&str] = &[
     "claimable-outputs",
     "clear",
     "consolidate",
-    "create-account-output",
+    "create-alias-output",
     "create-native-token",
-    "destroy-account",
+    "destroy-alias",
     "destroy-foundry",
     "exit",
     "faucet",
@@ -45,17 +51,60 @@ pub(crate) const PROTOCOL_COMMANDS: &[&str] = &[
     "help",
 ];
 
-impl Completion for ProtocolCliCompletion {
-    fn get(&self, input: &str) -> Option<String> {
-        let matches = PROTOCOL_COMMANDS
-            .iter()
-            .filter(|option| option.starts_with(input))
-            .collect::<Vec<_>>();
+impl Completer for ProtocolCommandCompleter {
+    type Candidate = &'static str;
 
-        if matches.len() == 1 {
-            Some(matches[0].to_string())
+    fn complete(
+        &self,
+        input: &str,
+        _pos: usize,
+        _ctx: &Context<'_>,
+    ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
+        Ok((
+            0,
+            PROTOCOL_COMMANDS
+                .iter()
+                .filter_map(|cmd| cmd.starts_with(input).then_some(*cmd))
+                .collect(),
+        ))
+    }
+}
+
+#[derive(Helper, Completer, Hinter, Validator)]
+pub struct ProtocolPromptHelper {
+    #[rustyline(Completer)]
+    completer: ProtocolCommandCompleter,
+    #[rustyline(Hinter)]
+    hinter: HistoryHinter,
+    prompt: String,
+}
+
+impl ProtocolPromptHelper {
+    pub fn set_prompt(&mut self, prompt: String) {
+        self.prompt = prompt;
+    }
+}
+
+impl Highlighter for ProtocolPromptHelper {
+    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
+        if default {
+            Cow::Borrowed(&self.prompt)
         } else {
-            None
+            Cow::Borrowed(prompt)
+        }
+    }
+
+    fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
+        Cow::Owned(hint.bold().to_string())
+    }
+}
+
+impl Default for ProtocolPromptHelper {
+    fn default() -> Self {
+        Self {
+            completer: ProtocolCommandCompleter,
+            hinter: HistoryHinter {},
+            prompt: String::new(),
         }
     }
 }

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 from iota_sdk.types.common import json
-from iota_sdk.types.node_info import NodeInfoProtocol
+from iota_sdk.types.node_info import ProtocolParameters
 
 
 @json
@@ -68,7 +68,7 @@ class ClientOptions:
             The User-Agent header for requests.
         broker_options (MqttBrokerOptions):
             Options for the MQTT broker.
-        protocol_parameters (NodeInfoProtocol):
+        protocol_parameters (ProtocolParameters):
             Protocol parameters.
         api_timeout (Duration):
             Timeout for API requests.
@@ -85,6 +85,6 @@ class ClientOptions:
     quorum_threshold: Optional[int] = None
     user_agent: Optional[str] = None
     broker_options: Optional[MqttBrokerOptions] = None
-    protocol_parameters: Optional[NodeInfoProtocol] = None
+    protocol_parameters: Optional[ProtocolParameters] = None
     api_timeout: Optional[Duration] = None
     max_parallel_api_requests: Optional[int] = None

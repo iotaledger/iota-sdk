@@ -19,8 +19,9 @@
 use iota_sdk::{
     client::node_manager::node::Node,
     wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result},
-    Url, Wallet,
+    Wallet,
 };
+use url::Url;
 
 // The node that runs the participation plugin
 const PARTICPATION_NODE_URL: &str = "https://api.testnet.shimmer.network";

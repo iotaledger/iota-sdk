@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 import humps
 from dacite import from_dict
 
-import iota_sdk
-from iota_sdk import call_client_method, listen_mqtt
+from iota_sdk.external import create_client, call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
@@ -28,7 +27,6 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 
 class ClientError(Exception):
     """Represents a client error."""
-    pass
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
@@ -116,7 +114,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         # Create the message handler
         if client_handle is None:
-            self.handle = iota_sdk.create_client(client_config_str)
+            self.handle = create_client(client_config_str)
         else:
             self.handle = client_handle
 
@@ -383,7 +381,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def sign_transaction(
             self,
-            secret_manager: Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager],
+            secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager],
             prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 

@@ -137,6 +137,7 @@ pub enum Response {
     /// - [`BasicOutputIds`](crate::method::ClientMethod::BasicOutputIds)
     /// - [`FoundryOutputIds`](crate::method::ClientMethod::FoundryOutputIds)
     /// - [`NftOutputIds`](crate::method::ClientMethod::NftOutputIds)
+    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)

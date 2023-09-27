@@ -5,7 +5,6 @@ mod error;
 mod helper;
 mod protocol_cli;
 mod protocol_cli_completion;
-mod protocol_cli_history;
 mod wallet_cli;
 
 use clap::Parser;

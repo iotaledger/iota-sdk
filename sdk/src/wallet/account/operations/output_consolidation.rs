@@ -152,6 +152,7 @@ where
 
         drop(wallet_data);
 
+        #[allow(clippy::option_if_let_else)]
         let output_threshold = match params.output_threshold {
             Some(t) => t,
             None => {

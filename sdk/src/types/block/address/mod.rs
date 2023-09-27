@@ -125,13 +125,13 @@ impl Address {
         match (self, unlock) {
             (Self::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
                 if context.unlocked_addresses.contains(self) {
-                    return Err(TransactionFailureReason::InvalidUnlock);
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
 
                 let Signature::Ed25519(signature) = unlock.signature();
 
                 if signature.is_valid(&context.essence_hash, ed25519_address).is_err() {
-                    return Err(TransactionFailureReason::InvalidSignature);
+                    return Err(TransactionFailureReason::InvalidUnlockBlockSignature);
                 }
 
                 context.unlocked_addresses.insert(*self);
@@ -139,36 +139,36 @@ impl Address {
             (Self::Ed25519(_ed25519_address), Unlock::Reference(_unlock)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !context.unlocked_addresses.contains(self) {
-                    return Err(TransactionFailureReason::InvalidUnlock);
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
             (Self::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Account(account_output)) = inputs[unlock.index() as usize] {
                     if &account_output.account_id_non_null(output_id) != account_address.account_id() {
-                        return Err(TransactionFailureReason::InvalidUnlock);
+                        return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
                     if !context.unlocked_addresses.contains(self) {
-                        return Err(TransactionFailureReason::InvalidUnlock);
+                        return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
                 } else {
-                    return Err(TransactionFailureReason::InvalidUnlock);
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
             (Self::Nft(nft_address), Unlock::Nft(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Nft(nft_output)) = inputs[unlock.index() as usize] {
                     if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
-                        return Err(TransactionFailureReason::InvalidUnlock);
+                        return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
                     if !context.unlocked_addresses.contains(self) {
-                        return Err(TransactionFailureReason::InvalidUnlock);
+                        return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
                 } else {
-                    return Err(TransactionFailureReason::InvalidUnlock);
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
-            _ => return Err(TransactionFailureReason::InvalidUnlock),
+            _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
         Ok(())

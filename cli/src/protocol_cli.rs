@@ -5,7 +5,6 @@ use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
-use dialoguer::Input;
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::{
@@ -27,13 +26,13 @@ use iota_sdk::{
     },
     U256,
 };
+use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use crate::{
     error::Error,
     helper::{bytes_from_hex_or_file, to_utc_date_time},
     println_log_error, println_log_info,
-    protocol_cli_completion::ProtocolCliCompletion,
-    protocol_cli_history::ProtocolCliHistory,
+    protocol_cli_completion::{ProtocolCommandCompleter, ProtocolPromptHelper},
 };
 
 #[derive(Debug, Parser)]
@@ -949,11 +948,20 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
-// loop on the wallet prompt
+// loop on the account prompt
 pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
-    let mut history = ProtocolCliHistory::default();
+    let config = Config::builder()
+        .auto_add_history(true)
+        .history_ignore_space(true)
+        .completion_type(rustyline::CompletionType::List)
+        .edit_mode(rustyline::EditMode::Emacs)
+        .build();
+
+    let mut rl = Editor::with_history(config, MemHistory::with_config(config))?;
+    rl.set_helper(Some(ProtocolPromptHelper::default()));
+
     loop {
-        match prompt_internal(wallet, &mut history).await {
+        match prompt_internal(wallet, &mut rl).await {
             Ok(res) => match res {
                 PromptResponse::Reprompt => (),
                 PromptResponse::Done => {
@@ -972,132 +980,312 @@ pub enum PromptResponse {
     Done,
 }
 
-// loop on the wallet prompt
-pub async fn prompt_internal(wallet: &Wallet, history: &mut ProtocolCliHistory) -> Result<PromptResponse, Error> {
+// loop on the account prompt
+pub async fn prompt_internal(
+    wallet: &Wallet,
+    rl: &mut Editor<ProtocolPromptHelper, MemHistory>,
+) -> Result<PromptResponse, Error> {
     let alias = wallet.alias().await;
+    let prompt = format!("Wallet \"{alias}\": ");
 
-    let command: String = Input::new()
-        .with_prompt(format!("Wallet \"{}\"", alias).green().to_string())
-        .history_with(history)
-        .completion_with(&ProtocolCliCompletion)
-        .interact_text()?;
-    match command.as_str() {
-        "h" | "help" => ProtocolCli::print_help()?,
-        "c" | "clear" => {
-            // Clear console
-            let _ = std::process::Command::new("clear").status();
-        }
-        _ => {
-            // Prepend `Account: ` so the parsing will be correct
-            let command = format!("Wallet: {}", command.trim());
-            let account_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
-                Ok(account_cli) => account_cli,
-                Err(err) => {
-                    println!("{err}");
-                    return Ok(PromptResponse::Reprompt);
+    if let Some(helper) = rl.helper_mut() {
+        helper.set_prompt(prompt.green().to_string());
+    }
+
+    let input = rl.readline(&prompt);
+    match input {
+        Ok(command) => {
+            match command.as_str() {
+                "h" | "help" => ProtocolCli::print_help()?,
+                "c" | "clear" => {
+                    // Clear console
+                    let _ = std::process::Command::new("clear").status();
                 }
-            };
-            if let Err(err) = match account_cli.command {
-                ProtocolCommand::Address => address_command(wallet).await,
-                ProtocolCommand::Balance => balance_command(wallet).await,
-                ProtocolCommand::BurnNativeToken { token_id, amount } => {
-                    burn_native_token_command(wallet, token_id, amount).await
-                }
-                ProtocolCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
-                ProtocolCommand::Claim { output_id } => claim_command(wallet, output_id).await,
-                ProtocolCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
-                ProtocolCommand::Consolidate => consolidate_command(wallet).await,
-                ProtocolCommand::CreateAccountOutput => create_account_output_command(wallet).await,
-                ProtocolCommand::CreateNativeToken {
-                    circulating_supply,
-                    maximum_supply,
-                    foundry_metadata_hex,
-                    foundry_metadata_file,
-                } => {
-                    create_native_token_command(
-                        wallet,
-                        circulating_supply,
-                        maximum_supply,
-                        bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
-                    )
-                    .await
-                }
-                ProtocolCommand::DestroyAccount { account_id } => destroy_account_command(wallet, account_id).await,
-                ProtocolCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(wallet, foundry_id).await,
-                ProtocolCommand::Exit => {
-                    return Ok(PromptResponse::Done);
-                }
-                ProtocolCommand::Faucet { url } => faucet_command(wallet, url).await,
-                ProtocolCommand::MeltNativeToken { token_id, amount } => {
-                    melt_native_token_command(wallet, token_id, amount).await
-                }
-                ProtocolCommand::MintNativeToken { token_id, amount } => {
-                    mint_native_token(wallet, token_id, amount).await
-                }
-                ProtocolCommand::MintNft {
-                    address,
-                    immutable_metadata_hex,
-                    immutable_metadata_file,
-                    metadata_hex,
-                    metadata_file,
-                    tag,
-                    sender,
-                    issuer,
-                } => {
-                    mint_nft_command(
-                        wallet,
-                        address,
-                        bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
-                        bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
-                        tag,
-                        sender,
-                        issuer,
-                    )
-                    .await
-                }
-                ProtocolCommand::NodeInfo => node_info_command(wallet).await,
-                ProtocolCommand::Output { output_id } => output_command(wallet, output_id).await,
-                ProtocolCommand::Outputs => outputs_command(wallet).await,
-                ProtocolCommand::Send {
-                    address,
-                    amount,
-                    return_address,
-                    expiration,
-                    allow_micro_amount,
-                } => {
-                    let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
-                        true
-                    } else {
-                        allow_micro_amount
+                _ => {
+                    // Prepend `Wallet: ` so the parsing will be correct
+                    let command = format!("Wallet: {}", command.trim());
+                    let account_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
+                        Ok(account_cli) => account_cli,
+                        Err(err) => {
+                            println!("{err}");
+                            return Ok(PromptResponse::Reprompt);
+                        }
                     };
-                    send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
+                    match account_cli.command {
+                        ProtocolCommand::Address => address_command(wallet).await,
+                        ProtocolCommand::Balance => balance_command(wallet).await,
+                        ProtocolCommand::BurnNativeToken { token_id, amount } => {
+                            burn_native_token_command(wallet, token_id, amount).await
+                        }
+                        ProtocolCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
+                        ProtocolCommand::Claim { output_id } => claim_command(wallet, output_id).await,
+                        ProtocolCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        ProtocolCommand::Consolidate => consolidate_command(wallet).await,
+                        ProtocolCommand::CreateAccountOutput => create_account_output_command(wallet).await,
+                        ProtocolCommand::CreateNativeToken {
+                            circulating_supply,
+                            maximum_supply,
+                            foundry_metadata_hex,
+                            foundry_metadata_file,
+                        } => {
+                            create_native_token_command(
+                                wallet,
+                                circulating_supply,
+                                maximum_supply,
+                                bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
+                            )
+                            .await
+                        }
+                        ProtocolCommand::DestroyAccount { account_id } => {
+                            destroy_account_command(wallet, account_id).await
+                        }
+                        ProtocolCommand::DestroyFoundry { foundry_id } => {
+                            destroy_foundry_command(wallet, foundry_id).await
+                        }
+                        ProtocolCommand::Exit => {
+                            return Ok(PromptResponse::Done);
+                        }
+                        ProtocolCommand::Faucet { url } => faucet_command(wallet, url).await,
+                        ProtocolCommand::MeltNativeToken { token_id, amount } => {
+                            melt_native_token_command(wallet, token_id, amount).await
+                        }
+                        ProtocolCommand::MintNativeToken { token_id, amount } => {
+                            mint_native_token(wallet, token_id, amount).await
+                        }
+                        ProtocolCommand::MintNft {
+                            address,
+                            immutable_metadata_hex,
+                            immutable_metadata_file,
+                            metadata_hex,
+                            metadata_file,
+                            tag,
+                            sender,
+                            issuer,
+                        } => {
+                            mint_nft_command(
+                                wallet,
+                                address,
+                                bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
+                                bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
+                                tag,
+                                sender,
+                                issuer,
+                            )
+                            .await
+                        }
+                        ProtocolCommand::NodeInfo => node_info_command(wallet).await,
+                        ProtocolCommand::Output { output_id } => output_command(wallet, output_id).await,
+                        ProtocolCommand::Outputs => outputs_command(wallet).await,
+                        ProtocolCommand::Send {
+                            address,
+                            amount,
+                            return_address,
+                            expiration,
+                            allow_micro_amount,
+                        } => {
+                            let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
+                                true
+                            } else {
+                                allow_micro_amount
+                            };
+                            send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
+                        }
+                        ProtocolCommand::SendNativeToken {
+                            address,
+                            token_id,
+                            amount,
+                            gift_storage_deposit,
+                        } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
+                        ProtocolCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
+                        ProtocolCommand::Sync => sync_command(wallet).await,
+                        ProtocolCommand::Transaction { selector } => transaction_command(wallet, selector).await,
+                        ProtocolCommand::Transactions { show_details } => {
+                            transactions_command(wallet, show_details).await
+                        }
+                        ProtocolCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
+                        ProtocolCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
+                        ProtocolCommand::StopParticipating { event_id } => {
+                            stop_participating_command(wallet, event_id).await
+                        }
+                        ProtocolCommand::ParticipationOverview { event_ids } => {
+                            let event_ids = (!event_ids.is_empty()).then_some(event_ids);
+                            participation_overview_command(wallet, event_ids).await
+                        }
+                        ProtocolCommand::VotingPower => voting_power_command(wallet).await,
+                        ProtocolCommand::IncreaseVotingPower { amount } => {
+                            increase_voting_power_command(wallet, amount).await
+                        }
+                        ProtocolCommand::DecreaseVotingPower { amount } => {
+                            decrease_voting_power_command(wallet, amount).await
+                        }
+                        ProtocolCommand::VotingOutput => voting_output_command(wallet).await,
+                    }
+                    .unwrap_or_else(|err| {
+                        println_log_error!("{err}");
+                    });
                 }
-                ProtocolCommand::SendNativeToken {
-                    address,
-                    token_id,
-                    amount,
-                    gift_storage_deposit,
-                } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
-                ProtocolCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
-                ProtocolCommand::Sync => sync_command(wallet).await,
-                ProtocolCommand::Transaction { selector } => transaction_command(wallet, selector).await,
-                ProtocolCommand::Transactions { show_details } => transactions_command(wallet, show_details).await,
-                ProtocolCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
-                ProtocolCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
-                ProtocolCommand::StopParticipating { event_id } => stop_participating_command(wallet, event_id).await,
-                ProtocolCommand::ParticipationOverview { event_ids } => {
-                    let event_ids = (!event_ids.is_empty()).then_some(event_ids);
-                    participation_overview_command(wallet, event_ids).await
-                }
-                ProtocolCommand::VotingPower => voting_power_command(wallet).await,
-                ProtocolCommand::IncreaseVotingPower { amount } => increase_voting_power_command(wallet, amount).await,
-                ProtocolCommand::DecreaseVotingPower { amount } => decrease_voting_power_command(wallet, amount).await,
-                ProtocolCommand::VotingOutput => voting_output_command(wallet).await,
-            } {
-                println_log_error!("{err}");
             }
+        }
+        Err(ReadlineError::Interrupted) => {
+            return Ok(PromptResponse::Done);
+        }
+        Err(err) => {
+            println_log_error!("{err}");
         }
     }
 
     Ok(PromptResponse::Reprompt)
 }
+
+// // loop on the wallet prompt
+// pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
+//     let mut history = ProtocolCliHistory::default();
+//     loop {
+//         match prompt_internal(wallet, &mut history).await {
+//             Ok(res) => match res {
+//                 PromptResponse::Reprompt => (),
+//                 PromptResponse::Done => {
+//                     return Ok(());
+//                 }
+//             },
+//             Err(e) => {
+//                 println_log_error!("{e}");
+//             }
+//         }
+//     }
+// }
+
+// pub enum PromptResponse {
+//     Reprompt,
+//     Done,
+// }
+
+// // loop on the wallet prompt
+// pub async fn prompt_internal(wallet: &Wallet, history: &mut ProtocolCliHistory) -> Result<PromptResponse, Error> {
+//     let alias = wallet.alias().await;
+
+//     let command: String = Input::new()
+//         .with_prompt(format!("Wallet \"{}\"", alias).green().to_string())
+//         .history_with(history)
+//         .completion_with(&ProtocolCliCompletion)
+//         .interact_text()?;
+//     match command.as_str() {
+//         "h" | "help" => ProtocolCli::print_help()?,
+//         "c" | "clear" => {
+//             // Clear console
+//             let _ = std::process::Command::new("clear").status();
+//         }
+//         _ => {
+//             // Prepend `Account: ` so the parsing will be correct
+//             let command = format!("Wallet: {}", command.trim());
+//             let account_cli = match ProtocolCli::try_parse_from(command.split_whitespace()) {
+//                 Ok(account_cli) => account_cli,
+//                 Err(err) => {
+//                     println!("{err}");
+//                     return Ok(PromptResponse::Reprompt);
+//                 }
+//             };
+//             if let Err(err) = match account_cli.command {
+//                 ProtocolCommand::Address => address_command(wallet).await,
+//                 ProtocolCommand::Balance => balance_command(wallet).await,
+//                 ProtocolCommand::BurnNativeToken { token_id, amount } => {
+//                     burn_native_token_command(wallet, token_id, amount).await
+//                 }
+//                 ProtocolCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
+//                 ProtocolCommand::Claim { output_id } => claim_command(wallet, output_id).await,
+//                 ProtocolCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+//                 ProtocolCommand::Consolidate => consolidate_command(wallet).await,
+//                 ProtocolCommand::CreateAccountOutput => create_account_output_command(wallet).await,
+//                 ProtocolCommand::CreateNativeToken {
+//                     circulating_supply,
+//                     maximum_supply,
+//                     foundry_metadata_hex,
+//                     foundry_metadata_file,
+//                 } => {
+//                     create_native_token_command(
+//                         wallet,
+//                         circulating_supply,
+//                         maximum_supply,
+//                         bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
+//                     )
+//                     .await
+//                 }
+//                 ProtocolCommand::DestroyAccount { account_id } => destroy_account_command(wallet, account_id).await,
+//                 ProtocolCommand::DestroyFoundry { foundry_id } => destroy_foundry_command(wallet, foundry_id).await,
+//                 ProtocolCommand::Exit => {
+//                     return Ok(PromptResponse::Done);
+//                 }
+//                 ProtocolCommand::Faucet { url } => faucet_command(wallet, url).await,
+//                 ProtocolCommand::MeltNativeToken { token_id, amount } => {
+//                     melt_native_token_command(wallet, token_id, amount).await
+//                 }
+//                 ProtocolCommand::MintNativeToken { token_id, amount } => {
+//                     mint_native_token(wallet, token_id, amount).await
+//                 }
+//                 ProtocolCommand::MintNft {
+//                     address,
+//                     immutable_metadata_hex,
+//                     immutable_metadata_file,
+//                     metadata_hex,
+//                     metadata_file,
+//                     tag,
+//                     sender,
+//                     issuer,
+//                 } => {
+//                     mint_nft_command(
+//                         wallet,
+//                         address,
+//                         bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
+//                         bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
+//                         tag,
+//                         sender,
+//                         issuer,
+//                     )
+//                     .await
+//                 }
+//                 ProtocolCommand::NodeInfo => node_info_command(wallet).await,
+//                 ProtocolCommand::Output { output_id } => output_command(wallet, output_id).await,
+//                 ProtocolCommand::Outputs => outputs_command(wallet).await,
+//                 ProtocolCommand::Send {
+//                     address,
+//                     amount,
+//                     return_address,
+//                     expiration,
+//                     allow_micro_amount,
+//                 } => {
+//                     let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
+//                         true
+//                     } else {
+//                         allow_micro_amount
+//                     };
+//                     send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
+//                 }
+//                 ProtocolCommand::SendNativeToken {
+//                     address,
+//                     token_id,
+//                     amount,
+//                     gift_storage_deposit,
+//                 } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
+//                 ProtocolCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
+//                 ProtocolCommand::Sync => sync_command(wallet).await,
+//                 ProtocolCommand::Transaction { selector } => transaction_command(wallet, selector).await,
+//                 ProtocolCommand::Transactions { show_details } => transactions_command(wallet, show_details).await,
+//                 ProtocolCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
+//                 ProtocolCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
+//                 ProtocolCommand::StopParticipating { event_id } => stop_participating_command(wallet,
+// event_id).await,                 ProtocolCommand::ParticipationOverview { event_ids } => {
+//                     let event_ids = (!event_ids.is_empty()).then_some(event_ids);
+//                     participation_overview_command(wallet, event_ids).await
+//                 }
+//                 ProtocolCommand::VotingPower => voting_power_command(wallet).await,
+//                 ProtocolCommand::IncreaseVotingPower { amount } => increase_voting_power_command(wallet,
+// amount).await,                 ProtocolCommand::DecreaseVotingPower { amount } =>
+// decrease_voting_power_command(wallet, amount).await,                 ProtocolCommand::VotingOutput =>
+// voting_output_command(wallet).await,             } {
+//                 println_log_error!("{err}");
+//             }
+//         }
+//     }
+
+//     Ok(PromptResponse::Reprompt)
+// }
