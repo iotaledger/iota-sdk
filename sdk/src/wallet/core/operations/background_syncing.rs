@@ -48,20 +48,17 @@ where
                 .unwrap();
             runtime.block_on(async {
                 'outer: loop {
-                    log::debug!("[background_syncing]: syncing accounts");
+                    log::debug!("[background_syncing]: syncing wallet");
 
-                    todo!("we do not need to iter anymore");
-                    // for account in wallet.data.read().await.iter() {
-                    //     // Check if the process should stop before syncing each account so it stops faster
-                    //     if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
-                    //         log::debug!("[background_syncing]: stopping");
-                    //         break 'outer;
-                    //     }
-                    //     match account.sync(options.clone()).await {
-                    //         Ok(_) => {}
-                    //         Err(err) => log::debug!("[background_syncing] error: {}", err),
-                    //     };
-                    // }
+                    // Check if the process should stop before syncing each account so it stops faster
+                    if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
+                        log::debug!("[background_syncing]: stopping");
+                        break 'outer;
+                    }
+                    match wallet.sync(options.clone()).await {
+                        Ok(_) => {}
+                        Err(err) => log::debug!("[background_syncing] error: {}", err),
+                    };
 
                     // split interval syncing to seconds so stopping the process doesn't have to wait long
                     let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();

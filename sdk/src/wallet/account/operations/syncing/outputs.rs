@@ -29,6 +29,7 @@ where
     pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_meta: Vec<OutputWithMetadata>,
+        // TODO: can be simplified since associated_address == wallet address?
         associated_address: &AddressWithUnspentOutputs,
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
@@ -48,7 +49,7 @@ where
 
                 // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
                 let chain = Bip44::new(wallet_data.bip_path.coin_type)
-                    .with_account(todo!("wallet_data.index"))
+                    .with_account(wallet_data.bip_path.account)
                     .with_change(associated_address.internal as _)
                     .with_address_index(associated_address.key_index);
 

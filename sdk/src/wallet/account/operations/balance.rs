@@ -117,7 +117,7 @@ where
                     total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
                     let account_id = output.account_id_non_null(output_id);
-                    todo!("balance.accounts.push(account_id)");
+                    balance.accounts.push(account_id);
                 }
                 Output::Foundry(output) => {
                     // Add amount
@@ -190,7 +190,7 @@ where
                                 // We use the addresses with unspent outputs, because other addresses of
                                 // the account without unspent
                                 // outputs can't be related to this output
-                                todo!("&wallet_data.addresses_with_unspent_outputs"),
+                                wallet_data.address.inner(),
                                 output,
                                 slot_index,
                             );

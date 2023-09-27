@@ -53,17 +53,6 @@ where
         #[allow(unused_mut)]
         let mut forbidden_inputs = wallet_data.locked_outputs.clone();
 
-        todo!("no need for a vec anymore");
-        let addresses = vec![wallet_data.address.into_inner()];
-
-        // TODO: remove
-        // let addresses = wallet_data
-        //     .public_addresses
-        //     .iter()
-        //     .chain(wallet_data.internal_addresses.iter())
-        //     .map(|address| *address.address.as_ref())
-        //     .collect::<Vec<_>>();
-
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
         if let Some(voting_output) = &voting_output {
@@ -102,7 +91,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                addresses,
+                Some(wallet_data.address.into_inner()),
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
@@ -137,7 +126,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                addresses,
+                Some(wallet_data.address.into_inner()),
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
@@ -169,7 +158,7 @@ where
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
             outputs,
-            addresses,
+            Some(wallet_data.address.into_inner()),
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs);
@@ -229,7 +218,7 @@ where
 /// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
-    account: &WalletData,
+    wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
     outputs: &[Output],
@@ -250,7 +239,7 @@ fn filter_inputs(
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
-                todo!("&account.addresses_with_unspent_outputs"),
+                &wallet_data.address.inner,
                 &output_data.output,
                 slot_index,
             );
@@ -264,7 +253,9 @@ fn filter_inputs(
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
         let account_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
 
-        if let Some(available_input) = output_data.input_signing_data(account, slot_index, account_state_transition)? {
+        if let Some(available_input) =
+            output_data.input_signing_data(wallet_data, slot_index, account_state_transition)?
+        {
             available_outputs_signing_data.push(available_input);
         }
     }

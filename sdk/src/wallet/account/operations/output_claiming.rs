@@ -68,7 +68,7 @@ where
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            todo!("&wallet_data.addresses_with_unspent_outputs"),
+                            wallet_data.address.inner(),
                             // outputs controlled by an account or nft are currently not considered
                             &[],
                             output_data,

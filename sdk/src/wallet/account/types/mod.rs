@@ -43,7 +43,7 @@ pub struct OutputData {
     pub output: Output,
     /// If an output is spent
     pub is_spent: bool,
-    /// Associated account address.
+    /// Associated wallet address.
     pub address: Address,
     /// Network ID
     pub network_id: u64,
@@ -65,23 +65,14 @@ impl OutputData {
 
         let chain = if unlock_address == self.address {
             self.chain
-
-        // TODO: remove?
-        // } else if let Address::Ed25519(_) = unlock_address {
-        //     if let Some(address) = wallet_data
-        //         .addresses_with_unspent_outputs
-        //         .iter()
-        //         .find(|a| a.address.inner == unlock_address)
-        //     {
-        //         Some(
-        //             Bip44::new(wallet_data.coin_type())
-        //                 .with_account(todo!("wallet_data.index"))
-        //                 .with_change(address.internal as _)
-        //                 .with_address_index(address.key_index),
-        //         )
-        //     } else {
-        //         return Ok(None);
-        //     }
+        } else if let Address::Ed25519(_) = unlock_address {
+            if wallet_data.address.inner() == &unlock_address {
+                // TODO: make sure that `wallet_data.address` and `wallet_data.bip_path` are never conflicting?
+                // Should wallet.address be a Bip44Address?
+                Some(wallet_data.bip_path)
+            } else {
+                return Ok(None);
+            }
         } else {
             // Account and NFT addresses have no chain
             None

@@ -293,9 +293,9 @@ where
                         None
                     }
                     RemainderValueStrategy::ChangeAddress => {
-                        todo!("how is this handled now?")
+                        // TODO: remove since all change goes back to wallet address I guess
                         // let remainder_address = self.generate_remainder_address().await?;
-                        // Some(remainder_address.address().inner)
+                        Some(self.address().await.into_inner())
                     }
                     RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }

@@ -68,11 +68,7 @@ impl StorageManager {
         self.delete(&format!("{WALLET_DATA_KEY}")).await
     }
 
-    pub(crate) async fn set_default_sync_options(
-        &self,
-        account_index: u32,
-        sync_options: &SyncOptions,
-    ) -> crate::wallet::Result<()> {
+    pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
         let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
     }

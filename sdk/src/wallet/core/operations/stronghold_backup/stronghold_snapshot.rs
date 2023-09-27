@@ -16,10 +16,13 @@ use crate::{
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
-pub(crate) const ACCOUNTS_KEY: &str = "accounts";
+pub(crate) const WALLET_DATA_KEY: &str = "wallet_data";
 
 impl<S: 'static + SecretManagerConfig> Wallet<S> {
-    pub(crate) async fn store_data_to_stronghold(&self, stronghold: &StrongholdAdapter) -> crate::wallet::Result<()> {
+    pub(crate) async fn store_wallet_data_to_stronghold(
+        &self,
+        stronghold: &StrongholdAdapter,
+    ) -> crate::wallet::Result<()> {
         // Set migration version
         stronghold
             .set(MIGRATION_VERSION_KEY, &latest_backup_migration_version())
@@ -35,27 +38,20 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
             stronghold.set(SECRET_MANAGER_KEY, &secret_manager_dto).await?;
         }
 
-        todo!("single account");
-        // let mut serialized_accounts = Vec::new();
-        // for account in self.data.read().await.iter() {
-        //     serialized_accounts.push(serde_json::to_value(&AccountDetailsDto::from(
-        //         &*account.details().await,
-        //     ))?);
-        // }
-
-        // stronghold.set(ACCOUNTS_KEY, &serialized_accounts).await?;
+        let serialized_wallet_data = serde_json::to_value(&WalletDataDto::from(&*self.data.read().await))?;
+        stronghold.set(WALLET_DATA_KEY, &serialized_wallet_data).await?;
 
         Ok(())
     }
 }
 
-pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
+pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Option<ClientOptions>,
     Option<u32>,
     Option<S::Config>,
-    Option<Vec<WalletData>>,
+    Option<WalletData>,
 )> {
     migrate(stronghold).await?;
 
@@ -79,16 +75,12 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: 'static + SecretManage
     // Get secret_manager
     let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
 
-    // Get accounts
-    let restored_accounts = stronghold
-        .get::<Vec<WalletDataDto>>(ACCOUNTS_KEY)
+    // Get wallet data
+    let restored_wallet_data = stronghold
+        .get::<WalletDataDto>(WALLET_DATA_KEY)
         .await?
-        .map(|v| {
-            v.into_iter()
-                .map(WalletData::try_from_dto)
-                .collect::<Result<Vec<_>, _>>()
-        })
+        .map(|dto| WalletData::try_from_dto(dto))
         .transpose()?;
 
-    Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
+    Ok((client_options, coin_type, restored_secret_manager, restored_wallet_data))
 }

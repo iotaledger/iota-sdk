@@ -36,9 +36,7 @@ where
         #[cfg(feature = "storage")]
         {
             let storage_manager = self.storage_manager.read().await;
-            storage_manager
-                .set_default_sync_options(todo!("index"), &options)
-                .await?;
+            storage_manager.set_default_sync_options(&options).await?;
         }
 
         *self.default_sync_options.lock().await = options;
