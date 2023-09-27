@@ -75,9 +75,13 @@ where
         }
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,
+            protocol_parameters,
         } => {
             let transaction = &secret_manager
-                .sign_transaction(PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
+                .sign_transaction(
+                    PreparedTransactionData::try_from_dto(prepared_transaction_data)?,
+                    protocol_parameters,
+                )
                 .await
                 .map_err(iota_sdk::client::Error::from)?;
             Response::SignedTransaction(transaction.into())

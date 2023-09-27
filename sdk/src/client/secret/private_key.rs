@@ -19,7 +19,8 @@ use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Error},
     types::block::{
-        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+        payload::signed_transaction::SignedTransactionPayload, protocol::ProtocolParameters,
+        signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -83,8 +84,9 @@ impl SecretManage for PrivateKeySecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        protocol_parameters: ProtocolParameters,
     ) -> Result<SignedTransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
+        super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
 }
 

@@ -35,7 +35,8 @@ use crate::{
         stronghold::Error,
     },
     types::block::{
-        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+        payload::signed_transaction::SignedTransactionPayload, protocol::ProtocolParameters,
+        signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -283,8 +284,9 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        protocol_parameters: ProtocolParameters,
     ) -> Result<SignedTransactionPayload, Self::Error> {
-        crate::client::secret::default_sign_transaction(self, prepared_transaction_data).await
+        crate::client::secret::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
 }
 
