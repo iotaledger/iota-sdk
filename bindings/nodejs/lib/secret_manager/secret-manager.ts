@@ -60,7 +60,7 @@ export class SecretManager {
      */
     async generateEvmAddresses(
         generateAddressesOptions: IGenerateAddressesOptions,
-    ): Promise<string[]> {
+    ): Promise<HexEncodedString[]> {
         const response = await this.methodHandler.callMethod({
             name: 'generateEvmAddresses',
             data: {

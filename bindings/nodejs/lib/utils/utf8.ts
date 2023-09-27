@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { HexEncodedString } from '../types/utils/hex-encoding';
+
 /** Convert UTF8 string to an array of bytes */
 export const utf8ToBytes = (utf8: string) => {
     const utf8Encode = new TextEncoder();
@@ -8,7 +10,7 @@ export const utf8ToBytes = (utf8: string) => {
 };
 
 /** Convert hex encoded string to UTF8 string */
-export const hexToUtf8 = (hex: string) =>
+export const hexToUtf8 = (hex: HexEncodedString) =>
     decodeURIComponent(hex.replace('0x', '').replace(/[0-9a-f]{2}/g, '%$&'));
 
 /** Convert UTF8 string to hex encoded string */

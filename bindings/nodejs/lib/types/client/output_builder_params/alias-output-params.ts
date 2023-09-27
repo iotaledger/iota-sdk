@@ -1,6 +1,6 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Feature, HexEncodedString } from '../..';
+import { AliasId, Feature, HexEncodedString } from '../..';
 import type { BasicOutputBuilderParams } from './basic-output-params';
 
 /**
@@ -10,7 +10,7 @@ export interface AliasOutputBuilderParams extends BasicOutputBuilderParams {
     /**
      * Unique identifier of an alias, which is the BLAKE2b-256 hash of the Output ID that created it.
      */
-    aliasId: HexEncodedString;
+    aliasId: AliasId;
     /**
      * A counter that must increase by 1 every time the alias is state transitioned.
      */

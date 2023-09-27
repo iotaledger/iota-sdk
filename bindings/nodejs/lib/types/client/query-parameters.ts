@@ -1,6 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { NumericString } from '../utils/numeric';
+
 /**
  * Query parameter for filtering output requests
  */
@@ -152,7 +154,7 @@ interface CreatedAfter {
 }
 /** Pass the cursor(confirmationMS+outputId.pageSize) to start the results from */
 interface Cursor {
-    cursor: string;
+    cursor: NumericString;
 }
 /** Filter for a certain issuer */
 interface Issuer {

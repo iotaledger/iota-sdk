@@ -1,6 +1,9 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { NftId, OutputId, TokenId } from '../block';
+import { NumericString } from '../utils';
+
 /** An Address of the Account */
 export interface AccountAddress {
     /** The Bech32 address. */
@@ -18,7 +21,7 @@ export interface SendParams {
     /** The Bech32 address to send the amount to. */
     address: string;
     /** The amount to send. */
-    amount: bigint | string;
+    amount: bigint | NumericString;
     /**
      * Bech32 encoded address, to which the storage deposit will be returned if one is necessary
      * given the provided amount. If a storage deposit is needed and a return address is not provided, it will
@@ -42,7 +45,7 @@ export interface AddressWithUnspentOutputs {
     /** Whether the address is a public or an internal (change) address. */
     internal: boolean;
     /** The IDs of associated unspent outputs. */
-    outputIds: string[];
+    outputIds: OutputId[];
 }
 
 /** Address with native tokens */
@@ -50,7 +53,7 @@ export interface SendNativeTokensParams {
     /** The Bech32 address. */
     address: string;
     /** The Native Tokens to send. */
-    nativeTokens: [string, bigint][];
+    nativeTokens: [TokenId, bigint][];
     /**
      * Bech32 encoded address, to which the storage deposit will be returned.
      * Default will use the first address of the account.
@@ -68,7 +71,7 @@ export interface SendNftParams {
     /** The Bech32 address. */
     address: string;
     /** The ID of the NFT to send. */
-    nftId: string;
+    nftId: NftId;
 }
 
 /** Options for address generation, useful with a Ledger Nano SecretManager */

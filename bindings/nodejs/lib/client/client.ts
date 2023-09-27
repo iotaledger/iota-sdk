@@ -38,8 +38,12 @@ import {
     MilestonePayload,
     TreasuryOutput,
     Output,
+    MilestoneId,
+    AliasId,
+    NftId,
+    FoundryId,
 } from '../types/block';
-import { HexEncodedString } from '../utils';
+import { HexEncodedString, NumericString } from '../utils';
 import {
     IBlockMetadata,
     INodeInfo,
@@ -48,6 +52,7 @@ import {
     UTXOInput,
     Response,
     OutputId,
+    TransactionId,
 } from '../types';
 import {
     IMilestoneUtxoChangesResponse,
@@ -431,7 +436,7 @@ export class Client {
     /**
      * Get the token supply.
      */
-    async getTokenSupply(): Promise<string> {
+    async getTokenSupply(): Promise<NumericString> {
         return (await this.getProtocolParameters()).tokenSupply;
     }
 
@@ -571,7 +576,7 @@ export class Client {
      * @returns A milestone UTXO changes response.
      */
     async getUtxoChangesById(
-        milestoneId: string,
+        milestoneId: MilestoneId,
     ): Promise<IMilestoneUtxoChangesResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getUtxoChangesById',
@@ -665,7 +670,7 @@ export class Client {
      * @param transactionId The ID of the transaction.
      * @returns The included block that contained the transaction.
      */
-    async getIncludedBlock(transactionId: string): Promise<Block> {
+    async getIncludedBlock(transactionId: TransactionId): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlock',
             data: {
@@ -682,7 +687,9 @@ export class Client {
      * @param transactionId The ID of the transaction.
      * @returns The included block that contained the transaction.
      */
-    async getIncludedBlockMetadata(transactionId: string): Promise<Block> {
+    async getIncludedBlockMetadata(
+        transactionId: TransactionId,
+    ): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
@@ -700,7 +707,10 @@ export class Client {
      * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
      * @returns The corresponding Bech32 address.
      */
-    async hexToBech32(hex: string, bech32Hrp?: string): Promise<string> {
+    async hexToBech32(
+        hex: string,
+        bech32Hrp?: string,
+    ): Promise<HexEncodedString> {
         const response = await this.methodHandler.callMethod({
             name: 'hexToBech32',
             data: {
@@ -720,7 +730,7 @@ export class Client {
      * @returns The corresponding Bech32 address.
      */
     async aliasIdToBech32(
-        aliasId: string,
+        aliasId: AliasId,
         bech32Hrp?: string,
     ): Promise<string> {
         const response = await this.methodHandler.callMethod({
@@ -741,7 +751,10 @@ export class Client {
      * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
      * @returns The corresponding Bech32 address.
      */
-    async nftIdToBech32(nftId: string, bech32Hrp?: string): Promise<string> {
+    async nftIdToBech32(
+        nftId: NftId,
+        bech32Hrp?: string,
+    ): Promise<HexEncodedString> {
         const response = await this.methodHandler.callMethod({
             name: 'nftIdToBech32',
             data: {
@@ -763,7 +776,7 @@ export class Client {
     async hexPublicKeyToBech32Address(
         hex: string,
         bech32Hrp?: string,
-    ): Promise<string> {
+    ): Promise<HexEncodedString> {
         const response = await this.methodHandler.callMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {
@@ -800,7 +813,7 @@ export class Client {
      * @param aliasId An Alias ID.
      * @returns The corresponding output ID.
      */
-    async aliasOutputId(aliasId: string): Promise<string> {
+    async aliasOutputId(aliasId: AliasId): Promise<OutputId> {
         const response = await this.methodHandler.callMethod({
             name: 'aliasOutputId',
             data: {
@@ -836,7 +849,7 @@ export class Client {
      * @param nftId An NFT ID.
      * @returns The corresponding output ID.
      */
-    async nftOutputId(nftId: string): Promise<string> {
+    async nftOutputId(nftId: NftId): Promise<OutputId> {
         const response = await this.methodHandler.callMethod({
             name: 'nftOutputId',
             data: {
@@ -872,7 +885,7 @@ export class Client {
      * @param foundryId A Foundry ID.
      * @returns The corresponding output ID.
      */
-    async foundryOutputId(foundryId: string): Promise<string> {
+    async foundryOutputId(foundryId: FoundryId): Promise<OutputId> {
         const response = await this.methodHandler.callMethod({
             name: 'foundryOutputId',
             data: {
@@ -891,7 +904,7 @@ export class Client {
      * @returns An array of corresponding output responses.
      */
     async getOutputsIgnoreErrors(
-        outputIds: string[],
+        outputIds: OutputId[],
     ): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutputsIgnoreErrors',
@@ -1211,7 +1224,7 @@ export class Client {
      */
     async requestFundsFromFaucet(
         url: string,
-        address: string,
+        address: HexEncodedString,
     ): Promise<string> {
         const response = await this.methodHandler.callMethod({
             name: 'requestFundsFromFaucet',
