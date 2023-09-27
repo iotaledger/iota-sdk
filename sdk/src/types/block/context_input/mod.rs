@@ -123,7 +123,7 @@ mod tests {
         .unwrap();
         assert!(commitment.is_commitment());
         assert_eq!(
-            commitment.as_commitment().commitment_id().to_string(),
+            commitment.as_commitment().slot_commitment_id().to_string(),
             "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
         );
 

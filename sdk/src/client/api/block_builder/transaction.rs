@@ -10,6 +10,7 @@ use crate::{
     types::block::{
         output::{Output, OutputId},
         payload::transaction::{RegularTransactionEssence, TransactionPayload},
+        protocol::ProtocolParameters,
         semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         BlockId, BlockWrapper,
@@ -29,6 +30,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction: &TransactionPayload,
+    protocol_parameters: ProtocolParameters,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
     let transaction_id = transaction.id();
     let inputs = input_signing_data
@@ -37,6 +39,7 @@ pub fn verify_semantic(
         .collect::<Vec<(&OutputId, &Output)>>();
 
     let context = ValidationContext::new(
+        protocol_parameters,
         &transaction_id,
         transaction.essence(),
         inputs.iter().map(|(id, input)| (*id, *input)),

@@ -29,6 +29,10 @@ impl TimelockUnlockCondition {
     pub fn slot_index(&self) -> SlotIndex {
         self.0
     }
+
+    pub fn is_time_locked(&self, commitment_index: SlotIndex, min_committable_age: SlotIndex) -> bool {
+        (commitment_index + min_committable_age) >= self.0
+    }
 }
 
 #[inline]

@@ -122,7 +122,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
+        .finish_with_params(protocol_parameters.clone())?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -154,7 +154,7 @@ async fn nft_reference_unlocks() -> Result<()> {
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

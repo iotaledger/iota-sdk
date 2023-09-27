@@ -312,6 +312,7 @@ fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
 
     let mut reward_index_set = HashSet::new();
     let mut bic_account_id_set = HashSet::new();
+
     for input in context_inputs.iter() {
         match input {
             ContextInput::BlockIssuanceCredit(bic) => {

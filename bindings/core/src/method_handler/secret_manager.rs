@@ -37,9 +37,13 @@ pub(crate) async fn call_secret_manager_method_internal(
         }
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,
+            protocol_parameters,
         } => {
             let transaction = &secret_manager
-                .sign_transaction(PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
+                .sign_transaction(
+                    PreparedTransactionData::try_from_dto(prepared_transaction_data)?,
+                    protocol_parameters,
+                )
                 .await?;
             Response::SignedTransaction(transaction.into())
         }

@@ -11,6 +11,7 @@ use crate::types::block::{
     address::Address,
     output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
+    protocol::ProtocolParameters,
     unlock::Unlocks,
     Error,
 };
@@ -153,6 +154,8 @@ impl TryFrom<u8> for TransactionFailureReason {
 ///
 pub struct ValidationContext<'a> {
     ///
+    protocol_parameters: ProtocolParameters,
+    ///
     pub essence: &'a RegularTransactionEssence,
     ///
     pub essence_hash: [u8; 32],
@@ -183,12 +186,14 @@ pub struct ValidationContext<'a> {
 impl<'a> ValidationContext<'a> {
     ///
     pub fn new(
+        protocol_parameters: ProtocolParameters,
         transaction_id: &TransactionId,
         essence: &'a RegularTransactionEssence,
         inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
         unlocks: &'a Unlocks,
     ) -> Self {
         Self {
+            protocol_parameters,
             essence,
             unlocks,
             essence_hash: TransactionEssence::from(essence.clone()).hash(),
@@ -274,9 +279,23 @@ pub fn semantic_validation(
             return Ok(Some(conflict));
         }
 
-        if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
-            return Ok(Some(TransactionFailureReason::TimelockNotExpired));
+        if let Some(timelock) = unlock_conditions.timelock() {
+            if let Some(commitment) = context.essence.context_inputs().iter().find(|c| c.is_commitment()) {
+                if timelock.is_time_locked(
+                    commitment.as_commitment().slot_index(),
+                    context.protocol_parameters.min_committable_age(),
+                ) {
+                    return Ok(Some(TransactionFailureReason::TimelockNotExpired));
+                }
+            } else {
+                // TODO return an error
+            }
         }
+
+        // TODO remove the method?
+        // if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
+        //     return Ok(Some(TransactionFailureReason::TimelockNotExpired));
+        // }
 
         if !unlock_conditions.is_expired(context.essence.creation_slot()) {
             if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {

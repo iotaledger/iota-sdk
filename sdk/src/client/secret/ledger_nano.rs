@@ -30,6 +30,7 @@ use crate::{
         address::{AccountAddress, Address, Ed25519Address, NftAddress},
         output::Output,
         payload::transaction::{TransactionEssence, TransactionPayload},
+        protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
@@ -405,8 +406,9 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        protocol_parameters: ProtocolParameters,
     ) -> Result<TransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
+        super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
 }
 

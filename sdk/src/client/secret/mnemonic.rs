@@ -20,7 +20,8 @@ use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Client, Error},
     types::block::{
-        address::Ed25519Address, payload::transaction::TransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+        address::Ed25519Address, payload::transaction::TransactionPayload, protocol::ProtocolParameters,
+        signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -131,8 +132,9 @@ impl SecretManage for MnemonicSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        protocol_parameters: ProtocolParameters,
     ) -> Result<TransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
+        super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
 }
 

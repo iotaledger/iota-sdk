@@ -131,6 +131,7 @@ where
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.transaction_payload,
+            self.client().get_protocol_parameters().await?,
         )?;
 
         if let Some(conflict) = conflict {

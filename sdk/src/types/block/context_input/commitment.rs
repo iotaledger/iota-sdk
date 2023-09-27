@@ -3,7 +3,7 @@
 
 use derive_more::{Display, From};
 
-use crate::types::block::slot::SlotCommitmentId;
+use crate::types::block::slot::{SlotCommitmentId, SlotIndex};
 
 /// A Commitment Context Input references a commitment to a certain slot.
 #[derive(Clone, Copy, Display, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
@@ -18,9 +18,14 @@ impl CommitmentContextInput {
         Self(commitment_id)
     }
 
-    /// Returns the commitment id of the [`CommitmentContextInput`].
-    pub fn commitment_id(&self) -> SlotCommitmentId {
+    /// Returns the slot commitment id of the [`CommitmentContextInput`].
+    pub fn slot_commitment_id(&self) -> SlotCommitmentId {
         self.0
+    }
+
+    /// Returns the slot index of the [`CommitmentContextInput`].
+    pub fn slot_index(&self) -> SlotIndex {
+        self.0.index()
     }
 }
 
@@ -43,7 +48,7 @@ mod dto {
         fn from(value: &CommitmentContextInput) -> Self {
             Self {
                 kind: CommitmentContextInput::KIND,
-                commitment_id: value.commitment_id(),
+                commitment_id: value.slot_commitment_id(),
             }
         }
     }
