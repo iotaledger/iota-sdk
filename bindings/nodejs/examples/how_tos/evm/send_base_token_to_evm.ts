@@ -94,6 +94,7 @@ async function run() {
         // Allowance
 
         // Send Output
+        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
         console.log('Sending Transaction...');
         const transaction = await account.sendOutputs([basicOutput]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
