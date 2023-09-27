@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+from typing import Dict, Optional, Union
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from typing import Dict, Optional, Union
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import AccountOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, outputs_from_dicts
 
@@ -67,9 +67,9 @@ class OutputWithMetadata:
     def as_dict(self):
         """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
         """
-        config = {}
+        d = {}
 
-        config['metadata'] = self.metadata.__dict__
-        config['output'] = self.output.as_dict()
+        d['metadata'] = self.metadata.__dict__
+        d['output'] = self.output.as_dict()
 
-        return config
+        return d

@@ -132,28 +132,28 @@ class StakingFeature(Feature):
         init=False)
 
 
-def feature_from_dict(dict: Dict[str, Any]) -> Union[SenderFeature, IssuerFeature,
-                                                     MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]:
+def feature_from_dict(d: Dict[str, Any]) -> Union[SenderFeature, IssuerFeature,
+                                                  MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == FeatureType.Sender:
-        return SenderFeature.from_dict(dict)
-    if type == FeatureType.Issuer:
-        return IssuerFeature.from_dict(dict)
-    if type == FeatureType.Metadata:
-        return MetadataFeature.from_dict(dict)
-    if type == FeatureType.Tag:
-        return TagFeature.from_dict(dict)
-    if type == FeatureType.BlockIssuer:
-        return BlockIssuerFeature.from_dict(dict)
-    if type == FeatureType.Staking:
-        return StakingFeature.from_dict(dict)
-    raise Exception(f'invalid feature type: {type}')
+    feature_type = d['type']
+    if feature_type == FeatureType.Sender:
+        return SenderFeature.from_dict(d)
+    if feature_type == FeatureType.Issuer:
+        return IssuerFeature.from_dict(d)
+    if feature_type == FeatureType.Metadata:
+        return MetadataFeature.from_dict(d)
+    if feature_type == FeatureType.Tag:
+        return TagFeature.from_dict(d)
+    if feature_type == FeatureType.BlockIssuer:
+        return BlockIssuerFeature.from_dict(d)
+    if feature_type == FeatureType.Staking:
+        return StakingFeature.from_dict(d)
+    raise Exception(f'invalid feature type: {feature_type}')
 
 
 def features_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[SenderFeature,

@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass, field
-from dataclasses_json import config
 from enum import IntEnum
 from typing import Dict, Optional, List, Union, Any
+from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.feature import features_from_dicts, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
@@ -227,26 +227,26 @@ class DelegationOutput(Output):
         OutputType.Delegation), init=False)
 
 
-def output_from_dict(dict: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
-                                                    FoundryOutput, NftOutput, DelegationOutput]:
+def output_from_dict(d: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
+                                                 FoundryOutput, NftOutput, DelegationOutput]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == OutputType.Basic:
-        return BasicOutput.from_dict(dict)
-    if type == OutputType.Account:
-        return AccountOutput.from_dict(dict)
-    if type == OutputType.Foundry:
-        return FoundryOutput.from_dict(dict)
-    if type == OutputType.Nft:
-        return NftOutput.from_dict(dict)
-    if type == OutputType.Delegation:
-        return DelegationOutput.from_dict(dict)
-    raise Exception(f'invalid output type: {type}')
+    output_type = dict['type']
+    if output_type == OutputType.Basic:
+        return BasicOutput.from_dict(d)
+    if output_type == OutputType.Account:
+        return AccountOutput.from_dict(d)
+    if output_type == OutputType.Foundry:
+        return FoundryOutput.from_dict(d)
+    if output_type == OutputType.Nft:
+        return NftOutput.from_dict(d)
+    if output_type == OutputType.Delegation:
+        return DelegationOutput.from_dict(d)
+    raise Exception(f'invalid output type: {output_type}')
 
 
 def outputs_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[BasicOutput,

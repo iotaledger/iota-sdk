@@ -149,30 +149,31 @@ class ImmutableAccountAddressUnlockCondition(UnlockCondition):
         UnlockConditionType.ImmutableAccountAddress), init=False)
 
 
-def unlock_condition_from_dict(dict: Dict[str, Any]) -> Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
-                                                              ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]:
+def unlock_condition_from_dict(d: Dict[str, Any]) -> Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+                                                           ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == UnlockConditionType.Address:
-        return AddressUnlockCondition.from_dict(dict)
-    if type == UnlockConditionType.StorageDepositReturn:
-        return StorageDepositReturnUnlockCondition.from_dict(dict)
-    if type == UnlockConditionType.Timelock:
-        return TimelockUnlockCondition.from_dict(dict)
-    if type == UnlockConditionType.Expiration:
-        return ExpirationUnlockCondition.from_dict(dict)
-    if type == UnlockConditionType.StateControllerAddress:
-        return StateControllerAddressUnlockCondition.from_dict(dict)
-    if type == UnlockConditionType.GovernorAddress:
-        return GovernorAddressUnlockCondition.from_dict(dict)
-    if type == UnlockConditionType.ImmutableAccountAddress:
-        return ImmutableAccountAddressUnlockCondition.from_dict(dict)
-    raise Exception(f'invalid unlock condition type: {type}')
+    # pylint: disable=R0911
+    uc_type = d['type']
+    if uc_type == UnlockConditionType.Address:
+        return AddressUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.StorageDepositReturn:
+        return StorageDepositReturnUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.Timelock:
+        return TimelockUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.Expiration:
+        return ExpirationUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.StateControllerAddress:
+        return StateControllerAddressUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.GovernorAddress:
+        return GovernorAddressUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.ImmutableAccountAddress:
+        return ImmutableAccountAddressUnlockCondition.from_dict(d)
+    raise Exception(f'invalid unlock condition type: {uc_type}')
 
 
 def unlock_conditions_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,

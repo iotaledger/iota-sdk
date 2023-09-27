@@ -81,21 +81,21 @@ class AddressWithUnspentOutputs():
     output_ids: bool
 
 
-def address_from_dict(dict: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress, NFTAddress]:
+def address_from_dict(d: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress, NFTAddress]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == AddressType.ED25519:
-        return Ed25519Address.from_dict(dict)
-    if type == AddressType.ACCOUNT:
-        return AccountAddress.from_dict(dict)
-    if type == AddressType.NFT:
-        return NFTAddress.from_dict(dict)
-    raise Exception(f'invalid address type: {type}')
+    address_type = d['type']
+    if address_type == AddressType.ED25519:
+        return Ed25519Address.from_dict(d)
+    if address_type == AddressType.ACCOUNT:
+        return AccountAddress.from_dict(d)
+    if address_type == AddressType.NFT:
+        return NFTAddress.from_dict(d)
+    raise Exception(f'invalid address type: {address_type}')
 
 
 def addresses_from_dicts(

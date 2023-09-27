@@ -73,22 +73,22 @@ class RewardContextInput(ContextInput):
         init=False)
 
 
-def context_input_from_dict(dict: Dict[str, Any]) -> Union[CommitmentContextInput,
-                                                           BlockIssuanceCreditContextInput, RewardContextInput]:
+def context_input_from_dict(d: Dict[str, Any]) -> Union[CommitmentContextInput,
+                                                        BlockIssuanceCreditContextInput, RewardContextInput]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == ContextInputType.Commitment:
-        return CommitmentContextInput.from_dict(dict)
-    if type == ContextInputType.BlockIssuanceCredit:
-        return BlockIssuanceCreditContextInput.from_dict(dict)
-    if type == ContextInputType.Reward:
-        return RewardContextInput.from_dict(dict)
-    raise Exception(f'invalid context input type: {type}')
+    context_input_type = dict['type']
+    if context_input_type == ContextInputType.Commitment:
+        return CommitmentContextInput.from_dict(d)
+    if context_input_type == ContextInputType.BlockIssuanceCredit:
+        return BlockIssuanceCreditContextInput.from_dict(d)
+    if context_input_type == ContextInputType.Reward:
+        return RewardContextInput.from_dict(d)
+    raise Exception(f'invalid context input type: {context_input_type}')
 
 
 def context_inputs_from_dicts(

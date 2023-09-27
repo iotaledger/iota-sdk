@@ -77,23 +77,23 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
-def unlock_from_dict(dict: Dict[str, Any]) -> Union[SignatureUnlock, ReferenceUnlock, AccountUnlock, NftUnlock]:
+def unlock_from_dict(d: Dict[str, Any]) -> Union[SignatureUnlock, ReferenceUnlock, AccountUnlock, NftUnlock]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == UnlockType.Signature:
-        return SignatureUnlock.from_dict(dict)
-    if type == UnlockType.Reference:
-        return ReferenceUnlock.from_dict(dict)
-    if type == UnlockType.Account:
-        return AccountUnlock.from_dict(dict)
-    if type == UnlockType.Nft:
-        return NftUnlock.from_dict(dict)
-    raise Exception(f'invalid unlock type: {type}')
+    unlock_type = d['type']
+    if unlock_type == UnlockType.Signature:
+        return SignatureUnlock.from_dict(d)
+    if unlock_type == UnlockType.Reference:
+        return ReferenceUnlock.from_dict(d)
+    if unlock_type == UnlockType.Account:
+        return AccountUnlock.from_dict(d)
+    if unlock_type == UnlockType.Nft:
+        return NftUnlock.from_dict(d)
+    raise Exception(f'invalid unlock type: {unlock_type}')
 
 
 def unlocks_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[SignatureUnlock,

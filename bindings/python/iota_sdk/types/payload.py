@@ -65,19 +65,19 @@ class TransactionPayload(Payload):
         init=False)
 
 
-def payload_from_dict(dict: Dict[str, Any]) -> Union[TaggedDataPayload, TransactionPayload]:
+def payload_from_dict(d: Dict[str, Any]) -> Union[TaggedDataPayload, TransactionPayload]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
     Arguments:
-    * `dict`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    type = dict['type']
-    if type == PayloadType.TaggedData:
-        return TaggedDataPayload.from_dict(dict)
-    if type == PayloadType.Transaction:
-        return TransactionPayload.from_dict(dict)
-    raise Exception(f'invalid payload type: {type}')
+    payload_type = d['type']
+    if payload_type == PayloadType.TaggedData:
+        return TaggedDataPayload.from_dict(d)
+    if payload_type == PayloadType.Transaction:
+        return TransactionPayload.from_dict(d)
+    raise Exception(f'invalid payload type: {payload_type}')
 
 
 def payloads_from_dicts(
