@@ -152,7 +152,7 @@ fn dto_mismatch_version() {
         }
     });
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, protocol_parameters.clone());
+    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,
@@ -193,7 +193,7 @@ fn dto_mismatch_network_id() {
         }
     });
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, protocol_parameters.clone());
+    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,

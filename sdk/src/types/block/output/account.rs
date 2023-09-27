@@ -370,7 +370,7 @@ pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METAD
 /// Describes an account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AccountOutput {
-    // Amount of IOTA tokens held by the output.
+    // Amount of IOTA coins held by the output.
     amount: u64,
     mana: u64,
     // Native tokens held by the output.
@@ -780,29 +780,20 @@ pub(crate) mod dto {
     pub struct AccountOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        // Amount of IOTA tokens held by the output.
         #[serde(with = "string")]
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        // Unique identifier of the account.
         pub account_id: AccountId,
-        // A counter that must increase by 1 every time the account is state transitioned.
         pub state_index: u32,
-        // Metadata that can only be changed by the state controller.
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
         pub state_metadata: Box<[u8]>,
-        // A counter that denotes the number of foundries created by this account.
         pub foundry_counter: u32,
-        //
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        //
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
-        //
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub immutable_features: Vec<Feature>,
     }

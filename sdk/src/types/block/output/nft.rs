@@ -287,7 +287,7 @@ impl From<&NftOutput> for NftOutputBuilder {
 /// Describes an NFT output, a globally unique token with metadata attached.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct NftOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     amount: u64,
     /// Amount of stored Mana held by this output.
     mana: u64,

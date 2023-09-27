@@ -206,10 +206,10 @@ pub struct ManaRewardsResponse {
 pub struct CommitteeResponse {
     /// The epoch index of the committee.
     pub epoch_index: EpochIndex,
-    /// The total amount of delegated and staked IOTA tokens in the selected committee.
+    /// The total amount of delegated and staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_stake: u64,
-    /// The total amount of staked IOTA tokens in the selected committee.
+    /// The total amount of staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_validator_stake: u64,
     /// The validators of the committee.

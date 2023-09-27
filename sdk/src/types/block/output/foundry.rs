@@ -329,7 +329,7 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 /// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     amount: u64,
     /// Native tokens held by this output.
     native_tokens: NativeTokens,
@@ -815,7 +815,7 @@ mod tests {
         let dto = OutputDto::Foundry((&output).into());
         let output_unver = Output::try_from_dto(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from_dto_with_params(dto, protocol_parameters.clone()).unwrap();
+        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
