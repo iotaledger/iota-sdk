@@ -157,7 +157,7 @@ def unlock_condition_from_dict(d: Dict[str, Any]) -> Union[AddressUnlockConditio
     Arguments:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    # pylint: disable=R0911
+    # pylint: disable=too-many-return-statements
     uc_type = d['type']
     if uc_type == UnlockConditionType.Address:
         return AddressUnlockCondition.from_dict(d)
