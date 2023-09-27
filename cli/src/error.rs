@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use dialoguer::Error as DialoguerError;
 use fern_logger::Error as LoggerError;
 use iota_sdk::{
     client::error::Error as ClientError, types::block::Error as BlockError, wallet::error::Error as WalletError,
@@ -14,6 +15,8 @@ pub enum Error {
     Block(#[from] BlockError),
     #[error("client error: {0}")]
     Client(Box<ClientError>),
+    #[error("dialoguer error: {0}")]
+    Dialoguer(#[from] DialoguerError),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
     #[error("logger error: {0}")]
