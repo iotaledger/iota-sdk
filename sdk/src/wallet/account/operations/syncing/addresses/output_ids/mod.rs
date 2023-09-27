@@ -38,10 +38,6 @@ where
         address: Bech32Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        // TODO: remove
-        // let bech32_hrp = self.bech32_hrp().await;
-        // let bech32_address = Bech32Address::new(bech32_hrp, address);
-
         if sync_options.sync_only_most_basic_outputs {
             let output_ids = self
                 .get_basic_output_ids_with_address_unlock_condition_only(address)

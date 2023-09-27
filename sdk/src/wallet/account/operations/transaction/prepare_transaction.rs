@@ -77,21 +77,6 @@ where
                         // select_inputs will select an address from the inputs if it's none
                         None
                     }
-                    RemainderValueStrategy::ChangeAddress => {
-                        // TODO: the change address will now always be the wallet address, right?
-                        // let remainder_address = self.generate_remainder_address().await?;
-                        let remainder_address = self.address().await;
-                        #[cfg(feature = "events")]
-                        {
-                            self.emit(WalletEvent::TransactionProgress(
-                                TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                    address: remainder_address,
-                                }),
-                            ))
-                            .await;
-                        }
-                        Some(remainder_address.into_inner())
-                    }
                     RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
             }

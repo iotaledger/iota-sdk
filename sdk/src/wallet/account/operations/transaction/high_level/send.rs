@@ -142,8 +142,6 @@ where
 
         let wallet_address = self.address().await;
 
-        // TODO: remove
-        // let default_return_address = wallet_address.first().ok_or(Error::FailedToGetRemainder)?;
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
 
         let slot_index = self.client().get_slot_index().await?;

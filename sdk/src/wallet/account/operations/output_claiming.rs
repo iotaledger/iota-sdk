@@ -226,14 +226,6 @@ where
         }
 
         let wallet_address = wallet_data.address.clone();
-
-        // TODO: remove
-        // let first_account_address = wallet_data
-        //     .public_addresses
-        //     .first()
-        //     .ok_or(crate::wallet::Error::FailedToGetRemainder)?
-        //     .clone();
-
         drop(wallet_data);
 
         let mut additional_inputs_used = HashSet::new();

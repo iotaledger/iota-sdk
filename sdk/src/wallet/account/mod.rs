@@ -86,48 +86,6 @@ pub struct FilterOptions {
     pub nft_ids: Option<HashSet<NftId>>,
 }
 
-// TODO: remove this down below!
-// /// A thread guard over an account, so we can lock the account during operations.
-// #[derive(Debug)]
-// pub struct Account<S: SecretManage = SecretManager> {
-//     inner: Arc<AccountInner>,
-//     pub(crate) wallet: Arc<WalletInner<S>>,
-// }
-
-// impl<S: SecretManage> Clone for Account<S> {
-//     fn clone(&self) -> Self {
-//         Self {
-//             inner: self.inner.clone(),
-//             wallet: self.wallet.clone(),
-//         }
-//     }
-// }
-
-// impl<S: SecretManage> Account<S> {
-//     pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
-//         self.wallet.get_secret_manager()
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct AccountInner {
-//     details: RwLock<WalletData>,
-//     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
-//     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
-//     // again, because sending transactions can change that
-//     pub(crate) last_synced: Mutex<u128>,
-//     pub(crate) default_sync_options: Mutex<SyncOptions>,
-// }
-
-// // impl Deref so we can use `account.details()` instead of `account.details.read()`
-// impl<S: SecretManage> Deref for Account<S> {
-//     type Target = AccountInner;
-
-//     fn deref(&self) -> &Self::Target {
-//         &self.inner
-//     }
-// }
-
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
     tx_payload: TransactionPayload,

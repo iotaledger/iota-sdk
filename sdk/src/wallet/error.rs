@@ -38,9 +38,6 @@ pub enum Error {
     /// Custom input error
     #[error("custom input error {0}")]
     CustomInput(String),
-    /// Failed to get remainder
-    #[error("failed to get remainder address")]
-    FailedToGetRemainder,
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },

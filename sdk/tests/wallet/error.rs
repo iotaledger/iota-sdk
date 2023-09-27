@@ -13,10 +13,4 @@ fn stringified_error() {
         &serde_json::to_string(&error).unwrap(),
         "{\"type\":\"noOutputsToConsolidate\",\"error\":\"nothing to consolidate: available outputs: 0, consolidation threshold: 0\"}"
     );
-
-    let error = Error::FailedToGetRemainder;
-    assert_eq!(
-        &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"failedToGetRemainder\",\"error\":\"failed to get remainder address\"}"
-    );
 }

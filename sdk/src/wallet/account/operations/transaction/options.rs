@@ -35,8 +35,6 @@ pub struct TransactionOptions {
 pub enum RemainderValueStrategy {
     /// Keep the remainder value on the source address.
     ReuseAddress,
-    /// Move the remainder value to a change address.
-    ChangeAddress,
     /// Move the remainder value to any specified address.
     CustomAddress(Address),
 }

@@ -132,8 +132,6 @@ where
         let mut outputs_to_consolidate = Vec::new();
         let wallet_data = self.data().await;
 
-        // TODO: remove
-        // let wallet_addresses = &wallet_data.addresses_with_unspent_outputs[..];
         let wallet_address = &wallet_data.address;
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
@@ -145,7 +143,6 @@ where
                 }
             }
 
-            // TODO: remove
             let is_locked_output = wallet_data.locked_outputs.contains(output_id);
             let should_consolidate_output = self.should_consolidate_output(output_data, slot_index, wallet_address)?;
             if !is_locked_output && should_consolidate_output {
@@ -185,7 +182,6 @@ where
             }
         };
 
-        // TODO: remove
         // only consolidate if the unlocked outputs are >= output_threshold
         if outputs_to_consolidate.is_empty() || (!params.force && outputs_to_consolidate.len() < output_threshold) {
             log::debug!(

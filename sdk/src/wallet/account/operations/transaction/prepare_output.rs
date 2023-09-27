@@ -292,11 +292,6 @@ where
                         // select_inputs will select an address from the inputs if it's none
                         None
                     }
-                    RemainderValueStrategy::ChangeAddress => {
-                        // TODO: remove since all change goes back to wallet address I guess
-                        // let remainder_address = self.generate_remainder_address().await?;
-                        Some(self.address().await.into_inner())
-                    }
                     RemainderValueStrategy::CustomAddress(address) => Some(*address),
                 }
             }

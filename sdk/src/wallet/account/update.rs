@@ -49,25 +49,6 @@ where
         let network_id = self.client().get_network_id().await?;
         let mut wallet_data = self.data_mut().await;
 
-        // TODO: remove
-
-        // // Update addresses_with_unspent_outputs
-        // // only keep addresses below the address start index, because we synced the addresses above and will update
-        // // them
-        // wallet_data.addresses_with_unspent_outputs.retain(|a| {
-        //     if a.internal {
-        //         a.key_index < options.address_start_index_internal
-        //     } else {
-        //         a.key_index < options.address_start_index
-        //     }
-        // });
-
-        // // then add all synced addresses with balance, all other addresses that had balance before will then be
-        // removed // from this list
-        // wallet_data
-        //     .addresses_with_unspent_outputs
-        //     .extend(addresses_with_unspent_outputs);
-
         // Update spent outputs
         for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it

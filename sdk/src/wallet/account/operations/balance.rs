@@ -25,8 +25,6 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     Error: From<S::Error>,
 {
-    // TODO: Needs to be merged with Wallet::balance
-
     /// Get the balance of the wallet.
     pub async fn balance(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
@@ -35,30 +33,6 @@ where
 
         self.balance_inner(&wallet_data).await
     }
-
-    // TODO: remove
-
-    // /// Get the balance of the given addresses.
-    // pub async fn addresses_balance(&self, addresses: Vec<impl ConvertTo<Bech32Address>>) -> Result<Balance> {
-    //     log::debug!("[BALANCE] addresses_balance");
-
-    //     let wallet_data = self.data.read().await;
-
-    //     let addresses_with_unspent_outputs = addresses
-    //         .into_iter()
-    //         .map(|address| {
-    //             let address = address.convert()?;
-    //             wallet_data
-    //                 .addresses_with_unspent_outputs
-    //                 .iter()
-    //                 .find(|&a| a.address == address)
-    //                 .ok_or(Error::AddressNotFoundInAccount(address))
-    //         })
-    //         .collect::<Result<Vec<&_>>>()?;
-
-    //     self.balance_inner(addresses_with_unspent_outputs.into_iter(), &wallet_data)
-    //         .await
-    // }
 
     async fn balance_inner(
         &self,
@@ -74,15 +48,9 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
 
-        // TODO: remove
-        // for address_with_unspent_outputs in addresses_with_unspent_outputs {
-
         #[cfg(feature = "participation")]
         {
             if let Some(voting_output) = &voting_output {
-                // TODO: remove
-                // if voting_output.output.as_basic().address() == address_with_unspent_outputs.address.inner() {
-
                 if voting_output.output.as_basic().address() == wallet_data.address.inner() {
                     balance.base_coin.voting_power = voting_output.output.amount();
                 }
@@ -90,10 +58,6 @@ where
         }
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
-            // TODO: remove
-            // for output_id in &address_with_unspent_outputs.output_ids {
-            // if let Some(data) = wallet_data.unspent_outputs.get(output_id) {
-
             // Check if output is from the network we're currently connected to
             if output_data.network_id != network_id {
                 continue;

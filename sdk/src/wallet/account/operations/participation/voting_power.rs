@@ -76,16 +76,7 @@ where
             }
             None => (
                 BasicOutputBuilder::new_with_amount(amount)
-                    .add_unlock_condition(AddressUnlockCondition::new(
-                        // TODO: remove
-                        // self.public_addresses()
-                        //     .await
-                        //     .first()
-                        //     .expect("account needs to have a public address")
-                        //     .address
-                        //     .inner,
-                        self.address().await,
-                    ))
+                    .add_unlock_condition(AddressUnlockCondition::new(self.address().await))
                     .add_feature(TagFeature::new(PARTICIPATION_TAG)?)
                     .finish_output(token_supply)?,
                 None,

@@ -116,10 +116,6 @@ pub struct WalletData {
     pub(crate) bip_path: Bip44,
     /// The wallet address.
     pub(crate) address: Bech32Address,
-
-    // TODO: remove
-    // /// The bech32 hrp.
-    // pub(crate) bech32_hrp: Hrp,
     /// The wallet alias.
     pub(crate) alias: String,
     /// Outputs
@@ -289,26 +285,6 @@ where
     pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
         self.data().await.incoming_transactions.get(transaction_id).cloned()
     }
-
-    // TODO: remove
-
-    // /// Returns all addresses of the wallet.
-    // pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
-    //     let wallet_data = self.data().await;
-    //     let mut all_addresses = wallet_data.public_addresses.clone();
-    //     all_addresses.extend(wallet_data.internal_addresses.clone());
-    //     Ok(all_addresses.to_vec())
-    // }
-
-    // /// Returns all public addresses of the wallet.
-    // pub(crate) async fn public_addresses(&self) -> Vec<Bip44Address> {
-    //     self.data().await.public_addresses.to_vec()
-    // }
-
-    // /// Returns only addresses of the wallet with balance
-    // pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
-    //     Ok(self.data().await.addresses_with_unspent_outputs.to_vec())
-    // }
 
     fn filter_outputs<'a>(
         &self,
