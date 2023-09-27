@@ -11,7 +11,7 @@ impl InputSelection {
     /// Fulfills a sender requirement by selecting an available input that unlocks its address.
     pub(crate) fn fulfill_sender_requirement(
         &mut self,
-        address: Address,
+        address: &Address,
     ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         match address {
             Address::Ed25519(_) => {
@@ -20,7 +20,7 @@ impl InputSelection {
                 match self.fulfill_ed25519_requirement(address) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Ed25519(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
                 }
@@ -32,7 +32,7 @@ impl InputSelection {
                 match self.fulfill_account_requirement(account_address.into_account_id(), AccountTransition::State) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Account(_, _))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
                 }
@@ -43,7 +43,7 @@ impl InputSelection {
                 match self.fulfill_nft_requirement(nft_address.into_nft_id()) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Nft(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
                 }

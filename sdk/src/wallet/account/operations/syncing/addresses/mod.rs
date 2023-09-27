@@ -35,7 +35,7 @@ where
                         specific_addresses_to_sync.insert(address.clone());
                     }
                     None => {
-                        return Err(crate::wallet::Error::AddressNotFoundInAccount(*bech32_address));
+                        return Err(crate::wallet::Error::AddressNotFoundInAccount(bech32_address.clone()));
                     }
                 }
             }

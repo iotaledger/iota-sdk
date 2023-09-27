@@ -618,7 +618,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi").to_string(),
+            addresses[0].clone().to_bech32_unchecked("atoi").to_string(),
             "atoi1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mru50gvd8"
         );
     }

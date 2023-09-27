@@ -22,7 +22,7 @@ use crate::{
 };
 
 /// A requirement, imposed by outputs, that needs to be resolved by selected inputs.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Requirement {
     /// Sender requirement.
     Sender(Address),
@@ -52,9 +52,9 @@ impl InputSelection {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {
-            Requirement::Sender(address) => self.fulfill_sender_requirement(address),
-            Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
-            Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
+            Requirement::Sender(address) => self.fulfill_sender_requirement(&address),
+            Requirement::Issuer(address) => self.fulfill_issuer_requirement(&address),
+            Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(&address),
             Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
             Requirement::Account(account_id, account_transition) => {
                 self.fulfill_account_requirement(account_id, account_transition)
@@ -127,7 +127,7 @@ impl InputSelection {
 
             // Add a sender requirement if the sender feature is present.
             if let Some(sender) = output.features().and_then(Features::sender) {
-                let requirement = Requirement::Sender(*sender.address());
+                let requirement = Requirement::Sender(sender.address().clone());
                 log::debug!("Adding {requirement:?} from output");
                 self.requirements.push(requirement);
             }
@@ -135,7 +135,7 @@ impl InputSelection {
             // Add an issuer requirement if the issuer feature is present and the chain output is created.
             if is_created {
                 if let Some(issuer) = output.immutable_features().and_then(Features::issuer) {
-                    let requirement = Requirement::Issuer(*issuer.address());
+                    let requirement = Requirement::Issuer(issuer.address().clone());
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
                 }

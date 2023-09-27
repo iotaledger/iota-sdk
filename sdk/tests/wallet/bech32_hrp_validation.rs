@@ -23,7 +23,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
         .send_with_params(
             [SendParams::new(
                 1_000_000,
-                Bech32Address::try_new("wronghrp", account.addresses().await?[0].address())?,
+                Bech32Address::try_new("wronghrp", account.first_address_bech32().await.unwrap())?,
             )?],
             None,
         )
@@ -58,9 +58,14 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let error = account
         .prepare_output(
             OutputParams {
-                recipient_address: account.addresses().await?[0]
-                    .address()
-                    .as_ref()
+                recipient_address: account
+                    .addresses()
+                    .await?
+                    .into_iter()
+                    .next()
+                    .unwrap()
+                    .into_bech32()
+                    .into_inner()
                     .to_bech32_unchecked("wronghrp"),
                 amount: 1_000_000,
                 assets: None,

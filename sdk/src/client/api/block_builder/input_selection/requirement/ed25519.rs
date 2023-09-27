@@ -68,13 +68,13 @@ impl InputSelection {
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.
     pub(crate) fn fulfill_ed25519_requirement(
         &mut self,
-        address: Address,
+        address: &Address,
     ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         // Checks if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
             .iter()
-            .find(|input| self.selected_unlocks_ed25519_address(input, &address))
+            .find(|input| self.selected_unlocks_ed25519_address(input, address))
         {
             log::debug!(
                 "{address:?} sender requirement already fulfilled by {:?}",
@@ -119,7 +119,7 @@ impl InputSelection {
 
                 Ok(vec![(input, account_transition)])
             }
-            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address))),
+            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address.clone()))),
         }
     }
 }

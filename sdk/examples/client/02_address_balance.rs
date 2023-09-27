@@ -31,19 +31,22 @@ async fn main() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     // Generate the first address
-    let addresses = secret_manager
+    let first_address = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)
                 .with_range(0..1),
         )
-        .await?;
+        .await?
+        .into_iter()
+        .next()
+        .unwrap();
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
         .basic_output_ids([
-            QueryParameter::Address(addresses[0]),
+            QueryParameter::Address(first_address.clone()),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
             QueryParameter::HasStorageDepositReturn(false),
@@ -65,7 +68,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Outputs controlled by {} have: {:?}i and native tokens:\n{:#?}",
-        addresses[0],
+        first_address,
         total_amount,
         total_native_tokens.finish_vec()?
     );

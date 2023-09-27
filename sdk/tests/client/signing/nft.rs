@@ -44,7 +44,10 @@ async fn nft_reference_unlocks() -> Result<()> {
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
         )
-        .await?[0]
+        .await?
+        .into_iter()
+        .next()
+        .unwrap()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();

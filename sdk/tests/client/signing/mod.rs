@@ -48,16 +48,26 @@ async fn all_combined() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
 
-    let ed25519_bech32_addresses = secret_manager
+    let mut ed25519_bech32_addresses = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..3),
         )
-        .await?;
-    let ed25519_bech32_address_0 = &ed25519_bech32_addresses[0].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let ed25519_bech32_address_1 = &ed25519_bech32_addresses[1].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let ed25519_bech32_address_2 = &ed25519_bech32_addresses[2].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .await?
+        .into_iter();
+    let ed25519_bech32_address_0 = ed25519_bech32_addresses
+        .next()
+        .unwrap()
+        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let ed25519_bech32_address_1 = ed25519_bech32_addresses
+        .next()
+        .unwrap()
+        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let ed25519_bech32_address_2 = ed25519_bech32_addresses
+        .next()
+        .unwrap()
+        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2)?;
@@ -360,9 +370,9 @@ async fn all_combined() -> Result<()> {
         inputs.clone(),
         outputs.clone(),
         [
-            *ed25519_bech32_address_0.inner(),
-            *ed25519_bech32_address_1.inner(),
-            *ed25519_bech32_address_2.inner(),
+            ed25519_bech32_address_0.into_inner(),
+            ed25519_bech32_address_1.into_inner(),
+            ed25519_bech32_address_2.into_inner(),
         ],
         protocol_parameters.clone(),
     )

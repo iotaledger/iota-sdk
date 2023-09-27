@@ -1,63 +1,91 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::{Deref, From};
-use packable::{error::UnpackErrorExt, Packable};
+use alloc::boxed::Box;
 
+use derive_more::{Deref, From};
+use packable::{bounded::BoundedU8, error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable};
+
+use super::Address;
 use crate::types::block::Error;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, getset::Getters)]
-#[getset(get = "pub")]
-pub struct RestrictedAddress<A> {
-    address: A,
-    allowed_capabilities: Option<Capabilities>,
+pub type CapabilitiesCount = BoundedU8<0, 1>;
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, getset::Getters)]
+pub struct RestrictedAddress {
+    #[getset(get = "pub")]
+    address: Address,
+    allowed_capabilities: BoxedSlicePrefix<Capabilities, CapabilitiesCount>,
 }
 
-impl<A> RestrictedAddress<A> {
-    /// Creates a new [`RestrictedAddress`] address from the underlying type.
+impl RestrictedAddress {
+    /// Type of a Restricted Address.
+    pub const KIND: u8 = 40;
+
+    /// Creates a new [`RestrictedAddress`] address from an [`Address`] with default allowed capabilities.
     #[inline(always)]
-    pub fn new(address: A) -> Self {
-        Self {
+    pub fn new(address: impl Into<Address> + Send) -> Result<Self, Error> {
+        let address = address.into();
+        if matches!(address, Address::Restricted(_)) {
+            return Err(Error::InvalidAddressKind(Self::KIND));
+        }
+        Ok(Self {
             address,
             allowed_capabilities: Default::default(),
-        }
+        })
     }
 
     /// Sets the allowed capabilities flags.
     #[inline(always)]
-    pub fn with_allowed_capabilities(mut self, allowed_capabilities: impl Into<Capabilities>) -> Self {
-        self.allowed_capabilities.replace(allowed_capabilities.into());
-        self
+    pub fn with_allowed_capabilities(
+        mut self,
+        allowed_capabilities: impl IntoIterator<Item = impl Into<Capabilities>>,
+    ) -> Result<Self, Error> {
+        self.allowed_capabilities = allowed_capabilities
+            .into_iter()
+            .map(Into::into)
+            .collect::<Box<[_]>>()
+            .try_into()
+            .map_err(Error::InvalidCapabilitiesCount)?;
+        Ok(self)
     }
 
     /// Sets the allowed capabilities flags.
     #[inline(always)]
-    pub fn set_allowed_capabilities(&mut self, allowed_capabilities: impl Into<Capabilities>) -> &mut Self {
-        self.allowed_capabilities.replace(allowed_capabilities.into());
-        self
+    pub fn set_allowed_capabilities(
+        &mut self,
+        allowed_capabilities: impl IntoIterator<Item = impl Into<Capabilities>>,
+    ) -> Result<&mut Self, Error> {
+        self.allowed_capabilities = allowed_capabilities
+            .into_iter()
+            .map(Into::into)
+            .collect::<Box<[_]>>()
+            .try_into()
+            .map_err(Error::InvalidCapabilitiesCount)?;
+        Ok(self)
+    }
+
+    /// Gets the allowed capabilities.
+    pub fn allowed_capabilities(&self) -> &[Capabilities] {
+        &self.allowed_capabilities
     }
 }
 
-impl<A> From<A> for RestrictedAddress<A> {
-    fn from(value: A) -> Self {
+impl TryFrom<Address> for RestrictedAddress {
+    type Error = Error;
+
+    fn try_from(value: Address) -> Result<Self, Self::Error> {
         Self::new(value)
     }
 }
 
-impl<A: 'static + Packable> Packable for RestrictedAddress<A>
-where
-    Error: From<A::UnpackError>,
-{
+impl Packable for RestrictedAddress {
     type UnpackError = Error;
-    type UnpackVisitor = A::UnpackVisitor;
+    type UnpackVisitor = ();
 
     fn pack<P: packable::packer::Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.address.pack(packer)?;
-        if self
-            .allowed_capabilities
-            .map(|c| c.0 != CapabilityFlag::NONE)
-            .unwrap_or_default()
-        {
+        if self.allowed_capabilities.iter().any(|c| c.0 != CapabilityFlag::NONE) {
             self.allowed_capabilities.pack(packer)?;
         } else {
             0_u8.pack(packer)?;
@@ -67,13 +95,12 @@ where
 
     fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        _visitor: &Self::UnpackVisitor,
     ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        let address = A::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let allowed_capabilities_set = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? != 0;
-        let allowed_capabilities = allowed_capabilities_set
-            .then(|| Capabilities::unpack::<_, VERIFY>(unpacker, &()).coerce())
-            .transpose()?;
+        let address = Address::unpack::<_, VERIFY>(unpacker, &())?;
+        let allowed_capabilities = BoxedSlicePrefix::<_, CapabilitiesCount>::unpack::<_, VERIFY>(unpacker, &())
+            .map_packable_err(|e| Error::InvalidCapabilitiesCount(e.into_prefix_err().into()))
+            .coerce()?;
         Ok(Self {
             address,
             allowed_capabilities,
@@ -127,23 +154,45 @@ pub(crate) mod dto {
 
     use serde::{Deserialize, Serialize};
 
+    use super::*;
     use crate::utils::serde::prefix_hex_bytes;
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct RestrictedAddressDto<A> {
-        #[serde(flatten)]
-        pub address: A,
+    pub struct RestrictedAddressDto {
+        #[serde(rename = "type")]
+        kind: u8,
+        pub address: Address,
         // TODO: is this format right?
         #[serde(with = "prefix_hex_bytes")]
         pub allowed_capabilities: Vec<u8>,
     }
 
-    impl<A> core::ops::Deref for RestrictedAddressDto<A> {
-        type Target = A;
+    impl core::ops::Deref for RestrictedAddressDto {
+        type Target = Address;
 
         fn deref(&self) -> &Self::Target {
             &self.address
         }
     }
+
+    impl From<&RestrictedAddress> for RestrictedAddressDto {
+        fn from(value: &RestrictedAddress) -> Self {
+            Self {
+                kind: RestrictedAddress::KIND,
+                address: value.address.clone(),
+                allowed_capabilities: value.allowed_capabilities.into_iter().map(|c| **c).collect(),
+            }
+        }
+    }
+
+    impl TryFrom<RestrictedAddressDto> for RestrictedAddress {
+        type Error = Error;
+
+        fn try_from(value: RestrictedAddressDto) -> Result<Self, Self::Error> {
+            Self::new(value.address)?.with_allowed_capabilities(value.allowed_capabilities)
+        }
+    }
+
+    impl_serde_typed_dto!(RestrictedAddress, RestrictedAddressDto, "restricted address");
 }

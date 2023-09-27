@@ -180,12 +180,11 @@ where
                     address
                 }
                 // todo other error message
-                None => {
-                    account_addresses
-                        .first()
-                        .ok_or(WalletError::FailedToGetRemainder)?
-                        .address
-                }
+                None => account_addresses
+                    .first()
+                    .ok_or(WalletError::FailedToGetRemainder)?
+                    .address
+                    .clone(),
             };
 
             // NftId needs to be set to 0 for the creation

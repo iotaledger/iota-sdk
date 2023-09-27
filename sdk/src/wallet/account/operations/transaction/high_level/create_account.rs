@@ -80,12 +80,13 @@ where
         let controller_address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
-                *bech32_address.inner()
+                bech32_address.inner().clone()
             }
             None => {
                 self.public_addresses()
                     .await
-                    .first()
+                    .into_iter()
+                    .next()
                     .expect("first address is generated during account creation")
                     .address
                     .inner
@@ -96,7 +97,7 @@ where
             AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
-                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
+                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address.clone()))
                 .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
         if let Some(CreateAccountParams {
             immutable_metadata,

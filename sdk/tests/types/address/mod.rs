@@ -70,8 +70,11 @@ fn is_valid_bech32() {
 
 #[test]
 fn capabilities() {
-    let address = RestrictedAddress::new(rand_ed25519_address()).with_allowed_capabilities(0);
-    let mut capabilities = address.allowed_capabilities().unwrap();
+    let address = RestrictedAddress::new(rand_ed25519_address())
+        .unwrap()
+        .with_allowed_capabilities([0])
+        .unwrap();
+    let mut capabilities = address.allowed_capabilities()[0];
 
     assert!(!capabilities.has_capabilities(CapabilityFlag::NATIVE_TOKENS));
     capabilities.add_capabilities(CapabilityFlag::NATIVE_TOKENS);
@@ -110,30 +113,30 @@ fn bech32() {
         "iota1qrhacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xqgyzyx"
     );
 
-    let mut address = RestrictedAddress::new(address);
+    let mut address = RestrictedAddress::new(address).unwrap();
     assert_eq!(
-        address.to_bech32_unchecked("iota").to_string(),
+        address.clone().to_bech32_unchecked("iota").to_string(),
         "iota1q8hacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xqq7ar5ue"
     );
-    address.set_allowed_capabilities(CapabilityFlag::ALL);
+    address.set_allowed_capabilities([CapabilityFlag::ALL]);
     assert_eq!(
-        address.to_bech32_unchecked("iota").to_string(),
+        address.clone().to_bech32_unchecked("iota").to_string(),
         "iota1q8hacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xq0l828jhc"
     );
-    address.set_allowed_capabilities(CapabilityFlag::NONE);
+    address.set_allowed_capabilities([CapabilityFlag::NONE]);
     assert_eq!(
-        address.to_bech32_unchecked("iota").to_string(),
+        address.clone().to_bech32_unchecked("iota").to_string(),
         "iota1q8hacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xqq7ar5ue"
     );
-    address.set_allowed_capabilities(
-        CapabilityFlag::NFT_OUTPUTS | CapabilityFlag::ACCOUNT_OUTPUTS | CapabilityFlag::DELEGATION_OUTPUTS,
-    );
+    address.set_allowed_capabilities([CapabilityFlag::NFT_OUTPUTS
+        | CapabilityFlag::ACCOUNT_OUTPUTS
+        | CapabilityFlag::DELEGATION_OUTPUTS]);
     assert_eq!(
-        address.to_bech32_unchecked("iota").to_string(),
+        address.clone().to_bech32_unchecked("iota").to_string(),
         "iota1q8hacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xq0qdxukan"
     );
 
-    let address = ImplicitAccountCreationAddress::from(*address.address());
+    let address = ImplicitAccountCreationAddress::from(address.address().as_ed25519().clone());
     assert_eq!(
         address.to_bech32_unchecked("iota").to_string(),
         "iota1rrhacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xg4ad2d"

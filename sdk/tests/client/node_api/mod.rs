@@ -68,7 +68,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids([
-                QueryParameter::Address(addresses[0]),
+                QueryParameter::Address(addresses[0].clone()),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
