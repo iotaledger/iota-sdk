@@ -45,7 +45,12 @@ impl ExpirationUnlockCondition {
         self.slot_index
     }
 
+    pub fn is_expired(&self, slot_index: SlotIndex, min_committable_age: SlotIndex) -> bool {
+        (slot_index + min_committable_age) >= self.slot_index
+    }
+
     /// Returns the return address if the condition has expired.
+    /// TODO needs to be updated
     pub fn return_address_expired(&self, slot_index: SlotIndex) -> Option<&Address> {
         if slot_index >= self.slot_index() {
             Some(&self.return_address)

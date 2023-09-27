@@ -297,18 +297,41 @@ pub fn semantic_validation(
         //     return Ok(Some(TransactionFailureReason::TimelockNotExpired));
         // }
 
-        if !unlock_conditions.is_expired(context.essence.creation_slot()) {
-            if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
-                let amount = context
-                    .storage_deposit_returns
-                    .entry(*storage_deposit_return.return_address())
-                    .or_default();
+        if let Some(expiration) = unlock_conditions.expiration() {
+            if let Some(commitment) = context.essence.context_inputs().iter().find(|c| c.is_commitment()) {
+                if !expiration.is_expired(
+                    commitment.as_commitment().slot_index(),
+                    context.protocol_parameters.min_committable_age(),
+                ) {
+                    if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
+                        let amount = context
+                            .storage_deposit_returns
+                            .entry(*storage_deposit_return.return_address())
+                            .or_default();
 
-                *amount = amount
-                    .checked_add(storage_deposit_return.amount())
-                    .ok_or(Error::StorageDepositReturnOverflow)?;
+                        *amount = amount
+                            .checked_add(storage_deposit_return.amount())
+                            .ok_or(Error::StorageDepositReturnOverflow)?;
+                    }
+                }
+            } else {
+                // TODO return an error
             }
         }
+
+        // TODO remove the method?
+        // if !unlock_conditions.is_expired(context.essence.creation_slot()) {
+        //     if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
+        //         let amount = context
+        //             .storage_deposit_returns
+        //             .entry(*storage_deposit_return.return_address())
+        //             .or_default();
+
+        //         *amount = amount
+        //             .checked_add(storage_deposit_return.amount())
+        //             .ok_or(Error::StorageDepositReturnOverflow)?;
+        //     }
+        // }
 
         context.input_amount = context
             .input_amount
