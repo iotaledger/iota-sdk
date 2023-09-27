@@ -23,7 +23,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/outputs/unlock-conditions.ts
 
-const amount = 100000;
+const amount = 1000000;
 const gas = 10000;
 const toEVMAddress = '0x48e28C1681BBb92a2E5874113bc740cC11A0FD7a';
 const chainAddress = 'rms1pr75wa5xuepg2hew44vnr28wz5h6n6x99zptk2g68sp2wuu2karywgrztx3';
@@ -95,7 +95,6 @@ async function run() {
 
         // Basic Output with Metadata
         const nftOutputSend = await client.buildNftOutput({
-            amount: amount.toString(),
             nftId: nftId,
             unlockConditions: [
                 addressUnlockCondition
@@ -111,7 +110,7 @@ async function run() {
         // // Send Output
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
         console.log('Sending Transaction...');
-        const transaction = await account.sendOutputs([nftOutput]);
+        const transaction = await account.sendOutputs([nftOutputSend]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         console.log('Waiting until included in block...');
