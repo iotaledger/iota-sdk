@@ -5,7 +5,7 @@ use iota_sdk::types::block::slot::SlotCommitment;
 use packable::PackableExt;
 
 #[test]
-fn slot_commitment_id() {
+fn slot_commitment_id_index() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#slot-commitment-id-1
 
     let slot_commitment_json = serde_json::json!({
@@ -30,10 +30,11 @@ fn slot_commitment_id() {
         ]
     );
 
-    let slot_commitment_id = slot_commitment.id().to_string();
+    let slot_commitment_id = slot_commitment.id();
 
     assert_eq!(
-        slot_commitment_id,
+        slot_commitment_id.to_string(),
         "0x3a73079f3dbf8c1744ae0b020b9767546e32f5bbbf4c6f0233da7b64f16581f80a00000000000000"
     );
+    assert_eq!(slot_commitment_id.index(), 10);
 }
