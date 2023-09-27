@@ -3,10 +3,10 @@
 
 from json import dumps, loads
 from typing import Optional, Union
-from dacyte import from_dict
+from dacite import from_dict
 import humps
 
-from iota_sdk import create_secret_manager, call_secret_manager_method
+from iota_sdk.external import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
@@ -72,6 +72,9 @@ class StrongholdSecretManager(dict):
             snapshot_path, password))
 
     class Inner(dict):
+        """Inner storage for stronghold configuration information.
+        """
+
         def __init__(self, snapshot_path, password):
             dict.__init__(self, password=password, snapshotPath=snapshot_path)
 
@@ -79,10 +82,12 @@ class StrongholdSecretManager(dict):
 class SecretManagerError(Exception):
     """Secret manager error.
     """
-    pass
 
 
 class SecretManager():
+    """Secret manager wrapper.
+    """
+
     def __init__(self, secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
                  SeedSecretManager, StrongholdSecretManager]] = None, secret_manager_handle=None):
         """Initialize a secret manager.

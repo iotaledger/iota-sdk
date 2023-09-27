@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .await?
         .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
-    let block_id = block.id();
+    let block_id = client.block_id(&block).await?;
 
     println!("{block:#?}");
 

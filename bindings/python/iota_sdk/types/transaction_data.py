@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from typing import Optional, List, Union
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput, OutputMetadata
-from iota_sdk.types.payload import RegularTransactionEssence, TransactionPayload
+from iota_sdk.types.essence import RegularTransactionEssence
+from iota_sdk.types.payload import TransactionPayload
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.common import json
 

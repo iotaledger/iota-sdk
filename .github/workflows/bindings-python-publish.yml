@@ -130,7 +130,7 @@ jobs:
             pip install -r requirements-dev.txt 
             pip install patchelf
             pip install maturin
-            maturin build --out ../../../dist --profile=production
+            maturin build --out ../../dist --profile=production
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3

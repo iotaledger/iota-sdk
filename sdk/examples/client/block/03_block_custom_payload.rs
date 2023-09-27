@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with custom payload sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
+        client.block_id(&block).await?
     );
 
     Ok(())

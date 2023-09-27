@@ -19,7 +19,7 @@ use packable::{
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockBuilder, BlockWrapper},
+    wrapper::{BlockBuilder, BlockHeader, BlockWrapper},
 };
 use crate::types::block::{
     parent::{ShallowLikeParents, StrongParents, WeakParents},

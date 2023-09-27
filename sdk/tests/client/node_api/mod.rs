@@ -31,6 +31,8 @@ const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750
 async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
+    let protocol_params = client.get_protocol_parameters().await.unwrap();
+
     client
         .unsigned_basic_block_builder(
             todo!("issuer id"),
@@ -45,7 +47,7 @@ async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
         .sign_ed25519(secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await
         .unwrap()
-        .id()
+        .id(&protocol_params)
 }
 
 pub fn setup_secret_manager() -> SecretManager {

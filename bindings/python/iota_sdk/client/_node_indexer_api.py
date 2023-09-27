@@ -3,12 +3,29 @@
 
 from dataclasses import dataclass
 from typing import Dict, Optional
+from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output_id import OutputId
 
 
-class NodeIndexerAPI():
+class OutputIdsResponse:
+    """Response type for output IDs.
+
+    Attributes:
+        ledger_index: The ledger index for which the response is valid.
+        cursor: The cursor to the next page of results.
+        items: The query results.
+    """
+
+    def __init__(self, output_dict: Dict):
+        self.ledgerIndex = output_dict["ledgerIndex"]
+        self.cursor = output_dict["cursor"]
+        self.items = [OutputId.from_string(
+            output_id) for output_id in output_dict["items"]]
+
+
+class NodeIndexerAPI(metaclass=ABCMeta):
     """Node indexer API.
     """
 
@@ -24,49 +41,51 @@ class NodeIndexerAPI():
             Filter foundry outputs based on bech32-encoded address of the controlling account.
         created_after :
             Returns outputs that were created after a certain Unix timestamp.
-         created_before :
+            created_before :
             Returns outputs that were created before a certain Unix timestamp.
-         cursor :
+            cursor :
             Starts the search from the cursor (confirmationMS+outputId.pageSize).
-         expiration_return_address :
+            expiration_return_address :
             Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
             condition.
-         expires_after :
+            expires_after :
             Returns outputs that expire after a certain Unix timestamp.
-         expires_before :
+            expires_before :
             Returns outputs that expire before a certain Unix timestamp.
-         governor :
+            governor :
             Filters outputs based on bech32-encoded governor (governance controller) address.
-         has_expiration :
+            has_expiration :
             Filters outputs based on the presence of expiration unlock condition.
-         has_native_tokens :
+            has_native_tokens :
             Filters outputs based on the presence of native tokens.
-         has_storage_deposit_return :
+            has_storage_deposit_return :
             Filters outputs based on the presence of storage deposit return unlock condition.
-         has_timelock :
+            has_timelock :
             Filters outputs based on the presence of timelock unlock condition.
-         issuer:
+            issuer:
             Filters outputs based on bech32-encoded issuer address.
-         max_native_token_count :
+            max_native_token_count :
             Filters outputs that have at most a certain number of distinct native tokens.
-         min_native_token_count :
+            min_native_token_count :
             Filters outputs that have at least a certain number of distinct native tokens.
-         page_size :
+            page_size :
             The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
             returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
-         sender :
+            sender :
             Filters outputs based on the presence of validated Sender (bech32 encoded).
-         state_controller :
+            state_controller :
             Filters outputs based on bech32-encoded state controller address.
-         storage_deposit_return_address :
+            storage_deposit_return_address :
             Filters outputs based on the presence of a specific return address in the storage deposit return unlock
             condition.
-         tag :
+            tag :
             Filters outputs based on matching Tag Block.
-         timelocked_after :
+            timelocked_after :
             Returns outputs that are timelocked after a certain Unix timestamp.
-         timelocked_before :
+            timelocked_before :
             Returns outputs that are timelocked before a certain Unix timestamp.
+         unlockable_by_address :
+            Returns outputs that are unlockable by the bech32 address.
         """
         address: Optional[str] = None
         account_address: Optional[str] = None
@@ -91,21 +110,27 @@ class NodeIndexerAPI():
         tag: Optional[str] = None
         timelocked_after: Optional[int] = None
         timelocked_before: Optional[int] = None
+        unlockable_by_address: Optional[str] = None
 
-    class OutputIdsResponse:
-        """Response type for output IDs.
+    @abstractmethod
+    def _call_method(self, name, data=None):
+        return {}
 
-        Attributes:
-            ledger_index: The ledger index for which the response is valid.
-            cursor: The cursor to the next page of results.
-            items: The query results.
+    def output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+        """Fetch alias/basic/NFT/foundry output IDs from the given query parameters.
+        Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter", "cursor", "pageSize".
+
+        Returns:
+            The corresponding output IDs of the outputs.
         """
 
-        def __init__(self, output_dict: Dict):
-            self.ledgerIndex = output_dict["ledgerIndex"]
-            self.cursor = output_dict["cursor"]
-            self.items = [OutputId.from_string(
-                output_id) for output_id in output_dict["items"]]
+        query_parameters_camelized = query_parameters.as_dict()
+
+        response = self._call_method('outputIds', {
+            'queryParameters': query_parameters_camelized,
+        })
+        return OutputIdsResponse(response)
 
     def basic_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
@@ -120,7 +145,7 @@ class NodeIndexerAPI():
         response = self._call_method('basicOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response)
+        return OutputIdsResponse(response)
 
     def account_output_ids(
             self, query_parameters: QueryParameters) -> OutputIdsResponse:
@@ -135,7 +160,7 @@ class NodeIndexerAPI():
         response = self._call_method('accountOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response)
+        return OutputIdsResponse(response)
 
     def account_output_id(self, account_id: HexStr) -> OutputId:
         """Fetch account output ID from the given account ID.
@@ -160,7 +185,7 @@ class NodeIndexerAPI():
         response = self._call_method('nftOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response)
+        return OutputIdsResponse(response)
 
     def nft_output_id(self, nft_id: HexStr) -> OutputId:
         """Fetch NFT output ID from the given NFT ID.
@@ -185,7 +210,7 @@ class NodeIndexerAPI():
         response = self._call_method('foundryOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
-        return self.OutputIdsResponse(response)
+        return OutputIdsResponse(response)
 
     def foundry_output_id(self, foundry_id: HexStr) -> OutputId:
         """Fetch foundry Output ID from the given foundry ID.

@@ -7,7 +7,6 @@ use iota_sdk::{
     client::constants::SHIMMER_COIN_TYPE,
     client::node_manager::node::{Node, NodeDto},
     wallet::Error,
-    Url,
 };
 use iota_sdk::{
     client::{
@@ -17,6 +16,7 @@ use iota_sdk::{
     types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, Wallet},
 };
+use url::Url;
 
 #[cfg(feature = "storage")]
 use crate::wallet::common::NODE_OTHER;

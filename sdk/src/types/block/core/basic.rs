@@ -159,7 +159,8 @@ impl BlockBuilder<BasicBlockBuilder> {
 
     pub fn finish(self, signature: Ed25519Signature) -> Result<BlockWrapper, Error> {
         Ok(BlockWrapper::new(
-            &self.protocol_parameters,
+            self.protocol_version,
+            self.network_id,
             // TODO provide a sensible default
             self.issuing_time.ok_or(Error::InvalidField("issuing time"))?,
             self.slot_commitment_id,

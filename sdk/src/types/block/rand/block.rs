@@ -45,7 +45,8 @@ pub fn rand_basic_block_builder_with_strong_parents(
     strong_parents: StrongParents,
 ) -> BlockBuilder<BasicBlockBuilder> {
     BlockWrapper::build_basic(
-        protocol_params,
+        protocol_params.version(),
+        protocol_params.network_id(),
         rand_slot_commitment_id(),
         rand_slot_index(),
         rand_issuer_id(),

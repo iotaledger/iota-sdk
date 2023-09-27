@@ -26,7 +26,7 @@ pub fn rand_sign_ed25519(msg: &[u8]) -> Ed25519Signature {
     let public_key = private_key.public_key();
     let signature = private_key.sign(msg);
 
-    Ed25519Signature::new(public_key.into(), signature)
+    Ed25519Signature::new(public_key, signature)
 }
 
 pub fn rand_signature() -> Signature {

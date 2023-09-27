@@ -39,6 +39,7 @@ where
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[reissue_transaction_until_included]");
 
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
@@ -72,7 +73,7 @@ where
                         Bip44::new(self.wallet.coin_type()),
                     )
                     .await?
-                    .id(),
+                    .id(&protocol_parameters),
             };
 
             // Attachments of the Block to check inclusion state
@@ -125,7 +126,7 @@ where
                                 Bip44::new(self.wallet.coin_type()),
                             )
                             .await?;
-                        block_ids.push(reissued_block.id());
+                        block_ids.push(reissued_block.id(&protocol_parameters));
                     }
                 }
                 // After we checked all our reissued blocks, check if the transaction got reissued in another block
@@ -141,7 +142,7 @@ where
                             e
                         }
                     })?;
-                    return Ok(included_block.id());
+                    return Ok(included_block.id(&protocol_parameters));
                 }
             }
             Err(ClientError::TangleInclusion(first_block_id.to_string()).into())
