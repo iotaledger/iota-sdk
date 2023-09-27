@@ -26,7 +26,7 @@ export interface TransactionOptions {
     /** Optional note, that is only stored locally. */
     note?: string;
     /** Whether to allow sending a micro amount. */
-    allowMicroAmount: boolean;
+    allowMicroAmount?: boolean;
 }
 
 /** The possible remainder value strategies. */

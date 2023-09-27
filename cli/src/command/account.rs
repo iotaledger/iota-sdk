@@ -21,7 +21,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, AccountIdentifier},
-            Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
+            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -768,7 +768,12 @@ pub async fn send_nft_command(
 
 // `sync` command
 pub async fn sync_command(account: &Account) -> Result<(), Error> {
-    let balance = account.sync(None).await?;
+    let balance = account
+        .sync(Some(SyncOptions {
+            sync_native_token_foundries: true,
+            ..Default::default()
+        }))
+        .await?;
     println_log_info!("Synced.");
     println_log_info!("{balance:#?}");
 
@@ -911,7 +916,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
     let mut log = format!(
-        "Address {}:\n {:<10}{}\n {:<10}{:?}",
+        "Address: {}\n{:<9}{}\n{:<9}{:?}",
         address.key_index(),
         "Bech32:",
         address.address(),
@@ -933,10 +938,11 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let mut aliases = Vec::new();
     let mut foundries = Vec::new();
 
-    if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
-        (a.key_index(), a.internal())
-    }) {
-        output_ids = addresses[index].output_ids().as_slice();
+    if let Some(address) = addresses
+        .iter()
+        .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
+    {
+        output_ids = address.output_ids().as_slice();
 
         for output_id in output_ids {
             if let Some(output_data) = account.get_output(output_id).await {
@@ -973,7 +979,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     }
 
     log = format!(
-        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Aliases: {:?}\n Foundries: {:?}\n",
+        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAliases: {:#?}\nFoundries: {:#?}\n",
         output_ids,
         amount,
         native_tokens.finish_vec()?,

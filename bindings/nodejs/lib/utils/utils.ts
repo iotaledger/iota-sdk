@@ -397,4 +397,20 @@ export class Utils {
             data: { mnemonic },
         });
     }
+
+    /**
+     * Returns the hex representation of the serialized output bytes.
+     *
+     * @param output The output.
+     * @returns The hex representation of the serialized output bytes.
+     */
+    static outputHexBytes(output: Output): string {
+        const hexBytes = callUtilsMethod({
+            name: 'outputHexBytes',
+            data: {
+                output,
+            },
+        });
+        return hexBytes;
+    }
 }

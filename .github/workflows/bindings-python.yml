@@ -2,7 +2,7 @@ name: Python bindings checks
 
 on:
   push:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -15,7 +15,7 @@ on:
       - "bindings/python/**"
       - ".github/workflows/bindings-python.yml"
   pull_request:
-    branches: [develop, production, 1.1]
+    branches: [develop, production, "1.1"]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -120,4 +120,3 @@ jobs:
       - name: Run tests
         working-directory: bindings/python
         run: tox
-
