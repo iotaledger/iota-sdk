@@ -44,10 +44,9 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
-        self.emit(
-            todo!("wallet_data.index"),
-            WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
-        )
+        self.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::SelectingInputs,
+        ))
         .await;
 
         let slot_index = self.client().get_slot_index().await?;

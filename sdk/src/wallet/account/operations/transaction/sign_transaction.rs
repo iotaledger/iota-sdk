@@ -32,10 +32,9 @@ where
         log::debug!("[TRANSACTION] sign_transaction_essence");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
-        self.emit(
-            todo!("self.data().await.index"),
-            WalletEvent::TransactionProgress(TransactionProgressEvent::SigningTransaction),
-        )
+        self.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::SigningTransaction,
+        ))
         .await;
 
         #[cfg(all(feature = "events", feature = "ledger_nano"))]
@@ -54,20 +53,18 @@ where
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;
                 if let Some(buffer_size) = ledger_nano_status.buffer_size() {
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {
-                        self.emit(
-                            todo!("self.data().await.index"),
-                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionEssenceHash(
-                                prefix_hex::encode(prepared_transaction_data.essence.hash()),
+                        self.emit(WalletEvent::TransactionProgress(
+                            TransactionProgressEvent::PreparedTransactionEssenceHash(prefix_hex::encode(
+                                prepared_transaction_data.essence.hash(),
                             )),
-                        )
+                        ))
                         .await;
                     } else {
-                        self.emit(
-                            todo!("self.data().await.index"),
-                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransaction(Box::new(
-                                PreparedTransactionDataDto::from(prepared_transaction_data),
+                        self.emit(WalletEvent::TransactionProgress(
+                            TransactionProgressEvent::PreparedTransaction(Box::new(PreparedTransactionDataDto::from(
+                                prepared_transaction_data,
                             ))),
-                        )
+                        ))
                         .await;
                     }
                 }

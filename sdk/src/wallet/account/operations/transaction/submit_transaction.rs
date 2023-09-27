@@ -32,11 +32,8 @@ where
             .await?;
 
         #[cfg(feature = "events")]
-        self.emit(
-            todo!("account_index"),
-            WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting),
-        )
-        .await;
+        self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
+            .await;
         let block_id = self.client().post_block(&block).await?;
         log::debug!("[TRANSACTION] submitted block {}", block_id);
         Ok(block_id)

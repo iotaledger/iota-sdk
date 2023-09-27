@@ -9,12 +9,12 @@ use std::{
     fmt::{Debug, Formatter, Result},
 };
 
-pub use self::types::{Event, WalletEvent, WalletEventType};
+pub use self::types::{WalletEvent, WalletEventType};
 
 type Handler<T> = Arc<dyn Fn(&T) + Send + Sync + 'static>;
 
 pub struct EventEmitter {
-    handlers: HashMap<WalletEventType, Vec<Handler<Event>>>,
+    handlers: HashMap<WalletEventType, Vec<Handler<WalletEvent>>>,
 }
 
 impl EventEmitter {
@@ -29,7 +29,7 @@ impl EventEmitter {
     /// multiple listeners for a single event.
     pub fn on<F>(&mut self, events: impl IntoIterator<Item = WalletEventType>, handler: F)
     where
-        F: Fn(&Event) + 'static + Send + Sync,
+        F: Fn(&WalletEvent) + 'static + Send + Sync,
     {
         let mut events = events.into_iter().peekable();
         let handler = Arc::new(handler);
@@ -68,7 +68,7 @@ impl EventEmitter {
 
     /// Invokes all listeners of `event`, passing a reference to `payload` as an
     /// argument to each of them.
-    pub fn emit(&self, account_index: u32, event: WalletEvent) {
+    pub fn emit(&self, event: WalletEvent) {
         let event_type = match &event {
             WalletEvent::NewOutput(_) => WalletEventType::NewOutput,
             WalletEvent::SpentOutput(_) => WalletEventType::SpentOutput,
@@ -78,7 +78,6 @@ impl EventEmitter {
             #[cfg(feature = "ledger_nano")]
             WalletEvent::LedgerAddressGeneration(_) => WalletEventType::LedgerAddressGeneration,
         };
-        let event = Event { account_index, event };
         if let Some(handlers) = self.handlers.get(&event_type) {
             for handler in handlers {
                 handler(&event);
@@ -148,48 +147,40 @@ mod tests {
         });
 
         // emit events
-        emitter.emit(0, WalletEvent::ConsolidationRequired);
-        emitter.emit(
-            0,
-            WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
-        );
-        emitter.emit(
-            0,
-            WalletEvent::TransactionInclusion(TransactionInclusionEvent {
-                transaction_id: TransactionId::from_str(
-                    "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
-                )
-                .expect("invalid tx id"),
-                inclusion_state: InclusionState::Confirmed,
-            }),
-        );
+        emitter.emit(WalletEvent::ConsolidationRequired);
+        emitter.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::SelectingInputs,
+        ));
+        emitter.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
+            transaction_id: TransactionId::from_str(
+                "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
+            )
+            .expect("invalid tx id"),
+            inclusion_state: InclusionState::Confirmed,
+        }));
 
         assert_eq!(3, event_counter.load(Ordering::SeqCst));
 
         // remove handlers of single event
         emitter.clear([WalletEventType::ConsolidationRequired]);
         // emit event of removed type
-        emitter.emit(0, WalletEvent::ConsolidationRequired);
+        emitter.emit(WalletEvent::ConsolidationRequired);
 
         assert_eq!(3, event_counter.load(Ordering::SeqCst));
 
         // remove handlers of all events
         emitter.clear([]);
         // emit events
-        emitter.emit(
-            0,
-            WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
-        );
-        emitter.emit(
-            0,
-            WalletEvent::TransactionInclusion(TransactionInclusionEvent {
-                transaction_id: TransactionId::from_str(
-                    "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
-                )
-                .expect("invalid tx id"),
-                inclusion_state: InclusionState::Confirmed,
-            }),
-        );
+        emitter.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::SelectingInputs,
+        ));
+        emitter.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
+            transaction_id: TransactionId::from_str(
+                "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
+            )
+            .expect("invalid tx id"),
+            inclusion_state: InclusionState::Confirmed,
+        }));
         assert_eq!(3, event_counter.load(Ordering::SeqCst));
 
         // listen to a single event
@@ -200,7 +191,7 @@ mod tests {
         });
 
         for _ in 0..1_000_000 {
-            emitter.emit(0, WalletEvent::ConsolidationRequired);
+            emitter.emit(WalletEvent::ConsolidationRequired);
         }
         assert_eq!(1_000_003, event_counter.load(Ordering::SeqCst));
     }

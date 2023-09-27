@@ -37,8 +37,6 @@ mod storage_stub {
         async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
             log::debug!("[save] wallet builder");
             storage.set(WALLET_BUILDER_KEY, self).await?;
-            // TODO: remove
-            println!("{}", serde_json::to_string_pretty(self).unwrap());
 
             if let Some(secret_manager) = &self.secret_manager {
                 let secret_manager = secret_manager.read().await;

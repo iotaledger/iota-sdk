@@ -57,12 +57,9 @@ impl Wallet {
 
                         let bech32_hrp = self.bech32_hrp().await;
 
-                        self.emit(
-                            account_index,
-                            WalletEvent::LedgerAddressGeneration(AddressData {
-                                address: address[0].to_bech32(bech32_hrp),
-                            }),
-                        )
+                        self.emit(WalletEvent::LedgerAddressGeneration(AddressData {
+                            address: address[0].to_bech32(bech32_hrp),
+                        }))
                         .await;
                     }
 

@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     wallet
         .listen([], move |event| {
-            println!("RECEIVED AN EVENT:\n{:?}", event.event);
+            println!("RECEIVED AN EVENT:\n{:?}", event);
         })
         .await;
 

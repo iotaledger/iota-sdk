@@ -229,7 +229,6 @@ where
             .network_info
             .protocol_parameters
             .bech32_hrp;
-        println!("HRP from protocol parameters: {bech32_hrp}");
 
         // May use a previously stored wallet address if it wasn't provided
         if self.address.is_none() {

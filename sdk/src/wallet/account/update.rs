@@ -95,12 +95,9 @@ where
                         output_data.is_spent = true;
                         #[cfg(feature = "events")]
                         {
-                            self.emit(
-                                self.index().await,
-                                WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-                                    output: OutputDataDto::from(&*output_data),
-                                })),
-                            )
+                            self.emit(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
+                                output: OutputDataDto::from(&*output_data),
+                            })))
                             .await;
                         }
                     }
@@ -121,20 +118,17 @@ where
                     let transaction = wallet_data
                         .incoming_transactions
                         .get(output_data.output_id.transaction_id());
-                    self.emit(
-                        todo!("account_index"),
-                        WalletEvent::NewOutput(Box::new(NewOutputEvent {
-                            output: OutputDataDto::from(&output_data),
-                            transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
-                            transaction_inputs: transaction.as_ref().map(|tx| {
-                                tx.inputs
-                                    .clone()
-                                    .into_iter()
-                                    .map(OutputWithMetadataResponse::from)
-                                    .collect()
-                            }),
-                        })),
-                    )
+                    self.emit(WalletEvent::NewOutput(Box::new(NewOutputEvent {
+                        output: OutputDataDto::from(&output_data),
+                        transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
+                        transaction_inputs: transaction.as_ref().map(|tx| {
+                            tx.inputs
+                                .clone()
+                                .into_iter()
+                                .map(OutputWithMetadataResponse::from)
+                                .collect()
+                        }),
+                    })))
                     .await;
                 }
             };
@@ -173,13 +167,10 @@ where
                     );
                     #[cfg(feature = "events")]
                     {
-                        self.emit(
-                            todo!("wallet_data.index"),
-                            WalletEvent::TransactionInclusion(TransactionInclusionEvent {
-                                transaction_id,
-                                inclusion_state: transaction.inclusion_state,
-                            }),
-                        )
+                        self.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
+                            transaction_id,
+                            inclusion_state: transaction.inclusion_state,
+                        }))
                         .await;
                     }
                 }

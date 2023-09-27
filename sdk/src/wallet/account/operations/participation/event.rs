@@ -67,7 +67,7 @@ where
                 .storage_manager
                 .read()
                 .await
-                .insert_participation_event(todo!("account_index"), event_with_node.clone())
+                .insert_participation_event(event_with_node.clone())
                 .await?;
             registered_participation_events.insert(event_id, event_with_node.clone());
         }
@@ -77,11 +77,7 @@ where
 
     /// Removes a previously registered participation event from local storage.
     pub async fn deregister_participation_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<()> {
-        self.storage_manager
-            .read()
-            .await
-            .remove_participation_event(todo!("account_index"), id)
-            .await?;
+        self.storage_manager.read().await.remove_participation_event(id).await?;
         Ok(())
     }
 
@@ -94,7 +90,7 @@ where
             .storage_manager
             .read()
             .await
-            .get_participation_events(todo!("account_index"))
+            .get_participation_events()
             .await?
             .get(&id)
             .cloned())
@@ -104,11 +100,7 @@ where
     pub async fn get_participation_events(
         &self,
     ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
-        self.storage_manager
-            .read()
-            .await
-            .get_participation_events(todo!("account_index"))
-            .await
+        self.storage_manager.read().await.get_participation_events().await
     }
 
     /// Retrieves IDs of all events tracked by the client options node.

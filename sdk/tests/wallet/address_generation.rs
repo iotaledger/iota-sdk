@@ -133,7 +133,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 
     wallet
         .listen([WalletEventType::LedgerAddressGeneration], move |event| {
-            if let WalletEvent::LedgerAddressGeneration(address) = &event.event {
+            if let WalletEvent::LedgerAddressGeneration(address) = event {
                 sender
                     .try_send(address.address)
                     .expect("too many LedgerAddressGeneration events");
