@@ -192,7 +192,7 @@ async fn migrate_snapshot_from_chrysalis_to_stardust(
             )
             .await?;
         stronghold_adapter
-            .set_bytes(SECRET_MANAGER_KEY, secret_manager_dto.as_bytes())
+            .set_bytes(SECRET_MANAGER_KEY, secret_manager_dto.to_string().as_bytes())
             .await?;
     }
 

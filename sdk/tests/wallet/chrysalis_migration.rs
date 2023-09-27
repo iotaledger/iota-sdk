@@ -17,6 +17,8 @@ use zeroize::Zeroizing;
 
 use crate::wallet::common::{setup, tear_down};
 
+const CHRYSALIS_ACCOUNT_INDEXATION_KEY: &str = "iota-wallet-account-indexation";
+
 #[tokio::test]
 async fn migrate_chrysalis_db() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -71,7 +73,7 @@ async fn migrate_chrysalis_db() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
@@ -161,7 +163,7 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
@@ -247,7 +249,7 @@ async fn migrate_chrysalis_db_encrypted_encrypt_new() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
@@ -324,7 +326,7 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    // "iota-wallet-account-indexation"
+    // CHRYSALIS_ACCOUNT_INDEXATION_KEY
     let accounts_indexation = chrysalis_data
         .get("0xddc058ad3b93b5a575b0051aafbc8ff17ad0415d7aa1c54d")
         .unwrap();
@@ -434,7 +436,7 @@ async fn migrate_chrysalis_db_ledger() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://2b9bd865368556d58f9d5a9fd44c30205f1fc80b09cde1dcb9b3a37748210854\"}]"
