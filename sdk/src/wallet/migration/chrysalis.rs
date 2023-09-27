@@ -167,8 +167,8 @@ pub(crate) fn migrate_from_chrysalis_data(
                                 r#"{{"Stronghold": {{"password": null, "timeout": null, "snapshotPath": "{}/wallet.stronghold"}} }}"#,
                                 storage_path.to_string_lossy()
                             ),
-                            Some("LedgerNano") => r#"{{"LedgerNano": false }}"#.into(),
-                            Some("LedgerNanoSimulator") => r#"{{"LedgerNano": true }}"#.into(),
+                            Some("LedgerNano") => r#"{"LedgerNano": false }"#.into(),
+                            Some("LedgerNanoSimulator") => r#"{"LedgerNano": true }"#.into(),
                             _ => return Err(Error::Migration("Missing signerType".into())),
                         };
                         secret_manager_dto = Some(dto);

@@ -384,3 +384,61 @@ fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> 
     }
     Ok(())
 }
+
+#[cfg(feature = "ledger_nano")]
+#[tokio::test]
+async fn migrate_chrysalis_db_ledger() -> Result<()> {
+    let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
+        .name("chrysalis.log")
+        .target_exclusions(&["h2", "hyper", "rustls"])
+        .level_filter(log::LevelFilter::Debug);
+
+    let config = fern_logger::LoggerConfig::build()
+        .with_output(logger_output_config)
+        .finish();
+
+    fern_logger::logger_init(config).unwrap();
+
+    let storage_path = "migrate_chrysalis_db_ledger/db";
+    setup(storage_path)?;
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/chrysalis-db-ledger/db", storage_path).unwrap();
+
+    migrate_db_chrysalis_to_stardust("migrate_chrysalis_db_ledger", None, None).await?;
+    println!("hier");
+    let client_options = ClientOptions::new();
+    let wallet = Wallet::builder()
+        .with_storage_path("migrate_chrysalis_db_ledger")
+        .with_client_options(client_options)
+        .finish()
+        .await?;
+
+    let accounts = wallet.get_accounts().await?;
+    assert_eq!(accounts.len(), 1);
+    assert_eq!(accounts[0].alias().await, "ledger");
+
+    let alice_acc_details = accounts[0].details().await;
+    assert_eq!(alice_acc_details.public_addresses().len(), 4);
+    // mnemonic: glory promote mansion idle axis finger extra february uncover one trip resource lawn turtle enact
+    // monster seven myth punch hobby comfort wild raise skin
+    assert_eq!(
+        alice_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
+        "rms1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruskth6z"
+    );
+    assert_eq!(alice_acc_details.internal_addresses().len(), 1);
+    assert_eq!(
+        alice_acc_details.internal_addresses()[0]
+            .address()
+            .try_to_bech32("rms")?,
+        "rms1qzev23h8qtdfjzzx4jqrdfaw2nnnwu2m4hhu2tkdmp2wrt6y8qwq22963tv"
+    );
+
+    let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
+    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    assert_eq!(
+        accounts_indexation,
+        "[{\"key\":\"wallet-account://2b9bd865368556d58f9d5a9fd44c30205f1fc80b09cde1dcb9b3a37748210854\"}]"
+    );
+
+    tear_down("migrate_chrysalis_db_ledger")
+}
