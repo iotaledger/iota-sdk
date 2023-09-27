@@ -10,7 +10,7 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 
 use super::{
     address::Hrp,
-    mana::ManaStructure,
+    mana::{ManaStructure, RewardsParameters},
     slot::{EpochIndex, SlotIndex},
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
@@ -76,6 +76,8 @@ pub struct ProtocolParameters {
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
     pub(crate) version_signaling: VersionSignalingParameters,
+    /// Defines the parameters used for reward calculation.
+    pub(crate) rewards_parameters: RewardsParameters,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -109,6 +111,7 @@ impl Default for ProtocolParameters {
             max_committable_age: 20.into(),
             congestion_control_parameters: Default::default(),
             version_signaling: Default::default(),
+            rewards_parameters: Default::default(),
         }
     }
 }
