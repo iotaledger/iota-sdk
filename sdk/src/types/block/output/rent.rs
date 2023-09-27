@@ -185,8 +185,8 @@ impl RentBuilder {
         self
     }
 
-    pub const fn issuer_keys_field<T>(mut self) -> Self {
-        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_issuer_keys() as u64;
+    pub const fn block_issuer_key_field<T>(mut self) -> Self {
+        self.bytes += size_of::<T>() as u64 * self.config.byte_factor_block_issuer_key() as u64;
         self
     }
 
@@ -221,8 +221,8 @@ impl RentBuilder {
         self
     }
 
-    pub fn packable_issuer_keys_field<T: Packable>(mut self, field: &T) -> Self {
-        self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_issuer_keys() as u64;
+    pub fn packable_block_issuer_key_field<T: Packable>(mut self, field: &T) -> Self {
+        self.bytes += field.pack_to_vec().len() as u64 * self.config.byte_factor_block_issuer_key() as u64;
         self
     }
 

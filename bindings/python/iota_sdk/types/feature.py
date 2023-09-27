@@ -2,10 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-from typing import Union
-
+from typing import List, Union
 from dataclasses import dataclass, field
-from typing import List
 
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr, json

@@ -1,16 +1,19 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{
-    helper::network_name_to_id,
-    payload::Payload,
-    protocol::{protocol_parameters, ProtocolParameters},
-    rand::{
-        block::{rand_basic_block_builder_with_strong_parents, rand_block_wrapper, rand_block_wrapper_with_block},
-        parents::rand_strong_parents,
-        payload::rand_tagged_data_payload,
+use iota_sdk::types::{
+    block::{
+        helper::network_name_to_id,
+        payload::Payload,
+        protocol::{protocol_parameters, ProtocolParameters},
+        rand::{
+            block::{rand_basic_block_builder_with_strong_parents, rand_block_wrapper, rand_block_wrapper_with_block},
+            parents::rand_strong_parents,
+            payload::rand_tagged_data_payload,
+        },
+        BlockWrapper, BlockWrapperDto,
     },
-    BlockWrapper, BlockWrapperDto,
+    TryFromDto,
 };
 use packable::PackableExt;
 
@@ -123,7 +126,7 @@ fn dto_mismatch_version() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+    let issuing_time = protocol_parameters.genesis_unix_timestamp()
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = protocol_parameters.network_id();
     let protocol_version = 4;
@@ -149,7 +152,7 @@ fn dto_mismatch_version() {
         }
     });
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block_res = BlockWrapper::try_from_dto(block_dto, protocol_parameters.clone());
+    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,
@@ -165,7 +168,7 @@ fn dto_mismatch_network_id() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+    let issuing_time = protocol_parameters.genesis_unix_timestamp()
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = network_name_to_id("invalid-network");
     let block_dto_json = serde_json::json!({
@@ -190,7 +193,7 @@ fn dto_mismatch_network_id() {
         }
     });
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block_res = BlockWrapper::try_from_dto(block_dto, protocol_parameters.clone());
+    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,

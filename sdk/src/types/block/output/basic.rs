@@ -311,7 +311,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of stored Mana held by this output.
@@ -410,7 +410,7 @@ impl BasicOutput {
     /// features. They are used to return storage deposits.
     pub fn simple_deposit_address(&self) -> Option<&Address> {
         if let [UnlockCondition::Address(address)] = self.unlock_conditions().as_ref() {
-            if self.native_tokens.is_empty() && self.features.is_empty() {
+            if self.mana == 0 && self.native_tokens.is_empty() && self.features.is_empty() {
                 return Some(address.address());
             }
         }

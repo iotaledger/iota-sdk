@@ -63,7 +63,7 @@ impl SlotIndex {
     pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> Self {
         timestamp
             .checked_sub(genesis_unix_timestamp)
-            .map(|diff| (diff / slot_duration_in_seconds as u64) + 1)
+            .map(|elapsed| (elapsed / slot_duration_in_seconds as u64) + 1)
             .unwrap_or_default()
             .into()
     }
@@ -130,7 +130,7 @@ mod test {
         let protocol_params = ProtocolParameters::default();
 
         // Timestamp before the genesis
-        let timestamp = protocol_params.genesis_unix_timestamp() as u64 - 100;
+        let timestamp = protocol_params.genesis_unix_timestamp() - 100;
         let slot_index = protocol_params.slot_index(timestamp);
         assert_eq!(*slot_index, 0);
         assert_eq!(
@@ -142,7 +142,7 @@ mod test {
         );
 
         // Genesis timestamp
-        let timestamp = protocol_params.genesis_unix_timestamp() as u64;
+        let timestamp = protocol_params.genesis_unix_timestamp();
         let slot_index = protocol_params.slot_index(timestamp);
         assert_eq!(*slot_index, 1);
         assert_eq!(
@@ -154,7 +154,7 @@ mod test {
         );
 
         // Timestamp 5 seconds after slot 100 starts
-        let timestamp = protocol_params.genesis_unix_timestamp() as u64
+        let timestamp = protocol_params.genesis_unix_timestamp()
             + (99 * protocol_params.slot_duration_in_seconds() as u64) // Add 99 because the slots are 1-indexed
             + 5;
         let slot_index = protocol_params.slot_index(timestamp);

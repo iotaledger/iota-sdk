@@ -1,18 +1,14 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod account_id;
 mod chain_id;
 mod delegation;
-mod foundry_id;
 mod inputs_commitment;
 mod metadata;
 mod native_token;
-mod nft_id;
 mod output_id;
 mod rent;
 mod state_transition;
-mod token_id;
 mod token_scheme;
 
 ///
@@ -46,23 +42,19 @@ pub(crate) use self::{
     unlock_condition::AddressUnlockCondition,
 };
 pub use self::{
-    account::{AccountOutput, AccountOutputBuilder, AccountTransition},
-    account_id::AccountId,
+    account::{AccountId, AccountOutput, AccountOutputBuilder, AccountTransition},
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
-    foundry::{FoundryOutput, FoundryOutputBuilder},
-    foundry_id::FoundryId,
+    foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
     inputs_commitment::InputsCommitment,
     metadata::OutputMetadata,
-    native_token::{NativeToken, NativeTokens, NativeTokensBuilder},
-    nft::{NftOutput, NftOutputBuilder},
-    nft_id::NftId,
+    native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
+    nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     rent::{Rent, RentBuilder, RentStructure},
     state_transition::{StateTransitionError, StateTransitionVerifier},
-    token_id::TokenId,
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
@@ -360,6 +352,7 @@ impl Output {
             (None, Some(Self::Account(next_state))) => AccountOutput::creation(next_state, context),
             (None, Some(Self::Foundry(next_state))) => FoundryOutput::creation(next_state, context),
             (None, Some(Self::Nft(next_state))) => NftOutput::creation(next_state, context),
+            (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
 
             // Transitions.
             (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
@@ -371,11 +364,15 @@ impl Output {
             (Some(Self::Nft(current_state)), Some(Self::Nft(next_state))) => {
                 NftOutput::transition(current_state, next_state, context)
             }
+            (Some(Self::Delegation(current_state)), Some(Self::Delegation(next_state))) => {
+                DelegationOutput::transition(current_state, next_state, context)
+            }
 
             // Destructions.
             (Some(Self::Account(current_state)), None) => AccountOutput::destruction(current_state, context),
             (Some(Self::Foundry(current_state)), None) => FoundryOutput::destruction(current_state, context),
             (Some(Self::Nft(current_state)), None) => NftOutput::destruction(current_state, context),
+            (Some(Self::Delegation(current_state)), None) => DelegationOutput::destruction(current_state, context),
 
             // Unsupported.
             _ => Err(StateTransitionError::UnsupportedStateTransition),

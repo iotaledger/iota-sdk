@@ -17,9 +17,9 @@ use iota_sdk::{
         },
         ClientOptions,
     },
-    Url,
 };
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 use crate::method::account::AccountMethod;
 #[cfg(feature = "stronghold")]
