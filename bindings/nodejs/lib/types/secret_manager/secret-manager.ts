@@ -33,11 +33,17 @@ export interface StrongholdSecretManager {
     };
 }
 
+/** Secret manager based on a single ED25519 private key. */
+export interface PrivateKeySecretManager {
+    privateKey: HexEncodedString;
+}
+
 /** Supported secret managers */
 export type SecretManagerType =
     | LedgerNanoSecretManager
     | MnemonicSecretManager
     | StrongholdSecretManager
+    | PrivateKeySecretManager
     | PlaceholderSecretManager;
 
 export interface Secp256k1EcdsaSignature {

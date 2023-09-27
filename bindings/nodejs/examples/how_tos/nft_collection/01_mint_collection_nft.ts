@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNftParams, NftId, utf8ToHex, Utils, Wallet } from '@iota/sdk';
+import { MintNftParams, NftId, Utils, Wallet, Irc27Metadata } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // The NFT collection size
@@ -48,9 +48,7 @@ async function run() {
         // Create the metadata with another index for each
         for (let index = 0; index < NFT_COLLECTION_SIZE; index++) {
             const params: MintNftParams = {
-                immutableMetadata: utf8ToHex(
-                    getImmutableMetadata(index, issuerNftId),
-                ),
+                immutableMetadata: getImmutableMetadata(index).asHex(),
                 // The NFT address from the NFT we minted in mint_issuer_nft example
                 issuer,
             };
@@ -97,21 +95,18 @@ async function run() {
     process.exit(0);
 }
 
-function getImmutableMetadata(index: number, issuerNftId: NftId) {
-    // Note: we use parse and stringify to remove all unnecessary whitespace
-    return JSON.stringify(
-        JSON.parse(`{
-        "standard":"IRC27",
-        "version":"v1.0",
-        "type":"video/mp4",
-        "uri":"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong",
-        "name":"Shimmer OG NFT ${index}",
-        "description":"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
-        "issuerName":"IOTA Foundation",
-        "collectionId":"${issuerNftId}",
-        "collectionName":"Shimmer OG"
-    }`),
-    );
+function getImmutableMetadata(index: number) {
+    return new Irc27Metadata(
+        'video/mp4',
+        'https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT',
+        `Shimmer OG NFT ${index}`,
+    )
+        .withDescription(
+            'The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation \
+        to celebrate the official launch of the Shimmer Network.',
+        )
+        .withIssuerName('IOTA Foundation')
+        .withCollectionName('Shimmer OG');
 }
 
 run();

@@ -295,17 +295,21 @@ impl SecretManage for LedgerSecretManager {
                 .map_err(Error::from)?;
         } else {
             // figure out the remainder address and bip32 index (if there is one)
+            #[allow(clippy::option_if_let_else)]
             let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
                 match &prepared_transaction.remainder {
                     Some(a) => {
-                        let chain = a.chain.ok_or(Error::MissingBip32Chain)?;
-                        (
-                            Some(&a.address),
-                            LedgerBIP32Index {
-                                bip32_change: chain.change.harden().into(),
-                                bip32_index: chain.address_index.harden().into(),
-                            },
-                        )
+                        if let Some(chain) = a.chain {
+                            (
+                                Some(&a.address),
+                                LedgerBIP32Index {
+                                    bip32_change: chain.change.harden().into(),
+                                    bip32_index: chain.address_index.harden().into(),
+                                },
+                            )
+                        } else {
+                            (None, LedgerBIP32Index::default())
+                        }
                     }
                     None => (None, LedgerBIP32Index::default()),
                 };

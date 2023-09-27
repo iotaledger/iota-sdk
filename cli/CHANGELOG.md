@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UX improvements (Ctrl+l, TAB completion/suggestions and more) during interactive account management;
 - `WalletCommand::SetPow` command;
 - Check for existing stronghold on `restore`;
+- Sync native token foundries to show their metadata;
 
 ### Changed
 
