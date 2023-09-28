@@ -13,7 +13,7 @@ pub(crate) fn can_output_be_unlocked_now(
     slot_index: SlotIndex,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
-        if unlock_conditions.is_time_locked(slot_index) {
+        if unlock_conditions.is_timelocked(slot_index) {
             return Ok(false);
         }
     }
@@ -33,7 +33,7 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     slot_index: SlotIndex,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
-        if unlock_conditions.is_time_locked(slot_index) {
+        if unlock_conditions.is_timelocked(slot_index) {
             return false;
         }
 

@@ -79,7 +79,7 @@ where
         Ok(if let Output::Basic(basic_output) = &output_data.output {
             let unlock_conditions = basic_output.unlock_conditions();
 
-            let is_time_locked = unlock_conditions.is_time_locked(slot_index);
+            let is_time_locked = unlock_conditions.is_timelocked(slot_index);
             if is_time_locked {
                 // If the output is timelocked, then it cannot be consolidated.
                 return Ok(false);
