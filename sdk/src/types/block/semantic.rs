@@ -313,7 +313,7 @@ impl<'a> SemanticValidationContext<'a> {
                     // TODO check is_deadzoned ?
                     if !expiration.is_expired(
                         commitment.as_commitment().slot_index(),
-                        self.protocol_parameters.min_committable_age().into(),
+                        self.protocol_parameters.min_committable_age(),
                     ) {
                         if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                             let amount = self

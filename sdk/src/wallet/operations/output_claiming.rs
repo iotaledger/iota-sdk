@@ -79,7 +79,8 @@ impl WalletData {
                             OutputsToClaim::MicroTransactions => {
                                 if let Some(sdr) = unlock_conditions.storage_deposit_return() {
                                     // If expired, it's not a micro transaction anymore
-                                    if unlock_conditions.is_expired(slot_index) {
+                                    if unlock_conditions.is_expired(slot_index, protocol_parameters.min_committable_age)
+                                    {
                                         continue;
                                     }
                                     // Only micro transaction if not the same
@@ -101,7 +102,8 @@ impl WalletData {
                             }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
-                                if !unlock_conditions.is_expired(slot_index) {
+                                if !unlock_conditions.is_expired(slot_index, protocol_parameters.min_committable_age())
+                                {
                                     claimable_amount -= unlock_conditions
                                         .storage_deposit_return()
                                         .map(|s| s.amount())
