@@ -37,11 +37,11 @@ class BlockWrapper:
     def from_dict(cls, block_wrapper_dict: Dict) -> BlockWrapper:
         """
         The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `BasicBlock` class.
+        create an instance of the `BlockWrapper` class.
 
         Returns:
 
-        An instance of the `BasicBlock` class.
+        An instance of the `BlockWrapper` class.
         """
         return from_dict(BlockWrapper, block_wrapper_dict)
 
