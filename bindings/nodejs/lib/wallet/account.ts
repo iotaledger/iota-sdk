@@ -54,6 +54,7 @@ import {
     FoundryId,
     TransactionId,
     NumericString,
+    Bech32Address,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -1204,7 +1205,7 @@ export class Account {
      */
     async send(
         amount: bigint | NumericString,
-        address: HexEncodedString,
+        address: Bech32Address,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         if (typeof amount === 'bigint') {
