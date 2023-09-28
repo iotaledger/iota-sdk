@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.0.13 - 2023-09-28
+
+### Fixed
+
+- `migrateDbChrysalisToStardust()` when ledger nano was used as signer type;
+
 ## 1.0.12 - 2023-09-25
 
 ### Changed
