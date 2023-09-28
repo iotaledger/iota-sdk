@@ -404,13 +404,12 @@ impl UnlockConditions {
             .map(UnlockCondition::as_expiration)
     }
 
-    /// Returns whether an expiration exists and is expired.
+    /// Checks whether an expiration exists and is expired.
     #[inline(always)]
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
-        let slot_index = slot_index.into();
-
-        self.expiration()
-            .map_or(false, |expiration| slot_index >= expiration.slot_index())
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+        self.expiration().map_or(false, |expiration| {
+            expiration.is_expired(slot_index, min_committable_age)
+        })
     }
 
     /// Gets a reference to a [`StateControllerAddressUnlockCondition`], if any.

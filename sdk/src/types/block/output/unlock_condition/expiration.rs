@@ -45,8 +45,9 @@ impl ExpirationUnlockCondition {
         self.slot_index
     }
 
-    pub fn is_expired(&self, slot_index: SlotIndex, min_committable_age: SlotIndex) -> bool {
-        (slot_index + min_committable_age) >= self.slot_index
+    /// Checks whether the expiration is expired.
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+        (slot_index.into() + min_committable_age.into()) >= self.slot_index
     }
 
     /// Returns the return address if the condition has expired.

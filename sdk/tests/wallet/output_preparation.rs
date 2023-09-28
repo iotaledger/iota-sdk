@@ -354,7 +354,8 @@ async fn output_preparation() -> Result<()> {
     let conditions = output.unlock_conditions().unwrap();
     // TODO double check
     assert!(conditions.is_timelocked(0, 0));
-    assert!(conditions.is_expired(2));
+    // TODO double check
+    assert!(conditions.is_expired(2, 0));
 
     // nft with expiration
     let output = account

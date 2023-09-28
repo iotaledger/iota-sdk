@@ -315,20 +315,6 @@ pub fn semantic_validation(
             }
         }
 
-        // TODO remove the method?
-        // if !unlock_conditions.is_expired(context.essence.creation_slot()) {
-        //     if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
-        //         let amount = context
-        //             .storage_deposit_returns
-        //             .entry(*storage_deposit_return.return_address())
-        //             .or_default();
-
-        //         *amount = amount
-        //             .checked_add(storage_deposit_return.amount())
-        //             .ok_or(Error::StorageDepositReturnOverflow)?;
-        //     }
-        // }
-
         context.input_amount = context
             .input_amount
             .checked_add(amount)
