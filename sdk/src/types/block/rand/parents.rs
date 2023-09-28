@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    parent::Parents,
+    core::Parents,
     rand::{block::rand_block_ids, number::rand_number_range},
 };
 

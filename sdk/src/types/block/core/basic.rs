@@ -9,8 +9,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::{verify_parents, Block},
-    parent::Parents,
+    core::{verify_parents, Block, Parents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     Error,

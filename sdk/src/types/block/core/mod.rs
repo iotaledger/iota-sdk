@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod basic;
+mod parent;
 pub mod validation;
 mod wrapper;
 
-use alloc::boxed::Box;
+use alloc::{boxed::Box, collections::BTreeSet};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
@@ -18,13 +19,13 @@ use packable::{
 
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
+    parent::Parents,
     validation::{ValidationBlock, ValidationBlockBuilder},
     wrapper::{BlockHeader, BlockWrapper},
 };
-use super::parent::Parents;
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    Error,
+    BlockId, Error,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -136,16 +137,14 @@ impl Packable for Block {
     }
 }
 
-pub(crate) fn verify_parents<const MAX: u8>(
-    strong_parents: &Parents<1, MAX>,
-    weak_parents: &Parents<0, MAX>,
-    shallow_like_parents: &Parents<0, MAX>,
+pub(crate) fn verify_parents(
+    strong_parents: &[BlockId],
+    weak_parents: &[BlockId],
+    shallow_like_parents: &[BlockId],
 ) -> Result<(), Error> {
-    let (strong_parents, weak_parents, shallow_like_parents) = (
-        strong_parents.to_set(),
-        weak_parents.to_set(),
-        shallow_like_parents.to_set(),
-    );
+    let strong_parents: BTreeSet<_> = strong_parents.iter().copied().collect();
+    let weak_parents: BTreeSet<_> = weak_parents.iter().copied().collect();
+    let shallow_like_parents: BTreeSet<_> = shallow_like_parents.iter().copied().collect();
 
     if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
         return Err(Error::NonDisjointParents);

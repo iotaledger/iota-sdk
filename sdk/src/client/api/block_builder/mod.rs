@@ -7,14 +7,11 @@ pub mod transaction;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
-    types::{
-        api::core::response::IssuanceBlockHeaderResponse,
-        block::{
-            core::{basic, Block, BlockWrapper},
-            payload::Payload,
-            signature::Ed25519Signature,
-            IssuerId,
-        },
+    types::block::{
+        core::{basic, Block, BlockWrapper},
+        payload::Payload,
+        signature::Ed25519Signature,
+        IssuerId,
     },
 };
 
@@ -27,14 +24,8 @@ impl ClientInner {
         strong_parents: Option<basic::StrongParents>,
         payload: Option<Payload>,
     ) -> Result<BlockWrapper> {
-        let IssuanceBlockHeaderResponse {
-            strong_parents: default_strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            latest_finalized_slot,
-            commitment,
-        } = self.get_issuance().await?;
-        let strong_parents = strong_parents.unwrap_or(default_strong_parents);
+        let issuance = self.get_issuance().await?;
+        let strong_parents = strong_parents.unwrap_or(issuance.strong_parents()?);
 
         let issuing_time = issuing_time.unwrap_or_else(|| {
             #[cfg(feature = "std")]
@@ -55,13 +46,13 @@ impl ClientInner {
             protocol_parameters.version(),
             protocol_parameters.network_id(),
             issuing_time,
-            commitment.id(),
-            latest_finalized_slot,
+            issuance.commitment.id(),
+            issuance.latest_finalized_slot,
             issuer_id,
             // TODO correct value for burned_mana
             Block::build_basic(strong_parents, 0)
-                .with_weak_parents(weak_parents)
-                .with_shallow_like_parents(shallow_like_parents)
+                .with_weak_parents(issuance.weak_parents()?)
+                .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)
                 .finish_block()?,
             signature,
