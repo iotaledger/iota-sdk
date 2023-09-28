@@ -281,7 +281,7 @@ pub fn semantic_validation(
 
         if let Some(timelock) = unlock_conditions.timelock() {
             if let Some(commitment) = context.essence.context_inputs().iter().find(|c| c.is_commitment()) {
-                if timelock.is_time_locked(
+                if timelock.is_timelocked(
                     commitment.as_commitment().slot_index(),
                     context.protocol_parameters.min_committable_age(),
                 ) {

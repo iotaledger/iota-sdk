@@ -30,8 +30,8 @@ impl TimelockUnlockCondition {
         self.0
     }
 
-    pub fn is_time_locked(&self, slot_index: SlotIndex, min_committable_age: SlotIndex) -> bool {
-        (slot_index + min_committable_age) < self.0
+    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+        (slot_index.into() + min_committable_age.into()) < self.0
     }
 }
 

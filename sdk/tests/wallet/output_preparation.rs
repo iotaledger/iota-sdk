@@ -352,7 +352,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(sender_feature.address(), issuer_and_sender_address.inner());
     // Unlocks
     let conditions = output.unlock_conditions().unwrap();
-    assert!(conditions.is_time_locked(0));
+    assert!(conditions.is_timelocked(0));
     assert!(conditions.is_expired(2));
 
     // nft with expiration

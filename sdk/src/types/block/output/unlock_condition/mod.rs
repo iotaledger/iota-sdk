@@ -389,11 +389,29 @@ impl UnlockConditions {
             .map(UnlockCondition::as_timelock)
     }
 
+    /// Returns whether a timelock exists and is still relevant.
+    #[inline(always)]
+    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        let slot_index = slot_index.into();
+
+        self.timelock()
+            .map_or(false, |timelock| slot_index < timelock.slot_index())
+    }
+
     /// Gets a reference to an [`ExpirationUnlockCondition`], if any.
     #[inline(always)]
     pub fn expiration(&self) -> Option<&ExpirationUnlockCondition> {
         self.get(ExpirationUnlockCondition::KIND)
             .map(UnlockCondition::as_expiration)
+    }
+
+    /// Returns whether an expiration exists and is expired.
+    #[inline(always)]
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        let slot_index = slot_index.into();
+
+        self.expiration()
+            .map_or(false, |expiration| slot_index >= expiration.slot_index())
     }
 
     /// Gets a reference to a [`StateControllerAddressUnlockCondition`], if any.
@@ -424,24 +442,6 @@ impl UnlockConditions {
         self.expiration()
             .and_then(|e| e.return_address_expired(slot_index))
             .unwrap_or(address)
-    }
-
-    /// Returns whether a time lock exists and is still relevant.
-    #[inline(always)]
-    pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
-        let slot_index = slot_index.into();
-
-        self.timelock()
-            .map_or(false, |timelock| slot_index < timelock.slot_index())
-    }
-
-    /// Returns whether an expiration exists and is expired.
-    #[inline(always)]
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
-        let slot_index = slot_index.into();
-
-        self.expiration()
-            .map_or(false, |expiration| slot_index >= expiration.slot_index())
     }
 }
 
