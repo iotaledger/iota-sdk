@@ -1,5 +1,6 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { AliasId, Feature, HexEncodedString } from '../..';
 import type { BasicOutputBuilderParams } from './basic-output-params';
 
