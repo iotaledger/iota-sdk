@@ -77,7 +77,7 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
-def unlock_from_dict(d: Dict[str, Any]) -> Union[SignatureUnlock, ReferenceUnlock, AccountUnlock, NftUnlock]:
+def deserialize_unlock(d: Dict[str, Any]) -> Union[SignatureUnlock, ReferenceUnlock, AccountUnlock, NftUnlock]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -96,12 +96,12 @@ def unlock_from_dict(d: Dict[str, Any]) -> Union[SignatureUnlock, ReferenceUnloc
     raise Exception(f'invalid unlock type: {unlock_type}')
 
 
-def unlocks_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[SignatureUnlock,
-                                                                  ReferenceUnlock, AccountUnlock, NftUnlock]]:
+def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Union[SignatureUnlock,
+                                                                   ReferenceUnlock, AccountUnlock, NftUnlock]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(unlock_from_dict, dicts))
+    return list(map(deserialize_unlock, dicts))

@@ -81,7 +81,7 @@ class AddressWithUnspentOutputs():
     output_ids: bool
 
 
-def address_from_dict(d: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress, NFTAddress]:
+def deserialize_address(d: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress, NFTAddress]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -98,7 +98,7 @@ def address_from_dict(d: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress
     raise Exception(f'invalid address type: {address_type}')
 
 
-def addresses_from_dicts(
+def deserialize_addresses(
         dicts: List[Dict[str, Any]]) -> List[Union[Ed25519Address, AccountAddress, NFTAddress]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
@@ -106,4 +106,4 @@ def addresses_from_dicts(
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(address_from_dict, dicts))
+    return list(map(deserialize_address, dicts))

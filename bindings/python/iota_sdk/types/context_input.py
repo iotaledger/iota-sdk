@@ -73,8 +73,8 @@ class RewardContextInput(ContextInput):
         init=False)
 
 
-def context_input_from_dict(d: Dict[str, Any]) -> Union[CommitmentContextInput,
-                                                        BlockIssuanceCreditContextInput, RewardContextInput]:
+def deserialize_context_input(d: Dict[str, Any]) -> Union[CommitmentContextInput,
+                                                          BlockIssuanceCreditContextInput, RewardContextInput]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -91,7 +91,7 @@ def context_input_from_dict(d: Dict[str, Any]) -> Union[CommitmentContextInput,
     raise Exception(f'invalid context input type: {context_input_type}')
 
 
-def context_inputs_from_dicts(
+def deserialize_context_inputs(
         dicts: List[Dict[str, Any]]) -> List[Union[CommitmentContextInput, BlockIssuanceCreditContextInput, RewardContextInput]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
@@ -99,4 +99,4 @@ def context_inputs_from_dicts(
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(context_input_from_dict, dicts))
+    return list(map(deserialize_context_input, dicts))

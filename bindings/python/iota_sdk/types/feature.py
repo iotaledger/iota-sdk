@@ -5,7 +5,7 @@ from enum import IntEnum
 from typing import Dict, List, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress, address_from_dict
+from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress, deserialize_address
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -45,7 +45,7 @@ class SenderFeature(Feature):
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(
         default_factory=lambda: int(
@@ -62,7 +62,7 @@ class IssuerFeature(Feature):
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(
         default_factory=lambda: int(
@@ -132,8 +132,8 @@ class StakingFeature(Feature):
         init=False)
 
 
-def feature_from_dict(d: Dict[str, Any]) -> Union[SenderFeature, IssuerFeature,
-                                                  MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]:
+def deserialize_feature(d: Dict[str, Any]) -> Union[SenderFeature, IssuerFeature,
+                                                    MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -156,12 +156,12 @@ def feature_from_dict(d: Dict[str, Any]) -> Union[SenderFeature, IssuerFeature,
     raise Exception(f'invalid feature type: {feature_type}')
 
 
-def features_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[SenderFeature,
-                                                                   IssuerFeature, MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]]:
+def deserialize_features(dicts: List[Dict[str, Any]]) -> List[Union[SenderFeature,
+                                                                    IssuerFeature, MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(feature_from_dict, dicts))
+    return list(map(deserialize_feature, dicts))

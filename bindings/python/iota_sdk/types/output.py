@@ -7,10 +7,10 @@ from typing import Dict, Optional, List, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.feature import features_from_dicts, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
+from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import unlock_conditions_from_dicts, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
+from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -59,12 +59,12 @@ class BasicOutput(Output):
     mana: str
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                                   TimelockUnlockCondition]] = field(metadata=config(
-                                                                    decoder=unlock_conditions_from_dicts
+                                                                    decoder=deserialize_unlock_conditions
                                                                     ))
     features: Optional[List[Union[SenderFeature,
                             MetadataFeature, TagFeature]]] = field(default=None,
                                                                    metadata=config(
-                                                                       decoder=features_from_dicts
+                                                                       decoder=deserialize_features
                                                                    ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -109,17 +109,17 @@ class AccountOutput(Output):
     unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
                                   GovernorAddressUnlockCondition]] = field(
         metadata=config(
-            decoder=unlock_conditions_from_dicts
+            decoder=deserialize_unlock_conditions
         ))
     features: Optional[List[Union[SenderFeature,
                             MetadataFeature]]] = field(default=None,
                                                        metadata=config(
-                                                           decoder=features_from_dicts
+                                                           decoder=deserialize_features
                                                        ))
     immutable_features: Optional[List[Union[IssuerFeature,
                                             MetadataFeature]]] = field(default=None,
                                                                        metadata=config(
-                                                                           decoder=features_from_dicts
+                                                                           decoder=deserialize_features
                                                                        ))
     state_metadata: Optional[HexStr] = None
     native_tokens: Optional[List[NativeToken]] = None
@@ -157,11 +157,11 @@ class FoundryOutput(Output):
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
     features: Optional[List[MetadataFeature]] = field(default=None,
                                                       metadata=config(
-                                                          decoder=features_from_dicts
+                                                          decoder=deserialize_features
                                                       ))
     immutable_features: Optional[List[MetadataFeature]] = field(default=None,
                                                                 metadata=config(
-                                                                    decoder=features_from_dicts
+                                                                    decoder=deserialize_features
                                                                 ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -198,17 +198,17 @@ class NftOutput(Output):
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
                                   StorageDepositReturnUnlockCondition, TimelockUnlockCondition]] = field(
         metadata=config(
-            decoder=unlock_conditions_from_dicts
+            decoder=deserialize_unlock_conditions
         ))
     features: Optional[List[Union[SenderFeature,
                             MetadataFeature, TagFeature]]] = field(default=None,
                                                                    metadata=config(
-                                                                       decoder=features_from_dicts
+                                                                       decoder=deserialize_features
                                                                    ))
     immutable_features: Optional[List[Union[
         IssuerFeature, MetadataFeature]]] = field(default=None,
                                                   metadata=config(
-                                                      decoder=features_from_dicts
+                                                      decoder=deserialize_features
                                                   ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
@@ -227,8 +227,8 @@ class DelegationOutput(Output):
         OutputType.Delegation), init=False)
 
 
-def output_from_dict(d: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
-                                                 FoundryOutput, NftOutput, DelegationOutput]:
+def deserialize_output(d: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
+                                                   FoundryOutput, NftOutput, DelegationOutput]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -249,12 +249,12 @@ def output_from_dict(d: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
     raise Exception(f'invalid output type: {output_type}')
 
 
-def outputs_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[BasicOutput,
-                                                                  AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]:
+def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Union[BasicOutput,
+                                                                   AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(output_from_dict, dicts))
+    return list(map(deserialize_output, dicts))

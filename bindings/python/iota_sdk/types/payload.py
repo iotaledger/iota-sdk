@@ -65,7 +65,7 @@ class TransactionPayload(Payload):
         init=False)
 
 
-def payload_from_dict(d: Dict[str, Any]) -> Union[TaggedDataPayload, TransactionPayload]:
+def deserialize_payload(d: Dict[str, Any]) -> Union[TaggedDataPayload, TransactionPayload]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -80,7 +80,7 @@ def payload_from_dict(d: Dict[str, Any]) -> Union[TaggedDataPayload, Transaction
     raise Exception(f'invalid payload type: {payload_type}')
 
 
-def payloads_from_dicts(
+def deserialize_payloads(
         dicts: List[Dict[str, Any]]) -> List[Union[TaggedDataPayload, TransactionPayload]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
@@ -88,4 +88,4 @@ def payloads_from_dicts(
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(payload_from_dict, dicts))
+    return list(map(deserialize_payload, dicts))

@@ -7,7 +7,7 @@ from typing import Dict, List, Union, Any
 from dataclasses_json import config
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import json
-from iota_sdk.types.address import address_from_dict
+from iota_sdk.types.address import deserialize_address
 
 
 class UnlockConditionType(IntEnum):
@@ -49,7 +49,7 @@ class AddressUnlockCondition(UnlockCondition):
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(
         default_factory=lambda: int(
@@ -68,7 +68,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
     amount: str
     return_address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StorageDepositReturn), init=False)
@@ -99,7 +99,7 @@ class ExpirationUnlockCondition(UnlockCondition):
     unix_time: int
     return_address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(
         default_factory=lambda: int(
@@ -116,7 +116,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StateControllerAddress), init=False)
@@ -131,7 +131,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
         metadata=config(
-            decoder=address_from_dict
+            decoder=deserialize_address
         ))
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.GovernorAddress), init=False)
@@ -149,8 +149,8 @@ class ImmutableAccountAddressUnlockCondition(UnlockCondition):
         UnlockConditionType.ImmutableAccountAddress), init=False)
 
 
-def unlock_condition_from_dict(d: Dict[str, Any]) -> Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
-                                                           ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]:
+def deserialize_unlock_condition(d: Dict[str, Any]) -> Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+                                                             ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -176,12 +176,12 @@ def unlock_condition_from_dict(d: Dict[str, Any]) -> Union[AddressUnlockConditio
     raise Exception(f'invalid unlock condition type: {uc_type}')
 
 
-def unlock_conditions_from_dicts(dicts: List[Dict[str, Any]]) -> List[Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
-                                                                            ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]]:
+def deserialize_unlock_conditions(dicts: List[Dict[str, Any]]) -> List[Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+                                                                             ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
-    return list(map(unlock_condition_from_dict, dicts))
+    return list(map(deserialize_unlock_condition, dicts))

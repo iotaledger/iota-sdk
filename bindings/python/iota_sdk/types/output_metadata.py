@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import AccountOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, outputs_from_dicts
+from iota_sdk.types.output import AccountOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_outputs
 
 
 @json
@@ -51,7 +51,7 @@ class OutputWithMetadata:
     metadata: OutputMetadata
     output: Union[AccountOutput, FoundryOutput,
                   NftOutput, BasicOutput, DelegationOutput] = field(metadata=config(
-                      decoder=outputs_from_dicts
+                      decoder=deserialize_outputs
                   ))
 
     @classmethod
