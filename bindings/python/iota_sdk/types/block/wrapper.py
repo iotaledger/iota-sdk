@@ -10,6 +10,7 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.signature import Signature
 from iota_sdk.utils import Utils
 
+
 @json
 @dataclass
 class BlockWrapper:
@@ -18,9 +19,11 @@ class BlockWrapper:
     All fields of a Block Wrapper except for the Block and Signature constitute the Block Header.
     """
 
-    def __init__(self, header: BlockHeader, block: Block, signature: Signature):
+    def __init__(self, header: BlockHeader, block: Block,
+                 signature: Signature):
         if not isinstance(block, Block):
-            raise ValueError("block must be an instance of Block or its subclasses")
+            raise ValueError(
+                "block must be an instance of Block or its subclasses")
         self.header = header
         self.block = block
         self.signature = signature
@@ -41,6 +44,7 @@ class BlockWrapper:
         An instance of the `BasicBlock` class.
         """
         return from_dict(BlockWrapper, block_wrapper_dict)
+
 
 @json
 @dataclass

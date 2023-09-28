@@ -394,7 +394,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(self, payload: Payload) -> List[Union[HexStr, BlockWrapper]]:
+    def submit_payload(
+            self, payload: Payload) -> List[Union[HexStr, BlockWrapper]]:
         """Submit a payload in a block.
 
         Args:

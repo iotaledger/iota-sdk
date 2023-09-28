@@ -8,6 +8,7 @@ from dacite import from_dict
 from iota_sdk.types.block.block import Block, BlockType
 from iota_sdk.types.common import HexStr, json
 
+
 @json
 @dataclass
 class ValidationBlock(Block):

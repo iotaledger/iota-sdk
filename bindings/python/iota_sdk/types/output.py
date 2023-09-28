@@ -194,7 +194,10 @@ class DelegationOutput(Output):
             The type of output.
     """
     # TODO fields done in #1174
-    type: int = field(default_factory=lambda: int(OutputType.Delegation), init=False)
+    type: int = field(
+        default_factory=lambda: int(
+            OutputType.Delegation),
+        init=False)
 
 
 @json

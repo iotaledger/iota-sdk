@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from iota_sdk.types.common import HexStr, json
 
+
 class BlockType(IntEnum):
     """Block types.
 
@@ -24,6 +25,7 @@ class Block:
     """Base class for blocks.
     """
     type: int
+
 
 @json
 @dataclass
@@ -54,6 +56,7 @@ class BlockMetadata:
     conflict_reason: Optional[TransactionFailureReason] = None
     should_promote: Optional[bool] = None
     should_reattach: Optional[bool] = None
+
 
 class LedgerInclusionState(str, Enum):
     """Represents whether a block is included in the ledger.

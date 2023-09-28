@@ -58,7 +58,8 @@ class RegularTransactionEssence(TransactionEssence):
     creation_slot: HexStr
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
-    outputs: List[Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]
+    outputs: List[Union[BasicOutput, AccountOutput,
+                        FoundryOutput, NftOutput, DelegationOutput]]
     context_inputs: Optional[List[Union[CommitmentContextInput,
                                         BlockIssuanceCreditContextInput, RewardContextInput]]] = None
     allotments: Optional[List[ManaAllotment]] = None

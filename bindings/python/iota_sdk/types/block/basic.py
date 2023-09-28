@@ -9,6 +9,7 @@ from iota_sdk.types.block.block import Block, BlockType
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 
+
 @json
 @dataclass
 class BasicBlock(Block):
