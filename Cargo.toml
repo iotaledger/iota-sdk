@@ -4,7 +4,6 @@ members = [
 	"bindings/core",
 	"bindings/native",
 	"bindings/nodejs",
-	"bindings/nodejs-old",
 	"bindings/python",
 	"bindings/wasm",
 	"cli",
