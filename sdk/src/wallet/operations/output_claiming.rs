@@ -13,6 +13,7 @@ use crate::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutput, BasicOutputBuilder, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
+        protocol::ProtocolParameters,
         slot::SlotIndex,
     },
     wallet::{
@@ -45,6 +46,7 @@ impl WalletData {
         &self,
         outputs_to_claim: OutputsToClaim,
         slot_index: SlotIndex,
+        protocol_parameters: ProtocolParameters,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
 
@@ -68,6 +70,9 @@ impl WalletData {
                             self.address.inner(),
                             output_data,
                             slot_index,
+                            protocol_parameters.min_committable_age(),
+                            // Not relevant without account addresses
+                            None,
                         )?
                     {
                         match outputs_to_claim {
@@ -137,8 +142,9 @@ where
         let wallet_data = self.data().await;
 
         let slot_index = self.client().get_slot_index().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        wallet_data.claimable_outputs(outputs_to_claim, slot_index)
+        wallet_data.claimable_outputs(outputs_to_claim, slot_index, protocol_parameters)
     }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as

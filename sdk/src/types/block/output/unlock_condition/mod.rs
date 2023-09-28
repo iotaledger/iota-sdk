@@ -248,13 +248,12 @@ impl UnlockConditions {
             .map(UnlockCondition::as_timelock)
     }
 
-    /// Returns whether a timelock exists and is still relevant.
+    /// Checks whether a timelock exists and is still relevant.
     #[inline(always)]
-    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>) -> bool {
-        let slot_index = slot_index.into();
-
-        self.timelock()
-            .map_or(false, |timelock| slot_index < timelock.slot_index())
+    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+        self.timelock().map_or(false, |timelock| {
+            timelock.is_timelocked(slot_index, min_committable_age)
+        })
     }
 
     /// Gets a reference to an [`ExpirationUnlockCondition`], if any.

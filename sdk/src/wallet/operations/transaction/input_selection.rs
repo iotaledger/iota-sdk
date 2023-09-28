@@ -70,6 +70,9 @@ where
             &wallet_data,
             wallet_data.unspent_outputs.values(),
             slot_index,
+            protocol_parameters.min_committable_age(),
+            &outputs,
+            burn,
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
         )?;
@@ -219,6 +222,9 @@ fn filter_inputs(
     wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
+    min_committable_age: SlotIndex,
+    outputs: &[Output],
+    burn: Option<&Burn>,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {
@@ -238,6 +244,7 @@ fn filter_inputs(
                 &wallet_data.address.inner,
                 &output_data.output,
                 slot_index,
+                min_committable_age,
             );
 
             // Outputs that could get unlocked in the future will not be included

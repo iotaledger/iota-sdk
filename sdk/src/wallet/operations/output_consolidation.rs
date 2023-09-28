@@ -70,16 +70,17 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    fn should_consolidate_output(
+    async fn should_consolidate_output(
         &self,
         output_data: &OutputData,
         slot_index: SlotIndex,
         wallet_address: &Address,
     ) -> Result<bool> {
         Ok(if let Output::Basic(basic_output) = &output_data.output {
+            let min_committable_age = self.client().get_protocol_parameters().await?.min_committable_age();
             let unlock_conditions = basic_output.unlock_conditions();
 
-            let is_time_locked = unlock_conditions.is_timelocked(slot_index);
+            let is_time_locked = unlock_conditions.is_timelocked(slot_index, min_committable_age);
             if is_time_locked {
                 // If the output is timelocked, then it cannot be consolidated.
                 return Ok(false);
@@ -93,7 +94,7 @@ where
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(wallet_address, output_data, slot_index)?
+            can_output_be_unlocked_now(wallet_address, output_data, slot_index, min_committable_age.into())?
         } else {
             false
         })
@@ -139,7 +140,9 @@ where
             }
 
             let is_locked_output = wallet_data.locked_outputs.contains(output_id);
-            let should_consolidate_output = self.should_consolidate_output(output_data, slot_index, wallet_address)?;
+            let should_consolidate_output = self
+                .should_consolidate_output(output_data, slot_index, wallet_address)
+                .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
             }

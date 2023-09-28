@@ -35,9 +35,9 @@ where
         // addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
         wallet_data: &WalletData,
     ) -> Result<Balance> {
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let network_id = self.client().get_network_id().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
-        let slot_index = self.client().get_slot_index().await?;
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -164,6 +164,7 @@ where
                                 wallet_data.address.inner(),
                                 output,
                                 slot_index,
+                                protocol_parameters.min_committable_age(),
                             );
 
                             if output_can_be_unlocked_now_and_in_future {

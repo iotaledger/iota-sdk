@@ -283,7 +283,10 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
-            if unlock_conditions.is_timelocked(self.transaction.creation_slot()) {
+            if unlock_conditions.is_timelocked(
+                self.transaction.creation_slot(),
+                self.protocol_parameters.min_committable_age(),
+            ) {
                 return Ok(Some(TransactionFailureReason::TimelockNotExpired));
             }
 
