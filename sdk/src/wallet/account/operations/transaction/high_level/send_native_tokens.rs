@@ -160,7 +160,7 @@ where
                     Ok::<_, Error>(addr)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address.clone());
+                .unwrap_or_else(|| default_return_address.address.clone());
 
             let native_tokens = NativeTokens::from_vec(
                 native_tokens

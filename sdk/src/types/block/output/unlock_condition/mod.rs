@@ -530,11 +530,11 @@ pub mod dto {
             match value {
                 UnlockCondition::Address(v) => Self::Address(v.clone()),
                 UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.into()),
-                UnlockCondition::Timelock(v) => Self::Timelock(v.clone()),
+                UnlockCondition::Timelock(v) => Self::Timelock(*v),
                 UnlockCondition::Expiration(v) => Self::Expiration(v.clone()),
                 UnlockCondition::StateControllerAddress(v) => Self::StateControllerAddress(v.clone()),
                 UnlockCondition::GovernorAddress(v) => Self::GovernorAddress(v.clone()),
-                UnlockCondition::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(v.clone()),
+                UnlockCondition::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(*v),
             }
         }
     }

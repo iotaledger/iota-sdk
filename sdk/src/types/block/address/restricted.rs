@@ -181,7 +181,7 @@ pub(crate) mod dto {
             Self {
                 kind: RestrictedAddress::KIND,
                 address: value.address.clone(),
-                allowed_capabilities: value.allowed_capabilities.into_iter().map(|c| **c).collect(),
+                allowed_capabilities: value.allowed_capabilities.iter().map(|c| **c).collect(),
             }
         }
     }

@@ -137,7 +137,7 @@ fn ed25519_bech32() {
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcpqytmqxr4"
     );
 
-    let address = ImplicitAccountCreationAddress::from(address.address().as_ed25519().clone());
+    let address = ImplicitAccountCreationAddress::from(*address.address().as_ed25519());
     assert_eq!(
         address.to_bech32_unchecked("iota").to_string(),
         "iota1rrhacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xg4ad2d"

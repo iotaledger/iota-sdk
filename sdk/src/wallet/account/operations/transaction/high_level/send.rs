@@ -170,7 +170,7 @@ where
                     Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address.clone());
+                .unwrap_or_else(|| default_return_address.address.clone());
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
