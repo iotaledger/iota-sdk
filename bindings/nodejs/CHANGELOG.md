@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Utils::outputHexBytes`;
 - `PrivateKeySecretManager`;
 
+## 1.0.13 - 2023-09-28
+
+### Fixed
+
+- `migrateDbChrysalisToStardust()` when ledger nano was used as signer type;
+
 ## 1.0.12 - 2023-09-25
 
 ### Changed
@@ -201,7 +207,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `callPluginRoute` to Client to fetch data from custom node plugins;
 - `computeTokenId `, `computeOutputId`, `computeInputsCommitment` and `computeStorageDeposit` to Utils;
 - Type alias for Ids which were previously just `HexEncodedString`;
-- List of `ConfictReason` explanations matching the enum;
+- List of `ConflictReason` explanations matching the enum;
 - `units-helper` class for IOTA units conversion;
 - `Client::destroy` to close an open handle;
 
