@@ -210,12 +210,12 @@ class ProtocolParameters:
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
     mana_structure: ManaStructure
-    staking_unbonding_period: str
+    staking_unbonding_period: EpochIndex
     validation_blocks_per_slot: int
-    punishment_epochs: str
-    liveness_threshold: str
-    min_committable_age: str
-    max_committable_age: str
+    punishment_epochs: EpochIndex
+    liveness_threshold: SlotIndex
+    min_committable_age: SlotIndex
+    max_committable_age: SlotIndex
     epoch_nearing_threshold: SlotIndex
     congestion_control_parameters: CongestionControlParameters
     version_signaling: VersionSignaling
