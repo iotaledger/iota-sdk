@@ -390,24 +390,13 @@ fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> 
 #[cfg(feature = "ledger_nano")]
 #[tokio::test]
 async fn migrate_chrysalis_db_ledger() -> Result<()> {
-    let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
-        .name("chrysalis.log")
-        .target_exclusions(&["h2", "hyper", "rustls"])
-        .level_filter(log::LevelFilter::Debug);
-
-    let config = fern_logger::LoggerConfig::build()
-        .with_output(logger_output_config)
-        .finish();
-
-    fern_logger::logger_init(config).unwrap();
-
     let storage_path = "migrate_chrysalis_db_ledger/db";
     setup(storage_path)?;
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/chrysalis-db-ledger/db", storage_path).unwrap();
 
     migrate_db_chrysalis_to_stardust("migrate_chrysalis_db_ledger", None, None).await?;
-    println!("hier");
+
     let client_options = ClientOptions::new();
     let wallet = Wallet::builder()
         .with_storage_path("migrate_chrysalis_db_ledger")
