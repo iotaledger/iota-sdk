@@ -3,7 +3,6 @@ resolver = "2"
 members = [
 	"bindings/core",
 	"bindings/nodejs",
-	"bindings/nodejs-old",
 	"bindings/python",
 	"bindings/wasm",
 	"cli",
