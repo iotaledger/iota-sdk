@@ -15,7 +15,7 @@ from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.block import Block
+    from iota_sdk.types.block.wrapper import BlockWrapper
 
 
 class Utils():
@@ -172,7 +172,7 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: Block) -> HexStr:
+    def block_id(block: BlockWrapper) -> HexStr:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {

@@ -2,54 +2,58 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from enum import Enum
+from enum import Enum, IntEnum
 from dataclasses import dataclass
-from typing import List, Optional, Union, Dict
-from dacite import from_dict
+from typing import List, Optional
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
-from iota_sdk.utils import Utils
+
+class BlockType(IntEnum):
+    """Block types.
+
+    Attributes:
+        Basic (1): A Basic Block.
+        Validation (2): A Validation Block.
+    """
+    Basic = 1
+    Validation = 2
 
 
 @json
 @dataclass
 class Block:
-    """Represent the object that nodes gossip around the network.
+    """Base class for blocks.
+    """
+    type: int
+
+@json
+@dataclass
+class BlockMetadata:
+    """Block Metadata.
 
     Attributes:
-        protocol_version: The protocol version with which this block was issued.
+        block_id: The id of the block.
         strong_parents: Blocks that are strongly directly approved.
         weak_parents: Blocks that are weakly directly approved.
         shallow_like_parents: Blocks that are directly referenced to adjust opinion.
-        burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
-        payload: The optional payload of this block.
+        is_solid: Whether the block is solid.
+        referenced_by_milestone_index: The milestone index referencing the block.
+        milestone_index: The milestone index if the block contains a milestone payload.
+        ledger_inclusion_state: The ledger inclusion state of the block.
+        conflict_reason: The optional conflict reason of the block.
+        should_promote: Whether the block should be promoted.
+        should_reattach: Whether the block should be reattached.
     """
-
-    protocol_version: int
+    block_id: HexStr
     strong_parents: List[HexStr]
     weak_parents: List[HexStr]
     shallow_like_parents: List[HexStr]
-    burned_mana: str
-    payload: Optional[Union[TaggedDataPayload,
-                      TransactionPayload]] = None
-
-    @classmethod
-    def from_dict(cls, block_dict: Dict) -> Block:
-        """
-        The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `Block` class.
-
-        Returns:
-
-        An instance of the `Block` class.
-        """
-        return from_dict(Block, block_dict)
-
-    def id(self) -> HexStr:
-        """Rreturns the block ID as a hexadecimal string.
-        """
-        return Utils.block_id(self)
-
+    is_solid: bool
+    referenced_by_milestone_index: Optional[int] = None
+    milestone_index: Optional[int] = None
+    ledger_inclusion_state: Optional[LedgerInclusionState] = None
+    conflict_reason: Optional[TransactionFailureReason] = None
+    should_promote: Optional[bool] = None
+    should_reattach: Optional[bool] = None
 
 class LedgerInclusionState(str, Enum):
     """Represents whether a block is included in the ledger.
@@ -139,34 +143,3 @@ class TransactionFailureReason(Enum):
             21: "Failed to claim delegation reward.",
             255: "The semantic validation failed for a reason not covered by the previous variants."
         }[self.value]
-
-
-@json
-@dataclass
-class BlockMetadata:
-    """Block Metadata.
-
-    Attributes:
-        block_id: The id of the block.
-        strong_parents: Blocks that are strongly directly approved.
-        weak_parents: Blocks that are weakly directly approved.
-        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
-        is_solid: Whether the block is solid.
-        referenced_by_milestone_index: The milestone index referencing the block.
-        milestone_index: The milestone index if the block contains a milestone payload.
-        ledger_inclusion_state: The ledger inclusion state of the block.
-        conflict_reason: The optional conflict reason of the block.
-        should_promote: Whether the block should be promoted.
-        should_reattach: Whether the block should be reattached.
-    """
-    block_id: HexStr
-    strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
-    is_solid: bool
-    referenced_by_milestone_index: Optional[int] = None
-    milestone_index: Optional[int] = None
-    ledger_inclusion_state: Optional[LedgerInclusionState] = None
-    conflict_reason: Optional[TransactionFailureReason] = None
-    should_promote: Optional[bool] = None
-    should_reattach: Optional[bool] = None

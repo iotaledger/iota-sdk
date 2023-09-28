@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
+from iota_sdk import BasicBlock, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 import json
 import unittest
 
@@ -111,7 +111,7 @@ def test_block():
             "type": 5,
             "tag": "0x68656c6c6f",
             "data": "0x68656c6c6f"}}
-    block = Block.from_dict(block_dict)
+    block = BasicBlock.from_dict(block_dict)
     assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
 
