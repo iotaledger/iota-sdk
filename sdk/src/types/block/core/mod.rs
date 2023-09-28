@@ -6,7 +6,7 @@ mod parent;
 pub mod validation;
 mod wrapper;
 
-use alloc::{boxed::Box, collections::BTreeSet};
+use alloc::boxed::Box;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
@@ -25,7 +25,7 @@ pub use self::{
 };
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    BlockId, Error,
+    Error,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -135,22 +135,6 @@ impl Packable for Block {
             k => return Err(Error::InvalidBlockKind(k)).map_err(UnpackError::Packable),
         })
     }
-}
-
-pub(crate) fn verify_parents(
-    strong_parents: &[BlockId],
-    weak_parents: &[BlockId],
-    shallow_like_parents: &[BlockId],
-) -> Result<(), Error> {
-    let strong_parents: BTreeSet<_> = strong_parents.iter().copied().collect();
-    let weak_parents: BTreeSet<_> = weak_parents.iter().copied().collect();
-    let shallow_like_parents: BTreeSet<_> = shallow_like_parents.iter().copied().collect();
-
-    if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
-        return Err(Error::NonDisjointParents);
-    }
-
-    Ok(())
 }
 
 #[cfg(feature = "serde")]
