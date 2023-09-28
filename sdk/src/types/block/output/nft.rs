@@ -408,7 +408,14 @@ impl NftOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(
+                self.address(),
+                context.essence.creation_slot(),
+                context.protocol_parameters.min_committable_age(),
+                context.protocol_parameters.max_committable_age(),
+            )
+            // TODO
+            .unwrap()
             .unlock(unlock, inputs, context)?;
 
         let nft_id = if self.nft_id().is_null() {

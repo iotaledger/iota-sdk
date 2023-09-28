@@ -241,6 +241,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
@@ -397,7 +398,7 @@ impl SecretManage for LedgerSecretManager {
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
         // Account/Nft/Reference unlocks
         if blind_signing {
-            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter())?;
+            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), protocol_parameters)?;
         }
 
         Ok(Unlocks::new(unlocks)?)
@@ -406,7 +407,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<TransactionPayload, Self::Error> {
         super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
@@ -515,6 +516,7 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
+    protocol_parameters: &ProtocolParameters,
 ) -> Result<Vec<Unlock>, Error> {
     let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
     let slot_index = essence.creation_slot();
@@ -531,6 +533,8 @@ fn merge_unlocks(
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) = input.output.required_and_unlocked_address(
             slot_index,
+            protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
             input.output_metadata.output_id(),
             account_transition,
         )?;

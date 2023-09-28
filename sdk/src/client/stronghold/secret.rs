@@ -284,14 +284,16 @@ impl SecretManage for StrongholdAdapter {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, Self::Error> {
-        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data).await
+        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data, protocol_parameters)
+            .await
     }
 
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<TransactionPayload, Self::Error> {
         crate::client::secret::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }

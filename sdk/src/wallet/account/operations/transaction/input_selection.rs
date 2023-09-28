@@ -77,6 +77,7 @@ where
             account_details.unspent_outputs.values(),
             slot_index,
             protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
             &outputs,
             burn,
             custom_inputs.as_ref(),
@@ -229,6 +230,7 @@ fn filter_inputs(
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
     min_committable_age: SlotIndex,
+    max_committable_age: SlotIndex,
     outputs: &[Output],
     burn: Option<&Burn>,
     custom_inputs: Option<&HashSet<OutputId>>,
@@ -251,6 +253,7 @@ fn filter_inputs(
                 &output_data.output,
                 slot_index,
                 min_committable_age,
+                max_committable_age,
             );
 
             // Outputs that could get unlocked in the future will not be included
@@ -262,7 +265,13 @@ fn filter_inputs(
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
         let account_state_transition = is_account_transition(&output_data.output, output_data.output_id, outputs, burn);
 
-        if let Some(available_input) = output_data.input_signing_data(account, slot_index, account_state_transition)? {
+        if let Some(available_input) = output_data.input_signing_data(
+            account,
+            slot_index,
+            min_committable_age,
+            max_committable_age,
+            account_state_transition,
+        )? {
             available_outputs_signing_data.push(available_input);
         }
     }

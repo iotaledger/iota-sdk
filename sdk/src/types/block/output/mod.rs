@@ -309,13 +309,19 @@ impl Output {
     /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_and_unlocked_address(
         &self,
-        slot_index: SlotIndex,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
         output_id: &OutputId,
         account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                *output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                    // TODO
+                    .unwrap(),
                 None,
             )),
             Self::Account(output) => {
@@ -331,11 +337,19 @@ impl Output {
             }
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                *output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                    // TODO
+                    .unwrap(),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
             Self::Delegation(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                *output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                    // TODO
+                    .unwrap(),
                 None,
             )),
         }

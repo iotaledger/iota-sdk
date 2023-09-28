@@ -79,7 +79,10 @@ where
             .secret_manager
             .read()
             .await
-            .sign_transaction_essence(prepared_transaction_data)
+            .sign_transaction_essence(
+                prepared_transaction_data,
+                &self.client().get_protocol_parameters().await?,
+            )
             .await
         {
             Ok(res) => res,

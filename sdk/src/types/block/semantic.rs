@@ -154,7 +154,7 @@ impl TryFrom<u8> for TransactionFailureReason {
 ///
 pub struct ValidationContext<'a> {
     ///
-    protocol_parameters: ProtocolParameters,
+    pub protocol_parameters: ProtocolParameters,
     ///
     pub essence: &'a RegularTransactionEssence,
     ///

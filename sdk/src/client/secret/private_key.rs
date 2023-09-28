@@ -85,14 +85,15 @@ impl SecretManage for PrivateKeySecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, Self::Error> {
-        super::default_sign_transaction_essence(self, prepared_transaction_data).await
+        super::default_sign_transaction_essence(self, prepared_transaction_data, protocol_parameters).await
     }
 
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<TransactionPayload, Self::Error> {
         super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }

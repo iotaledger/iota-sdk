@@ -16,7 +16,10 @@ use iota_sdk::{
         },
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    types::{block::payload::TransactionPayload, TryFromDto},
+    types::{
+        block::{payload::TransactionPayload, protocol::protocol_parameters},
+        TryFromDto,
+    },
     wallet::Result,
 };
 
@@ -38,7 +41,8 @@ async fn main() -> Result<()> {
 
     // Signs prepared transaction offline.
     let unlocks = SecretManager::Stronghold(secret_manager)
-        .sign_transaction_essence(&prepared_transaction_data)
+        // TODO meh
+        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters())
         .await?;
 
     let signed_transaction = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;

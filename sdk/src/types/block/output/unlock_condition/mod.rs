@@ -434,12 +434,19 @@ impl UnlockConditions {
     }
 
     /// Returns the address to be unlocked.
-    /// TODO take expiration deadzone into account
     #[inline(always)]
-    pub fn locked_address<'a>(&'a self, address: &'a Address, slot_index: SlotIndex) -> &'a Address {
-        self.expiration()
-            .and_then(|e| e.return_address_expired(slot_index))
-            .unwrap_or(address)
+    pub fn locked_address<'a>(
+        &'a self,
+        address: &'a Address,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
+    ) -> Option<&'a Address> {
+        if let Some(expiration) = self.expiration() {
+            expiration.return_address_expired(address, slot_index, min_committable_age, max_committable_age)
+        } else {
+            Some(address)
+        }
     }
 }
 

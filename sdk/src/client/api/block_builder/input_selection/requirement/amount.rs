@@ -356,7 +356,14 @@ impl InputSelection {
             if let Output::Basic(output) = &input.output {
                 output
                     .unlock_conditions()
-                    .locked_address(output.address(), self.slot_index)
+                    .locked_address(
+                        output.address(),
+                        self.slot_index,
+                        self.protocol_parameters.min_committable_age(),
+                        self.protocol_parameters.max_committable_age(),
+                    )
+                    // TODO
+                    .unwrap()
                     .is_ed25519()
             } else {
                 false
@@ -371,7 +378,14 @@ impl InputSelection {
             if let Output::Basic(output) = &input.output {
                 !output
                     .unlock_conditions()
-                    .locked_address(output.address(), self.slot_index)
+                    .locked_address(
+                        output.address(),
+                        self.slot_index,
+                        self.protocol_parameters.min_committable_age(),
+                        self.protocol_parameters.max_committable_age(),
+                    )
+                    // TODO
+                    .unwrap()
                     .is_ed25519()
             } else {
                 false
