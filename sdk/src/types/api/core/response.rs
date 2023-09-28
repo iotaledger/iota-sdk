@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        core::basic,
         output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
-        parent::{ShallowLikeParents, StrongParents, WeakParents},
         protocol::ProtocolParameters,
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -262,11 +262,11 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
-    pub strong_parents: StrongParents,
+    pub strong_parents: basic::StrongParents,
     /// Blocks that are weakly directly approved.
-    pub weak_parents: WeakParents,
+    pub weak_parents: basic::WeakParents,
     /// Blocks that are directly referenced to adjust opinion.
-    pub shallow_like_parents: ShallowLikeParents,
+    pub shallow_like_parents: basic::ShallowLikeParents,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
     /// The most recent slot commitment.

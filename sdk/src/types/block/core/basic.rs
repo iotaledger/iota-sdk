@@ -10,11 +10,15 @@ use packable::{
 
 use crate::types::block::{
     core::{verify_parents, Block},
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
+    parent::Parents,
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     Error,
 };
+
+pub type StrongParents = Parents<1, 8>;
+pub type WeakParents = Parents<0, 8>;
+pub type ShallowLikeParents = Parents<0, 8>;
 
 /// A builder for a [`BasicBlock`].
 pub struct BasicBlockBuilder {

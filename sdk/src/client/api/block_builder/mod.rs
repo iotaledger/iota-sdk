@@ -10,8 +10,7 @@ use crate::{
     types::{
         api::core::response::IssuanceBlockHeaderResponse,
         block::{
-            core::{Block, BlockWrapper},
-            parent::StrongParents,
+            core::{basic, Block, BlockWrapper},
             payload::Payload,
             signature::Ed25519Signature,
             IssuerId,
@@ -25,7 +24,7 @@ impl ClientInner {
         issuer_id: IssuerId,
         signature: Ed25519Signature,
         issuing_time: Option<u64>,
-        strong_parents: Option<StrongParents>,
+        strong_parents: Option<basic::StrongParents>,
         payload: Option<Payload>,
     ) -> Result<BlockWrapper> {
         let IssuanceBlockHeaderResponse {

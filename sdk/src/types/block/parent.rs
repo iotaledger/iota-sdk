@@ -88,7 +88,3 @@ impl<const MAX: u8> Default for Parents<0, MAX> {
         Self(Default::default())
     }
 }
-
-pub type StrongParents = Parents<1, 8>;
-pub type WeakParents = Parents<0, 8>;
-pub type ShallowLikeParents = Parents<0, 8>;

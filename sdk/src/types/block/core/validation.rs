@@ -10,10 +10,14 @@ use packable::{
 
 use crate::types::block::{
     core::{verify_parents, Block},
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
+    parent::Parents,
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
+
+pub type StrongParents = Parents<1, 50>;
+pub type WeakParents = Parents<0, 50>;
+pub type ShallowLikeParents = Parents<0, 50>;
 
 /// A builder for a [`ValidationBlock`].
 pub struct ValidationBlockBuilder {

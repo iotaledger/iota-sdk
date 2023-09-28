@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod basic;
-mod validation;
+pub mod basic;
+pub mod validation;
 mod wrapper;
 
 use alloc::boxed::Box;
@@ -21,8 +21,8 @@ pub use self::{
     validation::{ValidationBlock, ValidationBlockBuilder},
     wrapper::{BlockHeader, BlockWrapper},
 };
+use super::parent::Parents;
 use crate::types::block::{
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
@@ -56,14 +56,14 @@ impl Block {
 
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: StrongParents, burned_mana: u64) -> BasicBlockBuilder {
+    pub fn build_basic(strong_parents: self::basic::StrongParents, burned_mana: u64) -> BasicBlockBuilder {
         BasicBlockBuilder::new(strong_parents, burned_mana)
     }
 
     /// Creates a new [`ValidationBlockBuilder`].
     #[inline(always)]
     pub fn build_validation(
-        strong_parents: StrongParents,
+        strong_parents: self::validation::StrongParents,
         highest_supported_version: u8,
         protocol_parameters_hash: ProtocolParametersHash,
     ) -> ValidationBlockBuilder {
@@ -136,10 +136,10 @@ impl Packable for Block {
     }
 }
 
-pub(crate) fn verify_parents(
-    strong_parents: &StrongParents,
-    weak_parents: &WeakParents,
-    shallow_like_parents: &ShallowLikeParents,
+pub(crate) fn verify_parents<const MAX: u8>(
+    strong_parents: &Parents<1, MAX>,
+    weak_parents: &Parents<0, MAX>,
+    shallow_like_parents: &Parents<0, MAX>,
 ) -> Result<(), Error> {
     let (strong_parents, weak_parents, shallow_like_parents) = (
         strong_parents.to_set(),
