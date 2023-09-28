@@ -307,6 +307,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(expiration) = unlock_conditions.expiration() {
                 if let Some(commitment) = self.transaction.context_inputs().iter().find(|c| c.is_commitment()) {
+                    // TODO check is_deadzoned ?
                     if !expiration.is_expired(
                         commitment.as_commitment().slot_index(),
                         self.protocol_parameters.min_committable_age().into(),
