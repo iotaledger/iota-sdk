@@ -299,6 +299,7 @@ pub fn semantic_validation(
 
         if let Some(expiration) = unlock_conditions.expiration() {
             if let Some(commitment) = context.essence.context_inputs().iter().find(|c| c.is_commitment()) {
+                // TODO check is_deadzoned ?
                 if !expiration.is_expired(
                     commitment.as_commitment().slot_index(),
                     context.protocol_parameters.min_committable_age(),
