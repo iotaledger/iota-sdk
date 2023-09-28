@@ -10,7 +10,12 @@ impl InputSelection {
         // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id())
+            .required_and_unlocked_address(
+                self.slot_index,
+                self.protocol_parameters.min_committable_age(),
+                self.protocol_parameters.max_committable_age(),
+                input.output_id(),
+            )
             .unwrap()
             .0;
 
@@ -22,7 +27,12 @@ impl InputSelection {
     fn available_has_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
         let (required_address, _) = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id())
+            .required_and_unlocked_address(
+                self.slot_index,
+                self.protocol_parameters.min_committable_age(),
+                self.protocol_parameters.max_committable_age(),
+                input.output_id(),
+            )
             .unwrap();
 
         &required_address == address

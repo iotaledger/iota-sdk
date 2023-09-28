@@ -71,6 +71,7 @@ impl WalletData {
                             output_data,
                             slot_index,
                             protocol_parameters.min_committable_age(),
+                            protocol_parameters.max_committable_age(),
                             // Not relevant without account addresses
                             None,
                         )?

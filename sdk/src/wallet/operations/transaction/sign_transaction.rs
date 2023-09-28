@@ -78,7 +78,10 @@ where
             .secret_manager
             .read()
             .await
-            .transaction_unlocks(prepared_transaction_data)
+            .transaction_unlocks(
+                prepared_transaction_data,
+                &self.client().get_protocol_parameters().await?,
+            )
             .await
         {
             Ok(res) => res,

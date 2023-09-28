@@ -70,7 +70,8 @@ where
             &wallet_data,
             wallet_data.unspent_outputs.values(),
             slot_index,
-            protocol_parameters.min_committable_age(),
+            protocol_parameters.min_committable_age().into(),
+            protocol_parameters.max_committable_age().into(),
             &outputs,
             burn,
             custom_inputs.as_ref(),
@@ -223,6 +224,7 @@ fn filter_inputs(
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
     min_committable_age: SlotIndex,
+    max_committable_age: SlotIndex,
     outputs: &[Output],
     burn: Option<&Burn>,
     custom_inputs: Option<&HashSet<OutputId>>,
@@ -245,6 +247,7 @@ fn filter_inputs(
                 &output_data.output,
                 slot_index,
                 min_committable_age,
+                max_committable_age,
             );
 
             // Outputs that could get unlocked in the future will not be included
@@ -253,7 +256,9 @@ fn filter_inputs(
             }
         }
 
-        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index)? {
+        if let Some(available_input) =
+            output_data.input_signing_data(wallet_data, slot_index, min_committable_age, max_committable_age)?
+        {
             available_outputs_signing_data.push(available_input);
         }
     }

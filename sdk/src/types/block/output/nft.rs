@@ -45,7 +45,11 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -415,7 +419,14 @@ impl NftOutput {
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
+            .locked_address(
+                self.address(),
+                context.transaction.creation_slot(),
+                context.protocol_parameters.min_committable_age(),
+                context.protocol_parameters.max_committable_age(),
+            )
+            // TODO
+            .unwrap()
             .unlock(unlock, context)?;
 
         let nft_id = if self.nft_id().is_null() {

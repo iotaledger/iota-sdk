@@ -62,7 +62,12 @@ impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id())?
+            .required_and_unlocked_address(
+                self.slot_index,
+                self.protocol_parameters.min_committable_age(),
+                self.protocol_parameters.max_committable_age(),
+                input.output_id(),
+            )?
             .0;
         let required_address = if let Address::Restricted(restricted) = &required_address {
             restricted.address()
@@ -234,7 +239,12 @@ impl InputSelection {
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_and_unlocked_address(self.slot_index, input.output_id())
+                .required_and_unlocked_address(
+                    self.slot_index,
+                    self.protocol_parameters.min_committable_age(),
+                    self.protocol_parameters.max_committable_age(),
+                    input.output_id(),
+                )
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
@@ -261,6 +271,8 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         slot_index: SlotIndex,
+        min_committable_age: SlotIndex,
+        max_committable_age: SlotIndex,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
@@ -271,7 +283,12 @@ impl InputSelection {
             inputs.into_iter().partition(|input_signing_data| {
                 let (input_address, _) = input_signing_data
                     .output
-                    .required_and_unlocked_address(slot_index, input_signing_data.output_id())
+                    .required_and_unlocked_address(
+                        slot_index,
+                        min_committable_age,
+                        max_committable_age,
+                        input_signing_data.output_id(),
+                    )
                     // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
@@ -279,9 +296,12 @@ impl InputSelection {
             });
 
         for input in account_nft_address_inputs {
-            let (input_address, _) = input
-                .output
-                .required_and_unlocked_address(slot_index, input.output_id())?;
+            let (input_address, _) = input.output.required_and_unlocked_address(
+                slot_index,
+                min_committable_age,
+                max_committable_age,
+                input.output_id(),
+            )?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Account(unlock_address) => {
@@ -322,7 +342,12 @@ impl InputSelection {
                         match sorted_inputs.iter().position(|input_signing_data| {
                             let (input_address, _) = input_signing_data
                                 .output
-                                .required_and_unlocked_address(slot_index, input.output_id())
+                                .required_and_unlocked_address(
+                                    slot_index,
+                                    min_committable_age,
+                                    max_committable_age,
+                                    input.output_id(),
+                                )
                                 // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 
@@ -396,7 +421,12 @@ impl InputSelection {
         self.validate_transitions()?;
 
         Ok(Selected {
-            inputs: Self::sort_input_signing_data(self.selected_inputs, self.slot_index)?,
+            inputs: Self::sort_input_signing_data(
+                self.selected_inputs,
+                self.slot_index,
+                self.protocol_parameters.min_committable_age(),
+                self.protocol_parameters.max_committable_age(),
+            )?,
             outputs: self.outputs,
             remainder,
         })

@@ -59,9 +59,18 @@ impl ExpirationUnlockCondition {
     }
 
     /// Returns the return address if the condition has expired.
-    /// TODO needs to be updated
-    pub fn return_address_expired(&self, slot_index: SlotIndex) -> Option<&Address> {
-        if slot_index >= self.slot_index() {
+    pub fn return_address_expired<'a>(
+        &'a self,
+        address: &'a Address,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
+    ) -> Option<&'a Address> {
+        let slot_index = slot_index.into();
+
+        if self.slot_index() > (slot_index + max_committable_age.into()) {
+            Some(address)
+        } else if self.slot_index() <= (slot_index + min_committable_age.into()) {
             Some(&self.return_address)
         } else {
             None

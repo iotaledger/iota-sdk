@@ -129,12 +129,13 @@ pub trait SecretManage: Send + Sync {
     async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, Self::Error>;
 
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<SignedTransactionPayload, Self::Error>;
 }
 
@@ -427,19 +428,28 @@ impl SecretManage for SecretManager {
     async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => {
-                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
-            }
+            Self::Stronghold(secret_manager) => Ok(secret_manager
+                .transaction_unlocks(prepared_transaction_data, protocol_parameters)
+                .await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => {
-                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .transaction_unlocks(prepared_transaction_data, protocol_parameters)
+                .await?),
+            Self::Mnemonic(secret_manager) => {
+                secret_manager
+                    .transaction_unlocks(prepared_transaction_data, protocol_parameters)
+                    .await
             }
-            Self::Mnemonic(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
             #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
+            Self::PrivateKey(secret_manager) => {
+                secret_manager
+                    .transaction_unlocks(prepared_transaction_data, protocol_parameters)
+                    .await
+            }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -447,7 +457,7 @@ impl SecretManage for SecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<SignedTransactionPayload, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
@@ -536,6 +546,7 @@ impl SecretManager {
 pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
+    protocol_parameters: &ProtocolParameters,
 ) -> crate::client::Result<Unlocks>
 where
     crate::client::Error: From<M::Error>,
@@ -548,9 +559,12 @@ where
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let (input_address, _) = input
-            .output
-            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
+        let (input_address, _) = input.output.required_and_unlocked_address(
+            slot_index,
+            protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
+            input.output_metadata.output_id(),
+        )?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {
@@ -609,14 +623,16 @@ where
 pub(crate) async fn default_sign_transaction<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: PreparedTransactionData,
-    protocol_parameters: ProtocolParameters,
+    protocol_parameters: &ProtocolParameters,
 ) -> crate::client::Result<SignedTransactionPayload>
 where
     crate::client::Error: From<M::Error>,
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
+        .await?;
 
     let PreparedTransactionData {
         transaction,
@@ -627,7 +643,7 @@ where
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, protocol_parameters.clone())?;
 
     if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

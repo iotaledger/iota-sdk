@@ -248,6 +248,7 @@ impl SecretManage for LedgerSecretManager {
     async fn transaction_unlocks(
         &self,
         prepared_transaction: &PreparedTransactionData,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
@@ -402,7 +403,7 @@ impl SecretManage for LedgerSecretManager {
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
         // Account/Nft/Reference unlocks
         if blind_signing {
-            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter())?;
+            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), protocol_parameters)?;
         }
 
         Ok(Unlocks::new(unlocks)?)
@@ -411,7 +412,7 @@ impl SecretManage for LedgerSecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> Result<SignedTransactionPayload, Self::Error> {
         super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
@@ -516,6 +517,7 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
+    protocol_parameters: &ProtocolParameters,
 ) -> Result<Vec<Unlock>, Error> {
     let slot_index = prepared_transaction_data.transaction.creation_slot();
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
@@ -526,9 +528,12 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let (input_address, _) = input
-            .output
-            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
+        let input_address = input.output.required_and_unlocked_address(
+            slot_index,
+            protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
+            input.output_metadata.output_id(),
+        )?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {

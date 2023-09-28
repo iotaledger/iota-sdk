@@ -12,6 +12,7 @@ pub(crate) fn can_output_be_unlocked_now(
     output_data: &OutputData,
     slot_index: SlotIndex,
     min_committable_age: SlotIndex,
+    max_committable_age: SlotIndex,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, min_committable_age) {
@@ -19,9 +20,13 @@ pub(crate) fn can_output_be_unlocked_now(
         }
     }
 
-    let (required_unlock_address, _unlocked_account_or_nft_address) = output_data
-        .output
-        .required_and_unlocked_address(slot_index, &output_data.output_id)?;
+    let (required_unlock_address, _unlocked_account_or_nft_address) =
+        output_data.output.required_and_unlocked_address(
+            slot_index,
+            min_committable_age,
+            max_committable_age,
+            &output_data.output_id,
+        )?;
 
     Ok(wallet_address == &required_unlock_address)
 }
@@ -33,23 +38,27 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     output: &Output,
     slot_index: SlotIndex,
     min_committable_age: SlotIndex,
+    max_committable_age: SlotIndex,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, min_committable_age) {
             return false;
         }
 
-        // If there is an expiration unlock condition, we can only unlock it forever from now on, if it's expired and
-        // the return address belongs to the account
-        if let Some(expiration) = unlock_conditions.expiration() {
-            if let Some(return_address) = expiration.return_address_expired(slot_index) {
-                if wallet_address != return_address {
-                    return false;
-                };
-            } else {
-                return false;
-            }
-        }
+        // TODO HELP
+        // // If there is an expiration unlock condition, we can only unlock it forever from now on, if it's expired and
+        // // the return address belongs to the account
+        // if let Some(expiration) = unlock_conditions.expiration() {
+        //     if let Some(return_address) =
+        //         expiration.return_address_expired(slot_index, min_committable_age, max_committable_age)
+        //     {
+        //         if !account_addresses.iter().any(|a| a.address.inner == *return_address) {
+        //             return false;
+        //         };
+        //     } else {
+        //         return false;
+        //     }
+        // }
 
         true
     } else {

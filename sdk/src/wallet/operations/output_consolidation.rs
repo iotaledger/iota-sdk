@@ -77,10 +77,10 @@ where
         wallet_address: &Address,
     ) -> Result<bool> {
         Ok(if let Output::Basic(basic_output) = &output_data.output {
-            let min_committable_age = self.client().get_protocol_parameters().await?.min_committable_age();
+            let protocol_parameters = self.client().get_protocol_parameters().await?;
             let unlock_conditions = basic_output.unlock_conditions();
 
-            let is_time_locked = unlock_conditions.is_timelocked(slot_index, min_committable_age);
+            let is_time_locked = unlock_conditions.is_timelocked(slot_index, protocol_parameters.min_committable_age());
             if is_time_locked {
                 // If the output is timelocked, then it cannot be consolidated.
                 return Ok(false);
@@ -88,13 +88,19 @@ where
 
             let has_storage_deposit_return = unlock_conditions.storage_deposit_return().is_some();
             let has_expiration = unlock_conditions.expiration().is_some();
-            let is_expired = unlock_conditions.is_expired(slot_index, min_committable_age);
+            let is_expired = unlock_conditions.is_expired(slot_index, protocol_parameters.min_committable_age());
             if has_storage_deposit_return && (!has_expiration || !is_expired) {
                 // If the output has not expired and must return a storage deposit, then it cannot be consolidated.
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(wallet_address, output_data, slot_index, min_committable_age.into())?
+            can_output_be_unlocked_now(
+                wallet_address,
+                output_data,
+                slot_index,
+                protocol_parameters.min_committable_age(),
+                protocol_parameters.max_committable_age(),
+            )?
         } else {
             false
         })
