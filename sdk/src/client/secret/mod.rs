@@ -267,64 +267,6 @@ impl SecretManage for dyn DynSecretManagerConfig {
         self.dyn_sign_transaction(prepared_transaction_data).await
     }
 }
-#[async_trait]
-impl<T: SecretManage + ?Sized> SecretManage for Box<T> {
-    type Error = T::Error;
-
-    async fn generate_ed25519_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
-        self.as_ref()
-            .generate_ed25519_addresses(coin_type, account_index, address_indexes, options.into())
-            .await
-    }
-
-    async fn generate_evm_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error> {
-        self.as_ref()
-            .generate_evm_addresses(coin_type, account_index, address_indexes, options.into())
-            .await
-    }
-
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
-        self.as_ref().sign_ed25519(msg, chain).await
-    }
-
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
-        self.as_ref().sign_secp256k1_ecdsa(msg, chain).await
-    }
-
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
-        self.as_ref().signature_unlock(essence_hash, chain).await
-    }
-
-    async fn sign_transaction_essence(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Self::Error> {
-        self.as_ref().sign_transaction_essence(prepared_transaction_data).await
-    }
-
-    async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<TransactionPayload, Self::Error> {
-        self.as_ref().sign_transaction(prepared_transaction_data).await
-    }
-}
 
 pub trait SecretManagerConfig: SecretManage {
     type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
@@ -340,10 +282,10 @@ pub trait DynSerialize: erased_serde::Serialize + std::fmt::Debug + Send + Sync 
 impl<T: erased_serde::Serialize + std::fmt::Debug + Send + Sync> DynSerialize for T {}
 erased_serde::serialize_trait_object!(DynSerialize);
 
-pub trait DynSecretManagerConfig: DynSecretManage {
+pub trait DynSecretManagerConfig: DynSecretManage + AsAny {
     fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>>;
 }
-impl<T: SecretManagerConfig + std::fmt::Debug> DynSecretManagerConfig for T
+impl<T: SecretManagerConfig + AsAny + std::fmt::Debug> DynSecretManagerConfig for T
 where
     Error: From<T::Error>,
     T::Config: 'static,
@@ -669,17 +611,17 @@ impl SecretManage for SecretManager {
     }
 }
 
-pub trait DowncastSecretManager: SecretManage {
+pub trait DowncastSecretManager {
     fn is<T: 'static + SecretManage>(&self) -> bool;
 
-    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T>;
+    fn downcast_ref<T: 'static + SecretManage>(&self) -> Option<&T>;
 
     fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T>;
 
     fn as_stronghold(&self) -> crate::client::Result<&StrongholdAdapter> {
-        self.downcast::<StrongholdAdapter>()
+        self.downcast_ref::<StrongholdAdapter>()
             .or_else(|| {
-                self.downcast::<SecretManager>().and_then(|s| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
                     if let SecretManager::Stronghold(a) = s {
                         Some(a)
                     } else {
@@ -708,9 +650,9 @@ pub trait DowncastSecretManager: SecretManage {
     }
 
     fn as_mnemonic(&self) -> crate::client::Result<&MnemonicSecretManager> {
-        self.downcast::<MnemonicSecretManager>()
+        self.downcast_ref::<MnemonicSecretManager>()
             .or_else(|| {
-                self.downcast::<SecretManager>().and_then(|s| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
                     if let SecretManager::Mnemonic(a) = s {
                         Some(a)
                     } else {
@@ -740,9 +682,9 @@ pub trait DowncastSecretManager: SecretManage {
 
     #[cfg(feature = "ledger_nano")]
     fn as_ledger_nano(&self) -> crate::client::Result<&LedgerSecretManager> {
-        self.downcast::<LedgerSecretManager>()
+        self.downcast_ref::<LedgerSecretManager>()
             .or_else(|| {
-                self.downcast::<SecretManager>().and_then(|s| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
                     if let SecretManager::LedgerNano(a) = s {
                         Some(a)
                     } else {
@@ -774,15 +716,43 @@ pub trait DowncastSecretManager: SecretManage {
 
 impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
     fn is<T: 'static + SecretManage>(&self) -> bool {
-        (self as &(dyn std::any::Any + Send + Sync)).is::<T>()
+        self.as_any().is::<T>()
     }
 
-    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T> {
-        (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
+    fn downcast_ref<T: 'static + SecretManage>(&self) -> Option<&T> {
+        self.as_any().downcast_ref::<T>()
     }
 
     fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T> {
-        (self as &mut (dyn std::any::Any + Send + Sync)).downcast_mut::<T>()
+        self.as_any_mut().downcast_mut::<T>()
+    }
+}
+
+impl DowncastSecretManager for Box<dyn DynSecretManagerConfig> {
+    fn is<T: 'static + SecretManage>(&self) -> bool {
+        self.as_ref().as_any().is::<T>()
+    }
+
+    fn downcast_ref<T: 'static + SecretManage>(&self) -> Option<&T> {
+        self.as_ref().as_any().downcast_ref::<T>()
+    }
+
+    fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T> {
+        self.as_mut().as_any_mut().downcast_mut::<T>()
+    }
+}
+
+pub trait AsAny: 'static + Send + Sync {
+    fn as_any(&self) -> &(dyn std::any::Any + Send + Sync);
+    fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync);
+}
+
+impl<T: 'static + Send + Sync> AsAny for T {
+    fn as_any(&self) -> &(dyn std::any::Any + Send + Sync) {
+        self
+    }
+    fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync) {
+        self
     }
 }
 

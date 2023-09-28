@@ -55,7 +55,7 @@ pub use self::{
 };
 use super::core::WalletInner;
 use crate::{
-    client::{secret::SecretManage, Client},
+    client::{secret::DynSecretManagerConfig, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -148,7 +148,7 @@ impl Clone for Account {
 }
 
 impl Account {
-    pub fn get_secret_manager(&self) -> &Arc<RwLock<impl SecretManage>> {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<Box<dyn DynSecretManagerConfig>>> {
         self.wallet.get_secret_manager()
     }
 }
