@@ -3,6 +3,7 @@
 
 import { NumericString } from '../../utils/numeric';
 import type { IRent } from '../rent';
+
 /**
  * The Protocol Info.
  */

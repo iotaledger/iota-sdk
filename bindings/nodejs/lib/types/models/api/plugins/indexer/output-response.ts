@@ -3,6 +3,7 @@
 
 import { NumericString } from '../../../../utils';
 import type { HexEncodedString } from '../../../../utils/hex-encoding';
+
 /**
  * Details of an outputs response from the indexer plugin.
  */
