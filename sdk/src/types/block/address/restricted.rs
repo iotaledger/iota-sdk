@@ -4,7 +4,7 @@
 use alloc::boxed::Box;
 
 use derive_more::{Deref, From};
-use packable::{bounded::BoundedU8, error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU8, error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use super::Address;
 use crate::types::block::Error;
@@ -76,6 +76,12 @@ impl TryFrom<Address> for RestrictedAddress {
 
     fn try_from(value: Address) -> Result<Self, Self::Error> {
         Self::new(value)
+    }
+}
+
+impl core::fmt::Display for RestrictedAddress {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", prefix_hex::encode(self.pack_to_vec()))
     }
 }
 

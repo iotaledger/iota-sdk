@@ -31,7 +31,8 @@ pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Account(account) => account.to_string(),
         Address::Nft(nft) => nft.to_string(),
-        _ => todo!("What do we do here?"),
+        Address::ImplicitAccountCreation(imp) => imp.to_string(),
+        Address::Restricted(restricted) => restricted.to_string(),
     })
 }
 
