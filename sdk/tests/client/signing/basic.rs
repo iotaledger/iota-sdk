@@ -88,7 +88,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
+        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -189,7 +189,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
+        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -300,7 +300,7 @@ async fn two_signature_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
+        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 2);

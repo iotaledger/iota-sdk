@@ -132,7 +132,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
+        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
