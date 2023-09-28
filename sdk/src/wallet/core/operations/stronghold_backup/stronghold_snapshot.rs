@@ -175,7 +175,7 @@ pub(crate) async fn migrate_snapshot_from_chrysalis_to_stardust(
 
     if let Some(secret_manager_dto) = secret_manager_dto {
         stronghold_adapter
-            .set_bytes(SECRET_MANAGER_KEY, secret_manager_dto.as_bytes())
+            .set_bytes(SECRET_MANAGER_KEY, secret_manager_dto.to_string().as_bytes())
             .await?;
     }
 
