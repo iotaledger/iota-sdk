@@ -212,7 +212,7 @@ class ProtocolParameters:
     mana_structure: ManaStructure
     staking_unbonding_period: EpochIndex
     validation_blocks_per_slot: int
-    punishment_epochs: EpochIndex
+    punishment_epochs: str
     liveness_threshold: SlotIndex
     min_committable_age: SlotIndex
     max_committable_age: SlotIndex
