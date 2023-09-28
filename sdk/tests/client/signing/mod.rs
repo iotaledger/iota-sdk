@@ -232,7 +232,9 @@ async fn all_combined() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 15);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);

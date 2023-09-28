@@ -80,7 +80,7 @@ where
             let transaction = &secret_manager
                 .sign_transaction(
                     PreparedTransactionData::try_from_dto(prepared_transaction_data)?,
-                    protocol_parameters,
+                    &protocol_parameters,
                 )
                 .await
                 .map_err(iota_sdk::client::Error::from)?;
