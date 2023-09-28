@@ -404,6 +404,7 @@ async fn migrate_chrysalis_db_ledger() -> Result<()> {
     let wallet = Wallet::builder()
         .with_storage_path("migrate_chrysalis_db_ledger")
         .with_client_options(client_options)
+        .with_coin_type(IOTA_COIN_TYPE)
         .finish()
         .await?;
 
