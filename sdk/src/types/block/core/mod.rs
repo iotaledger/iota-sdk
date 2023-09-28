@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-pub mod basic;
-pub mod validation;
+mod basic;
+mod validation;
 mod wrapper;
 
 use alloc::boxed::Box;
@@ -21,7 +21,7 @@ pub use self::{
     validation::{ValidationBlock, ValidationBlockBuilder},
     wrapper::{BlockHeader, BlockWrapper},
 };
-use super::parent::Parents;
+use super::parent::{HasParents, Parents};
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
@@ -56,14 +56,17 @@ impl Block {
 
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: self::basic::StrongParents, burned_mana: u64) -> BasicBlockBuilder {
+    pub fn build_basic(
+        strong_parents: <BasicBlock as HasParents>::StrongParents,
+        burned_mana: u64,
+    ) -> BasicBlockBuilder {
         BasicBlockBuilder::new(strong_parents, burned_mana)
     }
 
     /// Creates a new [`ValidationBlockBuilder`].
     #[inline(always)]
     pub fn build_validation(
-        strong_parents: self::validation::StrongParents,
+        strong_parents: <ValidationBlock as HasParents>::StrongParents,
         highest_supported_version: u8,
         protocol_parameters_hash: ProtocolParametersHash,
     ) -> ValidationBlockBuilder {

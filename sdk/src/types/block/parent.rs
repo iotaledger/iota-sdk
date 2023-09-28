@@ -88,3 +88,18 @@ impl<const MAX: u8> Default for Parents<0, MAX> {
         Self(Default::default())
     }
 }
+
+pub trait HasParents {
+    type StrongParents;
+    type WeakParents;
+    type ShallowLikeParents;
+
+    /// Returns the strong parents.
+    fn strong_parents(&self) -> &Self::StrongParents;
+
+    /// Returns the weak parents.
+    fn weak_parents(&self) -> &Self::WeakParents;
+
+    /// Returns the shallow like parents.
+    fn shallow_like_parents(&self) -> &Self::ShallowLikeParents;
+}
