@@ -292,11 +292,6 @@ pub fn semantic_validation(
             }
         }
 
-        // TODO remove the method?
-        // if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
-        //     return Ok(Some(TransactionFailureReason::TimelockNotExpired));
-        // }
-
         if let Some(expiration) = unlock_conditions.expiration() {
             if let Some(commitment) = context.essence.context_inputs().iter().find(|c| c.is_commitment()) {
                 // TODO check is_deadzoned ?

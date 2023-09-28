@@ -61,8 +61,9 @@ where
         addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
         account_details: &AccountDetails,
     ) -> Result<Balance> {
-        let network_id = self.client().get_network_id().await?;
-        let rent_structure = self.client().get_rent_structure().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let network_id = protocol_parameters.network_id();
+        let rent_structure = protocol_parameters.rent_structure();
         let mut balance = Balance::default();
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -183,6 +184,7 @@ where
                                             &account_details.addresses_with_unspent_outputs,
                                             output,
                                             slot_index,
+                                            protocol_parameters.min_committable_age(),
                                         );
 
                                     if output_can_be_unlocked_now_and_in_future {

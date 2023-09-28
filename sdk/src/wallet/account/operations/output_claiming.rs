@@ -48,6 +48,7 @@ where
         let account_details = self.details().await;
 
         let slot_index = self.client().get_slot_index().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
@@ -71,6 +72,7 @@ where
                             &[],
                             output_data,
                             slot_index,
+                            protocol_parameters.min_committable_age(),
                             // Not relevant without account addresses
                             None,
                         )?
