@@ -58,9 +58,9 @@ pub(crate) fn migrate_from_chrysalis_data(
     storage_path: &Path,
     // in stronghold the keys are hashed first
     stronghold: bool,
-) -> Result<(Vec<AccountDetailsDto>, Option<String>)> {
+) -> Result<(Vec<AccountDetailsDto>, Option<Value>)> {
     let mut new_accounts: Vec<AccountDetailsDto> = Vec::new();
-    let mut secret_manager_dto: Option<String> = None;
+    let mut secret_manager_dto: Option<Value> = None;
 
     let account_indexation_key = to_chrysalis_key(b"iota-wallet-account-indexation", stronghold);
     if let Some(account_indexation) = chrysalis_data.get(&account_indexation_key) {
@@ -75,12 +75,12 @@ pub(crate) fn migrate_from_chrysalis_data(
                     let account_data = serde_json::from_str::<serde_json::Value>(account_data)?;
                     if secret_manager_dto.is_none() {
                         let dto = match &account_data["signerType"]["type"].as_str() {
-                            Some("Stronghold") => format!(
-                                r#"{{"Stronghold": {{"password": null, "timeout": null, "snapshotPath": "{}/wallet.stronghold"}} }}"#,
-                                storage_path.to_string_lossy()
-                            ),
-                            Some("LedgerNano") => r#"{{"LedgerNano": false }}"#.into(),
-                            Some("LedgerNanoSimulator") => r#"{{"LedgerNano": true }}"#.into(),
+                            Some("Stronghold") => serde_json::json!({"Stronghold": {"password": null, "timeout": null,
+                                "snapshotPath": format!("{}/wallet.stronghold", storage_path.to_string_lossy())
+                            }
+                                }),
+                            Some("LedgerNano") => serde_json::json!({"LedgerNano": false }),
+                            Some("LedgerNanoSimulator") => serde_json::json!({"LedgerNano": true }),
                             _ => return Err(Error::Migration("Missing signerType".into())),
                         };
                         secret_manager_dto = Some(dto);
@@ -288,9 +288,7 @@ pub(crate) mod rocksdb {
                     &serde_json::from_str::<Value>(&format!("{{ \"coinType\": {IOTA_COIN_TYPE}}}"))?,
                 )
                 .await?;
-            stardust_storage
-                .set(SECRET_MANAGER_KEY, &serde_json::from_str::<Value>(&secret_manager_dto)?)
-                .await?;
+            stardust_storage.set(SECRET_MANAGER_KEY, &secret_manager_dto).await?;
         }
 
         // set db migration version
