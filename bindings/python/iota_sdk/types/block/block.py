@@ -12,11 +12,11 @@ class BlockType(IntEnum):
     """Block types.
 
     Attributes:
-        Basic (1): A Basic Block.
-        Validation (2): A Validation Block.
+        Basic (0): A Basic Block.
+        Validation (1): A Validation Block.
     """
-    Basic = 1
-    Validation = 2
+    Basic = 0
+    Validation = 1
 
 
 @json

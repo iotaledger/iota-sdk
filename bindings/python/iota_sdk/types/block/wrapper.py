@@ -14,9 +14,8 @@ from iota_sdk.utils import Utils
 @json
 @dataclass
 class BlockWrapper:
-    """The two block types introduced in this TIP share some common fields which are contained in an outer wrapper.
-    This Block Wrapper is only introduced as a way to deduplicate the definition of those fields. It is not a standalone block type.
-    All fields of a Block Wrapper except for the Block and Signature constitute the Block Header.
+    """A block wrapper type that can hold either a `BasicBlock` or a `ValidationBlock`.
+    Shared data is stored alongside such a block in the `BlockHeader` and `Signature` fields.
     """
 
     def __init__(self, header: BlockHeader, block: Block,

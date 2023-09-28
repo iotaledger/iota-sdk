@@ -13,7 +13,8 @@ from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
 @json
 @dataclass
 class BasicBlock(Block):
-    """TODO: copy description from TIP-46 once added
+    """A `BasicBlock` is the most common type of block used to issue various kinds of payloads such as transactions
+    at the cost of burning Mana.
 
     Attributes:
         strong_parents: Blocks that are strongly directly approved.
@@ -36,10 +37,10 @@ class BasicBlock(Block):
     def from_dict(cls, basic_block_dict: Dict) -> BasicBlock:
         """
         The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `BasicBlock` class.
+        create an instance of the `BasicBlock` class .
 
         Returns:
 
-        An instance of the `BasicBlock` class.
+        An instance of the `BasicBlock` class .
         """
         return from_dict(BasicBlock, basic_block_dict)
