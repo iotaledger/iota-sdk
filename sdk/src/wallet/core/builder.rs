@@ -17,14 +17,17 @@ use super::operations::storage::SaveLoadWallet;
 use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
 use crate::wallet::storage::adapter::memory::Memory;
-#[cfg(feature = "storage")]
-use crate::wallet::{
-    account::AccountDetails,
-    storage::{StorageManager, StorageOptions},
-};
 use crate::{
-    client::secret::{DynSecretManagerConfig, SecretManagerConfig},
+    client::secret::DynSecretManagerConfig,
     wallet::{core::WalletInner, Account, ClientOptions, Wallet},
+};
+#[cfg(feature = "storage")]
+use crate::{
+    client::secret::SecretManagerConfig,
+    wallet::{
+        account::AccountDetails,
+        storage::{StorageManager, StorageOptions},
+    },
 };
 
 /// Builder for the wallet.
@@ -163,7 +166,6 @@ where
         #[cfg(feature = "storage")]
         let storage_options = self.storage_options.clone().unwrap_or_default();
 
-        println!("{storage_options:?}");
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]

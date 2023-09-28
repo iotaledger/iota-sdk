@@ -3,8 +3,10 @@
 
 use std::sync::atomic::Ordering;
 
+#[cfg(feature = "ledger_nano")]
+use crate::client::secret::DowncastSecretManager;
 use crate::{
-    client::secret::{DowncastSecretManager, GenerateAddressOptions, SecretManage},
+    client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::{Ed25519Address, Hrp},
     wallet::Wallet,
 };

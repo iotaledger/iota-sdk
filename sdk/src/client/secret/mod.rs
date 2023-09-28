@@ -20,8 +20,6 @@ pub mod stronghold;
 /// Signing related types
 pub mod types;
 
-#[cfg(feature = "stronghold")]
-use std::time::Duration;
 use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
@@ -31,18 +29,20 @@ use crypto::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use zeroize::Zeroizing;
+#[cfg(feature = "stronghold")]
+use {
+    self::stronghold::StrongholdSecretManager, super::stronghold::StrongholdAdapter,
+    crate::client::secret::types::StrongholdDto, std::time::Duration,
+};
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
 use self::mnemonic::MnemonicSecretManager;
 #[cfg(feature = "private_key_secret_manager")]
 use self::private_key::PrivateKeySecretManager;
-#[cfg(feature = "stronghold")]
-use self::stronghold::StrongholdSecretManager;
-pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
-use super::stronghold::StrongholdAdapter;
-#[cfg(feature = "stronghold")]
-use crate::client::secret::types::StrongholdDto;
+pub use self::types::GenerateAddressOptions;
+#[cfg(feature = "ledger_nano")]
+pub use self::types::LedgerNanoStatus;
 use crate::{
     client::{
         api::{
@@ -618,6 +618,7 @@ pub trait DowncastSecretManager {
 
     fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T>;
 
+    #[cfg(feature = "stronghold")]
     fn as_stronghold(&self) -> crate::client::Result<&StrongholdAdapter> {
         self.downcast_ref::<StrongholdAdapter>()
             .or_else(|| {
@@ -632,6 +633,7 @@ pub trait DowncastSecretManager {
             .ok_or(crate::client::Error::SecretManagerMismatch)
     }
 
+    #[cfg(feature = "stronghold")]
     fn as_stronghold_mut(&mut self) -> crate::client::Result<&mut StrongholdAdapter> {
         // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
         if self.is::<StrongholdAdapter>() {
@@ -705,6 +707,39 @@ pub trait DowncastSecretManager {
                 .and_then(|s| {
                     if let SecretManager::LedgerNano(a) = s {
                         Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
+
+    #[cfg(feature = "private_key_secret_manager")]
+    fn as_private_key(&self) -> crate::client::Result<&PrivateKeySecretManager> {
+        self.downcast_ref::<PrivateKeySecretManager>()
+            .or_else(|| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
+                    if let SecretManager::PrivateKey(a) = s {
+                        Some(a.as_ref())
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
+
+    #[cfg(feature = "private_key_secret_manager")]
+    fn as_private_key_mut(&mut self) -> crate::client::Result<&mut PrivateKeySecretManager> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<PrivateKeySecretManager>() {
+            Ok(self.downcast_mut::<PrivateKeySecretManager>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::PrivateKey(a) = s {
+                        Some(a.as_mut())
                     } else {
                         None
                     }
