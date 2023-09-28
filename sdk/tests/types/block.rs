@@ -4,7 +4,6 @@
 use iota_sdk::types::{
     block::{
         helper::network_name_to_id,
-        parent::HasParents,
         payload::Payload,
         protocol::{protocol_parameters, ProtocolParameters},
         rand::{

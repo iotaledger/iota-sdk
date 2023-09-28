@@ -10,16 +10,20 @@ use packable::{
 
 use crate::types::block::{
     core::{verify_parents, Block},
-    parent::{HasParents, Parents},
+    parent::Parents,
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
 
+pub type StrongParents = Parents<1, 50>;
+pub type WeakParents = Parents<0, 50>;
+pub type ShallowLikeParents = Parents<0, 50>;
+
 /// A builder for a [`ValidationBlock`].
 pub struct ValidationBlockBuilder {
-    strong_parents: <ValidationBlock as HasParents>::StrongParents,
-    weak_parents: <ValidationBlock as HasParents>::WeakParents,
-    shallow_like_parents: <ValidationBlock as HasParents>::ShallowLikeParents,
+    strong_parents: StrongParents,
+    weak_parents: WeakParents,
+    shallow_like_parents: ShallowLikeParents,
     highest_supported_version: u8,
     protocol_parameters_hash: ProtocolParametersHash,
 }
@@ -28,14 +32,14 @@ impl ValidationBlockBuilder {
     /// Creates a new [`ValidationBlockBuilder`].
     #[inline(always)]
     pub fn new(
-        strong_parents: <ValidationBlock as HasParents>::StrongParents,
+        strong_parents: StrongParents,
         highest_supported_version: u8,
         protocol_parameters_hash: ProtocolParametersHash,
     ) -> Self {
         Self {
             strong_parents,
-            weak_parents: Default::default(),
-            shallow_like_parents: Default::default(),
+            weak_parents: WeakParents::default(),
+            shallow_like_parents: ShallowLikeParents::default(),
             highest_supported_version,
             protocol_parameters_hash,
         }
@@ -43,27 +47,21 @@ impl ValidationBlockBuilder {
 
     /// Adds strong parents to a [`ValidationBlockBuilder`].
     #[inline(always)]
-    pub fn with_strong_parents(
-        mut self,
-        strong_parents: impl Into<<ValidationBlock as HasParents>::StrongParents>,
-    ) -> Self {
+    pub fn with_strong_parents(mut self, strong_parents: impl Into<StrongParents>) -> Self {
         self.strong_parents = strong_parents.into();
         self
     }
 
     /// Adds weak parents to a [`ValidationBlockBuilder`].
     #[inline(always)]
-    pub fn with_weak_parents(mut self, weak_parents: impl Into<<ValidationBlock as HasParents>::WeakParents>) -> Self {
+    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
         self.weak_parents = weak_parents.into();
         self
     }
 
     /// Adds shallow like parents to a [`ValidationBlockBuilder`].
     #[inline(always)]
-    pub fn with_shallow_like_parents(
-        mut self,
-        shallow_like_parents: impl Into<<ValidationBlock as HasParents>::ShallowLikeParents>,
-    ) -> Self {
+    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
         self.shallow_like_parents = shallow_like_parents.into();
         self
     }
@@ -107,11 +105,11 @@ impl ValidationBlockBuilder {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ValidationBlock {
     /// Blocks that are strongly directly approved.
-    strong_parents: <Self as HasParents>::StrongParents,
+    strong_parents: StrongParents,
     /// Blocks that are weakly directly approved.
-    weak_parents: <Self as HasParents>::WeakParents,
+    weak_parents: WeakParents,
     /// Blocks that are directly referenced to adjust opinion.
-    shallow_like_parents: <Self as HasParents>::ShallowLikeParents,
+    shallow_like_parents: ShallowLikeParents,
     /// The highest supported protocol version the issuer of this block supports.
     highest_supported_version: u8,
     /// The hash of the protocol parameters for the Highest Supported Version.
@@ -120,6 +118,24 @@ pub struct ValidationBlock {
 
 impl ValidationBlock {
     pub const KIND: u8 = 1;
+
+    /// Returns the strong parents of a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn strong_parents(&self) -> &StrongParents {
+        &self.strong_parents
+    }
+
+    /// Returns the weak parents of a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn weak_parents(&self) -> &WeakParents {
+        &self.weak_parents
+    }
+
+    /// Returns the shallow like parents of a [`ValidationBlock`].
+    #[inline(always)]
+    pub fn shallow_like_parents(&self) -> &ShallowLikeParents {
+        &self.shallow_like_parents
+    }
 
     /// Returns the highest supported protocol version of a [`ValidationBlock`].
     #[inline(always)]
@@ -152,9 +168,9 @@ impl Packable for ValidationBlock {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let strong_parents = <Self as HasParents>::StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let weak_parents = <Self as HasParents>::WeakParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let shallow_like_parents = <Self as HasParents>::ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
+        let strong_parents = StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
+        let weak_parents = WeakParents::unpack::<_, VERIFY>(unpacker, &())?;
+        let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
             verify_parents(&strong_parents, &weak_parents, &shallow_like_parents).map_err(UnpackError::Packable)?;
@@ -175,24 +191,6 @@ impl Packable for ValidationBlock {
             highest_supported_version,
             protocol_parameters_hash,
         })
-    }
-}
-
-impl HasParents for ValidationBlock {
-    type StrongParents = Parents<1, 50>;
-    type WeakParents = Parents<0, 50>;
-    type ShallowLikeParents = Parents<0, 50>;
-
-    fn strong_parents(&self) -> &Self::StrongParents {
-        &self.strong_parents
-    }
-
-    fn weak_parents(&self) -> &Self::WeakParents {
-        &self.weak_parents
-    }
-
-    fn shallow_like_parents(&self) -> &Self::ShallowLikeParents {
-        &self.shallow_like_parents
     }
 }
 
@@ -256,14 +254,12 @@ pub(crate) mod dto {
             }
 
             ValidationBlockBuilder::new(
-                <Self as HasParents>::StrongParents::from_set(dto.strong_parents)?,
+                StrongParents::from_set(dto.strong_parents)?,
                 dto.highest_supported_version,
                 dto.protocol_parameters_hash,
             )
-            .with_weak_parents(<Self as HasParents>::WeakParents::from_set(dto.weak_parents)?)
-            .with_shallow_like_parents(<Self as HasParents>::ShallowLikeParents::from_set(
-                dto.shallow_like_parents,
-            )?)
+            .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+            .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
             .finish()
         }
     }
